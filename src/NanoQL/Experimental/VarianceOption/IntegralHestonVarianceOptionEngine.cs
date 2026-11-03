@@ -26,22 +26,22 @@ namespace NanoQL.Experimental;
 /// A call has QuantLib's one-dimensional integral. The engine reads
 /// the risk-free curve on the model's clock, the earliest reference date of the process's curves on the risk-free day
 /// counter, the maturity's time from it and the rate the curve accrues to the maturity per unit of that time, where
-/// QuantLib measures the time from the evaluation date (the S-xeq plan's XER5 (xxxiii)); on curves dated on the
-/// evaluation date QuantLib's numbers stand.
+/// QuantLib measures the time from the evaluation date; on curves dated on the evaluation date QuantLib's numbers
+/// stand.
 /// </para>
 /// <para>
-/// Documented divergences (<c>Divergences/IntegralHestonVarianceOptionTests.cs</c>). A put is the call's integral without
-/// its forward term, the integrated variance's mean less the strike, by parity, and other payoffs are refused, where
-/// QuantLib sums any payoff but a call against the integrated variance's density on 4,096 points of spacing √(2π)/64,
-/// about one standard deviation of it: QuantLib's put case prices 0.0466796 against 0.0465915, a forward-start put 2.6%
-/// low, a cash-or-nothing put 13% to 24% low and above 1 at a strike past the distribution (the user's ruling at the
-/// S-xeq run's stop 8). The process's dividend curve isn't
-/// read, as the integrated variance's law doesn't depend on the drift, where QuantLib refuses a process whose dividend
-/// handle isn't empty (XER2). An option starting after the clock's origin is priced on the variance integrated from its
-/// start: each integrand is affine in the variance at the start, so its expectation over that variance's non-central χ²
-/// law from v₀ is the CIR transform, E[e^(Bv_s)] = (1 − 2cB)^(−d/2) exp(Bv₀e^(−κs)/(1 − 2cB)), c = σ²(1 − e^(−κs))/(4κ),
-/// d = 4κθ/σ², and the mean term takes E[v_s] = θ + (v₀ − θ)e^(−κs), where QuantLib prices every option as starting
-/// today (XER5 (xx)); a seasoned option, its start before the evaluation date, is refused, as QuantLib's header says.
+/// Documented divergences (<c>Divergences/IntegralHestonVarianceOptionTests.cs</c>). A put is the call's integral
+/// without its forward term, the integrated variance's mean less the strike, by parity, and other payoffs are refused,
+/// where QuantLib sums any payoff but a call against the integrated variance's density on 4,096 points of spacing
+/// √(2π)/64, about one standard deviation of it: QuantLib's put case prices 0.0466796 against 0.0465915, a
+/// forward-start put 2.6% low, a cash-or-nothing put 13% to 24% low and above 1 at a strike past the distribution. The
+/// process's dividend curve isn't read, as the integrated variance's law doesn't depend on the drift, where QuantLib
+/// refuses a process whose dividend handle isn't empty. An option starting after the clock's origin is priced on the
+/// variance integrated from its start: each integrand is affine in the variance at the start, so its expectation over
+/// that variance's non-central χ² law from v₀ is the CIR transform, E[e^(Bv_s)] = (1 − 2cB)^(−d/2) exp(Bv₀e^(−κs)/(1 −
+/// 2cB)), c = σ²(1 − e^(−κs))/(4κ), d = 4κθ/σ², and the mean term takes E[v_s] = θ + (v₀ − θ)e^(−κs), where QuantLib
+/// prices every option as starting today; a seasoned option, its start before the evaluation date, is refused, as
+/// QuantLib's header says.
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]
@@ -74,7 +74,7 @@ public static class IntegralHestonVarianceOptionEngine
 
     private static double Value(VarianceOption option, EvaluationContext context, HestonProcess process)
     {
-        // QuantLib's two-dimensional integral for other payoffs isn't ported (the ruling at stop 8)
+        // QuantLib's two-dimensional integral for other payoffs isn't ported
         if (option.Payoff is not PlainVanillaPayoff plainPayoff)
         {
             throw new NanoQLException("this engine prices plain-vanilla calls and puts only");
@@ -92,7 +92,7 @@ public static class IntegralHestonVarianceOptionEngine
         double rho = process.Rho;
         double v0 = process.V0;
 
-        // the model's clock (XER5 (xxxiii)): the maturity's time and the risk-free rate per unit of it
+        // the model's clock: the maturity's time and the risk-free rate per unit of it
         double tau = process.ModelTime(option.MaturityDate);
         double r = riskFreeRate.ZeroRate(option.MaturityDate, riskFreeRate.DayCounter, Compounding.Continuous).Rate;
         double curveTime = riskFreeRate.AccrualTimeTo(option.MaturityDate);
@@ -101,18 +101,18 @@ public static class IntegralHestonVarianceOptionEngine
             r = tau == 0.0 ? r : (curveTime == 0.0 ? 0.0 : r * (curveTime / tau));
         }
 
-        // a forward start: the variance integrated over [s, T] from the variance's law at s (XER5 (xx))
+        // a forward start: the variance integrated over [s, T] from the variance's law at s
         double s = Math.Min(process.ModelTime(option.StartDate), tau);
         StartLaw? start = s > 0.0 ? new StartLaw(epsilon, chi, theta, v0, s) : null;
 
-        // a specialization for Call options is available; a put by parity (the ruling at stop 8)
+        // a specialization for Call options is available; a put by parity
         double strike = plainPayoff.Strike;
         bool call = plainPayoff.OptionType == OptionType.Call;
         return IvopOneDim(epsilon, chi, theta, rho, v0, strike, tau, r, start, call) * option.Notional;
     }
 
     // QuantLib's one-dimensional integral for a call on the realized variance at strike eprice; a put is the integral
-    // without the forward term vero (the ruling at stop 8)
+    // without the forward term vero
     private static double IvopOneDim(
         double eps, double chi, double theta, double rho, double v0, double eprice, double tau, double rtax, StartLaw? start,
         bool call)
@@ -232,7 +232,7 @@ public static class IntegralHestonVarianceOptionEngine
         return optionValue;
     }
 
-    // The CIR law of the variance at the start s from v₀ (XER5 (xx)): its transform E[e^(Bv_s)] and its mean
+    // The CIR law of the variance at the start s from v₀: its transform E[e^(Bv_s)] and its mean
     private sealed class StartLaw(double sigma, double kappa, double theta, double v0, double s)
     {
         private readonly double c = sigma * sigma * (1.0 - Math.Exp(-kappa * s)) / (4.0 * kappa);

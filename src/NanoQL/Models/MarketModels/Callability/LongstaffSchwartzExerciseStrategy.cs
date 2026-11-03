@@ -16,8 +16,8 @@ namespace NanoQL.Models;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A working type (the S-mmp plan's MMPR1 (i)): it steps its own clones of the basis system, the exercise value and
-/// the control, and sizes every buffer at construction, so a decision allocates nothing.
+/// A working type: it steps its own clones of the basis system, the exercise value and the control, and sizes every
+/// buffer at construction, so a decision allocates nothing.
 /// </para>
 /// <para>
 /// Refused, QuantLib reading past them: a basis system with fewer exercises than the exercise value's, fewer

@@ -10,8 +10,8 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Extensions;
 
 /// <summary>
-/// The no-bypass walk (CVD34) on the instrument conventions: what each kind's builder builds, and each helper, through
-/// the marker set reaches only the set's calendars and currencies, so no default record or route builds a convention
+/// The no-bypass walk on the instrument conventions: what each kind's builder builds, and each helper, through the
+/// marker set reaches only the set's calendars and currencies, so no default record or route builds a convention
 /// outside the set; and <see cref="BTP"/> built in it.
 /// </summary>
 public class InstrumentWalkTests

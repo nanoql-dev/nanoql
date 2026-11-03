@@ -18,7 +18,7 @@ namespace NanoQL.Coupons;
 /// <remarks>
 /// QuantLib's optionlet price sets the pricer's integration limits, which <c>upperLimit()</c>, <c>lowerLimit()</c> and
 /// <c>stdDeviations()</c> read afterwards; here <see cref="IntegrationLimits"/> computes them from the arguments of the
-/// optionlet price that sets them (the S-cms plan's CMR1 (iv)).
+/// optionlet price that sets them.
 /// </remarks>
 public sealed class NumericHaganPricer : HaganPricer
 {

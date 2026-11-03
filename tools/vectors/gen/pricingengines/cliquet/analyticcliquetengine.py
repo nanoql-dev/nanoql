@@ -5,10 +5,10 @@ evaluation date 15 October 2026: cliquet calls and puts at moneyness 0.9, 1 and 
 reset at six months; quarterly over a year; quarterly over two years from three months), on two flat markets and one
 of zero curves under a flat volatility: the NPV, delta, gamma, theta, vega, rho and dividend rho.
 
-The outputs nanoql fixes are left out (the S-exo plan's §2.10): the theta on the zero curves, where QuantLib reads each
-period's dividend rate over the period after its reset and nanoql the rate to it
-(tests/NanoQL.Tests/Divergences/CliquetThetaTests.cs); volatilities off flat, where QuantLib's vega is the derivative
-in each period's forward volatility (ForwardVegaTermStructureTests.cs).
+The outputs nanoql fixes are left out: the theta on the zero curves, where QuantLib reads each period's dividend rate
+over the period after its reset and nanoql the rate to it (tests/NanoQL.Tests/Divergences/CliquetThetaTests.cs);
+volatilities off flat, where QuantLib's vega is the derivative in each period's forward volatility
+(ForwardVegaTermStructureTests.cs).
 
 The setups, which analyticperformanceengine.py and mcperformanceengine.py share: an option {"payoff" (a
 tools/vectors/gen/pricingengines/blackcalculator.py percentage-strike spec), "exercise" (European, its date),

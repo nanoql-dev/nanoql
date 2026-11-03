@@ -11,11 +11,11 @@ using NanoQL.Tests.Divergences;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The CLV models' conventions (the S-xrt plan's XRR5 (xxiii), (xli) and XRR14): the square-root mapping refuses a time
-/// past its last maturity with QuantLib's text, before the read QuantLib makes of its map's end; the normal mapping
-/// refuses a time that isn't positive, where QuantLib's standardized value is 0/0 at x₀ and infinite elsewhere; and the
-/// square-root rescale is QuantLib's on a top-only clamp, as at every date of QuantLib's two cases, the points scaled
-/// toward zero by a = (q(pMax) − x.front())/(x.back() − x.front()).
+/// The CLV models' conventions: the square-root mapping refuses a time past its last maturity with QuantLib's text,
+/// before the read QuantLib makes of its map's end; the normal mapping refuses a time that isn't positive, where
+/// QuantLib's standardized value is 0/0 at x₀ and infinite elsewhere; and the square-root rescale is QuantLib's on a
+/// top-only clamp, as at every date of QuantLib's two cases, the points scaled toward zero by a = (q(pMax) −
+/// x.front())/(x.back() − x.front()).
 /// </summary>
 public class CLVModelTests
 {

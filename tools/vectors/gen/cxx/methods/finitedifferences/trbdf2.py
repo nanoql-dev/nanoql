@@ -4,8 +4,8 @@
 zerocondition.hpp), which the wheel doesn't bind, each output computed by the C++ harness: values rolled back through
 FiniteDifferenceModel on time-independent tridiagonal operators (the heat equation's on uniform grids, and a
 convection-diffusion operator with discounting), from 1 to 0 and from 2 to 0.5 in 1 to 50 steps, with the zero condition
-and without. A time-dependent operator, whose trapezoidal stage nanoql reads at the stage's own time (the S-core plan's
-CR7 (xvi); tests/NanoQL.Tests/Divergences/TRBDF2Tests.cs), isn't among them. Read back by
+and without. A time-dependent operator, whose trapezoidal stage nanoql reads at the stage's own time
+(tests/NanoQL.Tests/Divergences/TRBDF2Tests.cs), isn't among them. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Methods/FiniteDifferences/TRBDF2CxxVectorTests.cs."""
 import math
 import os

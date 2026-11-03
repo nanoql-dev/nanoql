@@ -17,10 +17,10 @@ namespace NanoQL.Methods;
 /// <remarks>
 /// A working type: <see cref="SetTime"/> rewrites the part's operator in place through buffers it holds. The dividend
 /// curve and the volatility are read on the engine's clock (<see cref="FdmBlackScholesOp.Clock"/>), each on its own,
-/// QuantLib's reads where they share its times. With a quanto helper the short rate is the domestic one: the drift
-/// less the helper's adjustment with the grid's rate as the domestic rate, r − q − ½v − (r − r_f + ρσσ_fx), where
-/// QuantLib's operator takes no helper and its engine passes it to the mesher alone, so that a quanto prices without
-/// the quanto drift (a run find of the S-van plan's C4, under R8).
+/// QuantLib's reads where they share its times. With a quanto helper the short rate is the domestic one: the drift less
+/// the helper's adjustment with the grid's rate as the domestic rate, r − q − ½v − (r − r_f + ρσσ_fx), where QuantLib's
+/// operator takes no helper and its engine passes it to the mesher alone, so that a quanto prices without the quanto
+/// drift.
 /// </remarks>
 [WorkingType]
 internal sealed class FdmCIREquityPart

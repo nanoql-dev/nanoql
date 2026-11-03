@@ -32,27 +32,27 @@ namespace NanoQL.Models;
 /// moves by the shift. A custom smile inverts the digitals itself.
 /// </para>
 /// <para>
-/// Immutable, a <see cref="Gaussian1dModel"/> implementing <see cref="ICalibratedModel"/> over its volatilities (the
-/// S-g1d plan's G1R2): it calibrates its numeraire when it is built, under the context it is given (G1R1 (v); master
-/// plan §2.2's <c>LazyObject</c> row), where QuantLib's calibrates at its first use under the evaluation date then.
-/// <see cref="WithParams"/> keeps the smiles and re-tabulates the numeraire, QuantLib's <c>generateArguments</c>;
-/// <see cref="ForceArbitrageIndices"/> returns a copy calibrated again; <see cref="ModelOutputs"/> computes the
-/// diagnostics per call. Its first volatility is fixed by default in a calibration
-/// (<see cref="DefaultFixParameters"/>), as QuantLib's <c>calibrate</c> fixes it: the prices don't depend on the
-/// volatilities' level.
+/// Immutable, a <see cref="Gaussian1dModel"/> implementing <see cref="ICalibratedModel"/> over its volatilities: it
+/// calibrates its numeraire when it is built, under the context it is given (the playbook's <c>LazyObject</c> row),
+/// where QuantLib's calibrates at its first use under the evaluation date then. <see cref="WithParams"/> keeps the
+/// smiles and re-tabulates the numeraire, QuantLib's <c>generateArguments</c>; <see cref="ForceArbitrageIndices"/>
+/// returns a copy calibrated again; <see cref="ModelOutputs"/> computes the diagnostics per call. Its first volatility
+/// is fixed by default in a calibration (<see cref="DefaultFixParameters"/>), as QuantLib's <c>calibrate</c> fixes it:
+/// the prices don't depend on the volatilities' level.
 /// </para>
 /// <para>
 /// Six of QuantLib's defects are fixed. A caplet calibration point's end date, and the outputs' forward rates' and
-/// caplets', are the index's maturity date for the value date, as QuantLib's master computes the Gaussian1d forward rate
-/// after the pin (#2848), where QuantLib advances the value date by the tenor itself (<c>markovfunctional.cpp:278</c>,
-/// <c>:949</c>, <c>:1109</c>). With flat payoff extrapolation, the right tails integrate the last node's value, where
-/// QuantLib's integrate the second-last's (<c>:516-519</c>, <c>:1064-1066</c>, <c>:1141-1143</c>). A curve given to the
-/// numeraire is read at the numeraire time with extrapolation, as the model's own is (<c>:775-785</c>), and a curve on
-/// another clock at the instant QuantLib's argument denotes, by the date a time comes from (the plan's G1R6 (i),
-/// (xvi)); and the model's own curve, which the ratio with a given curve reads, with extrapolation, as the calibration
-/// reads it (<c>:783-785</c>, <c>:797-799</c>), so a model whose calibration extrapolates its curve prices with a
-/// given curve too. The settings refuse any two smile pretreatments (<see cref="MarkovFunctionalModelSettings"/>), and the state
-/// process is its equation's (<see cref="MfStateProcess"/>), its variance continuous in a small reversion.
+/// caplets', are the index's maturity date for the value date, as QuantLib's master computes the Gaussian1d forward
+/// rate after the pin (#2848), where QuantLib advances the value date by the tenor itself
+/// (<c>markovfunctional.cpp:278</c>, <c>:949</c>, <c>:1109</c>). With flat payoff extrapolation, the right tails
+/// integrate the last node's value, where QuantLib's integrate the second-last's (<c>:516-519</c>, <c>:1064-1066</c>,
+/// <c>:1141-1143</c>). A curve given to the numeraire is read at the numeraire time with extrapolation, as the model's
+/// own is (<c>:775-785</c>), and a curve on another clock at the instant QuantLib's argument denotes, by the date a
+/// time comes from; and the model's own curve, which the ratio with a given curve reads, with extrapolation, as the
+/// calibration reads it (<c>:783-785</c>, <c>:797-799</c>), so a model whose calibration extrapolates its curve prices
+/// with a given curve too. The settings refuse any two smile pretreatments (<see
+/// cref="MarkovFunctionalModelSettings"/>), and the state process is its equation's (<see cref="MfStateProcess"/>), its
+/// variance continuous in a small reversion.
 /// </para>
 /// <para>
 /// From QuantLib's master after the pin (#2912, <c>Divergences/MarkovFunctionalUpstreamFixesTests.cs</c>): the upper
@@ -966,7 +966,7 @@ public sealed class MarkovFunctional : Gaussian1dModel, ICalibratedModel
                             if ((adjustments & ExtrapolatePayoffFlat) != 0)
                             {
                                 // the right tail at the last node's value, where QuantLib's takes the second-last's
-                                // (G1R6 (xxi))
+                                //
                                 integral = GaussianShiftedPolynomialIntegral(
                                     0.0, 0.0, 0.0, 0.0, discreteDeflatedAnnuities[j], y[j - 1], y[j], 100.0);
                             }
@@ -1252,8 +1252,8 @@ public sealed class MarkovFunctional : Gaussian1dModel, ICalibratedModel
     }
 
     // The payoff's cubic spline integrated over the state grid and, with payoff extrapolation, past it: flat, at the
-    // boundary nodes' values (the right tail's the last node's, where QuantLib's takes the second-last's, G1R6 (xxi)),
-    // or the end segments' cubics, the call's right and the put's left.
+    // boundary nodes' values (the right tail's the last node's, where QuantLib's takes the second-last's), or the end
+    // segments' cubics, the call's right and the put's left.
     private double IntegratedPayoff(OptionType type, Vector z, double[] p)
     {
         var payoff = new CubicInterpolation(

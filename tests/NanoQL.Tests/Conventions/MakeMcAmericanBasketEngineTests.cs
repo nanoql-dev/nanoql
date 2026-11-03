@@ -11,11 +11,11 @@ using static NanoQL.Tests.Divergences.TwoAssetMarket;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The Longstaff-Schwartz basket engine's builder, engine and path pricer checks (S2R4; SEQR2; the S-exo plan's ED14):
-/// the seed is required and 0, QuantLib's seed from the clock, refused, naming the parameter; QuantLib's checks and
-/// texts on the steps, samples and tolerance; the engine's on its first process and its exercise; and the pricer's on
-/// its basis family, its payoff and the paths' number. QuantLib's "Stochastic process array required" can't fire, an
-/// array of no process being refused at its construction ("no processes given").
+/// The Longstaff-Schwartz basket engine's builder, engine and path pricer checks: the seed is required and 0,
+/// QuantLib's seed from the clock, refused, naming the parameter; QuantLib's checks and texts on the steps, samples and
+/// tolerance; the engine's on its first process and its exercise; and the pricer's on its basis family, its payoff and
+/// the paths' number. QuantLib's "Stochastic process array required" can't fire, an array of no process being refused
+/// at its construction ("no processes given").
 /// </summary>
 public class MakeMcAmericanBasketEngineTests
 {

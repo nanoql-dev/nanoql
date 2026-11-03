@@ -15,9 +15,9 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// C1's refusals and builders (the S-xeq plan's §C1.2): each refusal's type and QuantLib's text, the Monte Carlo
-/// builder's required seed (S2R4, XED3), the Heston forward engine's vol-of-vol and reset refusals, and the quanto
-/// double barrier's results.
+/// The experimental double-barrier engines' refusals and builders: each refusal's type and QuantLib's text, the Monte
+/// Carlo builder's required seed, the Heston forward engine's vol-of-vol and reset refusals, and the quanto double
+/// barrier's results.
 /// </summary>
 public class ExperimentalDoubleBarrierConventionTests
 {

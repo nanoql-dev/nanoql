@@ -14,8 +14,8 @@ namespace NanoQL.Models;
 /// steps, turned into Gaussian variates by the inverse cumulative normal and Brownian-bridged by the base's ordering.
 /// </summary>
 /// <remarks>
-/// A working type (the S-hes plan's HR3 (iv), (v)). Its seed is explicit, in [1, 4294967295], as
-/// <see cref="SobolRsg"/> takes it: QuantLib's default 0 draws one from the clock.
+/// A working type. Its seed is explicit, in [1, 4294967295], as <see cref="SobolRsg"/> takes it: QuantLib's default 0
+/// draws one from the clock.
 /// </remarks>
 [WorkingType]
 public sealed class SobolBrownianGenerator : SobolBrownianGeneratorBase

@@ -9,8 +9,8 @@ using static NanoQL.Excel.Tests.Xl;
 namespace NanoQL.Excel.Tests;
 
 /// <summary>
-/// The settings file (XLR9, XLD28): <c>&lt;xll name&gt;.settings.json</c> beside the add-in, its keys checked, a failed load
-/// never falling back to QuantLib's conventions; the refusing provider; the set's empty argument (XLR9).
+/// The settings file: <c>&lt;xll name&gt;.settings.json</c> beside the add-in, its keys checked, a failed load never
+/// falling back to QuantLib's conventions; the refusing provider; the set's empty argument.
 /// </summary>
 [Collection(TestSettings.Name)]
 public sealed class SettingsTests : IDisposable
@@ -97,7 +97,7 @@ public sealed class SettingsTests : IDisposable
         string set = H(Call("nqlConventionSetQuantLib"));
         H(Call("nqlConventionSetCalendar", set, "TARGET"));
 
-        // A member reading the default conventions inside nanoql refuses too, never priced on QuantLib's (XLP43).
+        // A member reading the default conventions inside nanoql refuses too, never priced on QuantLib's.
         Assert.Equal(ExcelError.ExcelErrorValue, Cds());
         Assert.Contains("didn't load", Message(), StringComparison.Ordinal);
     }
@@ -109,7 +109,7 @@ public sealed class SettingsTests : IDisposable
         return builder is string b ? Call("nqlMakeCreditDefaultSwapToCreditDefaultSwap", b, H(Call("nqlEvaluationContext", 42262.0))) : builder;
     }
 
-    /// <summary>The refusing provider overrides every overridable member of the convention provider (XLD28).</summary>
+    /// <summary>The refusing provider overrides every overridable member of the convention provider.</summary>
     [Fact]
     public void TheRefusingProviderOverridesEveryMember()
     {
@@ -121,7 +121,7 @@ public sealed class SettingsTests : IDisposable
         Assert.Empty(overridable.Except(overridden));
     }
 
-    /// <summary>A relative path in a cell is refused (XLD7).</summary>
+    /// <summary>A relative path in a cell is refused.</summary>
     [Fact]
     public void ARelativePathInACellIsRefused()
     {

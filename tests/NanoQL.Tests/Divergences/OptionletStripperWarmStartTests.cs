@@ -14,8 +14,8 @@ namespace NanoQL.Tests.Divergences;
 /// surface (1Y, 2Y, 3Y, 5Y by 2%, 3%, 4%, 5%) on a flat 4% curve and Euribor 6M, a quote moved and moved back, the
 /// wheel's re-strip differs from its first in 33 of 36 volatilities, by up to 6.8449e-7: the first optionlet at 2% is
 /// 0.30000093033375125 on the first strip and 0.3000002879738929 on the second. nanoql strips once, at construction, from
-/// QuantLib's first guess, 0.14 (S7R4): every stripper on those quotes gives QuantLib's first strip, which a fresh
-/// QuantLib stripper gives too.
+/// QuantLib's first guess, 0.14: every stripper on those quotes gives QuantLib's first strip, which a fresh QuantLib
+/// stripper gives too.
 /// </summary>
 public class OptionletStripperWarmStartTests
 {

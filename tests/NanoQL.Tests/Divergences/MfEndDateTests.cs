@@ -9,17 +9,17 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The Markov-functional model's caplet end dates (the S-g1d plan's G1R5 (i), #2848's class): a caplet calibration
-/// point, and the outputs' forward rates and caplets, end at the value date advanced by the index's tenor on its fixing
-/// calendar (<c>markovfunctional.cpp:278</c>, <c>:949</c>, <c>:1109</c>), where the index's own end is its maturity
-/// date, which an index of its own may override. On the wheel, USD Libor 6M fixing on 9 April 2025 values on 11 April
-/// and matures on 14 October 2025, where the advance gives 13 October. nanoql ends each at the index's maturity date,
-/// as QuantLib's master computes the Gaussian1d forward rate after the pin. QuantLib's check: the index's own maturity
-/// date, and for an index whose maturity is the advance (Euribor), QuantLib's bits. The outputs' caplets read the end
-/// twice, the forward rate's and the caplet's (<c>:949</c>, <c>:1109</c>): a call struck at 0 pays the floating leg, so
-/// its price is P(0, t) − P(0, end) for any end the two share with the calibration point, QuantLib's own martingale
-/// identity, which nanoql's holds to 7e-8; QuantLib's end a day early at the forward's site moves it by 4e-5, at the
-/// caplet's by 5e-3.
+/// The Markov-functional model's caplet end dates (#2848's class): a caplet calibration point, and the outputs' forward
+/// rates and caplets, end at the value date advanced by the index's tenor on its fixing calendar
+/// (<c>markovfunctional.cpp:278</c>, <c>:949</c>, <c>:1109</c>), where the index's own end is its maturity date, which
+/// an index of its own may override. On the wheel, USD Libor 6M fixing on 9 April 2025 values on 11 April and matures
+/// on 14 October 2025, where the advance gives 13 October. nanoql ends each at the index's maturity date, as QuantLib's
+/// master computes the Gaussian1d forward rate after the pin. QuantLib's check: the index's own maturity date, and for
+/// an index whose maturity is the advance (Euribor), QuantLib's bits. The outputs' caplets read the end twice, the
+/// forward rate's and the caplet's (<c>:949</c>, <c>:1109</c>): a call struck at 0 pays the floating leg, so its price
+/// is P(0, t) − P(0, end) for any end the two share with the calibration point, QuantLib's own martingale identity,
+/// which nanoql's holds to 7e-8; QuantLib's end a day early at the forward's site moves it by 4e-5, at the caplet's by
+/// 5e-3.
 /// </summary>
 public class MfEndDateTests
 {

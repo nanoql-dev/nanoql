@@ -12,7 +12,7 @@ namespace NanoQL.Tests.Conventions;
 
 /// <summary>
 /// The analytic time-dependent Heston engine's evaluation count comes back with each price as the additional result
-/// "numberOfEvaluations" (the S-hes plan's HR4 (v)), where QuantLib keeps the last call's count in a mutable member
+/// "numberOfEvaluations", where QuantLib keeps the last call's count in a mutable member
 /// (<c>analyticptdhestonengine.cpp:298</c>) that it resets at each call: a count is the call's own, Gatheral's form
 /// counting its two integrations and Andersen and Piterbarg's its one, and one engine serves many calls.
 /// </summary>

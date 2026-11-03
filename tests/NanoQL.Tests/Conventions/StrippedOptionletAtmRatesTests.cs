@@ -8,12 +8,12 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// A stripped base's at-the-money rates read the context they are given (PR1, S7D16). A
-/// <see cref="StrippedOptionlet"/>'s are the index's fixings on its dates, read at each call as QuantLib reads them
-/// (<c>strippedoptionlet.cpp:161-166</c>): forecast on 16 June 2025, 0.0398481233043659 and 0.03985031410154605 at 16
-/// December 2025 and 16 June 2026, the wheel's; under a later context whose evaluation date is past the first date they
-/// need that date's fixing, "Missing Euribor6M Actual/360 fixing for December 16th, 2025" without it, as the wheel's
-/// do. A stripper's are the rates its strip computed, whatever the context.
+/// A stripped base's at-the-money rates read the context they are given. A <see cref="StrippedOptionlet"/>'s are the
+/// index's fixings on its dates, read at each call as QuantLib reads them (<c>strippedoptionlet.cpp:161-166</c>):
+/// forecast on 16 June 2025, 0.0398481233043659 and 0.03985031410154605 at 16 December 2025 and 16 June 2026, the
+/// wheel's; under a later context whose evaluation date is past the first date they need that date's fixing, "Missing
+/// Euribor6M Actual/360 fixing for December 16th, 2025" without it, as the wheel's do. A stripper's are the rates its
+/// strip computed, whatever the context.
 /// </summary>
 public class StrippedOptionletAtmRatesTests
 {

@@ -5,11 +5,11 @@ computed by the C++ harness (tools/cxx/src/experimental/credit/pool.cpp) on
 tools/vectors/gen/cxx/experimental/credit/defaultevent.py's specs.
 
 Pools added in name order, the only order where QuantLib's defaultKeys() pairs each name with its own key (it lists
-them in name order; the S-xcr plan's XR8 (i), held in Divergences/PoolKeyOrderTests.cs): an empty pool, names on their
-own keys, a name added twice (kept once), and names on Pool::add's default key. For each: the size, names and keys;
-has() for held and missing names; each name's issuer read through get() on its key at two dates, and a missing name,
-refused; each name's key; and times after setTime calls (on held names, and on a missing one, which no read reaches).
-Read back by tests/NanoQL.Tests/Vectors/Cxx/Experimental/Credit/PoolCxxVectorTests.cs."""
+them in name order; held in Divergences/PoolKeyOrderTests.cs): an empty pool, names on their own keys, a name added
+twice (kept once), and names on Pool::add's default key. For each: the size, names and keys; has() for held and
+missing names; each name's issuer read through get() on its key at two dates, and a missing name, refused; each name's
+key; and times after setTime calls (on held names, and on a missing one, which no read reaches). Read back by
+tests/NanoQL.Tests/Vectors/Cxx/Experimental/Credit/PoolCxxVectorTests.cs."""
 import importlib.util
 import os
 import sys

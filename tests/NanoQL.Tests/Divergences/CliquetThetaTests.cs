@@ -11,11 +11,11 @@ namespace NanoQL.Tests.Divergences;
 
 /// <summary>
 /// The cliquet and performance engines' theta. QuantLib's reads each period's rate over the period after its reset
-/// (<c>analyticcliquetengine.cpp:92-94</c>, <c>analyticperformanceengine.cpp:91-93</c>), where the period's value decays
-/// with its weight over the time before the reset: a one-period cliquet's theta 0.2813 where QuantLib's forward
-/// engine's is 0.0 on a dividend curve flat at zero before the reset. nanoql reads the rate to each reset (the S-exo
-/// plan's ER5 (xxii)). The check is QuantLib's forward and forward-performance engines on each period's forward-start
-/// option: the values and thetas summed period by period, on the rising market, whose dividends are 0 to three months.
+/// (<c>analyticcliquetengine.cpp:92-94</c>, <c>analyticperformanceengine.cpp:91-93</c>), where the period's value
+/// decays with its weight over the time before the reset: a one-period cliquet's theta 0.2813 where QuantLib's forward
+/// engine's is 0.0 on a dividend curve flat at zero before the reset. nanoql reads the rate to each reset. The check is
+/// QuantLib's forward and forward-performance engines on each period's forward-start option: the values and thetas
+/// summed period by period, on the rising market, whose dividends are 0 to three months.
 /// </summary>
 public class CliquetThetaTests
 {

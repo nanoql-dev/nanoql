@@ -17,7 +17,7 @@ namespace NanoQL.Methods;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A working type (the S-eq plan's SEQR1): mutable, owned by one computation and not thread-safe.
+/// A working type: mutable, owned by one computation and not thread-safe.
 /// <see cref="Apply(ReadOnlySpan{double}, Span{double})"/> and
 /// <see cref="SolveSplitting(ReadOnlySpan{double}, double, double, Span{double})"/> write into the caller's span, which
 /// mustn't overlap the input, through a workspace the operator holds; <see cref="Axpyb"/> rewrites the operator in

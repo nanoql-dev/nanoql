@@ -13,8 +13,7 @@ namespace NanoQL.Models;
 /// each paid at the period's payment time, signed for a payer (−1 on the floating leg for a receiver).
 /// </summary>
 /// <remarks>
-/// A working type (the S-mmp plan's MMPR1 (i)). Fewer accruals or payment times than rates are refused, where QuantLib
-/// reads past them (MMPR4's refusals).
+/// A working type. Fewer accruals or payment times than rates are refused, where QuantLib reads past them.
 /// </remarks>
 [WorkingType]
 public sealed class MultiStepSwap : MultiProductMultiStep

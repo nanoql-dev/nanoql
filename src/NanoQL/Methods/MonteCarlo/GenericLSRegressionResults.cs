@@ -10,7 +10,7 @@ namespace NanoQL.Methods;
 
 /// <summary>
 /// The results of a Longstaff-Schwartz regression: the biased estimate of the value it obtains while regressing, and
-/// each exercise's basis coefficients, which QuantLib writes into the caller's vector (the S-mmp plan's SMD6).
+/// each exercise's basis coefficients, which QuantLib writes into the caller's vector.
 /// </summary>
 /// <param name="BiasedEstimate">The value estimated on the regression's own paths, biased high.</param>
 /// <param name="BasisCoefficients">Each exercise's coefficients, one a basis function.</param>

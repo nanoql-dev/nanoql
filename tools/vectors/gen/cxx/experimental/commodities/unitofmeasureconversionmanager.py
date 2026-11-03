@@ -8,10 +8,9 @@ every ordered pair of QuantLib's six petroleum units, its direct lookups of the 
 commodity type's own factor, a factor replaced by add(), a chained search through a user's factor, and the lookups it
 refuses.
 
-Left out: the direct lookups of the two known factors QuantLib stores backward (gallons and thousand-barrels, litres
-and gallons; the S-xrt plan's XRR4), whose conversions run the other way here, and every chained search QuantLib's
-recursion can't end, from barrels or thousand-barrels with no direct factor (the S-xrt run's R1-1), held in
-tests/NanoQL.Tests/Divergences/. Read back by
+Left out: the direct lookups of the two known factors QuantLib stores backward (gallons and thousand-barrels, litres and
+gallons), whose conversions run the other way here, and every chained search QuantLib's recursion can't end, from
+barrels or thousand-barrels with no direct factor, held in tests/NanoQL.Tests/Divergences/. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Experimental/Commodities/UnitOfMeasureConversionManagerCxxVectorTests.cs."""
 import importlib.util
 import os

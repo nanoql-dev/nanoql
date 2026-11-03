@@ -19,10 +19,9 @@ namespace NanoQL.Processes;
 /// <para>
 /// The drift's corrections, QuantLib's −(σ²/a)(1 − e^(−a(T−t))) − (ρση/b)(1 − e^(−b(T−t))) and its mirror, are written
 /// as −σ²τf(aτ) − ρσητf(bτ), τ = T − t, f(x) = (1 − e^(−x))/x; the expectation's, QuantLib's Mx_T and My_T, as
-/// σ²τ₁f(aτ₁)[τ₂f(aτ₂) + ½e^(−aτ₂)τ₁f(aτ₁)] + ρσητ₁[τ₁D(aτ₁, bτ₁) + τ₂f(bτ₂)f((a+b)τ₁)], τ₁ = t − s, τ₂ = T − t,
-/// D(u, v) = (f(u) − f(u+v))/v, and their mirrors, every term positive; the correlation and φ as
-/// <see cref="G2Process"/>'s (the S-sr plan's SSR6 (iii) and (xix)): a divergence, QuantLib's terms cancelling at small
-/// reversion.
+/// σ²τ₁f(aτ₁)[τ₂f(aτ₂) + ½e^(−aτ₂)τ₁f(aτ₁)] + ρσητ₁[τ₁D(aτ₁, bτ₁) + τ₂f(bτ₂)f((a+b)τ₁)], τ₁ = t − s, τ₂ = T − t, D(u,
+/// v) = (f(u) − f(u+v))/v, and their mirrors, every term positive; the correlation and φ as <see cref="G2Process"/>'s:
+/// a divergence, QuantLib's terms cancelling at small reversion.
 /// </para>
 /// <para>
 /// QuantLib's constructor leaves the forward measure time unset; <see cref="WithForwardMeasureTime"/> gives a copy at

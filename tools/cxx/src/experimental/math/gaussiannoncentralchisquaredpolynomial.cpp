@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 // ql/experimental/math/gaussiannoncentralchisquaredpolynomial.hpp, .cpp: the non-central chi-squared polynomial, its
-// recurrence computed by a multi-precision oracle (the S-xrt plan's XRR8). QuantLib's MomentBasedGaussianPolynomial
-// template runs at boost::multiprecision's cpp_bin_float_50 on the moments from the cumulants 2^(j−1)(j−1)!(ν + jλ) in
-// that type, ν and λ the doubles they are; its alpha and beta round once to double, its weight is Boost's density, as
+// recurrence computed by a multi-precision oracle. QuantLib's MomentBasedGaussianPolynomial template runs at
+// boost::multiprecision's cpp_bin_float_50 on the moments from the cumulants 2^(j−1)(j−1)!(ν + jλ) in that type, ν and
+// λ the doubles they are; its alpha and beta round once to double, its weight is Boost's density, as
 // GaussNonCentralChiSquaredPolynomial's. QuantLib's own double polynomial, whose ill-conditioned double recursion
 // nanoql doesn't port, isn't the oracle.
 //

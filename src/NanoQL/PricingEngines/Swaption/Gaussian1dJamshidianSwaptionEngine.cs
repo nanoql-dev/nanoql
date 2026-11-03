@@ -22,20 +22,20 @@ namespace NanoQL.PricingEngines;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A static class (master plan §2's engine row): <c>Calculate</c> runs QuantLib's four steps (playbook §2.1). Only the
+/// A static class (the playbook's engine row): <c>Calculate</c> runs QuantLib's four steps (playbook §2.1). Only the
 /// fixed coupons whose start is on or after the exercise date are part of the bond, which pays the nominal at the
-/// floating leg's accrual end. A floating coupon paid after its accrual end (an overnight swap with a payment lag)
-/// has the difference its delay makes frozen at time zero and folded into the nominal at the value date, as QuantLib's
-/// does. One call shares one memo of the model's terms (the S-g1d plan's G1R1 (iii)).
+/// floating leg's accrual end. A floating coupon paid after its accrual end (an overnight swap with a payment lag) has
+/// the difference its delay makes frozen at time zero and folded into the nominal at the value date, as QuantLib's
+/// does. One call shares one memo of the model's terms.
 /// </para>
 /// <para>
-/// Two documented divergences (the plan's G1R6 (xviii); <c>Divergences/JamshidianBracketTests.cs</c> and
+/// Two documented divergences (<c>Divergences/JamshidianBracketTests.cs</c> and
 /// <c>Divergences/JamshidianNoFixedCouponTests.cs</c>). QuantLib solves for y* on the fixed bracket [−8, 8] and refuses
-/// short-dated swaptions away from the money; the bracket here is QuantLib's first and is doubled only where it
-/// doesn't bracket the root, so QuantLib's solver path and bits stand wherever it prices. And with no fixed coupon
-/// starting on or after the exercise, QuantLib reads the fixed reset dates past their end as the bond's value date;
-/// here the value date is the first floating reset on or after the exercise, the start of the coupons QuantLib's
-/// Gaussian1d swaption engine exercises into, and with none the swaption is worth 0, as that engine values it.
+/// short-dated swaptions away from the money; the bracket here is QuantLib's first and is doubled only where it doesn't
+/// bracket the root, so QuantLib's solver path and bits stand wherever it prices. And with no fixed coupon starting on
+/// or after the exercise, QuantLib reads the fixed reset dates past their end as the bond's value date; here the value
+/// date is the first floating reset on or after the exercise, the start of the coupons QuantLib's Gaussian1d swaption
+/// engine exercises into, and with none the swaption is worth 0, as that engine values it.
 /// </para>
 /// </remarks>
 public static class Gaussian1dJamshidianSwaptionEngine
@@ -97,7 +97,7 @@ public static class Gaussian1dJamshidianSwaptionEngine
         int startIndex = Gaussian1dSwaptionEngine.UpperBound(arguments.FixedResetDates, exercise - 1);
 
         // the bond's value date: the first fixed reset on or after the exercise, as QuantLib's; with none, the first
-        // floating reset on or after it, where QuantLib reads past the fixed reset dates (G1R6 (xviii))
+        // floating reset on or after it, where QuantLib reads past the fixed reset dates
         Date valueDate;
         if (startIndex < arguments.FixedResetDates.Length)
         {
@@ -211,7 +211,7 @@ file readonly struct RStarFinder : ISolver1DFunction
     }
 
     // QuantLib's Brent on [−8, 8], accuracy 1e-8, guess 0; the bracket doubled only while it doesn't bracket the root,
-    // as the solver's own check reads it, so where QuantLib's brackets, its call is QuantLib's (G1R6 (xviii)).
+    // as the solver's own check reads it, so where QuantLib's brackets, its call is QuantLib's.
     public double SolveRStar()
     {
         double minStrike = -8.0;

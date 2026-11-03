@@ -15,26 +15,24 @@ post-adjustment), and one whose first floating coupon pays later, a known amount
 ("current floating coupon not given" when the rollback reaches its payment). The times are on Actual/365
 (Fixed) from the evaluation date, or on Actual/360 from ten days later, which puts the swaps' first dates before it.
 
-Each swaption's outputs are the discretized swaption's mandatory times ("swaptionTimes") and its swap's
-("swapTimes"), in QuantLib's order; the swaption's values and present value when initialized at its last exercise time
-on a Hull-White tree (on the flat 2.7% curve, a = 0.05, sigma = 0.01) on TimeGrid(its times, 30) and rolled back to its
-first exercise time at or after the reference date ("swaptionValues", "swaptionPresentValue") and to 0
-("swaptionValuesAtZero", "swaptionPresentValueAtZero"); the same at 0 on a Vasicek tree ("vasicekPresentValueAtZero");
-and the swap's values and present value when initialized at its last time on the Hull-White tree on TimeGrid(its
-times, 30) and rolled back to 0 ("swapValuesAtZero", "swapPresentValueAtZero"). Amounts are compared at the nominal.
-The swaption's six are generated and left out where nanoql's fix moves them (the S-cms plan's CMR4; the tree swaption
-file's snapping_moves): QuantLib snaps a swap date in the week after an exercise date back to it, and pays its snapped
-swap's coupons on the snapped schedule's dates, where nanoql snaps only the week before and pays on the swap's own
-dates (tests/NanoQL.Tests/Divergences/TreeSwaptionSnappingTests.cs); those swaptions' swap outputs stay. Each such
-swaption whose unlagged twin, its swap starting on its exercise date, nothing moves has that twin added
-(" / unlagged"), every output kept: the Europeans, plain and overnight-indexed; the Bermudans exercised before the
-coupons, and the overnight-indexed one, still snap without the lag, and get none. 14 of the 30 keep their swap's outputs
-only.
-The swap's two are generated and left out where its first floating coupon pays on the evaluation date: its second
-starts that day and fixed two business days before, and nanoql's swap, by its public constructor, knows a floating
-coupon by its fixing date (the S-sr plan's SSR6 (xvi); tests/NanoQL.Tests/Divergences/TreeKnownCouponTests.cs), so it
-reads that coupon's amount, whose fixing the case doesn't store, where QuantLib's forecasts it on the tree. The
-swaption's swap keeps QuantLib's rule.
+Each swaption's outputs are the discretized swaption's mandatory times ("swaptionTimes") and its swap's ("swapTimes"),
+in QuantLib's order; the swaption's values and present value when initialized at its last exercise time on a Hull-White
+tree (on the flat 2.7% curve, a = 0.05, sigma = 0.01) on TimeGrid(its times, 30) and rolled back to its first exercise
+time at or after the reference date ("swaptionValues", "swaptionPresentValue") and to 0 ("swaptionValuesAtZero",
+"swaptionPresentValueAtZero"); the same at 0 on a Vasicek tree ("vasicekPresentValueAtZero"); and the swap's values and
+present value when initialized at its last time on the Hull-White tree on TimeGrid(its times, 30) and rolled back to 0
+("swapValuesAtZero", "swapPresentValueAtZero"). Amounts are compared at the nominal. The swaption's six are generated
+and left out where nanoql's fix moves them (the tree swaption file's snapping_moves): QuantLib snaps a swap date in the
+week after an exercise date back to it, and pays its snapped swap's coupons on the snapped schedule's dates, where
+nanoql snaps only the week before and pays on the swap's own dates
+(tests/NanoQL.Tests/Divergences/TreeSwaptionSnappingTests.cs); those swaptions' swap outputs stay. Each such swaption
+whose unlagged twin, its swap starting on its exercise date, nothing moves has that twin added (" / unlagged"), every
+output kept: the Europeans, plain and overnight-indexed; the Bermudans exercised before the coupons, and the
+overnight-indexed one, still snap without the lag, and get none. 14 of the 30 keep their swap's outputs only. The swap's
+two are generated and left out where its first floating coupon pays on the evaluation date: its second starts that day
+and fixed two business days before, and nanoql's swap, by its public constructor, knows a floating coupon by its fixing
+date (tests/NanoQL.Tests/Divergences/TreeKnownCouponTests.cs), so it reads that coupon's amount, whose fixing the case
+doesn't store, where QuantLib's forecasts it on the tree. The swaption's swap keeps QuantLib's rule.
 
 Each case's inputs hold the swaption (the harness's spec, tools/cxx/src/instruments/swaptionspec.hpp), the reference
 date and day counter, the models, the grids' times (the harness's mandatory times) and steps, and the rollbacks'
@@ -143,7 +141,7 @@ def swaptions(lag=2):
 
 
 def moved(spec):
-    """Whether nanoql's fix moves a swaption's discretized swaption (CMR4)."""
+    """Whether nanoql's fix moves a swaption's discretized swaption."""
     with v.case_settings(TODAY):
         return tse.snapping_moves(swp.make_swaption(spec))
 

@@ -11,10 +11,9 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Vectors;
 
 /// <summary>
-/// The markets the CMS pricers' convention and divergence tests price on, each the one a wheel probe of the S-cms run
-/// (<c>scratchpad\c1\div_values.py</c>) read QuantLib's values on: the S-cms planner's flat 3% market, a 1-year coupon
-/// fixing in 10 years on a 10-year index with constant volatilities; and QuantLib's cms.cpp market, a flat 5% curve and
-/// its at-the-money matrix.
+/// The markets the CMS pricers' convention and divergence tests price on, each one QuantLib-Python 1.44 gave QuantLib's
+/// values on: a flat 3% market, a 1-year coupon fixing in 10 years on a 10-year index with constant volatilities; and
+/// QuantLib's cms.cpp market, a flat 5% curve and its at-the-money matrix.
 /// </summary>
 internal static class CmsInputs
 {

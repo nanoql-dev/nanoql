@@ -6,8 +6,8 @@ geometric average-price Asian options in closed form.
 
 Geometric calls and puts at 90, 100 and 110, over six months, a year and two years, on the flat, constant-volatility
 processes of tools/vectors/gen/instruments/asianoption.py: the NPV and the Greeks the engine sets. Then the refusals of
-a seasoned option, an arithmetic average, a payoff that isn't plain vanilla and an exercise that isn't European, and
-an expired option. Off flat markets the outputs are left out (the S-bar plan's §2.10: BR4 (a)'s exact form).
+a seasoned option, an arithmetic average, a payoff that isn't plain vanilla and an exercise that isn't European, and an
+expired option. Off flat markets the outputs are left out: nanoql's form is exact there.
 
 A continuous option spec is {"averageType", "payoff", "exercise" and, where seasoned, "startDate"}. The wheel's calls,
 by QuantLib-SWIG 1.44's options.i: ContinuousAveragingAsianOption(averageType, payoff, exercise) and (averageType,

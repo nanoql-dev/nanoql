@@ -384,7 +384,7 @@ def check_rows(out):
     # The inconsistent pairs are refused when priced, not when built.
     assert by_name["inconsistent physical, par yield curve"]["blackNPV"] == v.THROWS
     assert by_name["inconsistent physical, par yield curve"]["settlementMethod"] == PAR_YIELD
-    # QuantLib's helper skips the swaption's checks: the physical twin implies the physical volatility (F8).
+    # QuantLib's helper skips the swaption's checks: the physical twin implies the physical volatility.
     twin = by_name["implied volatility / physical with a cash method, priced as physical"]["impliedVolatility"]
     assert abs(twin - 0.2) < 1e-8, twin
     assert by_name["implied volatility / cash with a physical method, refused by the engine"][

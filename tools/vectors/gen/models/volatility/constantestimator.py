@@ -3,10 +3,9 @@
 """Vectors for QuantLib's ConstantEstimator (ql/models/volatility/constantestimator.hpp, .cpp): the dispersion of the
 window of values before each date past the first, QuantLib's √(Σu²/n − (Σu)²/(n(n + 1))).
 
-Twelve volatility series of 5 to 60 consecutive daily dates, their values drawn in [0.05, 0.6] and, in four, in
-[-0.6, 0.6], each through windows of 1, 2, 5 and 10 values no longer than the series: the output's dates and values.
-A window longer than the series, where QuantLib advances past the series' end, is left out (the S-bar plan's §2.10:
-BR5 (xxxv)); the refusal is a divergence fact.
+Twelve volatility series of 5 to 60 consecutive daily dates, their values drawn in [0.05, 0.6] and, in four, in [-0.6,
+0.6], each through windows of 1, 2, 5 and 10 values no longer than the series: the output's dates and values. A window
+longer than the series, where QuantLib advances past the series' end, is left out; the refusal is a divergence fact.
 
 The wheel's calls, by QuantLib-SWIG 1.44's volatilities.i: ConstantEstimator(size).calculate(RealTimeSeries). Read
 back by tests/NanoQL.Tests/Vectors/Models/Volatility/ConstantEstimatorVectorTests.cs."""

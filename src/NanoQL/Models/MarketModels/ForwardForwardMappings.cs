@@ -17,8 +17,8 @@ namespace NanoQL.Models;
 /// <remarks>
 /// The k-th long forward runs from rate time offset + k × multiplier over multiplier short forwards. QuantLib's
 /// Jacobian is 1/τ_long minus the long forward's derivative, and its Y matrix's long forward the negative of g/(1 + τ_long
-/// g); both are fixed here (the S-mm plan's MR3 (i); <c>Divergences/ForwardForwardMappingsTests.cs</c>): the derivative
-/// (P_start/P_end) τ_m (P_{m+1}/P_m)/τ_long, and the long forward (P_start/P_end − 1)/τ_long, QuantLib's own
+/// g); both are fixed here (<c>Divergences/ForwardForwardMappingsTests.cs</c>): the derivative (P_start/P_end) τ_m
+/// (P_{m+1}/P_m)/τ_long, and the long forward (P_start/P_end − 1)/τ_long, QuantLib's own
 /// <see cref="RestrictCurveState"/> forward, which central bumps of it check. A multiplier or an offset QuantLib's
 /// unsigned arithmetic wraps to an endless allocation (an offset past the rates) is refused.
 /// </remarks>
@@ -48,7 +48,7 @@ public static class ForwardForwardMappings
 
             for (int r = 0; r < multiplier; ++r, ++m)
             {
-                // dg/df_m = (P_start/P_end) τ_m (P_{m+1}/P_m) / τ_long; QuantLib's is 1/τ_long minus it (MR3 (i))
+                // dg/df_m = (P_start/P_end) τ_m (P_{m+1}/P_m) / τ_long; QuantLib's is 1/τ_long minus it
                 double value = df * tau[m] * cs.DiscountRatio(m + 1, m);
                 value /= bigTau;
                 jacobian[l, m] = value;
@@ -96,7 +96,7 @@ public static class ForwardForwardMappings
         {
             double tau = cs.RateTimes[((i + 1) * multiplier) + offset] - cs.RateTimes[(i * multiplier) + offset];
 
-            // g = (P_start/P_end − 1)/τ_long; QuantLib's ratio is P_end/P_start (MR3 (i))
+            // g = (P_start/P_end − 1)/τ_long; QuantLib's ratio is P_end/P_start
             double longForward = (cs.DiscountRatio((i * multiplier) + offset, ((i + 1) * multiplier) + offset) - 1.0) / tau;
             double longForwardDisplaced = longForward + longDisplacements[i];
             for (int j = 0; j < n; ++j)

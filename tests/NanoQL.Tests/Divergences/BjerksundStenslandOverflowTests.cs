@@ -10,14 +10,14 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// Bjerksund-Stensland's phi family where a power overflows against an underflowing normal tail (the S-van plan's VR4
-/// (xxxiii)). <c>phi</c> returns e^λ·[N(d) − (I/S)^κ·N(d − 2 ln(I/S)/√v)] (<c>bjerksundstenslandengine.cpp:37-48</c>);
-/// on puts with q ≫ r and a long expiry the symmetric call's (I/S)^κ overflows while the N factor underflows, the product
-/// is NaN, and the European floor misses it: QuantLib prices puts at σ 5%, 30 years, r 0.1%, q 30% NaN [executed on the
-/// wheel: <c>scratchpad\c2\oracle_c2.py</c>, section overflow]. The Greeks' functions carry the same powers beside erfc
-/// and Gaussian densities. nanoql takes each such product as one exponent, through log N's tail, where the power isn't
-/// finite or the tail is 0. QuantLib's check: its FD engine (2,000 × 2,000) on the value, delta and gamma; the other
-/// Greeks against the engine's own NPVs bumped by ±1e-6; QuantLib's bits where the guard doesn't fire.
+/// Bjerksund-Stensland's phi family where a power overflows against an underflowing normal tail. <c>phi</c> returns
+/// e^λ·[N(d) − (I/S)^κ·N(d − 2 ln(I/S)/√v)] (<c>bjerksundstenslandengine.cpp:37-48</c>); on puts with q ≫ r and a long
+/// expiry the symmetric call's (I/S)^κ overflows while the N factor underflows, the product is NaN, and the European
+/// floor misses it: QuantLib prices puts at σ 5%, 30 years, r 0.1%, q 30% NaN (QuantLib-Python 1.44). The Greeks'
+/// functions carry the same powers beside erfc and Gaussian densities. nanoql takes each such product as one exponent,
+/// through log N's tail, where the power isn't finite or the tail is 0. QuantLib's check: its FD engine (2,000 × 2,000)
+/// on the value, delta and gamma; the other Greeks against the engine's own NPVs bumped by ±1e-6; QuantLib's bits where
+/// the guard doesn't fire.
 /// </summary>
 public class BjerksundStenslandOverflowTests
 {

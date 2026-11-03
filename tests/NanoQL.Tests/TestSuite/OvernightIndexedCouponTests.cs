@@ -801,7 +801,7 @@ public class OvernightIndexedCouponTests
 
     // Moved: the check of line 1033, QuantLib's NPV of the leg with a lockout and telescopic value dates,
     // 34883.949669756257, which only its shortened value dates give, moves to Divergences/TelescopicValueDatesTests.cs:
-    // with every daily value date, the leg gives QuantLib's full-schedule NPV (S3R11, S5R5).
+    // with every daily value date, the leg gives QuantLib's full-schedule NPV.
     [Fact]
     public void TestOvernightLegNPV()
     {
@@ -1714,7 +1714,7 @@ public class OvernightIndexedCouponTests
     // Adapted: the forecast curve linked after Sofr is built (line 1930) becomes Sofr built on the curve, and the check
     // of line 1936, an accrued amount on 27 March 2027, inside the dates QuantLib's telescopic coupon skips, moves to
     // Divergences/TelescopicValueDatesTests.cs: with every daily value date the coupon gives QuantLib's full-schedule
-    // amount there (S3R11).
+    // amount there.
     [Fact]
     public void TestExCouponAccruedAmountAroundAccrualEndDate()
     {

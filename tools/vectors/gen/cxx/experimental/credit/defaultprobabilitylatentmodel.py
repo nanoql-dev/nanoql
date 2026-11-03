@@ -6,13 +6,12 @@ expose, each output computed by the C++ harness (tools/cxx/src/experimental/cred
 on tools/vectors/gen/cxx/experimental/credit/defaultevent.py's basket specs.
 
 Gaussian and Student t models, by correlation (QuantLib's quote constructor) and by factor weights, reset on baskets of
-pools added in name order (the S-xcr plan's XR8 (i)) with no realized default, at integrations by Gauss-Hermite and,
-on one factor, by trapezoids: each name's unconditional default probability integrated over the factors at dates from
-the evaluation date, where it is 0, to ten years; each pair's default correlation past the evaluation date (at it,
-QuantLib divides 0 by 0, XR8 (xlvi), held in Conventions/CreditPortfolioConventionTests.cs); the probability of n
-defaults or more for every n; the conditional default probabilities, plain and from the inverse, at probabilities
-below and above 1e-10 and factor samples; and the constant-loss model's recoveries. And a reset on a basket of another
-size, refused. Read back by
+pools added in name order with no realized default, at integrations by Gauss-Hermite and, on one factor, by trapezoids:
+each name's unconditional default probability integrated over the factors at dates from the evaluation date, where it is
+0, to ten years; each pair's default correlation past the evaluation date (at it, QuantLib divides 0 by 0, held in
+Conventions/CreditPortfolioConventionTests.cs); the probability of n defaults or more for every n; the conditional
+default probabilities, plain and from the inverse, at probabilities below and above 1e-10 and factor samples; and the
+constant-loss model's recoveries. And a reset on a basket of another size, refused. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Experimental/Credit/DefaultProbabilityLatentModelCxxVectorTests.cs."""
 import importlib.util
 import os

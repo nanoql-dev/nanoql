@@ -18,9 +18,8 @@ namespace NanoQL.Experimental;
 /// one buying protection and paying a coupon.
 /// </summary>
 /// <remarks>
-/// QuantLib's engine and its at-the-money rate read the swap's attached engine; here each takes the swap's engine as
-/// D14's delegate (the S-xcr plan's XD4). The implied volatility is an instance method running the Black engine's body
-/// on each trial (SIR2's form).
+/// QuantLib's engine and its at-the-money rate read the swap's attached engine; here each takes the swap's engine as a
+/// delegate. The implied volatility is an instance method running the Black engine's body on each trial.
 /// </remarks>
 [Experimental("NQL0001")]
 public sealed class CdsOption : Option

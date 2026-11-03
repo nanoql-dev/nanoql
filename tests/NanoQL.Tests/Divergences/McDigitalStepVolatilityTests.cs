@@ -12,17 +12,16 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The Monte Carlo digital engine's crossing volatility (the S-van plan's VR4 (iv), under R8, with an independent
-/// check). QuantLib's <c>DigitalPathPricer</c> reads the volatility of step i at the step's end time,
-/// <c>diffusion(timeGrid[i+1], S_i)</c>, under the comment "initial (timeGrid[i+1]) for the time being"
-/// (<c>mcdigitalengine.cpp:53-54</c>, <c>:80-82</c>), so on a time-dependent volatility each step's Brownian bridge reads
-/// the next step's. nanoql reads it at the step's start, (t_i, S_i). The check, QuantLib's having none: on a volatility
-/// constant within each grid step the bridge's crossing probability is exact, so the fixed engine on a coarse grid
-/// matches the same engine on a fine one within their errors, where QuantLib's is far off. The volatility: forward
-/// volatilities of 10%, 40%, 10% and 40% over four quarters of 91 days (a <see cref="BlackVarianceCurve"/>), an up-and-in
-/// call at 115 and a down-and-in put at 85 paying 10 at the hit; QuantLib's engine (seed 42, 100,000 samples) gives the
-/// call 7.362620907677973 on 4 steps against 6.395034183222466 on 64, the put 6.14377515430365 against 5.417421714551026
-/// [executed on the wheel: <c>oracle_c1c.py</c>].
+/// The Monte Carlo digital engine's crossing volatility (with an independent check). QuantLib's
+/// <c>DigitalPathPricer</c> reads the volatility of step i at the step's end time, <c>diffusion(timeGrid[i+1],
+/// S_i)</c>, under the comment "initial (timeGrid[i+1]) for the time being" (<c>mcdigitalengine.cpp:53-54</c>,
+/// <c>:80-82</c>), so on a time-dependent volatility each step's Brownian bridge reads the next step's. nanoql reads it
+/// at the step's start, (t_i, S_i). The check, QuantLib's having none: on a volatility constant within each grid step
+/// the bridge's crossing probability is exact, so the fixed engine on a coarse grid matches the same engine on a fine
+/// one within their errors, where QuantLib's is far off. The volatility: forward volatilities of 10%, 40%, 10% and 40%
+/// over four quarters of 91 days (a <see cref="BlackVarianceCurve"/>), an up-and-in call at 115 and a down-and-in put
+/// at 85 paying 10 at the hit; QuantLib's engine (seed 42, 100,000 samples) gives the call 7.362620907677973 on 4 steps
+/// against 6.395034183222466 on 64, the put 6.14377515430365 against 5.417421714551026 (QuantLib-Python 1.44).
 /// </summary>
 public class McDigitalStepVolatilityTests
 {

@@ -12,10 +12,10 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// C4's refusals (the S-exo plan's ED14): each check's exception type, QuantLib's text and the parameter it names.
-/// Where a check can't fire, the guard before it is asserted: the perpetual futures engine's unknown funding unit behind
-/// the period's own unit check, the Monte Carlo variance-swap engine's unknown position behind the swap's, and the
-/// variance pricer's interval count behind its empty-path check (a uniform grid's first step never exceeds its span).
+/// The remaining exotics' refusals: each check's exception type, QuantLib's text and the parameter it names. Where a
+/// check can't fire, the guard before it is asserted: the perpetual futures engine's unknown funding unit behind the
+/// period's own unit check, the Monte Carlo variance-swap engine's unknown position behind the swap's, and the variance
+/// pricer's interval count behind its empty-path check (a uniform grid's first step never exceeds its span).
 /// </summary>
 public class ExoticRestErrorTests
 {

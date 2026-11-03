@@ -22,7 +22,7 @@ namespace NanoQL.PricingEngines;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A working type (S2R2), as in QuantLib: it draws a new uniform sequence for each path it prices, from a copy of the
+/// A working type, as in QuantLib: it draws a new uniform sequence for each path it prices, from a copy of the
 /// generator it is given. References: Beaglehole, Dybvig and Zhou, "Going to Extremes: Correcting Simulation Bias in
 /// Exotic Option Valuation", Financial Analysts Journal, Jan/Feb 1997; El Babsiri and Noel, "Simulating
 /// path-dependent options: A new approach", Journal of Derivatives, Winter 1998.
@@ -30,10 +30,9 @@ namespace NanoQL.PricingEngines;
 /// <para>
 /// Two documented divergences. A step's crossing probability reads the volatility at the step's start, (t_i, S_i),
 /// where QuantLib reads it at the step's end time, <c>diffusion(timeGrid[i+1], S_i)</c>, whose comment calls it the
-/// initial one (the S-van plan's VR4 (iv), <c>Divergences/McDigitalStepVolatilityTests.cs</c>): the same on a
-/// volatility constant in time. And crossings count from the exercise window's opening, a path already past the strike
-/// there paid at it, where QuantLib counts them from the start (VR4 (iii), <c>Divergences/McDigitalWindowTests.cs</c>);
-/// a window open from the start is QuantLib's.
+/// initial one (<c>Divergences/McDigitalStepVolatilityTests.cs</c>): the same on a volatility constant in time. And
+/// crossings count from the exercise window's opening, a path already past the strike there paid at it, where QuantLib
+/// counts them from the start (<c>Divergences/McDigitalWindowTests.cs</c>); a window open from the start is QuantLib's.
 /// </para>
 /// </remarks>
 [WorkingType]
@@ -64,8 +63,7 @@ public sealed class DigitalPathPricer : PathPricer<MonteCarloPath>
     {
     }
 
-    // The engine's form: the curve read at the instants the paths' times denote on another clock (the S-van plan's
-    // VR1 (v)).
+    // The engine's form: the curve read at the instants the paths' times denote on another clock.
     internal DigitalPathPricer(
         CashOrNothingPayoff payoff,
         AmericanExercise exercise,
@@ -113,7 +111,7 @@ public sealed class DigitalPathPricer : PathPricer<MonteCarloPath>
         ReadOnlySpan<double> u = sequenceGen.NextSequence().Value.Span;
         double logStrike = Math.Log(payoff.Strike);
 
-        // the window's opening on the grid (the S-van plan's VR4 (iii)); QuantLib counts from the start
+        // the window's opening on the grid; QuantLib counts from the start
         int start = windowStart > 0.0 ? timeGrid.Index(windowStart) : 0;
         for (int j = 0; j < start; j++)
         {
@@ -134,8 +132,8 @@ public sealed class DigitalPathPricer : PathPricer<MonteCarloPath>
                 {
                     x = Math.Log(path[i + 1] / path[i]);
 
-                    // the volatility at the step's start (the S-van plan's VR4 (iv)), where QuantLib reads
-                    // diffProcess_->diffusion(timeGrid[i+1], ...)
+                    // the volatility at the step's start, where QuantLib reads diffProcess_->diffusion(timeGrid[i+1],
+                    // ...)
                     vol = diffProcess.Diffusion(timeGrid[i], Math.Exp(logAssetPrice));
                     dt = timeGrid.Dt(i);
                     y = logAssetPrice + (0.5 * (x + Math.Sqrt((x * x) - (2 * vol * vol * dt * Math.Log(1 - u[i])))));
@@ -161,8 +159,8 @@ public sealed class DigitalPathPricer : PathPricer<MonteCarloPath>
                 {
                     x = Math.Log(path[i + 1] / path[i]);
 
-                    // the volatility at the step's start (the S-van plan's VR4 (iv)), where QuantLib reads
-                    // diffProcess_->diffusion(timeGrid[i+1], ...)
+                    // the volatility at the step's start, where QuantLib reads diffProcess_->diffusion(timeGrid[i+1],
+                    // ...)
                     vol = diffProcess.Diffusion(timeGrid[i], Math.Exp(logAssetPrice));
                     dt = timeGrid.Dt(i);
                     y = logAssetPrice + (0.5 * (x - Math.Sqrt((x * x) - (2 * vol * vol * dt * Math.Log(u[i])))));

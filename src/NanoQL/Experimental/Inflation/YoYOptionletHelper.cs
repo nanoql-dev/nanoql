@@ -21,9 +21,9 @@ namespace NanoQL.Experimental;
 /// <para>
 /// The instrument is built once, at construction, from the context's evaluation date, as QuantLib's; its earliest and
 /// latest dates are its first and last coupons' fixing dates, the index values that fix it. The engine is a function of
-/// the instrument, the context and the trial volatility (the S-xrt plan's XRD8), the caller binding the index and the
-/// nominal curve, as <c>(c, ctx, v) =&gt; YoYInflationUnitDisplacedBlackCapFloorEngine.Calculate(c, ctx, index, v,
-/// nominal)</c>: QuantLib resets the shared engine's volatility to the bound surface instead.
+/// the instrument, the context and the trial volatility, the caller binding the index and the nominal curve, as <c>(c,
+/// ctx, v) =&gt; YoYInflationUnitDisplacedBlackCapFloorEngine.Calculate(c, ctx, index, v, nominal)</c>: QuantLib resets
+/// the shared engine's volatility to the bound surface instead.
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]

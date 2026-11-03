@@ -10,14 +10,14 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The simple swing engine on exercises within a day (the S-van plan's VR4 (xvi)). QuantLib's engine times each
-/// exercise by its date (<c>fdsimplebsswingengine.cpp:72-76</c>) where <c>SwingExercise::exerciseTimes</c> adds its
-/// seconds (<c>vanillaswingoption.cpp:83-97</c>): 60 half-daily exercises price as the 30 daily ones, 6.0120197306323737
-/// with 5 rights and 11.479815522463735 with 10, on a put forward at 30, spot 30, r 14%, q 2%, σ 40%, Actual/Actual
-/// (ISDA) from 15 October 2026 [executed: <c>scratchpad\c4\probe\swing_seconds.cpp</c>]. nanoql times them by the
-/// exercise's date times on the engine's clock, the maturity the last of them. The check, independent of QuantLib:
-/// with every right forced (the minimum and the maximum the number of exercises) the value is the sum of the forward
-/// payoffs' values at the exercise times, K·D(t) − S₀·D_q(t), a closed form.
+/// The simple swing engine on exercises within a day. QuantLib's engine times each exercise by its date
+/// (<c>fdsimplebsswingengine.cpp:72-76</c>) where <c>SwingExercise::exerciseTimes</c> adds its seconds
+/// (<c>vanillaswingoption.cpp:83-97</c>): 60 half-daily exercises price as the 30 daily ones, 6.0120197306323737 with 5
+/// rights and 11.479815522463735 with 10, on a put forward at 30, spot 30, r 14%, q 2%, σ 40%, Actual/Actual (ISDA)
+/// from 15 October 2026 (QuantLib 1.44). nanoql times them by the exercise's date times on the engine's clock, the
+/// maturity the last of them. The check, independent of QuantLib: with every right forced (the minimum and the maximum
+/// the number of exercises) the value is the sum of the forward payoffs' values at the exercise times, K·D(t) −
+/// S₀·D_q(t), a closed form.
 /// </summary>
 public class SwingExerciseSecondsTests
 {

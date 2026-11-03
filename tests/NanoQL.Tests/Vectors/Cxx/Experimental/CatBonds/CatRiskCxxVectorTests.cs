@@ -11,7 +11,7 @@ namespace NanoQL.Tests.Vectors;
 /// <summary>
 /// The C++ harness's catastrophe risk vectors, <c>tests/vectors/cxx/experimental/catbonds/catrisk.json</c>: every path
 /// of <see cref="EventSet"/>'s simulations, and <see cref="BetaRisk"/>'s first paths on MSVC's streams up to the first
-/// where QuantLib's fresh event draws and the cumulated ones can part (the S-xcr plan's XR4 (c), XR8 (xlii)), and
+/// where QuantLib's fresh event draws and the cumulated ones can part, and
 /// <see cref="BetaRiskSimulation.GenerateBeta"/>'s losses at shapes reaching each of the gamma's branches.
 /// </summary>
 [Trait("Oracle", "QuantLib")]

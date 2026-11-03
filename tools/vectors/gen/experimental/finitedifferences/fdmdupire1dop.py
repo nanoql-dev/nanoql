@@ -5,10 +5,10 @@ volatility operator 1/2 sigma(K)^2 d2/dK2: on three strike meshers (uniform, con
 fdPrice mesher's form) with a local volatility per point, at three (t1, t2), the size, apply, apply_direction,
 solve_splitting at s = -0.3 and 0.7, and preconditioner at s = 0.4, on seeded vectors (seed 20261023).
 
-Left out: apply_mixed, which QuantLib's returns as its input (the S-g1d plan's G1R6 (xi), FdmDupireApplyMixedTests).
-The inputs are tools/vectors/gen/methods/finitedifferences/operators/fdmg2op.py's, its mesher spec
-fdmsimpleprocess1dmesher.py's composite, and "localVolatility". The wheel's FdmDupire1dOp(mesher, localVolatility) is
-the C++ constructor. Read back by tests/NanoQL.Tests/Vectors/Experimental/FiniteDifferences/FdmDupire1dOpVectorTests.cs."""
+Left out: apply_mixed, which QuantLib's returns as its input (FdmDupireApplyMixedTests). The inputs are
+tools/vectors/gen/methods/finitedifferences/operators/fdmg2op.py's, its mesher spec fdmsimpleprocess1dmesher.py's
+composite, and "localVolatility". The wheel's FdmDupire1dOp(mesher, localVolatility) is the C++ constructor. Read back
+by tests/NanoQL.Tests/Vectors/Experimental/FiniteDifferences/FdmDupire1dOpVectorTests.cs."""
 import importlib.util
 import math
 import os

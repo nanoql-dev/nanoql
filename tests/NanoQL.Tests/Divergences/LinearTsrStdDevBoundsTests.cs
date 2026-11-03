@@ -9,10 +9,10 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The linear TSR pricer's standard-deviations strategy (the S-cms plan's CMR5 (iii)): QuantLib sets both bounds for
-/// either option, so a caplet is integrated from below its strike, takes the lognormal width k·σ without √T where the
-/// normal width has it, and subtracts the shift twice (<c>lineartsrpricer.cpp:318-342</c>): on the wheel, on a flat 3%
-/// curve and a 20% volatility, a 1-year coupon fixing in 10 years prices 0.03276470349655507, 0.03364469105154387 and
+/// The linear TSR pricer's standard-deviations strategy: QuantLib sets both bounds for either option, so a caplet is
+/// integrated from below its strike, takes the lognormal width k·σ without √T where the normal width has it, and
+/// subtracts the shift twice (<c>lineartsrpricer.cpp:318-342</c>): on the wheel, on a flat 3% curve and a 20%
+/// volatility, a 1-year coupon fixing in 10 years prices 0.03276470349655507, 0.03364469105154387 and
 /// 0.03424293117331103 at k = 3, 5 and 10, moving away from the full range's 0.032367510616761526 as k grows. nanoql
 /// sets each option's own bound, the width k·σ·√T and the shift once. QuantLib's check: its rate-bound strategy on the
 /// corrected bounds, and the full range as k grows.

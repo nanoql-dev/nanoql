@@ -9,9 +9,9 @@ namespace NanoQL.Tests.Vectors;
 /// The C++ harness's normal predictor-corrector evolver vectors,
 /// <c>tests/vectors/cxx/models/marketmodels/evolvers/normalfwdratepc.json</c>: <see cref="NormalFwdRatePc"/>'s whole
 /// evolutions on models of normal volatilities, on the Mersenne-twister and Sobol generators, under the terminal and
-/// money-market measures, from the first and a later step, with the model's initial state (a set one is the S-mm
-/// plan's MR3 (iv), in the Divergences record): each step's weight, current step, forwards, discount ratios and
-/// coterminal swap rates; and the refused numeraires.
+/// money-market measures, from the first and a later step, with the model's initial state (a set one is in the
+/// Divergences record): each step's weight, current step, forwards, discount ratios and coterminal swap rates; and
+/// the refused numeraires.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class NormalFwdRatePcCxxVectorTests

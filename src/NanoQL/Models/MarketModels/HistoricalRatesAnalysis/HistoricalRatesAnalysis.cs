@@ -17,8 +17,8 @@ namespace NanoQL.Models;
 /// (<see cref="HistoricalRatesAnalysisFunctions.HistoricalRatesAnalysis"/>).
 /// </summary>
 /// <remarks>
-/// Immutable once built (the S-mmp plan's SMD6): it holds the caller's statistics, filled by its constructor, as
-/// QuantLib's holds the shared pointer it is given.
+/// Immutable once built: it holds the caller's statistics, filled by its constructor, as QuantLib's holds the shared
+/// pointer it is given.
 /// </remarks>
 public sealed class HistoricalRatesAnalysis
 {

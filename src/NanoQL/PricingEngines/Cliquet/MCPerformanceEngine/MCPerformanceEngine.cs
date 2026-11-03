@@ -15,12 +15,11 @@ namespace NanoQL.PricingEngines;
 /// <summary>The performance option pricing engine by Monte Carlo simulation.</summary>
 /// <remarks>
 /// <para>
-/// A static class over a private simulation on S-sr's <see cref="McSimulation{TPath, TStats}"/>: <c>Calculate</c>
-/// returns the samples' mean as the NPV and, where the random-number traits allow one, their error estimate. The grid's
-/// times are the resets and expiry on the process's clock (<see cref="FdmBlackScholesOp.Clock"/>), the discounts read
-/// there (the S-exo plan's ER5 (xxiv)); on structures dated alike, QuantLib's. The path pricer reads each reset at its
-/// index on the grid, so a reset today prices (ER5 (xxxix), <c>Divergences/McPerformanceResetTodayTests.cs</c>). The
-/// seed is explicit (S2R4).
+/// A static class over a private simulation on <see cref="McSimulation{TPath, TStats}"/>: <c>Calculate</c> returns the
+/// samples' mean as the NPV and, where the random-number traits allow one, their error estimate. The grid's times are
+/// the resets and expiry on the process's clock (<see cref="FdmBlackScholesOp.Clock"/>), the discounts read there; on
+/// structures dated alike, QuantLib's. The path pricer reads each reset at its index on the grid, so a reset today
+/// prices (<c>Divergences/McPerformanceResetTodayTests.cs</c>). The seed is explicit.
 /// </para>
 /// </remarks>
 public static class MCPerformanceEngine

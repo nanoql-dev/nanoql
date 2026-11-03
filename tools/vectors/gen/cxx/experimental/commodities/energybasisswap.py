@@ -6,9 +6,9 @@ WTI against Brent on monthly periods, the basis on the pay leg and on the receiv
 the forward curves, the two indexes' last quote dates apart, with secondary costs; their NPV, pricing errors, cost
 amounts, daily positions and payment cash flows.
 
-On the base unit and currency alone, the basis in dollars (the S-xrt plan's §2.8): QuantLib's unit factors invert on any
-other unit (XRR5 (i)), it converts a basis from the base currency into the basis currency (XRR5 (ix)), and its payments
-pair one leg's currency with the other's rate (XRR5 (viii)), all of which agree in one currency and unit. Read back by
+On the base unit and currency alone, the basis in dollars: QuantLib's unit factors invert on any other unit, it converts
+a basis from the base currency into the basis currency, and its payments pair one leg's currency with the other's rate,
+all of which agree in one currency and unit. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Experimental/Commodities/EnergyBasisSwapCxxVectorTests.cs."""
 import importlib.util
 import os

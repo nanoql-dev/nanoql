@@ -12,15 +12,15 @@ using static NanoQL.Tests.Conventions.CreditPortfolioBuilders;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The adjusted binomial's weight (the S-xcr plan's XR8 (xviii)): mixed with the two-point mass at the floor and
-/// ceiling of the expected count, the binomial is weighted so that the conditional distribution has the pool's mean
-/// and variance, O'Kane's defining property; QuantLib's weight takes −(c − m)² − ((f − m)² − c²)(c − m) for the
-/// two-point mass's variance, so its distribution misses the variance it exists to match. On three names (notionals 10,
-/// 20, 30, hazards 0.02, 0.03, 0.015, recoveries 0.4, 0.3, 0.5, correlation 0.3) QuantLib's binomial reads the whole
-/// pool's expected loss 3.6067712419499616 at five years, its mean, which no weight moves, and the [10%, 40%] tranche's
-/// 2.0417230578123919, where the exact recursive model reads 1.8818433951861697 (the S-xcr run's
-/// <c>c3_facts.cpp</c>). And the loss distribution integrates a vector over the factor, where QuantLib's quadrature
-/// leaves its last node unweighted (XR8 (v), C1's fix): nanoql's is the scalar route's, point by point.
+/// The adjusted binomial's weight: mixed with the two-point mass at the floor and ceiling of the expected count, the
+/// binomial is weighted so that the conditional distribution has the pool's mean and variance, O'Kane's defining
+/// property; QuantLib's weight takes −(c − m)² − ((f − m)² − c²)(c − m) for the two-point mass's variance, so its
+/// distribution misses the variance it exists to match. On three names (notionals 10, 20, 30, hazards 0.02, 0.03,
+/// 0.015, recoveries 0.4, 0.3, 0.5, correlation 0.3) QuantLib's binomial reads the whole pool's expected loss
+/// 3.6067712419499616 at five years, its mean, which no weight moves, and the [10%, 40%] tranche's 2.0417230578123919,
+/// where the exact recursive model reads 1.8818433951861697. And the loss distribution integrates a vector over the
+/// factor, where QuantLib's quadrature leaves its last node unweighted (a fix): nanoql's is the scalar route's, point
+/// by point.
 /// </summary>
 public class BinomialLossModelTests
 {
@@ -99,7 +99,6 @@ public class BinomialLossModelTests
     public void ThePercentileAtOneIsATrancheLoss(double a, double d, double width)
     {
         // QuantLib: 29.999999999976612 at 1, the pool's largest loss; just below 1 the tranche's width, its own
-        // (the S-xcr code review's C3 O1-1)
         Basket basket = FiveNames(a, d).SetLossModel(new GaussianBinomialLossModel(Latent04()));
         Assert.Equal(width, basket.Percentile(D5, 1.0), 1e-12);
         Assert.Equal(width, basket.Percentile(D5, 0.999999), 1e-9);

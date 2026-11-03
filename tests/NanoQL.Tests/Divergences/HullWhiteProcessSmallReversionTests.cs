@@ -8,14 +8,14 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The Hull-White process at small mean reversion (the S-sr plan's SSR6 (ii)): QuantLib's drift's
-/// σ²/(2a)(1 − e^(−2at)) (<c>hullwhiteprocess.cpp:39</c>) has no a → 0 branch, so at a = 0, which the constructor
-/// accepts, the drift is NaN, and below it cancels: on the wheel, on a flat 4% curve with σ = 0.01, the drift at
-/// (1, 0.04) is NaN at a = 0 and 9.99982319171977e-05 at a = 1e-12, −1.8e-5 relative off its limit σ²t + f′(t),
-/// 1.00000444e-4, and the one-year expectation 0.04004999779003289 at 1e-12 against QuantLib's own a = 0 expectation, 0.04005000000218044
-/// (its variance 0.0001 at both). nanoql writes the term σ²t·(1 − e^(−x))/x, x = 2at. QuantLib's check: the limit,
-/// σ²t + f′(t) with f′ QuantLib's difference quotient of the curve's forward over 1e-4 (<c>:40-44</c>), and QuantLib's
-/// own a = 0 expectation and variance.
+/// The Hull-White process at small mean reversion: QuantLib's drift's σ²/(2a)(1 − e^(−2at))
+/// (<c>hullwhiteprocess.cpp:39</c>) has no a → 0 branch, so at a = 0, which the constructor accepts, the drift is NaN,
+/// and below it cancels: on the wheel, on a flat 4% curve with σ = 0.01, the drift at (1, 0.04) is NaN at a = 0 and
+/// 9.99982319171977e-05 at a = 1e-12, −1.8e-5 relative off its limit σ²t + f′(t), 1.00000444e-4, and the one-year
+/// expectation 0.04004999779003289 at 1e-12 against QuantLib's own a = 0 expectation, 0.04005000000218044 (its variance
+/// 0.0001 at both). nanoql writes the term σ²t·(1 − e^(−x))/x, x = 2at. QuantLib's check: the limit, σ²t + f′(t) with
+/// f′ QuantLib's difference quotient of the curve's forward over 1e-4 (<c>:40-44</c>), and QuantLib's own a = 0
+/// expectation and variance.
 /// </summary>
 public class HullWhiteProcessSmallReversionTests
 {

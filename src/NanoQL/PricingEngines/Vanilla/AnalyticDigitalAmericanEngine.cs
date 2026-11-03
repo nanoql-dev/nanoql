@@ -28,8 +28,7 @@ namespace NanoQL.PricingEngines;
 /// </para>
 /// <para>
 /// Each structure is read at the exercise date by date, nothing accrued before its own reference date (the
-/// mismatched-dates class, the S-van plan's VR4), where QuantLib's reads throw; the rho's time is the risk-free
-/// curve's, as QuantLib's.
+/// mismatched-dates class), where QuantLib's reads throw; the rho's time is the risk-free curve's, as QuantLib's.
 /// </para>
 /// </remarks>
 public static class AnalyticDigitalAmericanEngine

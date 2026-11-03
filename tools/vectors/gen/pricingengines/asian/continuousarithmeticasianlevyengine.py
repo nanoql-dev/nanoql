@@ -8,9 +8,8 @@ Arithmetic calls and puts at 90, 100 and 110, over six months, a year and two ye
 started 30 and 90 days ago at running averages of 95 and 105, on the flat Merton process of
 tools/vectors/gen/instruments/asianoption.py: the NPV, the engine's one result. Then the refusals of a geometric
 average, a payoff that isn't plain vanilla, an exercise that isn't European and a start after the evaluation date, and
-an expired option. The outputs nanoql fixes are left out (the S-bar plan's §2.10): markets off flat (BR4 (b)), carries
-within 1e-2 of 0, −σ²/2 and −σ² (BR5 (xxxix): the flat Black process's zero carry among them), and effective strikes at
-or below zero (BR5 (xxxi)).
+an expired option. The outputs nanoql fixes are left out: markets off flat, carries within 1e-2 of 0, −σ²/2 and −σ² (the
+flat Black process's zero carry among them), and effective strikes at or below zero.
 
 The current average goes in as "currentAverage", the option as tools/vectors/gen/pricingengines/asian/
 analytic_cont_geom_av_price.py's spec. The wheel's calls, by QuantLib-SWIG 1.44's options.i:

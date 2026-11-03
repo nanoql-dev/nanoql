@@ -100,7 +100,7 @@ public class CallabilityTypeAfterSettledCallabilityTests
             }
 
             // QuantLib 1.44's reading moves it; the price without it is QuantLib's within the tolerance, the tree's
-            // Ornstein-Uhlenbeck variance in its cancellation-free form (the S-sr plan's SSR3 class)
+            // Ornstein-Uhlenbeck variance in its cancellation-free form
             Assert.True(Tolerance.Within(quantLib144[type].Without, expected), $"{expected}");
             if (calculated == quantLib144[type].WithSettled)
             {

@@ -13,10 +13,10 @@ namespace NanoQL.Tests.Conventions;
 
 /// <summary>
 /// The exception type, message and parameter name of the refusals of the basket core's operators, its instrument and
-/// the process array's in-place step, each QuantLib's text (the S-exo plan's ED14): the 2-D Black-Scholes operator in a
-/// third direction, the Wiener operator on a mesher and eigenvalues of different dimensions, a multi-asset option
-/// given results without its Greeks, and an in-place step on increments of the wrong size (QuantLib's
-/// <c>Matrix * Array</c> check, which its allocating form reads).
+/// the process array's in-place step, each QuantLib's text: the 2-D Black-Scholes operator in a third direction, the
+/// Wiener operator on a mesher and eigenvalues of different dimensions, a multi-asset option given results without its
+/// Greeks, and an in-place step on increments of the wrong size (QuantLib's <c>Matrix * Array</c> check, which its
+/// allocating form reads).
 /// </summary>
 public class BasketOperatorErrorTests
 {

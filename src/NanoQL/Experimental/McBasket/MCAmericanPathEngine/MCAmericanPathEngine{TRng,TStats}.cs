@@ -21,8 +21,8 @@ namespace NanoQL.Experimental;
 /// <remarks>
 /// The regression's basis is QuantLib's: monomials of order 2 in the payoff's state. The paths run on the clock
 /// spanning every Black-Scholes process's structures, as <see cref="MCPathBasketEngine"/>'s, each payment discounted on
-/// the first process's risk-free curve at its instant and each fixing's curve the risk-free curve implied from its date
-/// (the S-xeq plan's XER5 (xxxiii), (xxxiv)); a market on one clock keeps QuantLib's draws and arithmetic.
+/// the first process's risk-free curve at its instant and each fixing's curve the risk-free curve implied from its
+/// date; a market on one clock keeps QuantLib's draws and arithmetic.
 /// </remarks>
 [Experimental("NQL0001")]
 public sealed class MCAmericanPathEngine<TRng, TStats> : MCLongstaffSchwartzPathEngine<TRng, TStats>

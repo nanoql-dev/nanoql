@@ -8,11 +8,12 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The types, messages and parameter names of C1's refusals of QuantLib's undefined paths (master §2.2's row; the
-/// divergences name QuantLib's lines): an empty basket's extreme (<c>Divergences/BasketPayoffEmptyTests.cs</c>), an
-/// average's price count other than its weights' (<c>Divergences/AverageBasketPayoffWeightCountTests.cs</c>), the
-/// Wiener operator's direction past its count (<c>Divergences/FdmWienerOpDirectionTests.cs</c>), and the spline's NaN
-/// coordinate (<c>Divergences/MultiCubicSplineBoundaryTests.cs</c>).
+/// The types, messages and parameter names of the refusals of QuantLib's undefined paths (the playbook's
+/// undefined-behaviour row; the divergences name QuantLib's lines): an empty basket's extreme
+/// (<c>Divergences/BasketPayoffEmptyTests.cs</c>), an average's price count other than its weights'
+/// (<c>Divergences/AverageBasketPayoffWeightCountTests.cs</c>), the Wiener operator's direction past its count
+/// (<c>Divergences/FdmWienerOpDirectionTests.cs</c>), and the spline's NaN coordinate
+/// (<c>Divergences/MultiCubicSplineBoundaryTests.cs</c>).
 /// </summary>
 public class BasketUndefinedPathRefusalTests
 {

@@ -20,11 +20,11 @@ namespace NanoQL.Models;
 /// on <see cref="CoxIngersollRossProcess"/>'s quadratic-exponential scheme.
 /// </para>
 /// <para>
-/// <b>The Feller constraint</b> (the S-sr plan's SSR7, K1): with it, the model's parameters satisfy σ² &lt; 2kθ at each
-/// vector's own k and θ, through <see cref="CalibratedModel.ParametersConstraint"/>, and σ's own constraint is
-/// positivity: a divergence, QuantLib's testing σ against the constructor's k and θ (<c>coxingersollross.cpp:24-37</c>),
-/// so a calibration can leave the Feller region and σ stops at a bound the constructor set
-/// (<c>Divergences/CirFellerConstraintTests.cs</c>). The constructor refuses a σ outside it with QuantLib's text.
+/// <b>The Feller constraint</b> (K1): with it, the model's parameters satisfy σ² &lt; 2kθ at each vector's own k and θ,
+/// through <see cref="CalibratedModel.ParametersConstraint"/>, and σ's own constraint is positivity: a divergence,
+/// QuantLib's testing σ against the constructor's k and θ (<c>coxingersollross.cpp:24-37</c>), so a calibration can
+/// leave the Feller region and σ stops at a bound the constructor set (<c>Divergences/CirFellerConstraintTests.cs</c>).
+/// The constructor refuses a σ outside it with QuantLib's text.
 /// </para>
 /// <para>
 /// <b>The tree</b> (K2): on QuantLib's dynamics before its 1.23, the square root y = √r of the short rate, of constant

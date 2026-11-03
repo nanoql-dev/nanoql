@@ -9,9 +9,9 @@ namespace NanoQL.Tests.Conventions;
 
 /// <summary>
 /// The smile-section density calculator builds its quantile table at construction and, where that fails, raises the
-/// refusal from the inverse, QuantLib's point (the S-van plan's VD10): the calculator is built, the density and the
-/// distribution don't need the table, and the inverse raises QuantLib's message at every call. Its one time is the
-/// section's: another is refused by all three, with QuantLib's message.
+/// refusal from the inverse, QuantLib's point: the calculator is built, the density and the distribution don't need
+/// the table, and the inverse raises QuantLib's message at every call. Its one time is the section's: another is
+/// refused by all three, with QuantLib's message.
 /// </summary>
 public class SmileSectionRNDDeferredRefusalTests
 {

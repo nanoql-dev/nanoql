@@ -11,12 +11,11 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The binary barrier engine below machine-epsilon variance (the S-bar plan's BR5 (xv), fixed under R8). QuantLib's
-/// indicators read the spot and its power of the barrier overflows to 0, so a down-and-out cash-or-nothing call whose
-/// forward stays above the barrier prices 0 at σ of 0 and 1e-8, where its limit is cash × D = 9.512294 and σ 1e-4 gives
-/// 9.51229425 (the planner's P8). nanoql follows the forward, which hits the barrier, if at all, when it reaches it, as
-/// QuantLib's master prices the analytic barrier engine (#2853). Checks: the engine at σ 1e-4, and #2853's rule on a
-/// forward that falls through the barrier.
+/// The binary barrier engine below machine-epsilon variance (fixed). QuantLib's indicators read the spot and its power
+/// of the barrier overflows to 0, so a down-and-out cash-or-nothing call whose forward stays above the barrier prices 0
+/// at σ of 0 and 1e-8, where its limit is cash × D = 9.512294 and σ 1e-4 gives 9.51229425. nanoql follows the forward,
+/// which hits the barrier, if at all, when it reaches it, as QuantLib's master prices the analytic barrier engine
+/// (#2853). Checks: the engine at σ 1e-4, and #2853's rule on a forward that falls through the barrier.
 /// </summary>
 public class BinaryBarrierZeroVolatilityTests
 {

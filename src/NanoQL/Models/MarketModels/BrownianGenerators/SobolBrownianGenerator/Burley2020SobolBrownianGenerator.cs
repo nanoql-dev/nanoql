@@ -15,8 +15,8 @@ namespace NanoQL.Models;
 /// Brownian-bridged by the base's ordering.
 /// </summary>
 /// <remarks>
-/// A working type (the S-hes plan's HR3 (iv), (v)). Both seeds are explicit, in [1, 4294967295], as
-/// <see cref="Burley2020SobolRsg"/> takes them (the S-mm plan's SD6); QuantLib's defaults are 42 and 43.
+/// A working type. Both seeds are explicit, in [1, 4294967295], as <see cref="Burley2020SobolRsg"/> takes them;
+/// QuantLib's defaults are 42 and 43.
 /// </remarks>
 [WorkingType]
 public sealed class Burley2020SobolBrownianGenerator : SobolBrownianGeneratorBase

@@ -40,8 +40,8 @@ namespace NanoQL.PricingEngines;
 /// <para>
 /// The protection leg runs to the maturity: the maturity joins the curves' nodes when their last one is before it.
 /// QuantLib adds the maturity only when the curves have no nodes, so on curves that end before the maturity it drops
-/// the protection from their last node to the maturity, a documented divergence. A static class (D14): an expired
-/// swap's results are <see cref="CreditDefaultSwap.SetupExpired"/>'s.
+/// the protection from their last node to the maturity, a documented divergence. A static class: an expired swap's
+/// results are <see cref="CreditDefaultSwap.SetupExpired"/>'s.
 /// </para>
 /// </remarks>
 public static class IsdaCdsEngine

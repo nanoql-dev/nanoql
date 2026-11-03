@@ -25,12 +25,12 @@ builder attaches (the one given, a DiscountingSwapEngine on the discounting term
 forecasting curve): the NPV, the per-leg NPV and BPS, and the fair rate and spread. NPVs are compared at the nominal
 and BPS at it times 1e-4.
 
-Telescopic builds follow the plan's telescopic rule (S3R11, SD11): QuantLib builds with the flag first, so a refusal
-is its own; the expected values are then the same build's without it, with
-ArithmeticAveragedOvernightIndexedCouponPricer(byApprox=True) set on an averaged swap's overnight leg, the pricer the
-flag selects. With no fixed rate, the flag would set that pricer on the swap the builder prices at 0% too, so the par
-rate is computed as the builder computes it, on the same swap at 0% with the pricer set on its overnight leg, and the
-swap is built at it. The wheel's ArithmeticAveragedOvernightIndexedCouponPricer is built with keyword arguments only.
+Telescopic builds follow the telescopic rule: QuantLib builds with the flag first, so a refusal is its own; the expected
+values are then the same build's without it, with ArithmeticAveragedOvernightIndexedCouponPricer(byApprox=True) set on
+an averaged swap's overnight leg, the pricer the flag selects. With no fixed rate, the flag would set that pricer on the
+swap the builder prices at 0% too, so the par rate is computed as the builder computes it, on the same swap at 0% with
+the pricer set on its overnight leg, and the swap is built at it. The wheel's
+ArithmeticAveragedOvernightIndexedCouponPricer is built with keyword arguments only.
 
 The builds call QuantLib-Python's MakeOIS, a Python function that builds the C++ QuantLib::MakeOIS through its
 deprecated four-argument constructor (the tenor, the index, the fixed rate or Null<Rate>(), the forward start), which

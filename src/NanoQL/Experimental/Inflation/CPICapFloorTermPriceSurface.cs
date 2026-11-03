@@ -28,9 +28,9 @@ namespace NanoQL.Experimental;
 /// <para>
 /// An extension point: <see cref="InterpolatedCPICapFloorTermPriceSurface{TInterpolator2D}"/> derives from it. QuantLib's
 /// surface follows the evaluation date (<c>TermStructure(0, …)</c>), so a derived class's factory computes the
-/// reference date and passes it in (D15); <see cref="AtmRate"/> and <see cref="Price(Date, double, EvaluationContext)"/>
-/// read the index's fixings, from the context. The protected range checks, which QuantLib never calls, are kept; a
-/// price past the last maturity or strike extrapolates.
+/// reference date and passes it in; <see cref="AtmRate"/> and <see cref="Price(Date, double, EvaluationContext)"/> read
+/// the index's fixings, from the context. The protected range checks, which QuantLib never calls, are kept; a price
+/// past the last maturity or strike extrapolates.
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]

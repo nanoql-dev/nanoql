@@ -187,7 +187,7 @@ public class GjrGarchModelTests
         var model = new GJRGARCHModel(process);
 
         // QuantLib's one engine, which its helpers share: an engine for each model the calibration hands the helpers,
-        // its moments' memo shared by the evaluation's helpers (the S-hes plan's HR4 (iv))
+        // its moments' memo shared by the evaluation's helpers
         AnalyticGJRGARCHEngine? engine = null;
         InstrumentResults Price(VanillaOption option, EvaluationContext c, GJRGARCHModel m)
         {

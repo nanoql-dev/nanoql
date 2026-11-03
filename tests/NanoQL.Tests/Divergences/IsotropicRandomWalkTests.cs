@@ -7,13 +7,13 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The isotropic random walk's direction from three dimensions (the S-xrt plan's XRR5 (xxxiii) and XRR11, fixed under
-/// R8). QuantLib's hyperspherical angles are each uniform in [0, π], where a uniform direction needs densities
-/// ∝ sin^(d−k−1)φ, so its first coordinate's second moment is ½ in any dimension, against 1/d. nanoql's direction is
-/// Muller's, d normals scaled to unit length (IMSL's RNSPH above four dimensions). On a unit radius at a fixed seed its
-/// moments are E[xᵢ²] = 1/d and E[xᵢxⱼ] = 0 within three standard errors, d 3 to 6, and its first coordinate's law,
-/// the density ∝ (1 − x²)^((d−3)/2) on [−1, 1], passes a binned χ² test at the 0.1% level; in one and two dimensions
-/// the walk is QuantLib's, bit for bit (the harness's vectors).
+/// The isotropic random walk's direction from three dimensions (fixed). QuantLib's hyperspherical angles are each
+/// uniform in [0, π], where a uniform direction needs densities ∝ sin^(d−k−1)φ, so its first coordinate's second moment
+/// is ½ in any dimension, against 1/d. nanoql's direction is Muller's, d normals scaled to unit length (IMSL's RNSPH
+/// above four dimensions). On a unit radius at a fixed seed its moments are E[xᵢ²] = 1/d and E[xᵢxⱼ] = 0 within three
+/// standard errors, d 3 to 6, and its first coordinate's law, the density ∝ (1 − x²)^((d−3)/2) on [−1, 1], passes a
+/// binned χ² test at the 0.1% level; in one and two dimensions the walk is QuantLib's, bit for bit (the harness's
+/// vectors).
 /// </summary>
 public class IsotropicRandomWalkTests
 {

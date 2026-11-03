@@ -8,8 +8,8 @@ using ExcelDna.Integration;
 namespace NanoQL.Excel;
 
 /// <summary>
-/// Each call's recipe kept by its calling cell with its outcome (XLR14): its Excel result, its failure, or the Excel
-/// error an argument passed; the settings' <c>"recordCalls"</c> switches it off, leaving value cells unexportable.
+/// Each call's recipe kept by its calling cell with its outcome: its Excel result, its failure, or the Excel error an
+/// argument passed; the settings' <c>"recordCalls"</c> switches it off, leaving value cells unexportable.
 /// </summary>
 public static partial class X
 {

@@ -1041,8 +1041,8 @@ public class BarrierOptionTests
         Assert.True(Math.Abs(PerturbativeBarrierOptionValue(1) - 0.894374) <= 1.0e-6);
     }
 
-    // QuantLib's master's cached value (#2935, the S-xeq plan's XER3 (a)), its own check of the trivariate normal's fix;
-    // QuantLib 1.44 cached its defective code's 0.8943769 (Divergences/PerturbativeBarrierEngineTests.cs)
+    // QuantLib's master's cached value (#2935), its own check of the trivariate normal's fix; QuantLib 1.44 cached its
+    // defective code's 0.8943769 (Divergences/PerturbativeBarrierEngineTests.cs)
     [Fact]
     public void TestPerturbativeOrder2Fast()
     {

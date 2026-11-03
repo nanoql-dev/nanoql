@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 // ql/experimental/commodities/quantity.hpp, .cpp: a quantity's arithmetic under each conversion type.
-// "Quantity::arithmetic" takes (settings, pairs): settings {"conversionType", "baseUnit"} (Quantity's two statics,
-// the unit a code or null for none) and [q1, q2] pairs of quantities; it returns {"pairs", "equal"}: for each pair,
-// [sum, difference, ratio, <, <=, >, >=, close, close_enough, +q1, -q1, q1 * 2.5, 2.5 * q1, q1 / 4], a quantity
-// [unit, amount], each of the first nine {"throws": true} where QuantLib refuses it, and its ==, apart, which the
-// vector test maps where QuantLib throws on a mismatch without conversion. The generator keeps to conversions whose
-// results are whole units, where QuantLib's rounding to the unit leaves them as they are (the S-xrt plan's XRR10).
+// "Quantity::arithmetic" takes (settings, pairs): settings {"conversionType", "baseUnit"} (Quantity's two statics, the
+// unit a code or null for none) and [q1, q2] pairs of quantities; it returns {"pairs", "equal"}: for each pair, [sum,
+// difference, ratio, <, <=, >, >=, close, close_enough, +q1, -q1, q1 * 2.5, 2.5 * q1, q1 / 4], a quantity [unit,
+// amount], each of the first nine {"throws": true} where QuantLib refuses it, and its ==, apart, which the vector test
+// maps where QuantLib throws on a mismatch without conversion. The generator keeps to conversions whose results are
+// whole units, where QuantLib's rounding to the unit leaves them as they are.
 
 #include "experimental/commodities/commodityspec.hpp"
 

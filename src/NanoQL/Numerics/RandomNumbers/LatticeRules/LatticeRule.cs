@@ -15,7 +15,7 @@ namespace NanoQL.Numerics;
 /// </summary>
 /// <remarks>
 /// The tables are generated from QuantLib's <c>latticerules.cpp</c> by <c>tools/tables/latticerules.py</c> into the
-/// embedded resource <c>LatticeRules.bin</c>, which this class reads once, at first use (the S-core plan's CD7).
+/// embedded resource <c>LatticeRules.bin</c>, which this class reads once, at first use.
 /// </remarks>
 public static class LatticeRule
 {
@@ -29,7 +29,7 @@ public static class LatticeRule
     /// <summary>The generating vector of a rule, for a number of points.</summary>
     /// <remarks>
     /// QuantLib checks the number of points against 2.9^20, about 1.8e9, where its message and its tables say 2^20, so
-    /// it accepts up to about 1.8e9 points; nanoql checks 2^20 (the S-core plan's CR7 (xi); a documented divergence in
+    /// it accepts up to about 1.8e9 points; nanoql checks 2^20 (a documented divergence in
     /// <c>Divergences/LatticeRsgTests.cs</c>). As in QuantLib, the number of points needn't be a power of 2.
     /// </remarks>
     /// <param name="name">The rule.</param>

@@ -7,11 +7,11 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The Brownian generators' contract (the S-hes plan's HR3 (iv)): <see cref="BrownianGeneratorFactory.Create"/> returns
-/// a new generator each call, each drawing its own sequence from the factory's seed;
-/// <see cref="BrownianGenerator.NextStep"/> and <see cref="BrownianGenerator.NextPath"/> return the draw's weight, 1
-/// for the Mersenne-Twister, Sobol and Burley-scrambled Sobol generators, as QuantLib's; and seeds are explicit, in [1,
-/// 4294967295], where QuantLib's 0 draws one from the clock.
+/// The Brownian generators' contract: <see cref="BrownianGeneratorFactory.Create"/> returns a new generator each call,
+/// each drawing its own sequence from the factory's seed; <see cref="BrownianGenerator.NextStep"/> and
+/// <see cref="BrownianGenerator.NextPath"/> return the draw's weight, 1 for the Mersenne-Twister, Sobol and
+/// Burley-scrambled Sobol generators, as QuantLib's; and seeds are explicit, in [1, 4294967295], where QuantLib's 0
+/// draws one from the clock.
 /// </summary>
 public class BrownianGeneratorContractTests
 {

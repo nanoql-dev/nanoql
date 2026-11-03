@@ -12,10 +12,10 @@ namespace NanoQL.Tests.Divergences;
 /// <summary>
 /// The compound engine where the daughter is a put whose largest value, K_D·D(T_M, T_D) (95.123 here), doesn't exceed
 /// the mother's strike. QuantLib's Brent bracket [1e-6, 1000·K_D] holds no root and it refuses ("root not bracketed",
-/// <c>analyticcompoundoptionengine.cpp:91-95</c>), where the mother is never exercised (a call on the put is worth 0) or
-/// always (a put on the put is worth K_M·D(T_M) less the put today). nanoql prices those limits (the S-exo plan's ER5
-/// (xxxviii)). The checks: the limits, exact; and just inside the domain (K_M 95), QuantLib's values within Drezner's
-/// accuracy, the put on the put within 0.06 of its limit at that strike.
+/// <c>analyticcompoundoptionengine.cpp:91-95</c>), where the mother is never exercised (a call on the put is worth 0)
+/// or always (a put on the put is worth K_M·D(T_M) less the put today). nanoql prices those limits. The checks: the
+/// limits, exact; and just inside the domain (K_M 95), QuantLib's values within Drezner's accuracy, the put on the put
+/// within 0.06 of its limit at that strike.
 /// </summary>
 public class CompoundNoCriticalSpotTests
 {

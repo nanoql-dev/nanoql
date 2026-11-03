@@ -7,12 +7,12 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The composite curve's second curve on another clock (the S-sr plan's SSR6 (xv)). QuantLib reads the second curve's
-/// zero rate at the composite's time (<c>compositezeroyieldstructure.hpp:136-137</c>), a time on the first curve's
-/// clock, which the second curve counts from its own reference date on its own day counter; QuantLib's case dates both
-/// curves 10 November 2017 on Actual/365 (Fixed) (<c>termstructures.cpp:542</c>). On the wheel, the difference of a
-/// 4%–5.5% zero curve and a 1%–3.5% one, both from 15 January 2025, gives the zero rate 0.025136986301369922 at a year
-/// with the second on Actual/360, where QuantLib's own composite over the second restated on Actual/365 (Fixed) gives
+/// The composite curve's second curve on another clock. QuantLib reads the second curve's zero rate at the composite's
+/// time (<c>compositezeroyieldstructure.hpp:136-137</c>), a time on the first curve's clock, which the second curve
+/// counts from its own reference date on its own day counter; QuantLib's case dates both curves 10 November 2017 on
+/// Actual/365 (Fixed) (<c>termstructures.cpp:542</c>). On the wheel, the difference of a 4%–5.5% zero curve and a
+/// 1%–3.5% one, both from 15 January 2025, gives the zero rate 0.025136986301369922 at a year with the second on
+/// Actual/360, where QuantLib's own composite over the second restated on Actual/365 (Fixed) gives
 /// 0.024722222222222062; with the second dated 30 days earlier, 0.020201342281879166 at five years, where the second
 /// implied at 15 January 2025 gives 0.01968474385438166. nanoql reads the second curve at the instant the composite's
 /// time denotes, its zero rate the one its discount there implies over that time. QuantLib's check: its own composite

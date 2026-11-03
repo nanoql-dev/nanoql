@@ -18,14 +18,14 @@ namespace NanoQL.Tests.Divergences;
 /// T+2 throws "negative time"; on the curve's own date the Heston engine's integrations read 0/0
 /// (<c>analytichestonengine.cpp:644-674</c>) and the dividend engine's theta is 0. QuantLib's finite-difference engine
 /// on the market restated from today, every structure accruing nothing before its own date, prices them, as nanoql's
-/// does on its clock (the user's rulings). nanoql's other engines read each structure as accruing nothing before its
-/// own date, so each prices them as QuantLib's engine prices the restated market: the analytic engines' value and
-/// Greeks, and the binomial engine's value, delta, gamma and theta; the Heston engine's model time runs from the
-/// earliest curve date (<c>HestonMismatchedTimesTests</c>), and at its time 0, on or before every curve's date, its
-/// value is the forward's intrinsic value, as QuantLib's European engine reads it at zero volatility. The rho of an
-/// option expiring before the risk-free curve's date is 0, as no risk-free rate reaches it. Where every structure is
-/// dated after the exercise, the finite-difference and binomial engines' clocks have no time for it, and they refuse it
-/// as QuantLib's do on structures dated together.
+/// does on its clock. nanoql's other engines read each structure as accruing nothing before its own date, so each
+/// prices them as QuantLib's engine prices the restated market: the analytic engines' value and Greeks, and the
+/// binomial engine's value, delta, gamma and theta; the Heston engine's model time runs from the earliest curve date
+/// (<c>HestonMismatchedTimesTests</c>), and at its time 0, on or before every curve's date, its value is the forward's
+/// intrinsic value, as QuantLib's European engine reads it at zero volatility. The rho of an option expiring before the
+/// risk-free curve's date is 0, as no risk-free rate reaches it. Where every structure is dated after the exercise, the
+/// finite-difference and binomial engines' clocks have no time for it, and they refuse it as QuantLib's do on
+/// structures dated together.
 /// </summary>
 public class ExerciseBeforeReferenceDateTests
 {

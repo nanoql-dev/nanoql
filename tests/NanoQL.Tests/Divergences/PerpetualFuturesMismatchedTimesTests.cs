@@ -10,8 +10,8 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The perpetual futures engine on a curve dated apart (the playbook's dates row; the S-exo plan's ER5 (xxix)).
-/// QuantLib reads its curves at the grid's times, the instrument's day counter's from the evaluation date
+/// The perpetual futures engine on a curve dated apart (the playbook's row for structures on another clock). QuantLib
+/// reads its curves at the grid's times, the instrument's day counter's from the evaluation date
 /// (<c>discountingperpetualfuturesengine.cpp:154-155</c>, <c>:172-177</c>), so a domestic curve settling two days on is
 /// read as though its date were today's. nanoql reads each curve at the instants the grid's times denote, nothing
 /// accruing before its own date. The check is nanoql on the curve restated from the evaluation date: a discount of 1 to

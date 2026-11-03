@@ -9,10 +9,10 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The bond forward's spot value and its date (C4's review, C4-O1): QuantLib's forward value is the spot value less the
-/// income over the discount at delivery (<c>forward.cpp:61-65</c>), its spot the bond's dirty price, a value at the
-/// bond's settlement date (<c>bondforward.cpp:86-87</c>), its income and both discounts from the curve's reference
-/// date, so a bond that doesn't settle on that date gives a forward high by 1/P(ref, settlement). QuantLib's own
+/// The bond forward's spot value and its date: QuantLib's forward value is the spot value less the income over the
+/// discount at delivery (<c>forward.cpp:61-65</c>), its spot the bond's dirty price, a value at the bond's settlement
+/// date (<c>bondforward.cpp:86-87</c>), its income and both discounts from the curve's reference date, so a bond that
+/// doesn't settle on that date gives a forward high by 1/P(ref, settlement). QuantLib's own
 /// <c>testThatForwardValueIsEqualToSpotValueIfNoIncome</c> asserts the identity the factor breaks, within 1e-2 on a
 /// 0.05% curve three days out. On the wheel, on a 5-year 4% bullet from 17 January 2025 (annual on TARGET,
 /// Actual/Actual (ISMA)) settling in 2 days, on a flat 3% curve on 15 January 2025, its dirty price is

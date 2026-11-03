@@ -7,7 +7,7 @@
 // [start, end], or null for QuantLib's empty interval; each date's isDateBetween under the four flag pairs (first,
 // last) = (true, true), (true, false), (false, true), (false, false); each other interval's [==, !=]; and the interval
 // as QuantLib's operator<< writes it. The generator tests dates strictly inside or outside the interval: at an end
-// QuantLib's excludes it whatever the flags say (the S-xrt plan's XRR5 (iii)).
+// QuantLib's excludes it whatever the flags say.
 
 #include "convert.hpp"
 

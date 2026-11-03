@@ -578,7 +578,7 @@ public final class Native {
     }
 
     /**
-     * A collection of pairs nanoql returned, from its elements' lists (B2R10), a null pair where its flag is clear.
+     * A collection of pairs nanoql returned, from its elements' lists, a null pair where its flag is clear.
      *
      * @param <A> the first elements' type
      * @param <B> the second elements' type
@@ -596,8 +596,7 @@ public final class Native {
     }
 
     /**
-     * A collection of triples nanoql returned, from its elements' lists (B2R10), a null triple where its flag is
-     * clear.
+     * A collection of triples nanoql returned, from its elements' lists, a null triple where its flag is clear.
      *
      * @param <A> the first elements' type
      * @param <B> the second elements' type

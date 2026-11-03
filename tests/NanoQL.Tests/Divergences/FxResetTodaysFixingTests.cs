@@ -11,15 +11,15 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The discounting FX reset pricer's rate for a reset fixed today (the S-rx plan's SRXR3 (xiii), fixed under R8).
-/// QuantLib forecasts today's rate when the registry's lookup fails, as a fixing not yet published, but catches every
-/// <c>Error</c> to do so (<c>fxresetcashflows.cpp:92-98</c>): a published fixing of zero or below, which its own check
-/// refuses ("FX fixing … must be positive", <c>:126-129</c>), is forecast instead, 1.100090414674525 on the facts'
-/// curves, while the same fixing yesterday is refused. nanoql forecasts only a missing rate, which the registry
-/// refuses with either of its two texts, the smart lookup's "no conversion available" and the direct lookup's "no
-/// direct conversion available", which a pair triangulated through the other currency reaches
-/// (<c>exchangeratemanager.cpp:137-146</c>, <c>:65-79</c>); every other refusal passes. QuantLib's check: the same
-/// fixing on a past date [executed on the wheel].
+/// The discounting FX reset pricer's rate for a reset fixed today (fixed). QuantLib forecasts today's rate when the
+/// registry's lookup fails, as a fixing not yet published, but catches every <c>Error</c> to do so
+/// (<c>fxresetcashflows.cpp:92-98</c>): a published fixing of zero or below, which its own check refuses ("FX fixing …
+/// must be positive", <c>:126-129</c>), is forecast instead, 1.100090414674525 on the facts' curves, while the same
+/// fixing yesterday is refused. nanoql forecasts only a missing rate, which the registry refuses with either of its
+/// two texts, the smart lookup's "no conversion available" and the direct lookup's "no direct conversion available",
+/// which a pair triangulated through the other currency reaches (<c>exchangeratemanager.cpp:137-146</c>,
+/// <c>:65-79</c>); every other refusal passes. QuantLib's check: the same fixing on a past date (QuantLib-Python
+/// 1.44).
 /// </summary>
 public class FxResetTodaysFixingTests
 {

@@ -202,7 +202,7 @@ public class CalibrationErrorTests
             "no exercise time on or after the reference date");
 
         // The discretized swaption reset before it is initialized: QuantLib initializes its underlying on its null
-        // lattice, as its other members dereference it (MD13).
+        // lattice, as its other members dereference it.
         var asset = new DiscretizedSwaption(swaption, Curve.ReferenceDate, Curve.DayCounter, Context);
         Expect<NanoQLException>(() => asset.Reset(3), null, "asset not initialized");
     }

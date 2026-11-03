@@ -6,12 +6,11 @@ using NanoQL.Experimental;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The convolved Student t past order 171, its factorial and power scaled together (the S-xcr plan's XR8 (xxvi)):
-/// QuantLib's series divides a factorial by a power, both of which leave the doubles from degree 172 on
-/// (<c>convolvedstudentt.cpp:124-127</c>), so on two t's of order 173 its cumulative reads −∞ and its inverse refuses
-/// ("root not bracketed"). QuantLib's values are the S-xcr run's <c>c1_facts.cpp</c>; the check is the same series in
-/// 50 digits (the run's <c>premises\bf_ref.py</c>, after the planner's <c>xp_bf_precision.py</c>), within R7: the scaled
-/// terms carry the logarithms' rounding through the series' alternating sum, 4e-12 at most here.
+/// The convolved Student t past order 171, its factorial and power scaled together: QuantLib's series divides a
+/// factorial by a power, both of which leave the doubles from degree 172 on (<c>convolvedstudentt.cpp:124-127</c>), so
+/// on two t's of order 173 its cumulative reads −∞ and its inverse refuses ("root not bracketed"). QuantLib's values
+/// are recorded in the test; the check is the same series in 50 digits, within the tolerance: the scaled terms carry
+/// the logarithms' rounding through the series' alternating sum, 4e-12 at most here.
 /// </summary>
 public class BehrensFisherHighOrderTests
 {

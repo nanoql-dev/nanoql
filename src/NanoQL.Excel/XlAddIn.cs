@@ -5,7 +5,7 @@ using ExcelDna.Integration;
 
 namespace NanoQL.Excel;
 
-/// <summary>The add-in's opening: its settings file read once, when Excel loads it (XLR9).</summary>
+/// <summary>The add-in's opening: its settings file read once, when Excel loads it.</summary>
 public sealed class XlAddIn : IExcelAddIn
 {
     /// <inheritdoc/>

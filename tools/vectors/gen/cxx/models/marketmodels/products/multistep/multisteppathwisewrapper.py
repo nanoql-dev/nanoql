@@ -10,8 +10,7 @@ Rate grids: six semi-annual rates and five irregular ones; the wrapped pathwise 
 receiver, QuantLib's test's terms), swap, cash rebate and coterminal swaptions, every one an undeflated product.
 
 Left out: wrapped deflated products (the deflated caplets and caps), whose amounts QuantLib hands the engine deflated
-for it to discount again (the S-mmp plan's MMPR4 (xvii), tests/NanoQL.Tests/Divergences/
-MultiProductPathwiseWrapperDeflatedTests.cs).
+for it to discount again (tests/NanoQL.Tests/Divergences/MultiProductPathwiseWrapperDeflatedTests.cs).
 
 The harness units are tools/cxx/src/models/marketmodels/products/products.cpp and
 tools/cxx/src/models/marketmodels/accountingengine.cpp. Read back by

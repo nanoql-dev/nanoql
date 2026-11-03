@@ -8,9 +8,9 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// A step of the Dupire operator allocates nothing (the S-g1d plan's G1D11, S-eq's one-dimensional pin): its map is
-/// built once from the local volatilities, and its apply and splitting solve write into the caller's spans. A rollback
-/// of <see cref="FdmBackwardSolver"/> on <see cref="FdmDupire1dOp"/> under Douglas's scheme, <c>fdPrice</c>'s
+/// A step of the Dupire operator allocates nothing (the one-dimensional pin): its map is built once from the local
+/// volatilities, and its apply and splitting solve write into the caller's spans. A rollback of
+/// <see cref="FdmBackwardSolver"/> on <see cref="FdmDupire1dOp"/> under Douglas's scheme, <c>fdPrice</c>'s
 /// (<c>zabr.cpp:187</c>), on a strike mesher concentrating at the forward as <c>fdPrice</c> builds it, is measured on
 /// fresh values after a warm-up (<see cref="AllocationAssert"/>), and gives the warm-up's values.
 /// </summary>

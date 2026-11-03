@@ -8,14 +8,14 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The fixed local volatility surface's constant extrapolation in strike at a node time (the S-van plan's VR4 (xviii)).
-/// Between nodes QuantLib holds a strike outside a time's strikes at the nearest one, but at a node, and for every time
-/// before the first, which it clamps onto the first node, it evaluates the strike interpolation beyond its range
+/// The fixed local volatility surface's constant extrapolation in strike at a node time. Between nodes QuantLib holds a
+/// strike outside a time's strikes at the nearest one, but at a node, and for every time before the first, which it
+/// clamps onto the first node, it evaluates the strike interpolation beyond its range
 /// (<c>fixedlocalvolsurface.cpp:135-137</c>, <c>:143-161</c>): on three strikes 80, 100 and 120 and three times from 15
-/// October 2026, linear in both, at the second node and strike 60 it gives 0.25, where a nanosecond either side it gives
-/// 0.22999999995989012 and 0.23000000001994536; before the first node 0.24, where a nanosecond after it 0.2200000000401099
-/// [executed: the wheel, <c>scratchpad\c5\probe_fixed_node.py</c>]. nanoql clamps at a node too; QuantLib's check, its own
-/// off-node value as the time tends to the node, gives nanoql's values. Inside a time's strikes QuantLib's bits stand.
+/// October 2026, linear in both, at the second node and strike 60 it gives 0.25, where a nanosecond either side it
+/// gives 0.22999999995989012 and 0.23000000001994536; before the first node 0.24, where a nanosecond after it
+/// 0.2200000000401099 (QuantLib-Python 1.44). nanoql clamps at a node too; QuantLib's check, its own off-node value as
+/// the time tends to the node, gives nanoql's values. Inside a time's strikes QuantLib's bits stand.
 /// </summary>
 public class FixedLocalVolNodeExtrapolationTests
 {

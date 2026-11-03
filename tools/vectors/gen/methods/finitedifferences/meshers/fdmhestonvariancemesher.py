@@ -12,12 +12,11 @@ local volatility mesher on the first set, at 25 points and the three maturities,
 tools/vectors/gen/pricingengines/vanilla/fdhestonvanillaengine.py's constant and fixed surface leverage functions.
 Outputs: locations, dplus, dminus (QuantLib's null at the ends as null) and volaEstimate.
 
-Left out (the S-hes plan's §2.10): variance distributions on which the quantile grid falls back, which QuantLib's
-master and nanoql test before building it (HR8, tests/NanoQL.Tests/Divergences/
-FdmHestonVarianceMesherFallbackTests.cs: none of these sets is narrow for its grid or falls fast); a sigma over kappa
-above 2, where nanoql caps the skew factor (HR9); a leverage function off the risk-free curve's day counter or
-reference date; and the leverage surface read outside its strikes past its last time, where QuantLib's interpolator
-extrapolates and nanoql holds the volatility (the S-van plan's VR4 (xviii)): its strikes span every forward the mesher
+Left out: variance distributions on which the quantile grid falls back, which QuantLib's master and nanoql test before
+building it (tests/NanoQL.Tests/Divergences/FdmHestonVarianceMesherFallbackTests.cs: none of these sets is narrow for
+its grid or falls fast); a sigma over kappa above 2, where nanoql caps the skew factor; a leverage function off the
+risk-free curve's day counter or reference date; and the leverage surface read outside its strikes past its last time,
+where QuantLib's interpolator extrapolates and nanoql holds the volatility: its strikes span every forward the mesher
 averages over. The meshers' mixing factor, which the wheel doesn't take, is the engines' (fdhestonvanillaengine.py).
 
 A case holds the "process" (hestonprocess.py's spec), the "size", "maturity", "tAvgSteps" and "epsilon", and the

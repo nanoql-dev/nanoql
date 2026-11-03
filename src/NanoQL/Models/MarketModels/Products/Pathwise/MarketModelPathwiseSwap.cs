@@ -14,11 +14,11 @@ namespace NanoQL.Models;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A working type (the S-mmp plan's MMPR1 (i)). Its cash-flow times are the rate times, the first unused, as QuantLib's.
+/// A working type. Its cash-flow times are the rate times, the first unused, as QuantLib's.
 /// </para>
 /// <para>
-/// <b>One strike for every rate</b> (MMPR4 (xi), a documented divergence): the strikes' check reads the strikes expanded
-/// from one, as its text offers ("does not equal numberOfRates or 1"). QuantLib's reads the parameter
+/// <b>One strike for every rate</b> (a documented divergence): the strikes' check reads the strikes expanded from one,
+/// as its text offers ("does not equal numberOfRates or 1"). QuantLib's reads the parameter
 /// (<c>pathwiseproductswap.cpp:59</c>), so it refuses the one strike it has just expanded
 /// (<c>Divergences/MarketModelPathwiseSwapStrikeTests.cs</c>). With a strike a rate, QuantLib's swap.
 /// </para>

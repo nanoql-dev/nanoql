@@ -55,8 +55,8 @@ public class OptimizationCopyTests
         // The getter returns the state's own vector, as QuantLib's const Array& does.
         Assert.Same(state.CurrentValue, state.CurrentValue);
 
-        // A compound assignment on the property is the binary operator and the setter (SD30): the state gets a new
-        // vector, and one read before keeps the old value.
+        // A compound assignment on the property is the binary operator and the setter: the state gets a new vector,
+        // and one read before keeps the old value.
         Vector before = state.CurrentValue;
         state.CurrentValue += new Vector(2, 1.0);
         Assert.NotSame(before, state.CurrentValue);

@@ -9,11 +9,10 @@ meshers (uneven, and the calculator's ln(spot) points' kind of uniform), and on 
 underlying in direction 1; and the predefined meshers' locations and distances.
 
 For each and for (t1, t2) of (0, 0.25), (0.5, 0.75) and (0.9, 1): the operator outputs
-tools/vectors/gen/methods/finitedifferences/operators/fdmblackscholesfwdop.py lists. Every structure is dated 15
-October 2026 on Act/365: on another clock nanoql reads the structures at the instants the operator's times denote,
-where QuantLib reads them at those times (the S-van plan's VR4 (xxiii);
-tests/NanoQL.Tests/Divergences/LocalVolMismatchedTimesTests.cs). The fixed surface extrapolates by its interpolator on
-both sides, past VR4 (xviii)'s reach.
+tools/vectors/gen/methods/finitedifferences/operators/fdmblackscholesfwdop.py lists. Every structure is dated 15 October
+2026 on Act/365: on another clock nanoql reads the structures at the instants the operator's times denote, where
+QuantLib reads them at those times (tests/NanoQL.Tests/Divergences/LocalVolMismatchedTimesTests.cs). The fixed surface
+extrapolates by its interpolator on both sides, which nanoql's fixes don't reach.
 
 The specs are an operator {"mesher", "spot", "riskFree", "dividend", "localVol", "direction"}, the mesher
 fdmmeshercomposite.py's (a predefined 1-D mesher {"type": "Predefined", "x"}), the curves blackscholesprocess.py's, the

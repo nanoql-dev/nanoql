@@ -14,7 +14,7 @@ namespace NanoQL.Tests.Vectors;
 /// <summary>
 /// The AnalyticHolderExtensibleOptionEngine vectors, <c>tests/vectors/pricingengines/exotic/analyticholderextensibleoptionengine.json</c>:
 /// <see cref="AnalyticHolderExtensibleOptionEngine"/>'s NPV for holder-extensible calls on flat markets without
-/// dividends, within Drezner's accuracy of QuantLib's (the S-exo plan's ER7).
+/// dividends, within Drezner's accuracy of QuantLib's.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class AnalyticHolderExtensibleOptionEngineVectorTests

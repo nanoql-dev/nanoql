@@ -7,16 +7,15 @@ using static NanoQL.Tests.Divergences.HestonGeometricAsianMarkets;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The Heston geometric Asian engine's Fourier cutoff (the S-bar plan's BR5 (xxxiv), fixed under R8). QuantLib
-/// integrates on (0, ξ_max], ξ_max 100, by Gauss-Legendre at 128 points
-/// (<c>analytic_discr_geom_av_price_heston.cpp:48-55</c>, <c>:62</c>), cut before the integrand decays at short
-/// maturities and small variance: on P9's market (r 5%, q 0, κ 2, ρ −0.5, six fixings), ten days at v₀ = θ 0.0025 and
-/// vol of vol 0.1 price 0.11843188016798013 and thirty days 0.37302951787635213, where the integrals converge to
-/// 0.24347 and 0.50345, and QuantLib's Monte Carlo geometric Heston engine gives 0.24341 ± 0.0005 and 0.50309 ±
-/// 0.0009; the ten-day call at 200 at v₀ 0.04 and vol of vol 0.5 prices −0.06101169378323358 (the S-bar run's
-/// <c>c3_heston_div_refs.py</c>). nanoql cuts where Phi's modulus has decayed to 1e-14 of its value on the contour's
+/// The Heston geometric Asian engine's Fourier cutoff (fixed). QuantLib integrates on (0, ξ_max], ξ_max 100, by
+/// Gauss-Legendre at 128 points (<c>analytic_discr_geom_av_price_heston.cpp:48-55</c>, <c>:62</c>), cut before the
+/// integrand decays at short maturities and small variance: on a short-dated market (r 5%, q 0, κ 2, ρ −0.5, six
+/// fixings), ten days at v₀ = θ 0.0025 and vol of vol 0.1 price 0.11843188016798013 and thirty days
+/// 0.37302951787635213, where the integrals converge to 0.24347 and 0.50345, and QuantLib's Monte Carlo geometric
+/// Heston engine gives 0.24341 ± 0.0005 and 0.50309 ± 0.0009; the ten-day call at 200 at v₀ 0.04 and vol of vol 0.5
+/// prices −0.06101169378323358. nanoql cuts where Phi's modulus has decayed to 1e-14 of its value on the contour's
 /// axis, or at ξ_max where that is later. Checks: QuantLib's Monte Carlo engine within three standard errors, QUADPACK
-/// on two contours at R7 on BR12's scale, and the integral run to four times its decay point.
+/// on two contours at the tolerance on the engine's scale, and the integral run to four times its decay point.
 /// </summary>
 public class HestonGeometricAsianCutoffTests
 {

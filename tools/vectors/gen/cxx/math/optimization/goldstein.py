@@ -10,8 +10,8 @@ each method under QuantLib's default line search (eps 1e-8, alpha 0.05, beta 0.6
 under end criteria the method meets or a limit of 1,000 iterations, and under a limit of 5. Each case records the point
 the line search last accepted and the Problem after minimize (function value, gradient norm, the evaluation counts) and
 the end criterion; QuantLib's own current value, the point before where it returns on the function tolerance or the
-iteration limit, is left out (the S-sr plan's SSR6 (xvii); tests/NanoQL.Tests/Divergences/LineSearchReturnTests.cs). The
-harness unit is tools/cxx/src/math/optimization/goldstein.cpp. Read back by
+iteration limit, is left out (tests/NanoQL.Tests/Divergences/LineSearchReturnTests.cs). The harness unit is
+tools/cxx/src/math/optimization/goldstein.cpp. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Numerics/Optimization/GoldsteinLineSearchCxxVectorTests.cs."""
 import os
 import sys

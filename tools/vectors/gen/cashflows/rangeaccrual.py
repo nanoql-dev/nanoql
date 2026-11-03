@@ -5,20 +5,20 @@ RangeAccrualFloatersCoupon, RangeAccrualPricerByBgm and RangeAccrualLeg, on the 
 Euribor 6M index on a flat 3.1% curve.
 
 - "coupon" cases: a coupon starting after the evaluation date, every observation's fixing still to come (a coupon in
-  progress is the S-cms plan's CMR5 (xviii), tests/NanoQL.Tests/Divergences/RangeAccrualStartedCouponTests.cs), its
-  observations daily, weekly or monthly, its triggers around the forward, inside it, above it or wide enough to be
-  infinite, with a gearing and a spread, priced by the BGM pricer on each of its three routes (no smile; the smile by
-  a call spread; the smile by its correction), on flat smiles and on interpolated ones, at a correlation of 1, 0.5 or
-  0: fixingDate, indexFixing, rate, amount, price on the curve and accrualPeriod; and the pricer's own members, read
-  after the coupon has initialized it: swapletPrice, and capletPrice, capletRate, floorletPrice and floorletRate at 3%,
-  which QuantLib's range accrual pricer refuses ("not implemented").
-- "leg" cases: RangeAccrualLeg with every setting given, its coupons each holding one BGM pricer on interpolated
-  smiles: per flow its kind ("RangeAccrualFloatersCoupon", or "FixedRateCoupon" for a zero gearing, which pays the
-  spread), payment and accrual dates, rate and amount, and a range accrual's fixing date. QuantLib's leg holds n null
-  cash flows before its n coupons (the S-cms plan's CMR5 (xii), tests/NanoQL.Tests/Divergences/RangeAccrualLegTests.cs),
-  so its coupons are its second half, which the wheel's setCouponPricer can't reach past the nulls: each coupon's
-  pricer is set on it. The default observation tenor ((xiii), no observation dates) isn't sampled. A leg QuantLib
-  refuses records only "construction": {"throws": true}.
+  progress diverges, tests/NanoQL.Tests/Divergences/RangeAccrualStartedCouponTests.cs), its observations daily, weekly
+  or monthly, its triggers around the forward, inside it, above it or wide enough to be infinite, with a gearing and a
+  spread, priced by the BGM pricer on each of its three routes (no smile; the smile by a call spread; the smile by its
+  correction), on flat smiles and on interpolated ones, at a correlation of 1, 0.5 or 0: fixingDate, indexFixing, rate,
+  amount, price on the curve and accrualPeriod; and the pricer's own members, read after the coupon has initialized it:
+  swapletPrice, and capletPrice, capletRate, floorletPrice and floorletRate at 3%, which QuantLib's range accrual pricer
+  refuses ("not implemented").
+- "leg" cases: RangeAccrualLeg with every setting given, its coupons each holding one BGM pricer on interpolated smiles:
+  per flow its kind ("RangeAccrualFloatersCoupon", or "FixedRateCoupon" for a zero gearing, which pays the spread),
+  payment and accrual dates, rate and amount, and a range accrual's fixing date. QuantLib's leg holds n null cash flows
+  before its n coupons (tests/NanoQL.Tests/Divergences/RangeAccrualLegTests.cs), so its coupons are its second half,
+  which the wheel's setCouponPricer can't reach past the nulls: each coupon's pricer is set on it. The default
+  observation tenor (no observation dates) isn't sampled. A leg QuantLib refuses records only "construction": {"throws":
+  true}.
 
 A smile is a spec of termstructures/volatility/flatsmilesection.py or interpolatedsmilesection.py, in its floating
 form (the evaluation date its reference date). A case's inputs hold its settings, the index (a spec of

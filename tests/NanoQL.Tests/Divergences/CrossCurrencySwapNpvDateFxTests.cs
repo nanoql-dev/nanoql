@@ -13,9 +13,9 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The constant-notional cross-currency engine's spot with an explicit FX settlement date and an NPV date away from
-/// the curves' reference date (the S-rx plan's SRXR3 (vi), fixed under R8). QuantLib's engine takes its spot as the NPV
-/// date's rate, "w.r.t. a settlement equal to the npv date", and uses it as is when no FX settlement date is given
+/// The constant-notional cross-currency engine's spot with an explicit FX settlement date and an NPV date away from the
+/// curves' reference date (fixed). QuantLib's engine takes its spot as the NPV date's rate, "w.r.t. a settlement equal
+/// to the npv date", and uses it as is when no FX settlement date is given
 /// (<c>discountingconstnotionalcrosscurrencyswapengine.hpp:54-67</c>, <c>.cpp:127</c>); given one, it moves the spot to
 /// the reference date (<c>.cpp:128-137</c>) and multiplies values discounted to the NPV date by it, so a USD 1.1M
 /// against EUR 1M two-year swap priced three months on is off its consistent NPV by −46.593470, with a settlement date
@@ -23,7 +23,7 @@ namespace NanoQL.Tests.Divergences;
 /// settled spot to the NPV date, <c>S × D_dom(s)/D_for(s) × D_for(npv)/D_dom(npv)</c>, as QuantLib's own MtM engine
 /// does (<c>discountingmtmcrosscurrencybasisswapengine.cpp:103-121</c>); without one, and with the NPV date on the
 /// reference date, QuantLib's bits stand. QuantLib's check: its own engine with no settlement date and the spot moved
-/// to the NPV date, 26,787.661557906977 [executed on the wheel].
+/// to the NPV date, 26,787.661557906977 (QuantLib-Python 1.44).
 /// </summary>
 public class CrossCurrencySwapNpvDateFxTests
 {

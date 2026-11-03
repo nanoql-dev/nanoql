@@ -12,16 +12,14 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The binomial barrier engine's tree on structures that measure time differently (the S-bar plan's BR5 (ii), fixed
-/// under R8). QuantLib flattens each curve from the risk-free curve's reference date on its own day counter and runs
-/// the tree over the risk-free curve's time (<c>binomialbarrierengine.hpp:99-125</c>), so a volatility on another day
-/// counter integrates the wrong variance. nanoql's tree is <see cref="BinomialVanillaEngine"/>'s: on the risk-free
-/// curve's day counter from the earliest reference date, each structure on another day counter flattened on it from
-/// its variance or discount at maturity. QuantLib's check: its own engine on the market restated onto the risk-free
-/// curve's day counter, the volatility scaled so its variances by date are unchanged; and a risk-free curve settling
-/// two days after the others, flattened from its own date on the tree from the earliest, where QuantLib's tree starts at
-/// the risk-free curve's date (QuantLib's values from the S-bar run's
-/// <c>c1_clock_later.py</c>).
+/// The binomial barrier engine's tree on structures that measure time differently (fixed). QuantLib flattens each curve
+/// from the risk-free curve's reference date on its own day counter and runs the tree over the risk-free curve's time
+/// (<c>binomialbarrierengine.hpp:99-125</c>), so a volatility on another day counter integrates the wrong variance.
+/// nanoql's tree is <see cref="BinomialVanillaEngine"/>'s: on the risk-free curve's day counter from the earliest
+/// reference date, each structure on another day counter flattened on it from its variance or discount at maturity.
+/// QuantLib's check: its own engine on the market restated onto the risk-free curve's day counter, the volatility
+/// scaled so its variances by date are unchanged; and a risk-free curve settling two days after the others, flattened
+/// from its own date on the tree from the earliest, where QuantLib's tree starts at the risk-free curve's date.
 /// </summary>
 public class BinomialBarrierMismatchedTimesTests
 {

@@ -24,21 +24,20 @@ namespace NanoQL.PricingEngines;
 /// </summary>
 /// <remarks>
 /// <para>
-/// An immutable object over its model and settings (the S-hes plan's HD7); the static <c>Calculate</c> builds one. It
-/// keeps QuantLib's caches inside itself (HR4 (i), HD17): the characteristic function by (z, t) and the lifted grid by
-/// t, keyed by their arguments' bits, and the two Riemann-Liouville weight sets, built once; each entry is computed from
-/// the engine's immutable model and settings, by QuantLib's arithmetic, and filled thread-safely, so every answer is
-/// what a fresh engine returns, whatever the engine priced before and on whichever thread. A model with other
-/// parameters is a new model and so a new engine, where QuantLib's <c>update()</c> drops the caches. Each price returns
-/// its integration's evaluations as the additional result "numberOfEvaluations", where QuantLib's engine keeps the
-/// count in a mutable member.
+/// An immutable object over its model and settings; the static <c>Calculate</c> builds one. It keeps QuantLib's caches
+/// inside itself: the characteristic function by (z, t) and the lifted grid by t, keyed by their arguments' bits, and
+/// the two Riemann-Liouville weight sets, built once; each entry is computed from the engine's immutable model and
+/// settings, by QuantLib's arithmetic, and filled thread-safely, so every answer is what a fresh engine returns,
+/// whatever the engine priced before and on whichever thread. A model with other parameters is a new model and so a new
+/// engine, where QuantLib's <c>update()</c> drops the caches. Each price returns its integration's evaluations as the
+/// additional result "numberOfEvaluations", where QuantLib's engine keeps the count in a mutable member.
 /// </para>
 /// <para>
 /// The model's time runs from the earliest curve date (<see cref="HestonProcess"/>'s model time), the date form reading
 /// the curves by date and the time form at the instants its time denotes on that clock, where QuantLib's time form
-/// reads both curves at the risk-free curve's times (the S-hes plan's HR7 (xi), (xii)); a market whose curves share the
-/// risk-free curve's dates and day counter keeps QuantLib's times. At the model's time 0 the engine refuses, as
-/// QuantLib's does ("maturity must be positive").
+/// reads both curves at the risk-free curve's times; a market whose curves share the risk-free curve's dates and day
+/// counter keeps QuantLib's times. At the model's time 0 the engine refuses, as QuantLib's does ("maturity must be
+/// positive").
 /// </para>
 /// <para>
 /// The Adams scheme is the reference route, O(N²) in the time steps; the Padé approximation is a closed form matching
@@ -63,8 +62,8 @@ public sealed class AnalyticRoughHestonEngine
     private readonly AnalyticRoughHestonEngineApproximation approximation;
     private readonly int nFactors;
 
-    // QuantLib's caches (HR4 (i)): the characteristic function by the bits of (Re z, Im z, t), the lifted grid by the
-    // bits of t, and the weights of the alpha = 1 and alpha = 1 - a integrals
+    // QuantLib's caches: the characteristic function by the bits of (Re z, Im z, t), the lifted grid by the bits of t,
+    // and the weights of the alpha = 1 and alpha = 1 - a integrals
     private readonly ConcurrentDictionary<(long, long, long), Complex> chFCache = new();
     private readonly ConcurrentDictionary<long, LiftedGrid> liftedGridCache = new();
     private readonly Lazy<RiemannLiouvilleWeights> unitWeights;

@@ -5,19 +5,18 @@ computed by the C++ harness (tools/cxx/src/experimental/math/latentmodel.cpp) on
 an integration of a given type (QuantLib's protected IntegrationFactory), so that the base's integration answers.
 
 Gaussian and Student t models built by each constructor QuantLib defines on its policy: the weight matrix (one and two
-factors), the one-factor weights (Student t only: QuantLib's default-constructs the Gaussian policy, which crashes, the
-S-xcr plan's XR8 (vi), held in Divergences/LatentModelVectorConstructorTests.cs), a common weight, and a correlation
-whose square root is the weight (QuantLib's quote constructor). For each: the inspectors; the policy's members through
-the model (cumulative and inverse cumulative distributions of the variables, the idiosyncratic and systemic factors,
-the factors' density, the all-factor inversion of uniform samples), each variable's value on factor samples and the
-variables' correlations; the expected values of integrands under the Gauss-Hermite integration, and, on one factor,
-the trapezoid one; and twenty draws of the default factor sampler on Mersenne Twister and Sobol sequences, and of the
-Box-Muller sampler on the Gaussian models, at fixed seeds. The polar Student t sampler's draws differ (XR8 (xix), held
-in Divergences/PolarStudentTSamplerTests.cs: one uniform stream, each draw scaled by its variance factor), so of its
-first draw on a fresh sampler at each of twelve seeds the vectors hold what nanoql's shares: the first systemic value
-times its variance factor, sqrt((nu - 2)/nu) as QuantLib's policy computes it (both samplers' first t generator starts
-on the seed's stream), the dimension and the weight. Read back by
-tests/NanoQL.Tests/Vectors/Cxx/Experimental/Math/LatentModelCxxVectorTests.cs."""
+factors), the one-factor weights (Student t only: QuantLib's default-constructs the Gaussian policy, which crashes, held
+in Divergences/LatentModelVectorConstructorTests.cs), a common weight, and a correlation whose square root is the weight
+(QuantLib's quote constructor). For each: the inspectors; the policy's members through the model (cumulative and inverse
+cumulative distributions of the variables, the idiosyncratic and systemic factors, the factors' density, the all-factor
+inversion of uniform samples), each variable's value on factor samples and the variables' correlations; the expected
+values of integrands under the Gauss-Hermite integration, and, on one factor, the trapezoid one; and twenty draws of the
+default factor sampler on Mersenne Twister and Sobol sequences, and of the Box-Muller sampler on the Gaussian models, at
+fixed seeds. The polar Student t sampler's draws differ (held in Divergences/PolarStudentTSamplerTests.cs: one uniform
+stream, each draw scaled by its variance factor), so of its first draw on a fresh sampler at each of twelve seeds the
+vectors hold what nanoql's shares: the first systemic value times its variance factor, sqrt((nu - 2)/nu) as QuantLib's
+policy computes it (both samplers' first t generator starts on the seed's stream), the dimension and the weight. Read
+back by tests/NanoQL.Tests/Vectors/Cxx/Experimental/Math/LatentModelCxxVectorTests.cs."""
 import math
 import os
 import sys

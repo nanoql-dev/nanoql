@@ -14,8 +14,8 @@ namespace NanoQL.Tests.Divergences;
 /// The last year-on-year coupon of a cap on an empty leg. QuantLib's <c>lastYoYInflationCoupon()</c> reads
 /// <c>yoyLeg_.back()</c> (<c>inflationcapfloor.cpp:109-115</c>), which is undefined for an empty leg; the wheel doesn't
 /// bind it. nanoql refuses with <see cref="NanoQLException"/> and the text QuantLib's <c>CashFlows</c> gives an empty
-/// leg, "empty leg", as S7's <see cref="CapFloor.LastFloatingRateCoupon"/> does. The rest of the cap is QuantLib's
-/// defined behaviour, as the wheel gives it: it is expired and prices at 0.
+/// leg, "empty leg", as <see cref="CapFloor.LastFloatingRateCoupon"/> does. The rest of the cap is QuantLib's defined
+/// behaviour, as the wheel gives it: it is expired and prices at 0.
 /// </summary>
 public class YoYInflationCapFloorEmptyLegTests
 {

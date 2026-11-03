@@ -14,7 +14,7 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The calibration's default fixed parameters (the S-g1d plan's G1R2 (ii); master plan §2.2's calibration row):
+/// The calibration's default fixed parameters (the playbook's calibration row):
 /// <see cref="ICalibratedModel.DefaultFixParameters"/> is empty by default, QuantLib's, for every landed model; a model
 /// that gives one, as QuantLib's Markov-functional model overrides <c>calibrate</c> to fix its first volatility, has it
 /// read by <c>Calibrate</c> when the caller fixes nothing, and a caller's own flags win. The Markov-functional model

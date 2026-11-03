@@ -19,10 +19,9 @@ namespace NanoQL.PricingEngines;
 /// </summary>
 /// <remarks>
 /// Stateless. Each period's theta is its value times the risk-free rate to its start, where QuantLib's reads the rate
-/// over the period itself (the S-exo plan's ER5 (xxii), <c>Divergences/CliquetThetaTests.cs</c>): QuantLib's
-/// forward-performance engine's theta, period by period. Each period's vega is under a parallel shift of the input
-/// volatilities (ER5 (xxxvii)), and every structure is read by date on the process's clock (ER5 (xxiv)), as
-/// <see cref="AnalyticCliquetEngine"/> reads them.
+/// over the period itself (<c>Divergences/CliquetThetaTests.cs</c>): QuantLib's forward-performance engine's theta,
+/// period by period. Each period's vega is under a parallel shift of the input volatilities, and every structure is
+/// read by date on the process's clock, as <see cref="AnalyticCliquetEngine"/> reads them.
 /// </remarks>
 public static class AnalyticPerformanceEngine
 {

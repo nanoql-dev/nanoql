@@ -11,15 +11,14 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The barrier family's closed forms on structures that measure time differently (the S-bar plan's BR5 (i), fixed
-/// under R8, S-rx's class carried). QuantLib's double-barrier, double-barrier binary, partial-time, soft and two-asset
-/// engines read each rate as its curve's zero rate over the risk-free curve's time and the volatility over the same
-/// time, and combine them as though every structure shared that clock, so on an Actual/360 risk-free curve beside an
-/// Actual/365 Fixed volatility they are off their own values on the market restated onto one clock with the same
-/// discounts and variances by date (the planner's P7: −3.33%, +0.88% and +1.64% on the double barrier, the
-/// partial-time and the soft barrier). nanoql reads each rate on the volatility's clock, the curve's zero rate times
-/// its own time over the volatility's, and each time on it, as the analytic barrier engine reads them; the two-asset
-/// engine on the clock across both processes, the first's risk-free day counter (the S-exo plan's ED10). QuantLib's
+/// The barrier family's closed forms on structures that measure time differently (fixed). QuantLib's double-barrier,
+/// double-barrier binary, partial-time, soft and two-asset engines read each rate as its curve's zero rate over the
+/// risk-free curve's time and the volatility over the same time, and combine them as though every structure shared that
+/// clock, so on an Actual/360 risk-free curve beside an Actual/365 Fixed volatility they are off their own values on
+/// the market restated onto one clock with the same discounts and variances by date (−3.33%, +0.88% and +1.64% on the
+/// double barrier, the partial-time and the soft barrier). nanoql reads each rate on the volatility's clock, the
+/// curve's zero rate times its own time over the volatility's, and each time on it, as the analytic barrier engine
+/// reads them; the two-asset engine on the clock across both processes, the first's risk-free day counter. QuantLib's
 /// check: its own engine on the market restated onto that clock, each flat structure's rate or volatility scaled so its
 /// discounts or variances by date are unchanged, which nanoql's engine prices with QuantLib's bits (the vectors).
 /// </summary>

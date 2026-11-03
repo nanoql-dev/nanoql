@@ -11,9 +11,9 @@ a Heston process for the double-exponential ones) and its v0, kappa, theta, sigm
 lambda, nu and delta. Then the constructors' refusals of a mean-reversion speed of the intensity
 at 0, a probability of an up-jump above 1 and an intensity at 0 (QuantLib's ConstantParameter, ": invalid value").
 
-Left out (the S-hes plan's §2.10): an up-jump mean nuUp at or above 1, where nanoql's constraint refuses the value
-QuantLib takes (HR7 (v), tests/NanoQL.Tests/Divergences/BatesDoubleExpUpJumpTests.cs); every nuUp here is below 1,
-before and after setParams.
+Left out: an up-jump mean nuUp at or above 1, where nanoql's constraint refuses the value QuantLib takes
+(tests/NanoQL.Tests/Divergences/BatesDoubleExpUpJumpTests.cs); every nuUp here is below 1, before and after
+setParams.
 
 A case holds the "type", the "process" (the harness's spec, tools/cxx/src/models/equity/hestonspec.hpp: flat
 forwards at "riskFree" and "dividend" from the "referenceDate" on the "dayCounter"), the constructor's "arguments" (a

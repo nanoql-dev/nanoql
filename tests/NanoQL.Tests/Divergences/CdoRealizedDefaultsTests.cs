@@ -13,17 +13,16 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// A CDO and a random model on a basket with a realized default (the S-xcr plan's XR8 (ii)): the CDO's premium leg,
-/// upfront and remaining notional stand on the tranche's outstanding notional, and the random models simulate the live
-/// names alone. A (10) and B (20) alive and C (30) defaulted in June 2006 and settled at 0.4, the [10%, 50%] tranche
-/// from 1 January 2006: QuantLib refuses the pool model on the realized basket ("sizes differ: 3 vs 2"), and on the
-/// restated basket (A and B, [0, 40%]) its mid-point CDO at 1% upfront and 2% running reads NPV
-/// −0.28931799290637461, premium 0.98631843637350081, protection 1.3956199920495744, fair premium 0.025866624453865835
-/// and remaining notional 12, its integral CDO NPV −0.28056449432303487; at correlation 0 its random model on the
-/// restated basket reads P(≥ 2) 0.0088 and on the realized one P(≥ 3) 0.0004 (the S-xcr run's <c>c2_facts.cpp</c>).
-/// A basket whose first name has defaulted, the models' recoveries and rows differing by name, checks each model's
-/// restriction to the live rows, a seasoned CDO's paid first coupon and the random model's shifted loss distribution
-/// against QuantLib on its restated basket (the S-xcr run's <c>c2_o12.cpp</c>; the S-xcr code review's C2 O1-2).
+/// A CDO and a random model on a basket with a realized default: the CDO's premium leg, upfront and remaining notional
+/// stand on the tranche's outstanding notional, and the random models simulate the live names alone. A (10) and B (20)
+/// alive and C (30) defaulted in June 2006 and settled at 0.4, the [10%, 50%] tranche from 1 January 2006: QuantLib
+/// refuses the pool model on the realized basket ("sizes differ: 3 vs 2"), and on the restated basket (A and B, [0,
+/// 40%]) its mid-point CDO at 1% upfront and 2% running reads NPV −0.28931799290637461, premium 0.98631843637350081,
+/// protection 1.3956199920495744, fair premium 0.025866624453865835 and remaining notional 12, its integral CDO NPV
+/// −0.28056449432303487; at correlation 0 its random model on the restated basket reads P(≥ 2) 0.0088 and on the
+/// realized one P(≥ 3) 0.0004. A basket whose first name has defaulted, the models' recoveries and rows differing by
+/// name, checks each model's restriction to the live rows, a seasoned CDO's paid first coupon and the random model's
+/// shifted loss distribution against QuantLib on its restated basket.
 /// </summary>
 public class CdoRealizedDefaultsTests
 {
@@ -91,7 +90,7 @@ public class CdoRealizedDefaultsTests
     public void TheRandomLossModelPairsTheLiveNamesRows()
     {
         // QuantLib on the restated basket, the spot model's default rows 0.4 and 0.3 and recovery rows 0.2 and 0.45, at
-        // A = 3, where no simulated recovery rounds to 1 (XR8 (xxv)): 2.2075976562499999, plus the realized 1.5
+        // A = 3, where no simulated recovery rounds to 1: 2.2075976562499999, plus the realized 1.5
         var spot = new GaussianSpotLossLM([[0.5], [0.4], [0.3], [0.35], [0.2], [0.45]], Recoveries, 3.0, LatentModelIntegrationType.GaussianQuadrature);
         Basket basket = FirstDefaulted().SetLossModel(new GaussianRandomLossLM(spot, 2000, 2863311530));
         Assert.Equal(2.2075976562499999 + 1.5, basket.ExpectedTrancheLoss(D5), 1e-13);

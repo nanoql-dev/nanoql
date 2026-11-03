@@ -11,13 +11,12 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The BSM-Hull-White engine's variance offset at small mean reversion (the S-van plan's VR4 (xxvii), §3.3's
-/// small-reversion class). QuantLib's closed form, v = σ²/a²·(t + 2e^(−at)/a − e^(−2at)/(2a) − 3/(2a)) and
-/// μ = 2ρση/a·(t − (1 − e^(−at))/a) (<c>analyticbsmhullwhiteengine.cpp:97-110</c>), cancels to σ²t³/3 and ρσηt² with a
-/// relative error of about 3ε/(a·t)³, used down to (a·t)⁴ = ε. nanoql takes the series to (a·t)⁴ below a·t = 1e-2 and
-/// the closed form above. QuantLib's check: its own closed form evaluated to 50 digits (Python's decimal) on both sides
-/// of the cut, priced by QuantLib's analytic European engine on the total variance η²t + v + μ [executed on the wheel:
-/// <c>scratchpad\c2\bsmhw_decimal.py</c>].
+/// The BSM-Hull-White engine's variance offset at small mean reversion (§3.3's small-reversion class). QuantLib's
+/// closed form, v = σ²/a²·(t + 2e^(−at)/a − e^(−2at)/(2a) − 3/(2a)) and μ = 2ρση/a·(t − (1 − e^(−at))/a)
+/// (<c>analyticbsmhullwhiteengine.cpp:97-110</c>), cancels to σ²t³/3 and ρσηt² with a relative error of about
+/// 3ε/(a·t)³, used down to (a·t)⁴ = ε. nanoql takes the series to (a·t)⁴ below a·t = 1e-2 and the closed form above.
+/// QuantLib's check: its own closed form evaluated to 50 digits (Python's decimal) on both sides of the cut, priced by
+/// QuantLib's analytic European engine on the total variance η²t + v + μ (QuantLib-Python 1.44).
 /// </summary>
 public class BsmHullWhiteSmallReversionTests
 {

@@ -14,8 +14,8 @@ namespace NanoQL.Tests.Vectors;
 /// <c>tests/vectors/cxx/experimental/volatility/noarbsabrswaptionvolatilitycube.json</c>:
 /// <see cref="NoArbSabrSwaptionVolatilityCube"/> on QuantLib's SABR cube fixture at options of 5 years and more, beta
 /// fixed, at-the-money calibrated and not; its parameter and volatility matrices, its volatilities on and off its grid
-/// and by time, and its smile sections by tenors and by time, the elements S7R6's one-ulp refits leave stable. The cube
-/// as <c>tools/cxx/src/termstructures/volatility/swaption/sabrswaptionvolatilitycube.cpp</c> builds it.
+/// and by time, and its smile sections by tenors and by time, the elements one-ulp refits leave stable. The cube as
+/// <c>tools/cxx/src/termstructures/volatility/swaption/sabrswaptionvolatilitycube.cpp</c> builds it.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class NoArbSabrSwaptionVolatilityCubeCxxVectorTests

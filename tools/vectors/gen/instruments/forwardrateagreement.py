@@ -13,9 +13,9 @@ the maturity ("valueDate must be earlier than maturityDate").
 Each case's outputs are whether the FRA builds, QuantLib's refusal recorded as its throw; then its fixing date, whether
 it has expired, the forward rate, the amount (the payoff on the value date) and the NPV, amounts compared at the
 notional. Two expired FRAs, whose value dates are before the evaluation date, give their fixing date, expiry and NPV,
-QuantLib's zero; left out (the S-rx plan's §2.5): an expired FRA's amount, which QuantLib reads before computing it, and
-the forward rate and NPV of an expired par FRA, which QuantLib computes from its curve before the curve's reference date
-and refuses ("negative time ... given"), all fixed by SRXR3 (vii) (Divergences/ForwardRateAgreementExpiredTests.cs).
+QuantLib's zero; left out: an expired FRA's amount, which QuantLib reads before computing it, and the forward rate and
+NPV of an expired par FRA, which QuantLib computes from its curve before the curve's reference date and refuses
+("negative time ... given"), all fixed in nanoql (Divergences/ForwardRateAgreementExpiredTests.cs).
 
 Each case's inputs hold its settings, with the fixings it reads, and "fra" ({"index", "valueDate", "maturityDate", null
 for the value-date constructor, "type" (QuantLib's Position::Type integer), "strike", "notional", "discountCurve", a

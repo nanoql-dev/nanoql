@@ -31,7 +31,7 @@ internal sealed class ExcelHost : IXlHost
     /// <remarks>
     /// Through Excel's object model, on Excel's main thread (nqlxlError isn't registered thread-safe): the cell's
     /// <c>Range.HasSpill</c> and <c>Range.SpillParent</c>, the state Excel itself shows. Each object the read takes is
-    /// released before it returns: one left to the finalizer kept Excel from closing (XLP79).
+    /// released before it returns: one left to the finalizer kept Excel from closing.
     /// </remarks>
     public ExcelReference? SpillParent(ExcelReference cell)
     {
@@ -72,7 +72,7 @@ internal sealed class ExcelHost : IXlHost
     }
 
     /// <inheritdoc/>
-    /// <remarks>Excel gives <c>DATE(1904,1,1)</c> as 0 in the 1904 system and 1,462 in the 1900 one (XLP16).</remarks>
+    /// <remarks>Excel gives <c>DATE(1904,1,1)</c> as 0 in the 1904 system and 1,462 in the 1900 one.</remarks>
     public int DateShift()
     {
         try

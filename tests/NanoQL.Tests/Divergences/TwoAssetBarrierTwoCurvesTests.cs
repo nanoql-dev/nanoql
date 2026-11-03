@@ -11,13 +11,12 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The two-asset barrier's second risk-free curve (the S-bar plan's BR5 (vii), fixed under R8; the S-exo plan's ED27).
-/// QuantLib takes asset 2's carry from process 1's rate, b₂ = r₁ − q₂, so the price ignores process 2's curve: a
-/// down-and-out call at 100, barrier 90 on asset 2, r₁ 5%, q₂ 1%, prices 4.547879 at r₂ of 0, 5% and 10% (the
-/// planner's P2). nanoql reads b₂ = r₂ − q₂ and discounts on process 1's curve. Check: QuantLib's engine on the market
-/// restated onto process 1's curve, asset 2's dividend yield q₂ + r₁ − r₂: 4.045769328445, 4.547878997954 and
-/// 5.044213261884 on QuantLib's Dr78 (the S-bar run's <c>c1_ta_bb.py</c>), to its six decimal places on the
-/// formula's terms of weight 100 (BR4 (e)).
+/// The two-asset barrier's second risk-free curve (fixed). QuantLib takes asset 2's carry from process 1's rate, b₂ =
+/// r₁ − q₂, so the price ignores process 2's curve: a down-and-out call at 100, barrier 90 on asset 2, r₁ 5%, q₂ 1%,
+/// prices 4.547879 at r₂ of 0, 5% and 10%. nanoql reads b₂ = r₂ − q₂ and discounts on process 1's curve. Check:
+/// QuantLib's engine on the market restated onto process 1's curve, asset 2's dividend yield q₂ + r₁ − r₂:
+/// 4.045769328445, 4.547878997954 and 5.044213261884 on QuantLib's Dr78, to its six decimal places on the formula's
+/// terms of weight 100.
 /// </summary>
 public class TwoAssetBarrierTwoCurvesTests
 {

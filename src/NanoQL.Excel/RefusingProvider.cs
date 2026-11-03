@@ -9,9 +9,9 @@ using NanoQL.Time;
 namespace NanoQL.Excel;
 
 /// <summary>
-/// The default conventions after a failed settings load (XLR9): every lookup refuses with the load's error, so no
-/// result is ever priced on QuantLib's conventions by accident. It overrides every overridable member of
-/// <see cref="ConventionProvider"/>, which a test checks by reflection (XLD28).
+/// The default conventions after a failed settings load: every lookup refuses with the load's error, so no result is
+/// ever priced on QuantLib's conventions by accident. It overrides every overridable member of
+/// <see cref="ConventionProvider"/>, which a test checks by reflection.
 /// </summary>
 /// <param name="error">The load's error.</param>
 internal sealed class RefusingProvider(string error) : ConventionProvider

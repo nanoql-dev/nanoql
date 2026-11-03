@@ -13,12 +13,12 @@ a relative tolerance of 1e-8 and 10,000 evaluations): the NPVs of calls and puts
 the spot) and three maturities (a year, two and five years). Then the constructor's refusal of a negative
 correlation ("Fourier integration is not stable if the equity interest rate correlation is negative").
 
-Left out (the S-hes plan's §2.10): every structure is on the risk-free curve's day counter and reference date; lambda
-T below 2e-2, where nanoql evaluates I4 in double-double (HR7 (xvi), D3-4 of the S-hes run record,
-tests/NanoQL.Tests/Divergences/AnalyticH1HWSmallReversionTests.cs), the smallest here 0.03; and every set whose
-fit E[sqrt(v_t)] ~ a + b exp(-ct) has no decaying exponential, (Lambda(1) - a)/b outside (0, 1), where nanoql takes
-the fit's limits (HR7 (xxviii), tests/NanoQL.Tests/Divergences/AnalyticH1HWBandTests.cs): each set here is on the
-side 8 kappa theta / sigma^2 > 1, its ratio computed below as QuantLib's Fj_Helper computes it, and asserted inside.
+Left out: every structure is on the risk-free curve's day counter and reference date; lambda T below 2e-2, where
+nanoql evaluates I4 in double-double (tests/NanoQL.Tests/Divergences/AnalyticH1HWSmallReversionTests.cs), the smallest
+here 0.03; and every set whose fit E[sqrt(v_t)] ~ a + b exp(-ct) has no decaying exponential, (Lambda(1) - a)/b
+outside (0, 1), where nanoql takes the fit's limits (tests/NanoQL.Tests/Divergences/AnalyticH1HWBandTests.cs): each
+set here is on the side 8 kappa theta / sigma^2 > 1, its ratio computed below as QuantLib's Fj_Helper computes it, and
+asserted inside.
 
 A case holds one process, hestonprocess.py's spec without its discretization, the Hull-White model {"a", "sigma"} on
 the risk-free curve, rhoSr, the engine {"integrationOrder"} or {"relTolerance", "maxEvaluations"}, its maturities in

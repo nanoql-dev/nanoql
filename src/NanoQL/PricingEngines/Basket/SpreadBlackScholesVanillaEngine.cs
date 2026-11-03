@@ -21,9 +21,9 @@ namespace NanoQL.PricingEngines;
 /// its own process's curves and the payoff is discounted on the first process's risk-free curve, QuantLib's reading.
 /// </para>
 /// <para>
-/// Each structure is read by date and accrues nothing before its reference date (the playbook's dates row), where
-/// QuantLib's read throws for an option expiring before a later structure's date; on structures dated alike the reads
-/// are QuantLib's (<c>Divergences/TwoAssetMismatchedTimesTests.cs</c>).
+/// Each structure is read by date and accrues nothing before its reference date (the playbook's row for structures on
+/// another clock), where QuantLib's read throws for an option expiring before a later structure's date; on structures
+/// dated alike the reads are QuantLib's (<c>Divergences/TwoAssetMismatchedTimesTests.cs</c>).
 /// </para>
 /// </remarks>
 public abstract class SpreadBlackScholesVanillaEngine

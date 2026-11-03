@@ -231,7 +231,7 @@ public sealed class ConstNotionalCrossCurrencyFixedVsFloatingSwap : ConstNotiona
     /// <remarks>
     /// The fair rate and spread are the engine's when it gives them; otherwise each is derived from the NPV and its
     /// leg's BPS, and is <see langword="null"/> when that BPS is unknown or zero, where QuantLib divides by it and
-    /// gives an infinite rate (the S-rx plan's SRXR3 (xviii); QuantLib's fixed-vs-floating swap tests the zero).
+    /// gives an infinite rate (QuantLib's fixed-vs-floating swap tests the zero).
     /// </remarks>
     public override ConstNotionalCrossCurrencyFixedVsFloatingSwapResults FetchResults(InstrumentResults results)
     {

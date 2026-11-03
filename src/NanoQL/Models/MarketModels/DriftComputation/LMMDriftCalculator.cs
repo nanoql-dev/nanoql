@@ -18,9 +18,9 @@ namespace NanoQL.Models;
 /// Mark Joshi, "Rapid Computation of Drifts in a Reduced Factor Libor Market Model", Wilmott Magazine, May 2003.
 /// </summary>
 /// <remarks>
-/// A working type (the S-mm plan's MR1 (ii)): QuantLib's mutable scratch is the calculator's own, so it is owned by one
-/// computation and isn't thread-safe; one evolver builds one per step. The forwards' and the drifts' sizes are checked
-/// at every computation, QuantLib's extra-safety checks (SD8), the plain and reduced forms included.
+/// A working type: QuantLib's mutable scratch is the calculator's own, so it is owned by one computation and isn't
+/// thread-safe; one evolver builds one per step. The forwards' and the drifts' sizes are checked at every computation,
+/// QuantLib's extra-safety checks, the plain and reduced forms included.
 /// </remarks>
 [WorkingType]
 public sealed class LMMDriftCalculator

@@ -4,10 +4,10 @@
 namespace NanoQL.PricingEngines;
 
 /// <summary>
-/// The Monte Carlo geometric Asian pricers' running product (the S-bar plan's BR5 (xli)): QuantLib's product of the
-/// fixings, flushed into the average as its N-th root where the next factor would take it past double's largest value,
-/// as QuantLib flushes it, or below its smallest normal, where QuantLib's underflows; QuantLib's arithmetic and bits
-/// while the product stays in range.
+/// The Monte Carlo geometric Asian pricers' running product: QuantLib's product of the fixings, flushed into the
+/// average as its N-th root where the next factor would take it past double's largest value, as QuantLib flushes it, or
+/// below its smallest normal, where QuantLib's underflows; QuantLib's arithmetic and bits while the product stays in
+/// range.
 /// </summary>
 internal struct GeometricProduct
 {

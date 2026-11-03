@@ -10,14 +10,13 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The QD+ and QD fixed-point engines on structures counted differently (the S-van plan's VR4 (ix)). QuantLib reads the
-/// volatility as <c>blackVol(T, K)</c> at the risk-free curve's time (<c>qdplusamericanengine.cpp:179-184</c>), so a
-/// volatility on Act/360 beside curves on Act/365 is read at a time its variance doesn't run over: about −0.6% on a
-/// one-year option. nanoql reads σ² as the volatility's variance at the maturity date over the engine's time, and r and q
-/// from each curve's discount over it. QuantLib's check: its own engines on the market restated on one day counter, the
-/// volatility scaled by √(365/360) so its variance to the maturity is the original's [executed on the wheel:
-/// <c>scratchpad\c2\oracle_c2.py</c>, section qd]. Where the structures share their counts, QuantLib's bits (the
-/// engines' vectors).
+/// The QD+ and QD fixed-point engines on structures counted differently. QuantLib reads the volatility as
+/// <c>blackVol(T, K)</c> at the risk-free curve's time (<c>qdplusamericanengine.cpp:179-184</c>), so a volatility on
+/// Act/360 beside curves on Act/365 is read at a time its variance doesn't run over: about −0.6% on a one-year option.
+/// nanoql reads σ² as the volatility's variance at the maturity date over the engine's time, and r and q from each
+/// curve's discount over it. QuantLib's check: its own engines on the market restated on one day counter, the
+/// volatility scaled by √(365/360) so its variance to the maturity is the original's (QuantLib-Python 1.44). Where the
+/// structures share their counts, QuantLib's bits (the engines' vectors).
 /// </summary>
 public class QdMismatchedTimesTests
 {

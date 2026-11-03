@@ -12,14 +12,13 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The Monte Carlo digital engine at seed 76 (the S-van plan's VR4 (xxv), under R8). QuantLib's pricer draws the
-/// Brownian bridge's uniform numbers from <c>PseudoRandom::urng_type(76)</c> with the path generator's dimension
-/// (<c>mcdigitalengine.hpp:177-179</c>), so at the pricing seed 76 without antithetic variates each step's bridge draws
-/// the uniform number of the step's own increment: a down-and-in put at 80 (cash 10, S 100, r 5%, vol 25%, one year,
-/// 12 steps, 100,000 samples) prices 3.4762897047890697 ± 0.01477, 5.7 errors above QuantLib's analytic engine,
-/// 3.3915878484599937, where seed 77 gives 0.8 errors above [executed on the wheel: <c>oracle_c1b.py</c>]. nanoql's bridge
-/// takes the seed 77 at the pricing seed 76; every other seed keeps QuantLib's 76 and its bits. QuantLib's check: its
-/// analytic engine.
+/// The Monte Carlo digital engine at seed 76. QuantLib's pricer draws the Brownian bridge's uniform numbers from
+/// <c>PseudoRandom::urng_type(76)</c> with the path generator's dimension (<c>mcdigitalengine.hpp:177-179</c>), so at
+/// the pricing seed 76 without antithetic variates each step's bridge draws the uniform number of the step's own
+/// increment: a down-and-in put at 80 (cash 10, S 100, r 5%, vol 25%, one year, 12 steps, 100,000 samples) prices
+/// 3.4762897047890697 ± 0.01477, 5.7 errors above QuantLib's analytic engine, 3.3915878484599937, where seed 77 gives
+/// 0.8 errors above (QuantLib-Python 1.44). nanoql's bridge takes the seed 77 at the pricing seed 76; every other seed
+/// keeps QuantLib's 76 and its bits. QuantLib's check: its analytic engine.
 /// </summary>
 public class McDigitalSeed76Tests
 {

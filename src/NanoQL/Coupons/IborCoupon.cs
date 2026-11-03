@@ -217,7 +217,7 @@ public class IborCoupon : FloatingRateCoupon
         }
         else if (IborIndex.ForecastsThroughFixingDate)
         {
-            // an index whose forecast is its own, which QuantLib's coupon misses (the S-xrt plan's XRR5 (xxi))
+            // an index whose forecast is its own, which QuantLib's coupon misses
             return IborIndex.ForecastFixing(fixingDate, context);
         }
         else

@@ -15,7 +15,7 @@ namespace NanoQL.Experimental;
 /// The binomial double-barrier engine on the Cox-Ross-Rubinstein tree and Derman and Kani's discretized double-barrier
 /// option: QuantLib-Python's <c>BinomialCRRDoubleBarrierEngine</c>, QuantLib's
 /// <c>BinomialDoubleBarrierEngine&lt;CoxRossRubinstein, DiscretizedDermanKaniDoubleBarrierOption&gt;</c>, the wheel's
-/// closing (D12).
+/// closing.
 /// </summary>
 [Experimental("NQL0001")]
 public static class BinomialCRRDoubleBarrierEngine

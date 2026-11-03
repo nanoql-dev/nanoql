@@ -5,11 +5,11 @@
 and inverse of the square-root process dv = κ(θ − v)dt + σ√v dW, a scaled non-central chi-squared distribution, and its
 stationary gamma distribution.
 
-QuantLib's three parameter sets (testSquareRootProcessRND's) and a fourth near the Feller boundary: pdf and cdf at
-eight values and three times, invcdf at five probabilities and three times, and the stationary pdf, cdf and inverse at
-those values and probabilities. Every set's shape α = 2κθ/σ² is at most 48, so the stationary product stays finite and
-is QuantLib's (the S-hes plan's HR7 (xiii); §2.10 leaves out α past about 170). The wheel's calls, by QuantLib-SWIG
-1.44: SquareRootProcessRNDCalculator(v0, kappa, theta, sigma), pdf, cdf, invcdf, stationary_pdf, stationary_cdf and
+QuantLib's three parameter sets (testSquareRootProcessRND's) and a fourth near the Feller boundary: pdf and cdf at eight
+values and three times, invcdf at five probabilities and three times, and the stationary pdf, cdf and inverse at those
+values and probabilities. Every set's shape α = 2κθ/σ² is at most 48, so the stationary product stays finite and is
+QuantLib's (§2.10 leaves out α past about 170). The wheel's calls, by QuantLib-SWIG 1.44:
+SquareRootProcessRNDCalculator(v0, kappa, theta, sigma), pdf, cdf, invcdf, stationary_pdf, stationary_cdf and
 stationary_invcdf. Read back by
 tests/NanoQL.Tests/Vectors/Methods/FiniteDifferences/Utilities/SquareRootProcessRNDCalculatorVectorTests.cs."""
 import os

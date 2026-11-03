@@ -13,13 +13,13 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The Longstaff-Schwartz pricer's exercise times (the S-van plan's VR4 (xxiv), under R8). QuantLib's pricer exercises
-/// at every time of its grid (<c>longstaffschwartzpathpricer.hpp:111-133</c>, <c>:143-200</c>), while its engine adds
-/// steps between a Bermudan option's dates and never puts an American option's earliest date on the grid
+/// The Longstaff-Schwartz pricer's exercise times. QuantLib's pricer exercises at every time of its grid
+/// (<c>longstaffschwartzpathpricer.hpp:111-133</c>, <c>:143-200</c>), while its engine adds steps between a Bermudan
+/// option's dates and never puts an American option's earliest date on the grid
 /// (<c>mclongstaffschwartzengine.hpp:218-225</c>): a Bermudan on more steps than dates, and an American option whose
 /// window opens later, price as an American exercisable throughout. nanoql's pricer exercises only at the grid's
 /// exercise times. QuantLib's checks: its finite-difference engine (800 × 800) on the Bermudan and the window, within
-/// the Monte Carlo error; and on one step per date, QuantLib's own bits [executed on the wheel: <c>oracle_c1.py</c>].
+/// the Monte Carlo error; and on one step per date, QuantLib's own bits (QuantLib-Python 1.44).
 /// </summary>
 public class LongstaffSchwartzExerciseTimesTests
 {

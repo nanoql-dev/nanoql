@@ -3,9 +3,9 @@
   SPDX-License-Identifier: Apache-2.0
 -->
 <Project Sdk="Microsoft.NET.Sdk">
-  <!-- The Excel add-in's own tests, outside Excel (docs/excel.md, XLR11): the runtime's conversions, keys, errors and
+  <!-- The Excel add-in's own tests, outside Excel (docs/excel.md): the runtime's conversions, keys, errors and
        settings through a test host standing in for Excel, and the generated worksheet functions of the two tests'
-       builds (the list off, XLD36), which nanoql-bind writes into obj/ before the compile: the experimental with S-bind's
+       builds (the list off), which nanoql-bind writes into obj/ before the compile: the experimental with the bindings'
        test types (prefix nqlt), and the stable. -->
   <PropertyGroup>
     <OutputType>Exe</OutputType>

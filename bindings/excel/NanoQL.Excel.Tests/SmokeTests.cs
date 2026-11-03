@@ -3,11 +3,13 @@
 
 namespace NanoQL.Excel.Tests;
 
-/// <summary>The swap of XLP6 through the experimental tests' build: S-bind's bits for its NPV and its fair rate.</summary>
+/// <summary>The reference swap through the experimental tests' build: the C ABI's bits for its NPV and its fair
+/// rate.</summary>
 [Collection(TestSettings.Name)]
 public sealed class SmokeTests
 {
-    /// <summary>A 10-year swap on a flat 3% curve, its NPV and fair rate bit for bit as S-bind's C suite gives them.</summary>
+    /// <summary>A 10-year swap on a flat 3% curve, its NPV and fair rate bit for bit as the C suite gives
+    /// them.</summary>
     [Fact]
     public void TheSwapGivesSBindsBits()
     {

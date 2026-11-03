@@ -24,16 +24,15 @@ namespace NanoQL.PricingEngines;
 /// payment. A caplet paid on or before the reference date is skipped; one fixed on or before it pays on its known
 /// forward; any other on (P(t, S)/P(t, E) − 1)/τ, the bonds at its fixing on the rate there. Each payoff is accrued from
 /// its payment E to the last payment T by 1/P(E, T) on the rate at the path's next time after the caplet's fixing,
-/// the next fixing or the last payment, not at E: QuantLib's approximation, kept (the S-sr plan's SSD18). The sum is
-/// discounted from T on the curve.
+/// the next fixing or the last payment, not at E: QuantLib's approximation, kept. The sum is discounted from T on the
+/// curve.
 /// </para>
 /// <para>
 /// <b>An in-arrears caplet</b> still to be fixed, fixed after its start, forecasts its rate on its index's own period
 /// from the fixing date, (P(t, s)/P(t, e) − 1)/τᵢ, and its payment, a few days after the fixing, is valued at the
-/// fixing exactly, P(t, E)/P(t, T) on the rate there: a divergence (the S-sr plan's B2-1, ruled by the user on
-/// 2026-10-22; <c>Divergences/CapletInArrearsTests.cs</c>), QuantLib's forecast reading the bond to the coupon's start,
-/// before the fixing, and its accrual the rate at the next fixing, about a period after the payment
-/// (<c>mchullwhiteengine.cpp:80-90</c>).
+/// fixing exactly, P(t, E)/P(t, T) on the rate there: a divergence (<c>Divergences/CapletInArrearsTests.cs</c>),
+/// QuantLib's forecast reading the bond to the coupon's start, before the fixing, and its accrual the rate at the next
+/// fixing, about a period after the payment (<c>mchullwhiteengine.cpp:80-90</c>).
 /// </para>
 /// <para>
 /// <b>A collar</b> is its cap less its floor, as the analytic and tree engines price it: a divergence, QuantLib's
@@ -87,7 +86,7 @@ internal sealed class HullWhiteCapFloorPricer : PathPricer<MonteCarloPath>
             fixingTimes[i] = dayCounter.YearFraction(referenceDate, args.FixingDates[i]);
         }
 
-        // B2-1: a caplet still to be fixed after its start, in arrears, on its index's own period from the fixing date
+        // A caplet still to be fixed after its start, in arrears, on its index's own period from the fixing date
         inArrears = new bool[fixingTimes.Length];
         indexStartTimes = new double[fixingTimes.Length];
         indexEndTimes = new double[fixingTimes.Length];
@@ -148,8 +147,8 @@ internal sealed class HullWhiteCapFloorPricer : PathPricer<MonteCarloPath>
                 }
                 else if (inArrears[i])
                 {
-                    // B2-1: an in-arrears caplet's rate on its index's period, and its payment, a few days after the
-                    // fixing, valued there against the forward measure's bond, both on the fixing's short rate
+                    // An in-arrears caplet's rate on its index's period, and its payment, a few days after the fixing,
+                    // valued there against the forward measure's bond, both on the fixing's short rate
                     ri_1 = path[i - pastFixings + 1];
                     double d1 = model.DiscountBond(fixing, indexStartTimes[i], ri_1);
                     double d2 = model.DiscountBond(fixing, indexEndTimes[i], ri_1);

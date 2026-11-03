@@ -9,8 +9,7 @@ Rate grids: six semi-annual rates and five irregular ones; exercises at every ra
 and off the rate times; states drawn around the grid's forwards.
 
 Left out: the counts where an exercise before the last sits in the last two periods, which QuantLib counts 10 where
-its values give 6 or 3 (the S-mmp plan's MMPR4 (xv), tests/NanoQL.Tests/Divergences/BasisSystemFunctionCountTests.cs);
-the values stay, QuantLib's.
+its values give 6 or 3 (tests/NanoQL.Tests/Divergences/BasisSystemFunctionCountTests.cs); the values stay, QuantLib's.
 
 The harness unit is tools/cxx/src/models/marketmodels/callability/callability.cpp. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Models/MarketModels/SwapForwardBasisSystemCxxVectorTests.cs."""

@@ -13,14 +13,14 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The double-barrier binary's payoff strike and type (the S-bar plan's BR5 (xxxviii), fixed under R8). Hui's series
-/// integrates the killed density over the whole corridor and never reads the payoff's strike or type
-/// (<c>analyticdoublebarrierbinaryengine.cpp:78</c>, "this is not used ?"), so a knock-out with L 80, U 120, cash 10
-/// prices 6.69467 for every strike and both types, a put struck at 0 among them. nanoql integrates over the payoff's
-/// region, [max(K, L), U] for a call and [L, min(K, U)] for a put, in closed form, QuantLib's value standing for a call
-/// at K ≤ L and a put at K ≥ U. Checks: an independent Crank-Nicolson solve (the planner's P14: the call and put at K
-/// 100, 3.046527 and 3.648146, the full corridor 6.694673, extrapolated to N = 4,000), QuantLib's finite-difference
-/// Heston double-barrier engine at a vanishing vol of vol, and call + put = the full corridor.
+/// The double-barrier binary's payoff strike and type (fixed). Hui's series integrates the killed density over the
+/// whole corridor and never reads the payoff's strike or type (<c>analyticdoublebarrierbinaryengine.cpp:78</c>, "this
+/// is not used ?"), so a knock-out with L 80, U 120, cash 10 prices 6.69467 for every strike and both types, a put
+/// struck at 0 among them. nanoql integrates over the payoff's region, [max(K, L), U] for a call and [L, min(K, U)] for
+/// a put, in closed form, QuantLib's value standing for a call at K ≤ L and a put at K ≥ U. Checks: an independent
+/// Crank-Nicolson solve (the call and put at K 100, 3.046527 and 3.648146, the full corridor 6.694673, extrapolated to
+/// N = 4,000), QuantLib's finite-difference Heston double-barrier engine at a vanishing vol of vol, and call + put =
+/// the full corridor.
 /// </summary>
 public class DoubleBinaryStrikeTests
 {

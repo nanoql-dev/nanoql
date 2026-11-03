@@ -143,7 +143,7 @@ internal sealed class KindClassifier(WellKnown known)
                 return new CKind("snapshot", t);
             }
 
-            // A closed generator construction as a parameter takes the snapshot of a class deriving it (B2R6: the named
+            // A closed generator construction as a parameter takes the snapshot of a class deriving it (the named
             // uniform generators), its type checked at the call; one no class derives stays withheld.
             if (known.IsGenerator(t) && t.IsConstructedGenericType && !isReturn)
             {
@@ -258,8 +258,8 @@ internal sealed class KindClassifier(WellKnown known)
         Type tupleEl = el.NullableOf() ?? el;
         if (ek == null && !span && tupleEl.IsGenericType && tupleEl.GetGenericTypeDefinition().FullName!.StartsWith("System.ValueTuple`", StringComparison.Ordinal) && (isReturn || tupleEl == el))
         {
-            // A collection of tuples crosses as one array per element and one count, in and out (B2R3, B2R10); a
-            // returned collection of nullable tuples with has-value flags.
+            // A collection of tuples crosses as one array per element and one count, in and out; a returned collection
+            // of nullable tuples with has-value flags.
             ek = ElementTupleOf(tupleEl, p, out why);
             if (ek == null)
             {

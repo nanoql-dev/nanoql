@@ -6,11 +6,11 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The sphere-cylinder optimizer's clamp (the S-mm plan's MR3 (xxiii), fixed under R8). QuantLib's constructor stores
-/// the cylinder's radius s, then clamps its parameter to 0 (<c>spherecylinder.cpp:87</c>), so its intersection test
-/// reads the clamped radius and its solves the stored one: at r 1, α 0.5 and z (0.6, 0.1, 0.5), s −0.2 projects to
-/// (0.359, −0.141, 0.923) and s 0 to (0.5, 0, 0.866) (the planner's MP26). nanoql stores the clamped radius. QuantLib's
-/// one caller passes s ≥ 0. Check: QuantLib's own optimizer at s 0, for every s below 0.
+/// The sphere-cylinder optimizer's clamp (fixed). QuantLib's constructor stores the cylinder's radius s, then clamps
+/// its parameter to 0 (<c>spherecylinder.cpp:87</c>), so its intersection test reads the clamped radius and its solves
+/// the stored one: at r 1, α 0.5 and z (0.6, 0.1, 0.5), s −0.2 projects to (0.359, −0.141, 0.923) and s 0 to (0.5, 0,
+/// 0.866). nanoql stores the clamped radius. QuantLib's one caller passes s ≥ 0. Check: QuantLib's own optimizer at s
+/// 0, for every s below 0.
 /// </summary>
 public class SphereCylinderClampTests
 {

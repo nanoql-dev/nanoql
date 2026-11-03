@@ -14,21 +14,20 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// An in-arrears caplet on the short-rate cap engines (the S-sr plan's B2-1, ruled by the user on 2026-10-22, under R8 as
-/// amended that day): QuantLib's analytic and tree engines value a caplet still to be fixed at its start on its accrual
-/// period, reading neither its later fixing nor its index's own period (<c>analyticcapfloorengine.cpp:94-112</c>,
-/// <c>discretizedcapfloor.cpp:53-55</c>), so they price an in-arrears cap as the cap in advance; its Monte Carlo engine
-/// forecasts the rate from the bond to the coupon's start, before the fixing (<c>mchullwhiteengine.cpp:80-90</c>). On the
-/// wheel, a 1-year semiannual cap at 4% on Euribor 6M in arrears, from six months after the spot date, two fixing days,
-/// notional 1,000,000, its coupons on a Black pricer at 20%, on Hull-White (0.1, 0.01) on a flat 4% Actual/365 (Fixed)
-/// curve on 15 January 2025: the analytic engine 3,024.081283636271 and the tree (200 steps) 3,019.994708839063, the
-/// in-advance cap's prices; QuantLib's Monte Carlo route (the port's before the fix, which reproduces it on its vectors)
-/// 4,063.1343135221905 ± 6.317811808654881 (200,000 antithetic samples, seed 42). No QuantLib route prices it, so the
-/// check is independent: each caplet's value at its fixing is a one-dimensional Gaussian integral under the fixing's
-/// forward measure, 3,885.098792896677 by quadrature to about 1e-15 (the S-sr run's <c>b21_integral.py</c>). nanoql's
-/// trees value an in-arrears caplet at its fixing on every model from three bonds, to its payment and to its index
-/// period's start and end; its Monte Carlo engine forecasts on the index's period and values the payment at the fixing;
-/// its analytic engine refuses it.
+/// An in-arrears caplet on the short-rate cap engines: QuantLib's analytic and tree engines value a caplet still to be
+/// fixed at its start on its accrual period, reading neither its later fixing nor its index's own period
+/// (<c>analyticcapfloorengine.cpp:94-112</c>, <c>discretizedcapfloor.cpp:53-55</c>), so they price an in-arrears cap as
+/// the cap in advance; its Monte Carlo engine forecasts the rate from the bond to the coupon's start, before the fixing
+/// (<c>mchullwhiteengine.cpp:80-90</c>). On the wheel, a 1-year semiannual cap at 4% on Euribor 6M in arrears, from six
+/// months after the spot date, two fixing days, notional 1,000,000, its coupons on a Black pricer at 20%, on Hull-White
+/// (0.1, 0.01) on a flat 4% Actual/365 (Fixed) curve on 15 January 2025: the analytic engine 3,024.081283636271 and the
+/// tree (200 steps) 3,019.994708839063, the in-advance cap's prices; QuantLib's Monte Carlo route (the port's before
+/// the fix, which reproduces it on its vectors) 4,063.1343135221905 ± 6.317811808654881 (200,000 antithetic samples,
+/// seed 42). No QuantLib route prices it, so the check is independent: each caplet's value at its fixing is a
+/// one-dimensional Gaussian integral under the fixing's forward measure, 3,885.098792896677 by quadrature to about
+/// 1e-15. nanoql's trees value an in-arrears caplet at its fixing on every model from three bonds, to its payment and
+/// to its index period's start and end; its Monte Carlo engine forecasts on the index's period and values the payment
+/// at the fixing; its analytic engine refuses it.
 /// </summary>
 public class CapletInArrearsTests
 {

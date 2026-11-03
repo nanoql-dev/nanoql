@@ -13,11 +13,10 @@ full (tests/NanoQL.Tests/Divergences/TelescopicValueDatesTests.cs).
 
 Each case's outputs are whether the curve builds, QuantLib's refusal recorded as its throw; then the curve's dates and
 maximum date; each helper's earliest, maturity, latest relevant, pillar and latest dates; and the solved outputs: the
-curve's data, its discounts at 12 dates and each helper's implied quote on it. The stability filter of the S7 plan's
-S7R6 runs on each case: the curve is rebuilt with its helpers' quotes moved one ulp up, then down, together and each
-alone, and a solved output is written only where every move leaves it within 1e-12 x max(|a|, |b|, 1); a dropped one is
-written null and its index listed in the case's inputs "dropped". The generator prints "dropped n of m outputs" per case
-and for the file.
+curve's data, its discounts at 12 dates and each helper's implied quote on it. The stability filter runs on each case:
+the curve is rebuilt with its helpers' quotes moved one ulp up, then down, together and each alone, and a solved output
+is written only where every move leaves it within 1e-12 x max(|a|, |b|, 1); a dropped one is written null and its index
+listed in the case's inputs "dropped". The generator prints "dropped n of m outputs" per case and for the file.
 
 Each case's inputs hold its settings, "curve" ({"traits": "ZeroYield" or "Discount", "calendar", "dayCounter"}, the
 curve built on 0 settlement days), "helpers" (a list of {"kind": "IborIbor", "OvernightIbor" or "OvernightOvernight",

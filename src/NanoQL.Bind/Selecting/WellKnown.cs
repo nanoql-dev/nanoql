@@ -106,8 +106,8 @@ internal sealed class WellKnown
     public bool IsGenerator(Type t) => Rng.IsAssignableFrom(t) || Rsg.IsAssignableFrom(t);
 
     /// <summary>
-    /// A generator class of the inputs that derives a closed generator construction and has a public constructor, so its
-    /// snapshot can stand for the construction (B2R6: <c>MersenneTwisterUniformRsg</c> for
+    /// A generator class of the inputs that derives a closed generator construction and has a public constructor, so
+    /// its snapshot can stand for the construction (<c>MersenneTwisterUniformRsg</c> for
     /// <c>RandomSequenceGenerator&lt;MersenneTwisterUniformRng&gt;</c>); null where none does.
     /// </summary>
     /// <param name="t">The closed construction.</param>

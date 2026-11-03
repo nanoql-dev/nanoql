@@ -21,10 +21,10 @@ namespace NanoQL.Methods;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A working type (the S-eq plan's SEQR1): <see cref="SetTime"/> rewrites the operator's bands in place, through
-/// buffers it holds, by QuantLib's arithmetic in QuantLib's order, so a time step allocates nothing where QuantLib
-/// builds new bands and arrays. The forward rates come from the curves' compound factors as QuantLib's
-/// <c>forwardRate</c> computes them, without building the rate object.
+/// A working type: <see cref="SetTime"/> rewrites the operator's bands in place, through buffers it holds, by
+/// QuantLib's arithmetic in QuantLib's order, so a time step allocates nothing where QuantLib builds new bands and
+/// arrays. The forward rates come from the curves' compound factors as QuantLib's <c>forwardRate</c> computes them,
+/// without building the rate object.
 /// </para>
 /// <para>
 /// The finite-difference engine's times are the risk-free curve's, measured from its reference date in its day counter
@@ -40,8 +40,7 @@ namespace NanoQL.Methods;
 /// time, the local volatility at the step's midpoint scaled to that time. Between Actual/N day counters the instants
 /// are exact, a reference date's offset a constant shift; on others a time is read through its date, linear within the
 /// day. Where no structure is dated before the risk-free curve, the times are its own, and a structure that shares its
-/// day counter and reference date is read as QuantLib reads it. A documented divergence (the S-eq plan's rulings of
-/// 2026-10-20 and 2026-10-21, under R8).
+/// day counter and reference date is read as QuantLib reads it. A documented divergence.
 /// </para>
 /// </remarks>
 [WorkingType]
@@ -95,8 +94,8 @@ public sealed class FdmBlackScholesOp : FdmLinearOpComposite
     {
     }
 
-    // The operator on a clock given, the basket engines' across their processes (the S-exo plan's ED10), or on the
-    // process's own (Clock) where none is given.
+    // The operator on a clock given, the basket engines' across their processes, or on the process's own (Clock) where
+    // none is given.
     internal FdmBlackScholesOp(
         FdmMesher mesher,
         GeneralizedBlackScholesProcess bsProcess,
@@ -273,8 +272,8 @@ public sealed class FdmBlackScholesOp : FdmLinearOpComposite
     /// the step conditions and the escrowed dividend adjustment run on. Its day counter is the risk-free curve's and
     /// its reference date the earliest of the structures the engine reads, the process's curves and volatilities and
     /// the quanto helper's, so the days before a later-dated structure's date are time on the grid, each structure
-    /// accruing nothing before its own date (the S-eq plan's rulings of 2026-10-21). Where no structure is dated before
-    /// the risk-free curve, the clock is the risk-free curve itself, whose times are the process's.
+    /// accruing nothing before its own date. Where no structure is dated before the risk-free curve, the clock is the
+    /// risk-free curve itself, whose times are the process's.
     /// </summary>
     /// <remarks>
     /// A solver assembled from these types, as QuantLib's other finite-difference engines assemble theirs, takes its
@@ -305,10 +304,10 @@ public sealed class FdmBlackScholesOp : FdmLinearOpComposite
         return origin == rTS.ReferenceDate ? rTS : new FlatForward(origin, 0.0, rTS.DayCounter);
     }
 
-    // The clock of an engine reading several Black-Scholes processes (the S-exo plan's ER5 (i), ED10): Clock's form
-    // over all of them, the earliest reference date of every process's curves, volatilities and local volatility, on
-    // the first process's risk-free day counter; the first process's risk-free curve itself where none is dated
-    // before it, so a market on one clock keeps QuantLib's bits.
+    // The clock of an engine reading several Black-Scholes processes: Clock's form over all of them, the earliest
+    // reference date of every process's curves, volatilities and local volatility, on the first process's risk-free day
+    // counter; the first process's risk-free curve itself where none is dated before it, so a market on one clock keeps
+    // QuantLib's bits.
     internal static TermStructure ClockAcross(IReadOnlyList<GeneralizedBlackScholesProcess> processes)
     {
         YieldTermStructure rTS = processes[0].RiskFreeRate;

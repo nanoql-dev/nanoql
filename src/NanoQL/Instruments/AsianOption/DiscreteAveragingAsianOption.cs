@@ -22,14 +22,14 @@ namespace NanoQL.Instruments;
 /// Immutable. Two constructors, as in QuantLib: one taking the running sum or product of the past fixings and their
 /// number beside the future fixing dates; one taking every fixing date with the past fixings' values, which an engine
 /// splits by the evaluation context's date, the dates before it past (QuantLib's <c>setupArguments</c> on its global
-/// evaluation date; the S-bar plan's SD18). Both sort their fixing dates, a stable sort, where QuantLib's second
-/// constructor keeps the caller's order and its engines then read unsorted dates (BR5 (xl),
-/// <c>Divergences/AsianUnsortedDatesTests.cs</c>); the past values are taken by count, as QuantLib takes them.
+/// evaluation date). Both sort their fixing dates, a stable sort, where QuantLib's second constructor keeps the
+/// caller's order and its engines then read unsorted dates (<c>Divergences/AsianUnsortedDatesTests.cs</c>); the past
+/// values are taken by count, as QuantLib takes them.
 /// </para>
 /// <para>
 /// A geometric option's past fixings are carried as QuantLib's running product and, beside it, their log-sum, which the
 /// geometric engines read where the product leaves double's range: 120 past fixings at 1,000 multiply to ∞, where
-/// QuantLib's analytic engine prices ∞ (BR5 (xli), <c>Divergences/GeometricAsianProductRangeTests.cs</c>).
+/// QuantLib's analytic engine prices ∞ (<c>Divergences/GeometricAsianProductRangeTests.cs</c>).
 /// </para>
 /// </remarks>
 public sealed class DiscreteAveragingAsianOption : OneAssetOption
@@ -191,7 +191,7 @@ public sealed class DiscreteAveragingAsianOption : OneAssetOption
         }
         else if (!(runningAccumulator > 0.0 || runningLogSum > double.NegativeInfinity))
         {
-            // a product that underflows past positive fixings is still positive: its log-sum reads it (BR5 (xli))
+            // a product that underflows past positive fixings is still positive: its log-sum reads it
             throw new NanoQLException(
                 $"positive running product required: {runningAccumulator.ToString(CultureInfo.InvariantCulture)} not allowed");
         }

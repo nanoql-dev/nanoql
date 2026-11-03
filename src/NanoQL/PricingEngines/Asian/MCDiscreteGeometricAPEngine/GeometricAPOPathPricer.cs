@@ -22,11 +22,11 @@ namespace NanoQL.PricingEngines;
 /// product flushed into the average, as its root, where the next factor would overflow it.
 /// </para>
 /// <para>
-/// Documented divergences (the S-bar plan's BR5). The product is flushed as well where the next factor would take it
-/// below double's normal range, where QuantLib's underflows: 252 daily fixings at spot 0.01 price 0 in QuantLib ((xli),
-/// <c>Divergences/GeometricAsianProductRangeTests.cs</c>); the engine's route takes the past fixings' log where their
-/// product isn't finite and normal ((xli)), and weighs each node by the number of fixings on its time ((xxviii),
-/// <c>Divergences/AsianDuplicateFixingsTests.cs</c>). QuantLib's arithmetic and bits wherever the product stays in
+/// Documented divergences. The product is flushed as well where the next factor would take it below double's normal
+/// range, where QuantLib's underflows: 252 daily fixings at spot 0.01 price 0 in QuantLib
+/// (<c>Divergences/GeometricAsianProductRangeTests.cs</c>); the engine's route takes the past fixings' log where their
+/// product isn't finite and normal, and weighs each node by the number of fixings on its time
+/// (<c>Divergences/AsianDuplicateFixingsTests.cs</c>). QuantLib's arithmetic and bits wherever the product stays in
 /// range and each time holds one fixing.
 /// </para>
 /// </remarks>
@@ -52,8 +52,8 @@ public sealed class GeometricAPOPathPricer : PathPricer<MonteCarloPath>
     {
     }
 
-    // the engine's route: the past fixings' log where their product isn't finite and normal, NaN for the product
-    // (BR5 (xli)), and the number of fixings at each node of the grid (BR5 (xxviii))
+    // the engine's route: the past fixings' log where their product isn't finite and normal, NaN for the product, and
+    // the number of fixings at each node of the grid
     internal GeometricAPOPathPricer(
         OptionType type,
         double strike,

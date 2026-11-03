@@ -63,7 +63,7 @@ public sealed class PiecewiseFlatHazardRate : PiecewiseDefaultCurve<HazardRate, 
 
     /// <summary>
     /// A curve whose reference date is the given number of business days after the context's evaluation date:
-    /// QuantLib's settlement-days constructors (D15).
+    /// QuantLib's settlement-days constructors.
     /// </summary>
     /// <param name="settlementDays">The business days from the evaluation date to the reference date.</param>
     /// <param name="calendar">The calendar the days are counted on.</param>

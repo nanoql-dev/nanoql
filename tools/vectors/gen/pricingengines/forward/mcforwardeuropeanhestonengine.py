@@ -1,11 +1,11 @@
 # SPDX-FileCopyrightText: 2026 The nanoql Authors
 # SPDX-License-Identifier: Apache-2.0
 """Vectors for QuantLib's MCForwardEuropeanHestonEngine (ql/pricingengines/forward/mcforwardeuropeanhestonengine.hpp),
-on the evaluation date 15 October 2026: forward-start calls and puts at moneyness 0.9, 1 and 1.1, reset in three
-months and expiring in a year, or reset in six and expiring in two, on Heston processes (S-hes's equity parameters with
-the quadratic-exponential martingale and full truncation schemes, flat and zero curves), priced by pseudo-random
-numbers (with and without the control variate, antithetic, steps per year) and by low-discrepancy numbers, over a
-fixed number of samples: the NPV, and the error estimate where the numbers give one.
+on the evaluation date 15 October 2026: forward-start calls and puts at moneyness 0.9, 1 and 1.1, reset in three months
+and expiring in a year, or reset in six and expiring in two, on Heston processes (the Heston generators' equity
+parameters with the quadratic-exponential martingale and full truncation schemes, flat and zero curves), priced by
+pseudo-random numbers (with and without the control variate, antithetic, steps per year) and by low-discrepancy
+numbers, over a fixed number of samples: the NPV, and the error estimate where the numbers give one.
 
 A case holds forwardengine.py's option spec, a process spec of
 tools/vectors/gen/pricingengines/vanilla/mceuropeanhestonengine.py and an engine {"traits" ("PseudoRandom" |

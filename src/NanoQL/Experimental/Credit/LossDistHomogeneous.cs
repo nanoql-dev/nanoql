@@ -17,8 +17,8 @@ namespace NanoQL.Experimental;
 /// </summary>
 /// <param name="nBuckets">The number of buckets.</param>
 /// <param name="maximum">The largest loss.</param>
-/// <remarks>Immutable (the S-xcr plan's XR5): <see cref="EvaluateWithDetails"/> returns QuantLib's mutable by-products
-/// with the distribution.</remarks>
+/// <remarks>Immutable: <see cref="EvaluateWithDetails"/> returns QuantLib's mutable by-products with the
+/// distribution.</remarks>
 [Experimental("NQL0001")]
 public sealed class LossDistHomogeneous(int nBuckets, double maximum) : LossDist
 {

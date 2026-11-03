@@ -286,9 +286,9 @@ public class GsrTests
         }
     }
 
-    // Adapted: the quote's change (line 751) is a model, an index and a swaption engine built afresh on a 4% curve,
-    // the swap's fixed rate the forward on the 3% curve as before, since a quote is a value and a model doesn't observe
-    // its curve (master plan §2's quote and observer rows); the unused Hull-White model (line 726) isn't built.
+    // Adapted: the quote's change (line 751) is a model, an index and a swaption engine built afresh on a 4% curve, the
+    // swap's fixed rate the forward on the 3% curve as before, since a quote is a value and a model doesn't observe its
+    // curve (the playbook's quote and observer rows); the unused Hull-White model (line 726) isn't built.
     [Fact]
     public void TestGsrModelQuoteUpdate()
     {

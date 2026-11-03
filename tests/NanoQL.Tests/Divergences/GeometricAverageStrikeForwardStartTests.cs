@@ -12,14 +12,13 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The geometric average-strike engine on a forward-starting average (the S-bar plan's BR5 (xxxiii), fixed under R8).
-/// QuantLib measures the fixing times from the first fixing (<c>analytic_discr_geom_av_strike.cpp:57-101</c>), so it
-/// prices a forward-starting average as one starting today and misses e^(−q t₁): on spot 100, q 3%, r 6%, σ 20%
-/// (Act/360), QuantLib's own case, a call on ten fixings every 36 days from 36 days on, exercised at the last, prices
-/// 4.971092526326882, the value of the same average started today (the S-bar run's <c>c3_div_ql_a.py</c>; QuantLib's
-/// test expects 4.97109). nanoql measures every time from the evaluation date, in BR4 (a)'s exact form, and prices
-/// 4.956201596311162. Checks: the forward start's value e^(−q t₁) times the value today on a flat market, and an exact
-/// Monte Carlo.
+/// The geometric average-strike engine on a forward-starting average (fixed). QuantLib measures the fixing times from
+/// the first fixing (<c>analytic_discr_geom_av_strike.cpp:57-101</c>), so it prices a forward-starting average as one
+/// starting today and misses e^(−q t₁): on spot 100, q 3%, r 6%, σ 20% (Act/360), QuantLib's own case, a call on ten
+/// fixings every 36 days from 36 days on, exercised at the last, prices 4.971092526326882, the value of the same
+/// average started today (QuantLib's test expects 4.97109). nanoql measures every time from the evaluation date, in the
+/// exact form, and prices 4.956201596311162. Checks: the forward start's value e^(−q t₁) times the value today on a
+/// flat market, and an exact Monte Carlo.
 /// </summary>
 public class GeometricAverageStrikeForwardStartTests
 {

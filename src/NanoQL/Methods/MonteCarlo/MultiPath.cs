@@ -11,7 +11,7 @@ namespace NanoQL.Methods;
 
 /// <summary>Correlated multiple asset paths: <c>multiPath[j]</c> is the path followed by the j-th asset.</summary>
 /// <remarks>
-/// A <see cref="MultiPathGenerator{TGsg}"/>'s sample is a view of its own paths, valid until its next draw (S2R2); a
+/// A <see cref="MultiPathGenerator{TGsg}"/>'s sample is a view of its own paths, valid until its next draw; a
 /// multi-path built from paths copies them, as QuantLib's copies its vector.
 /// </remarks>
 public sealed class MultiPath

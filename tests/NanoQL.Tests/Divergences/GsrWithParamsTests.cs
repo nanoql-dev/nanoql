@@ -21,7 +21,7 @@ namespace NanoQL.Tests.Divergences;
 /// 0.04929346290668454; set from 0.05 to 0, NaN. nanoql's <c>WithParams</c> builds a new core from the new
 /// reversions. QuantLib's check: the model built at the same parameters, which QuantLib's own second <c>setParams</c>
 /// with the same values gives too. nanoql's prices here differ from QuantLib's in their last places only by the C
-/// runtime's <c>erf</c> (the S-g1d plan's G1R3).
+/// runtime's <c>erf</c>.
 /// </summary>
 public class GsrWithParamsTests
 {

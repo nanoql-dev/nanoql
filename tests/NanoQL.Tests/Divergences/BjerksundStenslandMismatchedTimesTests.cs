@@ -10,13 +10,13 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// Bjerksund-Stensland's Greeks on structures dated differently (the S-van plan's VR4 (viii)). QuantLib's American
-/// branch takes the dividend, risk-free and volatility times from the risk-free curve's reference date
+/// Bjerksund-Stensland's Greeks on structures dated differently. QuantLib's American branch takes the dividend,
+/// risk-free and volatility times from the risk-free curve's reference date
 /// (<c>bjerksundstenslandengine.cpp:248-251</c>, <c>:320</c>, <c>:366</c>), so where a curve settles T+2 the rate
 /// sensitivity of the other runs over the wrong time. nanoql takes each structure's time from its own reference date.
 /// QuantLib's check: its own NPVs bumped by ±1e-6 in the rate, which nanoql's rho and dividend rho match to the
-/// difference's own accuracy [executed on the wheel: <c>scratchpad\c2\oracle_c2.py</c>, section bjsdates]. Where the
-/// structures share their dates, QuantLib's bits (the engine's vectors).
+/// difference's own accuracy (QuantLib-Python 1.44). Where the structures share their dates, QuantLib's bits (the
+/// engine's vectors).
 /// </summary>
 public class BjerksundStenslandMismatchedTimesTests
 {

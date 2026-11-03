@@ -11,18 +11,18 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// A digital coupon's ex-coupon date and fixing convention (the S-cms plan's CMR5 (ix)): QuantLib's
-/// <c>DigitalCoupon</c> builds its floating coupon from twelve of the underlying's terms but not its ex-coupon date or
-/// its fixing convention, which take their defaults, no date and Preceding (<c>digitalcoupon.cpp:39-50</c>,
-/// <c>floatingratecoupon.hpp:60-61</c>), so a digital coupon on an underlying that goes ex-coupon accrues to its
-/// payment as if it didn't, and one on an underlying whose fixing convention isn't Preceding can fix on another date
-/// than its underlying. nanoql's keeps both of the underlying's. QuantLib's check: the underlying coupon's ex-coupon
-/// date and accrued amounts, which a digital coupon with neither option reproduces (the wheel): a 6-month Euribor
-/// coupon from 19 January 2026, paid 20 July 2026 and ex-coupon on 13 July, on the harness vectors' 3.1% curve and 20%
-/// lognormal volatility, accrues 14,892.889329889716 on 1e6 by 12 July and −599.1392259151036 on 13 July; and the
-/// capped coupon on the same underlying, which passes both terms (<c>capflooredcoupon.cpp:30-43</c>): on a coupon from
-/// Saturday 18 January 2025 with 0 fixing days and a Modified Following fixing convention, QuantLib's digital coupon
-/// fixes on 17 January where its underlying fixes on 20 January (the C++ harness).
+/// A digital coupon's ex-coupon date and fixing convention: QuantLib's <c>DigitalCoupon</c> builds its floating coupon
+/// from twelve of the underlying's terms but not its ex-coupon date or its fixing convention, which take their
+/// defaults, no date and Preceding (<c>digitalcoupon.cpp:39-50</c>, <c>floatingratecoupon.hpp:60-61</c>), so a digital
+/// coupon on an underlying that goes ex-coupon accrues to its payment as if it didn't, and one on an underlying whose
+/// fixing convention isn't Preceding can fix on another date than its underlying. nanoql's keeps both of the
+/// underlying's. QuantLib's check: the underlying coupon's ex-coupon date and accrued amounts, which a digital coupon
+/// with neither option reproduces (the wheel): a 6-month Euribor coupon from 19 January 2026, paid 20 July 2026 and
+/// ex-coupon on 13 July, on the harness vectors' 3.1% curve and 20% lognormal volatility, accrues 14,892.889329889716
+/// on 1e6 by 12 July and −599.1392259151036 on 13 July; and the capped coupon on the same underlying, which passes both
+/// terms (<c>capflooredcoupon.cpp:30-43</c>): on a coupon from Saturday 18 January 2025 with 0 fixing days and a
+/// Modified Following fixing convention, QuantLib's digital coupon fixes on 17 January where its underlying fixes on 20
+/// January (the C++ harness).
 /// </summary>
 public class DigitalCouponExCouponTests
 {

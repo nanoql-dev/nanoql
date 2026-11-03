@@ -12,8 +12,7 @@ namespace NanoQL.Tests.Conventions;
 /// <summary>
 /// The credit portfolio facts' shared inputs: QuantLib's n-th-to-default test market (31 August 2006, flat hazard
 /// curves on Actual/365, a 5% continuous discount curve, a five-year quarterly schedule from 1 September 2006) and the
-/// pools, baskets and constant-loss models the probes build on it (the S-xcr run's
-/// <c>scratchpad\probes\c1_facts.cpp</c>, the planner's <c>xp_basket.cpp</c>, the plan review's <c>rv_basket.cpp</c>).
+/// pools, baskets and constant-loss models the probes build on it.
 /// </summary>
 internal static class CreditPortfolioBuilders
 {

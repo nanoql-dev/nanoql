@@ -12,9 +12,10 @@ namespace NanoQL.Tests.Vectors;
 /// The calibration vectors, <c>tests/vectors/models/model.json</c>: Hull-White and Vasicek calibrated to swaption
 /// helpers with Levenberg-Marquardt and Simplex, with weights, fixed parameters and added constraints; each with its
 /// parameters, end criterion, problem values and number of function evaluations, the helpers' errors under the
-/// calibrated model, and the cost at its parameters and others; and the refusals of <see cref="CalibratedModelExtensions.Calibrate"/>
-/// and <see cref="CalibratedModelExtensions.Value"/>. A calibration's outputs are those the master plan's S7R6 filter
-/// keeps, each list element its own output ("params[0]"), so each case is compared on the outputs it holds.
+/// calibrated model, and the cost at its parameters and others; and the refusals of
+/// <see cref="CalibratedModelExtensions.Calibrate"/> and <see cref="CalibratedModelExtensions.Value"/>. A calibration's
+/// outputs are those the stability filter keeps, each list element its own output ("params[0]"), so each case is
+/// compared on the outputs it holds.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class ModelVectorTests

@@ -15,14 +15,14 @@ namespace NanoQL.Models;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A working type (the S-mm plan's MR1 (ii)): QuantLib's mutable scratch is the calculator's own, its per-call vector
-/// of annuities among it (MR1 (v)), so it is owned by one computation and isn't thread-safe. The drifts' size is
-/// checked at every computation, QuantLib's extra-safety check (SD8).
+/// A working type: QuantLib's mutable scratch is the calculator's own, its per-call vector of annuities among it, so it
+/// is owned by one computation and isn't thread-safe. The drifts' size is checked at every computation, QuantLib's
+/// extra-safety check.
 /// </para>
 /// <para>
 /// QuantLib reads the curve state's annuities from the first rate, so a state set from the step's first alive rate
 /// on, all the drifts read, is refused ("invalid index"); here they are read from the first alive rate, which gives
-/// QuantLib's drifts bit for bit on a state set from the first rate (MR3 (xvi); <c>Divergences/SmmDriftAliveTests.cs</c>).
+/// QuantLib's drifts bit for bit on a state set from the first rate (<c>Divergences/SmmDriftAliveTests.cs</c>).
 /// </para>
 /// </remarks>
 [WorkingType]

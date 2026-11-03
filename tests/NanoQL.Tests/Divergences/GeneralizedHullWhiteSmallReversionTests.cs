@@ -9,13 +9,12 @@ namespace NanoQL.Tests.Divergences;
 
 /// <summary>
 /// Generalized Hull-White's analytical fitting parameter and its Ornstein-Uhlenbeck process's variance at small and
-/// negative reversion, in their cancellation-free forms through expm1 below |a| 1e-2 (the S-xrt plan's XRR5 (xix), fixed
-/// under R8). QuantLib cuts both at a &lt; √ε to the zero-reversion forms σt and σ²Δt, which jump there and cancel just
-/// above, and which every negative reversion takes. On QuantLib 1.44 (the S-xrt planner's <c>xp_c3.cpp</c>: σ 0.01, a
-/// flat 3% curve, φ at 5 years, the variance over a year) the variance at −0.05 is 1e-4, 4.92e-2 low, and φ(5)
-/// 0.0312500000015574, 3.63e-4 low; at 1.4e-8 the variance is 1e-4, 1.4e-8 relative off; at 2e-8 4.47e-11. nanoql's
-/// values meet 40-digit references (mpmath) to a few ulps at every reversion from −0.1 to 0.1, QuantLib's formula from
-/// |a| 1e-2.
+/// negative reversion, in their cancellation-free forms through expm1 below |a| 1e-2 (fixed). QuantLib cuts both at a
+/// &lt; √ε to the zero-reversion forms σt and σ²Δt, which jump there and cancel just above, and which every negative
+/// reversion takes. On QuantLib 1.44 (σ 0.01, a flat 3% curve, φ at 5 years, the variance over a year) the variance at
+/// −0.05 is 1e-4, 4.92e-2 low, and φ(5) 0.0312500000015574, 3.63e-4 low; at 1.4e-8 the variance is 1e-4, 1.4e-8
+/// relative off; at 2e-8 4.47e-11. nanoql's values meet 40-digit references (mpmath) to a few ulps at every reversion
+/// from −0.1 to 0.1, QuantLib's formula from |a| 1e-2.
 /// </summary>
 public class GeneralizedHullWhiteSmallReversionTests
 {

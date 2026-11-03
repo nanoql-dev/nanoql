@@ -12,13 +12,13 @@ tagged run, and for --all the rest of the suite's, the tests the tagged run leav
 
     dotnet test --solution NanoQL.slnx -c Release --filter-trait "Oracle=QuantLib" --coverage
         --coverage-output-format cobertura --coverage-output coverage.cobertura.xml
-        --coverage-settings tests\\NanoQL.Tests\\CodeCoverage.xml --results-directory TestResults\\G7
+        --coverage-settings tests\\NanoQL.Tests\\CodeCoverage.xml --results-directory TestResults\\coverage
     dotnet test --solution NanoQL.slnx -c Release --filter-not-trait "Oracle=QuantLib" --coverage
         --coverage-output-format cobertura --coverage-output coverage.cobertura.xml
-        --coverage-settings tests\\NanoQL.Tests\\CodeCoverage.xml --results-directory TestResults\\G7rest
+        --coverage-settings tests\\NanoQL.Tests\\CodeCoverage.xml --results-directory TestResults\\coverage-rest
 
 With --qlnet, the second tagged run's folder, the QLNet oracle's (run A', the same command with
---filter-trait "Oracle=QLNet" into TestResults\\G7qlnet): a type whose file's Upstream line names QLNet passes on that
+--filter-trait "Oracle=QLNet" into TestResults\\coverage-qlnet): a type whose file's Upstream line names QLNet passes on that
 run's covered lines alone, and every other type on the first run's, so each extensions type passes against the library
 it comes from. A QLNet type the commit changes needs --qlnet.
 
@@ -33,23 +33,22 @@ match those files by path, so nested, file and compiler-generated classes count 
 
 Red when: the folder (or --qlnet's) doesn't hold exactly one report; the commit ports a public type and the report
 doesn't list the NanoQL package (or its extensions type's, NanoQL.Extensions); a QLNet type of the commit and no
---qlnet; a listed type has no covered line; a ported file carries ExcludeFromCodeCoverage; a type whose only
-executable lines are its equality members lacks a "// Equality-tested:" line naming an existing test file; or, with
---all, its folder doesn't hold exactly one report, or a NanoQL class of that report resolves to no file, which would
-leave every member unmatched and the line at 0.
-A type with no covered line but an "// Own-tested:" line whose first word names an existing test file (from the
-repository root or tests/NanoQL.Tests/) is listed apart instead: a type whose every executable line is nanoql's own,
-which no QuantLib-checked test can reach, such as a refusal of what QuantLib can't compile (the S-xcr run's stop 4).
-Listed apart: the types the report doesn't list, with their kinds, the equality-only types and the own-tested ones. A
-constructor the source doesn't declare (field and property initialisers, a primary constructor's parameters) counts
-as no code, as the coverage engines don't agree on listing one.
+--qlnet; a listed type has no covered line; a ported file carries ExcludeFromCodeCoverage; a type whose only executable
+lines are its equality members lacks a "// Equality-tested:" line naming an existing test file; or, with --all, its
+folder doesn't hold exactly one report, or a NanoQL class of that report resolves to no file, which would leave every
+member unmatched and the line at 0. A type with no covered line but an "// Own-tested:" line whose first word names an
+existing test file (from the repository root or tests/NanoQL.Tests/) is listed apart instead: a type whose every
+executable line is nanoql's own, which no QuantLib-checked test can reach, such as a refusal of what QuantLib can't
+compile. Listed apart: the types the report doesn't list, with their kinds, the equality-only types and the own-tested
+ones. A constructor the source doesn't declare (field and property initialisers, a primary constructor's parameters)
+counts as no code, as the coverage engines don't agree on listing one.
 
-With --all it also prints, without failing, the members no test reaches: the public members of the same files, or
-with --since of the files changed since that commit (a slot's, at its last commit), whose lines no report hits.
-A member is a report method of a class the compiler didn't generate;
-a lambda, iterator or local function belongs to the member whose source span holds it, and an iterator or async
-method, whose code is all in its generated class, is named by that class. A member counts as public when its
-declaration, and every type around it, is declared public; a file type is not.
+With --all it also prints, without failing, the members no test reaches: the public members of the same files, or with
+--since of the files changed since that commit (a porting step's, at its last commit), whose lines no report hits. A
+member is a report method of a class the compiler didn't generate; a lambda, iterator or local function belongs to the
+member whose source span holds it, and an iterator or async method, whose code is all in its generated class, is named
+by that class. A member counts as public when its declaration, and every type around it, is declared public; a file type
+is not.
 """
 import bisect
 import glob

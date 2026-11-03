@@ -9,8 +9,7 @@ date to past the last date (where QuantLib holds the last date's volatility flat
 own, and the forward variances between consecutive dates, extrapolating. Then QuantLib's refusals: a strike's falling
 variance, a first date on the reference date, dates out of order, and fewer volatilities than dates times strikes.
 
-No output is left out (the S-xeq plan's §2.8): the surface has no departure. Nothing is fitted, so no output is
-filtered.
+No output is left out: the surface has no departure. Nothing is fitted, so no output is filtered.
 
 The surface is tools/cxx/src/experimental/volatility/extendedblackvariancesurface.cpp's, its volatilities in QuantLib's
 order, strike by strike, each strike's at every date. Read back by

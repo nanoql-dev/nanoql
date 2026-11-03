@@ -15,7 +15,7 @@ namespace NanoQL.Experimental;
 /// Immutable. QuantLib's empty <c>PaymentTerm()</c> is a <c>PaymentTerm?</c> null. QuantLib keeps a process-wide
 /// registry keyed by name, so a second construction with a known name returns the first construction's event, offset
 /// and calendar whatever it was given (<c>paymentterm.cpp:27-40</c>). There is no registry here, so every term holds the
-/// data it is given, a documented divergence (<c>Divergences/CommodityRegistryTests.cs</c>; the S-xrt plan's XRR1).
+/// data it is given, a documented divergence (<c>Divergences/CommodityRegistryTests.cs</c>).
 /// </para>
 /// <para>
 /// Two terms are equal when their names are, compared ordinally, as QuantLib's <c>operator==</c> compares them

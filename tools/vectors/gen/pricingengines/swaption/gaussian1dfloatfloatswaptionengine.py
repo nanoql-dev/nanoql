@@ -15,12 +15,11 @@ takes with their coupons, Bermudan; caps and floors on Euribor 3M, Bermudan; Eur
 CMS 10Y capped against Euribor 6M, European; an exercise on the evaluation date, one past, and a Bermudan whose first
 exercise has passed. NPVs and the underlying's value are compared at the largest nominal, the probabilities as they are.
 
-Left out, each a documented divergence: a rebate (G1R6 (v), FloatFloatRebateTests); a discount or forwarding curve on
-another clock (G1R6 (xvi), Gaussian1dMismatchedTimesTests); and flat payoff extrapolation (G1R6 (xxi),
-FlatPayoffExtrapolationTests). The wheel's Gaussian1dFloatFloatSwaptionEngine(model, integrationPoints, stddevs,
-extrapolatePayoff, flatPayoffExtrapolation, oas, discountCurve, includeTodaysExercise, probabilities) is the C++
-constructor's proxy, its underlying value and probabilities read by the swaption's underlyingValue() and
-probabilities(). Read back by
+Left out, each a documented divergence: a rebate (FloatFloatRebateTests); a discount or forwarding curve on another
+clock (Gaussian1dMismatchedTimesTests); and flat payoff extrapolation (FlatPayoffExtrapolationTests). The wheel's
+Gaussian1dFloatFloatSwaptionEngine(model, integrationPoints, stddevs, extrapolatePayoff, flatPayoffExtrapolation, oas,
+discountCurve, includeTodaysExercise, probabilities) is the C++ constructor's proxy, its underlying value and
+probabilities read by the swaption's underlyingValue() and probabilities(). Read back by
 tests/NanoQL.Tests/Vectors/PricingEngines/Gaussian1dFloatFloatSwaptionEngineVectorTests.cs."""
 import importlib.util
 import os

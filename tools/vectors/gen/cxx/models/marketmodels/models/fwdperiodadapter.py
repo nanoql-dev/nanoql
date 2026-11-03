@@ -7,9 +7,9 @@ The adapter on FlatVol models (marketmodelspec.hpp) of twelve semi-annual and ni
 correlation, the default evolution times, full and reduced factors, displaced 1% and on rising displacements: in periods
 of 2 at offsets 0 and 1, of 3 at offsets 0 and 2, and of 4 at offset 1, with one displacement given and with one per
 long rate. Its reads: the long initial rates and displacements, the evolution's rate times, evolution times and first
-alive rates, and its counts. Left out: the pseudo-roots, on QuantLib's Y matrix (the S-mm plan's MR3 (i);
-tests/NanoQL.Tests/Divergences/ForwardForwardMappingsTests.cs), and the displacements' default with none given (MR3
-(ii); tests/NanoQL.Tests/Divergences/FwdPeriodAdapterTests.cs). Throws: a period of 0, an offset not below the period, a
+alive rates, and its counts. Left out: the pseudo-roots, on QuantLib's Y matrix
+(tests/NanoQL.Tests/Divergences/ForwardForwardMappingsTests.cs), and the displacements' default with none given
+(tests/NanoQL.Tests/Divergences/FwdPeriodAdapterTests.cs). Throws: a period of 0, an offset not below the period, a
 wrong count of displacements, a long rate time that isn't an evolution time.
 
 The harness unit is tools/cxx/src/models/marketmodels/models/adapters.cpp. Read back by

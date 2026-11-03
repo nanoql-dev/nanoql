@@ -6,13 +6,13 @@ doesn't expose, each output computed by the C++ harness: whole evolutions, step 
 lognormalfwdratepc.py's FlatVol models (six semi-annual and five irregular rates, an exponential correlation, the
 default evolution times, full and reduced factors, undisplaced and displaced 1% at full factors) on a SquareRootAndersen
 of squarerootandersen.py's kind: mean level 1, reversion speed 4000, its evolution times 1 then 2e-4 more a step, one
-per model step, so its first step's e^(-k dt) underflows to 0, QuantLib's (the S-mm plan's MR3 (xvii)), and its later
-steps' k dt are 0.8 over the sub-steps; vol of variance 25, v0 1.44, weights 0.5 and 0.5, cut point 1.5; one and two
-sub-steps. The process draws from the first variate (0), the second (1) and past the forwards' factors (clamped to
-them); the variate step is 1, which QuantLib doesn't read. On the Mersenne-twister generator (seed 42) and Sobol's
-(diagonal ordering, seed 1234), the terminal and money-market measures, from step 0 (the one QuantLib supports) with
-the model's initial state and a set one. Each of two paths: its weight and each step's weight, current step, the curve
-state's forwards, discount ratios to the last bond and coterminal swap rates. Throws: incompatible numeraires.
+per model step, so its first step's e^(-k dt) underflows to 0, QuantLib's, and its later steps' k dt are 0.8 over the
+sub-steps; vol of variance 25, v0 1.44, weights 0.5 and 0.5, cut point 1.5; one and two sub-steps. The process draws
+from the first variate (0), the second (1) and past the forwards' factors (clamped to them); the variate step is 1,
+which QuantLib doesn't read. On the Mersenne-twister generator (seed 42) and Sobol's (diagonal ordering, seed 1234), the
+terminal and money-market measures, from step 0 (the one QuantLib supports) with the model's initial state and a set
+one. Each of two paths: its weight and each step's weight, current step, the curve state's forwards, discount ratios to
+the last bond and coterminal swap rates. Throws: incompatible numeraires.
 
 The harness call is tools/cxx/src/models/marketmodels/evolvers/evolvers.cpp's "SVDDFwdRatePc.evolve". Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Models/MarketModels/SVDDFwdRatePcCxxVectorTests.cs."""

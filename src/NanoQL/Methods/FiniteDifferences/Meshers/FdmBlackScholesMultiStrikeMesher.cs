@@ -19,8 +19,7 @@ namespace NanoQL.Methods;
 /// Immutable. QuantLib reads the curves and the volatility at the risk-free curve's times
 /// (<c>fdmblackscholesmultistrikemesher.cpp:45-62</c>); here each at the instants its maturity denotes on
 /// <see cref="FdmBlackScholesOp.Clock"/>, on its own clock, as <see cref="FdmBlackScholesMesher"/> reads them, and
-/// QuantLib's reads where they share the risk-free curve's day counter and reference date (the S-hes plan's
-/// HR7 (ii)).
+/// QuantLib's reads where they share the risk-free curve's day counter and reference date.
 /// </remarks>
 public sealed class FdmBlackScholesMultiStrikeMesher : Fdm1dMesher
 {
@@ -53,8 +52,8 @@ public sealed class FdmBlackScholesMultiStrikeMesher : Fdm1dMesher
     {
     }
 
-    // The finite-difference Heston engines' form (the S-hes plan's HR7 (ii)): the engine's clock given, its own and
-    // not the helper process's, whose curves QuantLib's engines bind in each other's places.
+    // The finite-difference Heston engines' form: the engine's clock given, its own and not the helper process's, whose
+    // curves QuantLib's engines bind in each other's places.
     internal FdmBlackScholesMultiStrikeMesher(
         int size,
         GeneralizedBlackScholesProcess process,

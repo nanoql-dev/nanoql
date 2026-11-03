@@ -307,8 +307,8 @@ def engine_outputs(bond, scale):
 
 
 # The effective convexity's recorded tolerance: a second difference of tree prices over bump^2, which amplifies the
-# prices' last-bit moves by about 1/bump^2; the Ornstein-Uhlenbeck variance's cancellation-free form, nanoql's by the
-# user's ruling of 2026-10-22 (the S-sr plan's SSR3 class), moves it by up to 8.2e-9 relative.
+# prices' last-bit moves by about 1/bump^2; the Ornstein-Uhlenbeck variance's cancellation-free form, nanoql's, moves it
+# by up to 8.2e-9 relative.
 CONVEXITY_TOLERANCE = 1e-7
 
 
@@ -780,7 +780,7 @@ def check_rows(out):
     for kind in ("a call on the settlement date ahead of live calls", "a put on the settlement date ahead of live puts"):
         npvs = [by_name[f"reference date / a coupon and {kind}, flag {flag}"]["NPV"] for flag in (True, False)]
         assert npvs[0] == npvs[1], npvs
-    # the spread converted on its curve argument, which doesn't price (the plan's part-B probe)
+    # the spread converted on its curve argument, which doesn't price
     assert by_name["solver / the spread converted on the engine's curve"]["OAS"] == 0.011085320535265009
     assert by_name["solver / the spread converted on a flat 8%"]["OAS"] == 0.011309258864703242
     assert by_name["solver / the spread refused after three evaluations"]["OAS"] == v.THROWS

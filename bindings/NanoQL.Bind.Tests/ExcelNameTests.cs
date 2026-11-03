@@ -10,12 +10,12 @@ using static NanoQL.Bind.Tests.ExcelSurfaces;
 namespace NanoQL.Bind.Tests;
 
 /// <summary>
-/// The Excel names (XLR1): words run together after the prefix, overloads and collisions numbered in the stated order
-/// over the whole filtered surface, one numbering for both builds and the list on or off, released names frozen.
+/// The Excel names: words run together after the prefix, overloads and collisions numbered in the stated order over the
+/// whole filtered surface, one numbering for both builds and the list on or off, released names frozen.
 /// </summary>
 public class ExcelNameTests
 {
-    /// <summary>Metadata order, not the C names': each class pinned (XLP36, XLP52).</summary>
+    /// <summary>Metadata order, not the C names': each class pinned.</summary>
     [Fact]
     public void TheStatedOrderNumbersEachGroup()
     {
@@ -36,7 +36,7 @@ public class ExcelNameTests
         Assert.Equal("nqlLinearInterpolatedSmileSectionCreate2", NameOf(x, "nql_LinearInterpolatedSmileSection_Create__Date_doubleArray_doubleArray_Optdouble_EvaluationContext_DayCounter_Linear"));
     }
 
-    /// <summary>A draws function numbers after its type's members, a bind after its members (XLR1's order), synthesized.</summary>
+    /// <summary>A draws function numbers after its type's members, a bind after its members, synthesized.</summary>
     [Fact]
     public void DrawsNumberLast()
     {
@@ -47,7 +47,8 @@ public class ExcelNameTests
         Assert.Equal("fxUserRngDraws2", names[draws]);
     }
 
-    /// <summary>XLD31: a struct's implicit default constructor withheld beside a declared maker, kept as its type's only one.</summary>
+    /// <summary>A struct's implicit default constructor withheld beside a declared maker, kept as its type's only
+    /// one.</summary>
     [Fact]
     public void AStructsDefaultConstructorBesideADeclaredMaker()
     {
@@ -57,7 +58,7 @@ public class ExcelNameTests
         Assert.Equal("nqlLinear", NameOf(x, "nql_Linear_new"));
     }
 
-    /// <summary>A constructor with no member or token in a numbered group is refused (B4-1), synthesized.</summary>
+    /// <summary>A constructor with no member or token in a numbered group is refused, synthesized.</summary>
     [Fact]
     public void ATokenlessConstructorInANumberedGroupIsRefused()
     {
@@ -69,7 +70,7 @@ public class ExcelNameTests
         Assert.Contains("no member or metadata token in the numbered group fxToke", e.Message, StringComparison.Ordinal);
     }
 
-    /// <summary>A generated name meeting the add-in's own regardless of case is refused (XLR13), synthesized.</summary>
+    /// <summary>A generated name meeting the add-in's own regardless of case is refused, synthesized.</summary>
     [Fact]
     public void ANameMeetingTheAddInsOwnIsRefused()
     {
@@ -80,7 +81,7 @@ public class ExcelNameTests
         Assert.Contains("meets the add-in's own nqlxlError", e.Message, StringComparison.Ordinal);
     }
 
-    /// <summary>One numbering: the stable build's names are the experimental build's, the list on or off (XLR1, XLP84).</summary>
+    /// <summary>One numbering: the stable build's names are the experimental build's, the list on or off.</summary>
     [Fact]
     public void OneNumberingForEveryBuild()
     {
@@ -99,7 +100,7 @@ public class ExcelNameTests
         Assert.Equal("fxSquareLabel", NameOf(Users, "fx_Square_get_Label"));
     }
 
-    /// <summary>Released names stay: an overload added to a released group takes its lowest unused number; a retired name is never reused (XLR1).</summary>
+    /// <summary>Released names stay: an overload added to a released group takes its lowest unused number; a retired name is never reused.</summary>
     [Fact]
     public void ReleasedNamesStayAndRetiredOnesAreNeverReused()
     {

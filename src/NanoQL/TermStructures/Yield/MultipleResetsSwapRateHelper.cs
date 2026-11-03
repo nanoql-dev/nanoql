@@ -14,11 +14,11 @@ namespace NanoQL.TermStructures;
 
 /// <summary>A rate helper bootstrapping from the quotes of multiple-resets swaps.</summary>
 /// <remarks>
-/// On S5's helper contract (the S-cms plan's CMD12): the helper's index is cloned without a curve, and the copy bound
-/// to a curve under construction rebuilds the swap on the index cloned on it, where QuantLib relinks its handle; a
-/// re-dated helper rebuilds the swap under the context. The implied quote is the swap's fair rate, priced on the
-/// discounting curve given or else on the curve under construction, without the settlement date's flows. The latest
-/// date is the last payment date of either leg or the end of the last fixing's period, whichever is later.
+/// On the rate helpers' contract: the helper's index is cloned without a curve, and the copy bound to a curve under
+/// construction rebuilds the swap on the index cloned on it, where QuantLib relinks its handle; a re-dated helper
+/// rebuilds the swap under the context. The implied quote is the swap's fair rate, priced on the discounting curve
+/// given or else on the curve under construction, without the settlement date's flows. The latest date is the last
+/// payment date of either leg or the end of the last fixing's period, whichever is later.
 /// </remarks>
 public sealed class MultipleResetsSwapRateHelper : RelativeDateRateHelper
 {

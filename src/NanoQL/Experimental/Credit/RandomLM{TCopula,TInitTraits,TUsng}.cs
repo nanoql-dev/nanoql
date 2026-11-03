@@ -27,26 +27,25 @@ namespace NanoQL.Experimental;
 /// <remarks>
 /// <para>
 /// The simulation runs once, when the model is bound to a basket, on the basket's live names, and is stored in the
-/// bound copy (the S-xcr plan's XR5, XR1 (b)): QuantLib's simulates lazily at its first statistic and keeps a model's
-/// paths across baskets (XR8 (viii)). The path count is required and at least 1 (QuantLib's defaults to 0, "stats will
-/// crash on div by zero, FIX ME"; XR8 (xlv)); the seed is required, in [1, 4294967295] (XR4 (a)), QuantLib's default
-/// 2863311530.
+/// bound copy: QuantLib's simulates lazily at its first statistic and keeps a model's paths across baskets. The path
+/// count is required and at least 1 (QuantLib's defaults to 0, "stats will crash on div by zero, FIX ME"); the seed is
+/// required, in [1, 4294967295], QuantLib's default 2863311530.
 /// </para>
 /// <para>
-/// A default's day counts from the evaluation date, its probability 0 before its curve's reference date (XR8 (x)):
-/// QuantLib's counts from each curve's date and reads the count from the evaluation date, so curves dated T+2 read
-/// today's statistics. Defaults count to a horizon, QuantLib's 4,050 days by default, a construction parameter here,
-/// and a statistic dated past it is refused (XR8 (xliv)): QuantLib's reads any later date, its expected loss stopping
-/// where the simulation does.
+/// A default's day counts from the evaluation date, its probability 0 before its curve's reference date: QuantLib's
+/// counts from each curve's date and reads the count from the evaluation date, so curves dated T+2 read today's
+/// statistics. Defaults count to a horizon, QuantLib's 4,050 days by default, a construction parameter here, and a
+/// statistic dated past it is refused: QuantLib's reads any later date, its expected loss stopping where the simulation
+/// does.
 /// </para>
 /// <para>
 /// The default correlation is the paths' Pearson correlation, refused where a name's frequency is 0 or 1 (0/0):
 /// QuantLib's divides the joint frequency by n − 1 and the single ones by n, so a name's correlation with itself is
-/// 1.0013 on 5,000 paths (XR8 (xxiv)). The n-th event counts every default on a day, in name order: QuantLib's keys
-/// its order by day, so two names defaulting on one day count once (<c>randomdefaultlatentmodel.hpp:270-286</c>). The
-/// percentile and the shortfall are refused where they read past the sorted losses (the percentile at a position of
-/// n, the shortfall where ⌈p·n⌉ = n, XR8 (xxix)); the percentile's interval keeps its indices within the losses, so at
-/// 0 it reads QuantLib's value without its read before the start.
+/// 1.0013 on 5,000 paths. The n-th event counts every default on a day, in name order: QuantLib's keys its order by
+/// day, so two names defaulting on one day count once (<c>randomdefaultlatentmodel.hpp:270-286</c>). The percentile and
+/// the shortfall are refused where they read past the sorted losses (the percentile at a position of n, the shortfall
+/// where ⌈p·n⌉ = n); the percentile's interval keeps its indices within the losses, so at 0 it reads QuantLib's value
+/// without its read before the start.
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]

@@ -4,10 +4,9 @@
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// <c>IntervalPrice</c> is an immutable value object (PR6.4b, the S-bar plan's BR3 (iv), SD19): <c>SetValue</c> and
-/// <c>SetValues</c> return a copy and leave the receiver unchanged, where QuantLib's change the object; two prices are
-/// equal, with equal hashes, when their four values are, and a price type outside the enum is refused with QuantLib's
-/// "Unknown price type".
+/// <c>IntervalPrice</c> is an immutable value object: <c>SetValue</c> and <c>SetValues</c> return a copy and leave the
+/// receiver unchanged, where QuantLib's change the object; two prices are equal, with equal hashes, when their four
+/// values are, and a price type outside the enum is refused with QuantLib's "Unknown price type".
 /// </summary>
 public class IntervalPriceCopyTests
 {

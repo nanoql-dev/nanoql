@@ -10,13 +10,13 @@ using static NanoQL.Tests.Divergences.Fd2dMismatchedTimesTests;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The n-dimensional finite-difference basket engine on a singular covariance. QuantLib meshes each principal
-/// direction over 1.3√λ·√T standard normal quantiles (<c>fdndimblackscholesvanillaengine.cpp:144-163</c>): an
-/// eigenvalue of 0 (a correlation of 1, a zero volatility) meshes its direction at one point, which its spline refuses
-/// ("Dimension 1 : invalid data"), and a rounding negative eigenvalue meshes NaN, while its price is continuous towards
-/// the singular case (an eigenvalue of 1e-10 prices 10.3739, its Monte Carlo engine 10.3459 ± 0.0506 at ρ = 1). nanoql
-/// floors the mesh's eigenvalue at the largest one's times machine epsilon, the operator keeping QuantLib's (the S-exo
-/// plan's ER5 (vi)): QuantLib's own value at near-singular covariances and the Monte Carlo engine are the checks.
+/// The n-dimensional finite-difference basket engine on a singular covariance. QuantLib meshes each principal direction
+/// over 1.3√λ·√T standard normal quantiles (<c>fdndimblackscholesvanillaengine.cpp:144-163</c>): an eigenvalue of 0 (a
+/// correlation of 1, a zero volatility) meshes its direction at one point, which its spline refuses ("Dimension 1 :
+/// invalid data"), and a rounding negative eigenvalue meshes NaN, while its price is continuous towards the singular
+/// case (an eigenvalue of 1e-10 prices 10.3739, its Monte Carlo engine 10.3459 ± 0.0506 at ρ = 1). nanoql floors the
+/// mesh's eigenvalue at the largest one's times machine epsilon, the operator keeping QuantLib's: QuantLib's own value
+/// at near-singular covariances and the Monte Carlo engine are the checks.
 /// </summary>
 public class FdNdimSingularCovarianceTests
 {

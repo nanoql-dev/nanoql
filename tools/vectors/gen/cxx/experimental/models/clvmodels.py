@@ -8,7 +8,7 @@ which the wheel doesn't bind, each output computed by the C++ harness (tools/cxx
   maturities, the cdf at each Y point, and the mapping at three points between and at the maturities.
 - "squareRoot" cases: the square-root kernel of QuantLib's vanilla case (θ 0.06, κ 1, σ 0.2, x₀ 0.09) collocated at
   three and six months, at Lagrange orders 3, 4 and 5 with QuantLib's bounds 1e-14 and 1 − 1e-14, where QuantLib's
-  double nodes are within R7 of the exact ones nanoql's polynomial computes (the S-xrt plan's XRR8): the same outputs.
+  double nodes are within the tolerance of the exact ones nanoql's polynomial computes: the same outputs.
 
 Read back by tests/NanoQL.Tests/Vectors/Cxx/Experimental/Models/CLVModelsCxxVectorTests.cs."""
 import os

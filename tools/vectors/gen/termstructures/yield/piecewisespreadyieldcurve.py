@@ -21,9 +21,9 @@ discount curve on the same interpolator rebuilt from the nodes over the base (th
 LogCubicSpreadDiscountCurve and LogMixedLinearCubicSpreadDiscountCurve), its extrapolation enabled. A refused value is
 {"throws": true}.
 
-Left out (the S-sr plan's SSR6 (xxi)): the rebuilt curve's reads past a base that doesn't extrapolate, where
-QuantLib's spread discount curve reads the base without the extrapolation flag and throws, and nanoql's reads it with
-the flag (tests/NanoQL.Tests/Divergences/DerivedCurveExtrapolationTests.cs).
+Left out: the rebuilt curve's reads past a base that doesn't extrapolate, where QuantLib's spread discount curve reads
+the base without the extrapolation flag and throws, and nanoql's reads it with the flag
+(tests/NanoQL.Tests/Divergences/DerivedCurveExtrapolationTests.cs).
 
 Each case's inputs hold its settings, the "base" (the zero-spreaded generator's spec), the "interpolator" (as
 tests/NanoQL.Tests/Vectors/BootstrapInputs.cs reads it), the "helpers" (tools/vectors/gen/termstructures/yield/
@@ -114,7 +114,7 @@ def cases():
                     raw = raw_class(h, [d for d, _ in nodes], [x for _, x in nodes], factory(interpolator))
                     raw.enableExtrapolation()
                     # past a base that doesn't extrapolate QuantLib's spread discount curve throws, reading the base
-                    # without the flag, where nanoql's reads it with (the S-sr plan's SSR6 (xxi)): left out
+                    # without the flag, where nanoql's reads it with: left out
                     raw_dates = [d for d in dates if base.allowsExtrapolation() or d <= base.maxDate()]
                     expected["rawDiscount"] = [v.attempt(lambda d=d: raw.discount(d)) for d in raw_dates]
                 out.append({"name": f"{name} / {interpolator['type']}"

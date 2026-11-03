@@ -18,9 +18,8 @@ namespace NanoQL.Tests.Divergences;
 /// discounts and variances by date unchanged, a spread call prices 0.58% below the same market restated on Act/365 on
 /// the same seed, and on a risk-free curve settling two business days after the other structures 0.53% below. nanoql's
 /// paths run on the clock spanning every process's structures, each read at the instants its times denote and accruing
-/// nothing before its own date (the S-exo plan's ER5 (i)), so on the same seed they price the restated market:
-/// QuantLib's engine on that market is the check, well inside its error estimate. A market on one clock keeps
-/// QuantLib's draws and arithmetic.
+/// nothing before its own date, so on the same seed they price the restated market: QuantLib's engine on that market is
+/// the check, well inside its error estimate. A market on one clock keeps QuantLib's draws and arithmetic.
 /// </summary>
 public class McBasketMismatchedTimesTests
 {

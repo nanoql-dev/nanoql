@@ -9,9 +9,10 @@ that isn't one) and of one fixing. The builder: samples, then a tolerance ("numb
 tolerance, then samples ("tolerance already set"), a tolerance alone, neither, and a tolerance on low-discrepancy
 paths ("chosen random generator policy does not allow an error estimate").
 
-The prices of the Monte Carlo engine are the wheel's (tools/vectors/gen/pricingengines/asian/mc_discr_arith_av_price.py). The builder's process is tools/cxx/src/pricingengines/asian/mc_discr_arith_av_price.cpp's, on the
-evaluation date 15 October 2026. nanoql's builder takes its seed at construction (the S-bar plan's BR1); the
-harness sets QuantLib's to 42. Read back by
+The prices of the Monte Carlo engine are the wheel's
+(tools/vectors/gen/pricingengines/asian/mc_discr_arith_av_price.py). The builder's process is
+tools/cxx/src/pricingengines/asian/mc_discr_arith_av_price.cpp's, on the evaluation date 15 October 2026. nanoql's
+builder takes its seed at construction; the harness sets QuantLib's to 42. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/PricingEngines/Asian/MCDiscreteArithmeticAPEngineCxxVectorTests.cs."""
 import os
 import sys

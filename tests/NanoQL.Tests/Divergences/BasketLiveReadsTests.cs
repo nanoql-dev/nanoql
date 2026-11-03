@@ -10,11 +10,11 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// A basket's live reads by the live names, not by the live list's positions (the S-xcr plan's XR8 (ii)): QuantLib's
-/// <c>remainingNotionals(d)</c> and <c>remainingProbabilities(d)</c> read the first live-list-length positions of the
-/// pool (<c>basket.cpp:196-220</c>), so after the first of three names defaults they read the first two names. QuantLib's
-/// values are the planner's <c>xp_basket.cpp</c> (D2, D3); the check is QuantLib on the basket of the live names alone,
-/// whose reads are those names' notionals and curves.
+/// A basket's live reads by the live names, not by the live list's positions: QuantLib's <c>remainingNotionals(d)</c>
+/// and <c>remainingProbabilities(d)</c> read the first live-list-length positions of the pool
+/// (<c>basket.cpp:196-220</c>), so after the first of three names defaults they read the first two names. QuantLib's
+/// values are recorded in the test; the check is QuantLib on the basket of the live names alone, whose reads are those
+/// names' notionals and curves.
 /// </summary>
 public class BasketLiveReadsTests
 {

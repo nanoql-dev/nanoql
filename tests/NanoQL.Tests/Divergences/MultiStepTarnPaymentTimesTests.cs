@@ -8,13 +8,12 @@ using NanoQL.Tests.Conventions;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The TARN's floating payment times (the S-mmp plan's MMPR4 (x), fixed under R8). QuantLib's <c>MultiStepTarn</c>
-/// takes the floating coupons' payment times and appends the fixed ones in their place
-/// (<c>multisteptarn.cpp:50</c>), so it discounts the floating coupons at the fixed times: on six semi-annual rates with
-/// the fixed coupons paid at each period's start and the floating at its end, its cash-flow times are the starts twice,
-/// and on a model of 1e-8 volatility its value is −0.351659, 1.3e-3 above the deterministic closed form (this run's
-/// <c>probes\c2_facts.cpp</c>; the planner's MPP10 (d)). nanoql pays the floating coupons at their own times. Checks:
-/// QuantLib's value where the two schedules coincide (the vectors); the deterministic model's closed form.
+/// The TARN's floating payment times (fixed). QuantLib's <c>MultiStepTarn</c> takes the floating coupons' payment times
+/// and appends the fixed ones in their place (<c>multisteptarn.cpp:50</c>), so it discounts the floating coupons at the
+/// fixed times: on six semi-annual rates with the fixed coupons paid at each period's start and the floating at its
+/// end, its cash-flow times are the starts twice, and on a model of 1e-8 volatility its value is −0.351659, 1.3e-3
+/// above the deterministic closed form. nanoql pays the floating coupons at their own times. Checks: QuantLib's value
+/// where the two schedules coincide (the vectors); the deterministic model's closed form.
 /// </summary>
 public class MultiStepTarnPaymentTimesTests
 {

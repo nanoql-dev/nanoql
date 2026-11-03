@@ -17,12 +17,12 @@ namespace NanoQL.Experimental;
 /// affine model of the default intensity, bootstrapped so that the model's curve reprices the market.
 /// </summary>
 /// <remarks>
-/// The curve kind takes its model: the model-aware members carry the formulas (the S-xcr plan's XR3 (c)), and the
-/// model-free ones refuse, as QuantLib's piecewise curve fails to build on these traits without a model. The survival
-/// probability is the deterministic part's times the model's bond price at its initial intensity, the dynamics' short
-/// rate at the process's x0: QuantLib squares x0 (<c>interpolatedaffinehazardratecurve.hpp:297</c>), right for its 1.22
-/// √r CIR helper and wrong since 1.23 put CIR's dynamics on the CIR process, 0.9089 for 0.8769 at five years (XR8
-/// (xiii); <c>Divergences/AffineHazardRateTests.cs</c>).
+/// The curve kind takes its model: the model-aware members carry the formulas, and the model-free ones refuse, as
+/// QuantLib's piecewise curve fails to build on these traits without a model. The survival probability is the
+/// deterministic part's times the model's bond price at its initial intensity, the dynamics' short rate at the
+/// process's x0: QuantLib squares x0 (<c>interpolatedaffinehazardratecurve.hpp:297</c>), right for its 1.22 √r CIR
+/// helper and wrong since 1.23 put CIR's dynamics on the CIR process, 0.9089 for 0.8769 at five years
+/// (<c>Divergences/AffineHazardRateTests.cs</c>).
 /// </remarks>
 [Experimental("NQL0001")]
 public readonly struct AffineHazardRate : IDefaultProbabilityTraits
@@ -161,7 +161,7 @@ public readonly struct AffineHazardRate : IDefaultProbabilityTraits
     }
 
     /// <summary>The default density: the deterministic hazard rate times the survival over the model's bond price,
-    /// QuantLib's base structure's (XR8 (xxxviii)).</summary>
+    /// QuantLib's base structure's.</summary>
     /// <param name="times">The nodes' times.</param>
     /// <param name="data">The nodes' hazard rates.</param>
     /// <param name="interpolation">The interpolation.</param>

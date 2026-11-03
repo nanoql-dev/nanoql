@@ -27,7 +27,7 @@ namespace NanoQL.TermStructures;
 /// <para>
 /// Built whole: QuantLib's default constructor, which leaves the frequency uninitialized until <c>set</c>, and
 /// <c>set</c> itself, whose only caller is the constructor, aren't ported. The constructor's checks are QuantLib's
-/// <c>validate</c>, which isn't virtual here; nor are the three inspectors, two of which it reads (master §2.2's
+/// <c>validate</c>, which isn't virtual here; nor are the three inspectors, two of which it reads (the playbook's
 /// constructor-read row), and no QuantLib class overrides them. An extension point: <see cref="KerkhofSeasonality"/>
 /// derives from it.
 /// </para>

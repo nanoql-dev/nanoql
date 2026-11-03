@@ -1172,8 +1172,7 @@ public class EuropeanOptionTests
     }
 
     // Adapted: the quotes changed in place become a process built for each value; the engines are the analytic and
-    // finite-difference branches of QuantLib's makeOption, which the other branches' slots extend (the S-eq plan's
-    // SEQD8).
+    // finite-difference branches of QuantLib's makeOption, which the other branches' ports extend.
     private static void TestEngineConsistency(
         EngineType engine, Size binomialSteps, Size samples, Dictionary<string, Real> tolerance, bool testGreeks = false)
     {
@@ -1262,7 +1261,7 @@ public class EuropeanOptionTests
         }
     }
 
-    // QuantLib's makeOption's engine, for the branches the slots so far port.
+    // QuantLib's makeOption's engine, for the branches ported so far.
     private static Func<VanillaOption, EvaluationContext, OneAssetOptionResults> MakeEngine(
         EngineType engineType, GeneralizedBlackScholesProcess stochProcess, Size binomialSteps, Size samples) =>
         engineType switch
@@ -1392,9 +1391,7 @@ public class EuropeanOptionTests
     private static Integer TimeToDays(double t, Integer daysPerYear = 360) =>
         (Integer)Math.Round(t * daysPerYear, MidpointRounding.AwayFromZero);
 
-    // QuantLib's EngineType.
-    // QuantLib's master's case for #2927 (after v1.44; the S-xeq plan's XER4), a check of S-van's landed Black-Vasicek
-    // engine
+    // QuantLib's EngineType. QuantLib's master's case for #2927 (after v1.44), a check of the Black-Vasicek engine
     [Fact]
     public void TestBlackVasicekEngineWithDeterministicRates()
     {
@@ -1447,8 +1444,7 @@ public class EuropeanOptionTests
         }
     }
 
-    // QuantLib's master's case for #2927 (after v1.44; the S-xeq plan's XER4), a check of S-van's landed Black-Vasicek
-    // engine
+    // QuantLib's master's case for #2927 (after v1.44), a check of the Black-Vasicek engine
     [Fact]
     public void TestBlackVasicekEngineWithStochasticRates()
     {

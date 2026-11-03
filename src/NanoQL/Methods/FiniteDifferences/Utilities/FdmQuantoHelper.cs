@@ -14,7 +14,7 @@ namespace NanoQL.Methods;
 /// The market data a quanto option's finite-difference operator needs for its drift adjustment: the domestic and
 /// foreign curves, the exchange rate's volatility, its at-the-money level and its correlation with the equity.
 /// </summary>
-/// <remarks>Immutable (the S-eq plan's SEQR1).</remarks>
+/// <remarks>Immutable.</remarks>
 public sealed class FdmQuantoHelper
 {
     /// <summary>Initializes a new instance of the <see cref="FdmQuantoHelper"/> class.</summary>

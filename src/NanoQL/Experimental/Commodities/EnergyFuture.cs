@@ -18,19 +18,18 @@ namespace NanoQL.Experimental;
 /// its forward price at the evaluation date otherwise (with QuantLib's warning). The future never expires, as QuantLib's.
 /// </para>
 /// <para>
-/// Three of QuantLib's lines are fixed (the S-xrt plan's XRR5; <c>Divergences/EnergyFutureTests.cs</c>):
+/// Three of QuantLib's lines are fixed (<c>Divergences/EnergyFutureTests.cs</c>):
 /// </para>
 /// <list type="bullet">
-/// <item><description>(vii) the lot multiplies the quantity once: QuantLib's conversion factor already carries it and
-/// the value multiplies by it again, so lot 1,000 prices 5,000,000 there for 5,000 here;</description></item>
-/// <item><description>(xxxix) the secondary costs are charged on the quantity the value uses, in the base unit with
-/// its lots, where QuantLib's reads the raw amount (a fee of 0.1 a unit on 10 gallons reads 42 there, 1
+/// <item><description>The lot multiplies the quantity once: QuantLib's conversion factor already carries it and the
+/// value multiplies by it again, so lot 1,000 prices 5,000,000 there for 5,000 here;</description></item>
+/// <item><description>The secondary costs are charged on the quantity the value uses, in the base unit with its lots,
+/// where QuantLib's reads the raw amount (a fee of 0.1 a unit on 10 gallons reads 42 there, 1
 /// here);</description></item>
-/// <item><description>(xl) within QuantLib's window the quote is the stored history's entry for the evaluation date
-/// where there is one (QuantLib's), else the day before's, read from the history itself: QuantLib reads the evaluation
-/// date's fixing alone, so with the last fixing yesterday it refuses ("missing quote"), and through the index's fixing,
-/// which refuses a Saturday evaluation on a weekday index. Neither entry: QuantLib's "missing
-/// quote".</description></item>
+/// <item><description>Within QuantLib's window the quote is the stored history's entry for the evaluation date where
+/// there is one (QuantLib's), else the day before's, read from the history itself: QuantLib reads the evaluation date's
+/// fixing alone, so with the last fixing yesterday it refuses ("missing quote"), and through the index's fixing, which
+/// refuses a Saturday evaluation on a weekday index. Neither entry: QuantLib's "missing quote".</description></item>
 /// </list>
 /// </remarks>
 [Experimental("NQL0001")]

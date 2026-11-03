@@ -9,9 +9,9 @@ and its call price, digital price and density at strikes from a quarter of the f
 detail::D0Interpolator's absorption probability at each model's parameters. Then QuantLib's refusals: each parameter
 past its bound, and an expiry of 0.
 
-The outputs nanoql fixes are left out (the S-xeq plan's §2.8): every model has sigmaI sqrt(T) of 0.1 or more, where
-nanoql's integrals are QuantLib's single intervals; below it nanoql splits them at the density's peak (the S-xeq run's
-XER5 (xxvi)). Nothing is fitted, so no output is filtered.
+The outputs nanoql fixes are left out: every model has sigmaI sqrt(T) of 0.1 or more, where nanoql's integrals are
+QuantLib's single intervals; below it nanoql splits them at the density's peak. Nothing is fitted, so no output is
+filtered.
 
 The model is tools/cxx/src/experimental/volatility/noarbsabr.cpp's. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Experimental/Volatility/NoArbSabrModelCxxVectorTests.cs."""

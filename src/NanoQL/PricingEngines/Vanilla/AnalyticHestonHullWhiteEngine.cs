@@ -18,16 +18,14 @@ namespace NanoQL.PricingEngines;
 /// </summary>
 /// <remarks>
 /// <para>
-/// An object over its Heston and Hull-White models (the S-hes plan's HD7), unsealed as QuantLib's
-/// (<see cref="AnalyticH1HWEngine"/> derives). The short rate enters the characteristic function through
-/// <see cref="AnalyticHestonEngine.AddOnTerm"/>, its variance offset m at the model's time, which runs from the earliest
-/// curve date (HR7 (xi), <see cref="AnalyticHestonEngine"/>'s).
+/// An object over its Heston and Hull-White models, unsealed as QuantLib's (<see cref="AnalyticH1HWEngine"/> derives).
+/// The short rate enters the characteristic function through <see cref="AnalyticHestonEngine.AddOnTerm"/>, its variance
+/// offset m at the model's time, which runs from the earliest curve date (<see cref="AnalyticHestonEngine"/>'s).
 /// </para>
 /// <para>
-/// Below a·t = 1e-2 the offset is S-van's Black-Scholes-Merton Hull-White series to (a·t)⁴, half that engine's v, where
-/// QuantLib's closed form, used above a·t = ε^¼, cancels to a relative error of about 3ε/(a·t)³ and its series below
-/// stops at (a·t)², the price moving by 5e-8 relative across its cut (HR7 (xiv)); QuantLib's closed form and bits above
-/// 1e-2.
+/// Below a·t = 1e-2 the offset is the Black-Scholes-Merton Hull-White engine's series to (a·t)⁴, half that engine's v,
+/// where QuantLib's closed form, used above a·t = ε^¼, cancels to a relative error of about 3ε/(a·t)³ and its series
+/// below stops at (a·t)², the price moving by 5e-8 relative across its cut; QuantLib's closed form and bits above 1e-2.
 /// </para>
 /// <para>
 /// References: Karel in't Hout, Joris Bierkens, Antoine von der Ploeg, Joe in't Panhuis, A Semi closed-from analytic
@@ -37,7 +35,7 @@ namespace NanoQL.PricingEngines;
 /// </remarks>
 public class AnalyticHestonHullWhiteEngine : AnalyticHestonEngine
 {
-    // where S-van's series replaces QuantLib's closed form (HR7 (xiv); the S-van plan's VR4 (xxvii))
+    // where the Black-Scholes-Merton Hull-White engine's series replaces QuantLib's closed form
     private const double SeriesCut = 1e-2;
 
     private readonly double a;
@@ -135,7 +133,8 @@ public class AnalyticHestonHullWhiteEngine : AnalyticHestonEngine
         return new Complex(-m * phi * phi, phi * (m - (2 * m * (j - 1))));
     }
 
-    // QuantLib's m_ at the maturity (analytichestonhullwhiteengine.cpp:57-67), S-van's series below a·t = 1e-2
+    // QuantLib's m_ at the maturity (analytichestonhullwhiteengine.cpp:57-67), the Black-Scholes-Merton Hull-White
+    // engine's series below a·t = 1e-2
     private double VarianceOffset(double t)
     {
         if (a * t > SeriesCut)
@@ -144,7 +143,7 @@ public class AnalyticHestonHullWhiteEngine : AnalyticHestonEngine
                 * (t + (2 / a * Math.Exp(-a * t)) - (1 / (2 * a) * Math.Exp(-2 * a * t)) - (3 / (2 * a)));
         }
 
-        // low-a algebraic limit, to (a·t)⁴ (HR7 (xiv); the S-van plan's VR4 (xxvii))
+        // low-a algebraic limit, to (a·t)⁴
         return 0.5 * sigma * sigma * t * t * t
             * ((1 / 3.0) - (0.25 * a * t) + (7 / 60.0 * a * a * t * t)
                - (a * a * a * t * t * t / 24.0) + (31 / 2520.0 * a * a * a * a * t * t * t * t));

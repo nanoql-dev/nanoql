@@ -6,12 +6,11 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// An integration's error estimate (the S-cms plan's CMR2, tanh-sinh's the S-van plan's): QuantLib's integrators keep
-/// it in a mutable member, which only the non-adaptive Gauss-Kronrod rule, tanh-sinh and exp-sinh set, so
-/// <c>absoluteError()</c> reads an unset member on every other; nanoql's <see cref="IntegrationResult.AbsoluteError"/>
-/// is <see langword="null"/> there, and <see cref="Integrator.IntegrationSuccess"/>, which reads it, refuses a result
-/// without one rather than compare an unset value. An empty interval's integral is exact: an error of 0, which every
-/// integrator reports.
+/// An integration's error estimate: QuantLib's integrators keep it in a mutable member, which only the non-adaptive
+/// Gauss-Kronrod rule, tanh-sinh and exp-sinh set, so <c>absoluteError()</c> reads an unset member on every other;
+/// nanoql's <see cref="IntegrationResult.AbsoluteError"/> is <see langword="null"/> there, and
+/// <see cref="Integrator.IntegrationSuccess"/>, which reads it, refuses a result without one rather than compare an
+/// unset value. An empty interval's integral is exact: an error of 0, which every integrator reports.
 /// </summary>
 public class IntegrationErrorTests
 {

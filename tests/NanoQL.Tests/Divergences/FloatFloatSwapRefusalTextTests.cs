@@ -10,11 +10,10 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The float-float swap's refusal of a second leg's nominals that don't match its schedule (the S-rx plan's SRXR3
-/// (xix)). QuantLib's check names "schedule2 size" and prints the nominals' size in its place
-/// (<c>floatfloatswap.cpp:119-122</c>): three nominals on a schedule of five dates read "nominal2 size (3) does not
-/// match schedule2 size (3)". nanoql prints the schedule's size, as QuantLib's first leg's check two lines up does, its
-/// wording kept.
+/// The float-float swap's refusal of a second leg's nominals that don't match its schedule. QuantLib's check names
+/// "schedule2 size" and prints the nominals' size in its place (<c>floatfloatswap.cpp:119-122</c>): three nominals on a
+/// schedule of five dates read "nominal2 size (3) does not match schedule2 size (3)". nanoql prints the schedule's
+/// size, as QuantLib's first leg's check two lines up does, its wording kept.
 /// </summary>
 public class FloatFloatSwapRefusalTextTests
 {

@@ -4,13 +4,13 @@
 the evaluation date 15 October 2026: European options on any payoff under the Heston model, the payoff integrated
 against the density of the log spot at expiry.
 
-Two Heston parameter sets (tools/vectors/gen/processes/hestonprocess.py's equity and far-from-Feller sets), each on
-one flat and one linear zero curve serving as both the risk-free and the dividend curve: the NPV of plain-vanilla calls
-and puts, cash-or-nothing calls and asset-or-nothing puts at five strikes and two maturities, at QuantLib's default
-accuracy and at 1e-8. With no carry, the forward is the spot and QuantLib's window, centred on the forward's mirror, is
-nanoql's, centred on the forward (the S-hes plan's HR7 (vii); §2.10 leaves out every case with carry), and every κt is
-above HR7 (xxv)'s branch. The density and distribution members, Pv and Cdf, which the wheel doesn't
-expose, are the harness's (tools/vectors/gen/cxx/pricingengines/vanilla/analyticpdfhestonengine.py).
+Two Heston parameter sets (tools/vectors/gen/processes/hestonprocess.py's equity and far-from-Feller sets), each on one
+flat and one linear zero curve serving as both the risk-free and the dividend curve: the NPV of plain-vanilla calls and
+puts, cash-or-nothing calls and asset-or-nothing puts at five strikes and two maturities, at QuantLib's default accuracy
+and at 1e-8. With no carry, the forward is the spot and QuantLib's window, centred on the forward's mirror, is nanoql's,
+centred on the forward (every case with carry is left out), and every κt is above the branch where nanoql's form
+departs. The density and distribution members, Pv and Cdf, which the wheel doesn't expose, are the harness's
+(tools/vectors/gen/cxx/pricingengines/vanilla/analyticpdfhestonengine.py).
 
 A case holds one process {"riskFree", "dividend", "s0", "v0", "kappa", "theta", "sigma", "rho"}, the curves
 tools/vectors/gen/processes/blackscholesprocess.py's specs, and an engine {"eps", "maxIterations"}. The wheel's calls,

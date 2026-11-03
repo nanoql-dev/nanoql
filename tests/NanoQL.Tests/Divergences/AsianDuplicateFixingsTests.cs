@@ -12,16 +12,15 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// A fixing date given twice (the S-bar plan's BR5 (xxviii), fixed under R8). The average counts it twice, as QuantLib's
-/// analytic engines count it, where QuantLib's finite-difference condition weighs every node by the first duplicate's
-/// count and its Monte Carlo grid keeps the time once, so its pricers count it once: on spot 100, q 3%, r 6%, σ 20% (Act/360),
-/// a call at 100 fixing at 90, 180, 180, 270 and 360 days prices 6.624103653021713 by QuantLib's FD engine (100 × 100 ×
-/// 50) where the contract is worth 6.0461 ± 0.0032, its arithmetic Monte Carlo 6.115069708532511 (the schedule counted
-/// once, 6.1358), and its geometric Monte Carlo 5.934198148917606 ± 0.0144 against its analytic geometric engine's
-/// 5.884809360030421, 3.4σ (the S-bar run's <c>c3_div_ql_a.py</c>). nanoql weighs each node by its fixings' count. Checks:
-/// an exact Monte Carlo of the average with the date counted twice, QuantLib's Mersenne twister and inverse normal, the
-/// FD engine within its error and the grid's own, measured on the schedule without the duplicate; and the geometric
-/// engine.
+/// A fixing date given twice (fixed). The average counts it twice, as QuantLib's analytic engines count it, where
+/// QuantLib's finite-difference condition weighs every node by the first duplicate's count and its Monte Carlo grid
+/// keeps the time once, so its pricers count it once: on spot 100, q 3%, r 6%, σ 20% (Act/360), a call at 100 fixing at
+/// 90, 180, 180, 270 and 360 days prices 6.624103653021713 by QuantLib's FD engine (100 × 100 × 50) where the contract
+/// is worth 6.0461 ± 0.0032, its arithmetic Monte Carlo 6.115069708532511 (the schedule counted once, 6.1358), and its
+/// geometric Monte Carlo 5.934198148917606 ± 0.0144 against its analytic geometric engine's 5.884809360030421, 3.4σ.
+/// nanoql weighs each node by its fixings' count. Checks: an exact Monte Carlo of the average with the date counted
+/// twice, QuantLib's Mersenne twister and inverse normal, the FD engine within its error and the grid's own, measured
+/// on the schedule without the duplicate; and the geometric engine.
 /// </summary>
 public class AsianDuplicateFixingsTests
 {

@@ -11,9 +11,9 @@ reach, which McSimulation::value refuses. Each case records the NPV and, where t
 estimate.
 
 The C# side runs a test-only engine on the port's McSimulation with QuantLib's European path pricer and
-MCVanillaEngine's time grid and path generator (the S-sr plan's SSD7: no S-sr engine lands before C2). The wheel's
-MCEuropeanEngine(process, traits, timeSteps, timeStepsPerYear, brownianBridge, antitheticVariate, requiredSamples,
-requiredTolerance, maxSamples, seed) is MakeMCEuropeanEngine's settings, each the C++ engine's. Read back by
+MCVanillaEngine's time grid and path generator. The wheel's MCEuropeanEngine(process, traits, timeSteps,
+timeStepsPerYear, brownianBridge, antitheticVariate, requiredSamples, requiredTolerance, maxSamples, seed) is
+MakeMCEuropeanEngine's settings, each the C++ engine's. Read back by
 tests/NanoQL.Tests/Vectors/PricingEngines/McSimulationVectorTests.cs."""
 import os
 import sys

@@ -153,9 +153,9 @@ public static class CashFlowVectorsFunctions
     /// A per-period vector gives each period its element, the last element past its end, and the default when empty: a
     /// nominal and a gearing of 1, the index's fixing days, a spread of 0, and no call or put strike or payoff. A
     /// zero-gearing period's fixed coupon pays the spread, 0 by default, where QuantLib's defaults it to 1.0 there, so
-    /// that such a period of a leg without spreads pays 100% (R8, the S-cms plan's CMR5 (vii); QuantLib's
-    /// <c>FloatingLeg</c> on the same period pays 0). The floating coupons take no ex-coupon date and fix on the
-    /// preceding business day, as QuantLib's template builds them.
+    /// that such a period of a leg without spreads pays 100% (QuantLib's <c>FloatingLeg</c> on the same period pays 0).
+    /// The floating coupons take no ex-coupon date and fix on the preceding business day, as QuantLib's template builds
+    /// them.
     /// </remarks>
     /// <typeparam name="TIndex">The index type.</typeparam>
     /// <typeparam name="TCoupon">The floating coupon type.</typeparam>
@@ -591,8 +591,8 @@ public static class CashFlowVectorsFunctions
 
             if (Get(gearings, i, 1.0) == 0.0)
             {
-                // fixed coupon, at the spread (0 by default, where QuantLib's is 1.0: CMR5 (vii)); QuantLib builds it
-                // on an empty day counter and fails only when it is priced, so the leg is refused once it is built
+                // fixed coupon, at the spread (0 by default, where QuantLib's is 1.0); QuantLib builds it on an empty
+                // day counter and fails only when it is priced, so the leg is refused once it is built
                 if (paymentDayCounter is null)
                 {
                     zeroGearingRefusal ??=

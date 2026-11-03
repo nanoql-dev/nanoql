@@ -10,13 +10,12 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// A step of the CEV, SABR and CIR operators, and an application of the swing condition, allocate nothing (the S-van
-/// plan's VD12, S3's zero-allocation pin in S-eq's one-dimensional form and S-sr's two-dimensional one): their parts are
-/// built once, <c>SetTime</c> rewrites them in place, and the apply, splitting solves and preconditioner write into the
-/// caller's spans through buffers they hold; the swing condition writes through a scratch buffer it holds. A rollback of
-/// <see cref="FdmBackwardSolver"/> on each operator under its engine's default scheme, Douglas for the CEV engine and
-/// Hundsdorfer for the SABR and CIR engines (VR8), is measured on fresh values after a warm-up
-/// (<see cref="AllocationAssert"/>), and gives the warm-up's values.
+/// A step of the CEV, SABR and CIR operators, and an application of the swing condition, allocate nothing (the
+/// zero-allocation pins, one- and two-dimensional): their parts are built once, <c>SetTime</c> rewrites them in place,
+/// and the apply, splitting solves and preconditioner write into the caller's spans through buffers they hold; the
+/// swing condition writes through a scratch buffer it holds. A rollback of <see cref="FdmBackwardSolver"/> on each
+/// operator under its engine's default scheme, Douglas for the CEV engine and Hundsdorfer for the SABR and CIR engines,
+/// is measured on fresh values after a warm-up (<see cref="AllocationAssert"/>), and gives the warm-up's values.
 /// </summary>
 public class FdmCevSabrCirAllocationTests
 {

@@ -16,8 +16,8 @@ namespace NanoQL.Experimental;
 /// <remarks>
 /// It copies its inputs, as every <see cref="Interpolation"/> does. Outside its range the value is the nearest end's
 /// and the derivative 0, as QuantLib's. The primitive there is the flat value's integral, where QuantLib's extends the
-/// end intervals' lines past the ends, so that its slope outside the range isn't the value (the S-xrt run's R3-1;
-/// <c>Divergences/LinearFlatPrimitiveTests.cs</c>); on a single point, where QuantLib's primitive and derivative read
+/// end intervals' lines past the ends, so that its slope outside the range isn't the value
+/// (<c>Divergences/LinearFlatPrimitiveTests.cs</c>); on a single point, where QuantLib's primitive and derivative read
 /// before their arrays, they are the flat value's.
 /// </remarks>
 [Experimental("NQL0001")]
@@ -66,7 +66,7 @@ public sealed class LinearFlatInterpolation : Interpolation
     }
 
     /// <inheritdoc/>
-    /// <remarks>The flat value's integral outside the range (R3-1).</remarks>
+    /// <remarks>The flat value's integral outside the range.</remarks>
     protected override double PrimitiveCore(double x)
     {
         if (x < XMin || X.Length == 1)

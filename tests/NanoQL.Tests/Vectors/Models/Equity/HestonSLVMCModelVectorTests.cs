@@ -13,7 +13,7 @@ namespace NanoQL.Tests.Vectors;
 /// The HestonSLVMCModel vectors, <c>tests/vectors/models/equity/hestonslvmcmodel.json</c>: the Monte Carlo calibrated
 /// leverage function on a constant local volatility with the Mersenne-Twister and Sobol factories, on a smile constant
 /// in time, at mixing factor 0.5, with a mandatory date and on zero curves, read between the time grid's nodes and at
-/// two nodes, the points stable under the master plan's S7R6.
+/// two nodes, the points stable under one-ulp moves of the inputs.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class HestonSLVMCModelVectorTests

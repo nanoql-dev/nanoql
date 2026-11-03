@@ -13,15 +13,15 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The calibration basket from the engine object a caller passes (the S-g1d plan's G1D5): QuantLib's instrument reads
-/// the engine it holds, nanoql's <see cref="NonstandardSwaption.CalibrationBasket"/> the one passed, its model and
-/// discount curve. On the wheel, a Bermudan payer exercised in one, two and three years into a 5-year amortizing swap
-/// at 3.5% (fixed nominals 1,000,000 to 200,000, annual; Euribor 6M), its engine on a GSR model (a = 0.03, σ = 0.008)
-/// on a flat 3% curve with a 2.8% discount curve, the standard swaps the 10-year EUR swap index's at 20%: the naive
-/// basket is coterminal at the money on a nominal of 1; the delta-gamma basket matures on 20 August 2029, 21 January
-/// 2030 and 20 May 2030 on nominals 834084.0070174834, 676859.2375139953 and 516398.05710079614 at 0.03497210203627414,
-/// 0.035009776513416094 and 0.03489800698686514, where an engine on the model a = σ = 0.01 without the discount curve
-/// gives its first helper 19 September 2029 on 823939.5255605449.
+/// The calibration basket from the engine object a caller passes: QuantLib's instrument reads the engine it holds,
+/// nanoql's <see cref="NonstandardSwaption.CalibrationBasket"/> the one passed, its model and discount curve. On the
+/// wheel, a Bermudan payer exercised in one, two and three years into a 5-year amortizing swap at 3.5% (fixed nominals
+/// 1,000,000 to 200,000, annual; Euribor 6M), its engine on a GSR model (a = 0.03, σ = 0.008) on a flat 3% curve with a
+/// 2.8% discount curve, the standard swaps the 10-year EUR swap index's at 20%: the naive basket is coterminal at the
+/// money on a nominal of 1; the delta-gamma basket matures on 20 August 2029, 21 January 2030 and 20 May 2030 on
+/// nominals 834084.0070174834, 676859.2375139953 and 516398.05710079614 at 0.03497210203627414, 0.035009776513416094
+/// and 0.03489800698686514, where an engine on the model a = σ = 0.01 without the discount curve gives its first helper
+/// 19 September 2029 on 823939.5255605449.
 /// </summary>
 public class CalibrationBasketTests
 {

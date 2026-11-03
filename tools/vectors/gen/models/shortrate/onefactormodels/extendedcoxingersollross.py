@@ -14,11 +14,11 @@ generated and left out of its model's points (coxingersollross.py's chi2_refused
 arguments; tests/NanoQL.Tests/Divergences/ChiSquaredSeriesRefusalTests.cs).
 
 Then setParams on a fresh model, its refusals compared alone; calibrations to tools/vectors/gen/models/model.py's
-swaption helper sets through its machinery and S7R6 filter, the model on the helpers' curve, with theta and k fixed,
-where QuantLib's Feller test and nanoql's agree at every trial (the S-sr plan's SSR7, K1), those that free them
-generated and left out, as the tree prices are (K2: nanoql's tree is QuantLib's before 1.23, on the square root of the
-short rate, its numerical fitting the fitted tree constructor's; tests/NanoQL.Tests/Divergences/
-CirFellerConstraintTests.cs, CirTreeConvergenceTests.cs). Then the constructor's refusals.
+swaption helper sets through its machinery and stability filter, the model on the helpers' curve, with theta and k
+fixed, where QuantLib's Feller test and nanoql's agree at every trial, those that free them generated and left out, as
+the tree prices are (nanoql's tree is QuantLib's before 1.23, on the square root of the short rate, its numerical
+fitting the fitted tree constructor's; tests/NanoQL.Tests/Divergences/CirFellerConstraintTests.cs,
+CirTreeConvergenceTests.cs). Then the constructor's refusals.
 
 The wheel's calls, by QuantLib-SWIG's shortratemodels.i: ql.ExtendedCoxIngersollRoss(YieldTermStructureHandle, theta,
 k, sigma, x0), params(), termStructure(), discount(t), discountBond, discountBondOption, setParams and calibrate. Each

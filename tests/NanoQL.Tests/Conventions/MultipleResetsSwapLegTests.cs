@@ -11,11 +11,11 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The multiple-resets swap's floating leg (the S-cms plan's CMD7): QuantLib's <c>MultipleResetsSwap</c> builds its
-/// <c>FixedVsFloatingSwap</c> base on the coupon schedule, every resets-per-coupon-th reset date, then replaces the
-/// base's floating leg with a <c>MultipleResetsLeg</c> on the full reset schedule
-/// (<c>multipleresetsswap.cpp:38-73</c>); nanoql's passes the leg's builder to the base's constructor, so the swap is
-/// built once, its floating leg the <see cref="MultipleResetsLeg"/> and its floating schedule the coupon schedule.
+/// The multiple-resets swap's floating leg: QuantLib's <c>MultipleResetsSwap</c> builds its <c>FixedVsFloatingSwap</c>
+/// base on the coupon schedule, every resets-per-coupon-th reset date, then replaces the base's floating leg with a
+/// <c>MultipleResetsLeg</c> on the full reset schedule (<c>multipleresetsswap.cpp:38-73</c>); nanoql's passes the leg's
+/// builder to the base's constructor, so the swap is built once, its floating leg the <see cref="MultipleResetsLeg"/>
+/// and its floating schedule the coupon schedule.
 /// </summary>
 public class MultipleResetsSwapLegTests
 {

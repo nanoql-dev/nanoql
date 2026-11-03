@@ -8,11 +8,11 @@ tools/vectors/gen/termstructures/credit/defaultprobabilityhelpers.py's helper se
   1 business days on WeekendsOnly and TARGET (the settlement-days constructor): the curve's reference and maximum
   dates, its node dates, times and hazard rates, and its survival probability and hazard rate at 20 dates to 12 years.
 
-The data and the values are solved, so the stability filter of the S-infl plan's SID20 (the S7 plan's S7R6) runs on
-them, as in the helpers' file; a dropped output is written null and its index listed in the case's inputs "dropped".
-The default-density and survival-probability traits' nodes, which the wheel doesn't bind, are in the harness's
-cxx/termstructures/credit/piecewisedefaultcurve. A case's inputs are the helpers' file's, with the sample dates. Read
-back by tests/NanoQL.Tests/Vectors/TermStructures/Credit/PiecewiseDefaultCurveVectorTests.cs."""
+The data and the values are solved, so the stability filter runs on them, as in the helpers' file; a dropped output is
+written null and its index listed in the case's inputs "dropped". The default-density and survival-probability traits'
+nodes, which the wheel doesn't bind, are in the harness's cxx/termstructures/credit/piecewisedefaultcurve. A case's
+inputs are the helpers' file's, with the sample dates. Read back by
+tests/NanoQL.Tests/Vectors/TermStructures/Credit/PiecewiseDefaultCurveVectorTests.cs."""
 import importlib.util
 import os
 import sys

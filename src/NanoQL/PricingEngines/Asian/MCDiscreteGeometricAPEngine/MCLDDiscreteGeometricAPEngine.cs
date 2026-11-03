@@ -16,7 +16,7 @@ namespace NanoQL.PricingEngines;
 /// <see cref="MCDiscreteGeometricAPEngine"/> on low-discrepancy draws with QuantLib's default statistics:
 /// QuantLib-Python's <c>MCLDDiscreteGeometricAPEngine</c>, QuantLib's
 /// <c>MCDiscreteGeometricAPEngine&lt;LowDiscrepancy&gt;</c>, its calculations closed at <see cref="LowDiscrepancy"/>
-/// and <see cref="GeneralStatistics"/> (D12).
+/// and <see cref="GeneralStatistics"/>.
 /// </summary>
 public static class MCLDDiscreteGeometricAPEngine
 {

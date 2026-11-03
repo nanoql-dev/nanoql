@@ -16,8 +16,8 @@ December 2011:
   and down times of 2 and 6, start limits of none, 1 and 3, at efficiencies from 0.35 to 0.9, on the VPP case's first
   hours of prices.
 
-No output is left out (the S-xeq plan's §2.8): every shape's last time is past each engine's last lookup (XER5 (xxxi));
-the intrinsic engine's fuel and power lists are as long. Nothing is fitted, so no output is filtered.
+No output is left out: every shape's last time is past each engine's last lookup; the intrinsic engine's fuel and power
+lists are as long. Nothing is fitted, so no output is filtered.
 
 The processes are tools/cxx/src/experimental/processes/extouspec.hpp's specs and the methods
 tools/cxx/src/experimental/finitedifferences/fdsimpleklugeextouvppengine.cpp's. Read back by

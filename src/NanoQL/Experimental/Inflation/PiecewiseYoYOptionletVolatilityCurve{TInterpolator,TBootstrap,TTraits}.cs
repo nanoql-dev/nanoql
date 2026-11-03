@@ -23,11 +23,11 @@ namespace NanoQL.Experimental;
 /// <remarks>
 /// <para>
 /// The curve bootstraps in its factory (<see cref="Create"/>), over a working state its helpers' bound copies price
-/// against, as S-infl's piecewise year-on-year curve does; its first node is the base date at the base volatility, the
-/// assumption on the unquoted early optionlets. It implements <see cref="IInterpolatedCurve{TTraits, TInterpolator}"/>,
-/// where QuantLib's derives from the interpolated curve, and its nodes come from its dates and data, QuantLib's
-/// master's (#2941), where 1.44's nodes are empty. The last date is the reference date plus the last time rounded up to
-/// whole years, adjusted, QuantLib's approximation.
+/// against, as the piecewise year-on-year inflation curve does; its first node is the base date at the base volatility,
+/// the assumption on the unquoted early optionlets. It implements
+/// <see cref="IInterpolatedCurve{TTraits, TInterpolator}"/>, where QuantLib's derives from the interpolated curve, and
+/// its nodes come from its dates and data, QuantLib's master's (#2941), where 1.44's nodes are empty. The last date is
+/// the reference date plus the last time rounded up to whole years, adjusted, QuantLib's approximation.
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]

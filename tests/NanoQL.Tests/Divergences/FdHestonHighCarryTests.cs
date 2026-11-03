@@ -15,23 +15,22 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The FD Heston engine's equity grid at high carry and low volatility (B1-1 of the S-hes plan's C1 review, under
-/// R8). QuantLib's engine builds its equity mesher on a helper process whose curves its call binds in each other's places
-/// (<c>fdhestonvanillaengine.cpp:126-128</c>), so the mesher walks the forward's mirror about the spot. Where the carry is
-/// large against the volatility the grid's far edge falls inside the distribution and QuantLib's price stops converging:
-/// a five-year call at 1.25 times the forward, carry 0.30 and volatility 0.1, prices 0 on every grid, where the analytic
-/// engine gives 1.5732 [executed on the wheel]; where cash dividends take the mirrored walk below zero, its bound isn't a
-/// number and QuantLib's engine refuses ("end must be larger than start"). nanoql keeps QuantLib's mesher wherever its
-/// range holds the true forwards' band, the walk's ends on the helper's curves in place widened by the volatility's
-/// quantile, half the mesher's own margin, and widens it to that band through QuantLib's own constraints where it
-/// doesn't, a bound that isn't a number falling short (B2-2 of the review). The multi-strike solve, whose mesher takes
-/// no constraints, solves each strike alone where its grid doesn't hold the band at the points the solve is read at,
-/// S·K/Kᵢ for the option's strike K (B2-1), their forwards quanto-adjusted where a quanto helper is given (B3-1); the
-/// two paths run on different grids, so a strike's value steps where the switch moves, by up to about 0.4% at carry 0.06
-/// (F2-1). The band holds the strike too, widened by the same half margin, where an option far from the forwards takes
-/// its value (D3-1 of the S-hes run record). The check: QuantLib's components given those constraints through the harness
-/// (<c>tests/vectors/cxx/pricingengines/vanilla/fdhestonvanillaengine.json</c>), and the analytic engine's price under
-/// refinement.
+/// The FD Heston engine's equity grid at high carry and low volatility. QuantLib's engine builds its equity mesher on a
+/// helper process whose curves its call binds in each other's places (<c>fdhestonvanillaengine.cpp:126-128</c>), so the
+/// mesher walks the forward's mirror about the spot. Where the carry is large against the volatility the grid's far
+/// edge falls inside the distribution and QuantLib's price stops converging: a five-year call at 1.25 times the
+/// forward, carry 0.30 and volatility 0.1, prices 0 on every grid, where the analytic engine gives 1.5732
+/// (QuantLib-Python 1.44); where cash dividends take the mirrored walk below zero, its bound isn't a number and
+/// QuantLib's engine refuses ("end must be larger than start"). nanoql keeps QuantLib's mesher wherever its range holds
+/// the true forwards' band, the walk's ends on the helper's curves in place widened by the volatility's quantile, half
+/// the mesher's own margin, and widens it to that band through QuantLib's own constraints where it doesn't, a bound
+/// that isn't a number falling short. The multi-strike solve, whose mesher takes no constraints, solves each strike
+/// alone where its grid doesn't hold the band at the points the solve is read at, S·K/Kᵢ for the option's strike K,
+/// their forwards quanto-adjusted where a quanto helper is given; the two paths run on different grids, so a strike's
+/// value steps where the switch moves, by up to about 0.4% at carry 0.06. The band holds the strike too, widened by the
+/// same half margin, where an option far from the forwards takes its value. The check: QuantLib's components given
+/// those constraints through the harness (<c>tests/vectors/cxx/pricingengines/vanilla/fdhestonvanillaengine.json</c>),
+/// and the analytic engine's price under refinement.
 /// </summary>
 public class FdHestonHighCarryTests
 {
@@ -42,7 +41,7 @@ public class FdHestonHighCarryTests
     [Fact]
     public void AHighCarryCallConvergesToTheAnalyticEngine()
     {
-        // QuantLib 1.44's engine prices 0.0 on x-grids of 100, 200 and 400 [executed on the wheel]
+        // QuantLib 1.44's engine prices 0.0 on x-grids of 100, 200 and 400 (QuantLib-Python 1.44)
         (HestonModel model, VanillaOption call) = Market(5, 0.31, 0.01, 1.25, OptionType.Call);
         const double Analytic = 1.5731592765498104;
         Assert.Equal(Analytic, AnalyticHestonEngine.Calculate(call, Context, model, 192).NPV!.Value);
@@ -53,7 +52,7 @@ public class FdHestonHighCarryTests
     public void ANegativeCarryPutConvergesToTheAnalyticEngine()
     {
         // QuantLib 1.44's engine prices 0.43108461265905135, 0.4192698886268002 and 0.4140697500981558 on x-grids of
-        // 100, 200 and 400, its error growing from -15% to -19% [executed on the wheel]
+        // 100, 200 and 400, its error growing from -15% to -19% (QuantLib-Python 1.44)
         (HestonModel model, VanillaOption put) = Market(10, 0.01, 0.21, 0.8, OptionType.Put);
         const double Analytic = 0.5091548969691079;
         Assert.Equal(Analytic, AnalyticHestonEngine.Calculate(put, Context, model, 192).NPV!.Value);
@@ -66,7 +65,7 @@ public class FdHestonHighCarryTests
         // a year's put at 0.7 of the forward, carry -0.3: QuantLib's grid holds the forwards' band but the strike sits
         // near its edge, and QuantLib 1.44's engine stalls, 0.0066016341928117825, 0.006176625089392059 and
         // 0.006063108322089414 on grids of 100 x 100 x 50, 200 x 200 x 100 and 400 x 400 x 100, +7.2%, +0.27% and -1.6%
-        // [executed on the wheel: scratchpad\c3\oracle_c3d.py]; nanoql's band holds the strike too (D3-1 of the run record)
+        // (QuantLib-Python 1.44); nanoql's band holds the strike too
         (HestonModel model, VanillaOption put) = Market(1, 0.01, 0.31, 0.7, OptionType.Put);
         const double Analytic = 0.006160366199509028;
         Assert.Equal(Analytic, AnalyticHestonEngine.Calculate(put, Context, model, 192).NPV!.Value);
@@ -82,7 +81,7 @@ public class FdHestonHighCarryTests
     [Fact]
     public void AMarketInsideTheBandKeepsQuantLibsBits()
     {
-        // carry 0.05 at volatility 0.1 over five years: QuantLib's grid holds the band [executed on the wheel]
+        // carry 0.05 at volatility 0.1 over five years: QuantLib's grid holds the band (QuantLib-Python 1.44)
         (HestonModel model, VanillaOption call) = Market(5, 0.06, 0.01, 1.25, OptionType.Call);
         OneAssetOptionResults r = FdHestonVanillaEngine.Calculate(call, Context, model);
         Assert.Equal(1.5898858597412422, r.NPV);
@@ -112,8 +111,8 @@ public class FdHestonHighCarryTests
     [Fact]
     public void AReferenceStrikeAwayFromTheSpotTakesEachStrikeAlone()
     {
-        // QuantLib 1.44's multi-strike solve, its grid sized on S^2/K_i, prices 0 for every strike where the solve is read
-        // at S K/K_i, the analytic engine giving 0.2507, 0.0067 and 5.6e-5 (the C1 review's B2-1)
+        // QuantLib 1.44's multi-strike solve, its grid sized on S^2/K_i, prices 0 for every strike where the solve is
+        // read at S K/K_i, the analytic engine giving 0.2507, 0.0067 and 5.6e-5
         var rts = new FlatForward(Today, 0.06, A365);
         var qts = new FlatForward(Today, 0.04, A365);
         var model = new HestonModel(new HestonProcess(rts, qts, 100.0, 0.01, 1.5, 0.01, 0.1, -0.5));
@@ -136,8 +135,8 @@ public class FdHestonHighCarryTests
     public void AQuantoForwardFarFromTheDomesticTakesEachStrikeAlone()
     {
         // a foreign rate of 0.30 against a domestic 0.05 over five years: the multi-strike solve, its band read without
-        // the quanto adjustment, misses by -10%, -5.0% and -1.7% on the default grid (the C1 review's B3-1); at an
-        // equity-FX correlation of 0 the analytic engine on the dividend curve q + r - r_f is exact
+        // the quanto adjustment, misses by -10%, -5.0% and -1.7% on the default grid; at an equity-FX correlation of 0
+        // the analytic engine on the dividend curve q + r - r_f is exact
         var rts = new FlatForward(Today, 0.05, A365);
         var qts = new FlatForward(Today, 0.01, A365);
         var fts = new FlatForward(Today, 0.30, A365);
@@ -164,7 +163,7 @@ public class FdHestonHighCarryTests
     public void CashDividendsTakingTheMirroredWalkBelowZeroPrice()
     {
         // QuantLib 1.44's engine refuses every call and put at 0.8, 1 and 1.25 times the dividend forward: "end must be
-        // larger than start" (the C1 review's B2-2)
+        // larger than start"
         var rts = new FlatForward(Today, 0.31, A365);
         var qts = new FlatForward(Today, 0.01, A365);
         var model = new HestonModel(new HestonProcess(rts, qts, 100.0, 0.01, 1.5, 0.01, 0.1, -0.5));

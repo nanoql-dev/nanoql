@@ -10,10 +10,10 @@ namespace NanoQL.Tests.Divergences;
 
 /// <summary>
 /// The n-th-to-default engine reads a default probability before a default curve's reference date as 0, and a discount
-/// before the discount curve's as 1 (the S-xcr plan's XR8 (x), S-core's CR7 (xxxiv) class): on default curves dated T+2
-/// QuantLib's reads at the evaluation date refuse ("negative time (-0.00821918) given"). QuantLib's values are the S-xcr
-/// run's <c>c1_facts.cpp</c>; the check is QuantLib on the market restated from the evaluation date: each curve a hazard
-/// curve of rate 0 to T+2 and the T+2 curve's rate after it.
+/// before the discount curve's as 1: on default curves dated T+2 QuantLib's reads at the evaluation date refuse
+/// ("negative time (-0.00821918) given"). QuantLib's values are recorded in the test; the check is QuantLib on the
+/// market restated from the evaluation date: each curve a hazard curve of rate 0 to T+2 and the T+2 curve's rate after
+/// it.
 /// </summary>
 public class NthToDefaultReferenceDateTests
 {

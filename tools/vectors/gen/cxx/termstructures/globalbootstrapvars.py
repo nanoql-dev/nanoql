@@ -16,9 +16,9 @@ computed by the C++ harness.
   and an accuracy of 1e-10. The curve's nodes' dates and data, the volatility at the optimum, and each helper's
   quote error (the curve's helpers', then the futures') and the additional helper's.
 
-Instrument weights are in no case: they act only where the instruments keep errors at the optimum, a set more
-penalised than its unknowns, and on every such set tried a one-ulp move of an input moves the fit by 1e-12 to 6e-11
-(QuantLib's and nanoql's alike), past the S7 plan's S7R6 margin, so the filter would drop every output.
+Instrument weights are in no case: they act only where the instruments keep errors at the optimum, a set more penalised
+than its unknowns, and on every such set tried a one-ulp move of an input moves the fit by 1e-12 to 6e-11 (QuantLib's
+and nanoql's alike), past the stability filter's margin, so the filter would drop every output.
 tests/NanoQL.Tests/Conventions/BootstrapVariantConventionTests.cs reads the weights on such a set by two routes.
 
 A case's inputs are its settings and "kind": "variables" with "count", "initialGuesses", "lowerBounds" and "x"; or

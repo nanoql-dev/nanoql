@@ -11,8 +11,8 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// A double-barrier binary knock-in already knocked in (the S-bar plan's BR5 (vi), fixed under R8). It pays its cash
-/// at expiry, where the payoff is in the money, as QuantLib's own header says ("the Double Knock In pays at end",
+/// A double-barrier binary knock-in already knocked in (fixed). It pays its cash at expiry, where the payoff is in the
+/// money, as QuantLib's own header says ("the Double Knock In pays at end",
 /// <c>analyticdoublebarrierbinaryengine.hpp:38-41</c>); QuantLib's degenerate branch pays the cash undiscounted, 10.0
 /// at a spot beyond the barrier where its formula's limit just inside is cash × D(T), and whatever the payoff's strike
 /// and type (<c>.cpp:237-246</c>). nanoql prices it as the European cash-or-nothing it is, at the payoff's strike and

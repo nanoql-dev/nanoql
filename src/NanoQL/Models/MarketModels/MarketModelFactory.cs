@@ -13,9 +13,8 @@ namespace NanoQL.Models;
 
 /// <summary>A factory of <see cref="MarketModel"/>s on given evolutions.</summary>
 /// <remarks>
-/// Immutable (the S-mm plan's MR1 (i)): <see cref="Create"/> returns a new model at each call. QuantLib's factories are
-/// observables, so a model is rebuilt when their market changes; here a changed market is a new factory. An extension
-/// point, as in QuantLib.
+/// Immutable: <see cref="Create"/> returns a new model at each call. QuantLib's factories are observables, so a model
+/// is rebuilt when their market changes; here a changed market is a new factory. An extension point, as in QuantLib.
 /// </remarks>
 public abstract class MarketModelFactory
 {

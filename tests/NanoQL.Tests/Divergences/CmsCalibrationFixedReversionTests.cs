@@ -10,14 +10,14 @@ using NanoQL.Tests.Vectors;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// A fixed reversion given to the CMS market calibration (the S-cms plan's CMR5 (xxvi)): QuantLib passes it through
-/// the transform's round trip, √(m²) = |m| (<c>cmsmarketcalibration.cpp:362-365</c> with <c>:188-191</c>; the matrix
-/// and parametric overloads <c>:430-433</c>, <c>:520-523</c>), and reports m (<c>:373-374</c>), so a negative reversion
-/// prices as its absolute value: on the wheel, on the vectors' market with the linear TSR pricer, a fixed −0.03 fits
-/// to an error of 0.010816623721669666, +0.03's, where QuantLib's own fixed path with no reversion given, on pricers
-/// built at −0.03, fits to 0.010817563120824606. nanoql passes the reversion as given. QuantLib's check: that path,
-/// the pricers' own reversion repriced as it stands (<c>:188-189</c>); here on nanoql's pricers, whose TSR prices on
-/// the SABR cube differ from QuantLib's (CMR5 (xxvii)).
+/// A fixed reversion given to the CMS market calibration: QuantLib passes it through the transform's round trip, √(m²)
+/// = |m| (<c>cmsmarketcalibration.cpp:362-365</c> with <c>:188-191</c>; the matrix and parametric overloads
+/// <c>:430-433</c>, <c>:520-523</c>), and reports m (<c>:373-374</c>), so a negative reversion prices as its absolute
+/// value: on the wheel, on the vectors' market with the linear TSR pricer, a fixed −0.03 fits to an error of
+/// 0.010816623721669666, +0.03's, where QuantLib's own fixed path with no reversion given, on pricers built at −0.03,
+/// fits to 0.010817563120824606. nanoql passes the reversion as given. QuantLib's check: that path, the pricers' own
+/// reversion repriced as it stands (<c>:188-189</c>); here on nanoql's pricers, whose TSR prices on the SABR cube
+/// differ from QuantLib's.
 /// </summary>
 public class CmsCalibrationFixedReversionTests
 {

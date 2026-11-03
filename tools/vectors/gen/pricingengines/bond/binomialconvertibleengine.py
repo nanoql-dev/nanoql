@@ -20,14 +20,13 @@ the bonds' last exercise date, after their last date. Each case's outputs are th
 date.
 
 Every structure shares the risk-free curve's day counter and reference date, where nanoql flattens a structure on
-another clock from its discount or variance (the S-sr plan's SSR8; tests/NanoQL.Tests/Divergences/ConvertibleClockTests.cs).
-Every bond settles on the evaluation date (convertiblebonds.py's priced_at_evaluation: "settlementDays" 0, an issue
-date after the evaluation date moved to it), where QuantLib's master's spot at the settlement date (#2752, taken ahead
-of the pin as the upstream sweep's SWR1 (a) and SWI2 rule) is QuantLib 1.44's, divided by a discount of 1; a lag, and a
-dividend inside it, are checked in tests/NanoQL.Tests/Divergences/ConvertibleUpstreamFixesTests.cs.
-Generated and left out: the Leisen-Reimer and Joshi trees at an even count, on which QuantLib rolls back a tree built for
-one more step (the S-eq plan's SEQR7 (x), which nanoql's engine applies); and an American exercise whose grid's last
-time rounds below the tree's maturity (#2878, convertiblebonds.py's test).
+another clock from its discount or variance (tests/NanoQL.Tests/Divergences/ConvertibleClockTests.cs). Every bond
+settles on the evaluation date (convertiblebonds.py's priced_at_evaluation: "settlementDays" 0, an issue date after the
+evaluation date moved to it), where QuantLib's master's spot at the settlement date (#2752, taken ahead of the pin) is
+QuantLib 1.44's, divided by a discount of 1; a lag, and a dividend inside it, are checked in
+tests/NanoQL.Tests/Divergences/ConvertibleUpstreamFixesTests.cs. Generated and left out: the Leisen-Reimer and Joshi
+trees at an even count, on which QuantLib rolls back a tree built for one more step (which nanoql's engine applies); and
+an American exercise whose grid's last time rounds below the tree's maturity (#2878, convertiblebonds.py's test).
 
 A case holds a bond spec of convertiblebonds.py, a process spec, the tree, the step count, the credit spread and the
 dividends (tools/vectors/gen/pricingengines/vanilla/analyticdividendeuropeanengine.py's specs). The wheel's calls, by

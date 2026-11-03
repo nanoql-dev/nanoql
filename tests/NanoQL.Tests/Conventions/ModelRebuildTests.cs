@@ -11,9 +11,9 @@ namespace NanoQL.Tests.Conventions;
 /// <summary>
 /// A model is immutable, and relinking its curve means building a new model (playbook §2's handle row): the new model's
 /// initial short rate is its curve's, and the old model keeps its own. It replaces QuantLib's
-/// <c>testHullWhiteUpdatesR0WhenTermStructureRelinks</c>, whose model observes a relinkable handle, and (the S-sr
-/// plan's SSD14) <c>testExtendedCoxIngersollRossUpdatesWhenTermStructureRelinks</c>, whose model notifies its observers
-/// of a relink, and <c>testG2ProcessObservesTermStructure</c>, whose process reads a quote set in place: the extended
+/// <c>testHullWhiteUpdatesR0WhenTermStructureRelinks</c>, whose model observes a relinkable handle, and
+/// <c>testExtendedCoxIngersollRossUpdatesWhenTermStructureRelinks</c>, whose model notifies its observers of a relink,
+/// and <c>testG2ProcessObservesTermStructure</c>, whose process reads a quote set in place: the extended
 /// Cox-Ingersoll-Ross model and the G2 process rebuilt on another curve each fit that curve, the first kept on its own.
 /// </summary>
 public class ModelRebuildTests

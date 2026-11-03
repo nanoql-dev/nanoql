@@ -3,12 +3,11 @@
 """Vectors for QuantLib's Garman-Klass estimators (ql/models/volatility/garmanklass.hpp): GarmanKlassSigma1, 3, 4, 5
 and 6 and ParkinsonSigma, the open-close ones (1, 3 and 6) from the previous close and today's open.
 
-Eight interval-price series of 2 to 40 consecutive daily dates, a random walk from 100 with each interval's open,
-close, high and low (the high the largest of the four, the low the smallest), each through every estimator at year
-fractions 1/252 and 1/360 and, for the open-close ones, market-open fractions 0.3 and 0.6: the output's dates and
-values. An empty series, which the open-close estimators read past its end in QuantLib, is left out (the S-bar plan's
-§2.10: BR5 (xxxv)); the refusal is a divergence fact. GarmanKlassSimpleSigma, which the wheel doesn't name, is the
-simple local estimator's harness file's.
+Eight interval-price series of 2 to 40 consecutive daily dates, a random walk from 100 with each interval's open, close,
+high and low (the high the largest of the four, the low the smallest), each through every estimator at year fractions
+1/252 and 1/360 and, for the open-close ones, market-open fractions 0.3 and 0.6: the output's dates and values. An empty
+series, which the open-close estimators read past its end in QuantLib, is left out; the refusal is a divergence fact.
+GarmanKlassSimpleSigma, which the wheel doesn't name, is the simple local estimator's harness file's.
 
 The wheel's calls, by QuantLib-SWIG 1.44's volatilities.i: each estimator's constructor and calculate on an
 IntervalPriceTimeSeries from IntervalPrice.makeSeries. Read back by

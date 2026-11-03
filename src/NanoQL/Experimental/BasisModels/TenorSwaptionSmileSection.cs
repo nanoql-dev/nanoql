@@ -37,7 +37,7 @@ internal sealed class TenorSwaptionSmileSection : SmileSection
         Calendar baseCalendar = volTS.BaseIndex.FixingCalendar;
         Date effectiveDate = baseCalendar.Advance(exerciseDate, volTS.BaseIndex.FixingDays, TimeUnit.Days);
 
-        // the length in whole months, rounded (XRR5 (xv)), where QuantLib's truncates it to whole years first
+        // the length in whole months, rounded, where QuantLib's truncates it to whole years first
         int months = (int)Math.Round(swapLength * 12.0, MidpointRounding.AwayFromZero);
         Date maturityDate = baseCalendar.Advance(
             effectiveDate, new Period(months, TimeUnit.Months), BusinessDayConvention.Unadjusted, false);
@@ -72,7 +72,7 @@ internal sealed class TenorSwaptionSmileSection : SmileSection
         var cf2 = new SwaptionCashFlows(
             new Swaption(targSwap, new EuropeanExercise(exerciseDate)), volTS.DiscountCurve, context);
 
-        // the flows QuantLib reads the last of, refused when empty (XRR5 (xvi))
+        // the flows QuantLib reads the last of, refused when empty
         if (cfs.FixedTimes.IsEmpty || cfs.FloatTimes.IsEmpty || cf2.FloatTimes.IsEmpty)
         {
             throw new NanoQLException(

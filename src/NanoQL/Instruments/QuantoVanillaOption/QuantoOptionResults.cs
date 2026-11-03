@@ -13,8 +13,8 @@ namespace NanoQL.Instruments;
 /// </summary>
 /// <remarks>
 /// Immutable. QuantLib's template over its results collapses to one record, every quanto instrument's results being
-/// <see cref="OneAssetOptionResults"/> (the S-exo plan's ER2 (i)); a sensitivity the engine doesn't compute is
-/// <see langword="null"/>, where QuantLib's accessors refuse it.
+/// <see cref="OneAssetOptionResults"/>; a sensitivity the engine doesn't compute is <see langword="null"/>, where
+/// QuantLib's accessors refuse it.
 /// </remarks>
 public sealed record QuantoOptionResults : OneAssetOptionResults
 {

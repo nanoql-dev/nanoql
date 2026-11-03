@@ -2,17 +2,16 @@
 // SPDX-License-Identifier: Apache-2.0
 
 // ql/experimental/math/particleswarmoptimization.hpp, .cpp and fireflyalgorithm.hpp, .cpp: the particle swarm and the
-// firefly algorithm, which the wheel doesn't bind, run where the S-xrt plan's fixes don't reach (XRR5 (xxviii)-(xxxii)
-// and the run's R4-1 and R4-2), each cost function logging the points it evaluates.
+// firefly algorithm, which the wheel doesn't bind, run where nanoql's fixes don't reach, each cost function logging the
+// points it evaluates.
 //
 // "ParticleSwarmOptimization::minimize" takes (M, form, coefficients, inertia, inertiaParameters, seed, lower, upper,
 // center, maxIterations, maxStationary): the swarm on the topology below, the constriction form "constriction" [c1, c2]
 // or the inertia form "inertia" [omega, c1, c2], the inertia "trivial" [], "simpleRandom" [threshold, seed] or
 // "levyFlight" [alpha, threshold, seed], minimizing the sphere Σ(xᵢ − cᵢ)² centred at center within the bounds. The
 // topology is the global topology as QuantLib's documents it, the best personal best every particle's social best,
-// written here (and alike in the C# reader): QuantLib's own keeps the worst (XRR5 (xxviii)). It returns {"x", "value",
-// "evaluations", "endCriteria", "log"}: the result, the count, EndCriteria::Type's integer and the evaluated points in
-// turn.
+// written here (and alike in the C# reader): QuantLib's own keeps the worst. It returns {"x", "value", "evaluations",
+// "endCriteria", "log"}: the result, the count, EndCriteria::Type's integer and the evaluated points in turn.
 //
 // "FireflyAlgorithm::minimize" takes (M, Mde, mutation, crossover, seed, walk, walkParameters, intensity,
 // intensityParameters, cost, lower, upper, center, maxIterations, maxStationary): the walk "gaussian" [sigma, delta,

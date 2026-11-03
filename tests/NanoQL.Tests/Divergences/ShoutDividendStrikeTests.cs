@@ -12,16 +12,16 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The finite-difference shout engine with a dividend between the shout and expiry (the S-van plan's VR4 (xxx)).
-/// QuantLib's inner value takes the intrinsic value at the spot, the escrowed level less the dividend adjustment, but
-/// strikes the residual option at the escrowed level (<c>fdmshoutloginnervaluecalculator.cpp:47-73</c>), handing the
-/// dividends' present value back: on <c>testLargeDividendShoutNPV</c>'s option, a call at 80 on 100 with a dividend of
-/// 30 at three months, its engine gives 24.90999 = 20 + 4.90999, a shout now whose residual is at the money on the
-/// escrowed 70 [read; executed by the reviewer, the S-van plan's round 1, p08], and its test's reference, a shout without
-/// dividends up to the dividend date, prices the same handed-back residual. A shout at τ pays
-/// max(S_T − K, S_τ − K) = (S_τ − K) + (S_T − S_τ)⁺, so the residual is struck at the spot S_τ. nanoql strikes it there,
-/// its volatility read there; without dividends the two levels are one, and QuantLib's bits stand. The checks: the
-/// payoff identity at t₀, and, independently, a binomial programme of the same stopping problem on the escrowed process.
+/// The finite-difference shout engine with a dividend between the shout and expiry. QuantLib's inner value takes the
+/// intrinsic value at the spot, the escrowed level less the dividend adjustment, but strikes the residual option at the
+/// escrowed level (<c>fdmshoutloginnervaluecalculator.cpp:47-73</c>), handing the dividends' present value back: on
+/// <c>testLargeDividendShoutNPV</c>'s option, a call at 80 on 100 with a dividend of 30 at three months, its engine
+/// gives 24.90999 = 20 + 4.90999, a shout now whose residual is at the money on the escrowed 70, and its test's
+/// reference, a shout without dividends up to the dividend date, prices the same handed-back residual. A shout at τ
+/// pays max(S_T − K, S_τ − K) = (S_τ − K) + (S_T − S_τ)⁺, so the residual is struck at the spot S_τ. nanoql strikes it
+/// there, its volatility read there; without dividends the two levels are one, and QuantLib's bits stand. The checks:
+/// the payoff identity at t₀, and, independently, a binomial programme of the same stopping problem on the escrowed
+/// process.
 /// </summary>
 public class ShoutDividendStrikeTests
 {

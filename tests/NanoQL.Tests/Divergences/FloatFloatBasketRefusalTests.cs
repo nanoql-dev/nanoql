@@ -11,8 +11,8 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The float-float engine's calibration basket refuses, with QuantLib's master's texts (#2845, after the pin; the
-/// S-g1d plan's G1R5 (iv)), the two expiries its initial guess can't be built at: master's
+/// The float-float engine's calibration basket refuses, with QuantLib's master's texts (#2845, after the pin), the two
+/// expiries its initial guess can't be built at: master's
 /// <c>testGaussian1dFloatFloatSwaptionCalibrationInitialGuessBoundaries</c>, on its fixture (Euribor 6M and 3M, 100 a
 /// leg, a flat 5% from the settlement date, GSR σ = 0.01, a = 0.03), the evaluation date fixed at 15 January 2025.
 /// QuantLib 1.44 refuses both with a schedule's text instead: on the wheel, "effective date (October 21st, 2025) later

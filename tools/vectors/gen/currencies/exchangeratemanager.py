@@ -14,10 +14,10 @@ those currencies, Direct and Derived, on dates inside, outside and at the edges 
 (the evaluation date). Each lookup's source, target, rate and type, and its exchange of 100 units of its source, or
 {"throws": true} for each where QuantLib refuses it.
 
-Left out (the S-rx plan's §2.5): currencies coded 1,000 or more and currencies sharing a numeric code (CNY and CNH),
-whose lookups nanoql fixes (SRXR3 (iv), (v); Divergences/ExchangeRateKeyTests.cs, SharedNumericCodeTests.cs). No
-other ported currency shares a code with another. Also left out: a lookup between BGL and BGN, which QuantLib's name
-equality answers as one currency's, at 1.0, where nanoql tells them apart (Divergences/CurrencyNameAndCodeTests.cs).
+Left out: currencies coded 1,000 or more and currencies sharing a numeric code (CNY and CNH), whose lookups nanoql fixes
+(Divergences/ExchangeRateKeyTests.cs, SharedNumericCodeTests.cs). No other ported currency shares a code with another.
+Also left out: a lookup between BGL and BGN, which QuantLib's name equality answers as one currency's, at 1.0, where
+nanoql tells them apart (Divergences/CurrencyNameAndCodeTests.cs).
 
 A case holds its settings' exchangeRates (the rates added after clear()) and "lookups", a list of {"source", "target"
 (codes), "date" (a serial, or null for the evaluation date), "type" (QuantLib's integer)}; the outputs are arrays, one

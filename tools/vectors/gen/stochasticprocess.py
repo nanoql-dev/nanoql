@@ -1,15 +1,15 @@
 # SPDX-FileCopyrightText: 2026 The nanoql Authors
 # SPDX-License-Identifier: Apache-2.0
 """Vectors for QuantLib's StochasticProcess and StochasticProcess1D (ql/stochasticprocess.hpp, .cpp) through the
-members the wheel exposes, on 10 Ornstein-Uhlenbeck processes, the one concrete process S2 ports. For each process
-the multi-dimensional interface's size, factors (the base's default, size()) and initialValues; and at 20 points
-(t0, x0, dt, dw, dx): the 1-D defaults the process doesn't override, evolve(t0, x0, dt, dw) (expectation plus
-stdDeviation times dw, through apply) and apply(x0, dx); and the multi-dimensional forms StochasticProcess1D
-implements through the 1-D members on arrays of size 1: drift(t0, x), diffusion(t0, x), expectation(t0, x, dt),
-stdDeviation(t0, x, dt), covariance(t0, x, dt) and evolve(t0, x, dt, dw). A 1 x 1 matrix is written as its rows.
-Left out: the outputs that read the variance of the processes at speed 1e-9, below the square root of machine epsilon,
-where QuantLib's variance takes its a = 0 limit and nanoql's is the cancellation-free form, by the user's ruling of
-2026-10-22 (the S-sr plan's SSR3 class; tests/NanoQL.Tests/Divergences/OrnsteinUhlenbeckVarianceTests.cs).
+members the wheel exposes, on 10 Ornstein-Uhlenbeck processes, a concrete one-dimensional process. For each process the
+multi-dimensional interface's size, factors (the base's default, size()) and initialValues; and at 20 points (t0, x0,
+dt, dw, dx): the 1-D defaults the process doesn't override, evolve(t0, x0, dt, dw) (expectation plus stdDeviation times
+dw, through apply) and apply(x0, dx); and the multi-dimensional forms StochasticProcess1D implements through the 1-D
+members on arrays of size 1: drift(t0, x), diffusion(t0, x), expectation(t0, x, dt), stdDeviation(t0, x, dt),
+covariance(t0, x, dt) and evolve(t0, x, dt, dw). A 1 x 1 matrix is written as its rows. Left out: the outputs that read
+the variance of the processes at speed 1e-9, below the square root of machine epsilon, where QuantLib's variance takes
+its a = 0 limit and nanoql's is the cancellation-free form
+(tests/NanoQL.Tests/Divergences/OrnsteinUhlenbeckVarianceTests.cs).
 
 The wheel's calls, by QuantLib-SWIG's stochasticprocess.i: the process is ql.OrnsteinUhlenbeckProcess(speed, vol,
 x0, level). Its proxy class declares the 1-D members, which hide the base's array forms of the same names, so those

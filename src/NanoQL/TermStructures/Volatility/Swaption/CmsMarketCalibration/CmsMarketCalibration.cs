@@ -28,10 +28,10 @@ namespace NanoQL.TermStructures;
 /// <see cref="Compute(EndCriteria, OptimizationMethod, Vector, bool, EvaluationContext)"/> starts from the cube and
 /// market it was given, each cost evaluation building a new cube from the last one and a new market, as QuantLib's
 /// evaluations change the one cube in turn, and it returns the recalibrated cube and repriced market in its results,
-/// the calibration's own left unchanged. Three of QuantLib's defects are fixed (R8): the fixed-reversion path's β guess
-/// enters the optimizer transformed, as its other paths' do (the S-cms plan's CMR5 (x)); the reversion is √|y|, where
-/// QuantLib's √y returns NaN for an optimizer step to y below 0 (CMR5 (xi)); and a fixed reversion is passed to the
-/// pricers as given, where QuantLib passes it through the transform's round trip, √(m²) = |m| (CMR5 (xxvi)).
+/// the calibration's own left unchanged. Three of QuantLib's defects are fixed: the fixed-reversion path's β guess
+/// enters the optimizer transformed, as its other paths' do; the reversion is √|y|, where QuantLib's √y returns NaN for
+/// an optimizer step to y below 0; and a fixed reversion is passed to the pricers as given, where QuantLib passes it
+/// through the transform's round trip, √(m²) = |m|.
 /// </para>
 /// </remarks>
 public sealed class CmsMarketCalibration
@@ -122,8 +122,7 @@ public sealed class CmsMarketCalibration
     /// <returns>The y.</returns>
     public static double ReversionTransformInverse(double reversion) => reversion * reversion;
 
-    /// <summary>The reversion of a y: √|y|, which QuantLib's √y is for every y at or above 0 (R8, the S-cms plan's CMR5
-    /// (xi)).</summary>
+    /// <summary>The reversion of a y: √|y|, which QuantLib's √y is for every y at or above 0.</summary>
     /// <param name="y">The y.</param>
     /// <returns>The reversion.</returns>
     public static double ReversionTransformDirect(double y) => Math.Sqrt(Math.Abs(y));
@@ -176,7 +175,7 @@ public sealed class CmsMarketCalibration
             var betasGuess = new double[nBeta];
             for (int i = 0; i < nBeta; ++i)
             {
-                // transformed, as the other paths' guesses are, where QuantLib's passes guess[i] (CMR5 (x))
+                // transformed, as the other paths' guesses are, where QuantLib's passes guess[i]
                 betasGuess[i] = BetaTransformInverse(guess[i]);
             }
 
@@ -605,7 +604,7 @@ public sealed class CmsMarketCalibration
                 }
             }
 
-            // a fixed reversion as given, where QuantLib's passes it through the transform's round trip (CMR5 (xxvi))
+            // a fixed reversion as given, where QuantLib's passes it through the transform's round trip
             Cube = cube;
             Market = Market.Reprice(cube, meanReversion, context);
         }

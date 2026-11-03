@@ -11,11 +11,10 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The Markov-functional model's state (the S-g1d plan's G1R1 (v)): it calibrates when it is built, under the context
-/// it is given, where QuantLib's calibrates at its first use under the evaluation date then;
-/// <see cref="MarkovFunctional.ForceArbitrageIndices"/> returns a copy calibrated again, its Kahale cores starting and
-/// ending at the given indices at the least and the most (QuantLib's forced indices, checked on the wheel's Kahale
-/// vectors), and leaves the receiver;
+/// The Markov-functional model's state: it calibrates when it is built, under the context it is given, where QuantLib's
+/// calibrates at its first use under the evaluation date then; <see cref="MarkovFunctional.ForceArbitrageIndices"/>
+/// returns a copy calibrated again, its Kahale cores starting and ending at the given indices at the least and the most
+/// (QuantLib's forced indices, checked on the wheel's Kahale vectors), and leaves the receiver;
 /// <see cref="MarkovFunctional.WithParams"/> keeps the smiles and tabulates the numeraire again, QuantLib's
 /// <c>setParams</c>; and <see cref="MarkovFunctional.ModelOutputs"/> computes the outputs per call.
 /// </summary>
@@ -64,7 +63,7 @@ public class MarkovFunctionalStateTests
         var moved = (MarkovFunctional)model.WithParams(new Vector([1.0, 0.8, 1.2, 1.1]));
 
         // QuantLib's before and after setParams, on the wheel, within the vectors' tolerance (the C runtime's erf
-        // apart, the plan's G1R3, which the calibration moves to 1.5e-13).
+        // apart, which the calibration moves to 1.5e-13).
         Assert.True(Math.Abs((model.Numeraire(2.5, 0.3) / 0.679826077566786) - 1.0) <= Tolerance.Relative, $"{model.Numeraire(2.5, 0.3)}");
         Assert.True(Math.Abs((moved.Numeraire(2.5, 0.3) / 0.6794519677636444) - 1.0) <= Tolerance.Relative, $"{moved.Numeraire(2.5, 0.3)}");
         Assert.True(Math.Abs((moved.Zerobond(6.0, 2.5, 0.3) / 0.8989351543521948) - 1.0) <= Tolerance.Relative, $"{moved.Zerobond(6.0, 2.5, 0.3)}");

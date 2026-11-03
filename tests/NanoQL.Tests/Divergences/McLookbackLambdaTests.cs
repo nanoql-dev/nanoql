@@ -13,13 +13,12 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The Monte Carlo partial floating lookback's λ (the S-bar plan's BR5 (xxi), fixed under R8). QuantLib's pricer pays
-/// S_T − min where the instrument's payoff, and QuantLib's analytic engine, is S_T − λ min: a partial floating call at
-/// λ 1.2 (running minimum 100) whose window ends 90 days into 360, on spot 100, r 5%, q 2%, σ 20%, 4 steps, 100,000
-/// antithetic samples at seed 42, prices at 7.747172763156529, its value at λ 1 (the S-bar run's probe harness,
-/// <c>probe_mc_ql.py</c>). nanoql pays λ times the minimum. Check: the discrete payoff's exact value on the engine's
-/// window {0, 90 days}, the quadrature <c>McLookbackWindowTests</c> takes: 3.042965056630764, within three of the
-/// engine's error estimates.
+/// The Monte Carlo partial floating lookback's λ (fixed). QuantLib's pricer pays S_T − min where the instrument's
+/// payoff, and QuantLib's analytic engine, is S_T − λ min: a partial floating call at λ 1.2 (running minimum 100) whose
+/// window ends 90 days into 360, on spot 100, r 5%, q 2%, σ 20%, 4 steps, 100,000 antithetic samples at seed 42, prices
+/// at 7.747172763156529, its value at λ 1. nanoql pays λ times the minimum. Check: the discrete payoff's exact value on
+/// the engine's window {0, 90 days}, the quadrature <c>McLookbackWindowTests</c> takes: 3.042965056630764, within three
+/// of the engine's error estimates.
 /// </summary>
 public class McLookbackLambdaTests
 {

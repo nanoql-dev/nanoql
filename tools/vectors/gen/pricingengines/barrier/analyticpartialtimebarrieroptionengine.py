@@ -11,20 +11,19 @@ blackscholesprocess.py, calls and puts at three strikes (90, 100 and 110% of the
 NPV, the engine's one result. B2 with the strike beyond the barrier is QuantLib's refusal. Then an expired option and
 the refusal of a cash-or-nothing payoff.
 
-QuantLib's engine reads Drezner's bivariate normal, nanoql's West's (the S-bar plan's BR4 (e), the S-exo plan's ER7),
-so every value carries §3.3's override: Drezner's accuracy, 6e-7 (EP39) times the sum of the bivariate terms'
-coefficients, three pairs of S e^((b-r)T)(1 + (H/S)^(2mu+2)) and X e^(-rT)(1 + (H/S)^(2mu)) on the call the engine
-prices (a put's put-call symmetric call, K/S times), relative to the value.
+QuantLib's engine reads Drezner's bivariate normal, nanoql's West's, so every value carries §3.3's override: Drezner's
+accuracy, 6e-7 times the sum of the bivariate terms' coefficients, three pairs of S e^((b-r)T)(1 + (H/S)^(2mu+2)) and X
+e^(-rT)(1 + (H/S)^(2mu)) on the call the engine prices (a put's put-call symmetric call, K/S times), relative to the
+value.
 
-The outputs nanoql fixes are left out (the S-bar plan's §2.10): every process here has one day counter and reference
-date (BR5 (i), tests/NanoQL.Tests/Divergences/BarrierClosedFormMismatchedTimesTests.cs); every rebate is 0, which
-QuantLib's engine never reads (BR5 (xii), PartialTimeRebateTests.cs); no cover event is today (BR5 (xiii),
-PartialTimeCoverTodayTests.cs) and no spot is beyond its barrier (BR5 (xiv), PartialTimeTouchedTests.cs); the
-end-window knock-ins QuantLib refuses aren't written (BR8 (a), PartialTimeEndKnockInTests.cs); nor are the
-start-window knock-in puts, whose European #2876 reads on the symmetric call (BarrierUpstreamFixesTests.cs); and a
-value Drezner's algorithm returns as NaN is left out of its case (#2880, BR4 (e)): a case holds the payoffs left; and
-every exercise is European, where QuantLib prices an American one to its last date and nanoql refuses it
-(PartialTimeExerciseTests.cs).
+The outputs nanoql fixes are left out: every process here has one day counter and reference date
+(tests/NanoQL.Tests/Divergences/BarrierClosedFormMismatchedTimesTests.cs); every rebate is 0, which QuantLib's engine
+never reads (PartialTimeRebateTests.cs); no cover event is today (PartialTimeCoverTodayTests.cs) and no spot is beyond
+its barrier (PartialTimeTouchedTests.cs); the end-window knock-ins QuantLib refuses aren't written
+(PartialTimeEndKnockInTests.cs); nor are the start-window knock-in puts, whose European #2876 reads on the symmetric
+call (BarrierUpstreamFixesTests.cs); and a value Drezner's algorithm returns as NaN is left out of its case (#2880): a
+case holds the payoffs left; and every exercise is European, where QuantLib prices an American one to its last date and
+nanoql refuses it (PartialTimeExerciseTests.cs).
 
 A case holds one process, exercise, barrier, barrier range and cover event, its outputs one per payoff: the specs
 tools/vectors/gen/pricingengines/barrier/analyticbarrierengine.py's, the range QuantLib's PartialBarrier::Range (Start
@@ -64,7 +63,7 @@ SETUPS = [("down-and-out, start", abe.DOWN_OUT, START), ("down-and-out, end B1",
           ("up-and-out, end B1", abe.UP_OUT, END_B1), ("up-and-out, end B2", abe.UP_OUT, END_B2),
           ("down-and-in, start", abe.DOWN_IN, START), ("up-and-in, start", abe.UP_IN, START)]
 DRZ = 6e-7
-REASON = "ER7: QuantLib's engine reads Dr78, nanoql's We04DP; 6e-7 times the bivariate terms' coefficients (EP39)"
+REASON = "QuantLib's engine reads Dr78, nanoql's We04DP; 6e-7 times the bivariate terms' coefficients"
 
 
 def option(barrier, barrier_range, cover, payoff, ex):

@@ -23,9 +23,9 @@ namespace NanoQL.TermStructures;
 /// Immutable; it builds an analytic engine per query, as QuantLib's does. Its reference date is the model's origin, the
 /// earlier of its curves' reference dates, and its times are on the risk-free curve's day counter from there, each
 /// curve read at the instant a time denotes, where QuantLib's runs from the risk-free curve's reference date and reads
-/// the dividend curve at the risk-free curve's times (the S-hes plan's HR7 (xi)); a market whose dividend curve shares
-/// the risk-free curve's reference date and day counter keeps QuantLib's values. Where the model's price isn't positive
-/// the volatility is √θ, QuantLib's guard.
+/// the dividend curve at the risk-free curve's times; a market whose dividend curve shares the risk-free curve's
+/// reference date and day counter keeps QuantLib's values. Where the model's price isn't positive the volatility is √θ,
+/// QuantLib's guard.
 /// </para>
 /// </remarks>
 public sealed class HestonBlackVolSurface : BlackVolTermStructure

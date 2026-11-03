@@ -12,7 +12,7 @@ namespace NanoQL.Numerics;
 /// </summary>
 /// <remarks>
 /// QuantLib keeps the moments and factorials in NaN-filled memos; here each call computes moment n and n! by a loop,
-/// the same products in QuantLib's order, so QuantLib's values, in O(n) with nothing kept (the S-core plan's CR5 (d)).
+/// the same products in QuantLib's order, so QuantLib's values, in O(n) with nothing kept.
 /// </remarks>
 public abstract class GaussLaguerreTrigonometricBase : MomentBasedGaussianPolynomial
 {

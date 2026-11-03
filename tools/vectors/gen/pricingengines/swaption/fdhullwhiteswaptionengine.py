@@ -13,9 +13,9 @@ the coarse grid. Then the refusals: an index forecasting on an Actual/360 curve 
 curve must match"), and a Bermudan swaption with an exercise date before the evaluation date ("exercise dates must not
 contain past date").
 
-Generated and left out: TR-BDF2 (the S-eq plan's SEQR9, tools/vectors/gen/methods/finitedifferences/solvers/
-fdmhullwhitesolver.py's reason). Not generated: an American exercise, whose step conditions reach the inner value at
-times off its exercise dates, where QuantLib reads its map's end (undefined behaviour) and nanoql refuses
+Generated and left out: TR-BDF2 (tools/vectors/gen/methods/finitedifferences/solvers/fdmhullwhitesolver.py's reason).
+Not generated: an American exercise, whose step conditions reach the inner value at times off its exercise dates, where
+QuantLib reads its map's end (undefined behaviour) and nanoql refuses
 (tests/NanoQL.Tests/Conventions/InnerValueAmericanRefusalTests.cs).
 
 Each case's output is the NPV ("NPV", an amount at the nominal) on each engine spec {"model", "tGrid", "xGrid",

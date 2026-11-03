@@ -14,10 +14,10 @@ namespace NanoQL.Instruments;
 /// accrual factor.
 /// </summary>
 /// <remarks>
-/// An immutable function object (the S-cms plan's CMD17). Each type is +1 (sticky), −1 (ratchet) or 0 (no second
-/// option), checked when the payoff is evaluated, as QuantLib checks them. An extension point: the six named payoffs
-/// derive from it, as in QuantLib. QuantLib's single <c>StickyRatchetPayoff</c> and its two payoffs, in a block of
-/// comments the double payoff superseded, aren't ported.
+/// An immutable function object. Each type is +1 (sticky), −1 (ratchet) or 0 (no second option), checked when the
+/// payoff is evaluated, as QuantLib checks them. An extension point: the six named payoffs derive from it, as in
+/// QuantLib. QuantLib's single <c>StickyRatchetPayoff</c> and its two payoffs, in a block of comments the double
+/// payoff superseded, aren't ported.
 /// </remarks>
 public class DoubleStickyRatchetPayoff : Payoff
 {

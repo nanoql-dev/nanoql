@@ -16,7 +16,7 @@ namespace NanoQL.PricingEngines;
 /// QuantLib's engine holds it. The fixed rate is corrected for the floating leg's spread, which the model doesn't take
 /// into account, by the spread times the ratio of the legs' basis-point values on the model's curve, and the swaption
 /// is priced by <see cref="G2"/>'s integral over the given number of standard deviations on the given number of
-/// segments, its coupons the swap's own fixed coupons (the S-sr plan's SSR6 (xiii)).
+/// segments, its coupons the swap's own fixed coupons.
 /// </para>
 /// <para>As QuantLib's header warns, the engine assumes that the exercise date equals the start date of the swap.</para>
 /// </remarks>

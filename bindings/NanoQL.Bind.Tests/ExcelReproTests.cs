@@ -13,8 +13,8 @@ using static NanoQL.Bind.Tests.ExcelSurfaces;
 namespace NanoQL.Bind.Tests;
 
 /// <summary>
-/// Repro export's part in the generator (XLR14): the path reporters, which a build hands the runtime by their Excel names
-/// for the export to refuse (round 6's F6-1), and each function's repro template with Python's names beside C#'s (XLP66).
+/// Repro export's part in the generator: the path reporters, which a build hands the runtime by their Excel names for
+/// the export to refuse, and each function's repro template with Python's names beside C#'s.
 /// </summary>
 public sealed class ExcelReproTests
 {
@@ -62,9 +62,9 @@ public sealed class ExcelReproTests
     }
 
     /// <summary>
-    /// Each template carries Python's module, class, member, call style and parameters (S-bind's Python back end's
-    /// names): a constructor, a method, a property, a lookup on the convention set, and the experimental API's module;
-    /// a family's on each construction; none for a date's or a period's constructor, which Python takes as values.
+    /// Each template carries Python's module, class, member, call style and parameters (the Python back end's names): a
+    /// constructor, a method, a property, a lookup on the convention set, and the experimental API's module; a family's
+    /// on each construction; none for a date's or a period's constructor, which Python takes as values.
     /// </summary>
     [Fact]
     public void EachTemplateCarriesPythonsNames()

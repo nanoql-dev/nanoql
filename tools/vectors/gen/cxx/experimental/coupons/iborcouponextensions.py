@@ -9,7 +9,7 @@ which the wheel doesn't bind, each output computed by the C++ harness
   volatility of 20% (shift 0 and 1%) and a normal one of 0.8%: its swaplet, caplet and floorlet rates.
 - "proxy" cases: a proxy of Euribor 6M at gearing 2 and spread 0.001: its name, its fixing, value and maturity dates at
   the coupon's fixing, and a past fixing read back. Its forecast, gearing × proxied × spread on QuantLib, is left out
-  (the S-xrt plan's XRR5 (xxi); Divergences/ProxyIborTests.cs).
+  (Divergences/ProxyIborTests.cs).
 - "stripped" cases: capped, floored and collared coupons on QuantLib's Black pricer at a 20% optionlet volatility: the
   underlying's, the capped coupon's and the stripped coupon's rates, a three-coupon stripped leg's amounts, and the
   stripped coupon's cap, floor, effective cap and floor, kind and convexity adjustment.

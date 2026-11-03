@@ -13,10 +13,10 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The Monte Carlo barrier engine's loop allocates nothing per sample after its first batch (the S-van plan's VD12, the
-/// S-bar plan's BR1): the Brownian-bridge pricer's draw-price-add, its bridge uniforms drawn as a view of its
-/// generator's buffer, and the biased pricer's, each on a down-and-out and an up-and-in call. Each batch goes into an
-/// <see cref="IncrementalStatistics"/>, which keeps no sample.
+/// The Monte Carlo barrier engine's loop allocates nothing per sample after its first batch: the Brownian-bridge
+/// pricer's draw-price-add, its bridge uniforms drawn as a view of its generator's buffer, and the biased pricer's,
+/// each on a down-and-out and an up-and-in call. Each batch goes into an <see cref="IncrementalStatistics"/>, which
+/// keeps no sample.
 /// </summary>
 public class McBarrierAllocationTests
 {

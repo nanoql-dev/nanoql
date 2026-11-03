@@ -8,9 +8,9 @@ using static NanoQL.Tests.Divergences.AbcdTermStructures;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The abcd calibration is immutable (the S-g1d plan's G1D9): <see cref="AbcdCalibration.Compute"/> returns the fitted
-/// calibration, where QuantLib's <c>compute()</c> writes the fit into the object; the receiver keeps its guesses, its
-/// errors theirs, and no end criteria.
+/// The abcd calibration is immutable: <see cref="AbcdCalibration.Compute"/> returns the fitted calibration, where
+/// QuantLib's <c>compute()</c> writes the fit into the object; the receiver keeps its guesses, its errors theirs, and
+/// no end criteria.
 /// </summary>
 public class AbcdCalibrationComputeTests
 {

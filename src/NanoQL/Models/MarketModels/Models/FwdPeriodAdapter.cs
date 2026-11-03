@@ -18,16 +18,14 @@ namespace NanoQL.Models;
 /// the last long reset, each step's pseudo-root the Y matrix times the short model's, the expired rates' rows zero.
 /// </summary>
 /// <remarks>
-/// <para>Immutable (the S-mm plan's MR1 (i)): its pseudo-roots are computed at construction, and a read returns a
-/// copy.</para>
+/// <para>Immutable: its pseudo-roots are computed at construction, and a read returns a copy.</para>
 /// <para>
 /// Two departures from QuantLib (<c>Divergences/FwdPeriodAdapterTests.cs</c>): with no displacements given, each long
 /// rate's is the mean of its own period's short displacements, where QuantLib's running sum is never reset and starts
-/// at the first rate, not the offset (MR3 (ii); <c>fwdperiodadapter.cpp:54-64</c>); and the Y matrix is
-/// <see cref="ForwardForwardMappings.YMatrix"/>'s, the long forwards' true elasticities (MR3 (i)). A short model whose
-/// evolution holds no time to the last long reset, which leaves QuantLib's adapter with steps it never computes, no
-/// long forward fitting the short ones, and a pseudo-root read past the steps, which QuantLib reads unchecked, are
-/// refused (MR3 (xx)).
+/// at the first rate, not the offset (<c>fwdperiodadapter.cpp:54-64</c>); and the Y matrix is
+/// <see cref="ForwardForwardMappings.YMatrix"/>'s, the long forwards' true elasticities. A short model whose evolution
+/// holds no time to the last long reset, which leaves QuantLib's adapter with steps it never computes, no long forward
+/// fitting the short ones, and a pseudo-root read past the steps, which QuantLib reads unchecked, are refused.
 /// </para>
 /// </remarks>
 public sealed class FwdPeriodAdapter : MarketModel
@@ -67,7 +65,7 @@ public sealed class FwdPeriodAdapter : MarketModel
         numberOfFactors = largeModel.NumberOfFactors;
         numberOfRates = (largeModel.NumberOfRates - offset) / period;
 
-        // QuantLib sizes its long rates from the short ones less the offset, unsigned, a wrap past them (MR3 (xx))
+        // QuantLib sizes its long rates from the short ones less the offset, unsigned, a wrap past them
         if (!(offset <= largeModel.NumberOfRates && numberOfRates >= 1))
         {
             throw new ArgumentException(
@@ -86,7 +84,7 @@ public sealed class FwdPeriodAdapter : MarketModel
         else if (newDisplacements.IsEmpty)
         {
             // if not specified use average across rate: each period's own short displacements, from the offset, where
-            // QuantLib's sum runs on from the first rate (MR3 (ii))
+            // QuantLib's sum runs on from the first rate
             displacements = new double[numberOfRates];
             for (int k = 0; k < displacements.Length; ++k)
             {
@@ -125,7 +123,7 @@ public sealed class FwdPeriodAdapter : MarketModel
             newEvolutionTimes.Add(oldEvolutionTimes[i]);
         }
 
-        // QuantLib's evolution then takes the rate times' default while its steps stay none (MR3 (xx))
+        // QuantLib's evolution then takes the rate times' default while its steps stay none
         if (!(newEvolutionTimes.Count > 0))
         {
             throw new ArgumentException(
@@ -188,7 +186,7 @@ public sealed class FwdPeriodAdapter : MarketModel
     /// <exception cref="ArgumentOutOfRangeException"><paramref name="i"/> isn't a step.</exception>
     public override Matrix PseudoRoot(int i)
     {
-        // QuantLib reads the pseudo-roots unchecked (MR3 (xx)).
+        // QuantLib reads the pseudo-roots unchecked.
         if (!(i >= 0 && i < numberOfSteps))
         {
             throw new ArgumentOutOfRangeException(

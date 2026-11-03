@@ -26,17 +26,16 @@ namespace NanoQL.PricingEngines;
 /// <remarks>
 /// <para>
 /// European exercise only, as QuantLib's. The engine reports the value, delta, gamma and theta. Its working types are
-/// built inside each calculation (SEQR1), its grids are <see cref="FdHestonVanillaEngine"/>'s (the S-bar plan's BR2 (v)),
-/// and its times run on <see cref="FdmHestonOp.Clock"/>, from the earliest reference date of the structures it reads,
-/// where QuantLib's read the process's time (BR5 (iv), the S-hes plan's HR7;
-/// <c>Divergences/FdHestonBarrierMismatchedTimesTests.cs</c>).
+/// built inside each calculation, its grids are <see cref="FdHestonVanillaEngine"/>'s, and its times run on
+/// <see cref="FdmHestonOp.Clock"/>, from the earliest reference date of the structures it reads, where QuantLib's read
+/// the process's time (<c>Divergences/FdHestonBarrierMismatchedTimesTests.cs</c>).
 /// </para>
 /// <para>
 /// Documented divergences. A knock-in's vanilla and rebate legs take the knock-out leg's leverage function and mixing
-/// factor, where QuantLib prices them on pure Heston, so a stochastic-local knock-in would mix models (BR5 (xviii),
-/// <c>Divergences/FdHestonKnockInLeverageTests.cs</c>). And a spot beyond the barrier is refused before the solve
+/// factor, where QuantLib prices them on pure Heston, so a stochastic-local knock-in would mix models
+/// (<c>Divergences/FdHestonKnockInLeverageTests.cs</c>). And a spot beyond the barrier is refused before the solve
 /// ("barrier touched"), as the family's other engines refuse it, where QuantLib's grid interpolation fails outside its
-/// range (BR5 (xliv), <c>Conventions/FdHestonBarrierTouchedTests.cs</c>).
+/// range (<c>Conventions/FdHestonBarrierTouchedTests.cs</c>).
 /// </para>
 /// </remarks>
 public static class FdHestonBarrierEngine
@@ -122,7 +121,7 @@ public static class FdHestonBarrierEngine
             throw new NanoQLException("non-striked payoff given");
         }
 
-        // a spot beyond the barrier is refused before the solve (BR5 (xliv))
+        // a spot beyond the barrier is refused before the solve
         if (option.Triggered(model.Process.S0))
         {
             throw new NanoQLException("barrier touched");
@@ -153,7 +152,7 @@ public static class FdHestonBarrierEngine
         // 6. Calculate vanilla option and rebate for in-barriers
         if (option.BarrierType is BarrierType.DownIn or BarrierType.UpIn)
         {
-            // Calculate the vanilla option, with the knock-out leg's leverage function and mixing factor (BR5 (xviii))
+            // Calculate the vanilla option, with the knock-out leg's leverage function and mixing factor
             var vanillaOption = new VanillaOption(payoff, option.Exercise);
             OneAssetOptionResults vanilla = FdHestonVanillaEngine.Calculate(
                 vanillaOption, context, model, dividends, tGrid, xGrid, vGrid, dampingSteps, scheme, leverageFct, mixingFactor);

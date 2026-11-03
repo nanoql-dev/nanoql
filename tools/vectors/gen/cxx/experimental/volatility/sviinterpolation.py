@@ -15,15 +15,15 @@ parameters' checks failing at the guesses (a fixed b above 4 among them).
 SviSmileSection::volatility), not the fit's own: QuantLib doesn't rebuild its model instance after writing the best
 restart's parameters back, so its values can be its last trial's, where nanoql's are the best's (XabrFit's remarks).
 
-The outputs nanoql fixes are left out (the S-rx plan's §2.5): no guess sits at an edge of SVI's inverse transforms
-(SRXR3 (x); tests/NanoQL.Tests/Divergences/SviTransformEdgeTests.cs), and a fit with b or a fixed is written only where
-QuantLib's completes, so no trial fails its check and nanoql's clamp never acts (SRXR3 (xvii);
-SviFixedParameterTests.cs). The generator prints the fits it leaves out.
+The outputs nanoql fixes are left out: no guess sits at an edge of SVI's inverse transforms
+(tests/NanoQL.Tests/Divergences/SviTransformEdgeTests.cs), and a fit with b or a fixed is written only where QuantLib's
+completes, so no trial fails its check and nanoql's clamp never acts (SviFixedParameterTests.cs). The generator prints
+the fits it leaves out.
 
-**The stability filter** (the S7 plan's S7R6): every fit is refitted with its volatilities moved one ulp up, then down,
-by math.nextafter, every one together and each alone; an output is written only where every refit leaves it within 1e-12
-× max(|base|, |moved|, 1) (equal, for the end criterion), and the others are dropped: a value by leaving its strike out
-of "valueStrikes", a parameter, an error or the end criterion by leaving its key out, the weights only all together. The
+**The stability filter**: every fit is refitted with its volatilities moved one ulp up, then down, by math.nextafter,
+every one together and each alone; an output is written only where every refit leaves it within 1e-12 × max(|base|,
+|moved|, 1) (equal, for the end criterion), and the others are dropped: a value by leaving its strike out of
+"valueStrikes", a parameter, an error or the end criterion by leaving its key out, the weights only all together. The
 generator prints the dropped outputs per case and for the file.
 
 Each fit case's input "fit" is the harness's fit spec, which

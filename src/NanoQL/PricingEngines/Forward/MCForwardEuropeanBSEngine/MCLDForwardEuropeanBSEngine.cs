@@ -13,7 +13,7 @@ namespace NanoQL.PricingEngines;
 /// <see cref="MCForwardEuropeanBSEngine"/> on low-discrepancy draws with QuantLib's default statistics:
 /// QuantLib-Python's <c>MCLDForwardEuropeanBSEngine</c>, QuantLib's
 /// <c>MCForwardEuropeanBSEngine&lt;LowDiscrepancy&gt;</c>, its calculations closed at <see cref="LowDiscrepancy"/> and
-/// <see cref="GeneralStatistics"/> (D12).
+/// <see cref="GeneralStatistics"/>.
 /// </summary>
 public static class MCLDForwardEuropeanBSEngine
 {

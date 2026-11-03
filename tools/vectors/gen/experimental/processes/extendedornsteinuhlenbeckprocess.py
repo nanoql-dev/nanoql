@@ -9,11 +9,11 @@ klugeextouprocess.hpp, .cpp), on the evaluation date 18 December 2011.
   volatility; drift and diffusion at times and values; expectation, standard deviation and variance over steps; and
   evolve on draws.
 - "jumps" cases: Kluge's process on it: size, factors, initial values, drift, the 2 x 2 diffusion, and evolve on draws
-  with and without a jump in the step (QuantLib's one jump at most, XER5 (xxxii)).
+  with and without a jump in the step (QuantLib's one jump at most).
 - "kluge" cases: the Kluge-OU process: size, factors, initial values, drift and evolve.
 
-The outputs nanoql fixes are left out (the S-xeq plan's §2.8): the Kluge-OU process's diffusion, whose gas row QuantLib
-writes past its matrix (XER5 (xxviii)). The trapezoidal and Gauss-Lobatto rules, which the wheel doesn't bind, are
+The outputs nanoql fixes are left out: the Kluge-OU process's diffusion, whose gas row QuantLib writes past its matrix.
+The trapezoidal and Gauss-Lobatto rules, which the wheel doesn't bind, are
 tools/vectors/gen/cxx/experimental/processes/extendedornsteinuhlenbeckprocess.py's. Nothing is fitted, so no output is
 filtered.
 

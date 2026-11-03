@@ -10,14 +10,13 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The square-root CLV model's collocation points raised to the pMin quantile where QuantLib's rescale puts them below it
-/// (the S-xrt plan's XRR15, ruled 2026-10-29). QuantLib maps the Gauss nodes by a·x + (xMin − x.front()), which keeps
-/// them inside [q(pMin), q(pMax)] at every date of QuantLib's two cases but breaks the lower bound the method states
-/// wherever pMin's quantile exceeds the map's lowest point: on the vanilla case's nodes at pMin 1e-3 and pMax 0.999 the
-/// lowest point falls at probability 6.5e-5, at pMin 1e-2 at 1.4e-3, and on the mapping case's year date at pMin 1e-3 at
-/// 3.5e-4 with no low clamp (the S-xrt planner's XRP28 and XRP29). nanoql's map is QuantLib's raised by the shortfall: its
-/// lowest point at the pMin quantile, the affine map onto [q(pMin), q(pMax)] where the low bound clamps, continuous in
-/// pMin.
+/// The square-root CLV model's collocation points raised to the pMin quantile where QuantLib's rescale puts them below
+/// it. QuantLib maps the Gauss nodes by a·x + (xMin − x.front()), which keeps them inside [q(pMin), q(pMax)] at every
+/// date of QuantLib's two cases but breaks the lower bound the method states wherever pMin's quantile exceeds the map's
+/// lowest point: on the vanilla case's nodes at pMin 1e-3 and pMax 0.999 the lowest point falls at probability 6.5e-5,
+/// at pMin 1e-2 at 1.4e-3, and on the mapping case's year date at pMin 1e-3 at 3.5e-4 with no low clamp. nanoql's map
+/// is QuantLib's raised by the shortfall: its lowest point at the pMin quantile, the affine map onto [q(pMin), q(pMax)]
+/// where the low bound clamps, continuous in pMin.
 /// </summary>
 public class SquareRootCLVRescaleTests
 {

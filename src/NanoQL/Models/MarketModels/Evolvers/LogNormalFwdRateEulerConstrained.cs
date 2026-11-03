@@ -16,26 +16,24 @@ namespace NanoQL.Models;
 /// covariances so that it lands on its constraint, and the step's weight takes the likelihood ratio of the shift.
 /// </summary>
 /// <remarks>
-/// <para>A working type (the S-mm plan's MR1 (ii)), copying each step's pseudo-root at construction (MR1 (iv)).</para>
+/// <para>A working type, copying each step's pseudo-root at construction.</para>
 /// <para>
-/// Two departures from QuantLib (<c>Divergences/ConstrainedEulerCovarianceTests.cs</c>,
-/// <c>…DisplacementTests.cs</c>): each step's covariances with its
-/// constrained rate are its own pseudo-root's, where QuantLib builds every step's from the pseudo-root of the step
-/// <see cref="SetConstraintType"/> is called at, so a later step's constraint misses (MR3 (vi);
-/// <c>lognormalfwdrateeulerconstrained.cpp:117</c>); and the log constraint is displaced by the constrained rate's
-/// displacement, where QuantLib's reads the step's index into the displacements (MR3 (vii); <c>:146</c>). A step
-/// before <see cref="SetThisConstraint"/>, an active constraint before <see cref="SetConstraintType"/> and a
-/// constrained rate past the rates, which QuantLib reads before or past its vectors, are refused (MR3 (xx)).
+/// Two departures from QuantLib (<c>Divergences/ConstrainedEulerCovarianceTests.cs</c>, <c>…DisplacementTests.cs</c>):
+/// each step's covariances with its constrained rate are its own pseudo-root's, where QuantLib builds every step's from
+/// the pseudo-root of the step <see cref="SetConstraintType"/> is called at, so a later step's constraint misses
+/// (<c>lognormalfwdrateeulerconstrained.cpp:117</c>); and the log constraint is displaced by the constrained rate's
+/// displacement, where QuantLib's reads the step's index into the displacements (<c>:146</c>). A step before
+/// <see cref="SetThisConstraint"/>, an active constraint before <see cref="SetConstraintType"/> and a constrained rate
+/// past the rates, which QuantLib reads before or past its vectors, are refused.
 /// </para>
 /// <para>
-/// <b>The likelihood ratio</b> (the S-mmp plan's MMPR3, ruled by the user, a documented divergence;
-/// <c>Divergences/ProxyGreekVegaTests.cs</c>): the evolver takes the reference model, the unbumped model whose
-/// distribution the proxy simulation keeps, and a constrained step's weight carries the ratio of the two models'
-/// transition densities of the constrained rate, which beside QuantLib's ratio of shifted to unshifted Gaussian densities
-/// (<c>lognormalfwdrateeulerconstrained.cpp:200-212</c>) holds √(var_reference / var_own) of the rate's step variance.
-/// QuantLib's weight misses that factor, right for a forward bump, whose variances are equal, and wrong for a volatility
-/// bump: its proxy vegas take the wrong sign. Where the reference is the evolver's own model, QuantLib's weight bit for
-/// bit.
+/// <b>The likelihood ratio</b> (a documented divergence; <c>Divergences/ProxyGreekVegaTests.cs</c>): the evolver takes
+/// the reference model, the unbumped model whose distribution the proxy simulation keeps, and a constrained step's
+/// weight carries the ratio of the two models' transition densities of the constrained rate, which beside QuantLib's
+/// ratio of shifted to unshifted Gaussian densities (<c>lognormalfwdrateeulerconstrained.cpp:200-212</c>) holds
+/// √(var_reference / var_own) of the rate's step variance. QuantLib's weight misses that factor, right for a forward
+/// bump, whose variances are equal, and wrong for a volatility bump: its proxy vegas take the wrong sign. Where the
+/// reference is the evolver's own model, QuantLib's weight bit for bit.
 /// </para>
 /// </remarks>
 [WorkingType]
@@ -149,7 +147,7 @@ public sealed class LogNormalFwdRateEulerConstrained : ConstrainedEvolver
             variances[j] = variance;
             fixedDrifts[j] = fixedDrift;
 
-            // the reference's step variance of each rate over the model's: 1 where the reference is the model (MMPR3)
+            // the reference's step variance of each rate over the model's: 1 where the reference is the model
             Matrix reference = ReferenceEquals(referenceModel, marketModel) ? a : referenceModel.PseudoRoot(j);
             double[] ratio = new double[numberOfRates];
             for (int k = 0; k < numberOfRates; ++k)
@@ -187,7 +185,7 @@ public sealed class LogNormalFwdRateEulerConstrained : ConstrainedEvolver
     /// The sizes aren't the steps', or a step's swap isn't a forward rate.
     /// </exception>
     /// <exception cref="ArgumentOutOfRangeException">A constrained rate is outside the rates.</exception>
-    /// <remarks>Each step's covariances are its own pseudo-root's (MR3 (vi)).</remarks>
+    /// <remarks>Each step's covariances are its own pseudo-root's.</remarks>
     public override void SetConstraintType(ReadOnlySpan<int> startIndexOfSwapRate, ReadOnlySpan<int> endIndexOfSwapRate)
     {
         if (!(startIndexOfSwapRate.Length == Numeraires.Length))
@@ -214,7 +212,7 @@ public sealed class LogNormalFwdRateEulerConstrained : ConstrainedEvolver
                 throw new ArgumentOutOfRangeException(nameof(startIndexOfSwapRate), "the constrained rate must be one of the rates");
             }
 
-            // step i's own pseudo-root, where QuantLib's is the current step's (MR3 (vi))
+            // step i's own pseudo-root, where QuantLib's is the current step's
             Matrix a = pseudoRoots[i];
             double[] c = new double[numberOfRates];
             for (int j = 0; j < numberOfRates; ++j)
@@ -242,7 +240,7 @@ public sealed class LogNormalFwdRateEulerConstrained : ConstrainedEvolver
     /// <exception cref="ArgumentException">The sizes aren't the steps'.</exception>
     /// <remarks>
     /// The targets' logs are displaced by the constrained rates' displacements, at each step, where QuantLib's
-    /// displaces each step's by the displacement of the rate whose index is the step's (MR3 (vii)).
+    /// displaces each step's by the displacement of the rate whose index is the step's.
     /// </remarks>
     public override void SetThisConstraint(ReadOnlySpan<double> rateConstraints, ReadOnlySpan<bool> isConstraintActive)
     {
@@ -284,7 +282,7 @@ public sealed class LogNormalFwdRateEulerConstrained : ConstrainedEvolver
     /// </exception>
     public override double AdvanceStep()
     {
-        // QuantLib reads its activity flags, an empty valarray before setThisConstraint (MR3 (xx)).
+        // QuantLib reads its activity flags, an empty valarray before setThisConstraint.
         if (!constraintSet)
         {
             throw new NanoQLException("setThisConstraint must be called before advanceStep");
@@ -331,7 +329,7 @@ public sealed class LogNormalFwdRateEulerConstrained : ConstrainedEvolver
 
             int index = startIndexOfSwapRate[currentStep];
 
-            // compute error; the target's log displaced by its own rate's displacement (MR3 (vii))
+            // compute error; the target's log displaced by its own rate's displacement
             double requiredShift = Math.Log(rateConstraints[currentStep] + displacements[index]) - logForwards[index];
 
             double multiplier = requiredShift / variances[currentStep][index];
@@ -359,7 +357,7 @@ public sealed class LogNormalFwdRateEulerConstrained : ConstrainedEvolver
                 weightsEffect *= originalDensity / newDensity;
             }
 
-            // the transition densities' ratio of the constrained rate, reference over own (MMPR3)
+            // the transition densities' ratio of the constrained rate, reference over own
             weightsEffect *= densityRatios[currentStep][index];
             weight *= weightsEffect;
         }

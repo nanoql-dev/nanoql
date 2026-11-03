@@ -23,11 +23,11 @@ namespace NanoQL.PricingEngines;
 /// </para>
 /// <para>
 /// QuantLib reads the volatility at the risk-free curve's time to expiry and each rate as its curve's discount over
-/// that time (<c>qdplusamericanengine.cpp:179-184</c>); here the time is the engines' clock's
-/// (<see cref="FdmBlackScholesOp.Clock"/>), the rates each curve's accrued discount over it, and the volatility the
-/// variance at the expiry date over it: QuantLib's reads where the structures share their times (the S-van plan's VR4
-/// (ix), <c>Divergences/QdMismatchedTimesTests.cs</c>). An exercise window opening after the reference date is priced
-/// by <see cref="ApproximationWindow"/>, where QuantLib reads the last date alone (VR4 (xxvi)).
+/// that time (<c>qdplusamericanengine.cpp:179-184</c>); here the time is the engines' clock's (<see
+/// cref="FdmBlackScholesOp.Clock"/>), the rates each curve's accrued discount over it, and the volatility the variance
+/// at the expiry date over it: QuantLib's reads where the structures share their times
+/// (<c>Divergences/QdMismatchedTimesTests.cs</c>). An exercise window opening after the reference date is priced by
+/// <see cref="ApproximationWindow"/>, where QuantLib reads the last date alone.
 /// </para>
 /// </remarks>
 public abstract class QdPutCallParityEngine
@@ -95,7 +95,7 @@ public abstract class QdPutCallParityEngine
         }
         else
         {
-            // QuantLib's volatility read at the clock's time where the volatility shares it (VR4 (ix))
+            // QuantLib's volatility read at the clock's time where the volatility shares it
             double? vol = Process.BlackVolatility.SharesTimes(clock)
                 ? Process.BlackVolatility.BlackVol(market.Time, payoff.Strike)
                 : null;

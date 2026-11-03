@@ -143,8 +143,8 @@ public sealed class VectorAssert
     private static bool IsThrows(JsonElement expected) =>
         expected.ValueKind == JsonValueKind.Object && expected.TryGetProperty("throws", out _);
 
-    // G3's bit-identical reading: with NANOQL_BITID_DIR set, the file's real outputs and those equal to the vector's
-    // bit for bit, one tally file per instance, so tests running together never write the same file.
+    // The vectors gate's bit-identical reading: with NANOQL_BITID_DIR set, the file's real outputs and those equal to
+    // the vector's bit for bit, one tally file per instance, so tests running together never write the same file.
     private void WriteTally()
     {
         string? dir = Environment.GetEnvironmentVariable("NANOQL_BITID_DIR");

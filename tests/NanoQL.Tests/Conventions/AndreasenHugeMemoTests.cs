@@ -8,9 +8,9 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The Andreasen-Huge interpolation's slices, memoised by time inside the immutable object (the S-van plan's VR2): a
-/// query at a time computes that time's slice once, from the calibration alone, so threads querying new times together
-/// get the bits one thread gets, and a query's bits don't depend on what was queried before, nearby times included.
+/// The Andreasen-Huge interpolation's slices, memoised by time inside the immutable object: a query at a time computes
+/// that time's slice once, from the calibration alone, so threads querying new times together get the bits one thread
+/// gets, and a query's bits don't depend on what was queried before, nearby times included.
 /// </summary>
 public class AndreasenHugeMemoTests
 {

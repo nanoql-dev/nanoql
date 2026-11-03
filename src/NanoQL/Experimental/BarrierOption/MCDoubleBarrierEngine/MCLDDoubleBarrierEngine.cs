@@ -13,9 +13,9 @@ namespace NanoQL.Experimental;
 
 /// <summary>
 /// <see cref="MCDoubleBarrierEngine"/> on low-discrepancy draws with QuantLib's default statistics:
-/// <c>MCLDDoubleBarrierEngine</c>, named as QuantLib-Python names its siblings (B2R2), QuantLib's
+/// <c>MCLDDoubleBarrierEngine</c>, named as QuantLib-Python names its siblings, QuantLib's
 /// <c>MCDoubleBarrierEngine&lt;LowDiscrepancy&gt;</c>, its calculations closed at <see cref="LowDiscrepancy"/> and
-/// <see cref="GeneralStatistics"/> (D12).
+/// <see cref="GeneralStatistics"/>.
 /// </summary>
 [Experimental("NQL0001")]
 public static class MCLDDoubleBarrierEngine

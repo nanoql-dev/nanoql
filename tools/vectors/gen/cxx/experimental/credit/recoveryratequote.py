@@ -3,10 +3,10 @@
 """Vectors for QuantLib's RecoveryRateQuote and ConstantRecoveryModel (ql/experimental/credit/recoveryratequote.hpp,
 .cpp, recoveryratemodel.hpp, .cpp), which the wheel doesn't expose, each output computed by the C++ harness
 (tools/cxx/src/experimental/credit/recoveryratequote.cpp) on tools/vectors/gen/cxx/experimental/credit/defaultevent.py's
-specs: ISDA's conventional recovery of each of the five ISDA seniorities (NoSeniority reads past QuantLib's table and
-is left out, the S-xcr plan's XR8 (xxviii), held in Divergences/ConventionalRecoveryNoSeniorityTests.cs) and its map;
-quotes of values in [0, 1] and of each seniority, and values outside it, refused; and the constant model's recovery
-at dates and keys, and whether it applies to each seniority. Read back by
+specs: ISDA's conventional recovery of each of the five ISDA seniorities (NoSeniority reads past QuantLib's table and is
+left out, held in Divergences/ConventionalRecoveryNoSeniorityTests.cs) and its map; quotes of values in [0, 1] and of
+each seniority, and values outside it, refused; and the constant model's recovery at dates and keys, and whether it
+applies to each seniority. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Experimental/Credit/RecoveryRateQuoteCxxVectorTests.cs."""
 import importlib.util
 import os

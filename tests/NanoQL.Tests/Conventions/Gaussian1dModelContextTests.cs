@@ -10,11 +10,11 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The Gaussian1d models' evaluation date (the S-g1d plan's G1R1 (ii)): QuantLib's model copies the evaluation date and
-/// the historic-fixings flag from <c>Settings</c> at its calculation (<c>gaussian1dmodel.hpp:200-203</c>) and reads
-/// them for every fixing (<c>gaussian1dmodel.cpp:38</c>, <c>:92</c>); here <c>ForwardRate</c> and <c>SwapRate</c> take
-/// the context, so a fixing before its date is read from its fixings, on its date when it enforces today's historic
-/// fixings; nothing is kept from one call's context to the next.
+/// The Gaussian1d models' evaluation date: QuantLib's model copies the evaluation date and the historic-fixings flag
+/// from <c>Settings</c> at its calculation (<c>gaussian1dmodel.hpp:200-203</c>) and reads them for every fixing
+/// (<c>gaussian1dmodel.cpp:38</c>, <c>:92</c>); here <c>ForwardRate</c> and <c>SwapRate</c> take the context, so a
+/// fixing before its date is read from its fixings, on its date when it enforces today's historic fixings; nothing is
+/// kept from one call's context to the next.
 /// </summary>
 public class Gaussian1dModelContextTests
 {

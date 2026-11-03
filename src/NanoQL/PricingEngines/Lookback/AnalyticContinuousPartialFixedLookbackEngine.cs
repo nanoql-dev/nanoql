@@ -23,25 +23,24 @@ namespace NanoQL.PricingEngines;
 /// The value alone, as QuantLib's, its bivariate normal QuantLib's We04DP.
 /// </para>
 /// <para>
-/// Documented divergences (BR5). Each rate is read on the volatility's clock and each time is the volatility's, as
+/// Documented divergences. Each rate is read on the volatility's clock and each time is the volatility's, as
 /// <see cref="AnalyticBarrierEngine"/> reads them, where QuantLib reads every structure at the risk-free curve's times
-/// (BR5 (xix), <c>Divergences/LookbackMismatchedTimesTests.cs</c>). Near zero carry, where QuantLib's terms over 2b/σ²
-/// cancel and it is NaN at r = q, the value is the cubic in the carry through QuantLib's values either side of a cut
-/// (BR5 (xxiii), <see cref="LookbackSmallCarry"/>, <c>Divergences/LookbackSmallCarryTests.cs</c>). At small
-/// volatilities, where λ = 2b/σ² is large and QuantLib's power of s times its normal or bivariate normal factor is +∞
-/// times 0, NaN, the product is taken in logs (BR5 (xxiv)'s class, the S-bar code review's B2-1,
-/// <see cref="LookbackTails"/>, <c>Divergences/LookbackSmallVolatilityTests.cs</c>). A window opening from the
-/// evaluation date to the volatility clock's origin, inclusive, is the full fixed lookback, the spot its maximum,
-/// nothing accruing before the origin, where QuantLib's f₁ is 0/0 at the money, and one opened before the evaluation
-/// date is refused, the option holding no maximum observed since its start, where QuantLib throws its bivariate
-/// normal's check of ρ (the review's B2-2 and B2-3, <c>Divergences/LookbackPartialWindowTodayTests.cs</c>). And below
-/// machine-epsilon variance the underlying follows its forward, where QuantLib divides by the volatility (BR5 (xxiv),
-/// <c>Divergences/LookbackZeroVolatilityTests.cs</c>).
+/// (<c>Divergences/LookbackMismatchedTimesTests.cs</c>). Near zero carry, where QuantLib's terms over 2b/σ² cancel and
+/// it is NaN at r = q, the value is the cubic in the carry through QuantLib's values either side of a cut (<see
+/// cref="LookbackSmallCarry"/>, <c>Divergences/LookbackSmallCarryTests.cs</c>). At small volatilities, where λ = 2b/σ²
+/// is large and QuantLib's power of s times its normal or bivariate normal factor is +∞ times 0, NaN, the product is
+/// taken in logs (<see cref="LookbackTails"/>, <c>Divergences/LookbackSmallVolatilityTests.cs</c>). A window opening
+/// from the evaluation date to the volatility clock's origin, inclusive, is the full fixed lookback, the spot its
+/// maximum, nothing accruing before the origin, where QuantLib's f₁ is 0/0 at the money, and one opened before the
+/// evaluation date is refused, the option holding no maximum observed since its start, where QuantLib throws its
+/// bivariate normal's check of ρ (<c>Divergences/LookbackPartialWindowTodayTests.cs</c>). And below machine-epsilon
+/// variance the underlying follows its forward, where QuantLib divides by the volatility
+/// (<c>Divergences/LookbackZeroVolatilityTests.cs</c>).
 /// </para>
 /// <para>
 /// The formula is a first-passage closed form in equivalent-constant rates and a volatility, the variance and discounts
-/// to expiry: no exact closed form exists for a first passage under general deterministic term structures (the S-bar
-/// plan's BR4 (d)); the term-structure-exact route is <see cref="MCLookbackEngine"/>.
+/// to expiry: no exact closed form exists for a first passage under general deterministic term structures; the
+/// term-structure-exact route is <see cref="MCLookbackEngine"/>.
 /// </para>
 /// </remarks>
 public static class AnalyticContinuousPartialFixedLookbackEngine
@@ -105,8 +104,8 @@ public static class AnalyticContinuousPartialFixedLookbackEngine
 
         // a window opening before the evaluation date is refused, the option holding no extremum observed since it
         // opened; one opening from the evaluation date to the volatility clock's origin, inclusive, is the full fixed
-        // lookback with the spot as its extremum, nothing accruing before the origin (the S-bar code review's B2-2 and
-        // B2-3), where QuantLib's formulas take 0/0 or NaN times
+        // lookback with the spot as its extremum, nothing accruing before the origin, where QuantLib's formulas take
+        // 0/0 or NaN times
         if (option.LookbackPeriodStart < context.EvaluationDate)
         {
             throw new NanoQLException(
@@ -125,7 +124,7 @@ public static class AnalyticContinuousPartialFixedLookbackEngine
         return option.FetchResults(new OneAssetOptionResults { NPV = new Formulas(option, process, payoff.Strike, eta).A() });
     }
 
-    // QuantLib's members, each read once on the volatility's clock (BR5 (xix))
+    // QuantLib's members, each read once on the volatility's clock
     private sealed class Formulas
     {
         private readonly double eta;
@@ -158,7 +157,7 @@ public static class AnalyticContinuousPartialFixedLookbackEngine
         private double StdDeviation => volatility * Math.Sqrt(residualTime);
 
         // QuantLib's A(eta), and below the small-carry cut the cubic in the carry through its values at the cut and
-        // twice it, either side of 0, the dividend discount moved with the carry (BR5 (xxiii))
+        // twice it, either side of 0, the dividend discount moved with the carry
         internal double A()
         {
             if (volatility * volatility * residualTime < NumericLimits.QL_EPSILON)
@@ -226,7 +225,7 @@ public static class AnalyticContinuousPartialFixedLookbackEngine
             double powS = Math.Pow(s, -x);
 
             // QuantLib's power product, in logs where it isn't finite, as at small volatilities, where QuantLib's is
-            // NaN (the S-bar code review's B2-1)
+            // NaN
             double rho3 = differentStartOfLookback ? -Math.Sqrt(lookbackPeriodStartTime / residualTime) : -1.0;
             double product3 = LookbackTails.PowerTimesM(powS * n3, 1.0, s, -x, h3, k3, rho3);
             double carryDiscount = Math.Exp(-carry * (residualTime - lookbackPeriodStartTime));
@@ -238,8 +237,7 @@ public static class AnalyticContinuousPartialFixedLookbackEngine
                 + (carryDiscount * dq * (1 - (0.5 * vol * vol / carry)) * underlying * n7 * n8));
         }
 
-        // the forward path's payoff (BR5 (xxiv)): the path is monotone, so its extremum over the window [t₁, T] is at
-        // an end
+        // the forward path's payoff: the path is monotone, so its extremum over the window [t₁, T] is at an end
         private double DeterministicValue()
         {
             double forward = underlying * dividendDiscount / riskFreeDiscount;

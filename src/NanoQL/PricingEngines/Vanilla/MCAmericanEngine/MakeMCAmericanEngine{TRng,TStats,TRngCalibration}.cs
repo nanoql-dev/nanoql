@@ -20,13 +20,13 @@ namespace NanoQL.PricingEngines;
 /// <typeparam name="TRngCalibration">The calibration random-number traits.</typeparam>
 /// <remarks>
 /// <para>
-/// An immutable builder (SEQR2): each method returns a modified copy, and <see cref="ToEngine"/> the engine as a
-/// function of the option and the context, with QuantLib's checks on the steps. QuantLib's defaults: 2,048 calibration
-/// samples, a polynomial order of 2, the monomial basis, no antithetic variates and no control variate.
+/// An immutable builder: each method returns a modified copy, and <see cref="ToEngine"/> the engine as a function of
+/// the option and the context, with QuantLib's checks on the steps. QuantLib's defaults: 2,048 calibration samples, a
+/// polynomial order of 2, the monomial basis, no antithetic variates and no control variate.
 /// </para>
 /// <para>
-/// The seed is a constructor argument (S2R4); the calibration seed is optional, its default QuantLib's documented one,
-/// the seed plus 1,768,237,423 modulo 2³² (the S-van plan's VR4 (v)), where QuantLib's builder passes its narrowed null.
+/// The seed is a constructor argument; the calibration seed is optional, its default QuantLib's documented one, the
+/// seed plus 1,768,237,423 modulo 2³², where QuantLib's builder passes its narrowed null.
 /// </para>
 /// </remarks>
 public sealed record MakeMCAmericanEngine<TRng, TStats, TRngCalibration>

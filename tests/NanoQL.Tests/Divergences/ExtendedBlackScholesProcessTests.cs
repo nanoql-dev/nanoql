@@ -9,21 +9,19 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The extended Black-Scholes process's Milstein, Euler and predictor steps in the log price (the S-xrt plan's XRR5
-/// (xxvi) and XRR7, fixed under R8). QuantLib's Milstein adds the asset's correction ½σ²(ΔW² − 1)Δt to the log price, its
-/// one-step mean 1.245e-3 high at Δt 0.25 and σ 0.4 (the S-xrt planner's XRP21 and XRP23); its Euler step and its
-/// predictor centre on the asset's mean x₀e^((r−q)Δt), which lacks the −σ²Δt/2, 2.02e-2 high a step there, and refuse a
-/// strike-dependent volatility ("not implemented"). On QuantLib 1.44 (the planner's <c>xp_c3.cpp</c>: x₀ 100, r 0.03, q
+/// The extended Black-Scholes process's Milstein, Euler and predictor steps in the log price (fixed). QuantLib's
+/// Milstein adds the asset's correction ½σ²(ΔW² − 1)Δt to the log price, its one-step mean 1.245e-3 high at Δt 0.25 and
+/// σ 0.4; its Euler step and its predictor centre on the asset's mean x₀e^((r−q)Δt), which lacks the −σ²Δt/2, 2.02e-2
+/// high a step there, and refuse a strike-dependent volatility ("not implemented"). On QuantLib 1.44 (x₀ 100, r 0.03, q
 /// 0, a flat 0.4, Δt 0.25, ΔW from −2 to 2) Milstein steps to 70.29285698, 80.85603163, 96.80224498, 120.6230249 and
-/// 156.4396302, Euler to 67.53663464, 82.48943182, 100.7528195, 123.0597717 and 150.3055446, and the predictor-corrector,
-/// the exact step there, to 66.19931967, 80.85603163, 98.75778005, 120.6230249 and 147.3292954. nanoql's three steps
-/// are that exact step, their one-step mean e^((r−q)Δt), and the predictor-corrector runs on a smile. There QuantLib's
-/// corrector, its diffusion the mean of the two ends' on the same increment, would converge to the Stratonovich
-/// equation, its error flat in the step count (9.7e-2 at 4, 16 and 64 steps on the first smile below, E[S_T] 0.097 low,
-/// and 0.565 low on the second); nanoql's takes each end's drift less ½σ·∂σ/∂ln S (the S-xrt run's B3-1, ruled
-/// 2026-10-29). On two SABR smiles each scheme converges, on the same Brownian increments, to a fine Milstein path of
-/// 16,384 steps, itself checked against the fine Euler path XRR7 names: Euler at order ½, Milstein and the
-/// predictor-corrector at order 1.
+/// 156.4396302, Euler to 67.53663464, 82.48943182, 100.7528195, 123.0597717 and 150.3055446, and the
+/// predictor-corrector, the exact step there, to 66.19931967, 80.85603163, 98.75778005, 120.6230249 and 147.3292954.
+/// nanoql's three steps are that exact step, their one-step mean e^((r−q)Δt), and the predictor-corrector runs on a
+/// smile. There QuantLib's corrector, its diffusion the mean of the two ends' on the same increment, would converge to
+/// the Stratonovich equation, its error flat in the step count (9.7e-2 at 4, 16 and 64 steps on the first smile below,
+/// E[S_T] 0.097 low, and 0.565 low on the second); nanoql's takes each end's drift less ½σ·∂σ/∂ln S. On two SABR smiles
+/// each scheme converges, on the same Brownian increments, to a fine Milstein path of 16,384 steps, itself checked
+/// against a fine Euler path: Euler at order ½, Milstein and the predictor-corrector at order 1.
 /// </summary>
 public class ExtendedBlackScholesProcessTests
 {

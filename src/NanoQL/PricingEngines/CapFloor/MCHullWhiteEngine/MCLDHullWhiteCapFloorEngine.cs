@@ -13,9 +13,9 @@ namespace NanoQL.PricingEngines;
 
 /// <summary>
 /// <see cref="MCHullWhiteCapFloorEngine"/> on low-discrepancy draws with QuantLib's default statistics:
-/// <c>MCLDHullWhiteCapFloorEngine</c>, named as QuantLib-Python names its siblings (B2R2), QuantLib's
+/// <c>MCLDHullWhiteCapFloorEngine</c>, named as QuantLib-Python names its siblings, QuantLib's
 /// <c>MCHullWhiteCapFloorEngine&lt;LowDiscrepancy&gt;</c>, its calculations closed at <see cref="LowDiscrepancy"/> and
-/// <see cref="GeneralStatistics"/> (D12).
+/// <see cref="GeneralStatistics"/>.
 /// </summary>
 public static class MCLDHullWhiteCapFloorEngine
 {

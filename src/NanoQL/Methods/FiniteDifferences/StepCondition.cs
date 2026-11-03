@@ -10,10 +10,10 @@ namespace NanoQL.Methods;
 /// <summary>A condition applied to a finite-difference problem's values at every time step.</summary>
 /// <remarks>
 /// <para>
-/// A working type (the S-eq plan's SEQR1): a condition is owned by one computation, and may hold the state it reads
-/// back (a snapshot) or buffers it works in. <see cref="ApplyTo"/> modifies the values in place, through the caller's
-/// span. QuantLib's template parameter is the array type; every finite-difference array here is a span of doubles, so
-/// the class isn't generic.
+/// A working type: a condition is owned by one computation, and may hold the state it reads back (a snapshot) or
+/// buffers it works in. <see cref="ApplyTo"/> modifies the values in place, through the caller's span. QuantLib's
+/// template parameter is the array type; every finite-difference array here is a span of doubles, so the class isn't
+/// generic.
 /// </para>
 /// <para>An extension point, as in QuantLib: later units derive their step conditions from it.</para>
 /// </remarks>

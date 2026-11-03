@@ -20,8 +20,8 @@ namespace NanoQL.Indexes;
 /// throws QuantLib's "empty Handle cannot be dereferenced". <see cref="Clone"/> is QuantLib's <c>clone(h)</c>.
 /// </para>
 /// <para>
-/// QuantLib's deprecated <c>interpolated()</c> and its member, which no QuantLib class sets, aren't ported (D5): the
-/// index never interpolates, the coupons do. An extension point.
+/// QuantLib's deprecated <c>interpolated()</c> and its member, which no QuantLib class sets, aren't ported: the index
+/// never interpolates, the coupons do. An extension point.
 /// </para>
 /// </remarks>
 public class YoYInflationIndex : InflationIndex

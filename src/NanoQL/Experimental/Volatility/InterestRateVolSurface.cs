@@ -20,9 +20,8 @@ namespace NanoQL.Experimental;
 /// Documented divergence (<c>Divergences/InterestRateVolSurfaceOptionDateTests.cs</c>): every option tenor's date on the
 /// surface is the index's, the at-the-money volatility and variance and the smile section at a tenor included, where
 /// QuantLib's <c>optionDateFromTenor</c> hides its base's non-virtual member, so those members, defined on the bases,
-/// date the option on the calendar instead (the S-xeq plan's XER5 (xxv)). <see cref="OptionDateFromTenor"/> hides the
-/// base's member as QuantLib's does; called through a <see cref="TermStructures.VolatilityTermStructure"/> reference,
-/// the base's date it is.
+/// date the option on the calendar instead. <see cref="OptionDateFromTenor"/> hides the base's member as QuantLib's
+/// does; called through a <see cref="TermStructures.VolatilityTermStructure"/> reference, the base's date it is.
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]
@@ -72,7 +71,7 @@ public abstract class InterestRateVolSurface : BlackVolSurface
         return i.FixingDate(start);
     }
 
-    /// <summary>The option date of a tenor: the index's (XER5 (xxv)).</summary>
+    /// <summary>The option date of a tenor: the index's.</summary>
     /// <param name="optionTenor">The option tenor.</param>
     /// <returns>The option date.</returns>
     protected override Date OptionDate(Period optionTenor) => OptionDateFromTenor(optionTenor);

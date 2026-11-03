@@ -8,9 +8,9 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The latent model framework's own rules (the S-xcr plan's XR2, XR4 (a), XR8 (xxx)): the copula policies' zero values
-/// refused, the samplers' and the polar generator's seeds S2R4's and their generators copied, the models and
-/// integrations of no dimension or above 15 refused, the weights copied.
+/// The latent model framework's own rules: the copula policies' zero values refused, the samplers' and the polar
+/// generator's seeds explicit and their generators copied, the models and integrations of no dimension or above 15
+/// refused, the weights copied.
 /// </summary>
 public class LatentModelConventionTests
 {

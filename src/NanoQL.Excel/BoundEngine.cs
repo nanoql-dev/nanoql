@@ -4,9 +4,9 @@
 namespace NanoQL.Excel;
 
 /// <summary>
-/// An engine bound with its inputs (XLR10), as the native host's: its input set, the instrument a <c>BindOn</c> gave,
-/// and the inputs given. The engine adapters the generator shares with the native host read it; its refusals are
-/// argument errors (#VALUE!).
+/// An engine bound with its inputs, as the native host's: its input set, the instrument a <c>BindOn</c> gave, and the
+/// inputs given. The engine adapters the generator shares with the native host read it; its refusals are argument
+/// errors (#VALUE!).
 /// </summary>
 /// <param name="set">The input set's id: the engine's full name and the set's index.</param>
 /// <param name="instrument">The instrument it's bound to, or null.</param>

@@ -4,22 +4,22 @@
 computed by the C++ harness (tools/cxx/src/experimental/credit/basket.cpp) on
 tools/vectors/gen/cxx/experimental/credit/defaultevent.py's specs, the model set on the basket and the basket calculated
 before any read (its first statistic recomputes its evaluation-date state after the tranche's amounts; before it,
-QuantLib's remaining amounts read 0, the S-xcr plan's XR8 (xliii), held in Divergences/BasketConstructionOrderTests.cs).
+QuantLib's remaining amounts read 0, held in Divergences/BasketConstructionOrderTests.cs).
 
 Baskets under 31 August 2006 on constant-loss models, Gaussian and Student t, by correlation and by factor weights:
-pools added in name order (XR8 (i)), no name defaulted by the evaluation date (a realized default restates the basket,
-XR8 (ii), held in Divergences/BasketRealizedDefaultsTests.cs), equity, mezzanine and senior tranches, unequal
-notionals and hazard rates, and "programmed" events after the evaluation date on the pool's last name, the one name
-whose default leaves QuantLib's live reads by position on the right names. For each: the inspectors; at a sample of
-dates the date reads (settled loss, remaining notional and notionals, names, size, live list, probabilities and the
-live names' probabilities), the restated attachment, detachment and tranche notional only at dates before an event
-settles (QuantLib's min(D, A + max(0, L - A)) and unamortized detachment differ from the header's max(0, A - L) once a
-loss settles); each name's exposure; and the statistics the constant-loss model gives (the probability of n events or
-more for every n, each pair's default correlation past the evaluation date, where QuantLib's divides 0 by 0, and each
-name's recovery), and those it refuses (expected tranche loss, the tail and shortfall statistics, the loss distribution,
-the n-th event probabilities). A basket on QuantLib's DefaultLossModel with every default kept (the harness's subclass),
-each statistic the basket routes to the model refused. And the refused baskets (notionals not matching the pool, empty, invalid tranches, a
-forward inception). Read back by tests/NanoQL.Tests/Vectors/Cxx/Experimental/Credit/BasketCxxVectorTests.cs."""
+pools added in name order, no name defaulted by the evaluation date (a realized default restates the basket, held in
+Divergences/BasketRealizedDefaultsTests.cs), equity, mezzanine and senior tranches, unequal notionals and hazard rates,
+and "programmed" events after the evaluation date on the pool's last name, the one name whose default leaves QuantLib's
+live reads by position on the right names. For each: the inspectors; at a sample of dates the date reads (settled loss,
+remaining notional and notionals, names, size, live list, probabilities and the live names' probabilities), the restated
+attachment, detachment and tranche notional only at dates before an event settles (QuantLib's min(D, A + max(0, L - A))
+and unamortized detachment differ from the header's max(0, A - L) once a loss settles); each name's exposure; and the
+statistics the constant-loss model gives (the probability of n events or more for every n, each pair's default
+correlation past the evaluation date, where QuantLib's divides 0 by 0, and each name's recovery), and those it refuses
+(expected tranche loss, the tail and shortfall statistics, the loss distribution, the n-th event probabilities). A
+basket on QuantLib's DefaultLossModel with every default kept (the harness's subclass), each statistic the basket routes
+to the model refused. And the refused baskets (notionals not matching the pool, empty, invalid tranches, a forward
+inception). Read back by tests/NanoQL.Tests/Vectors/Cxx/Experimental/Credit/BasketCxxVectorTests.cs."""
 import importlib.util
 import os
 import sys

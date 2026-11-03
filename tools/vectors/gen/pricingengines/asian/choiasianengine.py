@@ -5,11 +5,11 @@
 
 Arithmetic calls and puts at 90, 100 and 110, over six months, a year and two years, with 4 and 12 fixings, unseasoned
 on the ten processes of tools/vectors/gen/processes/blackscholesprocess.py and with two past fixings at 95 and 105 on
-the processes without a smile, at lambda 10 and 2 << 12 integration steps (QuantLib's own cases' settings): the NPV,
-the engine's one result. Then a single fixing, the known payoff with no fixing to come, the refusals of a geometric
-average, a payoff that isn't plain vanilla, an exercise that isn't European and a fixing after the exercise, and an
-expired option. The outputs nanoql fixes are left out (the S-bar plan's §2.10): seasoned options on a smile (BR5
-(xxx)) and an effective strike below zero (QuantLib refuses, BR7 (a)).
+the processes without a smile, at lambda 10 and 2 << 12 integration steps (QuantLib's own cases' settings): the NPV, the
+engine's one result. Then a single fixing, the known payoff with no fixing to come, the refusals of a geometric average,
+a payoff that isn't plain vanilla, an exercise that isn't European and a fixing after the exercise, and an expired
+option. The outputs nanoql fixes are left out: seasoned options on a smile and an effective strike below zero (QuantLib
+refuses).
 
 Lambda and the steps go in as "lambda" and "maxNrIntegrationSteps". The wheel's calls, by QuantLib-SWIG 1.44's
 options.i: ChoiAsianEngine(process, lambda, maxNrIntegrationSteps) and the option's NPV. Read back by

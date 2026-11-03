@@ -6,17 +6,17 @@ using NanoQL.Experimental;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// SVI fits with b or a fixed (the S-rx plan's SRXR3 (xvii), fixed under R8). QuantLib's direct transform keeps a free
-/// b inside b(1+|ρ|) &lt; 4 and a free a inside a + bσ√(1−ρ²) &gt; 0, but copies a fixed one as given while ρ, σ and b
-/// move (<c>sviinterpolation.hpp:112-128</c>), and every cost evaluation builds a section whose parameters' check
-/// refuses the excess (<c>xabrinterpolation.hpp:291-306</c>, <c>svismilesection.cpp:39-46</c>): on a seven-strike skew
-/// (a year, forward 100) QuantLib's fit throws midway with b fixed at 3.5 ("b(1+|rho|) must be less than or equal to 4,
-/// (b=3.5, rho=0.250507)"), with a, b and σ fixed at −0.05, 1 and 0.1 (at ρ 0.929163), and with a and σ fixed at −0.1
-/// and 0.05 (at b 0.069537) [executed on the harness]. Here, where a trial would fail QuantLib's check, the free
-/// parameters move onto the set it admits, each rounded inward: ρ capped first at the tightest bound the fixed
-/// parameters set, then σ or b raised to meet a's constraint. A fixed set no ρ admits is refused before the fit, with
-/// QuantLib's text. A trial the check passes is QuantLib's, so a fit QuantLib completes is QuantLib's. QuantLib's
-/// check: a fresh section at the reported parameters reproduces the fitted volatilities and error.
+/// SVI fits with b or a fixed (fixed). QuantLib's direct transform keeps a free b inside b(1+|ρ|) &lt; 4 and a free a
+/// inside a + bσ√(1−ρ²) &gt; 0, but copies a fixed one as given while ρ, σ and b move
+/// (<c>sviinterpolation.hpp:112-128</c>), and every cost evaluation builds a section whose parameters' check refuses
+/// the excess (<c>xabrinterpolation.hpp:291-306</c>, <c>svismilesection.cpp:39-46</c>): on a seven-strike skew (a year,
+/// forward 100) QuantLib's fit throws midway with b fixed at 3.5 ("b(1+|rho|) must be less than or equal to 4, (b=3.5,
+/// rho=0.250507)"), with a, b and σ fixed at −0.05, 1 and 0.1 (at ρ 0.929163), and with a and σ fixed at −0.1 and 0.05
+/// (at b 0.069537) (the C++ harness). Here, where a trial would fail QuantLib's check, the free parameters move onto
+/// the set it admits, each rounded inward: ρ capped first at the tightest bound the fixed parameters set, then σ or b
+/// raised to meet a's constraint. A fixed set no ρ admits is refused before the fit, with QuantLib's text. A trial the
+/// check passes is QuantLib's, so a fit QuantLib completes is QuantLib's. QuantLib's check: a fresh section at the
+/// reported parameters reproduces the fitted volatilities and error.
 /// </summary>
 public class SviFixedParameterTests
 {

@@ -5,8 +5,8 @@ namespace NanoQL.Numerics;
 
 /// <summary>
 /// An extended-range double: a double mantissa in [1, 2) times 2 to an integer exponent, normalized after each
-/// operation, so a value past double's range (e^{5κt} at κt = 600) keeps double's 53-bit precision (the S-hes plan's
-/// HR11), as SLATEC's extended-range arithmetic holds a value and an integer exponent.
+/// operation, so a value past double's range (e^{5κt} at κt = 600) keeps double's 53-bit precision, as SLATEC's
+/// extended-range arithmetic holds a value and an integer exponent.
 /// </summary>
 /// <remarks>
 /// <see cref="Value"/> rounds to a double, overflowing to infinity or underflowing to zero past double's range. Zero is a

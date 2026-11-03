@@ -8,35 +8,31 @@ namespace NanoQL.Tests.Divergences;
 
 /// <summary>
 /// The alpha-form calibration where a step's final part fails, which QuantLib's master refuses after the pin and nanoql
-/// refuses in the pass the calibration returns, and its fallback at maximum homogeneity, as the user ruled it on
-/// 2026-10-27. <list type="bullet"> <item>A step whose final part fails (S-mm plan MR3 (viii), re-ruled by the upstream
-/// sweep's SWR2 (a)): QuantLib 1.44's solve returns it as solved, the swap rate's last volatility left at its buffer's
-/// 0, and its calibration returns <c>true</c> with no failure (<c>alphafinder.cpp:335-346</c>, <c>:405-415</c>;
-/// <c>capletcoterminalalphacalibration.cpp:202-203</c>, its count commented out beside its throw). In the S-mm code
-/// review's 7,800-input sweep, 517 calibrations return so, their swaptions missing by 6.3e-4 to 0.249. One at
-/// QuantLib's own α₀ and bounds: displaced 2%, caplets × 0.95, three factors, QuantLib 1.44's swaptions missing by
-/// 0.0347198 and its caplet root-mean-square error 0.0109794 (the S-mm run's harness). QuantLib's master's solve
-/// returns false there (#2910, <c>dbe958954</c>), so its calibration throws "alpha form failure", and so does nanoql's
-/// where the pass it returns has such a step (the sweep's ruling SWI4 (b)): on that sweep 4,091 calibrations at
-/// QuantLib's settings, 517 on the linear-hyperbolic form and 3,574 on the inverse-linear one; and so does the
-/// inverse-linear form at α₀ 0 in [−1, 1], whose calibration and pass function the vectors held with 1.44's numbers
-/// (the generator now has them at ±0.5, where every step solves). Master throws at the first such step in any pass;
-/// nanoql counts one in an earlier pass, whose successor re-targets the caplets and can fit, so a calibration whose
-/// returned pass fits keeps QuantLib 1.44's numbers: displaced 2%, caplets × 1.2, five factors, α₀ 0.5, which QuantLib
-/// converges to a caplet root-mean-square error of 4.6924312876899316e-05 (the run's harness) and master refuses; at
-/// α-solving tolerances of 0.05 and 0.2 up to 172 more, at maximum homogeneity too (the sweep's code review's
-/// B1-1).</item> <item>Maximum homogeneity (MR3 (x)): the fixed minimization's α at one caplet can leave a later caplet
-/// no α where QuantLib's first trial leaves room, so the fixed calibration throws on 50 of the sweep's inputs QuantLib
-/// calibrates; the pass then runs again on QuantLib's test of the objective's value, for a caplet with no α, not for a
-/// failed final part, which is counted (the trigger the sweep's SWR2 (a) keeps): at α-solving tolerances of 0.01 and
-/// above, 147 of 33,600 maximum-homogeneity calibrations have a failed final part at the first pass, and on 18 of them
-/// a fallback for it too would complete where nanoql refuses, QuantLib 1.44's numbers on 15 (the sweep's code review's
-/// F1-1). On caplets × 0.95 and eight factors QuantLib's caplet error is 3.4739757936758017e-07 and its swaptions exact
-/// (the run's harness; the vectors hold the case bit for bit). On QuantLib's case the fixed calibration completes, more
-/// homogeneous: its deformation, the sum over rates and steps of the squared change of each step's standard deviation,
-/// 0.0010560 against QuantLib's 0.0018891 (the code review's run and the run's harness).</item> </list> Checks: the
-/// master's refusal on the half-solved cases; QuantLib's numbers on the fallback; the fit and the deformation on
-/// QuantLib's case.
+/// refuses in the pass the calibration returns, and its fallback at maximum homogeneity. <list type="bullet"> <item>A
+/// step whose final part fails: QuantLib 1.44's solve returns it as solved, the swap rate's last volatility left at its
+/// buffer's 0, and its calibration returns <c>true</c> with no failure (<c>alphafinder.cpp:335-346</c>,
+/// <c>:405-415</c>; <c>capletcoterminalalphacalibration.cpp:202-203</c>, its count commented out beside its throw). In
+/// a sweep of 7,800 inputs, 517 calibrations return so, their swaptions missing by 6.3e-4 to 0.249. One at QuantLib's
+/// own α₀ and bounds: displaced 2%, caplets × 0.95, three factors, QuantLib 1.44's swaptions missing by 0.0347198 and
+/// its caplet root-mean-square error 0.0109794. QuantLib's master's solve returns false there (#2910,
+/// <c>dbe958954</c>), so its calibration throws "alpha form failure", and so does nanoql's where the pass it returns
+/// has such a step: on that sweep 4,091 calibrations at QuantLib's settings, 517 on the linear-hyperbolic form and
+/// 3,574 on the inverse-linear one; and so does the inverse-linear form at α₀ 0 in [−1, 1], whose calibration and pass
+/// function the vectors held with 1.44's numbers (the generator now has them at ±0.5, where every step solves). Master
+/// throws at the first such step in any pass; nanoql counts one in an earlier pass, whose successor re-targets the
+/// caplets and can fit, so a calibration whose returned pass fits keeps QuantLib 1.44's numbers: displaced 2%, caplets
+/// × 1.2, five factors, α₀ 0.5, which QuantLib converges to a caplet root-mean-square error of 4.6924312876899316e-05
+/// and master refuses; at α-solving tolerances of 0.05 and 0.2 up to 172 more, at maximum homogeneity too.</item>
+/// <item>Maximum homogeneity: the fixed minimization's α at one caplet can leave a later caplet no α where QuantLib's
+/// first trial leaves room, so the fixed calibration throws on 50 of the swept inputs QuantLib calibrates; the pass
+/// then runs again on QuantLib's test of the objective's value, for a caplet with no α, not for a failed final part,
+/// which is counted: at α-solving tolerances of 0.01 and above, 147 of 33,600 maximum-homogeneity calibrations have a
+/// failed final part at the first pass, and on 18 of them a fallback for it too would complete where nanoql refuses,
+/// QuantLib 1.44's numbers on 15. On caplets × 0.95 and eight factors QuantLib's caplet error is 3.4739757936758017e-07
+/// and its swaptions exact (the vectors hold the case bit for bit). On QuantLib's case the fixed calibration completes,
+/// more homogeneous: its deformation, the sum over rates and steps of the squared change of each step's standard
+/// deviation, 0.0010560 against QuantLib's 0.0018891.</item> </list> Checks: the master's refusal on the half-solved
+/// cases; QuantLib's numbers on the fallback; the fit and the deformation on QuantLib's case.
 /// </summary>
 public class CTSMMCapletAlphaFormCalibrationTests
 {
@@ -50,7 +46,7 @@ public class CTSMMCapletAlphaFormCalibrationTests
     [Fact]
     public void ACalibrationWhoseReturnedPassFitsKeepsQuantLibsNumbers()
     {
-        // its first pass half-solved, its second fitting: QuantLib's converged fit, which master refuses (SWI4 (b))
+        // its first pass half-solved, its second fitting: QuantLib's converged fit, which master refuses
         var (calibration, variances, times) = Calibration(0.02, 1.2, false, alpha0: 0.5);
         CTSMMCapletCalibrationResults r = calibration.Calibrate(5, 10, 1e-4, 100, 1e-8);
         Assert.True(r.Converged);

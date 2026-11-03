@@ -7,8 +7,8 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The asset swap's results record (the S-cms plan's CMD6) compares by value, which QuantLib's results classes don't
-/// define: <see cref="AssetSwapResults"/> adds the fair spread, clean price and non-par repayment to
+/// The asset swap's results record compares by value, which QuantLib's results classes don't define:
+/// <see cref="AssetSwapResults"/> adds the fair spread, clean price and non-par repayment to
 /// <see cref="SwapResults"/>'s written-out equality, and never equals a record of another type; a new record holds no
 /// fair values.
 /// </summary>

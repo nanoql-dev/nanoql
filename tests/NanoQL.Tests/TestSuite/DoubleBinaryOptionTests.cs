@@ -137,8 +137,8 @@ public class DoubleBinaryOptionTests
             double calculated = AnalyticDoubleBarrierBinaryEngine.Calculate(opt, RunnerContext, stochProcess).NPV!.Value;
 
             // Moved: QuantLib's check at lines 171-172 expects the cash undiscounted from an option already knocked in,
-            // which pays at expiry; the European cash-or-nothing it is pays cash x D(T) (the S-bar plan's BR5 (vi),
-            // Divergences/DoubleBinaryKnockedInTests.cs)
+            // which pays at expiry; the European cash-or-nothing it is pays cash x D(T)
+            // (Divergences/DoubleBinaryKnockedInTests.cs)
             double expected = value.Moved ? value.Cash * rTS.Discount(exDate) : value.Result;
             double error = Math.Abs(calculated - expected);
             Assert.False(

@@ -6,10 +6,9 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// Pascal's triangle on Windows (the S-core plan's CR7 (xiv)): QuantLib's coefficients are <c>BigNatural</c>, a 32-bit
-/// <c>unsigned long</c> under MSVC, so its rows wrap from order 35; nanoql's are 64-bit, exact to order 67, Linux
-/// QuantLib's values. QuantLib's values are its own on the wheel's platform (this run's <c>probes\c4_facts.cpp</c>,
-/// <c>c4_facts.out</c>).
+/// Pascal's triangle on Windows: QuantLib's coefficients are <c>BigNatural</c>, a 32-bit <c>unsigned long</c> under
+/// MSVC, so its rows wrap from order 35; nanoql's are 64-bit, exact to order 67, Linux QuantLib's values. QuantLib's
+/// values are its own on the wheel's platform.
 /// </summary>
 public class PascalTriangleTests
 {

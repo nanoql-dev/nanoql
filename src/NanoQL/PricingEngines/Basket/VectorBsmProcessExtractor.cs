@@ -10,10 +10,10 @@ using static NanoQL.Numerics.ComparisonFunctions;
 
 namespace NanoQL.PricingEngines;
 
-// QuantLib's detail::VectorBsmProcessExtractor: the spots, variances, deviations and discounts of several
-// Black-Scholes processes at a date, each read by date on its own structures, accruing nothing before a structure's
-// reference date (the playbook's dates row), where QuantLib's reads throw for an option expiring before a later
-// structure's date; on structures dated alike the reads are QuantLib's.
+// QuantLib's detail::VectorBsmProcessExtractor: the spots, variances, deviations and discounts of several Black-Scholes
+// processes at a date, each read by date on its own structures, accruing nothing before a structure's reference date
+// (the playbook's row for structures on another clock), where QuantLib's reads throw for an option expiring before a
+// later structure's date; on structures dated alike the reads are QuantLib's.
 internal sealed class VectorBsmProcessExtractor
 {
     private readonly IReadOnlyList<GeneralizedBlackScholesProcess> processes;

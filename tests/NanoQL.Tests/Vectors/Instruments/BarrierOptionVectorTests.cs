@@ -12,8 +12,8 @@ namespace NanoQL.Tests.Vectors;
 /// <summary>
 /// The BarrierOption vectors, <c>tests/vectors/instruments/barrieroption.json</c>: <see cref="BarrierOption"/>'s
 /// implied volatility for the four barrier types with and without a rebate on five processes, through the analytic
-/// engine, and with cash dividends through the finite-difference one; the refusals. Each target is one S7R6's filter
-/// kept.
+/// engine, and with cash dividends through the finite-difference one; the refusals. Each target is one the stability
+/// filter kept.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class BarrierOptionVectorTests

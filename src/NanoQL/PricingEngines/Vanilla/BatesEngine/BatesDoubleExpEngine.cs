@@ -18,16 +18,15 @@ namespace NanoQL.PricingEngines;
 /// </summary>
 /// <remarks>
 /// <para>
-/// An <see cref="AnalyticHestonEngine"/> on Gatheral's formulation, as QuantLib's derives from it (the S-hes plan's
-/// HR1 (iv)), over its <see cref="BatesDoubleExpModel"/>. An extension point: <see cref="BatesDoubleExpDetJumpEngine"/>
-/// derives from it.
+/// An <see cref="AnalyticHestonEngine"/> on Gatheral's formulation, as QuantLib's derives from it, over its
+/// <see cref="BatesDoubleExpModel"/>. An extension point: <see cref="BatesDoubleExpDetJumpEngine"/> derives from it.
 /// </para>
 /// <para>
 /// For η_u ≥ 1 the up-jumps' exponential moment diverges and the term's compensator p/(1 − η_u) has no meaning, yet
 /// QuantLib's engine prices: 816,076 for a 100 call at η_u = 1.01, a plausible 26.98 at 1.5, and at 1.0 its Lobatto
-/// integration throws. Here the engine refuses a model at η_u ≥ 1, an <see cref="ArgumentException"/> naming the
-/// model, as the model's constraint refuses one at construction (the S-hes plan's HR7 (v), a refusal by the user's
-/// ruling, <c>Divergences/BatesDoubleExpUpJumpTests.cs</c>); QuantLib's bits below it.
+/// integration throws. Here the engine refuses a model at η_u ≥ 1, an <see cref="ArgumentException"/> naming the model,
+/// as the model's constraint refuses one at construction (a refusal, <c>Divergences/BatesDoubleExpUpJumpTests.cs</c>);
+/// QuantLib's bits below it.
 /// </para>
 /// </remarks>
 public class BatesDoubleExpEngine : AnalyticHestonEngine
@@ -125,7 +124,7 @@ public class BatesDoubleExpEngine : AnalyticHestonEngine
             - (g * ((p / (1 - nuUp)) + (q / (1 + nuDown)) - 1)));
     }
 
-    // HR7 (v): the up-jumps' exponential moment is finite for η_u below 1 only
+    // The up-jumps' exponential moment is finite for η_u below 1 only
     private static BatesDoubleExpModel CheckedUpJumps(BatesDoubleExpModel model)
     {
         ArgumentNullException.ThrowIfNull(model);

@@ -12,15 +12,14 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// A basket with realized defaults restated on its live names (the S-xcr plan's XR8 (ii), ORE's form): the lost notional
-/// writes the tranche down from its attachment and the recovered notional amortizes it from its detachment's side, the
-/// model prices the live names over the restated tranche and the realized tranche loss is added; the event counts take
-/// the order less the realized defaults. QuantLib's adds the whole settled loss to the expected tranche loss, tranches
-/// the live loss against min(D, A + max(0, L − A)) where its header means max(0, A − L), and counts the defaulted name
-/// among the live ones (<c>basket.cpp:292-299</c>, <c>:325-328</c>, <c>:345-369</c>). On A (10) and B (20) alive and C
-/// (30) defaulted and settled at 0.4, QuantLib's values are the plan review's <c>rv_basket.cpp realized</c> and the S-xcr
-/// run's <c>c1_facts.cpp</c>; the checks are the tranche's loss enumerated over the live names' defaults at
-/// independence, and QuantLib on the restated basket (the live names, the restated ratios).
+/// A basket with realized defaults restated on its live names: the lost notional writes the tranche down from its
+/// attachment and the recovered notional amortizes it from its detachment's side, the model prices the live names over
+/// the restated tranche and the realized tranche loss is added; the event counts take the order less the realized
+/// defaults. QuantLib's adds the whole settled loss to the expected tranche loss, tranches the live loss against min(D,
+/// A + max(0, L − A)) where its header means max(0, A − L), and counts the defaulted name among the live ones
+/// (<c>basket.cpp:292-299</c>, <c>:325-328</c>, <c>:345-369</c>). On A (10) and B (20) alive and C (30) defaulted and
+/// settled at 0.4, QuantLib's values are recorded in the test; the checks are the tranche's loss enumerated over the
+/// live names' defaults at independence, and QuantLib on the restated basket (the live names, the restated ratios).
 /// </summary>
 public class BasketRealizedDefaultsTests
 {

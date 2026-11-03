@@ -9,20 +9,19 @@ using NanoQL.Tests.Vectors;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The CMS market calibration's reversion transform (the S-cms plan's CMR5 (xi)): QuantLib fits the reversion through
-/// y = m² unconstrained and reads it back as √y (<c>cmsmarketcalibration.hpp:84-89</c>), so a fit that ends at y below
-/// 0 returns a NaN reversion beside finite betas and error: on the wheel, on the vectors' market, Simplex(0.1) fits
-/// with the reversion free on the Standard model, whose prices don't read it, return a NaN reversion on spreads from
-/// every guess of 0.05 to 1e-4 (a beta of 0.2425733030330998, an error of 0.011716914297575421), and finite ones on
-/// prices and forward prices. nanoql reads √|y|, QuantLib's map wherever y ≥ 0. QuantLib's check: its values on every
-/// fit, betas within 1e-7 relative, errors within 1e-12 relative, and the reversion within 1e-5 where QuantLib's is
-/// finite, an ill-conditioned fit's bounds: the C runtime and processor a fit runs on move its last bits, its beta
-/// 9.7e-12 relative on GitHub's windows-2022 runner, 5.4e-11 on macOS and 1.6e-8 on Linux, and its error up to 4.8e-15
-/// (CI run 41146085965). On forward prices the two Simplex
-/// paths agree to the bit for 114 evaluations; at the 115th, at the same point, one SABR section fit of the
-/// recalibrated cube, the 10-year expiry on the 2-year tenor, lands on the other of two solutions QuantLib's own fit
-/// flips between when its beta moves one ulp (S7's ill-conditioned section fit, whose outputs the S7 plan's S7R6 filter
-/// drops from the vectors), the costs 3.5e-12 apart, and from there the fit lands 2.8e-8 away in beta.
+/// The CMS market calibration's reversion transform: QuantLib fits the reversion through y = m² unconstrained and reads
+/// it back as √y (<c>cmsmarketcalibration.hpp:84-89</c>), so a fit that ends at y below 0 returns a NaN reversion
+/// beside finite betas and error: on the wheel, on the vectors' market, Simplex(0.1) fits with the reversion free on
+/// the Standard model, whose prices don't read it, return a NaN reversion on spreads from every guess of 0.05 to 1e-4
+/// (a beta of 0.2425733030330998, an error of 0.011716914297575421), and finite ones on prices and forward prices.
+/// nanoql reads √|y|, QuantLib's map wherever y ≥ 0. QuantLib's check: its values on every fit, betas within 1e-7
+/// relative, errors within 1e-12 relative, and the reversion within 1e-5 where QuantLib's is finite, an ill-conditioned
+/// fit's bounds: the C runtime and processor a fit runs on move its last bits, its beta 9.7e-12 relative on GitHub's
+/// windows-2022 runner, 5.4e-11 on macOS and 1.6e-8 on Linux, and its error up to 4.8e-15 (CI run 41146085965). On
+/// forward prices the two Simplex paths agree to the bit for 114 evaluations; at the 115th, at the same point, one SABR
+/// section fit of the recalibrated cube, the 10-year expiry on the 2-year tenor, lands on the other of two solutions
+/// QuantLib's own fit flips between when its beta moves one ulp (an ill-conditioned section fit, whose outputs the
+/// vectors' stability filter drops), the costs 3.5e-12 apart, and from there the fit lands 2.8e-8 away in beta.
 /// </summary>
 public class CmsCalibrationReversionTransformTests
 {
@@ -75,8 +74,7 @@ public class CmsCalibrationReversionTransformTests
         }
     }
 
-    // A free-reversion fit from a beta of 0.5 under EndCriteria(200, 50, 1e-8, 1e-8, 1e-8), the S-cms plan's CP16
-    // probe's.
+    // A free-reversion fit from a beta of 0.5 under EndCriteria(200, 50, 1e-8, 1e-8, 1e-8).
     private static CmsMarketCalibrationResults<Vector> Fit(CmsMarketCalibrationCalibrationType type, double guess, OptimizationMethod method)
     {
         VectorCase c = VectorFile.Load("termstructures/volatility/swaption/cmsmarketcalibration").Cases[0];

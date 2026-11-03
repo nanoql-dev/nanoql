@@ -10,7 +10,7 @@ fixedPayment, the legs' payment dates and amounts, startDate and maturityDate, a
 (on Actual/365 (Fixed) and 30/360) where QuantLib's are right. QuantLib discounts the fair payment at its fixed leg's
 maturity date (zerocouponswap.cpp:147-153), the fixed-rate coupon's accrual end, so for a swap built from a fixed rate
 whose payment date isn't its maturity date, by a payment delay or an adjusted maturity, the fair payment and rate are
-left out: the S-cms plan's CMR5 (xxiv) (tests/NanoQL.Tests/Divergences/ZeroCouponSwapFairPaymentDelayTests.cs).
+left out (tests/NanoQL.Tests/Divergences/ZeroCouponSwapFairPaymentDelayTests.cs).
 
 A case's inputs hold its settings with the stored fixings, the index (a spec of indexes/interestrateindex.py), the
 discounting curve, and the swap's arguments ("fixedPayment" or "fixedRate" with "fixedDayCounter"). Read back by

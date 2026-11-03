@@ -13,8 +13,7 @@ namespace NanoQL.Methods;
 /// <summary>The American exercise condition: each value floored at its inner value, from the exercise's start
 /// on.</summary>
 /// <remarks>
-/// A working type (the S-eq plan's SEQR1): it walks the layout with an iterator it holds and resets, so applying it
-/// allocates nothing.
+/// A working type: it walks the layout with an iterator it holds and resets, so applying it allocates nothing.
 /// </remarks>
 [WorkingType]
 public sealed class FdmAmericanStepCondition : StepCondition

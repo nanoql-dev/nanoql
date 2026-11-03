@@ -16,10 +16,10 @@ namespace NanoQL.Models;
 /// The curve state of LIBOR market models: set on forward rates or discount ratios, from a first valid index on.
 /// </summary>
 /// <remarks>
-/// A working type (the S-mm plan's MR1 (ii)). The coterminal swap annuities are computed lazily, from the last back to
-/// the one asked for, as QuantLib's are, and the constant-maturity swap rates at each read; both into the state's own
-/// buffers, reset at each set, so every read is QuantLib's arithmetic in QuantLib's order. A rate read at the number of
-/// rates, which QuantLib's index check admits and reads past its vectors, is refused with QuantLib's text (MR3 (xx)).
+/// A working type. The coterminal swap annuities are computed lazily, from the last back to the one asked for, as
+/// QuantLib's are, and the constant-maturity swap rates at each read; both into the state's own buffers, reset at each
+/// set, so every read is QuantLib's arithmetic in QuantLib's order. A rate read at the number of rates, which
+/// QuantLib's index check admits and reads past its vectors, is refused with QuantLib's text.
 /// </remarks>
 [WorkingType]
 public sealed class LMMCurveState : CurveState
@@ -110,8 +110,8 @@ public sealed class LMMCurveState : CurveState
     /// <exception cref="ArgumentOutOfRangeException"><paramref name="firstValidIndex"/> is outside the rates.</exception>
     /// <remarks>
     /// QuantLib's refusal of a first valid index names one more than the number of rates as its bound while checking
-    /// against the number of rates; the text here names the bound it checks (the S-mm plan's MR3 (xv);
-    /// <c>Divergences/MarketModelTextTests.cs</c>).
+    /// against the number of rates; the text here names the bound it checks
+    /// (<c>Divergences/MarketModelTextTests.cs</c>).
     /// </remarks>
     public void SetOnDiscountRatios(ReadOnlySpan<double> discRatios, int firstValidIndex = 0)
     {

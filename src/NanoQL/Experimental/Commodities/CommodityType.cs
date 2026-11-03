@@ -16,9 +16,8 @@ namespace NanoQL.Experimental;
 /// </para>
 /// <para>
 /// QuantLib keeps a process-wide registry keyed by code, so a second construction with a known code returns the first
-/// construction's name whatever it was given (<c>commoditytype.cpp:28-38</c>). There is no registry here, so every
-/// type holds the data it is given, a documented divergence (<c>Divergences/CommodityRegistryTests.cs</c>; the S-xrt
-/// plan's XRR1).
+/// construction's name whatever it was given (<c>commoditytype.cpp:28-38</c>). There is no registry here, so every type
+/// holds the data it is given, a documented divergence (<c>Divergences/CommodityRegistryTests.cs</c>).
 /// </para>
 /// <para>
 /// Two types are equal when their codes are, compared ordinally, as QuantLib's <c>operator==</c> compares them

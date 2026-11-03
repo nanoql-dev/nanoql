@@ -19,11 +19,10 @@ namespace NanoQL.Experimental;
 /// <remarks>
 /// <para>
 /// The paths run on the clock spanning every Black-Scholes process's structures, as
-/// <see cref="MCEuropeanBasketEngine"/>'s do (the S-exo plan's ER5 (i); the S-xeq plan's XER5 (xxxiii)): the grid holds
-/// the fixing times on it, each payment discounted on the first process's risk-free curve at the instant its time
-/// denotes, nothing accrued before the curve's own date, and each fixing's curve the risk-free curve implied from its
-/// date (XER5 (xxxiv)); a market on one clock keeps QuantLib's draws and arithmetic. The seed is explicit and required
-/// (the S-xeq plan's XED3).
+/// <see cref="MCEuropeanBasketEngine"/>'s do: the grid holds the fixing times on it, each payment discounted on the
+/// first process's risk-free curve at the instant its time denotes, nothing accrued before the curve's own date, and
+/// each fixing's curve the risk-free curve implied from its date; a market on one clock keeps QuantLib's draws and
+/// arithmetic. The seed is explicit and required.
 /// </para>
 /// <para>
 /// The fixing dates are refused unless strictly increasing ("Invalid dates/times", as QuantLib's American path engine

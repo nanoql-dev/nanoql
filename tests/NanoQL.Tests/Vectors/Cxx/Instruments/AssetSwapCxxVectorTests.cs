@@ -45,7 +45,7 @@ public class AssetSwapCxxVectorTests
             AssetSwapResults results = DiscountingSwapEngine.Calculate(swap, context, curve);
 
             // cxx/instruments/assetswap.py leaves out the repayments on a bond redeemed above par with none given
-            // (the S-cms plan's CMR5 (xx))
+            //
             if (c.Expected.TryGetProperty("nonParRepayment", out _))
             {
                 check.Output(c, "fairNonParRepayment", () => AssetSwap.FairNonParRepayment(results));

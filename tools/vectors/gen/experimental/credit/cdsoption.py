@@ -9,10 +9,9 @@
   and 60%.
 - "refused" cases: a receiver option that doesn't knock out, and an underlying with an upfront.
 
-The implied volatility is solved, so the stability filter of the S-infl plan's SID20 runs on it: it is solved again
-with the target value, the discount rate and the recovery moved one ulp up, then down, together and each alone, and
-written only where every move leaves it within 1e-12 x max(|a|, |b|, 1); a dropped one is written null and listed in
-the case's inputs "dropped".
+The implied volatility is solved, so the stability filter runs on it: it is solved again with the target value, the
+discount rate and the recovery moved one ulp up, then down, together and each alone, and written only where every move
+leaves it within 1e-12 x max(|a|, |b|, 1); a dropped one is written null and listed in the case's inputs "dropped".
 
 A case's inputs hold its settings, the swap spec, the exercise date, "knocksOut", the curve specs and the recovery.
 Read back by tests/NanoQL.Tests/Vectors/Experimental/Credit/CdsOptionVectorTests.cs."""

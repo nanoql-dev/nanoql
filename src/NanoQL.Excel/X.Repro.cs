@@ -10,8 +10,8 @@ using ExcelDna.Integration;
 namespace NanoQL.Excel;
 
 /// <summary>
-/// Repro export (XLR14): the build's own part, which the generated assembly hands over when it loads (its resources, the
-/// repro templates and the adapters' source, and the path reporters' Excel names), and <c>nqlxlRepro</c>'s formats.
+/// Repro export: the build's own part, which the generated assembly hands over when it loads (its resources, the repro
+/// templates and the adapters' source, and the path reporters' Excel names), and <c>nqlxlRepro</c>'s formats.
 /// </summary>
 public static partial class X
 {
@@ -23,7 +23,7 @@ public static partial class X
 
     private static Assembly? build;
 
-    /// <summary>Gets the Excel names of the members reporting a read file's path, which an export refuses (round 6's F6-1).</summary>
+    /// <summary>Gets the Excel names of the members reporting a read file's path, which an export refuses.</summary>
     internal static IReadOnlySet<string> PathReporters { get; private set; } = new HashSet<string>(StringComparer.Ordinal);
 
     /// <summary>Gets nanoql's version, as a vector's generator names it.</summary>
@@ -144,7 +144,8 @@ public static partial class X
         return s.Length > 0 && char.IsLetter(s[0]) ? s : throw new XlRefusal($"{kind}: expected an enum member's name, got \"{s}\"");
     }
 
-    /// <summary>A refusal of the add-in's own: its message kept by the calling cell for nqlxlError, #VALUE! returned (XLR4's 2).</summary>
+    /// <summary>A refusal of the add-in's own: its message kept by the calling cell for nqlxlError, #VALUE! returned
+    /// (error code 2).</summary>
     /// <param name="message">The message.</param>
     /// <returns>#VALUE!.</returns>
     internal static ExcelError Refused(string message)

@@ -4,12 +4,11 @@
 date 15 October 2026: European options under the Heston model by Fang and Oosterlee's cosine series.
 
 tools/vectors/gen/processes/hestonprocess.py's three Heston parameter sets on flat and linear zero curves: the NPV of
-calls and puts at five strikes and three maturities from 18 months to five years, at QuantLib's default truncation
-and order (L 16, N 200) and at (12, 75) and (25, 600). Every market's κt is at least 1.2, at or above every cumulant's
-cut, so the cumulants, which set the truncation range, are QuantLib's own double arithmetic (the S-hes plan's HR6;
-§2.10 leaves out the κt below the cuts), and every σ is far above the small-σ branch (HR7 (viii)). The members, ChF,
-C1 to C4, Mu, Var, Skew and Kurtosis, which the wheel doesn't expose, are the harness's
-(tools/vectors/gen/cxx/pricingengines/vanilla/coshestonengine.py).
+calls and puts at five strikes and three maturities from 18 months to five years, at QuantLib's default truncation and
+order (L 16, N 200) and at (12, 75) and (25, 600). Every market's κt is at least 1.2, at or above every cumulant's
+cut, so the cumulants, which set the truncation range, are QuantLib's own double arithmetic (§2.10 leaves out the κt
+below the cuts), and every σ is far above the small-σ branch. The members, ChF, C1 to C4, Mu, Var, Skew and Kurtosis,
+which the wheel doesn't expose, are the harness's (tools/vectors/gen/cxx/pricingengines/vanilla/coshestonengine.py).
 
 A case holds one process {"riskFree", "dividend", "s0", "v0", "kappa", "theta", "sigma", "rho"}, the curves
 tools/vectors/gen/processes/blackscholesprocess.py's specs, and an engine {"L", "N"}. The wheel's calls, by

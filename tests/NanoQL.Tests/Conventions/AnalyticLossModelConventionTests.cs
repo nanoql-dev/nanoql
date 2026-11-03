@@ -10,10 +10,10 @@ using static NanoQL.Tests.Conventions.CreditPortfolioBuilders;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The C3 units' refusals and kept designs (the S-xcr plan's XR8 (xxix), (xxxii), (xxxiii), (xlvii), (xlviii)): the
-/// recursive and binomial models' reads before their distribution's start, a recursive model of no loss, a base
-/// correlation outside [0, 1), a copula's negative correlation, the saddle-point expansion's unresolvable loss, the
-/// surface's own checks, and a copula at correlation 1, the comonotonic step.
+/// The analytic loss models' refusals and kept designs: the recursive and binomial models' reads before their
+/// distribution's start, a recursive model of no loss, a base correlation outside [0, 1), a copula's negative
+/// correlation, the saddle-point expansion's unresolvable loss, the surface's own checks, and a copula at correlation
+/// 1, the comonotonic step.
 /// </summary>
 public class AnalyticLossModelConventionTests
 {

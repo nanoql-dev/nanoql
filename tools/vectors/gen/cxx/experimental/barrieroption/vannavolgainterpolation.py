@@ -9,10 +9,10 @@ year and three years: the interpolation's values at its three strikes, between t
 interpolation and through the factory; the factory's requiredPoints; and QuantLib's refusals of two and four strikes
 ("Vanna Volga Interpolator only interpolates 3 volatilities in strike space").
 
-**The stability filter** (the S7 plan's S7R6): each smile is interpolated again with its volatilities moved one ulp
-up, then down, by math.nextafter, every one together and each alone; a value is written only where every move leaves
-it within 1e-12 × max(|base|, |moved|, 1), its point dropped from "points" otherwise. The value solves Black's formula
-for a standard deviation (blackFormulaImpliedStdDev). The generator prints the dropped points.
+**The stability filter**: each smile is interpolated again with its volatilities moved one ulp up, then down, by
+math.nextafter, every one together and each alone; a value is written only where every move leaves it within 1e-12 ×
+max(|base|, |moved|, 1), its point dropped from "points" otherwise. The value solves Black's formula for a standard
+deviation (blackFormulaImpliedStdDev). The generator prints the dropped points.
 
 A case's inputs are the "x" and "y" (the strikes and volatilities, the second at the money), the "spot", "dDiscount",
 "fDiscount" and "t", and the "points"; its output the "values" there, or for the factory "factoryValues". Read back by

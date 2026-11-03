@@ -200,8 +200,8 @@ class Object:
     _sealed = False
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
-        # Every generated class without a crossing constructor of its own takes this one, never a base's (B2D10); a
-        # preset's names its lookup by name.
+        # Every generated class without a crossing constructor of its own takes this one, never a base's; a preset's
+        # names its lookup by name.
         made_by = type(self).__dict__.get("_made_by")
         if made_by:
             raise TypeError(f"{type(self).__name__} is made by {made_by}")
@@ -322,14 +322,14 @@ class _ClassBody:
 
 
 # The names a class body makes for itself (__module__, __dict__, __doc__, 3.13's __firstlineno__ and the like), which a
-# holder's members leave out; its operators and constructors go across (round 6's B6-1, F6-1).
+# holder's members leave out; its operators and constructors go across.
 _CLASS_BODY = frozenset(vars(_ClassBody)) | {"__module__", "__qualname__", "__dict__", "__weakref__", "__doc__"}
 
 
 def _attach(cls: type, holder: type) -> None:
     """Adds a holder class's members to a class: Period's to nanoql.Period, its operators among them, and a stable
     class's experimental members on the opt-in, its constructor among them. A function, so the module binds no name a
-    module alias may take (round 5's F5-1)."""
+    module alias may take."""
     for name, value in list(vars(holder).items()):
         if name not in _CLASS_BODY:
             setattr(cls, name, value)
@@ -564,8 +564,8 @@ class _Kind:
         n = self.name
         head, _, rest = n.partition(":")
         if head == "array" and rest.startswith(("tuple:", "tuple?:")):
-            # A sequence of tuples, one C array per element and a count (B2R3); a returned sequence of nullable tuples
-            # with has-value flags (B2R10).
+            # A sequence of tuples, one C array per element and a count; a returned sequence of nullable tuples with
+            # has-value flags.
             self.name = "tuples"
             self.e = "nullable" if rest.startswith("tuple?:") else None
             names, _, kinds = rest.partition(":")[2].partition("|")
@@ -694,7 +694,7 @@ class _Kind:
             keep.append(a)
             args += [a.ctypes.data_as(POINTER(c_double)), a.shape[0]]
         elif n in ("vector&", "matrix&"):
-            # A Matrix or Vector the member writes into (R15): a writable, contiguous NumPy array, written in place.
+            # A Matrix or Vector the member writes into: a writable, contiguous NumPy array, written in place.
             if v is None:
                 args += [None, 0] if n == "vector&" else [None, 0, 0]
                 return
@@ -725,7 +725,7 @@ class _Kind:
             keep += [flat, lengths]
             args += [flat.ctypes.data_as(POINTER(c_double)), flat.shape[0], lengths.ctypes.data_as(POINTER(c_int32)), len(rows)]
         elif n == "tuple":
-            # One C argument per element (B2R3); None is C#'s default, each element's zero value.
+            # One C argument per element; None is C#'s default, each element's zero value.
             if v is None:
                 v = tuple(_ZERO.get(k.name) for k in self.items)
             if isinstance(v, (str, bytes)) or not hasattr(v, "__len__") or len(v) != len(self.items):
@@ -733,7 +733,7 @@ class _Kind:
             for k, x in zip(self.items, v):
                 k.put(x, args, keep)
         elif n == "tuples":
-            # One C array per element and a count (B2R3); None is NULL arrays, an empty sequence an empty collection.
+            # One C array per element and a count; None is NULL arrays, an empty sequence an empty collection.
             if v is None:
                 for k in self.items:
                     args.append(None)

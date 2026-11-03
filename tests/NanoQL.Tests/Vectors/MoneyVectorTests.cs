@@ -14,8 +14,8 @@ namespace NanoQL.Tests.Vectors;
 /// Under <see cref="MoneyConversionType.NoConversion"/> a pair is checked through the operators; under the conversion
 /// types, through the methods that take the context (<c>Conventions/MoneyConversionTests.cs</c> checks that the methods
 /// answer as the operators under no conversion). QuantLib's <c>==</c> and <c>!=</c> throw on a currency mismatch under
-/// no conversion, where nanoql's return <see langword="false"/> and <see langword="true"/> (U7, the S-rx plan's SRXR1):
-/// those two outputs map QuantLib's throw to the ruled values.
+/// no conversion, where nanoql's return <see langword="false"/> and <see langword="true"/>: those two outputs map
+/// QuantLib's throw to nanoql's values.
 /// </remarks>
 [Trait("Oracle", "QuantLib")]
 public class MoneyVectorTests

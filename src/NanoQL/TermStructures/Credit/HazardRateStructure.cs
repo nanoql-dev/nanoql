@@ -23,8 +23,8 @@ namespace NanoQL.TermStructures;
 /// 48-point Gauss-Chebyshev rule, which QuantLib warns "might be inefficient and inaccurate. Derived classes should
 /// override it if a more efficient implementation is available": the rule integrates a constant over [-1, 1] to
 /// 2.000357018144566, a relative error of 1.785e-4, and the spreaded curves miss their exact survival by 5.4e-6 to
-/// 1.05e-4 on it, so they override it exactly (the S-xcr plan's XR3 (a), (b)). QuantLib's default hazard rate refuses
-/// ("hazardRateImpl() must be implemented by a class derived from HazardRateStructure"); here it is abstract.
+/// 1.05e-4 on it, so they override it exactly ((b)). QuantLib's default hazard rate refuses ("hazardRateImpl() must be
+/// implemented by a class derived from HazardRateStructure"); here it is abstract.
 /// </para>
 /// </remarks>
 public abstract class HazardRateStructure : DefaultProbabilityTermStructure

@@ -18,7 +18,7 @@ namespace NanoQL.Tests.Vectors;
 /// rates bootstrapped on Ibor deposits' stored histories, the dates skipped and failed, their messages, the fixing
 /// periods and the statistics (the failed dates' messages counted, not read: the curve's range check prints its times
 /// in full where QuantLib prints six digits). nanoql bootstraps each date's curve afresh where QuantLib restarts from
-/// the last date's (the S-mmp plan's SMD9), its forwards within the bootstrap's accuracy.
+/// the last date's, its forwards within the bootstrap's accuracy.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class HistoricalForwardRatesAnalysisCxxVectorTests

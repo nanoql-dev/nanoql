@@ -13,8 +13,8 @@ namespace NanoQL.Experimental;
 
 /// <summary>
 /// <see cref="MCPagodaEngine"/> on low-discrepancy draws with QuantLib's default statistics: <c>MCLDPagodaEngine</c>,
-/// named as QuantLib-Python names its siblings (B2R2), QuantLib's <c>MCPagodaEngine&lt;LowDiscrepancy&gt;</c>, its
-/// calculations closed at <see cref="LowDiscrepancy"/> and <see cref="GeneralStatistics"/> (D12).
+/// named as QuantLib-Python names its siblings, QuantLib's <c>MCPagodaEngine&lt;LowDiscrepancy&gt;</c>, its
+/// calculations closed at <see cref="LowDiscrepancy"/> and <see cref="GeneralStatistics"/>.
 /// </summary>
 [Experimental("NQL0001")]
 public static class MCLDPagodaEngine

@@ -15,7 +15,7 @@ namespace NanoQL.Experimental;
 /// The binomial double-barrier engine on the Leisen-Reimer tree and Derman and Kani's discretized double-barrier
 /// option: QuantLib-Python's <c>BinomialLRDoubleBarrierEngine</c>, QuantLib's
 /// <c>BinomialDoubleBarrierEngine&lt;LeisenReimer, DiscretizedDermanKaniDoubleBarrierOption&gt;</c>, the wheel's
-/// closing (D12).
+/// closing.
 /// </summary>
 [Experimental("NQL0001")]
 public static class BinomialLRDoubleBarrierEngine

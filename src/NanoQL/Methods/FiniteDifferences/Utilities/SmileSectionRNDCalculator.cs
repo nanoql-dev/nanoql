@@ -18,10 +18,10 @@ namespace NanoQL.Methods;
 /// the normal quantile z = Φ⁻¹(P(S ≤ K)), linear for a lognormal law and well conditioned in the wings.
 /// </summary>
 /// <remarks>
-/// Immutable. The quantile table is built at construction (master §2.2's <c>LazyObject</c> row, the S-van plan's VD10),
-/// where QuantLib builds it at the first inverse; where it can't be built, the refusal is recorded and raised from
-/// <see cref="InvCdf(double, double)"/>, QuantLib's point, since the density and distribution never need the table.
-/// Its argument x is ln(S); its only time is the section's exercise time.
+/// Immutable. The quantile table is built at construction (the playbook's <c>LazyObject</c> row), where QuantLib builds
+/// it at the first inverse; where it can't be built, the refusal is recorded and raised from
+/// <see cref="InvCdf(double, double)"/>, QuantLib's point, since the density and distribution never need the table. Its
+/// argument x is ln(S); its only time is the section's exercise time.
 /// </remarks>
 public sealed class SmileSectionRNDCalculator : RiskNeutralDensityCalculator
 {

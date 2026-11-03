@@ -7,9 +7,9 @@ using Microsoft.Office.Interop.Excel;
 namespace NanoQL.Excel.XlTests;
 
 /// <summary>
-/// A range where a function takes one value (XLR15, XLP75): a column of dates, a column by a row as a grid of handles,
-/// a shorter range padded #N/A, a failed element and its message, looped helpers each its own call's handle, and a curve
-/// from them the curve from the single cells.
+/// A range where a function takes one value: a column of dates, a column by a row as a grid of handles, a shorter range
+/// padded #N/A, a failed element and its message, looped helpers each its own call's handle, and a curve from them the
+/// curve from the single cells.
 /// </summary>
 [ExcelTestSettings(OutOfProcess = true)]
 public class LoopTests : RunnerTest

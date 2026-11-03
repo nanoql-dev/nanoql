@@ -11,14 +11,14 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The Heston geometric Asian engine's refusal at vanishing variance near the forward (the S-bar plan's BR10, by its cut
-/// alone, BR11): where the switch to the intrinsic doesn't fire and the damped contour's cut, where <c>Phi</c> decays,
-/// lies past ξ 1e7, the engine refuses before the contour runs, with "variance too small for the Heston geometric engine
-/// near the forward". The market is BR10's: r 5%, q 0, κ 2, vol of vol 0.1, ρ −0.5, v₀ = θ. At spot 0.01, a month of
-/// six fixings at variance 1e-8, the strike 5e-5 below the forward, the cut is 4.25e8: refused. On the cut's other
-/// side, spot 100, a day at variance 1e-6 with one fixing, the strike 5e-5 above the forward, the cut 4.9e6: priced,
-/// within R7 of QUADPACK on the route's contour, where QuantLib's <c>AnalyticHestonEngine</c> doesn't converge (the
-/// S-bar run's <c>c3_br11_refs.py</c> on the planner's route, a second contour agreeing to 8e-17).
+/// The Heston geometric Asian engine's refusal at vanishing variance near the forward (by its cut alone): where the
+/// switch to the intrinsic doesn't fire and the damped contour's cut, where <c>Phi</c> decays, lies past ξ 1e7, the
+/// engine refuses before the contour runs, with "variance too small for the Heston geometric engine near the forward".
+/// The market: r 5%, q 0, κ 2, vol of vol 0.1, ρ −0.5, v₀ = θ. At spot 0.01, a month of six fixings at variance 1e-8,
+/// the strike 5e-5 below the forward, the cut is 4.25e8: refused. On the cut's other side, spot 100, a day at variance
+/// 1e-6 with one fixing, the strike 5e-5 above the forward, the cut 4.9e6: priced, within the vector tolerance of
+/// QUADPACK on the route's contour, where QuantLib's <c>AnalyticHestonEngine</c> doesn't converge (a second contour
+/// agreeing to 8e-17).
 /// </summary>
 public class HestonGeometricAsianRefusalTests
 {

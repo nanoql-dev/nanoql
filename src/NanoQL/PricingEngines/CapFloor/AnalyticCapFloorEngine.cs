@@ -21,20 +21,20 @@ namespace NanoQL.PricingEngines;
 /// 1/(1 + Kτ), a put for a caplet and a call for a floorlet.
 /// </para>
 /// <para>
-/// <b>The option's expiry</b> (the S-sr plan's B1-1, ruled by the user on 2026-10-22): QuantLib's option expires at the
-/// optionlet's start (<c>analyticcapfloorengine.cpp:94-112</c>), where the instrument fixes its rate and QuantLib's Monte
-/// Carlo engine reads it at the fixing date, so an optionlet with a fixing lag is priced on the variance to its start. On
-/// a <see cref="HullWhite"/> model, an optionlet fixed before its start is the option expiring at its fixing on the bond
-/// from its start to its payment, QuantLib's own five-argument bond option, as its Jamshidian engine prices one; one fixed
-/// on its start is QuantLib's value, bit for bit. The other models keep QuantLib's expiry at the start, since QuantLib has
-/// no such option for them: its affine model's five-argument option ignores the bond's start. A divergence
+/// <b>The option's expiry</b>: QuantLib's option expires at the optionlet's start
+/// (<c>analyticcapfloorengine.cpp:94-112</c>), where the instrument fixes its rate and QuantLib's Monte Carlo engine
+/// reads it at the fixing date, so an optionlet with a fixing lag is priced on the variance to its start. On a
+/// <see cref="HullWhite"/> model, an optionlet fixed before its start is the option expiring at its fixing on the bond
+/// from its start to its payment, QuantLib's own five-argument bond option, as its Jamshidian engine prices one; one
+/// fixed on its start is QuantLib's value, bit for bit. The other models keep QuantLib's expiry at the start, since
+/// QuantLib has no such option for them: its affine model's five-argument option ignores the bond's start. A divergence
 /// (<c>Divergences/CapletFixingExpiryTests.cs</c>).
 /// </para>
 /// <para>
-/// <b>An in-arrears caplet</b> still to be fixed, fixed after its start, is refused, on every model, since no closed form
-/// values it (the S-sr plan's B2-1, ruled by the user on 2026-10-22): QuantLib prices it as the caplet in advance, on its
-/// start and its accrual period, reading neither its fixing nor its index's period
-/// (<c>Divergences/CapletInArrearsTests.cs</c>). The tree and Monte Carlo engines value it at its fixing.
+/// <b>An in-arrears caplet</b> still to be fixed, fixed after its start, is refused, on every model, since no closed
+/// form values it: QuantLib prices it as the caplet in advance, on its start and its accrual period, reading neither
+/// its fixing nor its index's period (<c>Divergences/CapletInArrearsTests.cs</c>). The tree and Monte Carlo engines
+/// value it at its fixing.
 /// </para>
 /// <para>
 /// The term structure is needed only when the model can't provide one: a model that is an
@@ -139,14 +139,14 @@ public static class AnalyticCapFloorEngine
                     double maturity = dayCounter.YearFraction(referenceDate, arguments.StartDates[i]);
                     if (fixingTime > maturity)
                     {
-                        // B2-1: no closed form for an in-arrears caplet
+                        // No closed form for an in-arrears caplet
                         throw new NanoQLException(
                             $"an in-arrears caplet still to be fixed (on {arguments.FixingDates[i]}) has no closed form: "
                             + "price it on the tree or the Monte Carlo engine");
                     }
 
 
-                    // B1-1: on Hull-White, the option at the fixing on the bond from the start, where it is earlier
+                    // On Hull-White, the option at the fixing on the bond from the start, where it is earlier
                     HullWhite? atFixing = model is HullWhite hullWhite && fixingTime < maturity ? hullWhite : null;
                     if (type is CapFloorType.Cap or CapFloorType.Collar)
                     {

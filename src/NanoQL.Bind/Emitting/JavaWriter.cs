@@ -13,11 +13,11 @@ namespace NanoQL.Bind.Emitting;
 /// The Java back end (docs/bindings.md, "Java"): the idiomatic layer over jextract's (<c>org.nanoql.ffi</c>), from the
 /// surface. A class per type in a package per namespace (<c>org.nanoql.termstructures</c>), the experimental API's in
 /// <c>org.nanoql.experimental</c>, a stable class's experimental members as statics of its
-/// <c>org.nanoql.experimental.&lt;Class&gt;Experimental</c> (BIR7); interfaces with default methods; QuantLib's camelCase;
-/// telescoping overloads for nanoql's defaults (BIR13); <c>LocalDate</c>, a <c>Period</c> record, boxed nullables,
-/// primitive arrays of numbers and lists of the rest; exceptions per code (BIR21). Each function's class, member and
-/// form are planned once, for the classes and for the replayer's dispatch (<c>JavaReplayWriter</c>). A user's prefix
-/// (BIR9) calls through its own jextract class, <c>&lt;prefix&gt;.ffi.&lt;prefix&gt;_h</c> over its header, and
+/// <c>org.nanoql.experimental.&lt;Class&gt;Experimental</c>; interfaces with default methods; QuantLib's camelCase;
+/// telescoping overloads for nanoql's defaults; <c>LocalDate</c>, a <c>Period</c> record, boxed nullables, primitive
+/// arrays of numbers and lists of the rest; exceptions per code. Each function's class, member and form are planned
+/// once, for the classes and for the replayer's dispatch (<c>JavaReplayWriter</c>). A user's prefix
+///  calls through its own jextract class, <c>&lt;prefix&gt;.ffi.&lt;prefix&gt;_h</c> over its header, and
 /// registers its classes through its own <c>&lt;prefix&gt;.internal.&lt;Prefix&gt;Types</c>, so its package sits beside
 /// nanoql's jar.
 /// </summary>
@@ -399,7 +399,7 @@ internal sealed class JavaWriter
         return result;
     }
 
-    // A stable class's experimental members' holder: org.nanoql.experimental.<Class>Experimental (BIR7).
+    // A stable class's experimental members' holder: org.nanoql.experimental.<Class>Experimental.
     private string ExperimentalHolder(TypeRow t) => Package(t.Type.Namespace, true, t.Prefix) + "." + t.CName + "Experimental";
 
     // Period's canonical constructor, (length, units), is the record's own.
@@ -693,7 +693,7 @@ internal sealed class JavaWriter
         d.AppendLine("}");
     }
 
-    // A stable class's experimental members: statics of org.nanoql.experimental.<Class>Experimental, the instance first (BIR7).
+    // A stable class's experimental members: statics of org.nanoql.experimental.<Class>Experimental, the instance first.
     private void Holder(Dictionary<string, StringBuilder> files, string fqn, List<JavaMember> ms)
     {
         StringBuilder sb = Source(files, fqn, $"{ms[0].Type.CName}'s experimental members.");
@@ -949,7 +949,7 @@ internal sealed class JavaWriter
     }
 
     // The telescoped overloads of a form: its trailing parameters left at nanoql's defaults, from where its offered counts
-    // start (BIR13; Java has no default arguments).
+    // start (Java has no default arguments).
     private void Telescoped(StringBuilder sb, JavaMember m, string name, string modifiers, bool isNew, string result = "")
     {
         List<CParam> ps = [.. m.Function.Params.Where(p => !p.IsSelf)];
@@ -1094,8 +1094,8 @@ internal sealed class JavaWriter
             }
 
             case "tuple":
-                // One C argument per element (B2R3): null is C#'s default, each element's zero value, and a null in an
-                // element that takes none is refused by name (B2D7).
+                // One C argument per element: null is C#'s default, each element's zero value, and a null in an element
+                // that takes none is refused by name.
                 for (int i = 0; i < k.Items.Count; i++)
                 {
                     CKind e = k.Items[i];
@@ -1106,8 +1106,8 @@ internal sealed class JavaWriter
                 return;
             case "array" when k.Element!.Name == "tuple":
             {
-                // One C array per element, a nullable one with its flags, then the count (B2R3): each element's list
-                // taken from the tuples, a null in an element that takes none refused by name (B2D7).
+                // One C array per element, a nullable one with its flags, then the count: each element's list taken
+                // from the tuples, a null in an element that takes none refused by name.
                 CKind te = k.Element;
                 for (int i = 0; i < te.Items.Count; i++)
                 {

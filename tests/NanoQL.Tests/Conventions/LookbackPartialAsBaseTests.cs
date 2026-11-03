@@ -13,11 +13,11 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// A partial-time lookback passed where its full-period base is taken (the S-bar plan's SD8, U15). QuantLib's partial
-/// options derive from the full ones, and its full engines' arguments can't hold a partial option's ("wrong argument
-/// type" at <c>setupArguments</c>); nanoql's partial options derive from the unsealed full ones too, so the two full
-/// analytic engines, the Monte Carlo engine's full-period overloads and the builder's delegate for a full option each
-/// refuse one with QuantLib's text, rather than price it as a full-period option.
+/// A partial-time lookback passed where its full-period base is taken. QuantLib's partial options derive from the full
+/// ones, and its full engines' arguments can't hold a partial option's ("wrong argument type" at
+/// <c>setupArguments</c>); nanoql's partial options derive from the unsealed full ones too, so the two full analytic
+/// engines, the Monte Carlo engine's full-period overloads and the builder's delegate for a full option each refuse one
+/// with QuantLib's text, rather than price it as a full-period option.
 /// </summary>
 public class LookbackPartialAsBaseTests
 {

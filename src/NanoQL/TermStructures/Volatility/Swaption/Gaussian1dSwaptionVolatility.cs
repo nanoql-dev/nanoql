@@ -17,10 +17,10 @@ namespace NanoQL.TermStructures;
 /// <see cref="Gaussian1dSmileSection"/> on the index base cloned to the tenor.
 /// </summary>
 /// <remarks>
-/// A section is built per call, as QuantLib's <c>smileSectionImpl</c> builds one (the S-g1d plan's G1D10), under the
-/// context given at construction, which the structure keeps; its reference date is the model curve's. An option time
-/// is taken to the date whose time it is, by QuantLib's Newton search over a date's fractional serial number, adjusted
-/// on the index's fixing calendar; a swap length to the nearest whole month.
+/// A section is built per call, as QuantLib's <c>smileSectionImpl</c> builds one, under the context given at
+/// construction, which the structure keeps; its reference date is the model curve's. An option time is taken to the
+/// date whose time it is, by QuantLib's Newton search over a date's fractional serial number, adjusted on the index's
+/// fixing calendar; a swap length to the nearest whole month.
 /// </remarks>
 public sealed class Gaussian1dSwaptionVolatility : SwaptionVolatilityStructure
 {

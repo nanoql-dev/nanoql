@@ -12,8 +12,8 @@ namespace NanoQL.Tests.Divergences;
 /// (<c>margrabeoption.hpp:55</c>, members its constructor leaves unset) and its expired path sets only
 /// <c>MultiAssetOption</c>'s results (<c>multiassetoption.cpp:74-77</c>, through <c>instrument.hpp:132-133</c>), so
 /// <c>delta1()</c> and the others read uninitialized memory (<c>margrabeoption.cpp:32-54</c>), which is undefined.
-/// nanoql refuses the read as QuantLib's results refuse an unset value: the four are <see langword="null"/>, the
-/// NPV and the multi-asset Greeks 0 as QuantLib's (master §2.2's undefined-path row).
+/// nanoql refuses the read as QuantLib's results refuse an unset value: the four are <see langword="null"/>, the NPV
+/// and the multi-asset Greeks 0 as QuantLib's (the playbook's undefined-behaviour row).
 /// </summary>
 public class MargrabeExpiredGreeksTests
 {

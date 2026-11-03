@@ -11,13 +11,12 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The finite-difference CIR engine with a quanto helper (a run find of the S-van plan's C4, under R8). QuantLib's
-/// engine passes the helper to its equity mesher alone, and its operator takes none
-/// (<c>fdcirvanillaengine.cpp:60-63</c>, <c>fdmcirop.cpp</c>) [read], so a quanto prices without the quanto drift, on a
-/// mesher centred for it. nanoql's operator subtracts the helper's adjustment with the grid's short rate as the domestic
-/// one, r − q − ½v − (r − r_f + ρσσ_fx): the quanto drift r_f − q − ½v − ρσσ_fx, the domestic rate only discounting.
-/// QuantLib's check: as the rate's volatility goes to 0 with r₀ = θ the helper's domestic rate, the engine is
-/// QuantLib's finite-difference Black-Scholes engine on the same quanto helper.
+/// The finite-difference CIR engine with a quanto helper. QuantLib's engine passes the helper to its equity mesher
+/// alone, and its operator takes none (<c>fdcirvanillaengine.cpp:60-63</c>, <c>fdmcirop.cpp</c>), so a quanto prices
+/// without the quanto drift, on a mesher centred for it. nanoql's operator subtracts the helper's adjustment with the
+/// grid's short rate as the domestic one, r − q − ½v − (r − r_f + ρσσ_fx): the quanto drift r_f − q − ½v − ρσσ_fx, the
+/// domestic rate only discounting. QuantLib's check: as the rate's volatility goes to 0 with r₀ = θ the helper's
+/// domestic rate, the engine is QuantLib's finite-difference Black-Scholes engine on the same quanto helper.
 /// </summary>
 public class FdCirQuantoTests
 {

@@ -13,8 +13,8 @@ namespace NanoQL.Tests.Conventions;
 
 /// <summary>
 /// The refusals of the Markov-functional model, its state process, the smile sections it calibrates to and the flat
-/// extrapolator, by type, message and parameter (playbook §2; the S-g1d plan's G1D17): QuantLib's texts, a check of an
-/// argument an <see cref="ArgumentException"/> naming it, a check of a value already stored or computed a
+/// extrapolator, by type, message and parameter (playbook §2): QuantLib's texts, a check of an argument an
+/// <see cref="ArgumentException"/> naming it, a check of a value already stored or computed a
 /// <see cref="NanoQLException"/>. The settings' own refusals are <see cref="MarkovFunctionalSettingsTests"/>'.
 /// </summary>
 public class MarkovFunctionalRefusalTests

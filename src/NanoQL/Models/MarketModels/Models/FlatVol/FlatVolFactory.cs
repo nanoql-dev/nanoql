@@ -21,8 +21,8 @@ namespace NanoQL.Models;
 /// time-homogeneous.
 /// </summary>
 /// <remarks>
-/// Immutable (the S-mm plan's MR1 (i)): it holds its curve (R1), and <see cref="Create"/> returns a new model. QuantLib's
-/// factory observes its curve's handle; here a new curve is a new factory.
+/// Immutable: it holds its curve, and <see cref="Create"/> returns a new model. QuantLib's factory observes its curve's
+/// handle; here a new curve is a new factory.
 /// </remarks>
 public sealed class FlatVolFactory : MarketModelFactory
 {

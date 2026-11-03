@@ -11,12 +11,12 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// A running extremum beyond the spot (the S-bar plan's BR5 (xxii), fixed under R8). The spot is observed, so a running
-/// maximum below it or a minimum above it is impossible; QuantLib's engines price it as given: on spot 100, r 5%, q 0,
-/// σ 20% over a year, a fixed call struck at 90 with a running maximum of 80 at 30.175098740702154, where the spot as
-/// the maximum gives 28.67991950233946, and a floating put with that maximum at 19.69144860119077 for
-/// 14.29056770740371 (the planner's P2, rerun as the S-bar run's <c>c2_lb_facts.py</c>). nanoql reads the extremum as
-/// max(minmax, S) or min(minmax, S), in the analytic and Monte Carlo engines. Check: QuantLib's value at minmax = S.
+/// A running extremum beyond the spot (fixed). The spot is observed, so a running maximum below it or a minimum above
+/// it is impossible; QuantLib's engines price it as given: on spot 100, r 5%, q 0, σ 20% over a year, a fixed call
+/// struck at 90 with a running maximum of 80 at 30.175098740702154, where the spot as the maximum gives
+/// 28.67991950233946, and a floating put with that maximum at 19.69144860119077 for 14.29056770740371. nanoql reads the
+/// extremum as max(minmax, S) or min(minmax, S), in the analytic and Monte Carlo engines. Check: QuantLib's value at
+/// minmax = S.
 /// </summary>
 public class LookbackExtremeBeyondSpotTests
 {

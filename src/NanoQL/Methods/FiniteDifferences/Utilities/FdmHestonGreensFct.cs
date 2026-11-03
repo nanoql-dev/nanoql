@@ -16,8 +16,8 @@ namespace NanoQL.Methods;
 /// </summary>
 /// <remarks>
 /// Immutable. The curves are read on a clock, each at the instants its times denote: QuantLib reads the rates at the
-/// risk-free curve's times (HR7 (xxi)). The public constructor's clock is <see cref="FdmHestonOp.Clock"/>'s, the
-/// risk-free curve itself where the dividend curve isn't dated before it, QuantLib's reads.
+/// risk-free curve's times. The public constructor's clock is <see cref="FdmHestonOp.Clock"/>'s, the risk-free curve
+/// itself where the dividend curve isn't dated before it, QuantLib's reads.
 /// </remarks>
 public sealed class FdmHestonGreensFct
 {

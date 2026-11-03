@@ -14,7 +14,7 @@ namespace NanoQL.Instruments;
 /// </summary>
 /// <remarks>
 /// Immutable. The option type argument is QuantLib's, which its engine never reads (the payoff's type rules); it is kept
-/// for QuantLib's signature (the S-exo plan's ED8).
+/// for QuantLib's signature.
 /// </remarks>
 public sealed class HolderExtensibleOption : OneAssetOption
 {

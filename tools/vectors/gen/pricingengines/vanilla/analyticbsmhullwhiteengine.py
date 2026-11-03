@@ -8,11 +8,11 @@ risk-free curve of reversions 0.03 to 1 and correlations of the equity with the 
 NPV and the eleven Greeks the analytic European engine gives on the shifted variance. Then an expired option and the
 refusal of an American exercise.
 
-The outputs nanoql fixes are left out: below a·t = 1e-2, where nanoql's offset is its series (the S-van plan's
-VR4 (xxvii), tests/NanoQL.Tests/Divergences/BsmHullWhiteSmallReversionTests.cs), with a margin; and the puts'
-in-the-money probability (the S-eq plan's SEQR7, BlackCalculatorItmProbabilityTests.cs). Every structure is dated on
-the evaluation date, counts on Actual/365 (Fixed) and quotes a constant volatility, so the mismatched-dates class
-(VR4 (xi), BsmHullWhiteMismatchedTimesTests.cs) doesn't reach the file.
+The outputs nanoql fixes are left out: below a·t = 1e-2, where nanoql's offset is its series
+(tests/NanoQL.Tests/Divergences/BsmHullWhiteSmallReversionTests.cs), with a margin; and the puts' in-the-money
+probability (BlackCalculatorItmProbabilityTests.cs). Every structure is dated on the evaluation date, counts on
+Actual/365 (Fixed) and quotes a constant volatility, so the mismatched-dates class (BsmHullWhiteMismatchedTimesTests.cs)
+doesn't reach the file.
 
 A case's inputs are the process spec (tools/vectors/gen/processes/blackscholesprocess.py's), the payoffs
 (tools/vectors/gen/pricingengines/blackcalculator.py's), the exercise, "model": {"a", "sigma"} and "correlation". The

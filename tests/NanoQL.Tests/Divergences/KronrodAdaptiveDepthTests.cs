@@ -6,13 +6,13 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The adaptive Gauss-Kronrod rule's recursion (the S-cms plan's CMR5 (vi)): QuantLib halves the interval by recursion
-/// bounded by its evaluations only (<c>kronrodintegral.cpp:386-439</c>), so at a tolerance it can't reach it overflows
-/// a default stack before the bound refuses: integrating e^(−x²) cos 3x and √|x − 1.3| over [0, 4], QuantLib's C++ dies
-/// of a stack overflow at 1e-14 on its default stack (exit −1073741571), which in .NET ends the process uncaught.
-/// nanoql iterates over an explicit stack in QuantLib's order. QuantLib's check: its own values, counts and refusals,
-/// on a thread with a 1 GB stack (the S-cms planner's <c>kronrodstack.cpp</c>): at tolerances 1e-6 to 1e-13 the values
-/// and counts below, and at 1e-14 and 1e-15 "maximum number of function evaluations exceeded".
+/// The adaptive Gauss-Kronrod rule's recursion: QuantLib halves the interval by recursion bounded by its evaluations
+/// only (<c>kronrodintegral.cpp:386-439</c>), so at a tolerance it can't reach it overflows a default stack before the
+/// bound refuses: integrating e^(−x²) cos 3x and √|x − 1.3| over [0, 4], QuantLib's C++ dies of a stack overflow at
+/// 1e-14 on its default stack (exit −1073741571), which in .NET ends the process uncaught. nanoql iterates over an
+/// explicit stack in QuantLib's order. QuantLib's check: its own values, counts and refusals, on a thread with a 1 GB
+/// stack: at tolerances 1e-6 to 1e-13 the values and counts below, and at 1e-14 and 1e-15 "maximum number of function
+/// evaluations exceeded".
 /// </summary>
 public class KronrodAdaptiveDepthTests
 {

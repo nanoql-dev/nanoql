@@ -6,12 +6,11 @@ using NanoQL.Experimental;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The Geman-Roncoroni process as a working type, QuantLib's semantics kept (the S-xrt plan's XRR3, ruled 2026-10-28),
-/// and its two route (§2.5): the one-dimensional step draws its jump uniforms from a generator the process builds on its
-/// first call, seeded from that call's draw, and continues for every later call, so a process's steps depend on its
-/// history and a copy from <see cref="GemanRoncoroniProcess.Clone"/> starts its own; the five-argument step taking the
-/// uniforms is stateless; and with no jump intensity, below the threshold, the step is the diffusion's Euler step at the
-/// interval's midpoint.
+/// The Geman-Roncoroni process as a working type, QuantLib's semantics kept, and its two route (§2.5): the
+/// one-dimensional step draws its jump uniforms from a generator the process builds on its first call, seeded from that
+/// call's draw, and continues for every later call, so a process's steps depend on its history and a copy from
+/// <see cref="GemanRoncoroniProcess.Clone"/> starts its own; the five-argument step taking the uniforms is stateless;
+/// and with no jump intensity, below the threshold, the step is the diffusion's Euler step at the interval's midpoint.
 /// </summary>
 public class GemanRoncoroniWorkingTypeTests
 {

@@ -10,10 +10,10 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// A float-float swap on a schedule of one date (the S-rx plan's SRXR3 (ix)). Its leg has no coupon, so each of its
-/// vectors is empty, and QuantLib reads the first cap of each leg unchecked (<c>floatfloatswap.cpp:170</c>,
-/// <c>:182</c>): undefined behaviour, which on the wheel ends the process (0xC0000005). nanoql refuses the schedule
-/// just before the read, with an <see cref="ArgumentException"/> naming it, from either constructor.
+/// A float-float swap on a schedule of one date. Its leg has no coupon, so each of its vectors is empty, and QuantLib
+/// reads the first cap of each leg unchecked (<c>floatfloatswap.cpp:170</c>, <c>:182</c>): undefined behaviour, which
+/// on the wheel ends the process (0xC0000005). nanoql refuses the schedule just before the read, with an
+/// <see cref="ArgumentException"/> naming it, from either constructor.
 /// </summary>
 public class FloatFloatSwapOneDateScheduleTests
 {

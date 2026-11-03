@@ -11,16 +11,15 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The double-barrier binary's KIKO and KOKI options (the S-bar plan's BR5 (xlvii) and BR9, fixed under R8). QuantLib
-/// sums their series to i = 999 and checks only the last term, |term| &lt; 1e-8
-/// (<c>analyticdoublebarrierbinaryengine.cpp:156-169</c>), while the terms decay as 1/i³: at small variance it passes
-/// its check unconverged (a KOKI 8.4% low on [95, 105] at a volatility of 1% over two years) or refuses ("serie did not
-/// converge sufficiently fast"). nanoql keeps QuantLib's sum, its value and bits, wherever Abel's bound on the dropped
-/// tail is within 1e-11 of the sum, and elsewhere integrates the absorption flux of QuantLib's own image-series killed
-/// density at the barrier, each image paired with its reflection, in log time between the roots that bound its mass,
-/// on the adaptive Gauss-Kronrod rule scaled by a first estimate (SD24). Checks (the plan's §C0 constants): Kummer's
-/// transformation of QuantLib's series in 40 or 50 digits (the planner's P17, the reviewer's r5b and r6b), the survival
-/// route on QuantLib's image series (the reviewer's r3c, r4d, r5e), and the flux in 30 digits (r6b).
+/// The double-barrier binary's KIKO and KOKI options (fixed). QuantLib sums their series to i = 999 and checks only the
+/// last term, |term| &lt; 1e-8 (<c>analyticdoublebarrierbinaryengine.cpp:156-169</c>), while the terms decay as 1/i³:
+/// at small variance it passes its check unconverged (a KOKI 8.4% low on [95, 105] at a volatility of 1% over two
+/// years) or refuses ("serie did not converge sufficiently fast"). nanoql keeps QuantLib's sum, its value and bits,
+/// wherever Abel's bound on the dropped tail is within 1e-11 of the sum, and elsewhere integrates the absorption flux
+/// of QuantLib's own image-series killed density at the barrier, each image paired with its reflection, in log time
+/// between the roots that bound its mass, on the adaptive Gauss-Kronrod rule scaled by a first estimate. Checks:
+/// Kummer's transformation of QuantLib's series in 40 or 50 digits, the survival route on QuantLib's image series, and
+/// the flux in 30 digits.
 /// </summary>
 public class DoubleBinaryKikoTests
 {
@@ -59,8 +58,8 @@ public class DoubleBinaryKikoTests
     public void OnAPegLikeMarketTheFluxMatchesThe50DigitValue()
     {
         // [93, 107] at a volatility of 0.1% over 182 days, the spot near the upper barrier: 5.7081035321027e-17 in 50
-        // digits by both the flux and the survival route; R7's absolute floor would assert nothing, so the check is
-        // relative
+        // digits by both the flux and the survival route; the tolerance's absolute floor would assert nothing, so the
+        // check is relative
         double value = Value(DoubleBarrierType.KOKI, 106.9, 93.0, 107.0, 0.01, 0.03, 0.001, 182);
         Assert.True(Math.Abs(value - 5.7081035321027e-17) <= 1e-10 * 5.7081035321027e-17, $"{value:R}");
     }

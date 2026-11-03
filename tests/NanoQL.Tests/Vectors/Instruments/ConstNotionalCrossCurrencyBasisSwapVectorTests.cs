@@ -74,7 +74,7 @@ public class ConstNotionalCrossCurrencyBasisSwapVectorTests
             ConstNotionalCrossCurrencyBasisSwapResults results = Price();
             CrossCurrencyInputs.CheckResults(check, c, results);
 
-            // a leg compounding its spread has its fair spread left out (the S-rx plan's C3 review, B1-2)
+            // a leg compounding its spread has its fair spread left out
             foreach ((string output, double? fair) in new[]
                      { ("fairPaySpread", results.FairPaySpread), ("fairRecSpread", results.FairRecSpread) })
             {

@@ -12,11 +12,11 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The analytic GJR-GARCH engine at expiry (the S-hes plan's HR7 (xvii)). QuantLib's engine counts the days to the
-/// maturity as T = lround(days·t) and divides by T (<c>analyticgjrgarchengine.cpp:62</c>): an option expiring on the
-/// evaluation date, priced with <c>includeReferenceDateEvents</c>, is 0/0, NaN. nanoql prices the forward's discounted
-/// intrinsic value there, as S-eq's analytic Heston engine does at model time 0. QuantLib's check: its analytic European
-/// engine at the same date, the intrinsic value whatever the volatility.
+/// The analytic GJR-GARCH engine at expiry. QuantLib's engine counts the days to the maturity as T = lround(days·t) and
+/// divides by T (<c>analyticgjrgarchengine.cpp:62</c>): an option expiring on the evaluation date, priced with
+/// <c>includeReferenceDateEvents</c>, is 0/0, NaN. nanoql prices the forward's discounted intrinsic value there, as the
+/// analytic Heston engine does at model time 0. QuantLib's check: its analytic European engine at the same date, the
+/// intrinsic value whatever the volatility.
 /// </summary>
 public class GjrGarchExpiryTests
 {

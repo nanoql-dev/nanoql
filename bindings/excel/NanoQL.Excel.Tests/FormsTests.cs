@@ -10,9 +10,9 @@ using static NanoQL.Excel.Tests.Xl;
 namespace NanoQL.Excel.Tests;
 
 /// <summary>
-/// The values both ways (XLR2): dates as serials, the 1904 shift; ranges by rows, a trailing empty cell trimmed and an
-/// inner one refused; nullable elements keeping the range's shape; none as #N/A; matrices, pairs of arrays, tuples, maps,
-/// jagged ranges, complex numbers, distributions and draws; what feeds back (XLD27); and the left-out objects (XLP84, C0).
+/// The values both ways: dates as serials, the 1904 shift; ranges by rows, a trailing empty cell trimmed and an inner
+/// one refused; nullable elements keeping the range's shape; none as #N/A; matrices, pairs of arrays, tuples, maps,
+/// jagged ranges, complex numbers, distributions and draws; what feeds back; and the left-out objects.
 /// </summary>
 [Collection(TestSettings.Name)]
 public sealed class FormsTests
@@ -62,7 +62,7 @@ public sealed class FormsTests
         Assert.Equal(ExcelError.ExcelErrorNA, o[1, 0]);
     }
 
-    /// <summary>None is #N/A, a non-finite number #NUM!, a non-finite complex number #NUM!, an empty matrix #N/A (C0).</summary>
+    /// <summary>None is #N/A, a non-finite number #NUM!, a non-finite complex number #NUM!, an empty matrix #N/A.</summary>
     [Fact]
     public void NoValueAndNonFiniteNumbers()
     {
@@ -171,7 +171,7 @@ public sealed class FormsTests
         Assert.Equal((4, 2), (seq.GetLength(0), seq.GetLength(1)));
     }
 
-    /// <summary>An Excel error argument passes through whole; one inside a range is refused, so a returned none can't feed back (XLD27).</summary>
+    /// <summary>An Excel error argument passes through whole; one inside a range is refused, so a returned none can't feed back.</summary>
     [Fact]
     public void WhatFeedsBack()
     {
@@ -182,7 +182,7 @@ public sealed class FormsTests
         Assert.Throws<ArgumentException>(() => X.Jagged(new object[,] { { 1.0, ExcelError.ExcelErrorNA } }, "j"));
     }
 
-    /// <summary>An optional handle left out is none (XLP84), and so is a required one C# annotates nullable (C0's finding).</summary>
+    /// <summary>An optional handle left out is none, and so is a required one C# annotates nullable.</summary>
     [Fact]
     public void ObjectsLeftOutAreNone()
     {

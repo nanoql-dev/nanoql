@@ -13,7 +13,7 @@ namespace NanoQL.Methods;
 /// <remarks>
 /// A working type: its generator is built at construction, and <see cref="SetTime"/> rewrites the part's operator in
 /// place, the same at every step, as QuantLib's. The diffusion is ½σ²r, the CIR generator's, where QuantLib's is σ²r
-/// (<c>fdmcirop.cpp:55-60</c>), the generator of a process with twice the variance (the S-van plan's VR4 (xv)).
+/// (<c>fdmcirop.cpp:55-60</c>), the generator of a process with twice the variance.
 /// </remarks>
 [WorkingType]
 internal sealed class FdmCIRRatesPart
@@ -28,7 +28,7 @@ internal sealed class FdmCIRRatesPart
     {
         Numerics.Vector r = mesher.Locations(1);
 
-        // the CIR generator's 0.5*sigma^2*r, where QuantLib's is sigma^2*r (VR4 (xv))
+        // the CIR generator's 0.5*sigma^2*r, where QuantLib's is sigma^2*r
         dyMap = new SecondDerivativeOp(1, mesher)
             .Mult(0.5 * sigma * sigma * r)
             .Add(new FirstDerivativeOp(1, mesher).Mult(kappa * (theta - r)));

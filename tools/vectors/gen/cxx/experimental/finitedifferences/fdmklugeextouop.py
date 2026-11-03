@@ -9,8 +9,8 @@ case's, at order 16; each discounted at 0 and 5%. For [t1, t2] of [0, 0.1] and [
 apply_mixed, apply_direction and solve_splitting at s = -0.01 in each direction, and the preconditioner at s, on a
 seeded vector.
 
-No output is left out (the S-xeq plan's §2.8): the operators read their processes' drifts and volatilities, which no
-fix touches. Nothing is fitted, so no output is filtered.
+No output is left out: the operators read their processes' drifts and volatilities, which no fix touches. Nothing is
+fitted, so no output is filtered.
 
 The processes are tools/cxx/src/experimental/processes/extouspec.hpp's specs; the methods
 tools/cxx/src/experimental/finitedifferences/fdmklugeextouop.cpp's. Read back by

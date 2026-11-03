@@ -458,7 +458,7 @@ class Checker:
                                       f"{detail}")
 
     def check_boost(self, path, header):
-        """A Boost port (D19). Returns whether its header holds."""
+        """A Boost port. Returns whether its header holds."""
         if self.boost is None:
             self.error("boost-root", f"{path}: a Boost Upstream line needs --boost <Boost 1.90.0 root>")
             return False
@@ -510,7 +510,7 @@ class Checker:
         return ok
 
     def check_qlnet(self, path, header):
-        """A QLNet port (QLNet's route, in D19's form for Boost). Returns whether its header holds."""
+        """A QLNet port (QLNet's route, in the Boost ports' form). Returns whether its header holds."""
         if self.qlnet is None:
             self.error("qlnet-root", f"{path}: a QLNet Upstream line needs --qlnet <QLNet-v1.13.2 checkout>")
             return False

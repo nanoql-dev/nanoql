@@ -11,8 +11,8 @@ the wheel doesn't bind, each output computed by the C++ harness (tools/cxx/src/e
   level and strike range at each term.
 
 Left out: 30-year caplets, past the base structure's last date, which QuantLib's structure refuses on most evaluation
-dates even when asked to extrapolate (the S-xrt run's R2-4, tests/NanoQL.Tests/Divergences/TenorOptionletExtrapolationTests.cs).
-Read back by tests/NanoQL.Tests/Vectors/Cxx/Experimental/BasisModels/TenorOptionletVTSCxxVectorTests.cs."""
+dates even when asked to extrapolate (tests/NanoQL.Tests/Divergences/TenorOptionletExtrapolationTests.cs). Read back by
+tests/NanoQL.Tests/Vectors/Cxx/Experimental/BasisModels/TenorOptionletVTSCxxVectorTests.cs."""
 import importlib.util
 import os
 import sys

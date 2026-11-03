@@ -14,22 +14,21 @@ namespace NanoQL.Models;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A working type (the S-mmp plan's MMPR1 (i)): <see cref="Add"/> and <see cref="Subtract"/> store a clone of the
-/// product given, QuantLib's <c>Clone&lt;&gt;</c>, so the caller's product is never stepped by the composite;
-/// <see cref="FinalizeComposite"/> fixes the parts, after which the composite steps; <see cref="Item"/> is the
-/// composite's own part.
+/// A working type: <see cref="Add"/> and <see cref="Subtract"/> store a clone of the product given, QuantLib's
+/// <c>Clone&lt;&gt;</c>, so the caller's product is never stepped by the composite; <see cref="FinalizeComposite"/>
+/// fixes the parts, after which the composite steps; <see cref="Item"/> is the composite's own part.
 /// </para>
 /// <para>
-/// <b>A part's end is recorded</b> (MMPR4 (vii), option (1), a documented divergence): a part that reports its path
-/// finished isn't stepped again, and the composite's path is finished when every part's is, or at its last step.
-/// QuantLib records no part's end (<c>compositeproduct.cpp:43</c> resets the flag its <c>nextTimeStep</c> tests and
-/// never sets), so a finished part steps again at each of its later times, and it finishes the composite's path when
-/// the parts it stepped at a step are finished, whatever the others' later times: a swaption beside forwards was worth
-/// 4.2 to 7.7 times its value alone, and forwards beside a rebate lost their later flows
-/// (<c>Divergences/MarketModelCompositeEndTests.cs</c>). A derived composite steps its parts through
-/// <see cref="StepPart"/> and ends its step with <see cref="EndStep"/>, which keep these rules.
+/// <b>A part's end is recorded</b> (a documented divergence): a part that reports its path finished isn't stepped
+/// again, and the composite's path is finished when every part's is, or at its last step. QuantLib records no part's
+/// end (<c>compositeproduct.cpp:43</c> resets the flag its <c>nextTimeStep</c> tests and never sets), so a finished
+/// part steps again at each of its later times, and it finishes the composite's path when the parts it stepped at a
+/// step are finished, whatever the others' later times: a swaption beside forwards was worth 4.2 to 7.7 times its value
+/// alone, and forwards beside a rebate lost their later flows (<c>Divergences/MarketModelCompositeEndTests.cs</c>). A
+/// derived composite steps its parts through <see cref="StepPart"/> and ends its step with <see cref="EndStep"/>, which
+/// keep these rules.
 /// </para>
-/// <para>An extension point (U13).</para>
+/// <para>An extension point.</para>
 /// </remarks>
 [WorkingType]
 public abstract class MarketModelComposite : MarketModelMultiProduct

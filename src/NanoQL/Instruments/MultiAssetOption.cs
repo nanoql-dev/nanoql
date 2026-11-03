@@ -10,9 +10,9 @@ namespace NanoQL.Instruments;
 
 /// <summary>An option on several assets.</summary>
 /// <remarks>
-/// An extension point, as in QuantLib: the basket, Margrabe and two-asset correlation options derive from it, and so
-/// do later slots' Everest, Himalaya and Pagoda options. The option holds its payoff and exercise and is immutable; its
-/// engines are static, each returning a <see cref="MultiAssetOptionResults"/>.
+/// An extension point, as in QuantLib: the basket, Margrabe and two-asset correlation options derive from it, and so do
+/// the experimental Everest, Himalaya and Pagoda options. The option holds its payoff and exercise and is immutable;
+/// its engines are static, each returning a <see cref="MultiAssetOptionResults"/>.
 /// </remarks>
 public abstract class MultiAssetOption : Option
 {

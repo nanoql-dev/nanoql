@@ -17,8 +17,8 @@ namespace NanoQL.Coupons;
 /// </summary>
 /// <remarks>
 /// QuantLib's handles may be empty, and its <c>initialize</c> refuses them when the flow is priced; here a null input
-/// is refused when the flow is priced, with QuantLib's texts (the S-cms plan's CMD14). An index without a dividend
-/// curve takes QuantLib's flat zero curve, built per call under the context.
+/// is refused when the flow is priced, with QuantLib's texts. An index without a dividend curve takes QuantLib's flat
+/// zero curve, built per call under the context.
 /// </remarks>
 public sealed class EquityQuantoCashFlowPricer : EquityCashFlowPricer
 {

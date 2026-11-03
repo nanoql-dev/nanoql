@@ -11,10 +11,10 @@ using Calendar = NanoQL.Time.Calendar;
 
 namespace NanoQL.Excel;
 
-/// <summary>The conversions in (XLR2): each kind's Excel value to nanoql's, refusing what it can't read, naming the argument.</summary>
+/// <summary>The conversions in: each kind's Excel value to nanoql's, refusing what it can't read, naming the argument.</summary>
 public static partial class X
 {
-    // A handle's text: a type name, '#', and the key's 16 hex digits, or 32 after a collision (XLD23).
+    // A handle's text: a type name, '#', and the key's 16 hex digits, or 32 after a collision.
     private static readonly Regex HandleText = new(@"^[A-Za-z_][A-Za-z0-9_]*#[0-9A-F]{16}(?:[0-9A-F]{16})?$", RegexOptions.CultureInvariant);
 
     /// <summary>A number.</summary>
@@ -54,7 +54,7 @@ public static partial class X
     /// <returns>The text.</returns>
     public static string Str(object a, string p) => One(a) is string s ? s : throw Bad(p, "text", a);
 
-    /// <summary>A date: a whole serial number, the 1904 system's shifted to QuantLib's (XLD8); a time of day refused.</summary>
+    /// <summary>A date: a whole serial number, the 1904 system's shifted to QuantLib's; a time of day refused.</summary>
     /// <param name="a">The Excel value.</param>
     /// <param name="p">The argument's name.</param>
     /// <returns>The date.</returns>
@@ -91,7 +91,7 @@ public static partial class X
 
     /// <summary>
     /// An object by its handle; where a calendar or a day counter goes, text that isn't a handle's names one in the
-    /// current convention set (XLR16).
+    /// current convention set.
     /// </summary>
     /// <typeparam name="T">The type the argument takes.</typeparam>
     /// <param name="a">The Excel value.</param>
@@ -219,7 +219,7 @@ public static partial class X
     public static T[] Enums<T>(object a, string p)
         where T : struct, System.Enum => Cells(a, p).Select(x => Enum<T>(x, p)).ToArray();
 
-    /// <summary>Objects from a range of handles; calendars and day counters by name too (XLR16).</summary>
+    /// <summary>Objects from a range of handles; calendars and day counters by name too.</summary>
     /// <typeparam name="T">The type each element takes.</typeparam>
     /// <param name="a">The Excel value.</param>
     /// <param name="p">The argument's name.</param>
@@ -278,14 +278,14 @@ public static partial class X
         _ => a.GetType().Name,
     };
 
-    /// <summary>A 1 × 1 range is its value, as in a single call's key (XLR15).</summary>
+    /// <summary>A 1 × 1 range is its value, as in a single call's key.</summary>
     /// <param name="a">The Excel value.</param>
     /// <returns>The value.</returns>
     internal static object One(object a) => a is object[,] { Length: 1 } m ? m[0, 0] : a;
 
     /// <summary>
     /// A range's cells by rows, its trailing empty cells trimmed and an inner one refused, so two parallel ranges can't
-    /// fall out of step (XLR2); an Excel error inside it refused, a returned none never read as none (XLD27).
+    /// fall out of step; an Excel error inside it refused, a returned none never read as none.
     /// </summary>
     /// <param name="a">The Excel value.</param>
     /// <param name="p">The argument's name.</param>
@@ -322,7 +322,7 @@ public static partial class X
         return all.GetRange(0, n);
     }
 
-    /// <summary>A cell inside a range: an Excel error refused (XLD27).</summary>
+    /// <summary>A cell inside a range: an Excel error refused.</summary>
     /// <param name="x">The cell's value.</param>
     /// <param name="p">The argument's name.</param>
     /// <returns>The value.</returns>

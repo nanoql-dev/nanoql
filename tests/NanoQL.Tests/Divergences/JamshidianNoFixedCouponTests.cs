@@ -12,8 +12,8 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The Gaussian1d Jamshidian engine with no fixed coupon after the exercise (the S-g1d plan's G1R6 (xviii)): QuantLib
-/// reads <c>fixedResetDates[startIndex]</c> past the vector's end as the coupon bond's value date
+/// The Gaussian1d Jamshidian engine with no fixed coupon after the exercise: QuantLib reads
+/// <c>fixedResetDates[startIndex]</c> past the vector's end as the coupon bond's value date
 /// (<c>gaussian1djamshidianswaptionengine.cpp:84-87</c>, <c>:104</c>, <c>:107</c>, <c>:139</c>, <c>:159</c>,
 /// <c>:163</c>), undefined behaviour: on the wheel, a 2-year payer at 3% (annual fixed and 6-month floating coupons) on
 /// a GSR model (a = 0.02, σ = 0.01) on a flat 3% curve, exercised 13 months out, throws "negative time (-3.73411e+06)

@@ -5,8 +5,8 @@ namespace NanoQL.Numerics;
 
 /// <summary>
 /// The standard normal cumulative distribution in double-double, about 31 digits, in which the full lookback engines'
-/// cancelling probabilities evaluate below their cut (the S-bar plan's BR5 (xxiii), the user's ruling (b) of
-/// 2026-10-26): double-double arithmetic over double-precision probabilities would keep their 1e-16 error.
+/// cancelling probabilities evaluate below their cut: double-double arithmetic over double-precision probabilities
+/// would keep their 1e-16 error.
 /// </summary>
 /// <remarks>
 /// <para>

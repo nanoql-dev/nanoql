@@ -13,7 +13,7 @@ namespace NanoQL.PricingEngines;
 /// <summary>The European path pricer of a hybrid Heston-Hull-White multi-path: the payoff on the underlying's last value
 /// over the numeraire at the exercise.</summary>
 /// <remarks>Immutable; its evaluation allocates nothing, the numeraire read from the short rate's last value, all of the
-/// state it reads (the S-hes plan's HR2 (iii)).</remarks>
+/// state it reads.</remarks>
 public sealed class HestonHullWhitePathPricer : PathPricer<MultiPath>
 {
     private readonly double exerciseTime;

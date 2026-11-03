@@ -13,14 +13,13 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The Heston-Hull-White engines and process on structures dated or counted differently (the S-hes plan's HR7 (xix), the
-/// mismatched-dates class of master Revision 58). QuantLib's finite-difference operator reads the dividend curve at the
-/// risk-free curve's times (<c>fdmhestonhullwhiteop.cpp:62</c>), the hybrid process its dividend forward rate likewise
-/// (<c>hybridhestonhullwhiteprocess.cpp:126</c>), and the engines take their times from the risk-free curve's date. nanoql's
-/// run on the Heston process's model clock, from the earliest reference date of its curves, each read at the instants its
-/// times denote, the Hull-White parts on the risk-free curve restated on the clock. QuantLib's check: its engines and
-/// process on the market restated on one clock, which nanoql's on the original market reproduce to rounding [executed:
-/// <c>scratchpad\c3\oracle_c3.py</c>, <c>oracle_c3b.py</c>, <c>scratchpad\cxxprobe\src\c3oracle.cpp</c>].
+/// The Heston-Hull-White engines and process on structures dated or counted differently. QuantLib's finite-difference
+/// operator reads the dividend curve at the risk-free curve's times (<c>fdmhestonhullwhiteop.cpp:62</c>), the hybrid
+/// process its dividend forward rate likewise (<c>hybridhestonhullwhiteprocess.cpp:126</c>), and the engines take their
+/// times from the risk-free curve's date. nanoql's run on the Heston process's model clock, from the earliest reference
+/// date of its curves, each read at the instants its times denote, the Hull-White parts on the risk-free curve restated
+/// on the clock. QuantLib's check: its engines and process on the market restated on one clock, which nanoql's on the
+/// original market reproduce to rounding (QuantLib-Python 1.44 and QuantLib 1.44).
 /// </summary>
 public class HestonHullWhiteMismatchedTimesTests
 {

@@ -9,7 +9,7 @@ the accounting engine over a few paths of the predictor-corrector evolver, on th
 Rate grids: six semi-annual rates and five irregular ones; payer and receiver; fixed rates at, above and below the
 forwards; fixed accruals off the rate taus and payment times off the rate times.
 
-This file holds the shared helpers of the products S-mmp's second commit ports, which their generators import.
+This file holds the shared helpers of the multi-step products, which their generators import.
 
 Left out (nanoql refuses them, QuantLib reading past its inputs; tests/NanoQL.Tests/Conventions/
 MarketModelProductTests.cs): accruals or payment times not one a rate.

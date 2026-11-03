@@ -22,14 +22,14 @@ namespace NanoQL.TermStructures;
 /// <para>
 /// If curves are attached to the index, the engine's default discounting uses them; if not, the model's curve. The
 /// at-the-money level and the annuity are computed at construction under the context given, which the section keeps
-/// for its prices (the S-g1d plan's G1D10). An engine is a function, nanoql's engines being static: by default
-/// QuantLib's, the Gaussian1d swaption engine on the swap index's discounting curve or the cap/floor engine on the
-/// model curve, 64 points a side and 7 standard deviations.
+/// for its prices. An engine is a function, nanoql's engines being static: by default QuantLib's, the Gaussian1d
+/// swaption engine on the swap index's discounting curve or the cap/floor engine on the model curve, 64 points a side
+/// and 7 standard deviations.
 /// </para>
 /// <para>
 /// Two of QuantLib's defects are fixed. QuantLib's caplet starts on the fixing date, so it fixes two business days
-/// before the date of the forward it is quoted against; here it starts on the fixing's value date (G1R6 (xxii)). And
-/// QuantLib 1.44 refuses every section on an Ibor index ("cannot calculate ATM without a BlackCapFloorEngine or
+/// before the date of the forward it is quoted against; here it starts on the fixing's value date. And QuantLib 1.44
+/// refuses every section on an Ibor index ("cannot calculate ATM without a BlackCapFloorEngine or
 /// BachelierCapFloorEngine"): the caplet its annuity reads is built without a strike or an engine, which its builder
 /// needs for the at-the-money strike; here it is struck at the forward, the annuity reading only its dates. On an index
 /// without a forwarding curve the level is the model curve's, and the prices are refused as QuantLib's caplet refuses
@@ -179,7 +179,7 @@ public sealed class Gaussian1dSmileSection : SmileSection
     }
 
     // The index's caplet on the section's fixing: from the fixing's value date, where QuantLib's starts on the fixing
-    // date (G1R6 (xxii)).
+    // date.
     private CapFloor Caplet(CapFloorType type, double? strike) =>
         new MakeCapFloor(type, iborIndex!.Tenor, iborIndex)
             .WithStrike(strike)

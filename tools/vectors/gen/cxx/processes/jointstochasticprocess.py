@@ -1,8 +1,7 @@
 # SPDX-FileCopyrightText: 2026 The nanoql Authors
 # SPDX-License-Identifier: Apache-2.0
 """Vectors for QuantLib's JointStochasticProcess (ql/processes/jointstochasticprocess.hpp, .cpp), through the C++
-harness's own derived process (docs/porting-playbook.md §9.4; the S-hes plan's HD10), on the evaluation date 15 October
-2026.
+harness's own derived process (docs/porting-playbook.md §9.4), on the evaluation date 15 October 2026.
 
 The joint process of a geometric Brownian motion (100, drift 0.05, volatility 0.2), tools/vectors/gen/cxx/models/
 equity/batesmodel.py's equity Heston process and an Ornstein-Uhlenbeck process (speed 0.5, volatility 0.1, from 0.02 to
@@ -13,8 +12,8 @@ deviation at the states and times over two steps; apply at the states; and evolv
 the steps with two draws, each on a fresh process. Then the constructor's refusal of more factors than the size.
 
 Left out: an evolve on a process that has evolved before at the same (t0, dt), which QuantLib serves from its
-correlation cache where nanoql builds the step's correlation again (the S-hes plan's HR4 (iii),
-tests/NanoQL.Tests/Conventions/JointStochasticProcessTests.cs).
+correlation cache where nanoql builds the step's correlation again
+(tests/NanoQL.Tests/Conventions/JointStochasticProcessTests.cs).
 
 A case holds the "process" (tools/cxx/src/processes/jointstochasticprocess.cpp's spec), the "times", "states", "steps",
 "draws" and "increments" (apply's dx). The harness's calls: JointStochasticProcess::summary, ::drift, ::expectation,

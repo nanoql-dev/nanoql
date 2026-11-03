@@ -9,7 +9,7 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The members of the S-van plan's C5 units that QuantLib's cases and the vectors don't read: the local-volatility
+/// The members of the local-volatility units that QuantLib's cases and the vectors don't read: the local-volatility
 /// density calculator's time grid, the discrete Simpson Fourier integration, the grid model's arguments and constraint,
 /// and the piecewise variance surface's one-section constructor.
 /// </summary>

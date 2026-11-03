@@ -6,9 +6,9 @@ using ExcelDna.Integration;
 namespace NanoQL.Excel.Tests;
 
 /// <summary>
-/// Excel's stand-in behind the runtime's seam (round 8's F8-2): the calling cell, the values cells show, each cell's
-/// spill anchor, the workbook's date system, and RTD topics, each an entry's holder kept by its key until a test
-/// clears it as Excel disposes a topic when its last cell goes.
+/// Excel's stand-in behind the runtime's seam: the calling cell, the values cells show, each cell's spill anchor, the
+/// workbook's date system, and RTD topics, each an entry's holder kept by its key until a test clears it as Excel
+/// disposes a topic when its last cell goes.
 /// </summary>
 internal sealed class TestHost : IXlHost
 {

@@ -26,9 +26,8 @@ namespace NanoQL.Instruments;
 /// floating coupons). A floating coupon whose amount can't be computed, as one whose fixing is missing, has a null
 /// amount, as QuantLib's <c>try</c> leaves <c>Null&lt;Real&gt;()</c>. Only the members those engines read are kept,
 /// with three QuantLib's arguments don't carry: the fixed coupons' accrual periods, which G2's analytic swaption reads
-/// for its coupons (the S-sr plan's SSR6 (xiii)); the floating coupons' fixing dates, by which a discretized swap
-/// knows a coupon (SSR6 (xvi)); and the floating coupons' accrual end dates, to which a discretized swap takes the
-/// forward of a coupon paid on another date (the S-cms plan's CMR4).
+/// for its coupons; the floating coupons' fixing dates, by which a discretized swap knows a coupon; and the floating
+/// coupons' accrual end dates, to which a discretized swap takes the forward of a coupon paid on another date.
 /// </remarks>
 internal sealed class FixedVsFloatingSwapArguments
 {

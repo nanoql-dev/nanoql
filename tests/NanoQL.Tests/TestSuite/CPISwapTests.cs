@@ -324,7 +324,7 @@ public class CPISwapTests
     }
 
     // Adapted: QuantLib's fairRate() and fairSpread() refuse "result not available" where the results hold none, a
-    // null here (PR4).
+    // null here.
     [Fact]
     public void TestZeroBpsFairRateAndSpread()
     {

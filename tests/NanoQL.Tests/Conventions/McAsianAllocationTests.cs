@@ -16,12 +16,12 @@ namespace NanoQL.Tests.Conventions;
 
 /// <summary>
 /// The Monte Carlo Asian engines' loops and the finite-difference Asian step allocate nothing per sample or step after
-/// their first (the S-van plan's VD12, the S-bar plan's BR1 (iv)). The loops: the three Black-Scholes pricers'
-/// draw-price-add, the arithmetic average-price pricer with and without its geometric control, the average-strike and
-/// the geometric pricers, each on the engine's route, its fixings' multiplicities and, for the geometric, the past
-/// fixings' log (internal, so built through reflection); the two Heston pricers on fixing indices with one given twice;
-/// calls and puts, plain and antithetic. Each batch goes into an <see cref="IncrementalStatistics"/>, which keeps no
-/// sample. The step: <see cref="FdmArithmeticAverageCondition"/> at an averaging time, its spline's buffers held.
+/// their first. The loops: the three Black-Scholes pricers' draw-price-add, the arithmetic average-price pricer with
+/// and without its geometric control, the average-strike and the geometric pricers, each on the engine's route, its
+/// fixings' multiplicities and, for the geometric, the past fixings' log (internal, so built through reflection); the
+/// two Heston pricers on fixing indices with one given twice; calls and puts, plain and antithetic. Each batch goes
+/// into an <see cref="IncrementalStatistics"/>, which keeps no sample. The step:
+/// <see cref="FdmArithmeticAverageCondition"/> at an averaging time, its spline's buffers held.
 /// </summary>
 public class McAsianAllocationTests
 {

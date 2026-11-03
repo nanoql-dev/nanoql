@@ -14,14 +14,12 @@ namespace NanoQL.Models;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Immutable (the S-mmp plan's MMPR1 (ii)): computed at construction, as QuantLib's constructor computes; its matrix
-/// reads return copies.
+/// Immutable: computed at construction, as QuantLib's constructor computes; its matrix reads return copies.
 /// </para>
 /// <para>
-/// Refused (MMPR5 (b)), as <see cref="SwapForwardMappings.SwaptionImpliedVolatility"/> refuses, with its texts: steps
-/// straddling the swaption's expiry, whose variance QuantLib sums in whole steps (<c>swaptionpseudojacobian.cpp:53</c>),
-/// and unequal displacements, of which it reads the first (<c>:44</c>). On every grid holding the expiry, QuantLib's
-/// value.
+/// Refused, as <see cref="SwapForwardMappings.SwaptionImpliedVolatility"/> refuses, with its texts: steps straddling
+/// the swaption's expiry, whose variance QuantLib sums in whole steps (<c>swaptionpseudojacobian.cpp:53</c>), and
+/// unequal displacements, of which it reads the first (<c>:44</c>). On every grid holding the expiry, QuantLib's value.
 /// </para>
 /// </remarks>
 public sealed class SwaptionPseudoDerivative

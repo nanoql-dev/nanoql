@@ -10,13 +10,12 @@ quarterly cap on Euribor 3M, cap rates extended over the leg, amortizing notiona
 3.4% of the model's clock), a 10-year cap; each case's outputs are its NPV on each model and setting, and on the first
 model the optionlets' prices; amounts at the leg's largest notional.
 
-Left out, each a documented divergence (the S-g1d plan's G1R6): a discount curve given to the engine, whose strike leg
-QuantLib discounts on the model curve ((ii), Gaussian1dCapFloorDiscountTests); the optionlets' at-the-money forwards,
-which QuantLib leaves 0 ((iii), Gaussian1dCapFloorResultsTests); caplets fixed before the evaluation date, which
-QuantLib leaves undiscounted ((iv), Gaussian1dCapFloorFixedCapletTests); gearings and spreads, which the engine refuses;
-CMS and overnight coupons ((xix), (xx)); flat payoff extrapolation ((xxi)); and curves on another clock ((xvi)). The
-wheel's Gaussian1dCapFloorEngine(model, integrationPoints, stddevs, extrapolatePayoff, flatPayoffExtrapolation,
-discountCurve) is the C++ constructor's proxy. Read back by
+Left out, each a documented divergence: a discount curve given to the engine, whose strike leg QuantLib discounts on the
+model curve (Gaussian1dCapFloorDiscountTests); the optionlets' at-the-money forwards, which QuantLib leaves 0
+(Gaussian1dCapFloorResultsTests); caplets fixed before the evaluation date, which QuantLib leaves undiscounted
+(Gaussian1dCapFloorFixedCapletTests); gearings and spreads, which the engine refuses; CMS and overnight coupons; flat
+payoff extrapolation; and curves on another clock. The wheel's Gaussian1dCapFloorEngine(model, integrationPoints,
+stddevs, extrapolatePayoff, flatPayoffExtrapolation, discountCurve) is the C++ constructor's proxy. Read back by
 tests/NanoQL.Tests/Vectors/PricingEngines/Gaussian1dCapFloorEngineVectorTests.cs."""
 import importlib.util
 import os
@@ -47,7 +46,7 @@ CAP, FLOOR, COLLAR = cfl.CAP, cfl.FLOOR, cfl.COLLAR
 FORWARD = cfl.CAL.advance(cfl.SPOT, 3, M)
 MODELS = g1d.MODELS
 SETTINGS = g1d.SETTINGS[:2]
-# Euribor 1Y forecast on a curve of the model's clock, not instruments/capfloor.py's Actual/360 one (G1R6 (xvi))
+# Euribor 1Y forecast on a curve of the model's clock, not instruments/capfloor.py's Actual/360 one
 E1Y = cfl.ibc.euribor((1, Y), cfl.irx.curve_spec(TODAY, 0.034))
 
 

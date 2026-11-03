@@ -5,14 +5,13 @@
 3 or 8 expiring in three or six months, the daughter's 95 or 105 expiring in a year or eighteen months, on three flat
 markets: the NPV, delta, gamma, vega and theta.
 
-Flat markets only: on term structures QuantLib's Geske form reads one constant rate, yield and volatility per
-maturity, nanoql's ER4 form the discounts and variances by date (tests/NanoQL.Tests/Divergences/
-CompoundTermStructureTests.cs), and on structures dated or counted apart QuantLib's times differ
-(ExoticMismatchedTimesTests.cs). QuantLib's engine reads Drezner's bivariate normal, nanoql's West's (the S-exo plan's
-ER7, ruled by the user on 2026-10-25), so the value, delta and theta, which read it, carry §3.3's override: Drezner's
-accuracy, |Dr78 - We04DP| <= 6e-7 times the bivariate terms' coefficients (EP39), relative to the output; the gamma
-and vega read univariate densities only. A put daughter whose largest value doesn't reach the mother's strike, where
-QuantLib finds no critical spot (CompoundNoCriticalSpotTests.cs), is left out.
+Flat markets only: on term structures QuantLib's Geske form reads one constant rate, yield and volatility per maturity,
+nanoql's form the discounts and variances by date (tests/NanoQL.Tests/Divergences/CompoundTermStructureTests.cs), and on
+structures dated or counted apart QuantLib's times differ (ExoticMismatchedTimesTests.cs). QuantLib's engine reads
+Drezner's bivariate normal, nanoql's West's, so the value, delta and theta, which read it, carry an override
+(docs/porting-playbook.md §7.3): Drezner's accuracy, |Dr78 - We04DP| <= 6e-7 times the bivariate terms' coefficients,
+relative to the output; the gamma and vega read univariate densities only. A put daughter whose largest value doesn't
+reach the mother's strike, where QuantLib finds no critical spot (CompoundNoCriticalSpotTests.cs), is left out.
 
 The setups, which the other exotic generators' markets share: a process spec of
 tools/vectors/gen/processes/blackscholesprocess.py and an option {"motherPayoff", "motherExercise", "daughterPayoff",
@@ -45,8 +44,8 @@ bsp = _load("blackscholesprocess", "processes/blackscholesprocess.py")
 bc = _load("blackcalculator", "pricingengines/blackcalculator.py")
 R = bsp.R
 CALL, PUT = int(ql.Option.Call), int(ql.Option.Put)
-REASON = ("ER7: QuantLib's engine reads Drezner's bivariate normal, nanoql's West's; |Dr78 - We04DP| <= 6e-7 times the "
-          "bivariate terms' coefficients (EP39)")
+REASON = ("QuantLib's engine reads Drezner's bivariate normal, nanoql's West's; |Dr78 - We04DP| <= 6e-7 times the "
+          "bivariate terms' coefficients")
 
 
 def flat(spot, r, q, vol):

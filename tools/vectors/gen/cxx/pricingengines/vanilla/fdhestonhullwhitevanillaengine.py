@@ -5,17 +5,16 @@
 by the C++ harness (docs/porting-playbook.md §9.4), on the evaluation date 15 October 2026.
 
 An engine with enableMultipleStrikesCaching(strikes), a reference option priced on it, then an option at each strike
-served from its cache: each strike's NPV, delta, gamma and theta, which nanoql's CalculateStrikes returns from one solve
-(the S-hes plan's HR4 (ii)). On tools/vectors/gen/cxx/models/equity/batesmodel.py's equity Heston process with a
-Hull-White process on its risk-free curve (reversion 0.1, volatility 0.01) at the equity-rate correlation -0.5, on a
-20 x 40 x 10 x 7 grid: European calls and puts, the reference strike at the spot and away from it, with and without the
-control variate; American puts; the second Hull-White process (0.03, 0.02) at 0.3; and the Douglas scheme.
+served from its cache: each strike's NPV, delta, gamma and theta, which nanoql's CalculateStrikes returns from one
+solve. On tools/vectors/gen/cxx/models/equity/batesmodel.py's equity Heston process with a Hull-White process on its
+risk-free curve (reversion 0.1, volatility 0.01) at the equity-rate correlation -0.5, on a 20 x 40 x 10 x 7 grid:
+European calls and puts, the reference strike at the spot and away from it, with and without the control variate;
+American puts; the second Hull-White process (0.03, 0.02) at 0.3; and the Douglas scheme.
 
-Left out (the S-hes plan's §2.10): a reference whose payoff isn't a plain vanilla, whose strikes nanoql solves one by
-one (HR7 (xxiv), tests/NanoQL.Tests/Divergences/FdHestonHullWhiteStrikesReferenceTests.cs); markets whose
-multi-strike grid doesn't hold the true forwards' band, whose strikes nanoql solves one by one too (D3-1
-of the S-hes run record): none here, the carry 0.02 at a volatility of 0.2; and every structure off the process's
-reference date and day counter (HR7 (xix)).
+Left out: a reference whose payoff isn't a plain vanilla, whose strikes nanoql solves one by one
+(tests/NanoQL.Tests/Divergences/FdHestonHullWhiteStrikesReferenceTests.cs); markets whose multi-strike grid doesn't hold
+the true forwards' band, whose strikes nanoql solves one by one too: none here, the carry 0.02 at a volatility of 0.2;
+and every structure off the process's reference date and day counter.
 
 A case holds the "process" (batesmodel.py's harness spec), "a", "sigma", "correlation", "optionType",
 "referenceStrike", "exercise", "strikes", "tGrid", "xGrid", "vGrid", "rGrid", "dampingSteps", "controlVariate" and

@@ -12,7 +12,7 @@ namespace NanoQL.Tests.Conventions;
 /// <see cref="CPIBond"/>'s construction (<c>cpibond.cpp:83-102</c>): the cash flows are <see cref="CPILeg"/>'s, a CPI
 /// coupon per period and the notional flow last, which is the redemption; the notionals come from the cash flows; and
 /// <see cref="CPIBond.GrowthOnly"/>, QuantLib's inspector at the pin, is false, as for every bond the ported
-/// constructor builds (SID12).
+/// constructor builds.
 /// </summary>
 public class CPIBondConstructionTests
 {

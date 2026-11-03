@@ -11,10 +11,10 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The piecewise spread curve on S5's bootstrap (the S-sr plan's SSD20): its maximum date is the earlier of its own and
-/// its base's, as QuantLib's spread discount curve's (<c>spreaddiscountcurve.hpp:116-118</c>), and its reference date,
-/// day counter and extrapolation flag are the base's, so a curve on a base dated after the evaluation date is dated
-/// there and reprices its helpers.
+/// The piecewise spread curve on the piecewise bootstrap: its maximum date is the earlier of its own and its base's, as
+/// QuantLib's spread discount curve's (<c>spreaddiscountcurve.hpp:116-118</c>), and its reference date, day counter and
+/// extrapolation flag are the base's, so a curve on a base dated after the evaluation date is dated there and reprices
+/// its helpers.
 /// </summary>
 public class SpreadCurveBaseTests
 {

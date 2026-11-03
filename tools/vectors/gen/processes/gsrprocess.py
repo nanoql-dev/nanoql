@@ -5,12 +5,11 @@
 Seven processes: a constant reversion with no step times, one with three step times and piecewise volatilities, and
 piecewise reversions on the same times, among them a zero reversion (QuantLib's zero-reversion formulas, which nanoql
 keeps at a = 0 exactly), a negative one and a fast one, at forward measure times from 10 to 60. For each: x0(), the
-drift and diffusion at eight (t, x) points, the expectation, standard deviation and variance at eight (t0, x0, dt)
-steps (a zero step and steps across the step times among them), evolve at five points and apply at three, sigma(t),
-reversion(t) and y(t) at seven times, and G(t, T) at eight pairs. Every time stays at or below the forward measure
-time, which the process checks. The reversions stay at 0 or at |a| >= 1e-2, where nanoql keeps QuantLib's formulas;
-between them nanoql's forms are cancellation-free (the S-g1d plan's G1R4 (i);
-tests/NanoQL.Tests/Divergences/GsrSmallReversionTests.cs).
+drift and diffusion at eight (t, x) points, the expectation, standard deviation and variance at eight (t0, x0, dt) steps
+(a zero step and steps across the step times among them), evolve at five points and apply at three, sigma(t),
+reversion(t) and y(t) at seven times, and G(t, T) at eight pairs. Every time stays at or below the forward measure time,
+which the process checks. The reversions stay at 0 or at |a| >= 1e-2, where nanoql keeps QuantLib's formulas; between
+them nanoql's forms are cancellation-free (tests/NanoQL.Tests/Divergences/GsrSmallReversionTests.cs).
 
 QuantLib 1.44's setForwardMeasureTime moves the process's time and leaves its core's, so its later outputs mix two
 times; nanoql's WithForwardMeasureTime moves both, as QuantLib's master does after the pin (#2842). So each process is

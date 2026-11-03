@@ -8,10 +8,10 @@ day counter's name, the forward (atmLevel) at a grid of times, and the Black vol
 and strikes, extrapolating.
 
 **The stability filter** is the calibration's (andreasenhugevolatilityinterpl.py's): every output is computed again on
-the calibrations with the volatilities and the spot moved one ulp each way, and written only where every move leaves
-it within 1e-10 relative; the implied volatility, an iteration of Li's rational approximation, is filtered with it (the
-S-van plan's VD17). The calibration's leave-outs apply. The wheel's calls, by QuantLib-SWIG 1.44:
-AndreasenHugeVolatilityAdapter(interpolation, eps) and the Black volatility structure's members. Read back by
+the calibrations with the volatilities and the spot moved one ulp each way, and written only where every move leaves it
+within 1e-10 relative; the implied volatility, an iteration of Li's rational approximation, is filtered with it. The
+calibration's leave-outs apply. The wheel's calls, by QuantLib-SWIG 1.44: AndreasenHugeVolatilityAdapter(interpolation,
+eps) and the Black volatility structure's members. Read back by
 tests/NanoQL.Tests/Vectors/TermStructures/AndreasenHugeVolatilityAdapterVectorTests.cs."""
 import importlib.util
 import os

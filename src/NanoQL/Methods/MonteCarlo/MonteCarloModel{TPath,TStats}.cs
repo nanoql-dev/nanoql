@@ -20,10 +20,9 @@ namespace NanoQL.Methods;
 /// are used, in QuantLib's order; it is added to the accumulator with the path's weight.
 /// </para>
 /// <para>
-/// A working type (S2R2): <see cref="AddSamples"/> draws from its generators and adds to its accumulator, which it
-/// owns. A <see cref="NanoQL.PricingEngines.McSimulation{TPath, TStats}"/> builds one per calculation and returns it.
-/// Each batch reserves the accumulator for its samples first, so a one-dimensional batch allocates nothing per sample
-/// (the S-sr plan's SSR1 (v)).
+/// A working type: <see cref="AddSamples"/> draws from its generators and adds to its accumulator, which it owns. A
+/// <see cref="NanoQL.PricingEngines.McSimulation{TPath, TStats}"/> builds one per calculation and returns it. Each
+/// batch reserves the accumulator for its samples first, so a one-dimensional batch allocates nothing per sample.
 /// </para>
 /// </remarks>
 [WorkingType]

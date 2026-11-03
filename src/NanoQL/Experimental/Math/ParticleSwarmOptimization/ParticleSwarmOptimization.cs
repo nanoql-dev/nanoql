@@ -24,11 +24,10 @@ namespace NanoQL.Experimental;
 /// <para>
 /// The swarm starts on a Sobol sequence within the bounds, its seed the optimizer's: QuantLib's is 0, the clock, read
 /// only past the 32 dimensions of Jaeckel's direction integers, so the bits are QuantLib's up to 16 parameters. The
-/// velocities' uniforms are a Mersenne Twister's on the seed, which is required: QuantLib's default seeds from the clock
-/// (the S-xrt plan's XRD3), and its two constructors are ambiguous for an integer literal there. A problem's constraint is
-/// never empty, so QuantLib's refusal of one doesn't arise. Immutable: each minimization copies the topology and the
-/// inertia and starts the generators from the seed, where QuantLib's continues them and appends a new swarm to the
-/// last.
+/// velocities' uniforms are a Mersenne Twister's on the seed, which is required: QuantLib's default seeds from the
+/// clock, and its two constructors are ambiguous for an integer literal there. A problem's constraint is never empty,
+/// so QuantLib's refusal of one doesn't arise. Immutable: each minimization copies the topology and the inertia and
+/// starts the generators from the seed, where QuantLib's continues them and appends a new swarm to the last.
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]

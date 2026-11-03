@@ -4,10 +4,9 @@
 // ql/experimental/credit/spreadedhazardratecurve.hpp and factorspreadedhazardratecurve.hpp, which the wheel doesn't
 // expose, on a credit curve spec of termstructures/credit/creditspec.hpp:
 //
-//     SpreadedHazardRateCurve::values (factor, curve, spread, times): the curve's reference date, maximum date and
-//         time, and its hazard rate at each time, extrapolated; additive, or multiplicative where factor is true. Their
-//         survival probabilities and densities, which QuantLib integrates numerically where nanoql's are exact, aren't
-//         written (the S-xcr plan's XR3 (b)).
+// SpreadedHazardRateCurve::values (factor, curve, spread, times): the curve's reference date, maximum date and time,
+// and its hazard rate at each time, extrapolated; additive, or multiplicative where factor is true. Their survival
+// probabilities and densities, which QuantLib integrates numerically where nanoql's are exact, aren't written.
 
 #include "termstructures/credit/creditspec.hpp"
 

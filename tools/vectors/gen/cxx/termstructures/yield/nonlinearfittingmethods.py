@@ -1,9 +1,9 @@
 # SPDX-FileCopyrightText: 2026 The nanoql Authors
 # SPDX-License-Identifier: Apache-2.0
 """Vectors for QuantLib's NaturalCubicFitting (ql/termstructures/yield/nonlinearfittingmethods.hpp, .cpp), which the
-wheel doesn't expose (docs/porting-playbook.md §9.4, the S-sr plan's SSD12), each output computed by the C++ harness:
-its size and its discount function, through a FittedBondDiscountCurve dated Monday 16 June 2025 on Actual/365 (Fixed)
-that evaluates it on given nodal discounts, at 24 times from 0 to 40 years.
+wheel doesn't expose (docs/porting-playbook.md §9.4), each output computed by the C++ harness: its size and its discount
+function, through a FittedBondDiscountCurve dated Monday 16 June 2025 on Actual/365 (Fixed) that evaluates it on given
+nodal discounts, at 24 times from 0 to 40 years.
 
 Six knot sets (with and without 0 among them, unsorted, and two within 1e-14 of each other, which QuantLib takes as
 one), each with smooth nodal discounts; one with flat-forward cut-offs at 0.5 and 15 years; and the refusals: a single

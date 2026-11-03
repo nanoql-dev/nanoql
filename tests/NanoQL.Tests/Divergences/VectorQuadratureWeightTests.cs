@@ -6,10 +6,10 @@ using NanoQL.Experimental;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The Gauss-Hermite vector integration weights every node (the S-xcr plan's XR8 (v)): QuantLib's applies its first
-/// node's weight inside a <c>std::for_each</c> that discards the result (<c>multidimquadrature.hpp:61-64</c>), so node
-/// n − 1 enters unweighted. QuantLib's values are the S-xcr run's <c>c1_facts.cpp</c> and the planner's
-/// <c>xp_latent.cpp</c> (D18); the check is QuantLib's scalar rule per component, bit for bit.
+/// The Gauss-Hermite vector integration weights every node: QuantLib's applies its first node's weight inside a
+/// <c>std::for_each</c> that discards the result (<c>multidimquadrature.hpp:61-64</c>), so node n − 1 enters
+/// unweighted. QuantLib's values are recorded in the test; the check is QuantLib's scalar rule per component, bit for
+/// bit.
 /// </summary>
 public class VectorQuadratureWeightTests
 {

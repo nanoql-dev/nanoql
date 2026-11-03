@@ -9,9 +9,9 @@ numerical form's from a zero bump; bumps of each element, 1e-6, and random direc
 semi-annual rates and five irregular ones, displacements 0 and 2%; the analytic forms on the semi-annual rates,
 displacement 0.
 
-Left out (nanoql's analytic derivative sums each term over its own period and carries the displaced rate, the S-mmp
-plan's MMPR4 (iv); tests/NanoQL.Tests/Divergences/RatePseudoRootJacobianTests.cs): the analytic forms on unequal
-periods or displacements. On periods of 0.5 and no displacement QuantLib's arithmetic and nanoql's agree bit for bit.
+Left out (nanoql's analytic derivative sums each term over its own period and carries the displaced rate;
+tests/NanoQL.Tests/Divergences/RatePseudoRootJacobianTests.cs): the analytic forms on unequal periods or displacements.
+On periods of 0.5 and no displacement QuantLib's arithmetic and nanoql's agree bit for bit.
 
 The harness unit is tools/cxx/src/models/marketmodels/pathwisegreeks/pathwisegreeks.cpp. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Models/MarketModels/RatePseudoRootJacobianCxxVectorTests.cs."""

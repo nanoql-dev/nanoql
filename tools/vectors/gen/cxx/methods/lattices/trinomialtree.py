@@ -3,17 +3,17 @@
 """Vectors for QuantLib's TrinomialTree (ql/methods/lattices/trinomialtree.hpp, .cpp), which the wheel doesn't
 expose, each output computed by the C++ harness (docs/porting-playbook.md §9.4).
 
-Thirteen trees on Ornstein-Uhlenbeck processes: uniform grids of 1 to 25 steps; the non-uniform grid
-TimeGrid([0.25, 0.2525, 1.0, 1.003, 3.0, 5.0], 20), whose tree is widest at an earlier step than its last; grids of
-mandatory times only with a step 0.0099 and 0.0101 of the longest, either side of the dx floor's 0.01 threshold (as
-test-suite/trinomialtree.cpp's testFloorThresholdBoundary), and 0.001 (its testSmallMandatoryGapDoesNotExplode);
-mean reversion large, small, near 0 (below sqrt(QL_EPSILON), the process's own branch), 0 and negative; isPositive on
-a process near 0, alone and with a floored step; a negative start. For each: the branches constant, columns(),
+Thirteen trees on Ornstein-Uhlenbeck processes: uniform grids of 1 to 25 steps; the non-uniform grid TimeGrid([0.25,
+0.2525, 1.0, 1.003, 3.0, 5.0], 20), whose tree is widest at an earlier step than its last; grids of mandatory times
+only with a step 0.0099 and 0.0101 of the longest, either side of the dx floor's 0.01 threshold (as
+test-suite/trinomialtree.cpp's testFloorThresholdBoundary), and 0.001 (its testSmallMandatoryGapDoesNotExplode); mean
+reversion large, small, near 0 (below sqrt(QL_EPSILON), the process's own branch), 0 and negative; isPositive on a
+process near 0, alone and with a floored step; a negative start. For each: the branches constant, columns(),
 timeGrid(), and at every column size(i) and dx(i), underlying(i, j) at every node, and, at every column with a step
 after it, descendant(i, j, b) and probability(i, j, b) at every node and branch. Then the constructor's refusals,
-read through columns(): a grid of one time ("null time steps for trinomial tree"), the empty grid (QuantLib's
-"vector too long", nanoql's MD6), a zero and a NaN volatility and a NaN reversion (NaN probabilities, nanoql's MD5),
-a near-zero volatility whose node offset leaves the integers (MD5), and a negative volatility (the process's).
+read through columns(): a grid of one time ("null time steps for trinomial tree"), the empty grid (QuantLib's "vector
+too long", nanoql's own refusal), a zero and a NaN volatility and a NaN reversion (NaN probabilities, nanoql's
+refusal), a near-zero volatility whose node offset leaves the integers, and a negative volatility (the process's).
 
 A tree argument is the harness's spec (tools/cxx/src/methods/lattices/trinomialtree.cpp): {"process": {"type":
 "OrnsteinUhlenbeckProcess", "speed", "volatility", "x0", "level"}, "timeGrid", "isPositive"}, the grid a TimeGrid

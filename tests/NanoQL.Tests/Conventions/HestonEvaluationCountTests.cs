@@ -12,12 +12,11 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The analytic Heston engine's evaluation count comes back with each price (the S-eq plan's SEQR5): QuantLib keeps
-/// the last call's count in a mutable member (<c>analytichestonengine.hpp:193</c>), which it resets at each call, so a
-/// count is the call's own; here
-/// <see cref="AnalyticHestonEngine.PriceVanillaPayoffWithStatistics(PlainVanillaPayoff, Date)"/> returns it with the
-/// price and the engine's results carry it as "numberOfEvaluations", and one engine serves many calls. The counts are
-/// QuantLib's own per integration (<c>hestonmodel.cpp:1617-1780</c>, ported as
+/// The analytic Heston engine's evaluation count comes back with each price: QuantLib keeps the last call's count in a
+/// mutable member (<c>analytichestonengine.hpp:193</c>), which it resets at each call, so a count is the call's own;
+/// here <see cref="AnalyticHestonEngine.PriceVanillaPayoffWithStatistics(PlainVanillaPayoff, Date)"/> returns it with
+/// the price and the engine's results carry it as "numberOfEvaluations", and one engine serves many calls. The counts
+/// are QuantLib's own per integration (<c>hestonmodel.cpp:1617-1780</c>, ported as
 /// <c>HestonModelTests.TestAllIntegrationMethods</c>).
 /// </summary>
 public class HestonEvaluationCountTests
@@ -54,7 +53,7 @@ public class HestonEvaluationCountTests
     [Fact]
     public void QuantLibsCountsPerIntegration()
     {
-        // QuantLib's testAllIntegrationMethods, the integrations S-eq ports: the expected put value and each count
+        // QuantLib's testAllIntegrationMethods, the integrations nanoql ports: the expected put value and each count
         var today = new Date(7, Month.February, 2017);
         var context = new EvaluationContext { EvaluationDate = today };
         HestonModel model = Model(today);

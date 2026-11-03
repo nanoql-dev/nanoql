@@ -23,10 +23,10 @@ namespace NanoQL.PricingEngines;
 /// </summary>
 /// <remarks>
 /// QuantLib's engine, its times read on the engine's clock (<see cref="FdmBlackScholesOp.Clock"/>), the earliest
-/// reference date of the structures it reads, as S-eq's finite-difference vanilla engine reads them: the maturity, and
-/// the dividends' and exercise's step conditions' reference date and day counter, where QuantLib takes the maturity
-/// from the process and the step conditions' from the risk-free curve. Where every structure shares the risk-free
-/// curve's date and day counter, QuantLib's times stand.
+/// reference date of the structures it reads, as the finite-difference vanilla engine reads them: the maturity, and the
+/// dividends' and exercise's step conditions' reference date and day counter, where QuantLib takes the maturity from
+/// the process and the step conditions' from the risk-free curve. Where every structure shares the risk-free curve's
+/// date and day counter, QuantLib's times stand.
 /// </remarks>
 public static class FdBlackScholesRebateEngine
 {

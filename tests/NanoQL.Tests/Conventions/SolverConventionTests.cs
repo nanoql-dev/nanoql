@@ -6,8 +6,8 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// §2.6's two routes for the bisection, false-position and secant solvers (the S-core plan's C4): each finds Brent's
-/// root, within the accuracy asked, on functions of several shapes, bracketed and from a step.
+/// §2.6's two routes for the bisection, false-position and secant solvers: each finds Brent's root, within the
+/// accuracy asked, on functions of several shapes, bracketed and from a step.
 /// </summary>
 public class SolverConventionTests
 {

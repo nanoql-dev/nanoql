@@ -6,10 +6,9 @@ using NanoQL.Numerics;
 namespace NanoQL.PricingEngines;
 
 /// <summary>
-/// The analytic lookback engines' products of a power and a normal probability past double's range (the S-bar code
-/// review's B2-1, BR5 (xxiv)'s class): at small volatilities λ = 2b/σ² is large, s^(−λ) overflows to +∞ while its
-/// normal factor underflows to 0, and QuantLib's product is NaN where its value is finite (4.75614712250357 for a
-/// seasoned fixed call at σ 0.3%).
+/// The analytic lookback engines' products of a power and a normal probability past double's range: at small
+/// volatilities λ = 2b/σ² is large, s^(−λ) overflows to +∞ while its normal factor underflows to 0, and QuantLib's
+/// product is NaN where its value is finite (4.75614712250357 for a seasoned fixed call at σ 0.3%).
 /// </summary>
 /// <remarks>
 /// Where QuantLib's product is finite it stands, its bits. Elsewhere the product is taken in logs, s^a·P = exp(a ln s +
@@ -22,8 +21,7 @@ namespace NanoQL.PricingEngines;
 /// analytically, the arguments reaching 1e6 at σ 1e-7. Checked against QuantLib's formulas at 80 digits, the bivariate
 /// normal there by the same peak-outward integral in mpmath (a single quadrature from −∞ is 2.9e-4 off on M =
 /// N(−45.1)): 280 cells of the four engines from σ 1% to 1e-5, on carries of ±4%, within 3.3e-15 of max(|value|, 1),
-/// and 12 cells at σ 1e-6 and 1e-7 within 2.4e-15 (the S-bar run's <c>c2_sweep_refs.py</c>, <c>c2_tiny_refs.py</c>;
-/// <c>Divergences/LookbackSmallVolatilityTests.cs</c>).
+/// and 12 cells at σ 1e-6 and 1e-7 within 2.4e-15 (<c>Divergences/LookbackSmallVolatilityTests.cs</c>).
 /// </remarks>
 internal static class LookbackTails
 {

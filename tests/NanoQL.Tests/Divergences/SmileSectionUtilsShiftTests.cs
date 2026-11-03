@@ -9,8 +9,8 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The smile utilities' endpoints on a shifted section (the S-g1d plan's G1R6 (xii)): where a section's strike range is
-/// limited, QuantLib puts the range's ends in its grid with a moneyness of the shifted strike over the unshifted level
+/// The smile utilities' endpoints on a shifted section: where a section's strike range is limited, QuantLib puts the
+/// range's ends in its grid with a moneyness of the shifted strike over the unshifted level
 /// (<c>smilesectionutils.cpp:100-101</c>, <c>:107-108</c>), where every other point's is over the shifted level. On the
 /// harness, over a section shifted by 1% at a level of 5% with strikes from 0 to 10%, its grid's ends read 0.2 and 2.2
 /// where its own formula gives 1/6 and 11/6, and with a larger shift its grid comes out unsorted. nanoql divides by the

@@ -9,13 +9,13 @@ section; on each, three settings (plain; exponential extrapolation; the deletion
 moneyness grid and a grid of nine points: the core's indices, its first and last strikes, the level, and at nine
 strikes the volatility and the call and put prices.
 
-Left out, where nanoql's section differs (the S-g1d plan's G1R6 (viii), (xv), (xvii), and the run's at-the-money level
-and segment fits): shifted sources, on which QuantLib's put-branch volatility adds the unshifted strike, its left
-wing's check reads a digital in the core, and its level is the shifted forward (the fixed and QuantLib's expressions
-agree at a shift of 0); and interpolated fits, which on these smiles run to forwards of 1e14 and more, whose Black calls
-and constants cancel, and which nanoql solves again without the cancellation (and on one of which QuantLib's harness
-exits, its erase past its functions' end); the wheel's file keeps the interpolated fits of QuantLib's own test smiles. A case on which the
-harness exits is left out, its name printed. A refused value is {"throws": true}. Each case's input "kahale" is the spec
+Left out, where nanoql's section differs (and in its at-the-money level and segment fits): shifted sources, on which
+QuantLib's put-branch volatility adds the unshifted strike, its left wing's check reads a digital in the core, and its
+level is the shifted forward (the fixed and QuantLib's expressions agree at a shift of 0); and interpolated fits, which
+on these smiles run to forwards of 1e14 and more, whose Black calls and constants cancel, and which nanoql solves again
+without the cancellation (and on one of which QuantLib's harness exits, its erase past its functions' end); the wheel's
+file keeps the interpolated fits of QuantLib's own test smiles. A case on which the harness exits is left out, its name
+printed. A refused value is {"throws": true}. Each case's input "kahale" is the spec
 tools/cxx/src/termstructures/volatility/kahalesmilesection.cpp reads;
 tests/NanoQL.Tests/Vectors/Cxx/TermStructures/KahaleSmileSectionCxxVectorTests.cs reads it back."""
 import importlib.util
@@ -73,8 +73,8 @@ def one_case(H, n, evaluation_date, source, interpolate, exponential, delete, gr
 
 
 def cases():
-    """Each case on a harness of its own: where QuantLib's fit reads or erases past its functions' end (G1R6 (xv)) the
-    harness may exit, and the case is left out, its name printed."""
+    """Each case on a harness of its own: where QuantLib's fit reads or erases past its functions' end the harness may
+    exit, and the case is left out, its name printed."""
     out = []
     sources = [(e, s) for e, s, *_ in hss.SECTIONS if unshifted(s) and s.get("exerciseTime", 1.0) > 0.0]
     sources.append((E1, SABR))

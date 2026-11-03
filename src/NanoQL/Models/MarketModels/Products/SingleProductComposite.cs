@@ -12,15 +12,15 @@ namespace NanoQL.Models;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A working type (the S-mmp plan's MMPR1 (i)); a part's end is recorded and the composite's end is every part's or
-/// its last step (<see cref="MarketModelComposite"/>; MMPR4 (vii), a documented divergence), and its count is 0 at a
-/// step where no part steps, as <see cref="MultiProductComposite"/> zeroes a part it doesn't step, where QuantLib's
-/// leaves the last step's count (<c>singleproductcomposite.cpp:63</c>).
+/// A working type; a part's end is recorded and the composite's end is every part's or its last step (<see
+/// cref="MarketModelComposite"/>; a documented divergence), and its count is 0 at a step where no part steps, as
+/// <see cref="MultiProductComposite"/> zeroes a part it doesn't step, where QuantLib's leaves the last step's count
+/// (<c>singleproductcomposite.cpp:63</c>).
 /// </para>
 /// <para>
-/// <see cref="MaxNumberOfCashFlowsPerProductPerStep"/> counts each part's products (MMPR4 (viii), a documented
-/// divergence): QuantLib's sums the parts' maxima per product, so a part of several products paying at one step writes
-/// past its buffer (<c>Divergences/SingleProductCompositeBufferTests.cs</c>).
+/// <see cref="MaxNumberOfCashFlowsPerProductPerStep"/> counts each part's products (a documented divergence):
+/// QuantLib's sums the parts' maxima per product, so a part of several products paying at one step writes past its
+/// buffer (<c>Divergences/SingleProductCompositeBufferTests.cs</c>).
 /// </para>
 /// </remarks>
 [WorkingType]

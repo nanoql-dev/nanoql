@@ -6,14 +6,14 @@ using Microsoft.Office.Interop.Excel;
 namespace NanoQL.Excel.XlTests;
 
 /// <summary>
-/// The settings file beside the add-in (XLR9, XLD28, XLP43, XLP57), read at load, so each case runs a copy of the test
-/// build with its own file in an instance of its own: a desk's conventions by name and by handle; a missing file, a
-/// malformed one, an unknown key and a wrong type each a failed load, the default conventions' every lookup refused with
-/// its message, and never QuantLib's in their place, while an explicit set still works.
+/// The settings file beside the add-in, read at load, so each case runs a copy of the test build with its own file in
+/// an instance of its own: a desk's conventions by name and by handle; a missing file, a malformed one, an unknown key
+/// and a wrong type each a failed load, the default conventions' every lookup refused with its message, and never
+/// QuantLib's in their place, while an explicit set still works.
 /// </summary>
 public class SettingsTests
 {
-    /// <summary>The desk's TARGET, 24 December 2026 a holiday, by name and by handle (XLP76's desk).</summary>
+    /// <summary>The desk's TARGET, 24 December 2026 a holiday, by name and by handle.</summary>
     [Fact]
     public void TheDesksConventions()
         => WithSettings("{\"conventions\": \"desk.xml\"}", ws =>

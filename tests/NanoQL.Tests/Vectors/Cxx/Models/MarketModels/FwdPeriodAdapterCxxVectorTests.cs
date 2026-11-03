@@ -13,8 +13,7 @@ namespace NanoQL.Tests.Vectors;
 /// <see cref="FwdPeriodAdapter"/> on FlatVol models of twelve semi-annual and nine quarterly rates, in periods of 2, 3
 /// and 4 at several offsets, with one displacement given and with one per long rate: the long initial rates and
 /// displacements, the evolution's rate times, evolution times and first alive rates, and the counts; the pseudo-roots,
-/// on QuantLib's Y matrix (the S-mm plan's MR3 (i)), and the default displacements (MR3 (ii)) are the Divergences
-/// record's; and the refused adapters.
+/// on QuantLib's Y matrix, and the default displacements are the Divergences record's; and the refused adapters.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class FwdPeriodAdapterCxxVectorTests

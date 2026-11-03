@@ -11,9 +11,9 @@ namespace NanoQL.Tests.Conventions;
 
 /// <summary>
 /// The integral CDS engine's, the composite instrument's and the convex-monotone interpolation's conventions: the
-/// engine refuses a negative step on a live swap (the S-core plan's CR7 (xxv)), where QuantLib's loop walks back until
-/// a curve refuses its date, and QuantLib's null step with its text; the composite is immutable, its engines
-/// delegates (CR5 (c)); and the interpolation's checks and its zero value are QuantLib's.
+/// engine refuses a negative step on a live swap, where QuantLib's loop walks back until a curve refuses its date, and
+/// QuantLib's null step with its text; the composite is immutable, its engines delegates; and the interpolation's
+/// checks and its zero value are QuantLib's.
 /// </summary>
 public class CoreInstrumentConventionTests
 {

@@ -8,8 +8,8 @@ Products: caplets struck at the forwards, deflated caplets, two deflated caps (f
 deflated coterminal swaptions, on six semi-annual rates and five irregular ones, FlatVol 20%, displacements 0 and 2%;
 the Mersenne twister and Sobol; the vega engines with one bump a step and with two.
 
-Left out (nanoql's recursion, Jacobian and discount factors are the S-mmp plan's MMPR4 (i), (ii), (iv), (v), and its
-delta layout (iii); tests/NanoQL.Tests/Divergences/PathwiseDeltaTests.cs, PathwiseVegaTests.cs): the deltas and vegas.
+Left out (nanoql's recursion, Jacobian, discount factors and delta layout;
+tests/NanoQL.Tests/Divergences/PathwiseDeltaTests.cs, PathwiseVegaTests.cs): the deltas and vegas.
 
 The harness unit is tools/cxx/src/models/marketmodels/pathwisegreeks/pathwisegreeks.cpp. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Models/MarketModels/PathwiseAccountingEngineCxxVectorTests.cs."""

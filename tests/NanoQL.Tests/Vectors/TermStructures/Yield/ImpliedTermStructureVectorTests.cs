@@ -11,7 +11,7 @@ namespace NanoQL.Tests.Vectors;
 /// The implied curve vectors, <c>tests/vectors/termstructures/yield/impliedtermstructure.json</c>: the zero-spreaded
 /// file's six originals, each implied at its reference date and 1 and 3 years later; the implied curve's inspectors,
 /// its discounts at 17 times, and its discounts, zero rates and forward rates at 30 dates, but on the 30/360 original,
-/// whose date reads nanoql takes by date (the S-sr plan's SSR6 (viii)).
+/// whose date reads nanoql takes by date.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class ImpliedTermStructureVectorTests

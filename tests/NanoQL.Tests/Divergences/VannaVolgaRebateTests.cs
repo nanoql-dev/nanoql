@@ -13,14 +13,14 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The Vanna-Volga engine with a rebate (the S-rx plan's SRXR3 (xvi), fixed under R8). QuantLib prices the out option
-/// with its rebate and the in option by parity, <c>vanilla − outPrice</c>, capping <c>outPrice</c> at the vanilla
+/// The Vanna-Volga engine with a rebate (fixed). QuantLib prices the out option with its rebate and the in option by
+/// parity, <c>vanilla − outPrice</c>, capping <c>outPrice</c> at the vanilla
 /// (<c>vannavolgabarrierengine.cpp:174-193</c>, <c>:326-339</c>), and gives an out option beyond the barrier 0
 /// (<c>:141-168</c>): so a knock-in loses its own rebate and subtracts the knock-out's, a capped knock-out loses its
 /// rebate, and a knock-out at the barrier loses its rebate too. On a flat smile, where the method's adjustment vanishes
 /// and the engine should give the analytic engine's price, a 0.05 rebate leaves an up-and-in at 1.40, strike 1.25, at
-/// 0.06807979413354334 against 0.11711444573142975 [executed on the wheel]. nanoql prices each option's rebate-free
-/// part and bounds it as QuantLib does, then adds its own rebate: an out option's smile-adjusted rebate at the hit
+/// 0.06807979413354334 against 0.11711444573142975 (QuantLib-Python 1.44). nanoql prices each option's rebate-free part
+/// and bounds it as QuantLib does, then adds its own rebate: an out option's smile-adjusted rebate at the hit
 /// (QuantLib's own price where no bound binds), an in option's rebate at expiry by the analytic engine; with the spot
 /// at or beyond the barrier an out option is its rebate, due now, and an in option QuantLib's vanilla. A zero rebate
 /// keeps QuantLib's bits. QuantLib's checks: its own engine's rebate-free parts and uncapped prices, and its analytic

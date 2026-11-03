@@ -17,8 +17,7 @@ namespace NanoQL.Tests.TestSuite;
 /// <summary>QuantLib's CDO tests, <c>test-suite/cdo.cpp</c>.</summary>
 /// <remarks>
 /// QuantLib's case sets each model on each tranche's basket in turn; here each model is bound to each tranche's basket
-/// and the CDO built on the bound basket (the S-xcr plan's XR1 (d)). The random default models run on QuantLib's
-/// default seed, 2863311530.
+/// and the CDO built on the bound basket. The random default models run on QuantLib's default seed, 2863311530.
 /// </remarks>
 [Trait("Oracle", "QuantLib")]
 public class CdoTests

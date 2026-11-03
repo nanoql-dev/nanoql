@@ -8,10 +8,10 @@ namespace NanoQL.Tests.Conventions;
 
 /// <summary>
 /// The exponential fitting engine's node table is QuantLib's <c>values4</c>, generated from the pin into an embedded
-/// resource and read once (the S-hes plan's HD15; G4 (6) regenerates it and compares the bytes): 147 rows of 129
-/// doubles, each row's moneyness, 64 nodes and 64 weights, the moneyness increasing. QuantLib's first and last rows'
-/// leading values, from <c>exponentialfittinghestonengine.cpp:34</c> and <c>:180</c>. Read through reflection, the
-/// table being internal.
+/// resource and read once (tools/check-upstream.py regenerates it and compares the bytes): 147 rows of 129 doubles,
+/// each row's moneyness, 64 nodes and 64 weights, the moneyness increasing. QuantLib's first and last rows' leading
+/// values, from <c>exponentialfittinghestonengine.cpp:34</c> and <c>:180</c>. Read through reflection, the table being
+/// internal.
 /// </summary>
 public class ExponentialFittingTableTests
 {

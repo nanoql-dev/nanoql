@@ -6,12 +6,12 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The statistics' shape (the S-sr plan's SSR2): QuantLib's Gaussian and empirical risk layers, which derive from their
-/// type parameter, are extension members over the accumulator they read, so each applies to every accumulator with
-/// what it reads (<see cref="GaussianStatisticsExtensions"/> to <see cref="GeneralStatistics"/>,
-/// <see cref="IncrementalStatistics"/> and <see cref="StatsHolder"/>, from their mean and standard deviation alone;
-/// <see cref="RiskStatisticsExtensions"/> to the sample-keeping <see cref="IEmpiricalStatistics"/>); an accumulator is a
-/// working type that <c>Reset</c> empties; and <see cref="IEmpiricalStatistics.Data"/> is a view of the samples.
+/// The statistics' shape: QuantLib's Gaussian and empirical risk layers, which derive from their type parameter, are
+/// extension members over the accumulator they read, so each applies to every accumulator with what it reads (<see
+/// cref="GaussianStatisticsExtensions"/> to <see cref="GeneralStatistics"/>, <see cref="IncrementalStatistics"/> and
+/// <see cref="StatsHolder"/>, from their mean and standard deviation alone; <see cref="RiskStatisticsExtensions"/> to
+/// the sample-keeping <see cref="IEmpiricalStatistics"/>); an accumulator is a working type that <c>Reset</c> empties;
+/// and <see cref="IEmpiricalStatistics.Data"/> is a view of the samples.
 /// </summary>
 public class StatisticsExtensionTests
 {

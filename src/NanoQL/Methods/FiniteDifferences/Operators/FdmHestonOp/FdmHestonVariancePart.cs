@@ -17,9 +17,9 @@ namespace NanoQL.Methods;
 /// ½σ_m²v and the drift κ(θ − v), discounting at half the rate.
 /// </summary>
 /// <remarks>
-/// A working type (the S-hes plan's HD8): its generator is built at construction, and <see cref="SetTime"/> rewrites
-/// the part's operator in place. The risk-free curve is read on the engine's clock (<see cref="FdmHestonOp.Clock"/>),
-/// QuantLib's read where it is the risk-free curve itself (HR7 (ii)).
+/// A working type: its generator is built at construction, and <see cref="SetTime"/> rewrites the part's operator in
+/// place. The risk-free curve is read on the engine's clock (<see cref="FdmHestonOp.Clock"/>), QuantLib's read where it
+/// is the risk-free curve itself.
 /// </remarks>
 [WorkingType]
 internal sealed class FdmHestonVariancePart

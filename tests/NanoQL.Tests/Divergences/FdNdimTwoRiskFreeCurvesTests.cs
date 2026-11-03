@@ -13,10 +13,9 @@ namespace NanoQL.Tests.Divergences;
 /// 5.2% above the same market restated onto the first curve (asset 2's dividend yield q₂ + r₁ − r₂, the same forward),
 /// and its European branch refuses two curves through its final discount ("interest rates need to be the same for all
 /// underlyings", <c>vectorbsmprocessextractor.cpp:52-57</c>). nanoql reads each forward on its own process's curves and
-/// discounts on the first's in both branches (the S-exo plan's ER5 (xxxi), ED27), as QuantLib's spread and Monte Carlo
-/// basket engines read two curves: QuantLib's engine on the restated market is the check, and the two-dimensional
-/// engine, which drifts each asset on its own curve, prices the American within the grids' error. On one risk-free
-/// curve the reads are QuantLib's.
+/// discounts on the first's in both branches, as QuantLib's spread and Monte Carlo basket engines read two curves:
+/// QuantLib's engine on the restated market is the check, and the two-dimensional engine, which drifts each asset on
+/// its own curve, prices the American within the grids' error. On one risk-free curve the reads are QuantLib's.
 /// </summary>
 public class FdNdimTwoRiskFreeCurvesTests
 {

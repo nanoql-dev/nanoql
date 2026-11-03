@@ -12,9 +12,9 @@ namespace NanoQL.Experimental;
 
 /// <summary>
 /// <see cref="MCPathBasketEngine"/> on pseudo-random draws with QuantLib's default statistics:
-/// <c>MCPRPathBasketEngine</c>, named as QuantLib-Python names its siblings (B2R2), QuantLib's
+/// <c>MCPRPathBasketEngine</c>, named as QuantLib-Python names its siblings, QuantLib's
 /// <c>MCPathBasketEngine&lt;PseudoRandom&gt;</c>, its calculations closed at <see cref="PseudoRandom"/> and
-/// <see cref="GeneralStatistics"/> (D12).
+/// <see cref="GeneralStatistics"/>.
 /// </summary>
 [Experimental("NQL0001")]
 public static class MCPRPathBasketEngine

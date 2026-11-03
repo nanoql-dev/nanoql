@@ -26,15 +26,14 @@ namespace NanoQL.Instruments;
 /// </para>
 /// <para>
 /// A non-par repayment is per 100 of the bond's notional at the upfront date, as the fair repayment reads it, and paid
-/// as that share of the notional, where QuantLib's pays the number given as an amount
-/// (<c>assetswap.cpp:125-134</c>); with none given the swap repays the bond's redemption, and its repayment is that
-/// redemption per 100 of notional, where QuantLib's stores 100 whatever the redemption (<c>:130</c>) (the S-cms plan's
-/// CMR5 (xix), (xx)). On a bond of 100 redeemed at 100 the two agree.
+/// as that share of the notional, where QuantLib's pays the number given as an amount (<c>assetswap.cpp:125-134</c>);
+/// with none given the swap repays the bond's redemption, and its repayment is that redemption per 100 of notional,
+/// where QuantLib's stores 100 whatever the redemption (<c>:130</c>). On a bond of 100 redeemed at 100 the two agree.
 /// </para>
 /// <para>
 /// The swap is priced by <see cref="PricingEngines.DiscountingSwapEngine"/>'s asset swap overload, its fair values
-/// derived from the swap's results (the S-cms plan's CMD6); QuantLib's <c>AssetSwap::arguments</c>, which no QuantLib
-/// engine reads, aren't ported.
+/// derived from the swap's results; QuantLib's <c>AssetSwap::arguments</c>, which no QuantLib engine reads, aren't
+/// ported.
 /// </para>
 /// </remarks>
 public sealed class AssetSwap : Swap
@@ -362,7 +361,7 @@ public sealed class AssetSwap : Swap
             bondLeg.Add(new SimpleCashFlow(accruedAmount, finalDate));
         }
 
-        // add the redemption, or whatever the final payment is, per 100 of the bond's notional (CMR5 (xix), (xx))
+        // add the redemption, or whatever the final payment is, per 100 of the bond's notional
         double repayment;
         if (nonParRepayment is double given)
         {

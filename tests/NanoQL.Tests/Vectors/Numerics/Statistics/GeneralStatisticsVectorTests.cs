@@ -53,7 +53,7 @@ public class GeneralStatisticsVectorTests
             check.Output(c, "weightSum", () => s.WeightSum());
             check.Output(c, "mean", () => s.Mean());
 
-            // incrementalstatistics.py leaves these out where the leading samples weigh 0 (B1-2).
+            // incrementalstatistics.py leaves these out where the leading samples weigh 0.
             if (c.Expected.TryGetProperty("variance", out _))
             {
                 check.Output(c, "variance", () => s.Variance());

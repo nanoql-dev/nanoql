@@ -2507,7 +2507,7 @@ public sealed class ConventionSet : ConventionProvider, IEquatable<ConventionSet
             : throw Unknown("region", name, paramName);
     }
 
-    // Batch 7's kinds. A unit preset's record answers the provider's member for its class, a field it leaves out
+    // The commodity kinds. A unit preset's record answers the provider's member for its class, a field it leaves out
     // QuantLib's reference; a unit of a user's own is built from its record's chain, and takes no triangulation unit,
     // which its public constructor doesn't take. The other kinds are built from their records' chains.
 
@@ -3007,7 +3007,7 @@ public sealed class ConventionSet : ConventionProvider, IEquatable<ConventionSet
         }
     }
 
-    // A coded index preset's name keeps its class (CVD28), and a preset's arguments are its constructor's.
+    // A coded index preset's name keeps its class, and a preset's arguments are its constructor's.
     private void CheckIndex(ConventionRecord r, bool shippedLayer, Action<string> refuse)
     {
         if (CodedIndexKind(r.Name) is Type kind)
@@ -3062,7 +3062,7 @@ public sealed class ConventionSet : ConventionProvider, IEquatable<ConventionSet
             return;
         }
 
-        // a user's own Ibor index takes the fields its style builds, and no other (CVD38)
+        // a user's own Ibor index takes the fields its style builds, and no other
         if (r is IborIndexRecord && IborFieldsOf(r.Name, layers.Length, []) is { } f && ArgumentBaseOf(r.Name, []) is null)
         {
             string? ignored = (f.Style ?? IborIndexStyle.Ibor) switch

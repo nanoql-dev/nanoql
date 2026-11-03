@@ -19,13 +19,13 @@ namespace NanoQL.Processes;
 /// <remarks>
 /// <para>
 /// Immutable: QuantLib's process re-reads its Heston process's parameters when notified; here they are read at
-/// construction. Its step, the quadratic-exponential scheme for the variance and the leverage at the step's start,
-/// runs in place without allocating (the S-hes plan's §2.4, HR2's form), the allocating step its values bit for bit.
+/// construction. Its step, the quadratic-exponential scheme for the variance and the leverage at the step's start, runs
+/// in place without allocating, the allocating step its values bit for bit.
 /// </para>
 /// <para>
 /// Its times are the Heston process's, the curves read as that process reads them, and the leverage function at the
-/// instants those times denote, on its own clock (HR7 (xxi)); QuantLib's reads where the structures share the
-/// risk-free curve's times.
+/// instants those times denote, on its own clock; QuantLib's reads where the structures share the risk-free curve's
+/// times.
 /// </para>
 /// </remarks>
 public sealed class HestonSLVProcess : StochasticProcess
@@ -198,8 +198,8 @@ public sealed class HestonSLVProcess : StochasticProcess
     // isn't dated before it.
     internal TermStructure ModelClock() => hestonProcess.ModelClock();
 
-    // The process on an engine's clock (the S-hes plan's HR7 (vi) form): over the Heston process on the clock, the
-    // leverage read at the instants its times denote; the process itself where the clock shares its times.
+    // The process on an engine's clock: over the Heston process on the clock, the leverage read at the instants its
+    // times denote; the process itself where the clock shares its times.
     internal HestonSLVProcess OnClock(TermStructure clock)
     {
         HestonProcess onClock = hestonProcess.OnClock(clock);

@@ -9,8 +9,8 @@ of tools/vectors/gen/methods/finitedifferences/operators/fdmg2op.py, at a grid o
 of 1e-4), under the Hundsdorfer default and the Douglas, Craig-Sneyd, modified Craig-Sneyd and modified Hundsdorfer
 schemes, and the implicit Euler scheme, whose two-dimensional step runs QuantLib's BiCGStab, on the coarse grid.
 
-Generated and left out: TR-BDF2 (the S-eq plan's SEQR9, tools/vectors/gen/methods/finitedifferences/solvers/
-fdmg2solver.py's reason); and fdhullwhiteswaptionengine.py's American exercise is not generated, likewise.
+Generated and left out: TR-BDF2 (tools/vectors/gen/methods/finitedifferences/solvers/fdmg2solver.py's reason); and
+fdhullwhiteswaptionengine.py's American exercise is not generated, likewise.
 
 The specs are fdhullwhiteswaptionengine.py's, an engine spec with "yGrid". The wheel's FdG2SwaptionEngine is the proxy
 of the C++ constructor (QuantLib-SWIG 1.44, SWIG/swaption.i). Read back by

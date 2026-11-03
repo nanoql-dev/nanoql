@@ -14,11 +14,11 @@ namespace NanoQL.Models;
 /// <summary>
 /// A coterminal swap market model caplet calibration's results: QuantLib's inspectors of a calibrated
 /// <c>CTSMMCapletCalibration</c>, the fit's errors, the swap rates' pseudo-roots and the model's caplet and swaption
-/// volatilities (the S-mm plan's MR2 (a)).
+/// volatilities.
 /// </summary>
 /// <remarks>
 /// Immutable: a pseudo-root read returns a copy. The deformation size is null where the calibration doesn't compute it,
-/// where QuantLib returns its initializer's 987654321 (MR3 (xxi); <c>ctsmmcapletcalibration.cpp:199</c>).
+/// where QuantLib returns its initializer's 987654321 (<c>ctsmmcapletcalibration.cpp:199</c>).
 /// </remarks>
 public sealed class CTSMMCapletCalibrationResults
 {
@@ -95,7 +95,7 @@ public sealed class CTSMMCapletCalibrationResults
     /// <summary>Gets the model's swaption volatilities.</summary>
     public ImmutableArray<double> MdlSwaptionVols { get; }
 
-    /// <summary>Gets the deformation size, null where the calibration doesn't compute it (MR3 (xxi)).</summary>
+    /// <summary>Gets the deformation size, null where the calibration doesn't compute it.</summary>
     public double? DeformationSize { get; }
 
     /// <summary>Gets the alpha form's α of each rate, null for the other calibrations.</summary>

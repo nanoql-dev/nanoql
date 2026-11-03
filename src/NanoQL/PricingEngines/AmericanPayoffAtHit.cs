@@ -23,11 +23,11 @@ namespace NanoQL.PricingEngines;
 /// real λ (λ² = μ² − 2 ln D / σ²T &lt; 0, at negative rates), QuantLib's square root is NaN
 /// (<c>americanpayoffathit.cpp:75</c>); here the value and its Greeks are the payoff's present value at the hit
 /// integrated over the first-passage density of the log-price to the strike, which is the closed form where λ is real
-/// (the S-van plan's VR4 (i), as S-rx's barrier rebate; <c>Divergences/AmericanPayoffAtHitNegativeRateTests.cs</c>).
-/// Below a variance of ε, QuantLib divides by the variance (<c>:87-102</c>), NaN out of the money; here the underlying
-/// follows its forward, ln S(τ) = ln S + τ ln(D_q/D) over the fraction τ of the time to expiry, and the payoff is paid
-/// at the τ* where that path reaches the strike, if it does by expiry, with the Greeks of that value (VR4 (ii),
-/// <c>Divergences/AmericanPayoffZeroVarianceTests.cs</c>).
+/// (as the barrier engines' rebate; <c>Divergences/AmericanPayoffAtHitNegativeRateTests.cs</c>). Below a variance of ε,
+/// QuantLib divides by the variance (<c>:87-102</c>), NaN out of the money; here the underlying follows its forward, ln
+/// S(τ) = ln S + τ ln(D_q/D) over the fraction τ of the time to expiry, and the payoff is paid at the τ* where that
+/// path reaches the strike, if it does by expiry, with the Greeks of that value
+/// (<c>Divergences/AmericanPayoffZeroVarianceTests.cs</c>).
 /// </para>
 /// <para>
 /// A payoff other than a cash-or-nothing or asset-or-nothing one is refused, where QuantLib leaves the paid amount
@@ -123,7 +123,7 @@ public sealed class AmericanPayoffAtHit
 
         if (!(variance >= NumericLimits.QL_EPSILON))
         {
-            // the underlying on its forward (the S-van plan's VR4 (ii)), where QuantLib divides by the variance
+            // the underlying on its forward, where QuantLib divides by the variance
             special = hitNow ? (k, 0.0, 0.0, 0.0) : Deterministic(type, discount, dividendDiscount);
             return;
         }
@@ -132,8 +132,8 @@ public sealed class AmericanPayoffAtHit
         double lambdaSquared = (mu * mu) - (2.0 * Math.Log(discount) / variance);
         if (lambdaSquared < 0.0)
         {
-            // no real λ (the S-van plan's VR4 (i)): the first-passage integral, where QuantLib's square root is NaN;
-            // where the payoff is due now, its value and the λ-free terms of QuantLib's Greeks
+            // no real λ: the first-passage integral, where QuantLib's square root is NaN; where the payoff is due now,
+            // its value and the λ-free terms of QuantLib's Greeks
             special = !hitNow
                 ? FirstPassage(discount)
                 : (k, inTheMoney ? 0.0 : -k * mu / spot, inTheMoney ? 0.0 : k * (mu + (mu * mu) + lambdaSquared) / (spot * spot), 0.0);

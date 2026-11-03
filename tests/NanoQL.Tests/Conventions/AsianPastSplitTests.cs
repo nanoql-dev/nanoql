@@ -12,10 +12,10 @@ namespace NanoQL.Tests.Conventions;
 
 /// <summary>
 /// The Asian option built from every fixing date with the past fixings' values splits them at the context's evaluation
-/// date, as QuantLib's <c>setupArguments</c> splits them at <c>Settings::evaluationDate()</c> (the S-bar plan's SD18):
-/// a date before it is past, one on it to come. The option is one object; priced in two contexts it reads two splits,
-/// each the option built from a running sum and a count of past fixings with the dates to come; and a context past more
-/// dates than values were given is refused with QuantLib's text. The option keeps the values as given.
+/// date, as QuantLib's <c>setupArguments</c> splits them at <c>Settings::evaluationDate()</c>: a date before it is
+/// past, one on it to come. The option is one object; priced in two contexts it reads two splits, each the option built
+/// from a running sum and a count of past fixings with the dates to come; and a context past more dates than values
+/// were given is refused with QuantLib's text. The option keeps the values as given.
 /// </summary>
 public class AsianPastSplitTests
 {

@@ -9,9 +9,8 @@ output computed by the C++ harness (tools/cxx/src/experimental/inflation/yoyopti
   market: atmYoYSwapDateRates, the dates and rates.
 
 Every maturity's intersection is found on these markets, so each date is its own maturity's option date in QuantLib's
-as in nanoql's; a market where one fails is in the S-xrt plan's XRR5 (xii) fact,
-tests/NanoQL.Tests/Divergences/YoYCapFloorPriceSurfaceTests.cs. Read back by
-tests/NanoQL.Tests/Vectors/Cxx/Experimental/Inflation/YoYCapFloorTermPriceSurfaceCxxVectorTests.cs."""
+as in nanoql's; a market where one fails is in tests/NanoQL.Tests/Divergences/YoYCapFloorPriceSurfaceTests.cs. Read
+back by tests/NanoQL.Tests/Vectors/Cxx/Experimental/Inflation/YoYCapFloorTermPriceSurfaceCxxVectorTests.cs."""
 import importlib.util
 import os
 import sys

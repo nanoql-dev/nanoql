@@ -17,8 +17,8 @@ namespace NanoQL.Experimental;
 /// The best is the smallest personal best, and every particle's social best is set to it, the best particle's own
 /// included: QuantLib's keeps the largest (<c>if (bestF &lt; pBF_[i])</c>), steering every particle toward the worst,
 /// and skips the best particle, leaving its social best at the zero vector it started with; on a shifted sphere it
-/// stops at 6.4e-5 where the k-neighbours topology reaches 2.7e-18 (the S-xrt plan's XRR5 (xxviii), its standard
-/// QuantLib's own definition above the class; <c>Divergences/ParticleSwarmTopologyTests.cs</c>).
+/// stops at 6.4e-5 where the k-neighbours topology reaches 2.7e-18 (its standard QuantLib's own definition above the
+/// class; <c>Divergences/ParticleSwarmTopologyTests.cs</c>).
 /// </remarks>
 [Experimental("NQL0001")]
 public sealed class GlobalTopology : ParticleSwarmOptimizationTopology

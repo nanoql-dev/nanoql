@@ -8,8 +8,8 @@ namespace NanoQL.Methods;
 
 /// <summary>A triple-band operator whose bands are read and written point by point.</summary>
 /// <remarks>
-/// A working type, as <see cref="TripleBandLinearOp"/> is (the S-hes plan's HD6, HD8): the forward operators set their
-/// boundary rows through it. QuantLib's const and mutable accessor pairs are each one accessor returning a reference.
+/// A working type, as <see cref="TripleBandLinearOp"/> is: the forward operators set their boundary rows through it.
+/// QuantLib's const and mutable accessor pairs are each one accessor returning a reference.
 /// </remarks>
 [WorkingType]
 public sealed class ModTripleBandLinearOp : TripleBandLinearOp

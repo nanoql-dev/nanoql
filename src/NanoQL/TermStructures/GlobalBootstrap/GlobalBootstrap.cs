@@ -38,16 +38,15 @@ namespace NanoQL.TermStructures;
 /// </para>
 /// <para>
 /// The additional variables (<see cref="AdditionalVariables"/>) are optimized beside the nodes, the argument's values
-/// for the nodes first and then the variables', from their guesses (the S-core plan's CR3 (b)). The helpers that read
-/// them are built by <see cref="VariableHelpers"/> from their values: once at their guesses when the curve is built,
-/// which gives their pillars and latest relevant dates, and again at each evaluation of the cost function, as
-/// QuantLib's helpers read their quotes then. They follow the curve's helpers, in the order the function returns them:
-/// the alive ones add their pillars and their quote errors, after the curve's helpers' and before the penalties, and
-/// the instrument weights cover the curve's helpers and then these, one weight each, as QuantLib's error vector reads
-/// its instruments in their order, the variables' helpers among them. A later build whose helpers' pillars differ from
-/// the first's is refused, as QuantLib fixes the pillars when the bootstrap starts. The curve keeps the variables'
-/// values at the optimum (<see cref="BootstrapState{TTermStructure}.AdditionalVariables"/>), where QuantLib leaves them
-/// in its quotes.
+/// for the nodes first and then the variables', from their guesses. The helpers that read them are built by
+/// <see cref="VariableHelpers"/> from their values: once at their guesses when the curve is built, which gives their
+/// pillars and latest relevant dates, and again at each evaluation of the cost function, as QuantLib's helpers read
+/// their quotes then. They follow the curve's helpers, in the order the function returns them: the alive ones add their
+/// pillars and their quote errors, after the curve's helpers' and before the penalties, and the instrument weights
+/// cover the curve's helpers and then these, one weight each, as QuantLib's error vector reads its instruments in their
+/// order, the variables' helpers among them. A later build whose helpers' pillars differ from the first's is refused,
+/// as QuantLib fixes the pillars when the bootstrap starts. The curve keeps the variables' values at the optimum (<see
+/// cref="BootstrapState{TTermStructure}.AdditionalVariables"/>), where QuantLib leaves them in its quotes.
 /// </para>
 /// <para>
 /// The guess is the initial-guess function's when given, which is called once per curve built and sees no data, as

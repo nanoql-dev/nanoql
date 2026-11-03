@@ -14,10 +14,9 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The Heston extensions' analytic engines, surface and density on curves dated or counted differently (the S-hes
-/// plan's HR7 (xi), the mismatched-dates class of master Revision 58). QuantLib's engines run the model's time from the
-/// risk-free curve's reference date (<c>process-&gt;time</c>: <c>coshestonengine.cpp:66</c>,
-/// <c>exponentialfittinghestonengine.cpp:221</c>, <c>hestonexpansionengine.cpp:70</c>,
+/// The Heston extensions' analytic engines, surface and density on curves dated or counted differently. QuantLib's
+/// engines run the model's time from the risk-free curve's reference date (<c>process-&gt;time</c>:
+/// <c>coshestonengine.cpp:66</c>, <c>exponentialfittinghestonengine.cpp:221</c>, <c>hestonexpansionengine.cpp:70</c>,
 /// <c>analyticpdfhestonengine.cpp:44</c>, <c>analyticptdhestonengine.cpp:268-270</c>), and the PDF engine, the surface
 /// and the density calculator read the dividend curve at the risk-free curve's times
 /// (<c>analyticpdfhestonengine.cpp:51-52</c>, <c>hestonblackvolsurface.cpp:75-92</c>,
@@ -25,7 +24,7 @@ namespace NanoQL.Tests.Divergences;
 /// curves on the risk-free curve's day counter, each curve read at the instant a time denotes, nothing accruing before
 /// its own date; the density calculator's times are the risk-free curve's, as <see cref="BSMRNDCalculator"/>'s. The
 /// check: QuantLib on the market restated on one clock, which nanoql on the original market reproduces to rounding
-/// [executed on the wheel, and through the harness for the expansions and the det-jump Bates engines].
+/// (QuantLib-Python 1.44, and the C++ harness for the expansions and the det-jump Bates engines).
 /// </summary>
 public class HestonAnalyticMismatchedTimesTests
 {
@@ -60,10 +59,10 @@ public class HestonAnalyticMismatchedTimesTests
     [Fact]
     public void ThePdfEngineReadsEachCurveAtItsInstant()
     {
-        // markets whose carry to the expiry is 0, where QuantLib's integration window is nanoql's (HR7 (vii)): r 5%
-        // settling T+2 beside q 5%·363/365 today, QuantLib's restated market as above; and r 5% on Act/360 beside
-        // q 5%·365/360 on Act/365, QuantLib's restated market q 5% on Act/360; the window's value, the price less the tails
-        // nanoql adds beyond it (the code review's C2-B1-2)
+        // markets whose carry to the expiry is 0, where QuantLib's integration window is nanoql's: r 5% settling T+2
+        // beside q 5%·363/365 today, QuantLib's restated market as above; and r 5% on Act/360 beside q 5%·365/360 on
+        // Act/365, QuantLib's restated market q 5% on Act/360; the window's value, the price less the tails nanoql adds
+        // beyond it
         HestonModel settling = Model(SettlingLater(), new FlatForward(Today, 0.05 * 363 / 365, A365));
         AssertClose(6.97794400855235, Window(AnalyticPDFHestonEngine.Calculate(Put, Context, settling))); // as given 6.949557770801946
         HestonModel counted = Model(new FlatForward(Today, 0.05, A360), new FlatForward(Today, 0.05 * 365 / 360, A365));

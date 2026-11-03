@@ -9,13 +9,13 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Extensions;
 
 /// <summary>
-/// The field sensitivity table on batch 7's kinds (CVD38): every field of every kind, given two values, changes what
-/// the kind builds, or the set refuses the second where the kind can't take it; and a base chain, the same record on
-/// two bases that differ in one field.
+/// The field sensitivity table on the experimental commodity kinds: every field of every kind, given two values,
+/// changes what the kind builds, or the set refuses the second where the kind can't take it; and a base chain, the same
+/// record on two bases that differ in one field.
 /// </summary>
 public class CommodityFieldSensitivityTests
 {
-    /// <summary>Batch 7's record kinds, which this table holds and C2's leaves out.</summary>
+    /// <summary>The commodity record kinds, which this table holds and FieldSensitivityTests' leaves out.</summary>
     internal static readonly Type[] Kinds =
     [
         typeof(CommodityTypeRecord), typeof(UnitOfMeasureRecord), typeof(UnitOfMeasureConversionRecord), typeof(PaymentTermRecord),

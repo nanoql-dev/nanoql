@@ -12,9 +12,8 @@ namespace NanoQL.Tests.Vectors;
 /// The C++ harness's square-root volatility process vectors,
 /// <c>tests/vectors/cxx/models/marketmodels/evolvers/volprocesses/squarerootandersen.json</c>:
 /// <see cref="SquareRootAndersen"/>'s paths of given variates where the first step's e^{−κΔt} underflows to 0,
-/// QuantLib's own value (the S-mm plan's MR3 (xvii)), and the later steps' κΔt are past nanoql's small-reversion cut
-/// (MR3 (xviii)), each sub-step on either side of the cut point: each step's weight, standard deviation and state; and
-/// the variates per step and state variables.
+/// QuantLib's own value, and the later steps' κΔt are past nanoql's small-reversion cut, each sub-step on either side
+/// of the cut point: each step's weight, standard deviation and state; and the variates per step and state variables.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class SquareRootAndersenCxxVectorTests

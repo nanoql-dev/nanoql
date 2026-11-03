@@ -42,16 +42,15 @@ namespace NanoQL.Experimental;
 /// </para>
 /// <para>
 /// The base models are QuantLib's four <c>setupModels</c> specialisations, each a type implementing
-/// <see cref="IBaseCorrelationModel{TInitTraits}"/> (the S-xcr plan's XR2 (d)), and immutable: each statistic builds
-/// the two at its correlations, where QuantLib's sets the correlation quotes they observe (XR5). Bound to a basket with
-/// realized defaults, the equity baskets hold the live names, their notionals and recoveries, over the restated
-/// tranche: QuantLib's take the live notionals on the whole pool, which its basket refuses ("unmatched data entry sizes
-/// in basket"; XR8 (xvi); <c>Divergences/BaseCorrelationLossModelTests.cs</c>). A correlation the surface gives outside
-/// [0, 1) is refused, naming the date and level, where QuantLib's base model returns NaN below 0 and refuses above 1
-/// (XR8 (xxxii)). An equity tranche's attachment leg is 0, its basket [0, 0] not priced: QuantLib's prices it, so its
-/// LHP base refuses where the surface extrapolates below 0 at level 0 and its inhomogeneous pool base throws on every
-/// equity tranche ("a out of range", its own <c>\todo</c>: "is failing for equity tranches at least") (the S-xcr code
-/// review's C3 O1-5).
+/// <see cref="IBaseCorrelationModel{TInitTraits}"/>, and immutable: each statistic builds the two at its correlations,
+/// where QuantLib's sets the correlation quotes they observe. Bound to a basket with realized defaults, the equity
+/// baskets hold the live names, their notionals and recoveries, over the restated tranche: QuantLib's take the live
+/// notionals on the whole pool, which its basket refuses ("unmatched data entry sizes in basket";
+/// <c>Divergences/BaseCorrelationLossModelTests.cs</c>). A correlation the surface gives outside [0, 1) is refused,
+/// naming the date and level, where QuantLib's base model returns NaN below 0 and refuses above 1. An equity tranche's
+/// attachment leg is 0, its basket [0, 0] not priced: QuantLib's prices it, so its LHP base refuses where the surface
+/// extrapolates below 0 at level 0 and its inhomogeneous pool base throws on every equity tranche ("a out of range",
+/// its own <c>\todo</c>: "is failing for equity tranches at least").
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]

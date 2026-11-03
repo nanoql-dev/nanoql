@@ -12,7 +12,7 @@ namespace NanoQL.Numerics;
 /// <summary>
 /// Boost.Math's Student's t distribution (<c>students_t.hpp</c>) for <c>double</c> under the default policy: its
 /// <c>quantile</c>, on the fast method (<see cref="TDistributionInvFunctions"/>), for the integer degrees of freedom
-/// QuantLib passes, and its <c>cdf</c> and <c>pdf</c>, which QuantLib's T copula policy reads (the S-xcr plan's XR6).
+/// QuantLib passes, and its <c>cdf</c> and <c>pdf</c>, which QuantLib's T copula policy reads.
 /// </summary>
 internal static class StudentsTFunctions
 {

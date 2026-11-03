@@ -45,8 +45,7 @@ namespace NanoQL.PricingEngines;
 /// QuantLib's time runs from the risk-free curve's date, so its reads throw before that date and its integrations read
 /// 0/0 on it. An option expiring at the model's time 0, on or before every curve's date, is priced at the forward's
 /// intrinsic value. Where the dividend curve isn't dated before the risk-free curve, the time is QuantLib's. A
-/// documented divergence (the S-eq plan's rulings of 2026-10-21,
-/// <c>Divergences/ExerciseBeforeReferenceDateTests.cs</c>,
+/// documented divergence (<c>Divergences/ExerciseBeforeReferenceDateTests.cs</c>,
 /// <c>Divergences/HestonMismatchedTimesTests.cs</c>).
 /// </para>
 /// </remarks>
@@ -411,7 +410,7 @@ public class AnalyticHestonEngine
 
         // the forward by date, each curve accruing nothing before its reference date, where QuantLib's reads throw; the
         // model's time on the risk-free curve's day counter from the earliest curve date, where QuantLib's runs from
-        // the risk-free curve's (the S-eq plan's rulings of 2026-10-21, C4R2-O2 (i), C4R5-O1)
+        // the risk-free curve's
         double fwd = process.S0 * process.DividendYield.AccruedDiscount(maturity) / process.RiskFreeRate.AccruedDiscount(maturity);
 
         return PriceVanillaPayoff(payoff, process.ModelTime(maturity), fwd, process.RiskFreeRate.AccruedDiscount(maturity));
@@ -436,9 +435,8 @@ public class AnalyticHestonEngine
         return PriceVanillaPayoff(payoff, maturity, fwd, process.RiskFreeRate.Discount(maturity));
     }
 
-    // The time form on another structure's clock (the S-hes plan's HR7 (xi), the Heston surface's): the time on the
-    // clock, the forward and the risk-free discount read at the instant it denotes; QuantLib's time form where the clock
-    // shares the curves' times.
+    // The time form on another structure's clock (the Heston surface's): the time on the clock, the forward and the
+    // risk-free discount read at the instant it denotes; QuantLib's time form where the clock shares the curves' times.
     internal (double Price, int Evaluations) PriceVanillaPayoffWithStatistics(PlainVanillaPayoff payoff, TermStructure clock, double maturity)
     {
         HestonProcess process = Model.Process;
@@ -509,8 +507,8 @@ public class AnalyticHestonEngine
         }
 
         // at the model's time 0, on or before every curve's reference date, no variance has accrued: the forward's
-        // intrinsic value, where QuantLib's integrations read 0/0 (the S-eq plan's ruling of 2026-10-21, under R8;
-        // QuantLib's European engine at zero volatility checks it)
+        // intrinsic value, where QuantLib's integrations read 0/0 (QuantLib's European engine at zero volatility checks
+        // it)
         if (maturity == 0.0)
         {
             return (dr * payoff.Evaluate(fwd), 0);

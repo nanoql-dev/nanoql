@@ -15,9 +15,8 @@ namespace NanoQL.Tests.Conventions;
 
 /// <summary>
 /// QuantLib's <c>testMonteCarloCalibration</c> means to bound the calibration's maximum error by 15 bp, but tests the
-/// average against 15 (<c>hestonslvmodel.cpp:2074</c>, the S-hes plan's HD13); its port in
-/// <see cref="TestSuite.HestonSlvModelTests"/> keeps QuantLib's check, and this fact checks the maximum itself on
-/// QuantLib's case.
+/// average against 15 (<c>hestonslvmodel.cpp:2074</c>); its port in <see cref="TestSuite.HestonSlvModelTests"/> keeps
+/// QuantLib's check, and this fact checks the maximum itself on QuantLib's case.
 /// </summary>
 public class HestonSlvMcQualityMaximumTests
 {

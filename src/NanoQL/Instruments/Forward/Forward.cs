@@ -17,9 +17,9 @@ namespace NanoQL.Instruments;
 /// <para>
 /// QuantLib's derived classes set the mutable spot value and income in their <c>performCalculations</c> before the
 /// base's runs; here a derived class's calculation passes them to
-/// <see cref="Calculate(double, double, EvaluationContext, Date?)"/>, which gives the results (the S-cms plan's CMD5). The
-/// discount curve discounts the contract's cash flows and gives the forward value; the income curve, which a derived
-/// class sets, discounts the underlying's income.
+/// <see cref="Calculate(double, double, EvaluationContext, Date?)"/>, which gives the results. The discount curve
+/// discounts the contract's cash flows and gives the forward value; the income curve, which a derived class sets,
+/// discounts the underlying's income.
 /// </para>
 /// <para>
 /// QuantLib's class still needs to be rigorously tested, its header says.

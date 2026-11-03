@@ -14,9 +14,9 @@ caplet with accruals off the rate taus and payment times off the rate times.
 This file holds the pathwise product vectors' shared helpers, which the other pathwise generators import.
 
 Left out: the deflated caplets and caps with accruals other than the rate taus, where QuantLib's deflator derivative
-reads the accrual (the S-mmp plan's MMPR4 (vi), tests/NanoQL.Tests/Divergences/
-MarketModelPathwiseDeflatedCapletTests.cs); and, nanoql refusing them, QuantLib reading past its inputs, accruals,
-payment times or strikes not one a rate (tests/NanoQL.Tests/Conventions/MarketModelProductTests.cs).
+reads the accrual (tests/NanoQL.Tests/Divergences/MarketModelPathwiseDeflatedCapletTests.cs); and, nanoql refusing
+them, QuantLib reading past its inputs, accruals, payment times or strikes not one a rate
+(tests/NanoQL.Tests/Conventions/MarketModelProductTests.cs).
 
 The harness unit is tools/cxx/src/models/marketmodels/products/products.cpp. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Models/MarketModels/PathwiseProductCapletCxxVectorTests.cs."""

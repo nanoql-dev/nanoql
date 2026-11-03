@@ -17,8 +17,8 @@ namespace NanoQL.Experimental;
 /// <remarks>
 /// The factor is threshold + (1 − threshold)(K − k)/K at the k-th call of K iterations, k counted from 1, so the last
 /// iteration's is the threshold. QuantLib's never sets its swarm size, which it loops over (undefined), and never
-/// advances its iteration, so its factor stays 1 and the inertia never decreases (the S-xrt plan's XRR5 (xxxi);
-/// <c>Divergences/ParticleSwarmInertiaTests.cs</c>).
+/// advances its iteration, so its factor stays 1 and the inertia never decreases
+/// (<c>Divergences/ParticleSwarmInertiaTests.cs</c>).
 /// </remarks>
 [Experimental("NQL0001")]
 public sealed class DecreasingInertia : ParticleSwarmOptimizationInertia

@@ -24,13 +24,13 @@ namespace NanoQL.Experimental;
 /// </para>
 /// <para>
 /// Immutable, its mapping function computed once, on the first call of <see cref="G"/>, as QuantLib's lazy object
-/// computes it, so that a model read only through <see cref="Cdf"/> and <see cref="InvCDF"/> takes no maturities and
-/// no kernel process, as QuantLib's own cases build one. The collocation points are √2 times the Gauss-Hermite nodes of the Lagrange order, scaled by σ
-/// so that the outer one meets the pMax quantile, or else the pMin one, or 1. The mapping interpolates each collocation
-/// value linearly in time, extrapolated past the maturities, then by Lagrange interpolation at the kernel's standardized
-/// value; at t = 0 the kernel's deviation is 0 and QuantLib's standardized value σ(x − E)/0 is NaN at x₀ and infinite
-/// elsewhere, so the mapping refuses a time that isn't positive (the S-xrt plan's XRR5 (xli);
-/// <c>Conventions/CLVModelTests.cs</c>). QuantLib's mapping shares one buffer for its interpolated values among its
+/// computes it, so that a model read only through <see cref="Cdf"/> and <see cref="InvCDF"/> takes no maturities and no
+/// kernel process, as QuantLib's own cases build one. The collocation points are √2 times the Gauss-Hermite nodes of
+/// the Lagrange order, scaled by σ so that the outer one meets the pMax quantile, or else the pMin one, or 1. The
+/// mapping interpolates each collocation value linearly in time, extrapolated past the maturities, then by Lagrange
+/// interpolation at the kernel's standardized value; at t = 0 the kernel's deviation is 0 and QuantLib's standardized
+/// value σ(x − E)/0 is NaN at x₀ and infinite elsewhere, so the mapping refuses a time that isn't positive
+/// (<c>Conventions/CLVModelTests.cs</c>). QuantLib's mapping shares one buffer for its interpolated values among its
 /// calls; here each call has its own.
 /// </para>
 /// </remarks>

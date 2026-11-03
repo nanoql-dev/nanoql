@@ -11,14 +11,14 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The linear TSR pricer's vega-ratio strategy on a normal section (the S-cms plan's CMR5 (xxviii)): QuantLib's
-/// <c>strikeFromVegaRatio</c> reads <c>SmileSection::vega</c> outside its <c>try</c>
-/// (<c>lineartsrpricer.cpp:227-228</c>), which refuses a normal section (<c>smilesection.cpp:119-128</c>), so every
-/// normal-volatility coupon on the strategy refuses: on the wheel, on a flat 3% curve and a 0.8% normal volatility,
-/// "vega for normal smilesection not yet implemented". nanoql's search reads a normal section's vega from QuantLib's
-/// own Bachelier derivative (<c>bachelierBlackFormulaStdDevDerivative</c>) times √T, the ratio scale-free; S5's
-/// <see cref="SmileSection.Vega"/> keeps QuantLib's refusal. QuantLib's checks: its lognormal values, and the bound
-/// found has the ratio of QuantLib's Bachelier derivatives the strategy asks.
+/// The linear TSR pricer's vega-ratio strategy on a normal section: QuantLib's <c>strikeFromVegaRatio</c> reads
+/// <c>SmileSection::vega</c> outside its <c>try</c> (<c>lineartsrpricer.cpp:227-228</c>), which refuses a normal
+/// section (<c>smilesection.cpp:119-128</c>), so every normal-volatility coupon on the strategy refuses: on the
+/// wheel, on a flat 3% curve and a 0.8% normal volatility, "vega for normal smilesection not yet implemented".
+/// nanoql's search reads a normal section's vega from QuantLib's own Bachelier derivative
+/// (<c>bachelierBlackFormulaStdDevDerivative</c>) times √T, the ratio scale-free; <see cref="SmileSection.Vega"/>
+/// keeps QuantLib's refusal. QuantLib's checks: its lognormal values, and the bound found has the ratio of
+/// QuantLib's Bachelier derivatives the strategy asks.
 /// </summary>
 public class LinearTsrNormalVegaRatioTests
 {

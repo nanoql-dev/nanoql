@@ -7,9 +7,9 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The context's two fields for QuantLib's <c>ExchangeRateManager</c> and <c>Money::Settings</c> (U7, the S-rx plan's
-/// SRXR1): their defaults are QuantLib's, the known rates and no conversion with no base currency; neither takes null;
-/// and the record's equality compares the registry by content and the settings by value.
+/// The context's two fields for QuantLib's <c>ExchangeRateManager</c> and <c>Money::Settings</c>: their defaults are
+/// QuantLib's, the known rates and no conversion with no base currency; neither takes null; and the record's equality
+/// compares the registry by content and the settings by value.
 /// </summary>
 public class EvaluationContextMoneyTests
 {

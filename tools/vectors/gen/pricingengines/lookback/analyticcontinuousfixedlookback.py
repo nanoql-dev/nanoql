@@ -9,10 +9,9 @@ of it, each at three strikes (90, 100 and 110% of the spot), over six months, a 
 processes of tools/vectors/gen/processes/blackscholesprocess.py: the NPV, the engine's one result. Then an expired
 option and the refusal of a cash-or-nothing payoff ("Non-plain payoff given").
 
-The outputs nanoql fixes are left out (the S-bar plan's §2.10), as
-tools/vectors/gen/pricingengines/lookback/analyticcontinuousfloatinglookback.py leaves them out: one clock per
-process (BR5 (xix)), no running extremum beyond the spot (BR5 (xxii)), no output's carry within the small-carry cuts
-(BR5 (xxiii)) and no zero volatility (BR5 (xxiv)).
+The outputs nanoql fixes are left out, as
+tools/vectors/gen/pricingengines/lookback/analyticcontinuousfloatinglookback.py leaves them out: one clock per process,
+no running extremum beyond the spot, no output's carry within the small-carry cuts and no zero volatility.
 
 A case holds one process, exercise and running extremum, its outputs one per payoff. The wheel's calls, by
 QuantLib-SWIG 1.44's options.i: ContinuousFixedLookbackOption(minmax, payoff, exercise),

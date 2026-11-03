@@ -14,8 +14,8 @@ namespace NanoQL.Models;
 /// payment time, and finishes the path. Mainly the rebate received when another product is cancelled.
 /// </summary>
 /// <remarks>
-/// A working type (the S-mmp plan's MMPR1 (i)); the amounts are copied at construction. A rebate stepped more often
-/// than its payment times is refused, where QuantLib reads past its amounts (MMPR4's refusals).
+/// A working type; the amounts are copied at construction. A rebate stepped more often than its payment times is
+/// refused, where QuantLib reads past its amounts.
 /// </remarks>
 [WorkingType]
 public sealed class MarketModelCashRebate : MarketModelMultiProduct

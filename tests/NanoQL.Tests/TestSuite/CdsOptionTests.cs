@@ -17,7 +17,7 @@ namespace NanoQL.Tests.TestSuite;
 [Trait("Oracle", "QuantLib")]
 public class CdsOptionTests
 {
-    // Adapted: the swap's engine is passed to the option's engine as a delegate (the S-xcr plan's XD4).
+    // Adapted: the swap's engine is passed to the option's engine as a delegate.
     [Fact]
     public void TestCached()
     {

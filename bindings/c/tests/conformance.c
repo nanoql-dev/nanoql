@@ -331,7 +331,7 @@ static void test_arrays(void)
     OK(nqlt_Echo_Fill(span, 3, 7.5));
     CHECK(span[0] == 7.5 && span[2] == 7.5, "a writable span, written in place");
 
-    /* A vector the member writes into crosses in and out (R15): a line search's step moves the caller's point. */
+    /* A vector the member writes into crosses in and out: a line search's step moves the caller's point. */
     nql_handle box = NULL;
     OK(nql_BoundaryConstraint_new(-1.0, 1.0, &box));
     double point[2] = {0.5, 0.2}, dir[2] = {0.1, -0.3}, step = 0;
@@ -646,7 +646,7 @@ static void test_handles(void)
 
     /* A second nanoql library in the process: its handle is refused by its tag, never resolved to this library's. glibc
        may refuse a second copy the static TLS a library loaded late draws on; one library per process is the rule
-       (BIR9), so that refusal is reported and the foreign checks skipped (R21). */
+       anyway, so that refusal is reported and the foreign checks skipped. */
     void* second = load_second_library("nanoql-second.dll");
     if (!second && strstr(second_error, "static TLS")) {
         printf("the second copy isn't loaded (%s): the foreign checks are skipped\n", second_error);
@@ -893,7 +893,7 @@ static void test_conventions(void)
     release(usd);
 }
 
-/* An optional struct left out: NULL is its default, what C# passes (R16); its implicit constructor crosses too. */
+/* An optional struct left out: NULL is its default, what C# passes; its implicit constructor crosses too. */
 static void test_defaults(void)
 {
     nql_handle ctx = get(nqlt_Fixtures_get_Context), curve = NULL, explicit_curve = NULL, i = NULL, bootstrap = NULL;
@@ -1139,7 +1139,7 @@ static void test_calibrations(void)
     SAME(value, reference);
     REFUSED(nql_CapHelper_ModelValue(capped[0], gsr, ctx, &value), NQL_ERROR_INVALID_CAST);
 
-    /* The calibrations themselves, to C#'s parameters bit for bit (R14): GSR's iterative volatility calibration on the
+    /* The calibrations themselves, to C#'s parameters bit for bit: GSR's iterative volatility calibration on the
        priced swaptions, and Hull-White's on the priced caps through the extension method closed at its constraint. */
     nql_handle method = get(nqlt_Fixtures_get_Method), criteria = get(nqlt_Fixtures_get_Criteria), results = NULL, model = NULL;
     double *got = NULL, *want = NULL;

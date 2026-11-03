@@ -16,14 +16,14 @@ namespace NanoQL.Methods;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A working type (the S-bar plan's SD9): it holds its buffers, so a step allocates nothing, its spline QuantLib's
+/// A working type: it holds its buffers, so a step allocates nothing, its spline QuantLib's
 /// <c>MonotonicCubicNaturalSpline</c> computed into them with the same arithmetic. QuantLib's unused running-accumulator
 /// argument is kept, its signature's.
 /// </para>
 /// <para>
-/// A documented divergence (BR5 (xxviii)). With several fixings on one time, the new average weighs them by the count
-/// after the duplicates, n/i for n fixings ending the i-th, where QuantLib's weights read the count up to the first of
-/// them, +4.4% against an exact Monte Carlo on two fixings on one date (<c>Divergences/AsianDuplicateFixingsTests.cs</c>).
+/// A documented divergence. With several fixings on one time, the new average weighs them by the count after the
+/// duplicates, n/i for n fixings ending the i-th, where QuantLib's weights read the count up to the first of them,
+/// +4.4% against an exact Monte Carlo on two fixings on one date (<c>Divergences/AsianDuplicateFixingsTests.cs</c>).
 /// </para>
 /// </remarks>
 [WorkingType]
@@ -122,7 +122,7 @@ public sealed class FdmArithmeticAverageCondition : StepCondition
 
         a.CopyTo(copy);
 
-        // the count of fixings to the last on this time (BR5 (xxviii)), where QuantLib's reads the first's
+        // the count of fixings to the last on this time, where QuantLib's reads the first's
         int iT = first + nTimes + pastFixings;
         int averageDirection = equityDirection == 0 ? 1 : 0;
         int xSpacing = mesher.Layout.Spacing[equityDirection];

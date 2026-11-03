@@ -17,9 +17,9 @@ namespace NanoQL.Methods;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A working type (the S-eq plan's SEQR1): mutable, owned by one computation and not thread-safe. Its directions'
-/// operators and the mixed one are built at construction; <see cref="SetTime"/> rewrites the directions' operators in
-/// place with the step's φ, at the step's two ends' mean, and allocates nothing (the S-sr plan's SSD10).
+/// A working type: mutable, owned by one computation and not thread-safe. Its directions' operators and the mixed one
+/// are built at construction; <see cref="SetTime"/> rewrites the directions' operators in place with the step's φ, at
+/// the step's two ends' mean, and allocates nothing.
 /// </para>
 /// <para>
 /// The model's dynamics are built once, at construction, where QuantLib's <c>setTime</c> calls

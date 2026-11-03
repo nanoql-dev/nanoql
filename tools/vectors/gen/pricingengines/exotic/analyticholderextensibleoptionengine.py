@@ -5,14 +5,14 @@
 holder-extensible calls struck at 90, 100 or 110, expiring in six months or nine, extendable for a premium of 1 or 2 to
 a year at 105 or 115, on flat markets without dividends: the NPV.
 
-nanoql takes QuantLib's fix after v1.44 (#2892, 453e6605c; the S-exo plan's ER6 (iii)), which changes the put
-everywhere, the call with dividends and the call whose extension region is empty (where extending never beats
-exercising); all three are left out (tests/NanoQL.Tests/Divergences/HolderExtensibleCriticalPricesTests.cs), the last
-by the largest gain of extending over exercising at the first expiry, scanned over spots to three times the strike,
-kept above 0.05; the calls here are 1.44's and the fix's alike. QuantLib's engine reads Drezner's bivariate normal,
-nanoql's West's (ER7), so every value carries §3.3's override: Drezner's accuracy, |Dr78 - We04DP| <= 6e-7 times the
-bivariate terms' coefficients (EP39), relative to the value. Flat markets only: on term structures nanoql's ER4 form
-reads by date (HolderExtensibleTermStructureTests.cs).
+nanoql takes QuantLib's fix after v1.44 (#2892, 453e6605c), which changes the put everywhere, the call with dividends
+and the call whose extension region is empty (where extending never beats exercising); all three are left out
+(tests/NanoQL.Tests/Divergences/HolderExtensibleCriticalPricesTests.cs), the last by the largest gain of extending over
+exercising at the first expiry, scanned over spots to three times the strike, kept above 0.05; the calls here are
+1.44's and the fix's alike. QuantLib's engine reads Drezner's bivariate normal, nanoql's West's, so every value carries
+an override (docs/porting-playbook.md §7.3): Drezner's accuracy, |Dr78 - We04DP| <= 6e-7 times the bivariate terms'
+coefficients, relative to the value. Flat markets only: on term structures nanoql's form reads by date
+(HolderExtensibleTermStructureTests.cs).
 
 A case holds a tools/vectors/gen/processes/blackscholesprocess.py process spec and an option {"type", "premium",
 "secondExpiryDate", "secondStrike", "payoff", "exercise"}. The wheel's calls, by QuantLib-SWIG 1.44's options.i:

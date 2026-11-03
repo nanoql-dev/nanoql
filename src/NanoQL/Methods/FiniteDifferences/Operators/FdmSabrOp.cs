@@ -17,11 +17,10 @@ namespace NanoQL.Methods;
 /// curve's forward rate.
 /// </summary>
 /// <remarks>
-/// A working type (the S-eq plan's SEQR1): the parts are built at construction; <see cref="SetTime"/> rewrites the two
-/// directions' operators in place through buffers it holds, and the apply, splitting solves and preconditioner write
-/// into the caller's spans through buffers it holds, so a step allocates nothing (the S-van plan's VD12). The forward
-/// rate is the curve's over its own times, read through <see cref="YieldTermStructure"/>'s internal
-/// <c>ContinuousForwardRate</c>, its bits <c>ForwardRate</c>'s.
+/// A working type: the parts are built at construction; <see cref="SetTime"/> rewrites the two directions' operators in
+/// place through buffers it holds, and the apply, splitting solves and preconditioner write into the caller's spans
+/// through buffers it holds, so a step allocates nothing. The forward rate is the curve's over its own times, read
+/// through <see cref="YieldTermStructure"/>'s internal <c>ContinuousForwardRate</c>, its bits <c>ForwardRate</c>'s.
 /// </remarks>
 [WorkingType]
 public sealed class FdmSabrOp : FdmLinearOpComposite

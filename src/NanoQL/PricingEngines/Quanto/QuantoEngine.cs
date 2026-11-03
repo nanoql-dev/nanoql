@@ -18,29 +18,28 @@ namespace NanoQL.PricingEngines;
 /// </summary>
 /// <remarks>
 /// <para>
-/// QuantLib's <c>QuantoEngine&lt;Instr, Engine&gt;</c> as a static class over a delegate in D14's form (the S-exo
-/// plan's ER2 (i)): each overload runs the instrument's steps, builds QuantLib's quanto process
-/// (<see cref="QuantoTermStructure"/> as its dividend curve, at the drift's strike and the exchange rate's at-the-money
-/// level 1) and calls the engine on the instrument's terms as the inner engine's own instrument, QuantLib's arguments
-/// copy; the generic core takes any one-asset instrument and its terms, so later engines and a user's own quanto
-/// instruments plug in.
+/// QuantLib's <c>QuantoEngine&lt;Instr, Engine&gt;</c> as a static class over a delegate in the engines' form: each
+/// overload runs the instrument's steps, builds QuantLib's quanto process (<see cref="QuantoTermStructure"/> as its
+/// dividend curve, at the drift's strike and the exchange rate's at-the-money level 1) and calls the engine on the
+/// instrument's terms as the inner engine's own instrument, QuantLib's arguments copy; the generic core takes any
+/// one-asset instrument and its terms, so later engines and a user's own quanto instruments plug in.
 /// </para>
 /// <para>
 /// <see cref="QuantoOptionResults.Qvega"/> and <see cref="QuantoOptionResults.Qlambda"/> read the underlying's
 /// volatility at the drift's strike, where QuantLib reads it at the spot, so on a smile they are the derivatives of the
-/// price the drift gives (ER5 (xxxvi), <c>Divergences/QuantoSmileTests.cs</c>); on a flat volatility, QuantLib's. A
-/// quanto forward-start option's drift is read at the moneyness times the spot, the strike its forward engine prices
-/// at, where QuantLib reads it at the payoff's strike, which the forward engine ignores (ED30).
+/// price the drift gives (<c>Divergences/QuantoSmileTests.cs</c>); on a flat volatility, QuantLib's. A quanto
+/// forward-start option's drift is read at the moneyness times the spot, the strike its forward engine prices at, where
+/// QuantLib reads it at the payoff's strike, which the forward engine ignores.
 /// </para>
 /// <para>
 /// The rho, vega, <see cref="QuantoOptionResults.Qrho"/>, <see cref="QuantoOptionResults.Qvega"/> and
 /// <see cref="QuantoOptionResults.Qlambda"/> come from the inner dividend rho through each input's change to the quanto
 /// curve's log discount, by date, at the dates the inner engine reads: at expiry, and for a forward-start option at the
 /// reset too. QuantLib's assume the input moves the quanto zero rate by one factor at expiry, which misses where a
-/// structure counts or dates its time apart from the dividend curve, whose clock the quanto curve keeps (ER5 (xxiv)),
-/// and for a forward-start option where an input's contribution varies between the reset and expiry, as on a
-/// volatility term structure (R8; <c>Divergences/QuantoGreeksTermStructureTests.cs</c>, C3's review, B3-2). Where every
-/// structure shares the dividend curve's times and the factor is one, QuantLib's formula.
+/// structure counts or dates its time apart from the dividend curve, whose clock the quanto curve keeps, and for a
+/// forward-start option where an input's contribution varies between the reset and expiry, as on a volatility term
+/// structure (<c>Divergences/QuantoGreeksTermStructureTests.cs</c>). Where every structure shares the dividend curve's
+/// times and the factor is one, QuantLib's formula.
 /// </para>
 /// </remarks>
 public static class QuantoEngine
@@ -85,9 +84,9 @@ public static class QuantoEngine
     /// <exception cref="ArgumentNullException">An argument is <see langword="null"/>.</exception>
     /// <exception cref="NanoQLException">The spot isn't positive, or the inner engine refuses.</exception>
     /// <remarks>
-    /// The barrier engine prices the option's terms as a <see cref="BarrierOption"/> of its own (the S-bar plan's BR2
-    /// (iii)); it reads the quanto curve at the option's expiry alone, as the analytic barrier engine does, so the
-    /// derived Greeks' terms at expiry are its own.
+    /// The barrier engine prices the option's terms as a <see cref="BarrierOption"/> of its own; it reads the quanto
+    /// curve at the option's expiry alone, as the analytic barrier engine does, so the derived Greeks' terms at expiry
+    /// are its own.
     /// </remarks>
     public static QuantoOptionResults Calculate(
         QuantoBarrierOption option,
@@ -121,9 +120,9 @@ public static class QuantoEngine
     /// <exception cref="ArgumentNullException">An argument is <see langword="null"/>.</exception>
     /// <exception cref="NanoQLException">The spot isn't positive, or the inner engine refuses.</exception>
     /// <remarks>
-    /// The double-barrier engine prices the option's terms as a <see cref="DoubleBarrierOption"/> of its own (the
-    /// S-xeq plan's §2.0); QuantLib's analytic double-barrier engine gives no Greeks, so with it the derived
-    /// sensitivities are absent, as QuantLib's are.
+    /// The double-barrier engine prices the option's terms as a <see cref="DoubleBarrierOption"/> of its own;
+    /// QuantLib's analytic double-barrier engine gives no Greeks, so with it the derived sensitivities are absent, as
+    /// QuantLib's are.
     /// </remarks>
     [System.Diagnostics.CodeAnalysis.Experimental("NQL0001")]
     public static QuantoOptionResults Calculate(
@@ -149,7 +148,7 @@ public static class QuantoEngine
 
     /// <summary>
     /// Prices a quanto forward-start option: QuantLib's <c>QuantoEngine&lt;ForwardVanillaOption, Engine&gt;</c>, the
-    /// drift read at the forward engine's strike (ED30).
+    /// drift read at the forward engine's strike.
     /// </summary>
     /// <param name="option">The option.</param>
     /// <param name="context">The evaluation context.</param>
@@ -369,7 +368,7 @@ public static class QuantoEngine
     }
 
     // The change each input makes to the quanto curve's log discount, per unit of its parallel shift, at the dates the
-    // inner engine reads (C3's review, B3-2).
+    // inner engine reads.
     private sealed class DriftShifts(
         YieldTermStructure quanto,
         YieldTermStructure riskFree,

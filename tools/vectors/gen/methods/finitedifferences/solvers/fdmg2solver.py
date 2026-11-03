@@ -14,8 +14,8 @@ Euler scheme, whose two-dimensional step runs QuantLib's BiCGStab; one with two 
 valueAt at nine points of the factors' plane.
 
 Generated and left out: the TR-BDF2 scheme, whose second stage QuantLib runs on the operator at the time its trapezoidal
-sub-step set, where nanoql sets it over the whole step for both stages (the S-eq plan's SEQR9;
-tests/NanoQL.Tests/Divergences/TrBdf2TimeDependentTests.cs): the G2 operator depends on time through its fitting term,
+sub-step set, where nanoql sets it over the whole step for both stages
+(tests/NanoQL.Tests/Divergences/TrBdf2TimeDependentTests.cs): the G2 operator depends on time through its fitting term,
 so its values move by about 1e-6.
 
 A case holds the set-up spec {"model", "forwardingModel", "swap" (tools/vectors/gen/instruments/swaption.py's),

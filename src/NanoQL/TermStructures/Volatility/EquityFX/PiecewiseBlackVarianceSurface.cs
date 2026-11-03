@@ -17,9 +17,9 @@ namespace NanoQL.TermStructures;
 /// strike, linear from zero to the first tenor and at the last tenor's volatility past it.
 /// </summary>
 /// <remarks>
-/// Immutable (the S-van plan's VD24), its sections held as given: QuantLib's surface observes them. A section's
-/// variance is read at the section's own exercise time, as QuantLib reads it. Its strike range is unbounded; a strike
-/// outside a section's range is refused unless the surface extrapolates.
+/// Immutable, its sections held as given: QuantLib's surface observes them. A section's variance is read at the
+/// section's own exercise time, as QuantLib reads it. Its strike range is unbounded; a strike outside a section's range
+/// is refused unless the surface extrapolates.
 /// </remarks>
 public sealed class PiecewiseBlackVarianceSurface : BlackVarianceTermStructure
 {

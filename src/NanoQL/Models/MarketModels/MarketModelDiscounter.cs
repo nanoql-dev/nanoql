@@ -11,10 +11,10 @@ namespace NanoQL.Models;
 /// times bracketing the payment, log-linearly interpolated between them.
 /// </summary>
 /// <remarks>
-/// <para>Immutable (the S-mmp plan's MMPR1 (ii)): a pure function of a curve state.</para>
+/// <para>Immutable: a pure function of a curve state.</para>
 /// <para>
-/// <b>The bracket</b> (MMPR4 (ix), a documented divergence): the period's start is the last rate time at or before
-/// the payment, clamped to the periods, so a payment inside a period interpolates its own period's bonds. QuantLib's
+/// <b>The bracket</b> (a documented divergence): the period's start is the last rate time at or before the payment,
+/// clamped to the periods, so a payment inside a period interpolates its own period's bonds. QuantLib's
 /// <c>lower_bound</c> takes the first rate time at or after the payment (<c>discounter.cpp:31</c>), so a payment
 /// strictly inside a period but the last is extrapolated from the next period, against its own weight's [0, 1] form
 /// (<c>Divergences/MarketModelDiscounterBracketTests.cs</c>). A payment on a rate time, before the first or after the

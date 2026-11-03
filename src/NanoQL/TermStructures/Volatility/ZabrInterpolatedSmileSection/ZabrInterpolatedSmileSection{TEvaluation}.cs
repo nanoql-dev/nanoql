@@ -18,12 +18,12 @@ namespace NanoQL.TermStructures;
 /// <see cref="ZabrShortMaturityNormal"/>, <see cref="ZabrLocalVolatility"/> or <see cref="ZabrFullFd"/>.</typeparam>
 /// <remarks>
 /// <para>
-/// The fit (<see cref="ZabrInterpolation{TEvaluation}"/>) runs when the section is built, QuantLib's lazy calculation
-/// (the S-g1d plan's G1D10). QuantLib's quote forms are the value forms here, a quote being its value, and a volatility
-/// quote that isn't valid is a <see langword="null"/> value, its strike left out of the fit. With floating strikes, the
-/// strikes are offsets from the forward and the volatilities spreads over the at-the-money volatility. QuantLib's
-/// sections float with the evaluation date, having no reference date; here the <c>Create</c> factories take the
-/// evaluation context and fix the date.
+/// The fit (<see cref="ZabrInterpolation{TEvaluation}"/>) runs when the section is built, QuantLib's lazy calculation.
+/// QuantLib's quote forms are the value forms here, a quote being its value, and a volatility quote that isn't valid is
+/// a <see langword="null"/> value, its strike left out of the fit. With floating strikes, the strikes are offsets from
+/// the forward and the volatilities spreads over the at-the-money volatility. QuantLib's sections float with the
+/// evaluation date, having no reference date; here the <c>Create</c> factories take the evaluation context and fix the
+/// date.
 /// </para>
 /// <para>
 /// QuantLib reads one strike per volatility, past the strikes' end where there are fewer strikes than volatilities;

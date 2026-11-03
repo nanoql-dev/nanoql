@@ -12,22 +12,20 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The variance-gamma and FFT engines where QuantLib's fail (the S-xeq plan's XER5 (xvi), (xviii), (xix); the user's
-/// rulings of 2026-10-28 at about 10:22, 10:55 and 11:27 and at the S-xeq run's stops 6 and 9; the run's R2-4). QuantLib's
-/// analytic engine takes the gamma density as Γ(t/ν)·ν^(t/ν), an overflow times an underflow past t/ν of about 170, so
-/// at ν 0.002 over a year it throws "Interval contains no more machine number", and starts its bound at 15√(νt), below
-/// the gamma time's mean once ν &lt; t/225; nanoql takes the density in logs there and starts the bound beyond the mean
-/// where ν &lt; t/100, and the price rises toward Black-Scholes as ν falls, within the FFT engine's ordinary accuracy of
-/// it. QuantLib's FFT engine damps at α 1.25 even past the moment E[S^(α+1)], pricing 0.494 against the analytic 48.34
-/// at ν 2, θ 0.3, σ 0.5 [executed: the planner's <c>xp_c2.cpp</c>]; nanoql damps inside the strip, on the put side near
-/// its boundary, matching the planner's independent quadratures (<c>xp_fft_putside.py</c>, this run's
-/// <c>probes\vgref\refs.out</c>) within 1e-5. QuantLib sizes the grid from the largest strike's log alone, undefined below
-/// e^(−λ) ("vector too long" on an FX call at 0.85) and too coarse in frequency wherever its size falls below 2^14 (any
-/// strike between 1 and about 60); nanoql sizes it from the largest |log K| and at least 2^14, QuantLib's size on every
-/// QuantLib case. QuantLib's grid at α 1.25, period λn, aliases the damped call's tail once σ√T passes about 1.2, an
-/// at-the-money call pricing −298.8926 against 66.80 at σ√T 2 [executed: the code review's <c>cr2_fft.cpp</c> on QuantLib
-/// 1.44]; nanoql doubles the grid until two successive grids agree within 5e-5 of the spot, QuantLib's grid where it
-/// already agrees. Checks: the analytic engines, Black-Scholes's limit, the independent quadratures.
+/// The variance-gamma and FFT engines where QuantLib's fail. QuantLib's analytic engine takes the gamma density as
+/// Γ(t/ν)·ν^(t/ν), an overflow times an underflow past t/ν of about 170, so at ν 0.002 over a year it throws "Interval
+/// contains no more machine number", and starts its bound at 15√(νt), below the gamma time's mean once ν &lt; t/225;
+/// nanoql takes the density in logs there and starts the bound beyond the mean where ν &lt; t/100, and the price rises
+/// toward Black-Scholes as ν falls, within the FFT engine's ordinary accuracy of it. QuantLib's FFT engine damps at α
+/// 1.25 even past the moment E[S^(α+1)], pricing 0.494 against the analytic 48.34 at ν 2, θ 0.3, σ 0.5 (QuantLib 1.44);
+/// nanoql damps inside the strip, on the put side near its boundary, matching independent quadratures within 1e-5.
+/// QuantLib sizes the grid from the largest strike's log alone, undefined below e^(−λ) ("vector too long" on an FX call
+/// at 0.85) and too coarse in frequency wherever its size falls below 2^14 (any strike between 1 and about 60); nanoql
+/// sizes it from the largest |log K| and at least 2^14, QuantLib's size on every QuantLib case. QuantLib's grid at α
+/// 1.25, period λn, aliases the damped call's tail once σ√T passes about 1.2, an at-the-money call pricing −298.8926
+/// against 66.80 at σ√T 2 (QuantLib 1.44); nanoql doubles the grid until two successive grids agree within 5e-5 of the
+/// spot, QuantLib's grid where it already agrees. Checks: the analytic engines, Black-Scholes's limit, the independent
+/// quadratures.
 /// </summary>
 public class VarianceGammaFftTests
 {
@@ -101,8 +99,8 @@ public class VarianceGammaFftTests
     [Fact]
     public void AListsLargestStrikeSetsItsExpirysGrid()
     {
-        // QuantLib's precalculate (XER1): the at-the-money call alone and listed with a strike of 2,000 share a grid;
-        // listed with 5,000 it moves to the next power of two
+        // QuantLib's precalculate: the at-the-money call alone and listed with a strike of 2,000 share a grid; listed
+        // with 5,000 it moves to the next power of two
         GeneralizedBlackScholesProcess process = Bs(100.0, 0.2, 0.0, 0.05);
         double alone = FFTVanillaEngine.Calculate(Call(100.0, 365), Context, process).NPV!.Value;
         ImmutableArray<OneAssetOptionResults> with2000 = FFTVanillaEngine.Calculate([Call(100.0, 365), Call(2000.0, 365)], Context, process);
@@ -122,8 +120,8 @@ public class VarianceGammaFftTests
     [InlineData(0.8, 1460)] // σ√T 1.6
     public void PastSigmaRootTOf12TheGridIsDoubledToTheAnalyticPrice(double sigma, int days)
     {
-        // the stop-9 ruling: calls and puts at 0.25 to 4 times the spot on one expiry's grid, each within 5e-5 of the spot
-        // of the analytic price, where QuantLib's grid prices the at-the-money call at −298.89 at σ√T 2
+        // Calls and puts at 0.25 to 4 times the spot on one expiry's grid, each within 5e-5 of the spot of the analytic
+        // price, where QuantLib's grid prices the at-the-money call at −298.89 at σ√T 2
         GeneralizedBlackScholesProcess process = Bs(100.0, sigma, 0.01, 0.03);
         double[] moneyness = [0.25, 0.5, 1.0, 2.0, 4.0];
         VanillaOption[] options =
@@ -144,7 +142,7 @@ public class VarianceGammaFftTests
     public void PastTheTailGrowthBoundTheFftRefuses()
     {
         // σ√T 4, the damped tail's growth 22.5: two grids agree there on a rounding floor while both are off, an
-        // at-the-money call at σ√T 4.5 pricing 90.1243 against 89.3522 (the code review's O2-1)
+        // at-the-money call at σ√T 4.5 pricing 90.1243 against 89.3522
         GeneralizedBlackScholesProcess process = Bs(100.0, 4.0, 0.01, 0.03);
         NanoQLException e = Assert.Throws<NanoQLException>(
             () => FFTVanillaEngine.Calculate(Call(100.0, 365), Context, process));
@@ -176,11 +174,11 @@ public class VarianceGammaFftTests
     public void ANearBoundaryListFromStrike20To400IsTheIndependentQuadrature(
         double sigma, double nu, double gap, double k20, double k50, double k100, double k200, double k400)
     {
-        // the plan's B3-1 grid at three months, on the put side: its puts at a strike of 20, below 1e-6, keep changing
-        // relatively at the grid's rounding, so a convergence test on the put alone refuses the list; the references
-        // the Black-Scholes call and put on the gamma time g = u^(t/ν) integrated against its density at 30 digits,
-        // the call and the put with parity agreeing to 15 digits (the run's vg_two_routes.py, which gives the
-        // near-boundary fact's (0.5, 2, 0.03) and (0.2, 3, 0.019) rows to 13 digits)
+        // the grid at three months, on the put side: its puts at a strike of 20, below 1e-6, keep changing relatively
+        // at the grid's rounding, so a convergence test on the put alone refuses the list; the references the
+        // Black-Scholes call and put on the gamma time g = u^(t/ν) integrated against its density at 30 digits, the
+        // call and the put with parity agreeing to 15 digits (the same route gives the near-boundary fact's (0.5, 2,
+        // 0.03) and (0.2, 3, 0.019) rows to 13 digits)
         double hi = 1.0 + gap;
         double theta = (1.0 - (0.5 * sigma * sigma * nu * hi * hi)) / (nu * hi);
         double[] strikes = [20.0, 50.0, 100.0, 200.0, 400.0];

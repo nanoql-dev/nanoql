@@ -5,13 +5,13 @@
 at 95 or 105 and a put struck at 95 or 105, expiring in six, nine or twelve months, on
 analyticcompoundoptionengine.py's flat markets: the NPV.
 
-nanoql takes QuantLib's fix after v1.44 (#2891, bc3a54105; the S-exo plan's ER6 (ii)): the maturities measured from
-the evaluation date, where 1.44 measures them from the choosing date and its critical value from twice it. On a flat
-market 1.44 gives the fixed value for maturities placed the choosing time later, as its own test case does (ported
-on a // Moved: line): each case's wheel option is built so, its inputs the true maturities. QuantLib's engine reads
-Drezner's bivariate normal, nanoql's West's (ER7), so every value carries §3.3's override: Drezner's accuracy, |Dr78 -
-We04DP| <= 6e-7 times the bivariate terms' coefficients (EP39), relative to the value. Flat markets only: on term
-structures nanoql's ER4 form reads by date (tests/NanoQL.Tests/Divergences/ComplexChooserTermStructureTests.cs).
+nanoql takes QuantLib's fix after v1.44 (#2891, bc3a54105): the maturities measured from the evaluation date, where
+1.44 measures them from the choosing date and its critical value from twice it. On a flat market 1.44 gives the fixed
+value for maturities placed the choosing time later, as its own test case does (ported on a // Moved: line): each
+case's wheel option is built so, its inputs the true maturities. QuantLib's engine reads Drezner's bivariate normal,
+nanoql's West's, so every value carries an override (docs/porting-playbook.md §7.3): Drezner's accuracy, |Dr78 -
+We04DP| <= 6e-7 times the bivariate terms' coefficients, relative to the value. Flat markets only: on term structures
+nanoql's form reads by date (tests/NanoQL.Tests/Divergences/ComplexChooserTermStructureTests.cs).
 
 A case holds analyticcompoundoptionengine.py's process spec and an option {"choosingDate", "strikeCall", "strikePut",
 "exerciseCall", "exercisePut"}. The wheel's calls, by QuantLib-SWIG 1.44's options.i: ComplexChooserOption(

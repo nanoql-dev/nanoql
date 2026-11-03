@@ -14,7 +14,7 @@ namespace NanoQL.Models;
 /// </summary>
 /// <remarks>
 /// Its arguments are <see cref="BatesDoubleExpModel"/>'s nine, then κ_λ and θ_λ, both positive; its process the
-/// Heston model's, as QuantLib's (the S-hes plan's HR1 (ii)); η_u in (0, 1) (HR7 (v)).
+/// Heston model's, as QuantLib's; η_u in (0, 1).
 /// </remarks>
 public sealed class BatesDoubleExpDetJumpModel : BatesDoubleExpModel
 {

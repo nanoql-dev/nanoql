@@ -21,9 +21,10 @@ namespace NanoQL.Numerics;
 /// <para>
 /// A method that keeps state through a minimization (BFGS's inverse Hessian, which QuantLib's keeps as a member across
 /// minimizations) returns it from <see cref="NewMinimizationState"/> at each minimization's start and reads it in the
-/// five-argument <see cref="GetUpdatedDirection(ProblemState, double, Vector, LineSearch, LineSearchBasedMethodState?)"/>
-/// (the S-core plan's CR5 (a)); a method without state overrides the four-argument member, which the five-argument
-/// one calls by default. A method overriding neither is refused at its first direction.
+/// five-argument
+/// <see cref="GetUpdatedDirection(ProblemState, double, Vector, LineSearch, LineSearchBasedMethodState?)"/>; a method
+/// without state overrides the four-argument member, which the five-argument one calls by default. A method overriding
+/// neither is refused at its first direction.
 /// </para>
 /// <para>
 /// The problem's current value is the last point the line search accepted at every return, where QuantLib's

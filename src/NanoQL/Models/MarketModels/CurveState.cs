@@ -20,12 +20,11 @@ namespace NanoQL.Models;
 /// discount bonds d₀ … dₙ, the discount ratios dᵢ/d₀, and the coterminal swap rates sr₀ … srₙ₋₁.
 /// </para>
 /// <para>
-/// A working type (the S-mm plan's MR1 (ii)): a derived state changes in place when it is set, and computes some of its
-/// reads lazily into buffers of its own, so it is owned by one computation and isn't thread-safe. Its vector reads
-/// (<see cref="ForwardRates"/>, <see cref="CoterminalSwapRates"/>, <see cref="CmSwapRates"/>) are views of its own
-/// buffers, valid until it is next set or the same read is made with another argument (MR1 (iii)); a caller that keeps
-/// one copies it, and <see cref="Clone"/> keeps the whole state. An extension point, as in QuantLib; the setters live
-/// on the derived states only.
+/// A working type: a derived state changes in place when it is set, and computes some of its reads lazily into buffers
+/// of its own, so it is owned by one computation and isn't thread-safe. Its vector reads (<see cref="ForwardRates"/>,
+/// <see cref="CoterminalSwapRates"/>, <see cref="CmSwapRates"/>) are views of its own buffers, valid until it is next
+/// set or the same read is made with another argument; a caller that keeps one copies it, and <see cref="Clone"/> keeps
+/// the whole state. An extension point, as in QuantLib; the setters live on the derived states only.
 /// </para>
 /// </remarks>
 [WorkingType]
@@ -157,8 +156,7 @@ public abstract class CurveState
         }
     }
 
-    // A rate's index: QuantLib's check admits the number of rates, whose read is past its rate vectors, refused here
-    // (the S-mm plan's MR3 (xx)).
+    // A rate's index: QuantLib's check admits the number of rates, whose read is past its rate vectors, refused here.
     private protected static void CheckRateIndex(int i, int first, int numberOfRates)
     {
         if (!(i >= first && i < numberOfRates))

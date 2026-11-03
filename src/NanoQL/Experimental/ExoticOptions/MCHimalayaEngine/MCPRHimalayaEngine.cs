@@ -14,7 +14,7 @@ namespace NanoQL.Experimental;
 /// <summary>
 /// <see cref="MCHimalayaEngine"/> on pseudo-random draws with QuantLib's default statistics: QuantLib-Python's
 /// <c>MCPRHimalayaEngine</c>, QuantLib's <c>MCHimalayaEngine&lt;PseudoRandom&gt;</c>, its calculations closed at
-/// <see cref="PseudoRandom"/> and <see cref="GeneralStatistics"/> (D12).
+/// <see cref="PseudoRandom"/> and <see cref="GeneralStatistics"/>.
 /// </summary>
 [Experimental("NQL0001")]
 public static class MCPRHimalayaEngine

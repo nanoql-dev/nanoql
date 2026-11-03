@@ -12,14 +12,13 @@ on the evaluation date 15 October 2026.
   don't match the times or whose rows don't match the strikes, strikes out of order, and strike vectors other than one
   per time.
 
-Left out (the S-van plan's §2.10): at a node time, and at every time before the first or past the last, which clamp
-onto one, a strike outside the node's strikes where its side's extrapolation is the constant one: nanoql holds the
-volatility there, where QuantLib's interpolator extrapolates (VR4 (xviii);
-tests/NanoQL.Tests/Divergences/FixedLocalVolNodeExtrapolationTests.cs). The specs ("form" dates, times or
-perTimeStrikes) are written by the functions below, which tools/vectors/gen/methods/finitedifferences/utilities/
-localvolrndcalculator.py shares. The wheel's calls, by QuantLib-SWIG 1.44: the three constructors and
-setInterpolation(name). nanoql's WithInterpolation returns a copy, which the test reads. Read back by
-tests/NanoQL.Tests/Vectors/TermStructures/FixedLocalVolSurfaceVectorTests.cs."""
+Left out: at a node time, and at every time before the first or past the last, which clamp onto one, a strike outside
+the node's strikes where its side's extrapolation is the constant one: nanoql holds the volatility there, where
+QuantLib's interpolator extrapolates (tests/NanoQL.Tests/Divergences/FixedLocalVolNodeExtrapolationTests.cs). The specs
+("form" dates, times or perTimeStrikes) are written by the functions below, which
+tools/vectors/gen/methods/finitedifferences/utilities/localvolrndcalculator.py shares. The wheel's calls, by
+QuantLib-SWIG 1.44: the three constructors and setInterpolation(name). nanoql's WithInterpolation returns a copy, which
+the test reads. Read back by tests/NanoQL.Tests/Vectors/TermStructures/FixedLocalVolSurfaceVectorTests.cs."""
 import importlib.util
 import os
 import sys
@@ -98,7 +97,7 @@ def close_enough(x, y, n=42):
 
 
 def diverges(spec, times, t, k):
-    """VR4 (xviii)'s reach: at a node (after QuantLib's clamp to the first and last times) and outside its strikes on a
+    """The fix's reach: at a node (after QuantLib's clamp to the first and last times) and outside its strikes on a
     constant side."""
     tc = min(times[-1], max(t, times[0]))
     idx = next(i for i, x in enumerate(times) if not x < tc)

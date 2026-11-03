@@ -25,23 +25,22 @@ namespace NanoQL.PricingEngines;
 /// refused there. The coupons' times are the given day counter's year fractions from the reference date.
 /// </para>
 /// <para>
-/// <b>A floating coupon known by its fixing date</b> (the S-sr plan's SSR6 (xvi)): the public constructor, a swap's own
-/// value as the tree swap engine prices it, knows a floating coupon whose fixing date is on or before the reference
-/// date, adding its amount at its payment time, where QuantLib knows it by its accrual start (its reset date,
-/// <c>vanillaswap.cpp:67</c>; <c>discretizedswap.cpp:84-87</c>), so between its fixing and its start the tree forecasts
-/// a coupon whose fixing the discounting engine reads (<c>Divergences/TreeKnownCouponTests.cs</c>). The internal
-/// constructor, which the discretized swaption calls, keeps QuantLib's rule, so a swaption exercised in that window
-/// takes its floating leg at par, QuantLib's convention.
+/// <b>A floating coupon known by its fixing date</b>: the public constructor, a swap's own value as the tree swap
+/// engine prices it, knows a floating coupon whose fixing date is on or before the reference date, adding its amount at
+/// its payment time, where QuantLib knows it by its accrual start (its reset date, <c>vanillaswap.cpp:67</c>;
+/// <c>discretizedswap.cpp:84-87</c>), so between its fixing and its start the tree forecasts a coupon whose fixing the
+/// discounting engine reads (<c>Divergences/TreeKnownCouponTests.cs</c>). The internal constructor, which the
+/// discretized swaption calls, keeps QuantLib's rule, so a swaption exercised in that window takes its floating leg at
+/// par, QuantLib's convention.
 /// </para>
 /// <para>
-/// <b>A floating coupon paid after its accrual end</b> (the S-cms plan's CMR4): QuantLib values a floating coupon as a
-/// par floater to its payment date, the nominal times one less the bond from its payment time
-/// (<c>discretizedswap.cpp:199-218</c>), which overprices one paid on a lag or an adjusted date after its accrual end.
-/// Here such a coupon takes its forward over its own accrual period and is paid on its payment date: the nominal times
-/// the bond from its payment time over the bond from its accrual end, less the bond from its payment time, plus its
-/// spread; its accrual end is a mandatory time only there. With QuantLib's check, the finite-difference engine on a
-/// lagged swap (<c>Divergences/TreeSwaptionSnappingTests.cs</c>); a coupon paid on its accrual end keeps QuantLib's
-/// value.
+/// <b>A floating coupon paid after its accrual end</b>: QuantLib values a floating coupon as a par floater to its
+/// payment date, the nominal times one less the bond from its payment time (<c>discretizedswap.cpp:199-218</c>), which
+/// overprices one paid on a lag or an adjusted date after its accrual end. Here such a coupon takes its forward over
+/// its own accrual period and is paid on its payment date: the nominal times the bond from its payment time over the
+/// bond from its accrual end, less the bond from its payment time, plus its spread; its accrual end is a mandatory time
+/// only there. With QuantLib's check, the finite-difference engine on a lagged swap
+/// (<c>Divergences/TreeSwaptionSnappingTests.cs</c>); a coupon paid on its accrual end keeps QuantLib's value.
 /// </para>
 /// <para>
 /// <b>Its discount bonds.</b> QuantLib's swap builds a discount bond for each coupon it adds, initializes it at the
@@ -206,7 +205,7 @@ public sealed class DiscretizedSwap : DiscretizedAsset
 
     /// <summary>
     /// The swap's mandatory times: the non-negative fixed reset, fixed payment, floating reset and floating payment
-    /// times, in that order, then each floating coupon's accrual end time where it isn't its payment time (CMR4).
+    /// times, in that order, then each floating coupon's accrual end time where it isn't its payment time.
     /// </summary>
     /// <returns>The times, not guaranteed to be sorted.</returns>
     public override ImmutableArray<double> MandatoryTimes()
@@ -344,7 +343,7 @@ public sealed class DiscretizedSwap : DiscretizedAsset
     private static bool IsResetTimeInPast(double resetTime, double payTime, bool includeTodaysCashFlows) =>
         resetTime < 0.0 && (payTime > 0.0 || (includeTodaysCashFlows && payTime == 0.0));
 
-    // SSR6 (xvi): a floating coupon fixed on or before the reference date, whose payment isn't past.
+    // A floating coupon fixed on or before the reference date, whose payment isn't past.
     private static bool IsFixed(double fixingTime, double payTime, bool includeTodaysCashFlows) =>
         fixingTime <= 0.0 && (payTime > 0.0 || (includeTodaysCashFlows && payTime == 0.0));
 
@@ -390,7 +389,7 @@ public sealed class DiscretizedSwap : DiscretizedAsset
         double spread = arguments.FloatingSpreads[i];
         double accruedSpread = nominal * T * spread;
 
-        // CMR4: a coupon paid after its accrual end takes its forward to its accrual end
+        // A coupon paid after its accrual end takes its forward to its accrual end
         bool toEnd = floatingEndTimes[i] != floatingPayTimes[i];
         if (toEnd)
         {

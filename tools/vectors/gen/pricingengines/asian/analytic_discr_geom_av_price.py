@@ -7,8 +7,8 @@ geometric average-price Asian options in closed form.
 Geometric calls and puts at 90, 100 and 110, over six months, a year and two years, with 4 and 12 fixings, unseasoned
 and with two past fixings, on the flat, constant-volatility processes of tools/vectors/gen/instruments/asianoption.py:
 the NPV and the Greeks the engine sets. Then an arithmetic option priced as the arithmetic engine's control, a payoff
-that isn't plain vanilla, an exercise that isn't European, and an expired option. Off flat markets the outputs are
-left out (the S-bar plan's §2.10: BR4 (a)'s exact form).
+that isn't plain vanilla, an exercise that isn't European, and an expired option. Off flat markets the outputs are left
+out: nanoql's form is exact there.
 
 A case holds one process and option. The wheel's calls, by QuantLib-SWIG 1.44's options.i:
 AnalyticDiscreteGeometricAveragePriceAsianEngine(process) and the option's NPV, delta, gamma, theta, vega, rho and

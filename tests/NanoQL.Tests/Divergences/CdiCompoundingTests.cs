@@ -19,16 +19,16 @@ namespace NanoQL.Tests.Divergences;
 /// amount by +37.986528 and +94.968959 on 1,000,000, where a generic index's doesn't; a seasoned coupon's past grows by
 /// 1.0083664854 where CDI's convention gives 1.0079741404; and the arithmetic pricer sums the annual rates as simple
 /// ones. nanoql's compounding pricers grow a fixing by the index's <see cref="OvernightIndex.GrowthFactor"/>, and its
-/// averaging pricers sum the index's <see cref="OvernightIndex.SimpleAccrual"/>: for <see cref="Cdi"/>
-/// <c>(1 + r)^τ</c> and <c>(1 + r)^τ − 1</c>, CDI's daily factor as B3's DI factor states it, and by default
-/// <c>1 + r·τ</c> and <c>r·τ</c>, so every other index keeps QuantLib's bits. The Black pricers' forward parts compare a
-/// daily cap's or floor's strike with a simple rate estimated from the curve; a strike quoted in CDI's annual
-/// convention, which caps the past fixings as quoted, is compared as its simple equivalent, where QuantLib compares it
-/// as quoted, about 47bp too high at 10%. QuantLib's checks: its own telescopic amount;
-/// <c>InterestRate(r, Business252, Compounded, Annual)</c>'s compound factor, over the past and, for the Black pricers'
-/// past parts, on the capped fixing; a generic index fed the simple-equivalent fixings <c>((1 + r)^τ − 1)/τ</c>, in
-/// the arithmetic pricer, and at the simple-equivalent strike, in the Black pricers' forward parts [executed on the
-/// wheel]. QuantLib's amounts are recorded beside nanoql's.
+/// averaging pricers sum the index's <see cref="OvernightIndex.SimpleAccrual"/>: for <see cref="Cdi"/> <c>(1 + r)^τ</c>
+/// and <c>(1 + r)^τ − 1</c>, CDI's daily factor as B3's DI factor states it, and by default <c>1 + r·τ</c> and
+/// <c>r·τ</c>, so every other index keeps QuantLib's bits. The Black pricers' forward parts compare a daily cap's or
+/// floor's strike with a simple rate estimated from the curve; a strike quoted in CDI's annual convention, which caps
+/// the past fixings as quoted, is compared as its simple equivalent, where QuantLib compares it as quoted, about 47bp
+/// too high at 10%. QuantLib's checks: its own telescopic amount; <c>InterestRate(r, Business252, Compounded,
+/// Annual)</c>'s compound factor, over the past and, for the Black pricers' past parts, on the capped fixing; a generic
+/// index fed the simple-equivalent fixings <c>((1 + r)^τ − 1)/τ</c>, in the arithmetic pricer, and at the
+/// simple-equivalent strike, in the Black pricers' forward parts (QuantLib-Python 1.44). QuantLib's amounts are
+/// recorded beside nanoql's.
 /// </summary>
 public class CdiCompoundingTests
 {

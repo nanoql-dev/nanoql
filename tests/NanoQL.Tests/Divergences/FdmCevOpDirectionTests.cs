@@ -8,12 +8,12 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// <see cref="FdmCEVOp"/> in a direction other than 0 (the S-van plan's VR4 (xiv)). QuantLib's operator builds its
-/// second derivative on direction 0 whatever its direction (<c>fdmcevop.cpp:39-40</c>), so that in direction 1 of a
-/// two-dimensional mesher it differentiates along the other axis, with the CEV coefficients of direction 1: it differs
-/// from its own operator in direction 0 of the transposed mesher by 1.107 [executed by the S-van planner: VP25].
-/// nanoql's operator differentiates along the direction given. QuantLib's check: its operator in direction 0, its
-/// engine's, on the transposed mesher, whose bits nanoql's direction 0 keeps (the operator's vectors).
+/// <see cref="FdmCEVOp"/> in a direction other than 0. QuantLib's operator builds its second derivative on direction 0
+/// whatever its direction (<c>fdmcevop.cpp:39-40</c>), so that in direction 1 of a two-dimensional mesher it
+/// differentiates along the other axis, with the CEV coefficients of direction 1: it differs from its own operator in
+/// direction 0 of the transposed mesher by 1.107. nanoql's operator differentiates along the direction given.
+/// QuantLib's check: its operator in direction 0, its engine's, on the transposed mesher, whose bits nanoql's
+/// direction 0 keeps (the operator's vectors).
 /// </summary>
 public class FdmCevOpDirectionTests
 {

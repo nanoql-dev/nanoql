@@ -13,13 +13,12 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The double-exponential Bates models where the up-jumps' mean size η_u reaches 1 (the S-hes plan's HR7 (v), a refusal
-/// by the user's ruling). The up-jumps' exponential moment, which the model's drift compensates, is finite for η_u below
-/// 1 only ("the condition η1 &gt; 1 is necessary and sufficient for the random variable J_t to have finite
-/// expectation", Gulisashvili and Vives, η1 = 1/η_u), yet QuantLib's engine prices beyond it: a 100 call 3,040,812 at
-/// η_u = 1.01, a plausible 26.39 at 1.5, NaN at 1 [executed: <c>scratchpad\cxxprobe\src\c1oracle.cpp</c>]. nanoql's
-/// engines refuse a model at η_u ≥ 1, the models' constraint on η_u is (0, 1), so a construction or a calibration step
-/// there is refused, and below 1 QuantLib's values stand.
+/// The double-exponential Bates models where the up-jumps' mean size η_u reaches 1 (a refusal). The up-jumps'
+/// exponential moment, which the model's drift compensates, is finite for η_u below 1 only ("the condition η1 &gt; 1 is
+/// necessary and sufficient for the random variable J_t to have finite expectation", Gulisashvili and Vives, η1 =
+/// 1/η_u), yet QuantLib's engine prices beyond it: a 100 call 3,040,812 at η_u = 1.01, a plausible 26.39 at 1.5, NaN at
+/// 1 (QuantLib 1.44). nanoql's engines refuse a model at η_u ≥ 1, the models' constraint on η_u is (0, 1), so a
+/// construction or a calibration step there is refused, and below 1 QuantLib's values stand.
 /// </summary>
 public class BatesDoubleExpUpJumpTests
 {

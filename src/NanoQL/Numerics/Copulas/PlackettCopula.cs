@@ -12,13 +12,13 @@ namespace NanoQL.Numerics;
 /// <summary>The Plackett copula, C(x, y) = (s − √(s² − 4xyθ(θ − 1)))/(2(θ − 1)), s = 1 + (θ − 1)(x + y).</summary>
 /// <remarks>
 /// Immutable. On the unit square's edges it returns the boundary values, C(u, 0) = C(0, v) = 0, C(u, 1) = u and C(1, v)
-/// = v, before its formula, as every copula here does (the S-core plan's CR7 (xxxiii)). QuantLib's formula cancels
-/// wherever the root nears s: near the edges at every θ (1e-7 relative at θ 0.5 and 2 on points 1e-8 from them) and
-/// everywhere as θ nears 1 (9.5e-5). nanoql takes the stable root, 2xyθ/(s + √…) where s is positive, QuantLib's form
-/// elsewhere, and above θ 1 the radicand as 1 + 2(θ − 1)(x(1 − y) + y(1 − x)) + ((θ − 1)(x − y))², whose terms are all
-/// non-negative, where QuantLib's cancels as θ grows (1e-8 at θ 1e8) (the plan's CR7 (xxi), its stable root): within
-/// 4e-16 relative of a high-precision evaluation of QuantLib's formula on points within 1e-12 of the edges, from θ 0.1
-/// to 1e12; toward θ 0 the copula nears max(x + y − 1, 0), whose cancellation near x + y = 1 no form avoids.
+/// = v, before its formula, as every copula here does. QuantLib's formula cancels wherever the root nears s: near the
+/// edges at every θ (1e-7 relative at θ 0.5 and 2 on points 1e-8 from them) and everywhere as θ nears 1 (9.5e-5).
+/// nanoql takes the stable root, 2xyθ/(s + √…) where s is positive, QuantLib's form elsewhere, and above θ 1 the
+/// radicand as 1 + 2(θ − 1)(x(1 − y) + y(1 − x)) + ((θ − 1)(x − y))², whose terms are all non-negative, where
+/// QuantLib's cancels as θ grows (1e-8 at θ 1e8): within 4e-16 relative of a high-precision evaluation of QuantLib's
+/// formula on points within 1e-12 of the edges, from θ 0.1 to 1e12; toward θ 0 the copula nears max(x + y − 1, 0),
+/// whose cancellation near x + y = 1 no form avoids.
 /// </remarks>
 public sealed class PlackettCopula
 {

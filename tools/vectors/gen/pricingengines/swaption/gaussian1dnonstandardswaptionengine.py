@@ -12,12 +12,12 @@ date paid two TARGET days after it (RebatedExercise); an overnight index (SOFR's
 exercise on the evaluation date, one past, and a Bermudan whose first exercise has passed. NPVs are compared at the
 largest nominal, the probabilities as they are.
 
-Left out, each a documented divergence: a discount or forwarding curve on another clock (G1R6 (xvi),
-Gaussian1dMismatchedTimesTests), so SOFR is forecast here on an Actual/365 (Fixed) curve; flat payoff extrapolation
-(G1R6 (xxi), FlatPayoffExtrapolationTests), reversions between 0 and 1e-2 (G1R4 (i)), and fixed nominals positive but
-none above 1e-8 (#2845's class, NonstandardInitialGuessTests). The wheel's Gaussian1dNonstandardSwaptionEngine(model,
-integrationPoints, stddevs, extrapolatePayoff, flatPayoffExtrapolation, oas, discountCurve, probabilities) is the C++
-constructor's proxy, its probabilities read by the swaption's probabilities(). Read back by
+Left out, each a documented divergence: a discount or forwarding curve on another clock
+(Gaussian1dMismatchedTimesTests), so SOFR is forecast here on an Actual/365 (Fixed) curve; flat payoff extrapolation
+(FlatPayoffExtrapolationTests), reversions between 0 and 1e-2, and fixed nominals positive but none above 1e-8 (#2845's
+class, NonstandardInitialGuessTests). The wheel's Gaussian1dNonstandardSwaptionEngine(model, integrationPoints, stddevs,
+extrapolatePayoff, flatPayoffExtrapolation, oas, discountCurve, probabilities) is the C++ constructor's proxy, its
+probabilities read by the swaption's probabilities(). Read back by
 tests/NanoQL.Tests/Vectors/PricingEngines/Gaussian1dNonstandardSwaptionEngineVectorTests.cs."""
 import importlib.util
 import os

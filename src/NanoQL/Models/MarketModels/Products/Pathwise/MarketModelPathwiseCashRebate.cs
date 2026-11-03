@@ -14,8 +14,8 @@ namespace NanoQL.Models;
 /// step, its derivatives 0, and finishes the path.
 /// </summary>
 /// <remarks>
-/// A working type (the S-mmp plan's MMPR1 (i)); the amounts are copied at construction. A rebate stepped more often than
-/// its payment times is refused, where QuantLib reads past its amounts (MMPR4's refusals).
+/// A working type; the amounts are copied at construction. A rebate stepped more often than its payment times is
+/// refused, where QuantLib reads past its amounts.
 /// </remarks>
 [WorkingType]
 public sealed class MarketModelPathwiseCashRebate : MarketModelPathwiseMultiProduct

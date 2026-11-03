@@ -17,12 +17,12 @@ namespace NanoQL.Experimental;
 /// <para>
 /// Immutable; two state variables, X and Y, and three factors: X's Brownian draw, the draw that times a jump and the
 /// draw that sizes it, each an inverse normal mapped to a uniform within [ε, 1 − ε]. The in-place
-/// <see cref="Evolve(double, ReadOnlySpan{double}, double, ReadOnlySpan{double}, Span{double})"/> allocates nothing
-/// (the S-xeq plan's XED7), for QuantLib's swing cases' 200,000 paths.
+/// <see cref="Evolve(double, ReadOnlySpan{double}, double, ReadOnlySpan{double}, Span{double})"/> allocates nothing,
+/// for QuantLib's swing cases' 200,000 paths.
 /// </para>
 /// <para>
-/// A step draws at most one jump, QuantLib's first-order scheme (XER5 (xxxii)): the probability of a jump in a step of
-/// length dt is 1 − e^(−λdt), and two or more are taken as one, a bias of order (λdt)² that shrinks with the step.
+/// A step draws at most one jump, QuantLib's first-order scheme: the probability of a jump in a step of length dt is 1
+/// − e^(−λdt), and two or more are taken as one, a bias of order (λdt)² that shrinks with the step.
 /// </para>
 /// <para>
 /// References: T. Kluge, Pricing Swing Options and other Electricity Derivatives, 2008; B. Hambly, S. Howison and T.

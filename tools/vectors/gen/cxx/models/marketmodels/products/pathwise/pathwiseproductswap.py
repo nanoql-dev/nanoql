@@ -8,10 +8,9 @@ states the harness sets, read per step with its amounts' derivatives, with the p
 Rate grids: six semi-annual rates and five irregular ones; payer (multiplier 1) and receiver (-1); strikes at the
 forwards, one strike repeated for every rate, strikes rising along the curve; accruals off the rate taus.
 
-Left out: one strike for every rate, which QuantLib refuses where its message offers it and nanoql takes (the S-mmp
-plan's MMPR4 (xi), tests/NanoQL.Tests/Divergences/MarketModelPathwiseSwapStrikeTests.cs); and, nanoql refusing them,
-QuantLib reading past its inputs, accruals or strikes not one a rate (tests/NanoQL.Tests/Conventions/
-MarketModelProductTests.cs).
+Left out: one strike for every rate, which QuantLib refuses where its message offers it and nanoql takes
+(tests/NanoQL.Tests/Divergences/MarketModelPathwiseSwapStrikeTests.cs); and, nanoql refusing them, QuantLib reading
+past its inputs, accruals or strikes not one a rate (tests/NanoQL.Tests/Conventions/MarketModelProductTests.cs).
 
 The harness unit is tools/cxx/src/models/marketmodels/products/products.cpp. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Models/MarketModels/MarketModelPathwiseSwapCxxVectorTests.cs."""

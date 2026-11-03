@@ -2,13 +2,12 @@
 # SPDX-License-Identifier: Apache-2.0
 """Vectors for QuantLib's RecursiveLossModel (ql/experimental/credit/recursivelossmodel.hpp), which the wheel
 doesn't expose, each output computed by the C++ harness (tools/cxx/src/experimental/credit/basket.cpp and
-recursivelossmodel.cpp) on tools/vectors/gen/cxx/experimental/credit/defaultevent.py's specs: Gaussian and
-Student t models on equal weights, weights of 1 to 3 units and weights with gaps; the expected tranche loss at
-dates to ten years, and the statistics the model refuses. Left out (Divergences/RecursiveLossModelTests.cs): the
-loss probabilities and the loss distribution, the percentile and the shortfall on it, which integrate a vector over
-the factor, where QuantLib's quadrature leaves its last node unweighted (the S-xcr plan's XR8 (v), C1's fix); and
-with them the percentile at 0 and 1, which QuantLib's returns as a probability, and the distribution's labels on
-weights with gaps, which QuantLib's gives by rank (XR8 (vii)). Read back by
+recursivelossmodel.cpp) on tools/vectors/gen/cxx/experimental/credit/defaultevent.py's specs: Gaussian and Student t
+models on equal weights, weights of 1 to 3 units and weights with gaps; the expected tranche loss at dates to ten years,
+and the statistics the model refuses. Left out (Divergences/RecursiveLossModelTests.cs): the loss probabilities and the
+loss distribution, the percentile and the shortfall on it, which integrate a vector over the factor, where QuantLib's
+quadrature leaves its last node unweighted (fixed); and with them the percentile at 0 and 1, which QuantLib's returns as
+a probability, and the distribution's labels on weights with gaps, which QuantLib's gives by rank. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Experimental/Credit/RecursiveLossModelCxxVectorTests.cs through tests/NanoQL.Tests/Vectors/LossModelStatistics.cs."""
 import importlib.util
 import os

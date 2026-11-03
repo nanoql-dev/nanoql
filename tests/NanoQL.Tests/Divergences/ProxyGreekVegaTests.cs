@@ -11,17 +11,16 @@ using NanoQL.Tests.Conventions;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The proxy Greeks (the S-mmp plan's MMPR3, ruled by the user, and SMD13). QuantLib's constrained evolver weighs a path
-/// by the shifted Gaussians' density ratio alone (<c>lognormalfwdrateeulerconstrained.cpp:200-212</c>), which misses the
-/// transition densities' ratio of step deviations a volatility bump changes: <c>testGreeks</c>' proxy vegas, which it
-/// prints and doesn't assert, take the wrong sign, 81 to 131 standard errors off Black's (the planner's MPP13). nanoql's
-/// evolver takes the unbumped model as its reference and carries √(var_reference / var_own). On six semi-annual rates,
-/// FlatVol 20%, 3 factors, digital caplets paying 1% at the forwards, the money-market measure, 8,191 Sobol paths
-/// (seed 42), each step's forward constrained, forwards bumped 1e-6 and volatilities 1e-4: nanoql's deltas, gammas and
-/// vegas within 4 standard errors of Black's; QuantLib's weight, the evolvers' own models as references, its vegas far
-/// off. Checks: Black's formula on each caplet's total variance; QuantLib's accounting engine on the volatility-bumped
-/// models, the same paths, on plain caplets; QuantLib's weight bit for bit where the reference is the evolver's own model
-/// (the evolvers' and the proxy engine's vectors).
+/// The proxy Greeks. QuantLib's constrained evolver weighs a path by the shifted Gaussians' density ratio alone
+/// (<c>lognormalfwdrateeulerconstrained.cpp:200-212</c>), which misses the transition densities' ratio of step
+/// deviations a volatility bump changes: <c>testGreeks</c>' proxy vegas, which it prints and doesn't assert, take the
+/// wrong sign, 81 to 131 standard errors off Black's. nanoql's evolver takes the unbumped model as its reference and
+/// carries √(var_reference / var_own). On six semi-annual rates, FlatVol 20%, 3 factors, digital caplets paying 1% at
+/// the forwards, the money-market measure, 8,191 Sobol paths (seed 42), each step's forward constrained, forwards
+/// bumped 1e-6 and volatilities 1e-4: nanoql's deltas, gammas and vegas within 4 standard errors of Black's; QuantLib's
+/// weight, the evolvers' own models as references, its vegas far off. Checks: Black's formula on each caplet's total
+/// variance; QuantLib's accounting engine on the volatility-bumped models, the same paths, on plain caplets; QuantLib's
+/// weight bit for bit where the reference is the evolver's own model (the evolvers' and the proxy engine's vectors).
 /// </summary>
 public class ProxyGreekVegaTests
 {

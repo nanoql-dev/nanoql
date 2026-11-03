@@ -8,7 +8,7 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The market-model extension points (the playbook's U13): a correlation implementing its matrices alone answers each
+/// The market-model extension points (the playbook's §2.4): a correlation implementing its matrices alone answers each
 /// period from them through the base's <see cref="PiecewiseConstantCorrelation.Correlation"/>, with QuantLib's index
 /// check; and a model overriding <see cref="MarketModel.Covariance"/> gives its volatilities from the override, as
 /// QuantLib's <c>timeDependentVolatility</c> reads the virtual <c>covariance(j)</c>.

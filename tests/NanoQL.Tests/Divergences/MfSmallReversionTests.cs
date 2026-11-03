@@ -6,14 +6,14 @@ using NanoQL.Processes;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The Markov-functional state process at small reversions (the S-g1d plan's G1R4 (ii)): QuantLib's variance over a
-/// step, (e^{2au} − e^{2as})/(2a)·σ², cancels as a falls below 1e-2, and cuts to its zero formula only below its
-/// epsilon (<c>mfstateprocess.cpp:26-27</c>, <c>:81-84</c>, <c>:98-110</c>). On the harness, the variance over
-/// [0, 3] without step times at a volatility of 1 is 2.9976021664879227 at a = 1e-14 (−8.0e-4 from the limit, 3),
-/// 3.000044657142098 at 1e-12 (+1.5e-5) and 3.0000000927898895 at 1e-8. nanoql's is σ²e^{2as}·expm1(2a(u − s))/(2a)
-/// below 1e-2, its zero formula kept below QuantLib's epsilon, and QuantLib's form and bits from 1e-2. QuantLib's
-/// checks: its own form at the switch, which the expm1 form meets, and its own zero formula, the forms' limit, which
-/// the variance meets as a → 0 in proportion to a.
+/// The Markov-functional state process at small reversions: QuantLib's variance over a step, (e^{2au} −
+/// e^{2as})/(2a)·σ², cancels as a falls below 1e-2, and cuts to its zero formula only below its epsilon
+/// (<c>mfstateprocess.cpp:26-27</c>, <c>:81-84</c>, <c>:98-110</c>). On the harness, the variance over [0, 3] without
+/// step times at a volatility of 1 is 2.9976021664879227 at a = 1e-14 (−8.0e-4 from the limit, 3), 3.000044657142098 at
+/// 1e-12 (+1.5e-5) and 3.0000000927898895 at 1e-8. nanoql's is σ²e^{2as}·expm1(2a(u − s))/(2a) below 1e-2, its zero
+/// formula kept below QuantLib's epsilon, and QuantLib's form and bits from 1e-2. QuantLib's checks: its own form at
+/// the switch, which the expm1 form meets, and its own zero formula, the forms' limit, which the variance meets as a →
+/// 0 in proportion to a.
 /// </summary>
 public class MfSmallReversionTests
 {

@@ -11,9 +11,9 @@ namespace NanoQL.Tests.Vectors;
 /// <summary>
 /// The C++ harness's abcd specifier vectors,
 /// <c>tests/vectors/cxx/models/marketmodels/models/volatilityinterpolationspecifierabcd.json</c>:
-/// <see cref="VolatilityInterpolationSpecifierabcd"/> at offset 0 (an offset other than 0 is the S-mm plan's MR3 (iii),
-/// the Divergences record's) in periods of 2 and 3, with the last caplet's volatility the last long rate's or given,
-/// and after <see cref="VolatilityInterpolationSpecifier.WithScalingFactors"/>,
+/// <see cref="VolatilityInterpolationSpecifierabcd"/> at offset 0 (an offset other than 0 is in the Divergences record)
+/// in periods of 2 and 3, with the last caplet's volatility the last long rate's or given, and after
+/// <see cref="VolatilityInterpolationSpecifier.WithScalingFactors"/>,
 /// <see cref="VolatilityInterpolationSpecifier.WithLastCapletVol"/> or both, QuantLib's setters on its specifier: the
 /// period, offset and counts, and each interpolated and original variance's reads; and the refused specifiers.
 /// </summary>

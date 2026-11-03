@@ -16,16 +16,16 @@ namespace NanoQL.Numerics;
 /// <remarks>
 /// <para>
 /// Immutable: its breaks, counts and frequencies are computed once, at construction. The default construction is
-/// QuantLib's empty histogram, of 0 bins and the algorithm <c>Algorithm(-1)</c> (the S-core plan's CD15).
+/// QuantLib's empty histogram, of 0 bins and the algorithm <c>Algorithm(-1)</c>.
 /// </para>
 /// <para>
 /// Three fixes of QuantLib's, each documented (<c>Divergences/HistogramTests.cs</c>): the Freedman-Diaconis rule's
 /// quantiles are Hyndman and Fan's type 8, as QuantLib's comment says, where QuantLib's interpolation weight drops the
-/// method's p/3 term (CR7 (v)); at the upper boundary's probability the quantile reads the largest sample, type 8's
-/// clamp, where QuantLib reads a 0 past its sorted samples (CR7 (vii)); and given breaks that repeat count their bins
-/// once, where QuantLib counts the bins before it removes the repeats (CR7 (vi)). Data giving a bin width of 0 under
-/// the Freedman-Diaconis or Scott rule (no spread, or an interquartile range of 0) are refused, where QuantLib's bin
-/// count is undefined and it throws <c>std::length_error</c> (CR7 (xxxi)).
+/// method's p/3 term; at the upper boundary's probability the quantile reads the largest sample, type 8's clamp, where
+/// QuantLib reads a 0 past its sorted samples; and given breaks that repeat count their bins once, where QuantLib
+/// counts the bins before it removes the repeats. Data giving a bin width of 0 under the Freedman-Diaconis or Scott
+/// rule (no spread, or an interquartile range of 0) are refused, where QuantLib's bin count is undefined and it throws
+/// <c>std::length_error</c>.
 /// </para>
 /// </remarks>
 public sealed class Histogram

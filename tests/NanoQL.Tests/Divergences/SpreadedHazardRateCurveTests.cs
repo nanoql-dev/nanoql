@@ -12,22 +12,20 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The spreaded curves' survival (the S-xcr plan's XR3 (b), XR8 (xiv)): exact, where QuantLib's integrates the hazard
-/// rate with its base's 48-point Gauss-Chebyshev rule. On a flat hazard rate of 0.02 (Actual/365 Fixed) with an additive
-/// spread of 0.01, or a factor of 0.5, QuantLib reads 0.97044033656246698, 0.8606849301062508 and 0.74077854891200179
-/// at 1, 5 and 10 years, for the exact e^(−0.03t); and on a stepped original (0.01, 0.01, 0.03, 0.06 backward flat on
-/// today and one, three and five years out) spread by 0, 0.96078257879155837 and 0.87807505391690122 at two and four
-/// years, for the original's 0.96078943915232318 and 0.8781676061138235 (the S-xcr run's <c>c4_facts.cpp</c>). The
-/// survival is the exact integral of the hazard rate the curve reports, so on originals whose rate isn't their jump-free
-/// survival's it is QuantLib's within the 48-point rule's error (the S-xcr code review's C4 O1-2; the S-xcr run's
-/// <c>c4_r1b.cpp</c>): a linear survival curve (1, 0.98, 0.94, 0.90, 0.80 today and 1, 3, 5 and 10 years out) and a
-/// linear density curve (0.02, 0.02, 0.025, 0.03, 0.03) with a jump of 0.95 at two years, whose rate is the density over
-/// the jumped survival; and backward-flat affine curves (0.01, 0.01, 0.015, 0.02, 0.02) on Vasicek models, whose rate is
-/// the deterministic part alone. A user's subclass that reports its own rate is integrated with QuantLib's rule, as
+/// The spreaded curves' survival: exact, where QuantLib's integrates the hazard rate with its base's 48-point
+/// Gauss-Chebyshev rule. On a flat hazard rate of 0.02 (Actual/365 Fixed) with an additive spread of 0.01, or a factor
+/// of 0.5, QuantLib reads 0.97044033656246698, 0.8606849301062508 and 0.74077854891200179 at 1, 5 and 10 years, for the
+/// exact e^(−0.03t); and on a stepped original (0.01, 0.01, 0.03, 0.06 backward flat on today and one, three and five
+/// years out) spread by 0, 0.96078257879155837 and 0.87807505391690122 at two and four years, for the original's
+/// 0.96078943915232318 and 0.8781676061138235. The survival is the exact integral of the hazard rate the curve reports,
+/// so on originals whose rate isn't their jump-free survival's it is QuantLib's within the 48-point rule's error: a
+/// linear survival curve (1, 0.98, 0.94, 0.90, 0.80 today and 1, 3, 5 and 10 years out) and a linear density curve
+/// (0.02, 0.02, 0.025, 0.03, 0.03) with a jump of 0.95 at two years, whose rate is the density over the jumped
+/// survival; and backward-flat affine curves (0.01, 0.01, 0.015, 0.02, 0.02) on Vasicek models, whose rate is the
+/// deterministic part alone. A user's subclass that reports its own rate is integrated with QuantLib's rule, as
 /// QuantLib integrates every original: on a structure deriving the one-factor affine survival structure with a
-/// deterministic rate of 0.02 (Vasicek r0 = b = 0.02), the additive spread of 0.01 reads QuantLib's 0.8606849301062508 at
-/// five years (the S-xcr code review's C4 O2-1). A piecewise curve of each kind spreads as the interpolated curve on its
-/// nodes (O2-2).
+/// deterministic rate of 0.02 (Vasicek r0 = b = 0.02), the additive spread of 0.01 reads QuantLib's 0.8606849301062508
+/// at five years. A piecewise curve of each kind spreads as the interpolated curve on its nodes.
 /// </summary>
 public class SpreadedHazardRateCurveTests
 {

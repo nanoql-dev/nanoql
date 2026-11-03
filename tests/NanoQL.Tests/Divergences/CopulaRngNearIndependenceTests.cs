@@ -8,11 +8,10 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The Clayton and Frank copula generators near independence (the S-xrt plan's XRR5 (xxxiv), fixed under R8). Their
-/// conditional inverses cancel as θ → 0: QuantLib's Clayton draw is 7.1e-5 off at θ 1e-12 and 2.5e-7 at 1e-10, its
-/// Frank draw 2.4e-4 and 8.3e-8 (the references: 40-digit mpmath of QuantLib's own formulas on the same uniforms,
-/// the S-xrt run's <c>c4\copula_refs.py</c>). nanoql's <c>log1p</c>/<c>expm1</c> forms below |θ| 1e-2 meet the
-/// references to the last bits; at and above 1e-2 the forms are QuantLib's.
+/// The Clayton and Frank copula generators near independence (fixed). Their conditional inverses cancel as θ → 0:
+/// QuantLib's Clayton draw is 7.1e-5 off at θ 1e-12 and 2.5e-7 at 1e-10, its Frank draw 2.4e-4 and 8.3e-8 (the
+/// references: 40-digit mpmath of QuantLib's own formulas on the same uniforms). nanoql's <c>log1p</c>/<c>expm1</c>
+/// forms below |θ| 1e-2 meet the references to the last bits; at and above 1e-2 the forms are QuantLib's.
 /// </summary>
 public class CopulaRngNearIndependenceTests
 {

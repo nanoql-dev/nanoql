@@ -21,14 +21,14 @@ namespace NanoQL.Methods;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A working type (master §2.2's finite-difference row): its time-dependent maps are set in place by
-/// <see cref="SetTime"/>, and a step on the default scheme allocates nothing (the S-hes plan's HD8).
+/// A working type (the playbook's finite-difference row): its time-dependent maps are set in place by
+/// <see cref="SetTime"/>, and a step on the default scheme allocates nothing.
 /// </para>
 /// <para>
 /// Its times run on the Heston process's model clock (<see cref="FdmHestonOp.Clock"/>), from the earliest curve date
 /// on the risk-free curve's day counter, the dividend curve read at the instants they denote and the Hull-White model
 /// on the risk-free curve restated on the clock; QuantLib's operator reads the dividend curve at the risk-free curve's
-/// times (<c>fdmhestonhullwhiteop.cpp:62</c>; HR7 (xix)), and its reads stand where the curves share the clock.
+/// times (<c>fdmhestonhullwhiteop.cpp:62</c>), and its reads stand where the curves share the clock.
 /// </para>
 /// </remarks>
 [WorkingType]

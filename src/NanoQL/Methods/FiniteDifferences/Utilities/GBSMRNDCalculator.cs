@@ -24,8 +24,8 @@ namespace NanoQL.Methods;
 /// <para>
 /// The dividend curve and the volatility are read at the instant a time denotes, each on its own clock, the variance
 /// accrued from the risk-free curve's reference date and the volatility its root per unit of that curve's time, where
-/// QuantLib reads them at the risk-free curve's time (the S-van plan's VR4 (xxiii), the mismatched-dates class);
-/// structures that share the curve's times keep QuantLib's bits. A documented divergence.
+/// QuantLib reads them at the risk-free curve's time (the mismatched-dates class); structures that share the curve's
+/// times keep QuantLib's bits. A documented divergence.
 /// </para>
 /// </remarks>
 public sealed class GBSMRNDCalculator : RiskNeutralDensityCalculator

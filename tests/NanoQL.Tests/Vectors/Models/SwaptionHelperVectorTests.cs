@@ -44,7 +44,7 @@ public class SwaptionHelperVectorTests
             check.Output(c, "underlyingType", helper.Underlying.Type);
             check.Output(c, "fixedDates", helper.Underlying.FixedSchedule.Dates.Select(d => (object?)d));
             check.Output(c, "floatingDates", helper.Underlying.FloatingSchedule.Dates.Select(d => (object?)d));
-            // swaptionhelper.py leaves the times out where nanoql's fix moves them (the S-cms plan's CMR4).
+            // swaptionhelper.py leaves the times out where nanoql's fix moves them.
             if (c.Expected.TryGetProperty("times", out _))
             {
                 check.Output(c, "times", helper.Times(context));

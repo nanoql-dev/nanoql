@@ -10,13 +10,13 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The two-dimensional finite-difference step allocates nothing (the S-sr plan's SSD10, round 1's O1-11): the G2
-/// operator builds its dynamics once and rewrites its discounting in a held buffer at each
-/// <see cref="FdmG2Op.SetTime"/>, its apply and splitting solves write into the caller's spans, and each scheme steps in
-/// place, where QuantLib's operator builds its short-rate dynamics and arrays at every step. A rollback of
-/// <see cref="FdmBackwardSolver"/> on the G2 operator is measured under the six schemes the solver runs step by step
-/// without Krylov solvers (Douglas, Hundsdorfer, modified Hundsdorfer, Craig-Sneyd, modified Craig-Sneyd and explicit
-/// Euler), on fresh values after a warm-up (<see cref="AllocationAssert"/>), and gives the warm-up's values.
+/// The two-dimensional finite-difference step allocates nothing: the G2 operator builds its dynamics once and rewrites
+/// its discounting in a held buffer at each <see cref="FdmG2Op.SetTime"/>, its apply and splitting solves write into
+/// the caller's spans, and each scheme steps in place, where QuantLib's operator builds its short-rate dynamics and
+/// arrays at every step. A rollback of <see cref="FdmBackwardSolver"/> on the G2 operator is measured under the six
+/// schemes the solver runs step by step without Krylov solvers (Douglas, Hundsdorfer, modified Hundsdorfer,
+/// Craig-Sneyd, modified Craig-Sneyd and explicit Euler), on fresh values after a warm-up (<see
+/// cref="AllocationAssert"/>), and gives the warm-up's values.
 /// </summary>
 public class Fdm2DimAllocationTests
 {

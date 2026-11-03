@@ -12,8 +12,7 @@ namespace NanoQL.Experimental;
 /// <summary>The loss distribution of varying volumes and default probabilities by a Monte Carlo simulation of
 /// independent defaults, each a Mersenne Twister draw at or below its probability.</summary>
 /// <remarks>
-/// The seed is required, in [1, 4294967295] (the S-xcr plan's XR4 (a), S2R4's rule); QuantLib's defaults to 42, which
-/// gives its draws.
+/// The seed is required, in [1, 4294967295]; QuantLib's defaults to 42, which gives its draws.
 /// </remarks>
 [Experimental("NQL0001")]
 public sealed class LossDistMonteCarlo : LossDist

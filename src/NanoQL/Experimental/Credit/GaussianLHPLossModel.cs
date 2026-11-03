@@ -19,9 +19,9 @@ namespace NanoQL.Experimental;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A latent model implementing <see cref="IDefaultLossModel"/> over itself (the S-xcr plan's XR2 (a)): its correlation
-/// is a <see langword="double"/>, so QuantLib's quote and value constructors merge (XR2 (c)). Bound to a basket, a copy
-/// keeps the live names' rows and recoveries (XR2 (f)) and prices the restated tranche (XR8 (ii)).
+/// A latent model implementing <see cref="IDefaultLossModel"/> over itself: its correlation is a
+/// <see langword="double"/>, so QuantLib's quote and value constructors merge. Bound to a basket, a copy keeps the live
+/// names' rows and recoveries and prices the restated tranche.
 /// </para>
 /// <para>
 /// The pool's average default probability and recovery are weighted by the notionals of the names alive at the

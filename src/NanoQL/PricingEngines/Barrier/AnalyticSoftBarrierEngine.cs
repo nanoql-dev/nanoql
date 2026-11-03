@@ -21,24 +21,23 @@ namespace NanoQL.PricingEngines;
 /// <para>
 /// The value alone, as QuantLib's. A soft barrier option is the average of the single-barrier options with barriers in
 /// [L, U], as upstream's own test states it (#2883's <c>testSoftBarrierDirection</c>); its knock-in is computed here as
-/// that average of <see cref="AnalyticBarrierEngine"/>'s standard knock-ins, (1/(U − L))∫ DI(H) dH, the barriers on
-/// the spot's far side counted as knocked in, by the adaptive Gauss-Kronrod rule split at the strike, the spot and the
-/// forward and at one to thirty transition widths either side of the last two, at R7's measure on the average, and its
-/// knock-out as the vanilla less it (the S-bar plan's BR5 (x), SD24).
+/// that average of <see cref="AnalyticBarrierEngine"/>'s standard knock-ins, (1/(U − L))∫ DI(H) dH, the barriers on the
+/// spot's far side counted as knocked in, by the adaptive Gauss-Kronrod rule split at the strike, the spot and the
+/// forward and at one to thirty transition widths either side of the last two, at the tolerance's measure on the
+/// average, and its knock-out as the vanilla less it.
 /// </para>
 /// <para>
 /// Haug's form integrates the standard knock-in's branch for a barrier at or below the strike, so it is the average
 /// only for a down barrier on a call with U ≤ K, or an up barrier on a put with L ≥ K, the spot outside the band; it is
-/// taken there, with QuantLib's bits, where it is finite, its carry b = r − q is 2e-3 or more from 0 and from −σ², where
-/// its terms cancel, and the band's relative width (U − L)/U is 3e-3 or more, below which its difference quotient
-/// cancels. Elsewhere the average is taken (documented divergences, BR5 (x), (xi), (xvii), (xlv);
-/// <c>Divergences/SoftBarrier*Tests.cs</c>): QuantLib's nudge of the rate at r ≈ q, its rebuild of flat Act/360 curves
-/// for a band narrower than 1e-4 in price, the NaN of its overflowing powers at small volatility, and its values outside
-/// the form's domain are superseded. Upstream's refusal of the directions the form doesn't cover (#2883) isn't taken:
-/// they are priced by the average (BR7 (b), <c>Divergences/BarrierUpstreamFixesTests.cs</c>). A band of zero width is
-/// the analytic barrier engine's single barrier. QuantLib's limits on the rates, which no formula needs, aren't ported
-/// (BR8 (d)). Each rate is read on the volatility's clock and each time is the volatility's, as the analytic barrier
-/// engine reads them (BR5 (i)).
+/// taken there, with QuantLib's bits, where it is finite, its carry b = r − q is 2e-3 or more from 0 and from −σ²,
+/// where its terms cancel, and the band's relative width (U − L)/U is 3e-3 or more, below which its difference quotient
+/// cancels. Elsewhere the average is taken (documented divergences; <c>Divergences/SoftBarrier*Tests.cs</c>):
+/// QuantLib's nudge of the rate at r ≈ q, its rebuild of flat Act/360 curves for a band narrower than 1e-4 in price,
+/// the NaN of its overflowing powers at small volatility, and its values outside the form's domain are superseded.
+/// Upstream's refusal of the directions the form doesn't cover (#2883) isn't taken: they are priced by the average
+/// (<c>Divergences/BarrierUpstreamFixesTests.cs</c>). A band of zero width is the analytic barrier engine's single
+/// barrier. QuantLib's limits on the rates, which no formula needs, aren't ported. Each rate is read on the
+/// volatility's clock and each time is the volatility's, as the analytic barrier engine reads them.
 /// </para>
 /// <para>
 /// The exercise must be European, as the option's documentation states and the average's engine requires; QuantLib's
@@ -48,17 +47,17 @@ namespace NanoQL.PricingEngines;
 /// Haug's form and the average are first-passage closed forms in equivalent-constant rates and a volatility, the
 /// variance and discounts to expiry: no exact closed form exists for a first passage under general deterministic term
 /// structures, and on shaped markets they miss the average of <see cref="FdBlackScholesBarrierEngine"/>'s single-barrier
-/// knock-ins by -0.8% to +1.5% (the S-bar plan's BR4 (d)); that average is the term-structure-exact route.
+/// knock-ins by -0.8% to +1.5%; that average is the term-structure-exact route.
 /// </para>
 /// </remarks>
 public static class AnalyticSoftBarrierEngine
 {
     // the distance of the carry from Haug's singular points, and the band's relative width, under which the average is
-    // taken (BR5 (x), (xi))
+    // taken
     private const double SingularCarry = 2e-3;
     private const double NarrowBand = 3e-3;
 
-    // SD24's tolerance on the average, R7's measure, and the cap
+    // The integration's tolerance on the average, the vector tolerance's measure, and the cap
     private const double AverageTolerance = 1e-10;
     private const int MaxEvaluations = 100000;
 
@@ -145,7 +144,7 @@ public static class AnalyticSoftBarrierEngine
         double w;
         if (u == l)
         {
-            // a band of zero width is the single barrier (BR5 (xi))
+            // a band of zero width is the single barrier
             var single = new BarrierOption(barrierType, u, 0.0, payoff, option.Exercise);
             return new OneAssetOptionResults
             {
@@ -225,7 +224,7 @@ public static class AnalyticSoftBarrierEngine
 
     // The soft knock-in as its definition, the average of the standard knock-ins over the band: ∫₀¹ DI(L + h(U − L))dh
     // over the analytic barrier engine, the barriers beyond the spot knocked in, split at the strike, the spot, the
-    // forward and their transition widths, at 1e-10 × max(vanilla, 1), shared evenly by the pieces (BR5 (x), SD24)
+    // forward and their transition widths, at 1e-10 × max(vanilla, 1), shared evenly by the pieces
     private static double BandAverage(
         SoftBarrierOption option,
         PlainVanillaPayoff payoff,
@@ -289,7 +288,7 @@ public static class AnalyticSoftBarrierEngine
         return average;
     }
 
-    // QuantLib's validateInputs, but for its limits on the rates, which no formula needs (BR8 (d))
+    // QuantLib's validateInputs, but for its limits on the rates, which no formula needs
     private static void ValidateInputs(double s, double x, double t, double u, double l, double sigma)
     {
         if (!(s > 0.0))

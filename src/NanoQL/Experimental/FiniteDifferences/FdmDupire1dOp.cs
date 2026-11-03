@@ -17,12 +17,12 @@ namespace NanoQL.Experimental;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A working type (the S-eq plan's SEQR1), its band built at construction and never changed, so a step allocates
-/// nothing (the S-g1d plan's G1D11). Experimental, as in QuantLib.
+/// A working type, its band built at construction and never changed, so a step allocates nothing. Experimental, as in
+/// QuantLib.
 /// </para>
 /// <para>
-/// One of QuantLib's defects is fixed (G1R6 (xi)): QuantLib's <c>apply_mixed</c> returns its input, where a 1-D
-/// operator has no mixed part; here it is zero, as every other 1-D operator's.
+/// One of QuantLib's defects is fixed: QuantLib's <c>apply_mixed</c> returns its input, where a 1-D operator has no
+/// mixed part; here it is zero, as every other 1-D operator's.
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]
@@ -68,7 +68,7 @@ public sealed class FdmDupire1dOp : FdmLinearOpComposite
     }
 
     /// <inheritdoc/>
-    /// <remarks>Zero, where QuantLib's returns its input (G1R6 (xi)).</remarks>
+    /// <remarks>Zero, where QuantLib's returns its input.</remarks>
     public override void ApplyMixed(ReadOnlySpan<double> r, Span<double> result) => result[..r.Length].Clear();
 
     /// <inheritdoc/>

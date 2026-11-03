@@ -17,8 +17,8 @@ namespace NanoQL.Tests.Divergences;
 /// The year-on-year cap and floor engines' forward. QuantLib's engines take every optionlet's forward from the index's
 /// curve at the coupon's fixing date, <c>yoyTS-&gt;yoyRate(fixingDate)</c> (<c>inflationcapfloorengines.cpp:81</c>),
 /// and read no fixing, while QuantLib's own year-on-year pricer prices the same optionlet on the coupon's fixing
-/// (<c>inflationcouponpricer.cpp:99-109</c>; QuantLib's defect, R8). nanoql's engines read each optionlet's forward as
-/// its coupon's own fixing, <see cref="CPI.LaggedYoYRate"/> at its accrual end with its lag and interpolation, and keep
+/// (<c>inflationcouponpricer.cpp:99-109</c>; QuantLib's defect). nanoql's engines read each optionlet's forward as its
+/// coupon's own fixing, <see cref="CPI.LaggedYoYRate"/> at its accrual end with its lag and interpolation, and keep
 /// QuantLib's zero deviation for a fixing at or before the volatility's base date. QuantLib's check is the wheel's
 /// capped year-on-year coupon priced by its <c>BlackYoYInflationCouponPricer</c>, the caplet's rate times its accrual,
 /// nominal and discount. On <see cref="InflationFixture"/>'s market, a ratio of UK RPI and a Black volatility of 15%

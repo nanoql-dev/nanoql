@@ -12,7 +12,7 @@ namespace NanoQL.Models;
 /// A parametric exercise on a swap-rate trigger: one variable, the coterminal swap rate from the next rate at each
 /// exercise, and one parameter, the trigger, exercised when the rate reaches it; the strikes are the triggers' guesses.
 /// </summary>
-/// <remarks>A working type (the S-mmp plan's MMPR1 (i)).</remarks>
+/// <remarks>A working type.</remarks>
 [WorkingType]
 public sealed class TriggeredSwapExercise : MarketModelParametricExercise
 {

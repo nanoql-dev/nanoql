@@ -19,11 +19,11 @@ namespace NanoQL.PricingEngines;
 /// QuantLib's: the product flushed into the average, as its root, where the next factor would overflow it.
 /// </para>
 /// <para>
-/// Documented divergences (the S-bar plan's BR5). The product is flushed as well where the next factor would take it
-/// below double's normal range, where QuantLib's underflows ((xli), <c>Divergences/GeometricAsianProductRangeTests.cs</c>);
-/// the engine's route takes the past fixings' log where their product isn't finite and normal ((xli)), and gives an
-/// index once per fixing on its time ((xxviii), <c>Divergences/AsianDuplicateFixingsTests.cs</c>). QuantLib's arithmetic
-/// and bits wherever the product stays in range.
+/// Documented divergences. The product is flushed as well where the next factor would take it below double's normal
+/// range, where QuantLib's underflows (<c>Divergences/GeometricAsianProductRangeTests.cs</c>); the engine's route takes
+/// the past fixings' log where their product isn't finite and normal, and gives an index once per fixing on its time
+/// (<c>Divergences/AsianDuplicateFixingsTests.cs</c>). QuantLib's arithmetic and bits wherever the product stays in
+/// range.
 /// </para>
 /// </remarks>
 public sealed class GeometricAPOHestonPathPricer : PathPricer<MultiPath>
@@ -57,7 +57,7 @@ public sealed class GeometricAPOHestonPathPricer : PathPricer<MultiPath>
     }
 
     // the engine's route: the past fixings' log where their product isn't finite and normal, NaN for the product
-    // (BR5 (xli))
+    //
     internal GeometricAPOHestonPathPricer(
         OptionType type,
         double strike,

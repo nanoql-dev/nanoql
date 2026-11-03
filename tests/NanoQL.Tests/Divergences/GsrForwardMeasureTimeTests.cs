@@ -9,7 +9,7 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// GSR's forward measure time (QuantLib's #2842, taken ahead of the pin; the S-g1d plan's G1R5 (ii)): QuantLib 1.44's
+/// GSR's forward measure time (QuantLib's #2842, taken ahead of the pin): QuantLib 1.44's
 /// <c>GsrProcess::setForwardMeasureTime</c> moves the process's time and leaves its core's
 /// (<c>gsrprocess.hpp:85-88</c>), so a process on step times 1 and 2, volatilities 0.01, 0.012 and 0.009 and reversion
 /// 0.03, built at T = 10 and moved to 20, still gives the expectation E(x(1.5) | x(0) = 0) of T = 10,

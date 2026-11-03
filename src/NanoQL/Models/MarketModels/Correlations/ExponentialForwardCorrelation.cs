@@ -19,14 +19,13 @@ namespace NanoQL.Models;
 /// period's matrix the exponential correlation at the period's midpoint.
 /// </summary>
 /// <remarks>
-/// <para>Immutable (the S-mm plan's MR1 (i)): a matrix read returns a copy.</para>
+/// <para>Immutable: a matrix read returns a copy.</para>
 /// <para>
 /// Three departures from QuantLib (<c>Divergences/ExponentialCorrelationTests.cs</c>): one rate is accepted, which
-/// QuantLib refuses as "Rate times must contain at least two values" when given two (MR3 (xiv)); at γ ≠ 1, correlation
-/// times that skip a rate time but the last are refused, as QuantLib's own FIXME asks, since a period's midpoint then
-/// falls after a rate that is still alive in the period has fixed and the models give that rate no variance there
-/// (MR4 (b)); and the refusal of a last correlation time past the last rate time names that time, where QuantLib's text
-/// calls it the next-to-last (MR3 (xv)).
+/// QuantLib refuses as "Rate times must contain at least two values" when given two; at γ ≠ 1, correlation times that
+/// skip a rate time but the last are refused, as QuantLib's own FIXME asks, since a period's midpoint then falls after
+/// a rate that is still alive in the period has fixed and the models give that rate no variance there; and the refusal
+/// of a last correlation time past the last rate time names that time, where QuantLib's text calls it the next-to-last.
 /// </para>
 /// </remarks>
 public sealed class ExponentialForwardCorrelation : PiecewiseConstantCorrelation
@@ -52,7 +51,7 @@ public sealed class ExponentialForwardCorrelation : PiecewiseConstantCorrelation
     {
         int numberOfRates = rateTimes.IsEmpty ? 0 : rateTimes.Length - 1;
 
-        // QuantLib requires two rates or more under this text; one is accepted (MR3 (xiv)).
+        // QuantLib requires two rates or more under this text; one is accepted.
         if (!(numberOfRates >= 1))
         {
             throw new ArgumentException("Rate times must contain at least two values", nameof(rateTimes));
@@ -88,7 +87,7 @@ public sealed class ExponentialForwardCorrelation : PiecewiseConstantCorrelation
         }
         else
         {
-            // QuantLib's FIXME: "should check here that all rateTimes but the last are included in rateTimes" (MR4 (b)).
+            // QuantLib's FIXME: "should check here that all rateTimes but the last are included in rateTimes".
             for (int i = 0; i < temp.Length; ++i)
             {
                 if (!corrTimes.Contains(temp[i]))

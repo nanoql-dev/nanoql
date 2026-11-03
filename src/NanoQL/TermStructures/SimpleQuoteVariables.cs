@@ -21,9 +21,9 @@ namespace NanoQL.TermStructures;
 /// <para>
 /// Immutable: QuantLib's variables are quotes the optimizer writes and the helpers read; here
 /// <see cref="AdditionalBootstrapVariables.Values"/> returns the values, which the global bootstrap's
-/// <see cref="GlobalBootstrap.VariableHelpers"/> reads, and the curve keeps the optimum's (the S-core plan's CR3 (a)).
-/// Since a nanoql curve is always built afresh, <see cref="Initialize"/> gives the guesses whatever its argument, where
-/// QuantLib's reads the quotes' values, a previous bootstrap's, on a valid curve.
+/// <see cref="GlobalBootstrap.VariableHelpers"/> reads, and the curve keeps the optimum's. Since a nanoql curve is
+/// always built afresh, <see cref="Initialize"/> gives the guesses whatever its argument, where QuantLib's reads the
+/// quotes' values, a previous bootstrap's, on a valid curve.
 /// </para>
 /// </remarks>
 public sealed class SimpleQuoteVariables : AdditionalBootstrapVariables

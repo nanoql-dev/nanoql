@@ -24,8 +24,7 @@ namespace NanoQL.Numerics;
 /// freedom, p the coefficients the fit estimates (the singular values it keeps: the basis' size at full rank), as R's
 /// <c>lm</c> computes them. QuantLib divides by n − 2 whatever the basis (<c>generallinearleastsquares.hpp:144</c>),
 /// which is R's only for a straight line, infinite at n = 2 and undefined at n = 1, where <c>n − 2</c> wraps: a
-/// documented divergence (the S-van plan's VR4 (vi), <c>Divergences/LeastSquaresStandardErrorTests.cs</c>); at
-/// p = 2 the errors are QuantLib's.
+/// documented divergence (<c>Divergences/LeastSquaresStandardErrorTests.cs</c>); at p = 2 the errors are QuantLib's.
 /// </para>
 /// <para>
 /// Samples and values of different sizes are refused, with QuantLib's text, where QuantLib checks the values' size
@@ -143,7 +142,7 @@ public sealed class GeneralLinearLeastSquares
         }
 
         // R's n − p degrees of freedom, p the coefficients estimated, where QuantLib's n − 2 is R's for a line alone
-        // (the S-van plan's VR4 (vi))
+        //
         double multiplier = Math.Sqrt(chiSq / (n - estimated));
         for (int j = 0; j < m; j++)
         {

@@ -17,7 +17,7 @@ namespace NanoQL.Experimental;
 /// step's time: QuantLib's <c>ExtendedTian</c>.
 /// </summary>
 /// <remarks>
-/// Immutable; exact on constant parameters (<see cref="ExtendedBinomialTree{T}"/>, XRR6). The constructor checks the up
+/// Immutable; exact on constant parameters (<see cref="ExtendedBinomialTree{T}"/>). The constructor checks the up
 /// probability at time 0 only, as QuantLib's; its <c>up_</c>, <c>down_</c>, <c>pu_</c> and <c>pd_</c> members, which
 /// nothing reads after that check, aren't ported.
 /// </remarks>

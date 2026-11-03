@@ -7,9 +7,9 @@ using Microsoft.Office.Interop.Excel;
 namespace NanoQL.Excel.XlTests;
 
 /// <summary>
-/// A conventions file edited under its handle (XLR3, XLP42, XLP56): both readers keyed by the file's content, so the
-/// reader of paths gives the edit on F2 and Enter, the reader of one path on Ctrl+Alt+F9 alone, as neither is volatile;
-/// a looped reader over two paths gives a snapshot each; a relative path refused.
+/// A conventions file edited under its handle: both readers keyed by the file's content, so the reader of paths gives
+/// the edit on F2 and Enter, the reader of one path on Ctrl+Alt+F9 alone, as neither is volatile; a looped reader over
+/// two paths gives a snapshot each; a relative path refused.
 /// </summary>
 [ExcelTestSettings(OutOfProcess = true)]
 public class ConventionsTests : RunnerTest
@@ -64,7 +64,7 @@ public class ConventionsTests : RunnerTest
         Assert.Equal(true, Xl.Get(ws, "C3"));
     }
 
-    /// <summary>A looped reader (XLP78, F7-2): one formula over two paths gives two snapshots.</summary>
+    /// <summary>A looped reader: one formula over two paths gives two snapshots.</summary>
     [ExcelFact(AddIn = AddIns.Test)]
     public void ALoopedReader()
     {

@@ -11,10 +11,10 @@ using NanoQL.Bind.Reading;
 namespace NanoQL.Bind.Emitting;
 
 /// <summary>
-/// Writes <c>surface.json</c>, the surface's language-neutral description every back end reads, and S-xl may
-/// (docs/bindings.md, "surface.json"): its schema version, the assemblies, the types, the enums, every function with its
-/// C name, kind, parameters with their kinds and defaults, result and member key, its C parameters, the presets by name
-/// and the engine input sets. One row a line, so a change shows as lines in a diff.
+/// Writes <c>surface.json</c>, the surface's language-neutral description every back end reads, and the Excel back end
+/// may (docs/bindings.md, "surface.json"): its schema version, the assemblies, the types, the enums, every function
+/// with its C name, kind, parameters with their kinds and defaults, result and member key, its C parameters, the
+/// presets by name and the engine input sets. One row a line, so a change shows as lines in a diff.
 /// </summary>
 internal static class SurfaceWriter
 {

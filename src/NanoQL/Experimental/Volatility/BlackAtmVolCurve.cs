@@ -18,8 +18,8 @@ namespace NanoQL.Experimental;
 /// <remarks>
 /// An extension point, as in QuantLib: the curve and the smile surfaces derive from it. A curve is immutable, its
 /// reference date fixed at construction. An option tenor's date is <see cref="OptionDate"/>'s, the structure's own
-/// option date from a tenor, which an interest-rate surface overrides with its index's (the S-xeq plan's XER5 (xxv)).
-/// QuantLib's acyclic visitor isn't ported.
+/// option date from a tenor, which an interest-rate surface overrides with its index's. QuantLib's acyclic visitor
+/// isn't ported.
 /// </remarks>
 [Experimental("NQL0001")]
 public abstract class BlackAtmVolCurve : VolatilityTermStructure
@@ -104,7 +104,7 @@ public abstract class BlackAtmVolCurve : VolatilityTermStructure
 
     /// <summary>
     /// The option date of a tenor: <see cref="VolatilityTermStructure.OptionDateFromTenor"/>'s, the reference date
-    /// advanced on the calendar; an interest-rate surface's is its index's fixing date (XER5 (xxv)).
+    /// advanced on the calendar; an interest-rate surface's is its index's fixing date.
     /// </summary>
     /// <param name="optionTenor">The option tenor.</param>
     /// <returns>The option date.</returns>

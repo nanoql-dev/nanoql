@@ -12,15 +12,15 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The finite-difference core's inner loop allocates nothing (the S-eq plan's SEQR1): the operator's
-/// <see cref="FdmBlackScholesOp.SetTime"/> rewrites its bands in held buffers, each scheme steps in place through
-/// buffers it holds, and the step conditions apply in place, where QuantLib builds arrays and operators at every step.
-/// A rollback of <see cref="FdmBackwardSolver"/>, which keeps its schemes after the first, is measured under each of
-/// the eight schemes the solver runs step by step (the method of lines, whose adaptive Runge-Kutta allocates per step
-/// as QuantLib's does, is left out), with the local volatility, whose walk over the layout reads the local volatility
-/// at each point, with a Bermudan condition, and as a knock-out with a <see cref="FdmDirichletBoundary"/> on each side,
-/// which writes its value into the caller's span (the S-rx plan's SRXD13). Each rollback is measured on fresh values
-/// after a warm-up on others (<see cref="AllocationAssert"/>), and gives the warm-up's values.
+/// The finite-difference core's inner loop allocates nothing: the operator's <see cref="FdmBlackScholesOp.SetTime"/>
+/// rewrites its bands in held buffers, each scheme steps in place through buffers it holds, and the step conditions
+/// apply in place, where QuantLib builds arrays and operators at every step. A rollback of
+/// <see cref="FdmBackwardSolver"/>, which keeps its schemes after the first, is measured under each of the eight
+/// schemes the solver runs step by step (the method of lines, whose adaptive Runge-Kutta allocates per step as
+/// QuantLib's does, is left out), with the local volatility, whose walk over the layout reads the local volatility at
+/// each point, with a Bermudan condition, and as a knock-out with a <see cref="FdmDirichletBoundary"/> on each side,
+/// which writes its value into the caller's span. Each rollback is measured on fresh values after a warm-up on others
+/// (<see cref="AllocationAssert"/>), and gives the warm-up's values.
 /// </summary>
 public class FdmRollbackAllocationTests
 {

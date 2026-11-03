@@ -11,17 +11,17 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The short-rate models' other members at small mean reversion (the S-sr plan's SSR6 (iii), SSR3's sweep). G2's
-/// swaption pricing function (<c>g2.cpp:119-160</c>) cancels in its mux and sigmax: on the wheel, a one-period payer
-/// swaption, which is (1 + Kτ) puts on its bond struck at 1/(1 + Kτ), prices 0.0038981761747141413 at a = b = 1e-4
-/// against that bond option's 0.003898173326452401, 0.00017515607132449288 at 1e-6 against 0.003898519697671894, and at
-/// 1e-7 refuses "root not bracketed". Hull-White's <c>convexityBias</c> (<c>hullwhite.cpp:150</c>) cuts (1 − e^(−ax))/a
-/// at QL_EPSILON and cancels above it: 7.593680693951388e-05 at a = 1e-10, 7.594298930423405e-05 at 1e-12 and
-/// 7.801188790257374e-05 at 1e-14, against its own a = 0 value 7.593678809059146e-05. G2's bond option reads
-/// <c>sigmaP</c> (<c>g2.cpp:59-87</c>), which cancels likewise: 0.013016600554919378 at a = b = 1e-12 against
-/// 0.01301666498797277 at 1e-8. nanoql's are written in SSR3's cancellation-free forms. QuantLib's check: its second
-/// routes, the bond option for the swaption and the a = 0 branch for the bias, and, for the bond option, Black's formula
-/// on the a → 0 limit of sigmaP, (s − t)√(t(σ² + η² + 2ρση)) at a = b.
+/// The short-rate models' other members at small mean reversion. G2's swaption pricing function (<c>g2.cpp:119-160</c>)
+/// cancels in its mux and sigmax: on the wheel, a one-period payer swaption, which is (1 + Kτ) puts on its bond struck
+/// at 1/(1 + Kτ), prices 0.0038981761747141413 at a = b = 1e-4 against that bond option's 0.003898173326452401,
+/// 0.00017515607132449288 at 1e-6 against 0.003898519697671894, and at 1e-7 refuses "root not bracketed". Hull-White's
+/// <c>convexityBias</c> (<c>hullwhite.cpp:150</c>) cuts (1 − e^(−ax))/a at QL_EPSILON and cancels above it:
+/// 7.593680693951388e-05 at a = 1e-10, 7.594298930423405e-05 at 1e-12 and 7.801188790257374e-05 at 1e-14, against its
+/// own a = 0 value 7.593678809059146e-05. G2's bond option reads <c>sigmaP</c> (<c>g2.cpp:59-87</c>), which cancels
+/// likewise: 0.013016600554919378 at a = b = 1e-12 against 0.01301666498797277 at 1e-8. nanoql's are written in
+/// cancellation-free forms. QuantLib's check: its second routes, the bond option for the swaption and the a = 0 branch
+/// for the bias, and, for the bond option, Black's formula on the a → 0 limit of sigmaP, (s − t)√(t(σ² + η² + 2ρση)) at
+/// a = b.
 /// </summary>
 public class SmallReversionTests
 {

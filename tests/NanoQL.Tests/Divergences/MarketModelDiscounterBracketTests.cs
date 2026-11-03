@@ -8,16 +8,14 @@ using NanoQL.Tests.Conventions;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The discounter's bracket (the S-mmp plan's MMPR4 (ix), fixed under R8). QuantLib's <c>MarketModelDiscounter</c>
-/// takes the first rate time at or after the payment as its period's start (<c>discounter.cpp:31</c>,
-/// <c>lower_bound</c>), so a payment strictly inside a period but the last is extrapolated from the next period,
-/// against the class's own names (<c>before_</c>, <c>beforeWeight_</c>) and its weight's [0, 1] form: on forwards
-/// rising 0.5% a period, in the last bond, a payment at 1.25 is worth 1.10935174 bonds and one at 0.75 1.12738126 (this
-/// run's
-/// <c>probes\c1_facts.cpp</c>), each 1.2e-3 from its own period's log-linear interpolation, the next period's line
-/// carried back. nanoql takes the last rate time at or before the payment, clamped to the periods as QuantLib clamps.
-/// Checks: the bracketing bonds' log-linear interpolation, its weight in [0, 1]; and QuantLib's bits on a rate time,
-/// before the first and after the last, and in the last period.
+/// The discounter's bracket (fixed). QuantLib's <c>MarketModelDiscounter</c> takes the first rate time at or after the
+/// payment as its period's start (<c>discounter.cpp:31</c>, <c>lower_bound</c>), so a payment strictly inside a period
+/// but the last is extrapolated from the next period, against the class's own names (<c>before_</c>,
+/// <c>beforeWeight_</c>) and its weight's [0, 1] form: on forwards rising 0.5% a period, in the last bond, a payment at
+/// 1.25 is worth 1.10935174 bonds and one at 0.75 1.12738126, each 1.2e-3 from its own period's log-linear
+/// interpolation, the next period's line carried back. nanoql takes the last rate time at or before the payment,
+/// clamped to the periods as QuantLib clamps. Checks: the bracketing bonds' log-linear interpolation, its weight in [0,
+/// 1]; and QuantLib's bits on a rate time, before the first and after the last, and in the last period.
 /// </summary>
 public class MarketModelDiscounterBracketTests
 {
@@ -54,9 +52,9 @@ public class MarketModelDiscounterBracketTests
     [Fact]
     public void ThePathwiseDiscounterInterpolatesItsOwnPeriodToo()
     {
-        // MarketModelPathwiseDiscounter's bracket, pathwisediscounter.cpp:32: a payment at 0.75 on six semi-annual rates
-        // from 0.5, forwards 3% rising 0.1% a period, the step's discount factors from the forwards; QuantLib's factors
-        // extrapolate the next period's (this run's probes\c4_facts.cpp)
+        // MarketModelPathwiseDiscounter's bracket, pathwisediscounter.cpp:32: a payment at 0.75 on six semi-annual
+        // rates from 0.5, forwards 3% rising 0.1% a period, the step's discount factors from the forwards; QuantLib's
+        // factors extrapolate the next period's
         var market = new MarketModelProductMarket(6);
         var discounts = new Matrix(2, 7, 1.0);
         for (int j = 1; j <= 6; ++j)

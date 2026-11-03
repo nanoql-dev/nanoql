@@ -13,14 +13,13 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The Monte Carlo lookback engine on seasoned options (the S-bar plan's BR5 (xx), fixed under R8). QuantLib's pricers
-/// take the extremum from the path's second node and never read the running extremum, so a seasoned option prices as a
-/// new one: on spot 100, r 6%, q 0, σ 10% over a year, 2,000 steps, 20,000 antithetic samples at seed 1, a fixed call
-/// struck at 100 with a running maximum of 115 at 11.196910337699553 and a floating call with a running minimum of 90
-/// at 10.747874194538674, their values with the extremum at the spot, where the analytic engines give
-/// 16.195934579797157 and 15.741880586612329 (the S-bar run's probe harness, <c>probe_mc_ql.py</c>). nanoql folds the
-/// observed extremum into the path's. Check: QuantLib's analytic engines on the seasoned options, which the Monte Carlo
-/// converges to, within QuantLib's own Monte Carlo test's 0.1.
+/// The Monte Carlo lookback engine on seasoned options (fixed). QuantLib's pricers take the extremum from the path's
+/// second node and never read the running extremum, so a seasoned option prices as a new one: on spot 100, r 6%, q 0, σ
+/// 10% over a year, 2,000 steps, 20,000 antithetic samples at seed 1, a fixed call struck at 100 with a running maximum
+/// of 115 at 11.196910337699553 and a floating call with a running minimum of 90 at 10.747874194538674, their values
+/// with the extremum at the spot, where the analytic engines give 16.195934579797157 and 15.741880586612329. nanoql
+/// folds the observed extremum into the path's. Check: QuantLib's analytic engines on the seasoned options, which the
+/// Monte Carlo converges to, within QuantLib's own Monte Carlo test's 0.1.
 /// </summary>
 public class McLookbackSeasonedTests
 {

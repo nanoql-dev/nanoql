@@ -7,16 +7,16 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The forward-forward Jacobian and Y matrix (the S-mm plan's MR3 (i), fixed under R8). QuantLib's
-/// <c>ForwardForwardJacobian</c> is 1/τ_long minus the long forward's derivative (<c>value = df*tau[m]*P(m+1)/P(m) -
-/// 1</c>, then <c>-value/bigTau</c>, <c>forwardforwardmappings.cpp:51-53</c>), and <c>YMatrix</c>'s long forward is
-/// (P_end/P_start − 1)/τ_long, the negative of g/(1 + τ_long g) (<c>:86</c>): on twelve semi-annual forwards at 5% +
-/// 0.1% i in periods of 2, QuantLib's J[0][0] is 0.48725 where the derivative is 0.5125, and its Y[0][0] −0.50077 where
-/// the elasticity is +0.5013; on quarterly forwards in periods of 4, J[0][0] 0.74012 where the derivative is 0.2599
-/// (this run's <c>probes\c1_facts.cpp</c>; the planner's MP2). nanoql's derivative is (P_start/P_end) τ_m
-/// (P_{m+1}/P_m)/τ_long and its long forward (P_start/P_end − 1)/τ_long, QuantLib's own <c>RestrictCurveState</c>
-/// forward. Checks: central bumps of that forward, and of its logarithm against the short forwards' for Y, undisplaced
-/// and with long displacements other than the short ones, Y's scaling by (f_j + d_j)/(g_l + D_l).
+/// The forward-forward Jacobian and Y matrix (fixed). QuantLib's <c>ForwardForwardJacobian</c> is 1/τ_long minus the
+/// long forward's derivative (<c>value = df*tau[m]*P(m+1)/P(m) - 1</c>, then <c>-value/bigTau</c>,
+/// <c>forwardforwardmappings.cpp:51-53</c>), and <c>YMatrix</c>'s long forward is (P_end/P_start − 1)/τ_long, the
+/// negative of g/(1 + τ_long g) (<c>:86</c>): on twelve semi-annual forwards at 5% + 0.1% i in periods of 2, QuantLib's
+/// J[0][0] is 0.48725 where the derivative is 0.5125, and its Y[0][0] −0.50077 where the elasticity is +0.5013; on
+/// quarterly forwards in periods of 4, J[0][0] 0.74012 where the derivative is 0.2599. nanoql's derivative is
+/// (P_start/P_end) τ_m (P_{m+1}/P_m)/τ_long and its long forward (P_start/P_end − 1)/τ_long, QuantLib's own
+/// <c>RestrictCurveState</c> forward. Checks: central bumps of that forward, and of its logarithm against the short
+/// forwards' for Y, undisplaced and with long displacements other than the short ones, Y's scaling by (f_j + d_j)/(g_l
+/// + D_l).
 /// </summary>
 public class ForwardForwardMappingsTests
 {

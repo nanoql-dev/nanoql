@@ -8,12 +8,11 @@ at a spot of 6,000 and two at 100: the analytic engine's NPV at its default abso
 option alone and on each process's options as one list (precalculate), the process's x0, and its drift and diffusion,
 which it refuses.
 
-The outputs nanoql fixes are left out (the S-xeq plan's §2.8): every process has 1 - theta*nu - sigma^2*nu/2 positive
-(XER5 (xvii)) and the moment-generating function's upper strip bound above 2.25, where QuantLib's damping of 1.25
-stands (XER5 (xviii)); every strike is above 1 and every list's largest strike gives QuantLib at least 2^14 points,
-where nanoql sizes its grid as QuantLib does (XER5 (xix)); and nu is at least a hundredth of each expiry, where nanoql's
-integral starts where QuantLib's does (the S-xeq run's R2-4). The analytic engine's density is a product in QuantLib
-and a sum of logs in nanoql (XER5 (xvi)), equal within R7.
+The outputs nanoql fixes are left out: every process has 1 - theta*nu - sigma^2*nu/2 positive and the moment-generating
+function's upper strip bound above 2.25, where QuantLib's damping of 1.25 stands; every strike is above 1 and every
+list's largest strike gives QuantLib at least 2^14 points, where nanoql sizes its grid as QuantLib does; and nu is at
+least a hundredth of each expiry, where nanoql's integral starts where QuantLib's does. The analytic engine's density is
+a product in QuantLib and a sum of logs in nanoql, equal within the tolerance.
 
 The specs: a process {"s0", "dividendYield", "riskFreeRate", "sigma", "nu", "theta"}, flat continuous curves on Act/365
 (Fixed) from the evaluation date, and options {"optionType", "strike", "expiryDays"}. The wheel's calls, by

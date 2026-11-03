@@ -23,25 +23,24 @@ namespace NanoQL.PricingEngines;
 /// <typeparam name="TStats">The statistics accumulator.</typeparam>
 /// <remarks>
 /// <para>
-/// An extension point and an immutable object (the S-bar plan's BR1 (iii), the S-van plan's VR1 form over
-/// <see cref="McSimulation{TPath, TStats}"/>): a concrete engine's static <c>Calculate</c> builds one per call from the
-/// option, the context, the process and QuantLib's settings, implements the path pricer, and reads <see cref="Run"/>'s
-/// model and results. QuantLib's arguments are the option's own, split by the context's date where it holds every
-/// past fixing (SD18), read once the engine prices: <see cref="AverageType"/>, <see cref="RunningAccumulator"/>,
-/// <see cref="PastFixings"/>, <see cref="FixingDates"/> and the past fixings' log-sum, <see cref="RunningLog"/>. The
-/// control variate's value comes from <see cref="ControlPricingEngine"/>, an engine delegate of D14's type, on the
-/// option; a controlled value is clamped at 0, and the grid is the additional result <c>"TimeGrid"</c>, as QuantLib's.
-/// Every fixing in the past, or the one left today, is refused with QuantLib's "all fixings are in the past".
+/// An extension point and an immutable object (over <see cref="McSimulation{TPath, TStats}"/>): a concrete engine's
+/// static <c>Calculate</c> builds one per call from the option, the context, the process and QuantLib's settings,
+/// implements the path pricer, and reads <see cref="Run"/>'s model and results. QuantLib's arguments are the option's
+/// own, split by the context's date where it holds every past fixing, read once the engine prices:
+/// <see cref="AverageType"/>, <see cref="RunningAccumulator"/>, <see cref="PastFixings"/>, <see cref="FixingDates"/>
+/// and the past fixings' log-sum, <see cref="RunningLog"/>. The control variate's value comes from
+/// <see cref="ControlPricingEngine"/>, an engine delegate of the engines' form, on the option; a controlled value is
+/// clamped at 0, and the grid is the additional result <c>"TimeGrid"</c>, as QuantLib's. Every fixing in the past, or
+/// the one left today, is refused with QuantLib's "all fixings are in the past".
 /// </para>
 /// <para>
 /// The process is the engine's: the Black-Scholes and Heston engines pass the process on their clock, whose times run
-/// from the earliest structure's reference date (BR1 (v)), so <see cref="TimeGrid"/>'s times are that clock's.
+/// from the earliest structure's reference date, so <see cref="TimeGrid"/>'s times are that clock's.
 /// </para>
 /// <para>
 /// A fixing dated from the evaluation date to the clock's origin, where the structures settle after the evaluation
 /// date, is taken at the origin, the spot with no variance and no discount accrued, so as a past fixing at the spot
-/// (the S-bar code review's B3-1, <c>Divergences/AsianLateSettlementTests.cs</c>), where QuantLib's grid drops it from
-/// the average.
+/// (<c>Divergences/AsianLateSettlementTests.cs</c>), where QuantLib's grid drops it from the average.
 /// </para>
 /// </remarks>
 public abstract class MCDiscreteAveragingAsianEngineBase<TMc, TPath, TStats> : McSimulation<TPath, TStats>
@@ -152,7 +151,7 @@ public abstract class MCDiscreteAveragingAsianEngineBase<TMc, TPath, TStats> : M
 
     /// <summary>
     /// Gets the log of the running product: its own log where the product is finite and normal, else the past fixings'
-    /// log-sum (the S-bar plan's BR5 (xli)).
+    /// log-sum.
     /// </summary>
     protected double RunningLog => Arguments.RunningLog;
 
@@ -262,8 +261,8 @@ public abstract class MCDiscreteAveragingAsianEngineBase<TMc, TPath, TStats> : M
 
     /// <summary>
     /// The number of fixings at each node of a grid, its fixing dates to come counted by the node their time falls on,
-    /// so a date given twice, or two dates on one time, counts twice (the S-bar plan's BR5 (xxviii)), where QuantLib's
-    /// grid keeps each time once and its pricers count it once.
+    /// so a date given twice, or two dates on one time, counts twice, where QuantLib's grid keeps each time once and
+    /// its pricers count it once.
     /// </summary>
     /// <param name="grid">The engine's grid.</param>
     /// <returns>The count at each node, 0 at a node that isn't a fixing.</returns>
@@ -285,8 +284,7 @@ public abstract class MCDiscreteAveragingAsianEngineBase<TMc, TPath, TStats> : M
 
     /// <summary>
     /// The grid's index of each fixing to come, once per fixing, so a date given twice, or two dates on one time, gives
-    /// its index twice (the S-bar plan's BR5 (xxviii)), where QuantLib's engines index each of the grid's fixing times
-    /// once.
+    /// its index twice, where QuantLib's engines index each of the grid's fixing times once.
     /// </summary>
     /// <param name="grid">The engine's grid.</param>
     /// <returns>The indices, in the fixings' order.</returns>

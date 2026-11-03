@@ -27,25 +27,25 @@ namespace NanoQL.Experimental;
 /// The population starts on a Sobol sequence within the bounds, its seed the algorithm's: QuantLib's is 0, the clock,
 /// read only past the 32 dimensions of Jaeckel's direction integers, so the bits are QuantLib's up to there. A
 /// problem's constraint is never empty, so QuantLib's refusal of one doesn't arise. The differential evolution's integers are
-/// <c>std::uniform_int_distribution</c>'s on a <c>std::mt19937</c>, drawn as MSVC draws them (the S-xrt plan's XRD4),
-/// and its crossover's uniforms a Mersenne Twister's, both on the seed, which is required: QuantLib's default seeds
-/// from the clock (XRD3). Immutable: each minimization copies the intensity and the walk and starts the generators from
-/// the seed, where QuantLib's continues them.
+/// <c>std::uniform_int_distribution</c>'s on a <c>std::mt19937</c>, drawn as MSVC draws them, and its crossover's
+/// uniforms a Mersenne Twister's, both on the seed, which is required: QuantLib's default seeds from the clock.
+/// Immutable: each minimization copies the intensity and the walk and starts the generators from the seed, where
+/// QuantLib's continues them.
 /// </para>
 /// <para>
-/// Fixes (the S-xrt plan's XRR5 (xxxii) and the run's R4-1; <c>Divergences/FireflyAlgorithmTests.cs</c>): each moved
-/// firefly's new value goes to its own place in the sorted population, where QuantLib's writes it at the place its
-/// index names, another firefly's, so the population's values and positions part after the first move; pure
-/// differential evolution takes a copy of its random base, where QuantLib's assigns through a reference and overwrites
-/// the best firefly with it; and fewer than three differential evolution members are refused, since three distinct
-/// members can't be drawn from fewer, where QuantLib's draws loop forever.
+/// Fixes (<c>Divergences/FireflyAlgorithmTests.cs</c>): each moved firefly's new value goes to its own place in the
+/// sorted population, where QuantLib's writes it at the place its index names, another firefly's, so the population's
+/// values and positions part after the first move; pure differential evolution takes a copy of its random base, where
+/// QuantLib's assigns through a reference and overwrites the best firefly with it; and fewer than three differential
+/// evolution members are refused, since three distinct members can't be drawn from fewer, where QuantLib's draws loop
+/// forever.
 /// </para>
 /// <para>
 /// The differential evolution's donors, and pure differential evolution's base, are drawn in [Mfa, M − 1] and read as
 /// fireflies' labels, the order of the Sobol start, not as places in the sorted population, as QuantLib reads them; its
 /// header doesn't say which members it means. So in a hybrid the donors are the fireflies labelled Mfa to M − 1, which
-/// may be moving as fireflies, and a target may be its own donor; in pure differential evolution the two readings agree
-/// (the S-xrt code review's O4-1). The three-member refusal follows the label reading.
+/// may be moving as fireflies, and a target may be its own donor; in pure differential evolution the two readings
+/// agree. The three-member refusal follows the label reading.
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]
@@ -203,7 +203,7 @@ public sealed class FireflyAlgorithm : OptimizationMethod
                     {
                         if (!isFA)
                         {
-                            // pure DE requires a random index; its base a copy (XRR5 (xxxii))
+                            // pure DE requires a random index; its base a copy
                             indexBest = (int)MsvcRandom.UniformInt(generator, lowest, highest);
                             xBest = pop.X[indexBest].Clone();
                         }
@@ -250,7 +250,7 @@ public sealed class FireflyAlgorithm : OptimizationMethod
 
                         double val = P.Value(z);
 
-                        // the firefly's own place in the sorted population (R4-1)
+                        // the firefly's own place in the sorted population
                         if (val < pop.Values[i].Value)
                         {
                             // accept new point
@@ -305,7 +305,7 @@ public sealed class FireflyAlgorithm : OptimizationMethod
                         double val = P.Value(z);
                         if (!double.IsNaN(val))
                         {
-                            // accept new point, at the firefly's own place in the sorted population (R4-1)
+                            // accept new point, at the firefly's own place in the sorted population
                             z.AsSpan().CopyTo(x.AsSpan());
                             pop.Values[i].Value = val;
 

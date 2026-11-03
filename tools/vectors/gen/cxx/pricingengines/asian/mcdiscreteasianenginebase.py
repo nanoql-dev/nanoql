@@ -5,9 +5,9 @@
 the C++ harness: the time grid the base builds from an option's fixings and exercise.
 
 Monthly fixings over a year, on the fixing times alone, at 24 steps and at 12 steps a year; with the exercise after the
-last fixing, without and with it joining the grid; a fixing today; a date given twice (the grid keeps each time once,
-as nanoql's; its pricers count it twice, the S-bar plan's BR5 (xxviii)); and the refusals, every fixing in the past and
-the one left today ("all fixings are in the past"). The times and the mandatory times.
+last fixing, without and with it joining the grid; a fixing today; a date given twice (the grid keeps each time once, as
+nanoql's; its pricers count it twice); and the refusals, every fixing in the past and the one left today ("all fixings
+are in the past"). The times and the mandatory times.
 
 The engine's process is tools/cxx/src/pricingengines/asian/mcdiscreteasianenginebase.cpp's, on the evaluation date 15
 October 2026. Read back by tests/NanoQL.Tests/Vectors/Cxx/PricingEngines/Asian/MCDiscreteAveragingAsianEngineBaseCxxVectorTests.cs."""

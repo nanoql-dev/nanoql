@@ -11,12 +11,12 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// <see cref="ProxyIbor"/>'s forecast, the gearing times the proxied fixing plus the spread, and its coupons forecasting
-/// through it (the S-xrt plan's XRR5 (xxi), fixed under R8). QuantLib's <c>forecastFixing</c> returns gearing × proxied ×
-/// spread, and an Ibor coupon on the proxy forecasts from the proxy's forwarding curve, which it lacks. On QuantLib 1.44
-/// (the S-xrt planner's <c>xp_c3.cpp</c>: gearing 2 on Euribor 6M, spread 0.001) the proxied fixing 0.0298114585668
-/// forecasts 5.96229171335e-05 for 0.0606229171335, and the coupon's rate refuses "null term structure set to this
-/// instance of PX6M Actual/360". nanoql's forecast is gearing × proxied + spread, and the coupon's rate is it.
+/// <see cref="ProxyIbor"/>'s forecast, the gearing times the proxied fixing plus the spread, and its coupons
+/// forecasting through it (fixed). QuantLib's <c>forecastFixing</c> returns gearing × proxied × spread, and an Ibor
+/// coupon on the proxy forecasts from the proxy's forwarding curve, which it lacks. On QuantLib 1.44 (gearing 2 on
+/// Euribor 6M, spread 0.001) the proxied fixing 0.0298114585668 forecasts 5.96229171335e-05 for 0.0606229171335, and
+/// the coupon's rate refuses "null term structure set to this instance of PX6M Actual/360". nanoql's forecast is
+/// gearing × proxied + spread, and the coupon's rate is it.
 /// </summary>
 public class ProxyIborTests
 {

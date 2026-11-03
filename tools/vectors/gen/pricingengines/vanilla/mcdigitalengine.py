@@ -11,10 +11,10 @@ antithetic variates, to a number of samples or to a tolerance; low-discrepancy n
 the NPV and, for pseudo-random numbers, the error estimate. Then the refusals of a plain vanilla payoff and of a
 European exercise.
 
-The outputs nanoql fixes are left out (the S-van plan's VR4): the volatility is constant, where the bridge's read at
-the step's start, nanoql's, is QuantLib's at its end (tests/NanoQL.Tests/Divergences/McDigitalStepVolatilityTests.cs);
-every window opens on the evaluation date (McDigitalWindowTests.cs); no seed is 76 (McDigitalSeed76Tests.cs); and
-every structure is on the risk-free curve's clock (McMismatchedTimesTests.cs).
+The outputs nanoql fixes are left out: the volatility is constant, where the bridge's read at the step's start,
+nanoql's, is QuantLib's at its end (tests/NanoQL.Tests/Divergences/McDigitalStepVolatilityTests.cs); every window opens
+on the evaluation date (McDigitalWindowTests.cs); no seed is 76 (McDigitalSeed76Tests.cs); and every structure is on the
+risk-free curve's clock (McMismatchedTimesTests.cs).
 
 An engine spec is tools/vectors/gen/pricingengines/vanilla/mceuropeanengine.py's; an exercise {"type": "American",
 "date", "payoffAtExpiry"} from the evaluation date. The wheel's calls, by QuantLib-SWIG 1.44's options.i:

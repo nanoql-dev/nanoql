@@ -8,10 +8,9 @@ QuantLib's case's two processes and a third near its long-run variance, calls at
 integrated variance over six months, a year and eighteen months, at rates of 0 and 3% and notionals of 1 and 100; the
 NPV. Then a process with 2 kappa theta / sigma^2 at most 1, which the engine refuses.
 
-The outputs nanoql fixes are left out (the S-xeq plan's §2.8): every option starts on the evaluation date (XER5 (xx)),
-the risk-free curve is dated on it (XER5 (xxxiii)), and every payoff is a call: QuantLib's two-dimensional integral,
-its route for every other payoff, is the user's ruling at the S-xeq run's stop 8 (a put by parity, other payoffs
-refused). The process and option are
+The outputs nanoql fixes are left out: every option starts on the evaluation date, the risk-free curve is dated on it,
+and every payoff is a call: QuantLib's two-dimensional integral, its route for every other payoff, is nanoql's
+departure (a put by parity, other payoffs refused). The process and option are
 tools/cxx/src/experimental/varianceoption/integralhestonvarianceoptionengine.cpp's. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Experimental/VarianceOption/IntegralHestonVarianceOptionEngineCxxVectorTests.cs."""
 import math

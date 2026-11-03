@@ -14,8 +14,8 @@ cashflows/iborcoupon.py's history (every TARGET business day of the year to the 
 - "leg" cases: MultipleResetsLeg with every setting given, compounding or averaging, a payment lag and calendar, an
   ex-coupon period, settings per coupon: per coupon its payment, accrual and ex-coupon dates, its sub-periods' count
   and fixing dates, rate and amount. A reset schedule whose periods the resets per coupon don't divide, and too many
-  values of a setting, are refused ("construction": {"throws": true}); zero resets per coupon is the S-cms plan's
-  CMR5 (xiv) (tests/NanoQL.Tests/Divergences/MultipleResetsZeroResetsTests.cs) and isn't sampled.
+  values of a setting, are refused ("construction": {"throws": true}); zero resets per coupon diverges
+  (tests/NanoQL.Tests/Divergences/MultipleResetsZeroResetsTests.cs) and isn't sampled.
 
 A case's inputs hold its settings with the stored fixings, the index (a spec of indexes/interestrateindex.py), and the
 coupon's or leg's arguments, a schedule as cashflows/cashflows.py's. Read back by

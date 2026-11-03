@@ -22,7 +22,7 @@ namespace NanoQL.Experimental;
 /// <para>
 /// <see cref="FindBrightest"/> attracts each firefly to every brighter one, k &lt; i in the sorted population, where
 /// QuantLib's loop stops at k &lt; i − 1, skipping the next brighter one and leaving the second brightest unattracted
-/// (the S-xrt plan's XRR5 (xxxii); <c>Divergences/FireflyAlgorithmTests.cs</c>).
+/// (<c>Divergences/FireflyAlgorithmTests.cs</c>).
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]

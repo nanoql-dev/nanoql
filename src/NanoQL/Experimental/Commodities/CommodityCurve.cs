@@ -25,14 +25,13 @@ namespace NanoQL.Experimental;
 /// <para>
 /// The node times are measured from the reference date. QuantLib's <c>setPrices</c> measures them from the first price's
 /// date, so on the moving-date curve with the first price ten days after today every price in the ten days before
-/// each node is the next node's (the S-xrt plan's XRR5 (x); <c>Divergences/CommodityCurveTests.cs</c>); on the curve
-/// from dates the two are one.
+/// each node is the next node's (<c>Divergences/CommodityCurveTests.cs</c>); on the curve from dates the two are one.
 /// </para>
 /// <para>
 /// A basis curve is read at the date, on its own reference date and day counter, and its price converted by the factor
 /// from this curve's unit to its unit, a price's conversion. QuantLib reads it at this curve's time, on this curve's
-/// clock (XRR5 (xi)), and converts by the factor from the basis curve's unit to this one's, which inverts it (XRR5 (i));
-/// where the two curves share their reference date, day counter and unit both give QuantLib's prices.
+/// clock, and converts by the factor from the basis curve's unit to this one's, which inverts it; where the two curves
+/// share their reference date, day counter and unit both give QuantLib's prices.
 /// </para>
 /// <para>
 /// QuantLib's <c>operator==</c> compares the curves' names; compare <see cref="Name"/>, as for an index
@@ -355,7 +354,7 @@ public sealed class CommodityCurve : TermStructure
         return curve.Evaluate(TimeFromReference(d), true);
     }
 
-    // The node times from the reference date (XRR5 (x)).
+    // The node times from the reference date.
     private ImmutableArray<double> NodeTimes(ImmutableArray<Date> nodeDates) =>
         [.. nodeDates.Select(d => DayCounter.YearFraction(ReferenceDate, d))];
 }

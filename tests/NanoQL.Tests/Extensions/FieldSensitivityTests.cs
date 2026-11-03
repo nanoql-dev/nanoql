@@ -10,9 +10,9 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Extensions;
 
 /// <summary>
-/// Field sensitivity (CVD34) on C2's kinds: every field of every kind, built with two values in a setup where it
-/// matters, changes what the resolved value does (its holidays, counts or data), or the second value is refused where
-/// the field is a preset's identity. The table holds a row for every field the kinds have.
+/// Field sensitivity on the kinds from calendars to indexes: every field of every kind, built with two values in a
+/// setup where it matters, changes what the resolved value does (its holidays, counts or data), or the second value is
+/// refused where the field is a preset's identity. The table holds a row for every field the kinds have.
 /// </summary>
 public class FieldSensitivityTests
 {
@@ -75,7 +75,7 @@ public class FieldSensitivityTests
             "currency:EUR", false),
         ("Alias", "@base", "", "<Alias name=\"X\" base=\"TARGET\" />", "<Alias name=\"X\" base=\"UnitedKingdom.Settlement\" />", "calendar:X", false),
 
-        // C3's kinds
+        // the region and index kinds
         ("Region", "RegionName", "",
             "<Region name=\"X\"><RegionName>Atlantis</RegionName><Code>AT</Code></Region>",
             "<Region name=\"X\"><RegionName>Lemuria</RegionName><Code>AT</Code></Region>", "region:X", false),
@@ -291,7 +291,8 @@ public class FieldSensitivityTests
     public void TheTableHoldsEveryFieldOfEveryKind()
     {
         var expected = new List<(string, string)>();
-        // the instrument convention kinds are InstrumentFieldSensitivityTests', batch 7's CommodityFieldSensitivityTests'
+        // the instrument convention kinds are InstrumentFieldSensitivityTests', the experimental
+        // CommodityFieldSensitivityTests'
         foreach (Type kind in typeof(ConventionRecord).Assembly.GetExportedTypes()
             .Where(t => t.IsSubclassOf(typeof(ConventionRecord)) && !t.Name.EndsWith("ConventionRecord", StringComparison.Ordinal)
                 && !CommodityFieldSensitivityTests.Kinds.Contains(t)))

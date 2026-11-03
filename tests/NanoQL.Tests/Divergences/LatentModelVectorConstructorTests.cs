@@ -6,10 +6,10 @@ using NanoQL.Experimental;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The latent model on one factor's weights builds its Gaussian policy from them (the S-xcr plan's XR8 (vi)): QuantLib's
-/// constructor default-constructs the policy first (<c>latentmodel.hpp:667-680</c>), whose default reads the first row
-/// of an empty matrix (<c>gaussiancopulapolicy.hpp:40-43</c>): QuantLib crashes (the planner's <c>xp_latent.cpp</c>,
-/// D16). The check is QuantLib's matrix constructor on the same weights, bit for bit.
+/// The latent model on one factor's weights builds its Gaussian policy from them: QuantLib's constructor
+/// default-constructs the policy first (<c>latentmodel.hpp:667-680</c>), whose default reads the first row of an empty
+/// matrix (<c>gaussiancopulapolicy.hpp:40-43</c>): QuantLib crashes. The check is QuantLib's matrix constructor on the
+/// same weights, bit for bit.
 /// </summary>
 public class LatentModelVectorConstructorTests
 {

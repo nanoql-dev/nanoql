@@ -26,8 +26,8 @@ namespace NanoQL.PricingEngines;
 /// <para>
 /// The date form reads the forward by the maturity date and the model's time from the earliest curve date, as the
 /// engine's price does; QuantLib's form takes a time and reads each curve at it, the same only where the curves share
-/// the risk-free curve's day counter and reference date (the S-eq plan's rulings of 2026-10-20 and 2026-10-21,
-/// <c>Divergences/HestonForwardByDateTests.cs</c>, <c>Divergences/HestonMismatchedTimesTests.cs</c>).
+/// the risk-free curve's day counter and reference date (<c>Divergences/HestonForwardByDateTests.cs</c>,
+/// <c>Divergences/HestonMismatchedTimesTests.cs</c>).
 /// </para>
 /// </remarks>
 public sealed class AnalyticHestonEngineOptimalAlpha

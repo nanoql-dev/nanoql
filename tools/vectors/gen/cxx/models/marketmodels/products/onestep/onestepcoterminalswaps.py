@@ -8,10 +8,10 @@ over a few paths of its one step (multistep/multistepswap.py's helpers).
 Rate grids: six semi-annual rates and five irregular ones; fixed rates at the forwards' mean and 1% either side;
 fixed accruals off the rate taus and payment times off the rate times.
 
-Left out: the values through the engine of payments inside the rates' periods, which QuantLib's discounter
-brackets by the period after (the S-mmp plan's MMPR4 (ix), tests/NanoQL.Tests/Divergences/
-MarketModelDiscounterBracketTests.cs); and, nanoql refusing them, QuantLib reading past its inputs
-(tests/NanoQL.Tests/Conventions/MarketModelProductTests.cs), accruals or payment times not one a rate.
+Left out: the values through the engine of payments inside the rates' periods, which QuantLib's discounter brackets by
+the period after (tests/NanoQL.Tests/Divergences/MarketModelDiscounterBracketTests.cs); and, nanoql refusing them,
+QuantLib reading past its inputs (tests/NanoQL.Tests/Conventions/MarketModelProductTests.cs), accruals or payment times
+not one a rate.
 
 The harness units are tools/cxx/src/models/marketmodels/products/products.cpp and
 tools/cxx/src/models/marketmodels/accountingengine.cpp. Read back by

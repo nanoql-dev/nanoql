@@ -8,15 +8,15 @@ the strike range, the forward at a grid of times, the calibration error (min, ma
 both types and the local volatility at a grid of times (before, at and between the expiries, and past the last) and
 strikes.
 
-**The stability filter** (the S7 plan's S7R6, the S-van plan's VD17): every case is calibrated again with all its
-volatilities moved one ulp, up and then down, and with the spot moved one ulp each way, and an output is written only
-where every move leaves it within 1e-10 x max(|a|, |b|, 1), the vectors' own tolerance, since the calibration
-stops at its end criteria's 1e-10; the generator prints "dropped n of m outputs".
+**The stability filter**: every case is calibrated again with all its volatilities moved one ulp, up and then down, and
+with the spot moved one ulp each way, and an output is written only where every move leaves it within 1e-10 x max(|a|,
+|b|, 1), the vectors' own tolerance, since the calibration stops at its end criteria's 1e-10; the generator prints
+"dropped n of m outputs".
 
-Left out (the S-van plan's §2.10): the call-put calibration's error, which QuantLib picks by a grid point where nanoql
-picks it by strike against the forward (VR4 (xvii); tests/NanoQL.Tests/Divergences/AndreasenHugeCallPutErrorTests.cs);
-and curves on another clock, which nanoql reads at the instants the risk-free curve's times denote (VR4 (xxiii)): every
-structure here is dated 15 October 2026 on Actual/365 (Fixed).
+Left out: the call-put calibration's error, which QuantLib picks by a grid point where nanoql picks it by strike
+against the forward (tests/NanoQL.Tests/Divergences/AndreasenHugeCallPutErrorTests.cs); and curves on another clock,
+which nanoql reads at the instants the risk-free curve's times denote: every structure here is dated 15 October 2026 on
+Actual/365 (Fixed).
 
 The specs, which the two adapters' generators share, are a calibration {"spot", "riskFree", "dividend" (the curves
 tools/vectors/gen/processes/blackscholesprocess.py's specs), "options" ([optionType, strike, expiry offset in days,
@@ -95,7 +95,7 @@ RELATIVE = [0.4, 0.7, 0.9, 1.0, 1.1, 1.35, 2.0]
 
 
 def build(spec, vol_move=None, spot_move=None):
-    """The wheel's interpolation for a spec, its volatilities or spot moved one ulp where asked (S7R6)."""
+    """The wheel's interpolation for a spec, its volatilities or spot moved one ulp where asked."""
     cs = ql.CalibrationSet()
     for option_type, strike, days, vol in spec["options"]:
         if vol_move is not None:

@@ -5,13 +5,12 @@ computed by the C++ harness: the volatility series, the calibrations' four modes
 
 Returns simulated by GARCH(1,1) on Python's Mersenne twister (three models, 1,000 returns each, and short series of 10
 and 50): each long series calibrated by every mode, its log-likelihood, and from a guess by QuantLib's Simplex, its
-alpha, beta, omega and log-likelihood; each short series' volatility series at three parameter sets, its squared
-returns and their mean, and its cost; forecasts. The modes' alpha, beta and omega are generated and left out: their
-initial guesses fit the autocorrelations by least squares on the conjugate gradient, whose returned point is the last
-one its line search accepted (Divergences/LineSearchReturnTests.cs, the S-sr plan's SSR6 (xvii)), so the Simplex
-starts a hair away and ends within its tolerance, 1e-8, of QuantLib's point, its cost the same. A calibration that
-QuantLib's minimizer doesn't end within its iterations, which master (#2844) and nanoql refuse, isn't asked here (the
-S-bar plan's BR6 (vi) is a divergence fact).
+alpha, beta, omega and log-likelihood; each short series' volatility series at three parameter sets, its squared returns
+and their mean, and its cost; forecasts. The modes' alpha, beta and omega are generated and left out: their initial
+guesses fit the autocorrelations by least squares on the conjugate gradient, whose returned point is the last one its
+line search accepted (Divergences/LineSearchReturnTests.cs), so the Simplex starts a hair away and ends within its
+tolerance, 1e-8, of QuantLib's point, its cost the same. A calibration that QuantLib's minimizer doesn't end within its
+iterations, which master (#2844) and nanoql refuse, isn't asked here (a divergence fact).
 
 The harness unit is tools/cxx/src/models/volatility/garch.cpp. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Models/Volatility/Garch/Garch11CxxVectorTests.cs."""

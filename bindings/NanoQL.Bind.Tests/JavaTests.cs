@@ -12,8 +12,7 @@ namespace NanoQL.Bind.Tests;
 /// The Java back end: packages per namespace, the overload rule over erased signatures (no two forms of a class share
 /// one, and the telescoped overloads take no call another form takes, §2.2), flags enums holding any combination, every
 /// handle a call reads kept reachable until the call returns, a user's classes in packages of their own over their own
-/// jextract class and registry (BIR9), the members C# hides that Java overrides, and the dispatch reaching what C's does
-/// (BIR15).
+/// jextract class and registry, the members C# hides that Java overrides, and the dispatch reaching what C's does.
 /// </summary>
 public class JavaTests
 {

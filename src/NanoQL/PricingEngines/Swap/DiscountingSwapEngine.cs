@@ -183,8 +183,7 @@ public static class DiscountingSwapEngine
     /// uniform shift of its coupons' spreads that zeroes the NPV, solved on the swap's own pricing, each coupon keeping
     /// its pricer, cap and floor. The shift is bracketed from the BPS route's estimate within the spreads the pricers
     /// price, and is <see langword="null"/> where no shift in that domain, within a shift of 100%, changes the NPV's
-    /// sign (the S-rx review's B1-1, under R8;
-    /// <c>tests/NanoQL.Tests/Divergences/FloatFloatSwapOptionalLegFairSpreadTests.cs</c>).
+    /// sign (<c>tests/NanoQL.Tests/Divergences/FloatFloatSwapOptionalLegFairSpreadTests.cs</c>).
     /// </remarks>
     /// <exception cref="ArgumentException">
     /// The settlement date or the NPV date is <c>default(Date)</c>, or before the curve's reference date.
@@ -334,7 +333,7 @@ public static class DiscountingSwapEngine
     /// <see langword="null"/>.</param>
     /// <returns>The swap's results: the expired results when the swap has expired.</returns>
     /// <remarks>QuantLib's engine fills the swap's results, from which the asset swap derives its fair values
-    /// (<see cref="AssetSwap.FetchResults"/>, the S-cms plan's CMD6).</remarks>
+    /// (<see cref="AssetSwap.FetchResults"/>).</remarks>
     /// <exception cref="ArgumentException">
     /// The settlement date or the NPV date is <c>default(Date)</c>, or before the curve's reference date.
     /// </exception>
@@ -377,12 +376,12 @@ public static class DiscountingSwapEngine
     /// The fair payment is QuantLib's <c>fairFixedPayment</c>, the floating leg's NPV over the discount at the fixed
     /// amount's payment date, signed, with the discount read at the swap's payment date, where QuantLib reads its fixed
     /// leg's end discount, at the leg's maturity date: the accrual end for the fixed-rate constructor's coupon, so with
-    /// a payment delay, or an adjusted payment date, its fair payment fed back leaves a non-zero NPV (the S-cms plan's
-    /// CMR5 (xxiv)). For the fixed-payment constructor the two dates are one, and the payment QuantLib's. The floating
-    /// leg's NPV, given at the NPV date, is taken back to the curve's reference date by the NPV date's discount, as
-    /// QuantLib's asset swap scales its fair values (<c>assetswap.cpp:273</c>, <c>:294</c>), where QuantLib's divides
-    /// it by a discount from the reference date, so with an NPV date after the reference date its fair payment is high
-    /// by that discount's reciprocal (with CMR5 (xxiv)); at the default NPV date the discount is 1.
+    /// a payment delay, or an adjusted payment date, its fair payment fed back leaves a non-zero NPV. For the
+    /// fixed-payment constructor the two dates are one, and the payment QuantLib's. The floating leg's NPV, given at
+    /// the NPV date, is taken back to the curve's reference date by the NPV date's discount, as QuantLib's asset swap
+    /// scales its fair values (<c>assetswap.cpp:273</c>, <c>:294</c>), where QuantLib's divides it by a discount from
+    /// the reference date, so with an NPV date after the reference date its fair payment is high by that discount's
+    /// reciprocal; at the default NPV date the discount is 1.
     /// </remarks>
     /// <exception cref="ArgumentException">
     /// The settlement date or the NPV date is <c>default(Date)</c>, or before the curve's reference date.
@@ -435,10 +434,10 @@ public static class DiscountingSwapEngine
     /// <returns>The swap's results: the expired results when the swap has expired.</returns>
     /// <remarks>
     /// On a compounded leg the spread compounds with each fixing, so QuantLib's fair spread, linear in the floating
-    /// leg's BPS, misses par (the S-cms plan's CMR5 (xv)); here it is the spread at which the swap, rebuilt at it and
-    /// priced on this curve and under these dates, is worth zero, solved by Brent's method to 1e-12 from QuantLib's
-    /// estimate. It is <see langword="null"/> when the floating leg's BPS is zero or unknown, as QuantLib's. On an
-    /// averaged leg the spread is linear, and the swap's results derive QuantLib's.
+    /// leg's BPS, misses par; here it is the spread at which the swap, rebuilt at it and priced on this curve and under
+    /// these dates, is worth zero, solved by Brent's method to 1e-12 from QuantLib's estimate. It is
+    /// <see langword="null"/> when the floating leg's BPS is zero or unknown, as QuantLib's. On an averaged leg the
+    /// spread is linear, and the swap's results derive QuantLib's.
     /// </remarks>
     /// <exception cref="ArgumentException">
     /// The settlement date or the NPV date is <c>default(Date)</c>, or before the curve's reference date.
@@ -672,7 +671,7 @@ public static class DiscountingSwapEngine
 
     // A leg's fair spread solved on the swap's own pricing, from QuantLib's BPS route as the estimate: its first spread
     // plus the shift of its coupons' spreads that zeroes the NPV, null where none does or where the BPS route gives
-    // none. The cross-currency swaps' legs compounding their spreads take it (the S-rx plan's C3 review, B1-2).
+    // none. The cross-currency swaps' legs compounding their spreads take it.
     internal static double? SolvedFairSpread(
         double spread, double? bpsRoute, double? npv, Func<double, double> npvAtShift)
     {

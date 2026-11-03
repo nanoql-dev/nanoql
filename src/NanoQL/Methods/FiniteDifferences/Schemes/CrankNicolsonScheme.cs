@@ -13,7 +13,7 @@ namespace NanoQL.Methods;
 /// is the Douglas scheme; in more, operator-splitting schemes such as Craig-Sneyd or Hundsdorfer-Verwer usually beat
 /// it.
 /// </summary>
-/// <remarks>A working type (the S-eq plan's SEQR1), stepping in place through its two schemes.</remarks>
+/// <remarks>A working type, stepping in place through its two schemes.</remarks>
 [WorkingType]
 public sealed class CrankNicolsonScheme : IFdmScheme, IFdmSetOperatorScheme
 {

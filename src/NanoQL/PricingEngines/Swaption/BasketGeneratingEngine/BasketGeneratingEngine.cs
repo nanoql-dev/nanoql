@@ -29,11 +29,10 @@ namespace NanoQL.PricingEngines;
 /// discount curve should be the index's discounting curve.
 /// </para>
 /// <para>
-/// Immutable; the derived engines (<see cref="Gaussian1dNonstandardSwaptionEngine"/> and the float-float one) bind
-/// the underlying an instrument gives, where QuantLib's read the arguments they hold. A flipped match, a negative
-/// nominal read as the other swap type, gives its helper the nominal's size, where QuantLib floors the signed nominal
-/// at 1e-6 first and so gives 1e-6 (<c>basketgeneratingengine.cpp:213-214</c>, <c>:230</c>; the S-g1d plan's G1R6
-/// (xxiv)).
+/// Immutable; the derived engines (<see cref="Gaussian1dNonstandardSwaptionEngine"/> and the float-float one) bind the
+/// underlying an instrument gives, where QuantLib's read the arguments they hold. A flipped match, a negative nominal
+/// read as the other swap type, gives its helper the nominal's size, where QuantLib floors the signed nominal at 1e-6
+/// first and so gives 1e-6 (<c>basketgeneratingengine.cpp:213-214</c>, <c>:230</c>).
 /// </para>
 /// </remarks>
 public abstract class BasketGeneratingEngine
@@ -213,8 +212,7 @@ public abstract class BasketGeneratingEngine
                 // see warning in the header
                 solution[2] = Math.Max(solution[2], 0.00001 - shift); // floor at 0.1bp - shift
 
-                // also the calibrated nominal may be zero, so we floor it, too; its size, as the match read it (G1R6
-                // (xxiv))
+                // also the calibrated nominal may be zero, so we floor it, too; its size, as the match read it
                 solution[0] = Math.Max(Math.Abs(solution[0]), 0.000001); // float at 0.01bp
 
                 double vol = sec.Volatility(solution[2]);

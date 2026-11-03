@@ -7,14 +7,14 @@ using static NanoQL.Tests.Conventions.CommodityMarkets;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// Two of QuantLib's known unit factors stored the right way round (the S-xrt plan's XRR4, ruled 2026-10-28). QuantLib's
-/// <c>(LitreUnitOfMeasure, GallonUnitOfMeasure, 3.78541)</c> says one litre is 3.785 gallons and its
-/// <c>(GallonUnitOfMeasure, MBUnitOfMeasure, 1000 * 42)</c> that one gallon is 42,000 thousand-barrels
-/// (<c>unitofmeasureconversionmanager.cpp:115-122</c>), where NIST Handbook 44, Appendix C, gives one gallon as
-/// 3.785 411 784 litres and, "by custom", 42 gallons a barrel; so a direct lookup converts 1,000 litres into 3,785.41
-/// gallons and 1,000 thousand-barrels into 2.381e-2 gallons, the values QuantLib's <c>testDirect</c> asserts, its
-/// "actual" built from the same backward numbers. nanoql stores one gallon as 3.78541 litres and one thousand-barrel as
-/// 42,000 gallons: 264.17 gallons and 42,000,000 gallons, which its <c>testDirect</c> asserts.
+/// Two of QuantLib's known unit factors stored the right way round. QuantLib's <c>(LitreUnitOfMeasure,
+/// GallonUnitOfMeasure, 3.78541)</c> says one litre is 3.785 gallons and its <c>(GallonUnitOfMeasure, MBUnitOfMeasure,
+/// 1000 * 42)</c> that one gallon is 42,000 thousand-barrels (<c>unitofmeasureconversionmanager.cpp:115-122</c>), where
+/// NIST Handbook 44, Appendix C, gives one gallon as 3.785 411 784 litres and, "by custom", 42 gallons a barrel; so a
+/// direct lookup converts 1,000 litres into 3,785.41 gallons and 1,000 thousand-barrels into 2.381e-2 gallons, the
+/// values QuantLib's <c>testDirect</c> asserts, its "actual" built from the same backward numbers. nanoql stores one
+/// gallon as 3.78541 litres and one thousand-barrel as 42,000 gallons: 264.17 gallons and 42,000,000 gallons, which its
+/// <c>testDirect</c> asserts.
 /// </summary>
 public class CommodityKnownFactorsTests
 {

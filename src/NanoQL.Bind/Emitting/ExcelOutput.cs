@@ -11,6 +11,6 @@ namespace NanoQL.Bind.Emitting;
 /// <param name="Summary">The counts the build prints.</param>
 internal sealed record ExcelOutput(ExcelSelection Selection, IReadOnlyDictionary<string, string> Files, string Templates, string Manifest, string Summary)
 {
-    /// <summary>Gets the functions the add-in registers: the generated and its own (XLD16).</summary>
+    /// <summary>Gets the functions the add-in registers: the generated and its own.</summary>
     public int Registered { get; init; }
 }

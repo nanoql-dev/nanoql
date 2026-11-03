@@ -8,18 +8,18 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The piecewise forward-spreaded curve before its first spread date (the S-sr plan's SSR6 (vii)). QuantLib's zero rate
-/// at a time adds the spread's integral over the time, which it takes from the interpolation's first time
+/// The piecewise forward-spreaded curve before its first spread date. QuantLib's zero rate at a time adds the spread's
+/// integral over the time, which it takes from the interpolation's first time
 /// (<c>piecewiseforwardspreadedtermstructure.hpp:152-166</c>), leaving out the flat spread its own <c>calcSpread</c>
-/// applies before that time, and reading the interpolation extrapolated backwards before it. On the wheel, spreads of 2%
-/// and 3% 100 and 150 days after 15 January 2025 over a flat 2% Actual/365 (Fixed) curve, QuantLib's test set-up
+/// applies before that time, and reading the interpolation extrapolated backwards before it. On the wheel, spreads of
+/// 2% and 3% 100 and 150 days after 15 January 2025 over a flat 2% Actual/365 (Fixed) curve, QuantLib's test set-up
 /// (<c>termstructures.cpp:325-370</c>), give the forward 4.4% at 120 days, but every discount past 100 days is
 /// e^(0.02·100/365) − 1 = 0.5494% too high, 0.99224937 at 120 days against 0.98682726; and QuantLib's own backward-flat
 /// case (<c>termstructures.cpp:508</c>), on a flat 2% Actual/360 base, gives the zero rate 2.3019% at 110 days, its
 /// spread's average 0.30%, where the forwards' average is 2.10%. nanoql integrates the spread from the reference date,
-/// flat before the first spread's time. QuantLib's check: its own curve with the first spread prepended at the reference
-/// date, whose integral starts at 0, gives nanoql's curve bit for bit on the case's set-up; the zero rate is the
-/// forwards' average.
+/// flat before the first spread's time. QuantLib's check: its own curve with the first spread prepended at the
+/// reference date, whose integral starts at 0, gives nanoql's curve bit for bit on the case's set-up; the zero rate is
+/// the forwards' average.
 /// </summary>
 public class ForwardSpreadFirstDateTests
 {

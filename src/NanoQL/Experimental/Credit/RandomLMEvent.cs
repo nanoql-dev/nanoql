@@ -10,7 +10,7 @@ namespace NanoQL.Experimental;
 /// <summary>
 /// A simulated default: the name, its day counted from the evaluation date and its recovery. QuantLib's
 /// <c>simEvent</c> specializations pack these into bit fields (16 bits for the default model's name and day; 12, 12 and
-/// 8 for the loss model's name, day and recovery in 256ths); here they are values (the S-xcr plan's XR8 (xxv)).
+/// 8 for the loss model's name, day and recovery in 256ths); here they are values.
 /// </summary>
 /// <param name="NameIdx">The name's position in the simulated basket.</param>
 /// <param name="DayFromRef">The default's day from the evaluation date.</param>

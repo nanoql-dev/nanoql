@@ -13,7 +13,7 @@ namespace NanoQL.Tests.Vectors;
 /// <summary>
 /// The AnalyticPerformanceEngine vectors, <c>tests/vectors/pricingengines/cliquet/analyticperformanceengine.json</c>:
 /// <see cref="AnalyticPerformanceEngine"/>'s NPV and Greeks for performance calls and puts on flat markets and on zero
-/// curves (its theta left out there, the S-exo plan's ER5 (xxii)).
+/// curves (its theta left out there).
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class AnalyticPerformanceEngineVectorTests

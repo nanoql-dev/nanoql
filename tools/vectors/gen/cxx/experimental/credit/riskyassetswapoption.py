@@ -4,8 +4,8 @@
 wheel doesn't expose, each output computed by the C++ harness (tools/cxx/src/experimental/credit/riskyassetswap.cpp):
 payer and receiver swaps of riskyassetswap.py's form, the fixed leg annual and the float quarterly, expiring a month
 and a year out and today (expired), at market spreads below, at and above the swap's, at volatilities from 1e-9 to
-50%. At a volatility of 0 QuantLib reads NaN where nanoql reads the intrinsic value (the S-xcr plan's XR8 (xxii);
-tests/NanoQL.Tests/Divergences/RiskyAssetSwapOptionTests.cs), so no case asks for it. Read back by
+50%. At a volatility of 0 QuantLib reads NaN where nanoql reads the intrinsic value
+(tests/NanoQL.Tests/Divergences/RiskyAssetSwapOptionTests.cs), so no case asks for it. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Experimental/Credit/RiskyAssetSwapOptionCxxVectorTests.cs."""
 import importlib.util
 import os

@@ -8,19 +8,16 @@ using NanoQL.Tests.Conventions;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The market-model differences (the S-mmp plan's MMPR4 (xiii) and (xiv), fixed under R8). QuantLib's
-/// <c>rateVolDifferences</c> divides rate i's variance difference by the i-th evolution time
-/// (<c>marketmodeldifferences.cpp:50</c>), not the rate's reset time: FlatVol at 25% against 20% on quarterly steps
-/// over semi-annual rates gives 0.2121 for every rate where the volatilities differ by √(25%² − 20%²) = 15%, √2 too
-/// high, and reads past the evolution times where the rates outnumber the steps. Its <c>rateInstVolDifferences</c>
-/// checks the rate's index against the number of steps (<c>:68</c>): on three steps rate 4 of 6 is refused, "the index
-/// given is greater than the number of steps", and on fine steps an index past the rates reads past the covariance
-/// (this run's
-/// <c>probes\c1_facts.cpp</c>; the planner's MPP10 (g)). nanoql divides by the rate's reset time, or by the evolution's
-/// last time where that comes first, since the total covariance accrues nothing past it: on an evolution ending at 1.5
-/// over resets to 3.0, the reset time alone gives 0.1299, 0.1162 and 0.1061 on the last three rates. It checks the
-/// index against the number of rates. Checks: FlatVol's √(σ₁² − σ₂²); QuantLib's bits where the evolution times are
-/// the rate times.
+/// The market-model differences (fixed). QuantLib's <c>rateVolDifferences</c> divides rate i's variance difference by
+/// the i-th evolution time (<c>marketmodeldifferences.cpp:50</c>), not the rate's reset time: FlatVol at 25% against
+/// 20% on quarterly steps over semi-annual rates gives 0.2121 for every rate where the volatilities differ by √(25%² −
+/// 20%²) = 15%, √2 too high, and reads past the evolution times where the rates outnumber the steps. Its
+/// <c>rateInstVolDifferences</c> checks the rate's index against the number of steps (<c>:68</c>): on three steps rate
+/// 4 of 6 is refused, "the index given is greater than the number of steps", and on fine steps an index past the rates
+/// reads past the covariance. nanoql divides by the rate's reset time, or by the evolution's last time where that comes
+/// first, since the total covariance accrues nothing past it: on an evolution ending at 1.5 over resets to 3.0, the
+/// reset time alone gives 0.1299, 0.1162 and 0.1061 on the last three rates. It checks the index against the number of
+/// rates. Checks: FlatVol's √(σ₁² − σ₂²); QuantLib's bits where the evolution times are the rate times.
 /// </summary>
 public class MarketModelDifferencesTests
 {

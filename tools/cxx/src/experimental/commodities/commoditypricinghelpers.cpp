@@ -6,11 +6,10 @@
 // qtyPeriodicity, paymentTerm): the term {"name", "eventType", "offsetDays", "calendar"}; it returns {"term",
 // "periods"}: the term as QuantLib's operator<< writes it, with its == against itself and its != and == against a term
 // of another name; and each period [startDate, endDate, paymentDate, quantity], or {"throws": true}. The generator
-// builds monthly schedules alone (a daily period's quantity is one day short in QuantLib, the S-xrt plan's XRR5 (iv);
-// the other schedules refused, (v)). "CommodityPricingHelper::calculateUnitCost" takes (commodityType, unitCost,
-// baseCurrency, baseUnit, evaluationDate) and returns {"text", "unitCost"}: the cost as QuantLib's operator<< writes
-// it, and the cost per base unit, on the cost's own unit (a factor of 1; XRR5 (i) leaves others out), or
-// {"throws": true}.
+// builds monthly schedules alone (a daily period's quantity is one day short in QuantLib; the other schedules are
+// refused). "CommodityPricingHelper::calculateUnitCost" takes (commodityType, unitCost, baseCurrency, baseUnit,
+// evaluationDate) and returns {"text", "unitCost"}: the cost as QuantLib's operator<< writes it, and the cost per base
+// unit, on the cost's own unit (a factor of 1; others are left out), or {"throws": true}.
 
 #include "experimental/commodities/commodityspec.hpp"
 

@@ -9,7 +9,7 @@ using NanoQL.Bind.Reading;
 namespace NanoQL.Bind.Tests;
 
 /// <summary>
-/// The Excel builds the tests read, each made once: nanoql's listed builds and its tests' builds (XLD36), experimental and
+/// The Excel builds the tests read, each made once: nanoql's listed builds and its tests' builds, experimental and
 /// stable, and the fixtures under the prefix <c>fx</c> beside nanoql's whole surface, on a scratch list of their own.
 /// Each run's outputs are text: the generated C#, <c>functions.json</c> and the templates.
 /// </summary>

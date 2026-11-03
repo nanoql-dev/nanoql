@@ -17,7 +17,7 @@ namespace NanoQL.Tests.Vectors;
 /// <c>tests/vectors/cxx/termstructures/volatility/gaussian1dsmilesection.json</c>: <see cref="Gaussian1dSmileSection"/>
 /// on a Euribor swap index, three GSR models, curves attached to the index or the model's, the default engine and one
 /// given; its level, exercise date and time, reference date and strike range, and at strikes around the level its call
-/// and put prices at two discounts and its volatility where stable (the S7 plan's S7R6).
+/// and put prices at two discounts and its volatility where stable under one-ulp moves of the inputs.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class Gaussian1dSmileSectionCxxVectorTests

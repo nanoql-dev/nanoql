@@ -18,13 +18,13 @@ namespace NanoQL.Models;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Immutable (the S-mm plan's MR2 (a)). <see cref="CapletMaxHomogeneityCalibration"/> returns its pass's pseudo-roots,
-/// failures, deformation size and swaption error in place of QuantLib's out-parameters.
+/// Immutable. <see cref="CapletMaxHomogeneityCalibration"/> returns its pass's pseudo-roots, failures, deformation size
+/// and swaption error in place of QuantLib's out-parameters.
 /// </para>
 /// <para>
 /// One departure from QuantLib (<c>Divergences/CTSMMCapletMaxHomogeneityDeformationTests.cs</c>): the deformation size
 /// sums each moved volatility's squared change, where QuantLib's loop adds the step index's own change once per
-/// volatility (<c>capletcoterminalmaxhomogeneity.cpp:370-371</c>, the run's own find).
+/// volatility (<c>capletcoterminalmaxhomogeneity.cpp:370-371</c>).
 /// </para>
 /// </remarks>
 public sealed class CTSMMCapletMaxHomogeneityCalibration : CTSMMCapletCalibration

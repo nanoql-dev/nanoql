@@ -23,11 +23,11 @@ namespace NanoQL.Models;
 /// its spot and the parameters.
 /// </para>
 /// <para>
-/// An extension point, as in QuantLib: the Bates models derive from it (the S-hes plan's HR1), through the protected
-/// constructor, which sets the five Heston arguments of a larger argument list and builds the Heston process. No
-/// constructor calls the virtual <see cref="GenerateArguments"/>, which in C# would run a derived override before the
-/// derived constructor has set its arguments; each builds its process through its own non-virtual member, as QuantLib's
-/// C++ base constructor runs its own <c>generateArguments</c>.
+/// An extension point, as in QuantLib: the Bates models derive from it, through the protected constructor, which sets
+/// the five Heston arguments of a larger argument list and builds the Heston process. No constructor calls the virtual
+/// <see cref="GenerateArguments"/>, which in C# would run a derived override before the derived constructor has set its
+/// arguments; each builds its process through its own non-virtual member, as QuantLib's C++ base constructor runs its
+/// own <c>generateArguments</c>.
 /// </para>
 /// </remarks>
 public class HestonModel : CalibratedModel

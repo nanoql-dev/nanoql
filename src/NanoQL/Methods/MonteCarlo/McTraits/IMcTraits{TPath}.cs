@@ -27,7 +27,7 @@ public interface IMcTraits<TPath>
 
     /// <summary>The random-number traits' sequence generator, QuantLib's <c>RNG::make_sequence_generator</c>.</summary>
     /// <param name="dimension">The dimension.</param>
-    /// <param name="seed">The seed (S2R4: explicit, 0 refused).</param>
+    /// <param name="seed">The seed (explicit, 0 refused).</param>
     /// <returns>A new generator.</returns>
     static abstract IRsg MakeSequenceGenerator(int dimension, long seed);
 

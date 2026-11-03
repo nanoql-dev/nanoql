@@ -14,7 +14,7 @@ namespace NanoQL.Numerics;
 /// QuantLib grows a static vector of rows on demand, unsynchronised, of <c>BigNatural</c>, a 32-bit <c>unsigned
 /// long</c> under MSVC, so its rows wrap from order 35 on Windows (C(35, 17) 242,600,354 for 4,537,567,650), where
 /// Linux's 64 bits are exact. Here the rows are 64-bit and computed once, to order 67, the last whose coefficients fit;
-/// a higher order is refused (the S-core plan's CR7 (xiv), CD8).
+/// a higher order is refused.
 /// </remarks>
 public static class PascalTriangle
 {

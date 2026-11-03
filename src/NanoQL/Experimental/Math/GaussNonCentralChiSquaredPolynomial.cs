@@ -21,9 +21,8 @@ namespace NanoQL.Experimental;
 /// node and at λ 100 it doesn't return. Here the moments are exact, from the cumulants 2^(j−1)(j−1)!(ν + jλ) on ν and λ
 /// as the binary fractions they are, QuantLib's recursion runs on those exact rationals, and α and β are rounded to
 /// double once: the nodes are within a few ulps of the exact ones at every λ. QuantLib's recursion is a template on its
-/// number type for this, tested on a multi-precision type; exact rationals are that precision's limit (the S-xrt plan's
-/// XRR8, ruled 2026-10-28; <c>Divergences/NonCentralChiSquaredPolynomialTests.cs</c>). <see cref="Moment"/> is the
-/// exact moment rounded once.
+/// number type for this, tested on a multi-precision type; exact rationals are that precision's limit (<c>Divergences/NonCentralChiSquaredPolynomialTests.cs</c>). <see cref="Moment"/> is the exact moment
+/// rounded once.
 /// </para>
 /// <para>
 /// As QuantLib's, the moments stop at the 27th, so a rule takes at most 14 nodes. The recursion's values are memoised

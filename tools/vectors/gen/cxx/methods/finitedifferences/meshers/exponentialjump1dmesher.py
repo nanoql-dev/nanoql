@@ -7,10 +7,9 @@ output computed by the C++ harness: the stationary density and distribution and 
 integral from 1e-100 matches the closed form nanoql integrates to 5e-13, and its density at t, a difference of
 incomplete gammas, nanoql's integral of the closed form's derivative to 2.2e-10 absolute (relative 1.1e-7 at x 20, where
 both gammas near 1 cancel, and 0 for 4e-20 to 7e-18 where they underflow); from beta t about 230 its cut holds mass and
-QuantLib's distribution falls off, below about 1e-4 its density cancels, and from about 750 it refuses (the S-core
-plan's CR7 (xvii) and the code review's C4-O2; tests/NanoQL.Tests/Divergences/ExponentialJump1dMesherTests.cs), so those
-times are left out, as is a jump intensity at or above beta, where QuantLib's density at t refuses Gamma(1 -
-intensity/beta) and nanoql's routes compute. Read back by
+QuantLib's distribution falls off, below about 1e-4 its density cancels, and from about 750 it refuses
+(tests/NanoQL.Tests/Divergences/ExponentialJump1dMesherTests.cs), so those times are left out, as is a jump intensity at
+or above beta, where QuantLib's density at t refuses Gamma(1 - intensity/beta) and nanoql's routes compute. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Methods/FiniteDifferences/Meshers/ExponentialJump1dMesherCxxVectorTests.cs."""
 import os
 import sys

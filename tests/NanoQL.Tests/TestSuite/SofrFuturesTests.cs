@@ -18,7 +18,7 @@ namespace NanoQL.Tests.TestSuite;
 
 // Adapted throughout: the evaluation date and the fixings an index adds are the context; a future's price is its
 // Calculate under it; QuantLib's convexity quote is a value, so its two settings are two futures. The last case is
-// QuantLib's testForwardCurveStartingAfterEvaluationDate, which #2897 adds after 1.44 (the S-cms plan's CMR6).
+// QuantLib's testForwardCurveStartingAfterEvaluationDate, which #2897 adds after 1.44.
 [Trait("Oracle", "QuantLib")]
 public class SofrFuturesTests
 {

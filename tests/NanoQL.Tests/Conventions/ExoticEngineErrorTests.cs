@@ -13,11 +13,10 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// C3's engines' refusals (the S-exo plan's ED14; C3's review, B3-3): each check's exception type, QuantLib's text and
-/// the parameter it names. Where a check can't fire, the guard before it is asserted: the cliquet and performance
-/// engines' European check behind the cliquet option's European exercise, the Black-Scholes calculator's spot and
-/// growth checks behind its base's forward check, and the Monte Carlo forward base's control check through an engine
-/// of the test's own that offers none.
+/// The exotic engines' refusals: each check's exception type, QuantLib's text and the parameter it names. Where a check
+/// can't fire, the guard before it is asserted: the cliquet and performance engines' European check behind the cliquet
+/// option's European exercise, the Black-Scholes calculator's spot and growth checks behind its base's forward check,
+/// and the Monte Carlo forward base's control check through an engine of the test's own that offers none.
 /// </summary>
 public class ExoticEngineErrorTests
 {

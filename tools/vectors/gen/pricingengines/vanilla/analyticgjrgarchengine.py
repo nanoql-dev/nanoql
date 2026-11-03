@@ -9,11 +9,10 @@ tools/vectors/gen/processes/gjrgarchprocess.py's second set, on a flat and a lin
 dividend yield: the NPVs of calls and puts at six strikes (0.7 to 1.2 of the spot, the test's 35 to 60) and five
 maturities (a day, the test's 90 and 180 days, a year and two), one engine per model.
 
-Left out (the S-hes plan's §2.10): every structure is on the risk-free curve's day counter and reference date; a
-dividend yield, where nanoql prices on r − q (HR7 (xxix), tests/NanoQL.Tests/Divergences/
-AnalyticGjrGarchDividendTests.cs); an option at expiry, where QuantLib's 0/0 is NaN (HR7 (xvii),
-tests/NanoQL.Tests/Divergences/GjrGarchExpiryTests.cs); and non-plain payoffs, which nanoql refuses (HR12,
-tests/NanoQL.Tests/Divergences/AnalyticGjrGarchPayoffRefusalTests.cs).
+Left out: every structure is on the risk-free curve's day counter and reference date; a dividend yield, where nanoql
+prices on r − q (tests/NanoQL.Tests/Divergences/AnalyticGjrGarchDividendTests.cs); an option at expiry, where
+QuantLib's 0/0 is NaN (tests/NanoQL.Tests/Divergences/GjrGarchExpiryTests.cs); and non-plain payoffs, which nanoql
+refuses (tests/NanoQL.Tests/Divergences/AnalyticGjrGarchPayoffRefusalTests.cs).
 
 A case holds one process, gjrgarchprocess.py's spec, its maturities in days and its strikes. The wheel's calls, by
 QuantLib-SWIG 1.44's vanilla.i: AnalyticGJRGARCHEngine(GJRGARCHModel(GJRGARCHProcess(...))) on a VanillaOption, NPV

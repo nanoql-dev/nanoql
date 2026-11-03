@@ -11,10 +11,10 @@ using NanoQL.Tests.TestSuite;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// A year-on-year cap's volatility quote is its value (SID5, PR6.8): QuantLib's <c>testVolatilityQuoteObservability</c>
-/// prices a cap on a constant volatility built on a quote of 1%, moves the quote to 2% and checks that the price moves
-/// to that of a cap priced on a volatility of 2%. Here the moved quote is a volatility built from the new value, which
-/// answers the moved price; the cap and the first volatility are unchanged.
+/// A year-on-year cap's volatility quote is its value: QuantLib's <c>testVolatilityQuoteObservability</c> prices a cap
+/// on a constant volatility built on a quote of 1%, moves the quote to 2% and checks that the price moves to that of a
+/// cap priced on a volatility of 2%. Here the moved quote is a volatility built from the new value, which answers the
+/// moved price; the cap and the first volatility are unchanged.
 /// </summary>
 public class YoYInflationCapFloorQuoteTests
 {

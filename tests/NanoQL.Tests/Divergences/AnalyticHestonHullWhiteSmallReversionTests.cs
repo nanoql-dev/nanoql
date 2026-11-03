@@ -12,11 +12,10 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The analytic Heston-Hull-White engine's variance offset at small reversion (the S-hes plan's HR7 (xiv)). QuantLib's
-/// m = σ²/(2a²)(t + 2/a e^(−at) − 1/(2a) e^(−2at) − 3/(2a)) (<c>analytichestonhullwhiteengine.cpp:57-67</c>) cancels to
-/// order (a·t)³, its relative error about ε/(a·t)³; nanoql takes S-van's series below a·t = 1e-2 (the S-van plan's VR4
-/// (xxvii)), QuantLib's closed form and bits above. Checked against the closed form in 50 digits
-/// (<c>scratchpad\c3\refs_c3.py</c>), at σ 0.01 and t 2.
+/// The analytic Heston-Hull-White engine's variance offset at small reversion. QuantLib's m = σ²/(2a²)(t + 2/a e^(−at)
+/// − 1/(2a) e^(−2at) − 3/(2a)) (<c>analytichestonhullwhiteengine.cpp:57-67</c>) cancels to order (a·t)³, its relative
+/// error about ε/(a·t)³; nanoql takes the Black-Scholes-Merton Hull-White engine's series below a·t = 1e-2, QuantLib's
+/// closed form and bits above. Checked against the closed form in 50 digits, at σ 0.01 and t 2.
 /// </summary>
 public class AnalyticHestonHullWhiteSmallReversionTests
 {

@@ -12,12 +12,12 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// A knock-out's rebate under negative rates (the S-rx plan's SRXR3 (xv), fixed under R8). QuantLib's analytic engine
-/// takes <c>λ = √(μ² + 2r/σ²)</c> (<c>analyticbarrierengine.cpp:243-264</c>), the square root of a negative number
-/// where r &lt; 0 and μ² &lt; −2r/σ², so a knock-out with a rebate is NaN: at r −1%, q −1.5% and a volatility of 20%, a
-/// one-year down-and-out call at 90, strike 100, with 5 paid at the hit, where QuantLib's finite-difference engine
-/// gives 9.889092750723153 [executed on the wheel]. Where λ² &lt; 0, nanoql's rebate term is the rebate's present value
-/// at the hit, <c>R ∫₀ᵀ e^(−rt) f(t) dt</c>, f the first-passage density of the log-price to the barrier, integrated by
+/// A knock-out's rebate under negative rates (fixed). QuantLib's analytic engine takes <c>λ = √(μ² + 2r/σ²)</c>
+/// (<c>analyticbarrierengine.cpp:243-264</c>), the square root of a negative number where r &lt; 0 and μ² &lt; −2r/σ²,
+/// so a knock-out with a rebate is NaN: at r −1%, q −1.5% and a volatility of 20%, a one-year down-and-out call at 90,
+/// strike 100, with 5 paid at the hit, where QuantLib's finite-difference engine gives 9.889092750723153
+/// (QuantLib-Python 1.44). Where λ² &lt; 0, nanoql's rebate term is the rebate's present value at the hit, <c>R ∫₀ᵀ
+/// e^(−rt) f(t) dt</c>, f the first-passage density of the log-price to the barrier, integrated by
 /// <see cref="GaussLobattoIntegral"/>; with the spot on the barrier it is the rebate, paid now. Where λ² ≥ 0 QuantLib's
 /// closed form stands, with its bits. QuantLib's checks: its closed form, the same quantity where it works, and its
 /// finite-difference engine (400 × 800) where it doesn't, within that engine's own grid error.

@@ -8,9 +8,9 @@ using static NanoQL.Excel.Tests.Xl;
 namespace NanoQL.Excel.Tests;
 
 /// <summary>
-/// The errors (XLR4): an exception to BIR4's code, the runtime's own kinds first, then the codes a member documents,
-/// then the runtime's copy of the native host's table, checked against S-bind's by reflection; each code to its Excel
-/// error; the message by its cell.
+/// The errors: an exception to its C ABI error code, the runtime's own kinds first, then the codes a member documents,
+/// then the runtime's copy of the native host's table, checked against the native host's own by reflection; each code
+/// to its Excel error; the message by its cell.
 /// </summary>
 [Collection(TestSettings.Name)]
 public sealed class ErrorTests
@@ -19,15 +19,15 @@ public sealed class ErrorTests
     public ErrorTests() => Reset();
 
     /// <summary>
-    /// The runtime's copy of S-bind's <c>Rt.Code</c> agrees with S-bind's own over every exception type the runtime's
-    /// assemblies define, the BCL's and nanoql's, every assembly S-bind's library references loaded first (F3-5, F5-3),
-    /// read from the managed library B2's native build leaves (F6-2); a missing one fails.
+    /// The runtime's copy of the native host's <c>Rt.Code</c> agrees with the native host's own over every exception
+    /// type the runtime's assemblies define, the BCL's and nanoql's, every assembly the native library references
+    /// loaded first, read from the managed library the native build leaves; a missing one fails.
     /// </summary>
     [Fact]
     public void TheCopyOfTheCodeTableIsSBinds()
     {
         string path = Path.Combine(Repository(), "src", "NanoQL.Native", "bin", "Release", "net10.0", "win-x64", "NanoQL.Native.dll");
-        Assert.True(File.Exists(path), $"S-bind's managed library isn't at {path}: run the native build (B2) first");
+        Assert.True(File.Exists(path), $"the native host's managed library isn't at {path}: run the native build first");
         Assembly native = Assembly.LoadFrom(path);
         var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         void LoadReferences(Assembly a)
@@ -88,7 +88,7 @@ public sealed class ErrorTests
             int theirs = (int)code.Invoke(null, [e])!, ours = X.CopyOfRtCode(e);
             if (theirs != ours)
             {
-                differ.Add($"{t.FullName}: S-bind's {theirs}, the copy's {ours}");
+                differ.Add($"{t.FullName}: the native host's {theirs}, the copy's {ours}");
             }
         }
 
@@ -96,7 +96,8 @@ public sealed class ErrorTests
         Assert.Empty(differ);
     }
 
-    /// <summary>Each code to XLR4's Excel error: refused arguments, kinds, casts, names, files #VALUE!; a handle #REF!; the rest #NUM!.</summary>
+    /// <summary>Each code to its Excel error: refused arguments, kinds, casts, names, files #VALUE!; a handle #REF!;
+    /// the rest #NUM!.</summary>
     [Fact]
     public void EachCodeTakesItsExcelError()
     {
@@ -125,7 +126,8 @@ public sealed class ErrorTests
         Assert.Contains("no object \"FlatForward#0123456789ABCDEF\" in this Excel session", Message(), StringComparison.Ordinal);
     }
 
-    /// <summary>A documented kind outside the table takes its documented code (#VALUE!), an undocumented one 99 (#NUM!) (F4-2).</summary>
+    /// <summary>A documented kind outside the table takes its documented code (#VALUE!), an undocumented one 99
+    /// (#NUM!).</summary>
     [Fact]
     public void ADocumentedKindTakesItsCode()
     {

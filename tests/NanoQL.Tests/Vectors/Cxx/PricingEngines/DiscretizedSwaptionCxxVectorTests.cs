@@ -49,8 +49,7 @@ public class DiscretizedSwaptionCxxVectorTests
             double[] swapTimes = [.. Swap().MandatoryTimes()];
             check.Output(c, "swapTimes", swapTimes);
 
-            // discretizedswaption.py leaves the swaption's outputs out where nanoql's fix moves them (the S-cms plan's
-            // CMR4).
+            // discretizedswaption.py leaves the swaption's outputs out where nanoql's fix moves them.
             double[] values;
             double presentValue;
             if (c.Expected.TryGetProperty("swaptionTimes", out _))
@@ -75,7 +74,7 @@ public class DiscretizedSwaptionCxxVectorTests
             }
 
             // discretizedswaption.py leaves these out where the swap's first floating coupon pays on the evaluation date
-            // (the fixing-date rule, SSR6 (xvi)).
+            // (the fixing-date rule).
             if (c.Expected.TryGetProperty("swapValuesAtZero", out _))
             {
                 (values, presentValue) = Rollback(Swap(), hullWhite.Tree(new TimeGrid(swapTimes, steps)), c.Double("swapFrom"), 0.0);

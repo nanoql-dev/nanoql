@@ -11,11 +11,11 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The overnight-index future's past fixings on an index whose fixing isn't a simple rate (the S-cms plan's CMD13; the
-/// S-cal plan's SCR5): the compounded future grows each past fixing by the index's
-/// <see cref="OvernightIndex.GrowthFactor"/> and the averaged one sums its <see cref="OvernightIndex.SimpleAccrual"/>,
-/// so on <see cref="Cdi"/>, whose fixings are annual rates on Business/252, a seasoned future prices as one on a
-/// generic index fed the simple-equivalent fixings <c>((1 + r)^τ − 1)/τ</c>, which is QuantLib's route.
+/// The overnight-index future's past fixings on an index whose fixing isn't a simple rate: the compounded future grows
+/// each past fixing by the index's <see cref="OvernightIndex.GrowthFactor"/> and the averaged one sums its
+/// <see cref="OvernightIndex.SimpleAccrual"/>, so on <see cref="Cdi"/>, whose fixings are annual rates on Business/252,
+/// a seasoned future prices as one on a generic index fed the simple-equivalent fixings <c>((1 + r)^τ − 1)/τ</c>, which
+/// is QuantLib's route.
 /// </summary>
 public class OvernightFutureGrowthFactorTests
 {

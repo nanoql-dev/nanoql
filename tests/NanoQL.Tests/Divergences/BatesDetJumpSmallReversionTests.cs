@@ -12,15 +12,14 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The deterministic-intensity Bates engines at small κ_λ (the S-hes plan's HR7 (iv)). Their term weights the
-/// constant-intensity term by the intensity's average, (x − 1 + e^{−x})θ_λ/(xλ) + (1 − e^{−x})/x at x = κ_λt, which
-/// QuantLib writes as differences that cancel as x falls (<c>batesengine.cpp:80</c>, <c>:140</c>): with θ_λ 0.6 beside
-/// λ 0.3 a call prices 9.8118999810864693 at κ_λ = 1e-12 where the constant-intensity engine, its limit, gives
-/// 9.8119169388898158 [executed: <c>scratchpad\cxxprobe\src\c1oracle.cpp</c>]. Below x = 1e-2 nanoql writes the weights
-/// as x·φ₂(−x) and −expm1(−x)/x, which don't cancel, QuantLib's expressions and bits at and above it. Checks: the limit,
-/// and, since the term is linear in the intensity, the price equal to the constant-intensity engine's at
-/// λ_eff = θ_λ·w₁ + λ·w₂, the weights w₁ = (x − 1 + e^{−x})/x and w₂ = (1 − e^{−x})/x evaluated in 50 digits
-/// (Python's <c>decimal</c>), either side of the cut.
+/// The deterministic-intensity Bates engines at small κ_λ. Their term weights the constant-intensity term by the
+/// intensity's average, (x − 1 + e^{−x})θ_λ/(xλ) + (1 − e^{−x})/x at x = κ_λt, which QuantLib writes as differences
+/// that cancel as x falls (<c>batesengine.cpp:80</c>, <c>:140</c>): with θ_λ 0.6 beside λ 0.3 a call prices
+/// 9.8118999810864693 at κ_λ = 1e-12 where the constant-intensity engine, its limit, gives 9.8119169388898158 (QuantLib
+/// 1.44). Below x = 1e-2 nanoql writes the weights as x·φ₂(−x) and −expm1(−x)/x, which don't cancel, QuantLib's
+/// expressions and bits at and above it. Checks: the limit, and, since the term is linear in the intensity, the price
+/// equal to the constant-intensity engine's at λ_eff = θ_λ·w₁ + λ·w₂, the weights w₁ = (x − 1 + e^{−x})/x and w₂ = (1 −
+/// e^{−x})/x evaluated in 50 digits (Python's <c>decimal</c>), either side of the cut.
 /// </summary>
 public class BatesDetJumpSmallReversionTests
 {

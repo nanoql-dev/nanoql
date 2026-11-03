@@ -5,17 +5,15 @@ evaluation date 15 October 2026: the Longstaff-Schwartz engine's NPV and error e
 minimum puts and average puts on two and three Black-Scholes processes, pseudo-random, with and without antithetic
 variates, on monomial, Laguerre and Hermite bases of orders 2 and 3, on fixed seeds; then a maximum call and a minimum
 put on low-discrepancy paths ("traits": "ld", MCLDAmericanBasketEngine's closing), the NPV alone, as the traits give no
-error estimate.
-QuantLib's engine takes no calibration seed; its base's default is the narrowed null, 2147483647 through the wheel
-(the S-van plan's VR4 (v)), which the reader passes, nanoql's default being the documented one. A zero or negative
-strike is left out, where nanoql scales the regression by 1/|K| (tests/NanoQL.Tests/Divergences/
-AmericanBasketStrikeScalingTests.cs). The specs are tools/vectors/gen/instruments/basketoption.py's options and an
-engine {"processes", "rho", "timeSteps", "antitheticVariate", "requiredSamples", "seed", "nCalibrationSamples",
-"polynomialOrder", "polynomialType"}. The wheel's calls, by QuantLib-SWIG 1.44's basketoptions.i:
-StochasticProcessArray(processes, rho); MCAmericanBasketEngine(process, "pseudorandom", timeSteps=...,
-antitheticVariate=..., requiredSamples=..., seed=..., nCalibrationSamples=..., polynomOrder=..., polynomType=...),
-"lowdiscrepancy" in place of "pseudorandom" for the low-discrepancy cases; BasketOption's NPV and errorEstimate. Read
-back by
+error estimate. QuantLib's engine takes no calibration seed; its base's default is the narrowed null, 2147483647 through
+the wheel, which the reader passes, nanoql's default being the documented one. A zero or negative strike is left out,
+where nanoql scales the regression by 1/|K| (tests/NanoQL.Tests/Divergences/AmericanBasketStrikeScalingTests.cs). The
+specs are tools/vectors/gen/instruments/basketoption.py's options and an engine {"processes", "rho", "timeSteps",
+"antitheticVariate", "requiredSamples", "seed", "nCalibrationSamples", "polynomialOrder", "polynomialType"}. The wheel's
+calls, by QuantLib-SWIG 1.44's basketoptions.i: StochasticProcessArray(processes, rho); MCAmericanBasketEngine(process,
+"pseudorandom", timeSteps=..., antitheticVariate=..., requiredSamples=..., seed=..., nCalibrationSamples=...,
+polynomOrder=..., polynomType=...), "lowdiscrepancy" in place of "pseudorandom" for the low-discrepancy cases;
+BasketOption's NPV and errorEstimate. Read back by
 tests/NanoQL.Tests/Vectors/PricingEngines/Basket/MCAmericanBasketEngineVectorTests.cs."""
 import importlib.util
 import os

@@ -18,15 +18,15 @@ namespace NanoQL.PricingEngines;
 /// <remarks>
 /// <para>
 /// The value and, where the generator allows one, its error estimate, with the grid as the additional result
-/// <c>"TimeGrid"</c>, as QuantLib's (the S-bar plan's BR1 (iii)): a static class over a private simulation deriving
-/// <see cref="MCDiscreteAveragingAsianEngineBase{TMc, TPath, TStats}"/>, the exercise a time of the grid where it follows
-/// the last fixing, the seed explicit (S2R4).
+/// <c>"TimeGrid"</c>, as QuantLib's: a static class over a private simulation deriving
+/// <see cref="MCDiscreteAveragingAsianEngineBase{TMc, TPath, TStats}"/>, the exercise a time of the grid where it
+/// follows the last fixing, the seed explicit.
 /// </para>
 /// <para>
-/// Documented divergences (BR5). The paths and the discount run on the engine's clock,
-/// <see cref="FdmBlackScholesOp.Clock"/>, from the earliest reference date of the structures, where QuantLib's run on
-/// the risk-free curve's (BR1 (v), <c>Divergences/AsianMismatchedTimesTests.cs</c>); a fixing date given twice counts
-/// twice in the average strike ((xxviii), <c>Divergences/AsianDuplicateFixingsTests.cs</c>).
+/// Documented divergences. The paths and the discount run on the engine's clock, <see cref="FdmBlackScholesOp.Clock"/>,
+/// from the earliest reference date of the structures, where QuantLib's run on the risk-free curve's
+/// (<c>Divergences/AsianMismatchedTimesTests.cs</c>); a fixing date given twice counts twice in the average strike
+/// (<c>Divergences/AsianDuplicateFixingsTests.cs</c>).
 /// </para>
 /// </remarks>
 public static class MCDiscreteArithmeticASEngine

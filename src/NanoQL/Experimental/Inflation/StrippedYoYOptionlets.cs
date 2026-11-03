@@ -18,7 +18,7 @@ namespace NanoQL.Experimental;
 /// <remarks>
 /// <see cref="Slice(Date)"/> is QuantLib's <c>slice</c>, each curve read at the date through its own observation lag;
 /// <see cref="Slice(double)"/> reads each curve at a time on its own clock, with no lag, which
-/// <see cref="KInterpolatedYoYOptionletVolatilitySurface{TInterpolator}"/> reads (the S-xrt plan's XRR5 (xiii)).
+/// <see cref="KInterpolatedYoYOptionletVolatilitySurface{TInterpolator}"/> reads.
 /// </remarks>
 [Experimental("NQL0001")]
 public sealed class StrippedYoYOptionlets

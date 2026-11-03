@@ -49,11 +49,11 @@ internal static class ConventionKinds
     public static bool Aliased(ConventionKind kind) =>
         kind <= ConventionKind.Index || kind == ConventionKind.UnitOfMeasure || kind >= ConventionKind.Alias;
 
-    // The instrument convention kinds, C4's.
+    // The instrument convention kinds.
     public static bool IsInstrumentConvention(ConventionKind kind) =>
         kind is >= ConventionKind.ScheduleConvention and <= ConventionKind.BondConvention;
 
-    // Batch 7's commodity kinds.
+    // The commodity kinds.
     public static bool IsCommodity(ConventionKind kind) =>
         kind is >= ConventionKind.CommodityType and <= ConventionKind.QuantitySettings;
 

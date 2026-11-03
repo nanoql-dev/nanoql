@@ -18,17 +18,16 @@ namespace NanoQL.PricingEngines;
 /// <remarks>
 /// <para>
 /// European exercise only, as QuantLib's. The engine reports the value, delta, gamma and theta, on
-/// <see cref="FdHestonBarrierEngine"/>'s grids and <see cref="FdmHestonOp.Clock"/>'s times (the S-bar plan's BR2 (v), BR5
-/// (iv)).
+/// <see cref="FdHestonBarrierEngine"/>'s grids and <see cref="FdmHestonOp.Clock"/>'s times.
 /// </para>
 /// <para>
 /// Documented divergences. A knock-in, which QuantLib refuses, is priced by in-out parity, the method QuantLib's
 /// single-barrier engine applies: the vanilla less the knock-out, both legs with the knock-out's leverage function and
 /// mixing factor, and a knock-in's rebate, paid at expiry where neither barrier is touched, as the rebate times the
-/// knock-out of a unit cash-or-nothing at strike 0 (the S-bar plan's BR8 (b), BR5 (xlvi)'s convention;
+/// knock-out of a unit cash-or-nothing at strike 0 (the analytic engines' rebate convention;
 /// <c>Divergences/FdHestonDoubleKnockInTests.cs</c>). KIKO and KOKI options stay refused. And a spot on or beyond a
-/// barrier is refused before the solve ("barrier(s) already touched"), as the analytic engine refuses it, where QuantLib's
-/// grid interpolation fails outside its range (BR5 (xliv)).
+/// barrier is refused before the solve ("barrier(s) already touched"), as the analytic engine refuses it, where
+/// QuantLib's grid interpolation fails outside its range.
 /// </para>
 /// </remarks>
 public static class FdHestonDoubleBarrierEngine
@@ -81,7 +80,7 @@ public static class FdHestonDoubleBarrierEngine
             throw new NanoQLException("non-striked payoff given");
         }
 
-        // a spot on or beyond a barrier is refused before the solve (BR5 (xliv))
+        // a spot on or beyond a barrier is refused before the solve
         if (option.Triggered(model.Process.S0))
         {
             throw new NanoQLException("barrier(s) already touched");
@@ -97,8 +96,8 @@ public static class FdHestonDoubleBarrierEngine
                 vGrid, dampingSteps, scheme, leverageFct, mixingFactor));
         }
 
-        // the knock-in by in-out parity (BR8 (b)): the vanilla less the knock-out without a rebate, the rebate paid at
-        // expiry where no barrier is touched, R × the unit cash-or-nothing knock-out at strike 0 (BR5 (xlvi)'s
+        // the knock-in by in-out parity: the vanilla less the knock-out without a rebate, the rebate paid at expiry
+        // where no barrier is touched, R × the unit cash-or-nothing knock-out at strike 0 (the analytic engines'
         // convention); every leg with the leverage function and mixing factor
         OneAssetOptionResults vanilla = FdHestonVanillaEngine.Calculate(
             new VanillaOption(payoff, option.Exercise), context, model, tGrid, xGrid, vGrid, dampingSteps, scheme,

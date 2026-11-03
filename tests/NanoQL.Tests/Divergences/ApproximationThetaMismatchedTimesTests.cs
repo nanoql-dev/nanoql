@@ -10,16 +10,15 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The American approximations' theta where early exercise is never optimal, on structures dated differently (the
-/// mismatched-dates class, the S-van plan's VR4 "across C1–C4"). There Barone-Adesi-Whaley, Ju and
-/// Bjerksund-Stensland report the European results, and QuantLib's theta divides every term by the volatility's time
-/// (<c>baroneadesiwhaleyengine.cpp:200-204</c>, <c>juquadraticengine.cpp:108-112</c>,
-/// <c>bjerksundstenslandengine.cpp:145-149</c>), as its analytic European engine does. nanoql's analytic European engine
-/// divides each term by its own structure's time (<c>Divergences/AnalyticThetaMismatchedTimesTests.cs</c>, checked
-/// there against QuantLib's <c>blackScholesTheta</c>), and the approximations' European branch is that engine's.
-/// QuantLib's check: through the analytic engine's. QuantLib's thetas, its approximations' and its analytic engine's
-/// alike, recorded [executed on the wheel: <c>scratchpad\c2\oracle_c2.py</c>, section theta]. Where the structures share
-/// their dates, QuantLib's bits (the engines' vectors).
+/// The American approximations' theta where early exercise is never optimal, on structures dated differently. There
+/// Barone-Adesi-Whaley, Ju and Bjerksund-Stensland report the European results, and QuantLib's theta divides every term
+/// by the volatility's time (<c>baroneadesiwhaleyengine.cpp:200-204</c>, <c>juquadraticengine.cpp:108-112</c>,
+/// <c>bjerksundstenslandengine.cpp:145-149</c>), as its analytic European engine does. nanoql's analytic European
+/// engine divides each term by its own structure's time (<c>Divergences/AnalyticThetaMismatchedTimesTests.cs</c>,
+/// checked there against QuantLib's <c>blackScholesTheta</c>), and the approximations' European branch is that
+/// engine's. QuantLib's check: through the analytic engine's. QuantLib's thetas, its approximations' and its analytic
+/// engine's alike, recorded (QuantLib-Python 1.44). Where the structures share their dates, QuantLib's bits (the
+/// engines' vectors).
 /// </summary>
 public class ApproximationThetaMismatchedTimesTests
 {

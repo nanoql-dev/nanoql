@@ -7,12 +7,12 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The market-model evolution step's pin (the S-mm plan's MR1 (v), SD11): after a path's warm-up, a path of steps (the
-/// generator's step, the drifts, the state's update and the curve state's set, the constraint's shift and the
-/// volatility process's step where the evolver has them) allocates nothing, for each evolver on the Mersenne-twister,
-/// Sobol and Burley-scrambled Sobol generators at reduced factors, and for the Euler and predictor-corrector ones at
-/// full factors (the drifts' plain branch) too; the constrained evolver's constraints, which QuantLib's one caller
-/// sets before each path, are set allocating nothing; and the curve states' reads allocate nothing.
+/// The market-model evolution step's pin: after a path's warm-up, a path of steps (the generator's step, the drifts,
+/// the state's update and the curve state's set, the constraint's shift and the volatility process's step where the
+/// evolver has them) allocates nothing, for each evolver on the Mersenne-twister, Sobol and Burley-scrambled Sobol
+/// generators at reduced factors, and for the Euler and predictor-corrector ones at full factors (the drifts' plain
+/// branch) too; the constrained evolver's constraints, which QuantLib's one caller sets before each path, are set
+/// allocating nothing; and the curve states' reads allocate nothing.
 /// </summary>
 public class MarketModelAllocationTests
 {

@@ -10,11 +10,11 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// <see cref="SquareRootProcess"/> below 0 (the S-sr plan's C1 review, B1-3): QuantLib's diffusion is σ√x
-/// (<c>squarerootprocess.cpp:40-42</c>), and its default Euler step x + a(b − x)dt + σ√x√dt·dw leaves [0, ∞), so a
-/// path that steps below 0 turns NaN for good. The port's diffusion is σ√max(x, 0), the partial truncation QuantLib's
-/// <c>HestonProcess</c> takes for its variance (<c>hestonprocess.cpp:350-359</c>), the drift on the state as it is.
-/// QuantLib's check: the Heston process's partially truncated variance step with no correlation, on the same draws.
+/// <see cref="SquareRootProcess"/> below 0: QuantLib's diffusion is σ√x (<c>squarerootprocess.cpp:40-42</c>), and its
+/// default Euler step x + a(b − x)dt + σ√x√dt·dw leaves [0, ∞), so a path that steps below 0 turns NaN for good. The
+/// port's diffusion is σ√max(x, 0), the partial truncation QuantLib's <c>HestonProcess</c> takes for its variance
+/// (<c>hestonprocess.cpp:350-359</c>), the drift on the state as it is. QuantLib's check: the Heston process's
+/// partially truncated variance step with no correlation, on the same draws.
 /// </summary>
 public class SquareRootProcessTruncationTests
 {

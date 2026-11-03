@@ -24,22 +24,20 @@ namespace NanoQL.Experimental;
 /// <remarks>
 /// <para>
 /// An unsealed, immutable object holding the process, the summation cutoff and the integral's limit, its public member
-/// QuantLib's <see cref="Phi"/>, with a static <c>Calculate</c> as D14's form (the S-xeq plan's §2.0). <c>Phi</c>
-/// computes its coefficients from its times on each call, where QuantLib's read the last pricing's (0 before any); the
-/// recursion of its series, QuantLib's memo, is one call's working state. The value, with QuantLib's additional results
-/// ("dcf", "qf", "s0", "strike", "expiryTime", "exercise", "term1", "term2", "xiRightLimit", "summationCutoff", "a1" to
-/// "a5").
+/// QuantLib's <see cref="Phi"/>, with a static <c>Calculate</c> in the engines' form. <c>Phi</c> computes its
+/// coefficients from its times on each call, where QuantLib's read the last pricing's (0 before any); the recursion of
+/// its series, QuantLib's memo, is one call's working state. The value, with QuantLib's additional results ("dcf",
+/// "qf", "s0", "strike", "expiryTime", "exercise", "term1", "term2", "xiRightLimit", "summationCutoff", "a1" to "a5").
 /// </para>
 /// <para>
 /// Documented divergences (<c>Divergences/HestonContinuousGeometricAsianTests.cs</c>). <c>Phi</c>'s coefficient of w is
 /// log S₀ + log(D_q/D_r) − ρv₀/σ − ρκθτ/σ, log S_T's constant, where QuantLib's multiplies the log spot by the carry
 /// factor and adds ρκθτ/σ, the sign its a3 doesn't take, so its <c>Phi(0, 1)</c>, the expected terminal spot, is 81.92
-/// against the forward 103.05 (XER5 (xv)); the prices read w = 0 only and are QuantLib's. An option whose averaging
-/// starts before or after the model's time 0 is refused, as QuantLib's Black-Scholes continuous engine refuses a start
-/// date, where QuantLib's Heston engine prices it as unseasoned from today; one starting at time 0 is QuantLib's own
-/// case. Times run on the model's clock, <see cref="HestonProcess"/>'s model time from the earliest reference date of
-/// its curves, each discount read at its instants, none accrued before its curve's own date (XER5 (xxxiii); S-hes's
-/// HR7).
+/// against the forward 103.05; the prices read w = 0 only and are QuantLib's. An option whose averaging starts before
+/// or after the model's time 0 is refused, as QuantLib's Black-Scholes continuous engine refuses a start date, where
+/// QuantLib's Heston engine prices it as unseasoned from today; one starting at time 0 is QuantLib's own case. Times
+/// run on the model's clock, <see cref="HestonProcess"/>'s model time from the earliest reference date of its curves,
+/// each discount read at its instants, none accrued before its curve's own date.
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]
@@ -159,7 +157,7 @@ public class AnalyticContinuousGeometricAveragePriceAsianHestonEngine
         }
 
         // a seasoned or forward-starting average refused, as QuantLib's Black-Scholes continuous engine refuses it; an
-        // average starting at the model's time 0 is the one QuantLib's engine prices (the code review's O1-6)
+        // average starting at the model's time 0 is the one QuantLib's engine prices
         if (option.StartDate is Date start && Process.ModelClock().TimeFromReference(start) != 0.0)
         {
             throw new NanoQLException(
@@ -177,7 +175,7 @@ public class AnalyticContinuousGeometricAveragePriceAsianHestonEngine
         double strike = payoff.Strike;
         Date exercise = option.Exercise.LastDate();
 
-        // the model's clock (HR7)
+        // the model's clock
         TermStructure clock = Process.ModelClock();
         double expiryTime = Process.ModelTime(exercise);
         double expiryDcf = Process.RiskFreeRate.DiscountAt(clock, expiryTime);
@@ -239,7 +237,7 @@ public class AnalyticContinuousGeometricAveragePriceAsianHestonEngine
 
     // a3, a4 and a5 for an average over [t, T]: QuantLib's equations (14) to (17) with r → r(t) − q(t), the discounts
     // on the model's clock; the coefficient of w log S₀ + log(D_q/D_r) − ρv₀/σ − ρκθτ/σ, log S_T's constant, where
-    // QuantLib's reads log S₀ · D_q/D_r and +ρκθτ/σ (XER5 (xv); a3 carries the matching −ρκθτ²/(2σT))
+    // QuantLib's reads log S₀ · D_q/D_r and +ρκθτ/σ (a3 carries the matching −ρκθτ²/(2σT))
     private Coefficients CoefficientsAt(double T, double t)
     {
         TermStructure clock = Process.ModelClock();

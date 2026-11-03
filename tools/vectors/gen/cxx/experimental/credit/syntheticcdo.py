@@ -7,12 +7,12 @@ tools/vectors/gen/cxx/experimental/credit/defaultevent.py's specs.
 
 CDOs on equity, mezzanine and senior tranches of baskets bound to the pool, LHP, constant-loss and random default
 models, sellers and buyers, with and without an upfront, on a spot schedule from the day after the evaluation date,
-curves dated at the evaluation date (QuantLib refuses curves dated after it and a seasoned CDO, the S-xcr plan's XR8
-(x)), on the mid-point engine and the integral engine at QuantLib's three-month step and at a month: the value, the
-legs, the fair premium, the instrument's and the engine's leg values, the remaining notional, the error count and the
-expected tranche losses; the inspectors; and a CDO expired at the evaluation date, QuantLib's expired results. Unlevered (QuantLib's engines lever the legs unevenly, XR8 (ix), held in
-Divergences/CdoLeverageTests.cs); the fair upfront and the engines' additional fair premium are left out (XR8 (ix)).
-Read back by tests/NanoQL.Tests/Vectors/Cxx/Experimental/Credit/SyntheticCDOCxxVectorTests.cs."""
+curves dated at the evaluation date (QuantLib refuses curves dated after it and a seasoned CDO), on the mid-point engine
+and the integral engine at QuantLib's three-month step and at a month: the value, the legs, the fair premium, the
+instrument's and the engine's leg values, the remaining notional, the error count and the expected tranche losses; the
+inspectors; and a CDO expired at the evaluation date, QuantLib's expired results. Unlevered (QuantLib's engines lever
+the legs unevenly, held in Divergences/CdoLeverageTests.cs); the fair upfront and the engines' additional fair premium
+are left out. Read back by tests/NanoQL.Tests/Vectors/Cxx/Experimental/Credit/SyntheticCDOCxxVectorTests.cs."""
 import importlib.util
 import os
 import sys

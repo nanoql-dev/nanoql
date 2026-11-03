@@ -12,13 +12,13 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The finite-difference SLV model's first density is the Green's function of the process its forward operator
-/// evolves, the variance's volatility the mixing factor times σ (D4-1 of the S-hes run record, under R8). QuantLib
-/// builds its operator and variance mesher on the mixed σ and its Green's function on the unmixed σ
-/// (<c>hestonslvfdmmodel.cpp:297</c>, <c>:346</c>, <c>:415</c>, <c>:418</c>), a density the operator's process doesn't
-/// have. The independent check is the mixed process's own density (<see cref="HestonProcess.Pdf"/>, S-van's): against
-/// it the Gaussian algorithm on the mixed σ is within 5% in L1 at the first step, on the unmixed σ 76% off. At a mixing
-/// factor of 1 the density is QuantLib's; no QuantLib case runs the model with another.
+/// The finite-difference SLV model's first density is the Green's function of the process its forward operator evolves,
+/// the variance's volatility the mixing factor times σ. QuantLib builds its operator and variance mesher on the mixed σ
+/// and its Green's function on the unmixed σ (<c>hestonslvfdmmodel.cpp:297</c>, <c>:346</c>, <c>:415</c>, <c>:418</c>),
+/// a density the operator's process doesn't have. The independent check is the mixed process's own density (<see
+/// cref="HestonProcess.Pdf"/>): against it the Gaussian algorithm on the mixed σ is within 5% in L1 at the first step,
+/// on the unmixed σ 76% off. At a mixing factor of 1 the density is QuantLib's; no QuantLib case runs the model with
+/// another.
 /// </summary>
 public class HestonSlvFdmMixingGreensTests
 {

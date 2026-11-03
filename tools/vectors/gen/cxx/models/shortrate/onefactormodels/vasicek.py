@@ -7,12 +7,11 @@ output computed by the C++ harness (docs/porting-playbook.md §9.4).
 Five models: QuantLib's defaults, a mean reversion of 1e-9 (below sqrt(QL_EPSILON)), a large one with a risk premium,
 negative rates, level and premium, and the defaults after setParams. For each: a(), b(), sigma(), lambda() and r0();
 dynamics()'s variable(t, r) and shortRate(t, x) at four points each, and its process's x0(), drift and diffusion at
-three points and expectation, stdDeviation and variance at three steps; AffineModel's five-argument
-discountBondOption at five points, whose default ignores the bond's start; the model's constraint() (test,
-upperBound and lowerBound) at four parameter arrays; and the unfitted tree(grid) (OneFactorModel's), on a grid per
-model: every column's size, every step's discounts and every step's state prices, which the unfitted tree computes
-when asked, the last step's among them. Then a tree at a zero sigma, which setParams sets (NaN probabilities,
-nanoql's MD5).
+three points and expectation, stdDeviation and variance at three steps; AffineModel's five-argument discountBondOption
+at five points, whose default ignores the bond's start; the model's constraint() (test, upperBound and lowerBound) at
+four parameter arrays; and the unfitted tree(grid) (OneFactorModel's), on a grid per model: every column's size, every
+step's discounts and every step's state prices, which the unfitted tree computes when asked, the last step's among them.
+Then a tree at a zero sigma, which setParams sets (NaN probabilities, nanoql's refusal).
 
 Read back by tests/NanoQL.Tests/Vectors/Cxx/Models/ShortRate/OneFactorModels/VasicekCxxVectorTests.cs, with
 tests/NanoQL.Tests/Vectors/ModelInputs.cs."""

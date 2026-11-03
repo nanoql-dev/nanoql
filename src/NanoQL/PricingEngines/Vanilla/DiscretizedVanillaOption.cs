@@ -20,9 +20,9 @@ namespace NanoQL.PricingEngines;
 /// </para>
 /// <para>
 /// <b>The American window</b> is bounded by its two times compared with <c>IsOnTime</c> as well, upstream's fix after
-/// v1.44 (#2878, the S-sr plan's SSR5): the grid's last time can be an ulp off the maturity the engine starts the asset
-/// at, where QuantLib 1.44's plain comparison skips the exercise at expiry, an American option then priced below the
-/// European one on the same tree, or rejects a window ending there (<c>Divergences/AmericanBoundsOnTimeTests.cs</c>).
+/// v1.44 (#2878): the grid's last time can be an ulp off the maturity the engine starts the asset at, where QuantLib
+/// 1.44's plain comparison skips the exercise at expiry, an American option then priced below the European one on the
+/// same tree, or rejects a window ending there (<c>Divergences/AmericanBoundsOnTimeTests.cs</c>).
 /// </para>
 /// </remarks>
 [WorkingType]

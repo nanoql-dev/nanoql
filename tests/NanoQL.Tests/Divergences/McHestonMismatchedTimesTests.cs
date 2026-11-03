@@ -12,13 +12,13 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The Monte Carlo Heston engine on curves dated or counted differently (the S-hes plan's HR7 (vi), the mismatched-dates
-/// class of master Revision 58). QuantLib's engine runs its paths on the process's times, the risk-free curve's from its
-/// reference date, reads the dividend curve at those times and discounts at the grid's last time on the risk-free curve
+/// The Monte Carlo Heston engine on curves dated or counted differently (the playbook's row for structures on another
+/// clock). QuantLib's engine runs its paths on the process's times, the risk-free curve's from its reference date,
+/// reads the dividend curve at those times and discounts at the grid's last time on the risk-free curve
 /// (<c>mceuropeanhestonengine.hpp:121-129</c>). nanoql's runs its paths on the model's clock, from the earliest curve
 /// date on the risk-free curve's day counter, each curve read at the instants the grid's times denote, and discounts
-/// there. QuantLib's check: its engine on the market restated on one clock, from the same seed, which the fixed engine on
-/// the original market reproduces to rounding [executed on the wheel: <c>scratchpad\c1\oracle_c1.py</c>].
+/// there. QuantLib's check: its engine on the market restated on one clock, from the same seed, which the fixed engine
+/// on the original market reproduces to rounding (QuantLib-Python 1.44).
 /// </summary>
 public class McHestonMismatchedTimesTests
 {

@@ -9,7 +9,7 @@ using static NanoQL.Tests.Vectors.EquityInputs;
 namespace NanoQL.Tests.Vectors;
 
 /// <summary>
-/// The vanilla engines' vector files of S-van's grid (tools/vectors/gen/pricingengines/vanilla/
+/// The vanilla engines' vector files on their shared grid (tools/vectors/gen/pricingengines/vanilla/
 /// baroneadesiwhaleyengine.py and the generators that load it): each case a process, an exercise and payoffs, and the
 /// NPV and whichever of the eleven Greeks it records, one element per payoff.
 /// </summary>

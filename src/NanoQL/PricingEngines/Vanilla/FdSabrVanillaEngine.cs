@@ -24,17 +24,16 @@ namespace NanoQL.PricingEngines;
 /// <remarks>
 /// <para>
 /// The engine reports the value. Its finite-difference working types are built inside each calculation and dropped
-/// after it (the S-eq plan's SEQR1). Its times are the discount curve's, from its reference date in its day counter,
-/// as QuantLib's; an exercise on or before that date is refused, as <see cref="FdCEVVanillaEngine"/> refuses it, where
-/// QuantLib's engine throws.
+/// after it. Its times are the discount curve's, from its reference date in its day counter, as QuantLib's; an exercise
+/// on or before that date is refused, as <see cref="FdCEVVanillaEngine"/> refuses it, where QuantLib's engine throws.
 /// </para>
 /// <para>
 /// At ν = 0, which QuantLib's parameter check accepts, the log volatility's grid collapses and QuantLib's engine throws
 /// ("end must be larger than start"); so it does at a tiny positive ν, where the grid's span is a few ulps of ln α or
 /// none, and a little above it returns NaN (ν about 1e-15 over a year). SABR at ν = 0 is the CEV process with α its
 /// volatility, and wherever ν√T is at most 1e-10·max(1, |ln α|) the engine prices on <see cref="FdCEVVanillaEngine"/>
-/// with its own grids (the forward's for the CEV's), damping steps, scaling, ε and scheme (the S-van plan's VR4 (xxxi),
-/// VD28): from there up QuantLib's grid holds, and its values are the CEV's up to the two grids' difference.
+/// with its own grids (the forward's for the CEV's), damping steps, scaling, ε and scheme: from there up QuantLib's
+/// grid holds, and its values are the CEV's up to the two grids' difference.
 /// </para>
 /// </remarks>
 public static class FdSabrVanillaEngine
@@ -155,7 +154,7 @@ public static class FdSabrVanillaEngine
                 nameof(option));
         }
 
-        // SABR with a negligible volatility of volatility is CEV (VR4 (xxxi), VD28)
+        // SABR with a negligible volatility of volatility is CEV
         if (!(nu * Math.Sqrt(maturityTime) > NegligibleVolOfVol * Math.Max(1.0, Math.Abs(Math.Log(alpha)))))
         {
             OneAssetOptionResults cev = FdCEVVanillaEngine.Body(

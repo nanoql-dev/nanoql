@@ -22,8 +22,8 @@ namespace NanoQL.PricingEngines;
 /// </summary>
 /// <remarks>
 /// QuantLib's engine, its times read on the engine's clock (<see cref="FdmBlackScholesOp.Clock"/>), the earliest
-/// reference date of the structures it reads, as S-eq's finite-difference vanilla engine reads them: the maturity and
-/// the dividend handler's reference date and day counter, where QuantLib takes the maturity from the process and the
+/// reference date of the structures it reads, as the finite-difference vanilla engine reads them: the maturity and the
+/// dividend handler's reference date and day counter, where QuantLib takes the maturity from the process and the
 /// handler's from the risk-free curve, so that a knock-in's three parts price on one clock. Where every structure
 /// shares the risk-free curve's date and day counter, QuantLib's times stand.
 /// </remarks>

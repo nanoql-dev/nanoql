@@ -7,12 +7,11 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// <see cref="DateInterval.IsDateBetween"/> with its flags as named (the S-xrt plan's XRR5 (iii), fixed under R8).
-/// QuantLib's <c>else if</c> follows the <c>includeFirst</c> test, so a start date that passes <c>date &gt;=
-/// startDate</c> then fails <c>date &gt; startDate</c>, and the end likewise (<c>dateinterval.hpp:51-63</c>): on 1 to 31
-/// January 2025 both ends are excluded under all four flag pairs, the middle included (the S-xrt planner's
-/// <c>xp_c1.cpp</c>). nanoql includes an end exactly when its flag says. Check: every date of the interval and a day
-/// either side, under the four pairs.
+/// <see cref="DateInterval.IsDateBetween"/> with its flags as named (fixed). QuantLib's <c>else if</c> follows the
+/// <c>includeFirst</c> test, so a start date that passes <c>date &gt;= startDate</c> then fails <c>date &gt;
+/// startDate</c>, and the end likewise (<c>dateinterval.hpp:51-63</c>): on 1 to 31 January 2025 both ends are excluded
+/// under all four flag pairs, the middle included. nanoql includes an end exactly when its flag says. Check: every date
+/// of the interval and a day either side, under the four pairs.
 /// </summary>
 public class DateIntervalTests
 {

@@ -8,8 +8,8 @@ namespace NanoQL.Tests.Divergences;
 /// <summary>
 /// South Korea's 2025 presidential election day. QuantLib 1.44 misses June 3rd, 2025, when the snap election closed
 /// the country and the Korea Exchange; QuantLib's master adds it to the settlement calendar, which KRX inherits
-/// (#2894, <c>46c4d4ed9</c>), with the date in both test cases' 2025 lists, which nanoql takes ahead of the pin, as R8
-/// directs. The 2025 lists of <c>testSouthKoreanSettlement</c> and <c>testKoreaStockExchange</c>
+/// (#2894, <c>46c4d4ed9</c>), with the date in both test cases' 2025 lists, which nanoql takes ahead of the pin, as a
+/// fix. The 2025 lists of <c>testSouthKoreanSettlement</c> and <c>testKoreaStockExchange</c>
 /// (<c>test-suite/calendars.cpp:1772-1788</c>, <c>:2443-2460</c>) move here, with upstream's line; QuantLib 1.44's
 /// answer is recorded beside them.
 /// </summary>

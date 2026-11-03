@@ -13,17 +13,16 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The zero-coupon swap's fair payment with a payment delay (the S-cms plan's CMR5 (xxiv)): QuantLib's
-/// <c>fairFixedPayment</c> divides the floating leg's NPV by its fixed leg's end discount
-/// (<c>zerocouponswap.cpp:147-153</c>), read at <c>CashFlows::maturityDate</c> of that leg
-/// (<c>discountingswapengine.cpp:97-99</c>), the accrual end for the fixed-rate constructor's coupon, paid a payment
-/// delay later (<c>cashflows.cpp:52-64</c>), so that swap's fair rate fed back leaves a non-zero NPV: on the wheel, on
-/// the vectors' 5-year receiver on 1e8 from 17 January 2025 at 3.2% on Actual/365 (Fixed), −1,013.7182254604995,
-/// −14,173.113207207993, −42,397.21247311309 and −131,035.65942218527 at delays of 1, 10, 30 and 90 days, where the
-/// fixed-payment constructor's fair payment, 16,776,091.202675004 at every delay, fed back gives 0. nanoql discounts at
-/// the fixed flow's payment date. QuantLib's check: its fixed-payment constructor on the same swap, its fair payment
-/// and rate. At an NPV date (C3's review, C3-O1, with (xxiv)): the floating leg's NPV is given at the engine's
-/// NPV date (<c>cashflows.cpp:498</c>) and its end discount from the curve's reference date
+/// The zero-coupon swap's fair payment with a payment delay: QuantLib's <c>fairFixedPayment</c> divides the floating
+/// leg's NPV by its fixed leg's end discount (<c>zerocouponswap.cpp:147-153</c>), read at
+/// <c>CashFlows::maturityDate</c> of that leg (<c>discountingswapengine.cpp:97-99</c>), the accrual end for the
+/// fixed-rate constructor's coupon, paid a payment delay later (<c>cashflows.cpp:52-64</c>), so that swap's fair rate
+/// fed back leaves a non-zero NPV: on the wheel, on the vectors' 5-year receiver on 1e8 from 17 January 2025 at 3.2% on
+/// Actual/365 (Fixed), −1,013.7182254604995, −14,173.113207207993, −42,397.21247311309 and −131,035.65942218527 at
+/// delays of 1, 10, 30 and 90 days, where the fixed-payment constructor's fair payment, 16,776,091.202675004 at every
+/// delay, fed back gives 0. nanoql discounts at the fixed flow's payment date. QuantLib's check: its fixed-payment
+/// constructor on the same swap, its fair payment and rate. At an NPV date: the floating leg's NPV is given at the
+/// engine's NPV date (<c>cashflows.cpp:498</c>) and its end discount from the curve's reference date
 /// (<c>discountingswapengine.cpp:97-101</c>), so QuantLib's fair payment is high by the NPV date's discount's
 /// reciprocal: on the same swap without a delay, 17,200,779.97339953 at an NPV date of 15 January 2026 and
 /// 18,085,160.07066775 at 17 January 2028, fed back through the fixed-payment constructor at those dates

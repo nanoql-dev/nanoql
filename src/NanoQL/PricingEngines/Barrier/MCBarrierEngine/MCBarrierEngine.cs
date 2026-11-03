@@ -23,26 +23,26 @@ namespace NanoQL.PricingEngines;
 /// <remarks>
 /// <para>
 /// A static class over a private simulation deriving <see cref="McSimulation{TPath, TStats}"/> directly, as QuantLib's
-/// engine derives <c>McSimulation</c> (the S-bar plan's BR1 (i)): <c>Calculate</c> builds the simulation with QuantLib's
-/// checks and returns the NPV and, where the random-number traits allow one, the error estimate. The seed is explicit
-/// (S2R4). QuantLib's references: Beaglehole, Dybvig and Zhou (1997), El Babsiri and Noel (1998).
+/// engine derives <c>McSimulation</c>: <c>Calculate</c> builds the simulation with QuantLib's checks and returns the
+/// NPV and, where the random-number traits allow one, the error estimate. The seed is explicit. QuantLib's references:
+/// Beaglehole, Dybvig and Zhou (1997), El Babsiri and Noel (1998).
 /// </para>
 /// <para>
-/// Documented divergences. The paths and the discounts run on the engine's clock, <see cref="FdmBlackScholesOp.Clock"/>,
-/// from the earliest reference date of the structures, where QuantLib's run on the risk-free curve's (BR5 (iii),
-/// <c>Divergences/McBarrierMismatchedTimesTests.cs</c>). And the bridge's uniform numbers come from QuantLib's constant
-/// seed 5, but 6 where the pricing seed is 5 on pseudo-random traits, whose paths then draw from the same Mersenne
-/// twister stream as the bridge, so that each step's increment and its extreme share their uniform numbers, +31.9
-/// standard errors at ten steps (BR5 (v), <c>Divergences/McBarrierSeed5Tests.cs</c>); low-discrepancy paths share
-/// nothing with it and keep QuantLib's 5. And a non-European exercise is refused, as the family's European engines
-/// refuse it, where QuantLib prices it to its last date: an American down-and-out put at 80 prices 1.6705, its European
-/// value, where the binomial engine prices 6.3644 (<c>Divergences/McBarrierExerciseTests.cs</c>).
+/// Documented divergences. The paths and the discounts run on the engine's clock,
+/// <see cref="FdmBlackScholesOp.Clock"/>, from the earliest reference date of the structures, where QuantLib's run on
+/// the risk-free curve's (<c>Divergences/McBarrierMismatchedTimesTests.cs</c>). And the bridge's uniform numbers come
+/// from QuantLib's constant seed 5, but 6 where the pricing seed is 5 on pseudo-random traits, whose paths then draw
+/// from the same Mersenne twister stream as the bridge, so that each step's increment and its extreme share their
+/// uniform numbers, +31.9 standard errors at ten steps (<c>Divergences/McBarrierSeed5Tests.cs</c>); low-discrepancy
+/// paths share nothing with it and keep QuantLib's 5. And a non-European exercise is refused, as the family's European
+/// engines refuse it, where QuantLib prices it to its last date: an American down-and-out put at 80 prices 1.6705, its
+/// European value, where the binomial engine prices 6.3644 (<c>Divergences/McBarrierExerciseTests.cs</c>).
 /// </para>
 /// </remarks>
 public static class MCBarrierEngine
 {
     // QuantLib's constant seed of the bridge's uniform numbers (mcbarrierengine.hpp:253-254), and the one taken at the
-    // pricing seed 5 on pseudo-random traits (the S-bar plan's BR5 (v))
+    // pricing seed 5 on pseudo-random traits
     private const long BridgeSeed = 5;
     private const long BridgeSeedAt5 = 6;
 
@@ -179,7 +179,7 @@ public static class MCBarrierEngine
         public OneAssetOptionResults Price()
         {
             // QuantLib never reads the exercise's type and prices any exercise to its last date: the paths price a
-            // European exercise only, early exercise wanting a regression (the S-bar code review's B1-3)
+            // European exercise only, early exercise wanting a regression
             if (option.Exercise.Type != ExerciseType.European)
             {
                 throw new NanoQLException("only european style option are supported");

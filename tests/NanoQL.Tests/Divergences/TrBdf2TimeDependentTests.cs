@@ -11,14 +11,14 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// <see cref="TrBDF2Scheme{TTrapezoidalScheme}"/> with time-dependent coefficients (the S-eq plan's SEQR9). QuantLib's
-/// step sets the operator over its trapezoidal sub-step's interval, [t − α·dt, t], and solves its BDF2 stage with that
-/// operator (<c>trbdf2scheme.hpp:106-124</c>), so where a curve's rate moves within the step the stage reads the wrong
-/// one: first order, or stalling. nanoql sets the operator once over the whole step, [t − dt, t], the interval
-/// QuantLib's other schemes set, for both stages. On a zero curve whose forward rate jumps at half a year, an
-/// at-the-money call priced on 800 points lies within 1e-3 of the analytic engine at 365 and 640 steps, where
-/// QuantLib's engine errs by 2.7e-2 and 2.0e-2. QuantLib's TR-BDF2 cases are all on flat inputs, where the two forms
-/// differ in the last bits only (the scheme's vectors, within R7).
+/// <see cref="TrBDF2Scheme{TTrapezoidalScheme}"/> with time-dependent coefficients. QuantLib's step sets the operator
+/// over its trapezoidal sub-step's interval, [t − α·dt, t], and solves its BDF2 stage with that operator
+/// (<c>trbdf2scheme.hpp:106-124</c>), so where a curve's rate moves within the step the stage reads the wrong one:
+/// first order, or stalling. nanoql sets the operator once over the whole step, [t − dt, t], the interval QuantLib's
+/// other schemes set, for both stages. On a zero curve whose forward rate jumps at half a year, an at-the-money call
+/// priced on 800 points lies within 1e-3 of the analytic engine at 365 and 640 steps, where QuantLib's engine errs by
+/// 2.7e-2 and 2.0e-2. QuantLib's TR-BDF2 cases are all on flat inputs, where the two forms differ in the last bits only
+/// (the scheme's vectors, within the tolerance).
 /// </summary>
 public class TrBdf2TimeDependentTests
 {

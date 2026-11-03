@@ -8,17 +8,16 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The very fast annealing's sampler, fixed under R8 beside the S-xrt code review's B4-2. QuantLib's starts each
-/// coordinate's loop from lower − 1, which rounds to the lower bound itself at every magnitude from 2⁵⁴, so it returns
-/// that bound with no draw (<c>hybridsimulatedannealingfunctors.hpp:190-198</c>); nanoql's draws each coordinate at least
-/// once. QuantLib's step T·((1 + 1/T)^e − 1) is infinite where 1/T overflows, below about 5.6e-309, so its loop never
-/// lands in the box, and NaN at T = 0, which its loop returns; nanoql's takes the same value as T^(1 − e)·(1 + T)^e − T,
-/// which agrees with QuantLib's form where both are finite, so at T = 0 it holds the point; and an annealing on the very
-/// fast temperature with an end temperature of 0 runs past the overflow to its iteration limit. Above T 100 QuantLib's
-/// 1 + 1/T loses the digits of 1/T, its step 2.3e-2 off at 1e14 and 0 from about 1e16, where every draw holds the
-/// point (the S-xrt code review's F4-7): nanoql's, T·expm1(e·log1p(1/T)) there, is within 4 ulps of a 50-digit
-/// reference from 1e3 to 1e20 (mpmath on the exact doubles, the S-xrt run's <c>c4\f47_refs.py</c>), and QuantLib's bits
-/// at 100 and below.
+/// The very fast annealing's sampler, fixed. QuantLib's starts each coordinate's loop from lower − 1, which rounds to
+/// the lower bound itself at every magnitude from 2⁵⁴, so it returns that bound with no draw
+/// (<c>hybridsimulatedannealingfunctors.hpp:190-198</c>); nanoql's draws each coordinate at least once. QuantLib's step
+/// T·((1 + 1/T)^e − 1) is infinite where 1/T overflows, below about 5.6e-309, so its loop never lands in the box, and
+/// NaN at T = 0, which its loop returns; nanoql's takes the same value as T^(1 − e)·(1 + T)^e − T, which agrees with
+/// QuantLib's form where both are finite, so at T = 0 it holds the point; and an annealing on the very fast temperature
+/// with an end temperature of 0 runs past the overflow to its iteration limit. Above T 100 QuantLib's 1 + 1/T loses the
+/// digits of 1/T, its step 2.3e-2 off at 1e14 and 0 from about 1e16, where every draw holds the point: nanoql's,
+/// T·expm1(e·log1p(1/T)) there, is within 4 ulps of a 50-digit reference from 1e3 to 1e20 (mpmath on the exact
+/// doubles), and QuantLib's bits at 100 and below.
 /// </summary>
 public class VeryFastAnnealingSamplerTests
 {

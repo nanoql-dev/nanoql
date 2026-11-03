@@ -12,17 +12,17 @@ namespace NanoQL.Numerics;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A working type on S-mmp's seam (the S-core plan's CR5 (b)): it overrides <see cref="Add"/> and <see cref="Reset"/>.
-/// Dimension 1 is refused, as in QuantLib.
+/// A working type on the sequence statistics' seam: it overrides <see cref="Add"/> and <see cref="Reset"/>. Dimension 1
+/// is refused, as in QuantLib.
 /// </para>
 /// <para>
 /// Two fixes of QuantLib's, each documented (<c>Divergences/DiscrepancyStatisticsTests.cs</c>): QuantLib computes its
 /// constants for the dimension at construction or reset, so a statistics of dimension 0, whose first sample sets it,
 /// keeps dimension 0's and returns a wrong discrepancy (0.666 for a 3-dimensional sample whose discrepancy is 0.00592);
-/// nanoql computes them when the dimension is fixed (CR7 (viii)), and refuses a first sample of dimension 1 there, with
-/// QuantLib's text, before the base fixes the dimension (CR7 (xxxvii)). And QuantLib pairs the components' stored
-/// samples by position, which a sorting read of the components' statistics (a percentile sorts in place) breaks; nanoql
-/// keeps its own copy of the points (CR7 (ix)).
+/// nanoql computes them when the dimension is fixed, and refuses a first sample of dimension 1 there, with QuantLib's
+/// text, before the base fixes the dimension. And QuantLib pairs the components' stored samples by position, which a
+/// sorting read of the components' statistics (a percentile sorts in place) breaks; nanoql keeps its own copy of the
+/// points.
 /// </para>
 /// </remarks>
 [WorkingType]

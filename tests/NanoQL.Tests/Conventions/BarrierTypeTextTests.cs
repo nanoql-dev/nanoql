@@ -7,8 +7,8 @@ namespace NanoQL.Tests.Conventions;
 
 /// <summary>
 /// QuantLib's stream operator on <c>Barrier::Type</c> writes "Down&amp;In" and the rest, not the members' names, so it
-/// is <see cref="BarrierTypeFunctions.ToString(BarrierType)"/> (the S-rx plan's SRXD11; <c>barriertype.cpp:28-42</c>),
-/// its refusal of a value outside the type QuantLib's text. The members' integers are QuantLib's.
+/// is <see cref="BarrierTypeFunctions.ToString(BarrierType)"/> (<c>barriertype.cpp:28-42</c>), its refusal of a value
+/// outside the type QuantLib's text. The members' integers are QuantLib's.
 /// </summary>
 public class BarrierTypeTextTests
 {

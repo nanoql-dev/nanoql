@@ -9,10 +9,10 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The perpetual futures' enums and defaults (the S-exo plan's ED20; PR6.5b): QuantLib's stream operators print each
-/// payoff and funding type's member name (<c>perpetualfutures.cpp:71-95</c>), which the enums' own strings give, so the
-/// operators aren't ported; the members keep QuantLib's values; and the shorter constructors take QuantLib's defaults,
-/// funding on the current spot every eight hours on a null calendar and Actual/Actual (ISDA).
+/// The perpetual futures' enums and defaults: QuantLib's stream operators print each payoff and funding type's member
+/// name (<c>perpetualfutures.cpp:71-95</c>), which the enums' own strings give, so the operators aren't ported; the
+/// members keep QuantLib's values; and the shorter constructors take QuantLib's defaults, funding on the current spot
+/// every eight hours on a null calendar and Actual/Actual (ISDA).
 /// </summary>
 public class PerpetualFuturesStreamTests
 {

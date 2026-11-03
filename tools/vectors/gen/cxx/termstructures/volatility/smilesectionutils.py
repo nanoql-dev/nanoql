@@ -10,11 +10,10 @@ grids, the call prices, the level, and the arbitrage-free region's strikes and i
 refusals: a negative moneyness for a shifted lognormal section, a grid not increasing, no level, and the at-the-money
 point at the grid's end.
 
-Left out, where nanoql computes a limited range's endpoints on the shifted level (the S-g1d plan's G1R6 (xii)): a
-shifted lognormal section with a limited strike range, whose endpoints' moneyness QuantLib divides by the unshifted
-level. A refused value is {"throws": true}. Each case's input "utilities" is the spec
-tools/cxx/src/termstructures/volatility/smilesectionutils.cpp reads; tests/NanoQL.Tests/Vectors/Cxx/TermStructures/
-SmileSectionUtilsCxxVectorTests.cs reads it back."""
+Left out, where nanoql computes a limited range's endpoints on the shifted level: a shifted lognormal section with a
+limited strike range, whose endpoints' moneyness QuantLib divides by the unshifted level. A refused value is {"throws":
+true}. Each case's input "utilities" is the spec tools/cxx/src/termstructures/volatility/smilesectionutils.cpp reads;
+tests/NanoQL.Tests/Vectors/Cxx/TermStructures/SmileSectionUtilsCxxVectorTests.cs reads it back."""
 import importlib.util
 import os
 import sys
@@ -47,7 +46,7 @@ GRIDS = {SL: [0.0, 0.1, 0.4, 0.8, 1.0, 1.3, 2.0, 4.0], N: [-0.03, -0.02, -0.01, 
 
 
 def limited_shifted(spec):
-    """Whether the section is shifted lognormal with a limited strike range, (xii)'s case."""
+    """Whether the section is shifted lognormal with a limited strike range."""
     if spec["type"] != "HarnessSmileSection" or spec["volatilityType"] != SL:
         return False
     shift = spec["overriddenShift"] if spec.get("overriddenShift") is not None else spec["shift"]

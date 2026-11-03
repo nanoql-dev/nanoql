@@ -15,9 +15,9 @@ namespace NanoQL.Methods;
 /// underlying; its cell average by Simpson's rule over the half-cells on each side of the point.
 /// </summary>
 /// <remarks>
-/// A working type (the S-eq plan's SEQR1): the first <see cref="AvgInnerValue"/> fills a cache of every cell's average,
-/// at that call's time, as QuantLib's does, so each cell is integrated once. An extension point, as in QuantLib:
-/// <see cref="FdmLogInnerValue"/> derives from it.
+/// A working type: the first <see cref="AvgInnerValue"/> fills a cache of every cell's average, at that call's time, as
+/// QuantLib's does, so each cell is integrated once. An extension point, as in QuantLib: <see cref="FdmLogInnerValue"/>
+/// derives from it.
 /// </remarks>
 [WorkingType]
 public class FdmCellAveragingInnerValue : FdmInnerValueCalculator

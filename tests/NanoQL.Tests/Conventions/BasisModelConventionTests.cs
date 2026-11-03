@@ -15,8 +15,8 @@ namespace NanoQL.Tests.Conventions;
 
 /// <summary>
 /// The tenor basis models' conventions: the cash-flow sets' empty forms and refusals, a seasoned swap's empty flows and
-/// the tenor swaption structure's refusal of them (the S-xrt plan's XRR5 (xvi): QuantLib reads the last of the empty
-/// flows, undefined), the tenor optionlet structure's frequency check, and the structures' inspectors.
+/// the tenor swaption structure's refusal of them (QuantLib reads the last of the empty flows, undefined), the tenor
+/// optionlet structure's frequency check, and the structures' inspectors.
 /// </summary>
 public class BasisModelConventionTests
 {

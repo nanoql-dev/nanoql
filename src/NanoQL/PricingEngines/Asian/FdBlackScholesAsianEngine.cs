@@ -22,13 +22,13 @@ namespace NanoQL.PricingEngines;
 /// <para>
 /// The value, delta and gamma, as QuantLib's. Its times run on the engine's clock,
 /// <see cref="FdmBlackScholesOp.Clock"/>, from the earliest reference date of the structures, where QuantLib takes them
-/// from the process (the S-bar plan's BR5 (xxvi), <c>Divergences/AsianMismatchedTimesTests.cs</c>); several fixings on
-/// one date are weighed by their count (BR5 (xxviii), <see cref="FdmArithmeticAverageCondition"/>).
+/// from the process (<c>Divergences/AsianMismatchedTimesTests.cs</c>); several fixings on one date are weighed by their
+/// count (<see cref="FdmArithmeticAverageCondition"/>).
 /// </para>
 /// <para>
 /// A fixing dated from the evaluation date to the clock's origin, where the structures settle after the evaluation
 /// date, is taken at the origin, the spot with no variance and no discount accrued, so as a past fixing at the spot
-/// (the S-bar code review's B3-1, <c>Divergences/AsianLateSettlementTests.cs</c>), where QuantLib refuses it as past.
+/// (<c>Divergences/AsianLateSettlementTests.cs</c>), where QuantLib refuses it as past.
 /// </para>
 /// </remarks>
 public static class FdBlackScholesAsianEngine

@@ -24,14 +24,13 @@ namespace NanoQL.PricingEngines;
 /// clock. The formulas are first-passage closed forms in one equivalent-constant carry and volatility, the variance
 /// and discounts to expiry: no exact closed form exists for a first passage under general deterministic term
 /// structures, and on shaped markets they miss QuantLib's finite-difference barrier engine or a Monte Carlo by -1.2% to
-/// +1.7% (the S-bar plan's BR4 (d)); the term-structure-exact routes are <see cref="FdBlackScholesBarrierEngine"/>
-/// and the Monte Carlo engines.
+/// +1.7%; the term-structure-exact routes are <see cref="FdBlackScholesBarrierEngine"/> and the Monte Carlo engines.
 /// </para>
 /// <para>
 /// Two documented divergences. At a variance below machine epsilon the underlying follows its forward, and hits the
 /// barrier, if at all, when the forward reaches it, as QuantLib's master prices the analytic barrier engine
-/// (<c>e29c64126</c>), where QuantLib's indicators read the spot and its power of the barrier overflows to 0 (BR5 (xv),
-/// <c>Divergences/BinaryBarrierZeroVolatilityTests.cs</c>). And the option's rebate is priced, a knock-out's at the
+/// (<c>e29c64126</c>), where QuantLib's indicators read the spot and its power of the barrier overflows to 0
+/// (<c>Divergences/BinaryBarrierZeroVolatilityTests.cs</c>). And the option's rebate is priced, a knock-out's at the
 /// hit, now where the barrier is already touched, and a knock-in's at expiry, by the analytic barrier engine's rebate
 /// terms, where QuantLib's engine drops it (<c>Divergences/BinaryBarrierRebateTests.cs</c>).
 /// </para>
@@ -276,7 +275,7 @@ public static class AnalyticBinaryBarrierEngine
 
     // QuantLib's master's zero-volatility reading (e29c64126), as the analytic barrier engine takes it: the underlying
     // follows its forward and hits the barrier, if at all, when the forward reaches it, a spot on the barrier a hit
-    // now; the payoff at expiry is the forward's (the S-bar plan's BR5 (xv))
+    // now; the payoff at expiry is the forward's
     private static double ZeroVarianceValue(
         BarrierType barrierType,
         StrikedTypePayoff payoff,

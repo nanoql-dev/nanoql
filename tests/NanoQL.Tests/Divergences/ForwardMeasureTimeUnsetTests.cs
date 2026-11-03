@@ -9,11 +9,11 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// A forward-measure process built without its forward measure time (the S-sr plan's SSD6): QuantLib's default
-/// constructors leave <c>T_</c> uninitialized (<c>forwardmeasureprocess.hpp:42</c>, <c>:46</c>, <c>:60</c>, <c>:64</c>),
-/// so the forward Hull-White and G2 processes' drift and expectation read an indeterminate value, undefined behaviour
-/// (master plan §2.2's undefined-path row). nanoql's refuse with "forward measure time not set" until
-/// <c>WithForwardMeasureTime</c> gives one.
+/// A forward-measure process built without its forward measure time: QuantLib's default constructors leave <c>T_</c>
+/// uninitialized (<c>forwardmeasureprocess.hpp:42</c>, <c>:46</c>, <c>:60</c>, <c>:64</c>), so the forward Hull-White
+/// and G2 processes' drift and expectation read an indeterminate value, undefined behaviour (the playbook's
+/// undefined-behaviour row). nanoql's refuse with "forward measure time not set" until <c>WithForwardMeasureTime</c>
+/// gives one.
 /// </summary>
 public class ForwardMeasureTimeUnsetTests
 {

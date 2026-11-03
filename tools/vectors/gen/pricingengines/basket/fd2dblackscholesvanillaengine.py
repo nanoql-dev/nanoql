@@ -6,7 +6,7 @@ theta for European and American spread, minimum, maximum and average basket opti
 correlations of 0.5 and -0.3, on flat curves and constant volatilities, on zero curves with a constant volatility and a
 surface, with the local volatility (with and without an illegal-local-volatility overwrite), under Hundsdorfer's scheme
 (the default), Douglas's, Craig-Sneyd's with damping steps, and implicit Euler and TR-BDF2, whose Krylov solves are
-measured, not pinned (the S-exo plan's ED9).
+measured, not pinned.
 
 Every structure of both processes is on Act/365 (Fixed) from the evaluation date and the two share one risk-free curve:
 on structures dated or day-counted apart QuantLib reads the second process's at the first's risk-free times

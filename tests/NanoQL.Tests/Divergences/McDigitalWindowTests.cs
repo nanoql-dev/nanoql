@@ -12,14 +12,14 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The Monte Carlo digital engine on an exercise window (the S-van plan's VR4 (iii), under R8). QuantLib's analytic
-/// engine refuses a window ("American option with window exercise not handled yet",
-/// <c>analyticdigitalamericanengine.cpp:41-43</c>), and its Monte Carlo engine prices from today: an up-and-in call at
-/// 110 paying 10 (S 100, r 5%, vol 25%, one year; 365 steps, 20,000 samples, seed 1) gives 7.164398475241645 with the
-/// window opening today and in 180 days alike [executed on the wheel: <c>oracle_c1.py</c>]. nanoql's engine puts the
-/// window's opening on the grid and counts crossings from it, a path already past the strike there paid then.
-/// QuantLib's check: its own closed form, the cash at the hit from the opening (<see cref="AmericanPayoffAtHit"/>),
-/// integrated over the lognormal density of the underlying at the opening and discounted to today.
+/// The Monte Carlo digital engine on an exercise window. QuantLib's analytic engine refuses a window ("American option
+/// with window exercise not handled yet", <c>analyticdigitalamericanengine.cpp:41-43</c>), and its Monte Carlo engine
+/// prices from today: an up-and-in call at 110 paying 10 (S 100, r 5%, vol 25%, one year; 365 steps, 20,000 samples,
+/// seed 1) gives 7.164398475241645 with the window opening today and in 180 days alike (QuantLib-Python 1.44). nanoql's
+/// engine puts the window's opening on the grid and counts crossings from it, a path already past the strike there paid
+/// then. QuantLib's check: its own closed form, the cash at the hit from the opening (<see
+/// cref="AmericanPayoffAtHit"/>), integrated over the lognormal density of the underlying at the opening and discounted
+/// to today.
 /// </summary>
 public class McDigitalWindowTests
 {

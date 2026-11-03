@@ -11,13 +11,12 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The bootstrap variants' conventions (the S-core plan's CR3): the global bootstrap's variable helpers follow the
-/// curve's helpers and the instrument weights cover both, and a later build that moves a pillar is refused, as
-/// QuantLib's pillars are fixed when its bootstrap starts; the local bootstrap refuses an interpolator that isn't a
-/// local one, where QuantLib's template fails to compile, and a localisation below 1 or below the interpolator's data
-/// adjustment, where QuantLib's steps read out of their arrays; the additional variables' guesses, bounds and
-/// transforms, QuantLib's; and the variables through a multicurve's member as through the curve, and on every piecewise
-/// curve.
+/// The bootstrap variants' conventions: the global bootstrap's variable helpers follow the curve's helpers and the
+/// instrument weights cover both, and a later build that moves a pillar is refused, as QuantLib's pillars are fixed
+/// when its bootstrap starts; the local bootstrap refuses an interpolator that isn't a local one, where QuantLib's
+/// template fails to compile, and a localisation below 1 or below the interpolator's data adjustment, where QuantLib's
+/// steps read out of their arrays; the additional variables' guesses, bounds and transforms, QuantLib's; and the
+/// variables through a multicurve's member as through the curve, and on every piecewise curve.
 /// </summary>
 public class BootstrapVariantConventionTests
 {
@@ -54,9 +53,10 @@ public class BootstrapVariantConventionTests
         // an over-determined set: the 6- and 9-month deposits out of the curve and penalised at weight 1, so they
         // compete with the futures over the same months and the futures keep errors at the optimum; the futures
         // weighted 5. At the optimum's volatility the nodes solve the same weighted least squares with the futures as
-        // the curve's own instruments, weighted 5 in the same rows: the two routes agree, where a variable helper's weight
-        // dropped or read from another row moves the optimum by the weights' effect. Vectors can't hold this set: a
-        // one-ulp move of an input moves its fit by up to 6e-11, past S7R6's margin, in QuantLib and nanoql alike.
+        // the curve's own instruments, weighted 5 in the same rows: the two routes agree, where a variable helper's
+        // weight dropped or read from another row moves the optimum by the weights' effect. Vectors can't hold this
+        // set: a one-ulp move of an input moves its fit by up to 6e-11, past the tolerance's margin, in QuantLib and
+        // nanoql alike.
         List<RateHelper> all = GlobalBootstrapVariablesFixture.CurveHelpers();
         RateHelper[] penalised = [all[4], all[5]];
         List<RateHelper> helpers = [.. all.Take(4), .. all.Skip(6)];

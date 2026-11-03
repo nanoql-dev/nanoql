@@ -7,7 +7,7 @@ namespace NanoQL.Bind.Emitting;
 
 /// <summary>
 /// One worksheet function of a build: a C function, or a family of a generic type's constructions folded into one, its
-/// type arguments taken by name (XLD29).
+/// type arguments taken by name.
 /// </summary>
 /// <param name="Name">The Excel name.</param>
 /// <param name="Function">The function, or the family's representative, whose kinds every construction shares.</param>

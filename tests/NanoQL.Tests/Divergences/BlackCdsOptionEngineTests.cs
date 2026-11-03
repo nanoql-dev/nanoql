@@ -11,15 +11,14 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The CDS option's time before the discount curve's date (the S-xcr plan's XR8 (xv)): floored at 0, the intrinsic
-/// value, where QuantLib's is negative and its standard deviation NaN. On 31 August 2006, a knock-out payer option
-/// exercising the next day on a five-year buyer swap from a month out (spread 0.0005, notional 10⁶, quarterly, TARGET,
-/// Actual/360), the hazard rate 0.001 flat from today and the discount curve 5% flat from two days out, QuantLib throws
-/// ("stdDev (-nan(ind)) must be non-negative"); the Black formula at a standard deviation of 0 on its swap's fair spread
-/// 0.00060383738773871025 and coupon-leg NPV −2212.1143600025548 reads 459.4003530439083 (the S-xcr run's
-/// <c>c4_facts.cpp</c>). The same option not knocking out adds its front-end protection, read as XR8 (x) reads a curve
-/// before its date: a discount of 1 and a default probability of 0 (the S-xcr code review's C4 O1-3), where QuantLib
-/// refuses at the time first.
+/// The CDS option's time before the discount curve's date: floored at 0, the intrinsic value, where QuantLib's is
+/// negative and its standard deviation NaN. On 31 August 2006, a knock-out payer option exercising the next day on a
+/// five-year buyer swap from a month out (spread 0.0005, notional 10⁶, quarterly, TARGET, Actual/360), the hazard rate
+/// 0.001 flat from today and the discount curve 5% flat from two days out, QuantLib throws ("stdDev (-nan(ind)) must be
+/// non-negative"); the Black formula at a standard deviation of 0 on its swap's fair spread 0.00060383738773871025 and
+/// coupon-leg NPV −2212.1143600025548 reads 459.4003530439083. The same option not knocking out adds its front-end
+/// protection, read as the credit engines read a curve before its date: a discount of 1 and a default probability of 0,
+/// where QuantLib refuses at the time first.
 /// </summary>
 public class BlackCdsOptionEngineTests
 {

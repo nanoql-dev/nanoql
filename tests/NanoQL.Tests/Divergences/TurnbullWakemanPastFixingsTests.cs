@@ -11,12 +11,12 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// Turnbull-Wakeman with every fixing past (the S-bar plan's BR5 (xxix), fixed under R8). Where the effective strike is
-/// positive, QuantLib's engine reads <c>times.back()</c> of an empty vector of fixing times and crashes the process
-/// (0xC0000005, the planner's BP19); its certain-exercise branch covers only an effective strike at or below zero.
-/// nanoql prices the known payoff discounted, as QuantLib's Choi engine prices it (<c>choiasianengine.cpp:71-77</c>):
-/// on spot 100, q 3%, r 6%, σ 20% (Act/360), a put at 110 on two past fixings at 95 and 105, exercised in a month.
-/// Check: Choi's engine, and the payoff on the average discounted.
+/// Turnbull-Wakeman with every fixing past (fixed). Where the effective strike is positive, QuantLib's engine reads
+/// <c>times.back()</c> of an empty vector of fixing times and crashes the process (0xC0000005); its certain-exercise
+/// branch covers only an effective strike at or below zero. nanoql prices the known payoff discounted, as QuantLib's
+/// Choi engine prices it (<c>choiasianengine.cpp:71-77</c>): on spot 100, q 3%, r 6%, σ 20% (Act/360), a put at 110 on
+/// two past fixings at 95 and 105, exercised in a month. Check: Choi's engine, and the payoff on the average
+/// discounted.
 /// </summary>
 public class TurnbullWakemanPastFixingsTests
 {
@@ -41,7 +41,7 @@ public class TurnbullWakemanPastFixingsTests
     public void TestTurnbullWakemanAllFixingsInThePast()
     {
         // Upstream: QuantLib's master's case for #2954 (asianoptions.cpp's testTurnbullWakemanAllFixingsInThePast), the
-        // master's fix of this crash: its known payoff discounted, nanoql's since BR5 (xxix)
+        // master's fix of this crash: its known payoff discounted, nanoql's already
         DayCounter dc = new Actual365Fixed();
         var rTS = new FlatForward(Today, 0.03, dc);
         var process = new BlackScholesMertonProcess(

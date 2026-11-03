@@ -12,10 +12,10 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The analytic GJR-GARCH engine refuses a payoff that isn't a plain vanilla (the S-hes plan's HR12). QuantLib's engine
-/// reads the payoff as a <c>StrikedTypePayoff</c> and prices the plain vanilla on its strike and type
-/// (<c>analyticgjrgarchengine.cpp</c>), so a cash-or-nothing or an asset-or-nothing option is priced as the call it
-/// isn't. nanoql refuses them, as QuantLib's Monte Carlo GJR-GARCH engine does ("non-plain payoff given").
+/// The analytic GJR-GARCH engine refuses a payoff that isn't a plain vanilla. QuantLib's engine reads the payoff as a
+/// <c>StrikedTypePayoff</c> and prices the plain vanilla on its strike and type (<c>analyticgjrgarchengine.cpp</c>), so
+/// a cash-or-nothing or an asset-or-nothing option is priced as the call it isn't. nanoql refuses them, as QuantLib's
+/// Monte Carlo GJR-GARCH engine does ("non-plain payoff given").
 /// </summary>
 public class AnalyticGjrGarchPayoffRefusalTests
 {

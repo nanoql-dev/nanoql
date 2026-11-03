@@ -11,10 +11,10 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// A start-window partial-time barrier with the spot beyond its barrier (the S-bar plan's BR5 (xiv), refused under R8).
-/// QuantLib checks no trigger and prices −4.174446 for a down-and-out call at spot 80, barrier 85 (the planner's P2),
-/// where the family's analytic, binomial and Monte Carlo engines refuse "barrier touched". nanoql refuses it so; the end
-/// windows, whose monitoring starts at the cover event, are unaffected.
+/// A start-window partial-time barrier with the spot beyond its barrier (refused). QuantLib checks no trigger and
+/// prices −4.174446 for a down-and-out call at spot 80, barrier 85, where the family's analytic, binomial and Monte
+/// Carlo engines refuse "barrier touched". nanoql refuses it so; the end windows, whose monitoring starts at the cover
+/// event, are unaffected.
 /// </summary>
 public class PartialTimeTouchedTests
 {

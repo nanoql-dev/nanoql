@@ -9,13 +9,13 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The CEV engine at a time of 0 (a run find, S-van's C3). The formula's non-centrality x₀/t is infinite at t = 0, which
-/// Boost refuses ("Non centrality parameter is inf"), so QuantLib throws on an option exercised today with the reference
+/// The CEV engine at a time of 0 (a run find). The formula's non-centrality x₀/t is infinite at t = 0, which Boost
+/// refuses ("Non centrality parameter is inf"), so QuantLib throws on an option exercised today with the reference
 /// date's events included; and an exercise before the discount curve's reference date throws QuantLib's "negative time"
 /// (<c>analyticcevengine.cpp:104-111</c>). nanoql reads the curve by date, nothing accrued before its reference date
-/// (master's mismatched-dates row), and at t = 0 the value is the payoff at f0, the limit QuantLib's own values approach:
-/// a day out, its call at K 90 on f0 100 is 9.999178115968299 [executed on the wheel: <c>scratchpad\c3\oracle_c3.py</c>,
-/// σ 20%, r 3% on Actual/365 (Fixed), from 15 October 2026].
+/// (the playbook's row for structures on another clock), and at t = 0 the value is the payoff at f0, the limit
+/// QuantLib's own values approach: a day out, its call at K 90 on f0 100 is 9.999178115968299 (QuantLib-Python 1.44; σ
+/// 20%, r 3% on Actual/365 (Fixed), from 15 October 2026).
 /// </summary>
 public class CevAtExpiryTests
 {

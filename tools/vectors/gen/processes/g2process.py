@@ -11,11 +11,10 @@ points, drift and diffusion at five (t, [x, y]) points, expectation at six (t0, 
 them), stdDeviation and covariance at the five nonzero ones, and evolve at four (t0, [x, y], dt, [dw1, dw2]) points.
 
 The two sets with rho = 1 and rho = -1 at a = b are generated and left out: there QuantLib's conditional correlation,
-rho times the ratio of the factors' kernels, rounds just outside [-1, 1], and its standard deviation's
-sqrt(1 - rho^2) is NaN, where nanoql's is rho itself (the S-sr plan's SSR6 (xix);
-tests/NanoQL.Tests/Divergences/G2ProcessCorrelationBoundTests.cs). So are the zero step's standard deviation and
-covariance, whose correlation is QuantLib's 0/0, NaN, and nanoql's rho, the step's limit (the same test). Elsewhere QuantLib 1.44's forms and nanoql's
-cancellation-free ones (SSR3) agree within the tolerance.
+rho times the ratio of the factors' kernels, rounds just outside [-1, 1], and its standard deviation's sqrt(1 - rho^2)
+is NaN, where nanoql's is rho itself (tests/NanoQL.Tests/Divergences/G2ProcessCorrelationBoundTests.cs). So are the zero
+step's standard deviation and covariance, whose correlation is QuantLib's 0/0, NaN, and nanoql's rho, the step's limit
+(the same test). Elsewhere QuantLib 1.44's forms and nanoql's cancellation-free ones agree within the tolerance.
 
 The wheel's calls, by QuantLib-SWIG's stochasticprocess.i: ql.G2Process(a, sigma, b, eta, rho,
 YieldTermStructureHandle) and ql.G2ForwardProcess with the same arguments, size, factors, initialValues, phi,
@@ -47,7 +46,7 @@ CURVE = hw.flat(0.04)
 PARAMS = [(0.1, 0.01, 0.2, 0.013, -0.5), (0.05, 0.012, 0.3, 0.008, 0.3), (0.12, 0.011, 0.12, 0.009, -0.3),
           (0.5, 0.02, 0.05, 0.01, 0.9), (1e-3, 0.01, 0.2, 0.01, -0.7), (0.1, 0.01, 0.3, 0.01, 1.0),
           (0.1, 0.01, 0.1, 0.01, 1.0), (0.2, 0.01, 0.2, 0.012, -1.0)]
-# rho = +-1 at a = b, generated and left out (SSR6 (xix))
+# rho = +-1 at a = b, generated and left out
 LEFT_OUT = {6, 7}
 FORWARD_TIMES = [5.0, 20.0]
 
@@ -57,7 +56,7 @@ PROCESS_POINTS = [(0.0, (0.04, 0.0)), (0.5, (0.03, 0.01)), (1.0, (0.05, -0.02)),
                   (10.0, (-0.01, 0.03))]
 STEP_POINTS = [(0.0, (0.04, 0.0), 0.25), (0.5, (0.03, 0.01), 0.5), (1.0, (0.05, -0.02), 1.0),
                (2.0, (0.0, 0.0), 0.0), (3.0, (0.02, 0.005), 2.0), (0.1, (0.01, -0.01), 0.01)]
-# the zero step's standard deviation and covariance generated and left out (SSR6 (xix))
+# the zero step's standard deviation and covariance generated and left out
 NONZERO_STEPS = [s for s in STEP_POINTS if s[2] != 0.0]
 EVOLVE_POINTS = [(0.0, (0.04, 0.0), 0.25, (0.3, -1.1)), (1.0, (0.05, -0.02), 0.5, (-1.2, 0.4)),
                  (2.0, (0.0, 0.0), 1.0, (2.5, 0.0)), (0.5, (0.03, 0.01), 0.01, (-0.7, 1.9))]

@@ -11,13 +11,13 @@ years, a sixth parameter (ignored) and a moneyness grid and refinement (which th
 for the full finite-difference kernel, which solves a two-dimensional equation per strike of its grid, two of them, one
 by time and one by date, on the moneyness grid 0.25, 0.5, 0.8, 1, 1.25, 2 and 5 with one point between two.
 
-**The full finite-difference kernel's values are left out by the stability filter** (the S7 plan's S7R6): each of its
-sections is rebuilt with its exercise time (a date stays), forward and five parameters moved one ulp up, then down,
-every one together, then each alone, and a strike is kept only where every output at it stays within 1e-12 x
-max(|base|, |moved|, 1); none is, and the generator prints the outputs dropped. The kernel's damping steps solve by
-BiCGStab to a relative 1e-8, so a last-bit difference moves its prices by up to that: .NET's pow and the C runtime's,
-one ulp apart at a forward node (§3.3's known class), part the two solves' iterations and move a call price by 5e-9.
-QuantLib's testConsistency checks the kernel at its tolerances (tests/NanoQL.Tests/TestSuite/ZabrTests.cs).
+**The full finite-difference kernel's values are left out by the stability filter**: each of its sections is rebuilt
+with its exercise time (a date stays), forward and five parameters moved one ulp up, then down, every one together,
+then each alone, and a strike is kept only where every output at it stays within 1e-12 x max(|base|, |moved|, 1); none
+is, and the generator prints the outputs dropped. The kernel's damping steps solve by BiCGStab to a relative 1e-8, so a
+last-bit difference moves its prices by up to that: .NET's pow and the C runtime's, one ulp apart at a forward node (a
+known class), part the two solves' iterations and move a call price by 5e-9. QuantLib's testConsistency checks the
+kernel at its tolerances (tests/NanoQL.Tests/TestSuite/ZabrTests.cs).
 
 - "section" cases, one per section: its exerciseDate (null for a section by time), referenceDate (refused by time),
   exerciseTime, dayCounter (its name, null for QuantLib's empty one), volatilityType, shift, minStrike, maxStrike and
@@ -31,14 +31,12 @@ QuantLib's testConsistency checks the kernel at its tolerances (tests/NanoQL.Tes
   finite-difference kernel's ν 0, whose volatility mesher has no width.
 
 Each case's input "section" is {"kernel" ("ShortMaturityLognormal", "ShortMaturityNormal", "LocalVolatility" or
-"FullFd"), "form" ("time" or
-"floating"), "exerciseTime" or "exerciseDate", "forward", "parameters", "dayCounter" (the floating form's, as in
-tools/vectors/gen/indexes/interestrateindex.py), "moneyness", "fdRefinement"}. The wheel's classes are the proxies of
-the C++ constructors (volatilities.i), positional only. The case's "skip" input lists the strikes whose
-normal volatility QuantLib's master's Bachelier inversion moves (#2924, taken ahead of the pin as the upstream sweep's
-SWD14 and SWI3 rule; tools/vectors/gen/pricingengines/blackformula.py's smile_normal_moved): QuantLib 1.44's 0, null in
-"normalVolatility", which the reader nulls too. Read back by
-tests/NanoQL.Tests/Vectors/TermStructures/ZabrSmileSectionVectorTests.cs."""
+"FullFd"), "form" ("time" or "floating"), "exerciseTime" or "exerciseDate", "forward", "parameters", "dayCounter" (the
+floating form's, as in tools/vectors/gen/indexes/interestrateindex.py), "moneyness", "fdRefinement"}. The wheel's
+classes are the proxies of the C++ constructors (volatilities.i), positional only. The case's "skip" input lists the
+strikes whose normal volatility QuantLib's master's Bachelier inversion moves (#2924, taken ahead of the pin;
+tools/vectors/gen/pricingengines/blackformula.py's smile_normal_moved): QuantLib 1.44's 0, null in "normalVolatility",
+which the reader nulls too. Read back by tests/NanoQL.Tests/Vectors/TermStructures/ZabrSmileSectionVectorTests.cs."""
 import importlib.util
 import math
 import os
@@ -221,7 +219,7 @@ def same(a, b):
 
 
 def stable_strikes(spec, ks, discount, base):
-    """The strikes at which every refit of a moved spec leaves every output stable (the S7 plan's S7R6); a moved spec
+    """The strikes at which every refit of a moved spec leaves every output stable; a moved spec
     the model refuses (a parameter moved out of its range) is no refit."""
     keep = list(range(len(ks)))
     for m in moved_specs(spec):

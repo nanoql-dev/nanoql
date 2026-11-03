@@ -2,12 +2,11 @@
 # SPDX-License-Identifier: Apache-2.0
 """Vectors for QuantLib's older CDO (ql/experimental/credit/cdo.hpp), which the wheel doesn't expose, each output
 computed by the C++ harness (tools/cxx/src/experimental/credit/cdo.cpp): Gaussian copulas (a Student factor's range
-differs, the S-xcr code review's C3 O1-4), equity,
-mezzanine and senior tranches, sellers and buyers, given and repeated nominals, one and ten-year integration steps, a
-forward schedule and an expired one; the NPV, the legs, the fair premium, the count of falling losses, the nominal
-and the expiry; an expired CDO's legs, fair premium and count, which QuantLib leaves uninitialized, read as null.
-Not lgd(), which QuantLib sums onto an uninitialized value (the S-xcr plan's XR8 (xxvii);
-Divergences/OldCdoTests.cs). Read back by tests/NanoQL.Tests/Vectors/Cxx/Experimental/Credit/CDOCxxVectorTests.cs."""
+differs), equity, mezzanine and senior tranches, sellers and buyers, given and repeated nominals, one and ten-year
+integration steps, a forward schedule and an expired one; the NPV, the legs, the fair premium, the count of falling
+losses, the nominal and the expiry; an expired CDO's legs, fair premium and count, which QuantLib leaves uninitialized,
+read as null. Not lgd(), which QuantLib sums onto an uninitialized value (Divergences/OldCdoTests.cs). Read back by
+tests/NanoQL.Tests/Vectors/Cxx/Experimental/Credit/CDOCxxVectorTests.cs."""
 import importlib.util
 import os
 import sys

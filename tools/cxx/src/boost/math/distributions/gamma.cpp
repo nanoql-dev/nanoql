@@ -3,8 +3,7 @@
 
 // boost/math/distributions/gamma.hpp for double under the default policy: the density, the square-root process's
 // stationary law Gamma(alpha, theta/alpha) checked against SquareRootProcessRNDCalculator's stationary density where
-// QuantLib's product overflows (tests/NanoQL.Tests/Divergences/SquareRootStationaryDensityTests.cs, the S-hes plan's
-// HR7 (xiii)).
+// QuantLib's product overflows (tests/NanoQL.Tests/Divergences/SquareRootStationaryDensityTests.cs).
 //
 //     gamma::pdf  (shape, scale, x): boost::math::pdf(gamma_distribution<double>(shape, scale), x)
 //

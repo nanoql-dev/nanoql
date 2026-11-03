@@ -9,12 +9,12 @@ Three Heston processes (S₀ 100 on flat curves of 3% and 1% on Actual/365F from
 vol of vol 0.2, in 91 and 182; expiries in one and two years; calls and puts at moneyness 0.9, 1.0 and 1.1: the NPV.
 Then an expired option.
 
-The outputs nanoql fixes are left out (the S-xeq plan's §2.8; the user's ruling at the S-xeq run's stop 2): every
-reset is today or a month and more ahead, where QuantLib's propagator is finite (XER5 (xiii)), and its outer integral's
-nodes carry the propagator's unit mass within 1e-6, so nanoql keeps QuantLib's integral: at the vol of vol 0.3, 4κθ/σ²
-2.67, they miss it from the 91-day reset on, where nanoql integrates over the propagator's support (by up to 6.6e-4 at
-182 days; tests/NanoQL.Tests/Divergences/HestonForwardEngineTests.cs), so that process stops at 30 days; no κ − ρσ is near 0 (XER5 (xiv)); and the curves share the evaluation date and day counter, so the model's
-clock is the risk-free curve's (XER5 (xxxiii)).
+The outputs nanoql fixes are left out: every reset is today or a month and more ahead, where QuantLib's propagator is
+finite, and its outer integral's nodes carry the propagator's unit mass within 1e-6, so nanoql keeps QuantLib's
+integral: at the vol of vol 0.3, 4κθ/σ² 2.67, they miss it from the 91-day reset on, where nanoql integrates over the
+propagator's support (by up to 6.6e-4 at 182 days; tests/NanoQL.Tests/Divergences/HestonForwardEngineTests.cs), so that
+process stops at 30 days; no κ − ρσ is near 0; and the curves share the evaluation date and day counter, so the model's
+clock is the risk-free curve's.
 
 A case holds one process (tools/vectors/gen/processes/hestonprocess.py's spec), the reset, the exercise date and the
 payoffs, each a moneyness and an option type. The wheel's calls, by QuantLib-SWIG 1.44's options.i:

@@ -73,8 +73,7 @@ public static class CurveStateFunctions
             throw new ArgumentException("discountFactors.size()!=cotSwapRates.size()+1", nameof(discountFactors));
         }
 
-        // QuantLib writes the last swap's annuity first, before its vectors where there is no swap: refused (the S-mm
-        // plan's MR3 (xx)).
+        // QuantLib writes the last swap's annuity first, before its vectors where there is no swap: refused.
         if (!(nCotSwapRates > 0))
         {
             throw new ArgumentException("at least one coterminal swap rate is required", nameof(cotSwapRates));
@@ -134,7 +133,7 @@ public static class CurveStateFunctions
         ArgumentOutOfRangeException.ThrowIfNegative(spanningForwards);
 
         // QuantLib writes the first valid swap's annuity, past its vectors at a first valid index at or past the
-        // swaps: refused (the S-mm plan's MR3 (xx)).
+        // swaps: refused.
         ArgumentOutOfRangeException.ThrowIfNegative(firstValidIndex);
         if (!(firstValidIndex < nConstMatSwapRates))
         {

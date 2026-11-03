@@ -12,20 +12,19 @@ The calibrations, to four coterminal swaption helpers (models/shortrate/calibrat
 Euribor 6M on its flat 3.1% curve, discounted on the flat 2.7%, 1Y into 4Y to 4Y into 1Y) each priced by
 Gaussian1dSwaptionEngine on the model, Levenberg-Marquardt with models/model.py's test settings: calibrate with the
 reversions fixed, on a model whose volatility steps are the helpers' exercise dates but the last; calibrate with
-everything free, on a constant model; calibrateVolatilitiesIterative, unweighted, on the stepped model, whose record
-is its last step's; and calibrateReversionsIterative, unweighted, on a model with piecewise reversions on the same
-steps, which the wheel doesn't bind: its inline body (gsr.hpp:126-137), one calibration per helper with
-MoveReversion(i)'s flags, runs on the wheel's calibrate. Each calibration's outputs (the end criterion, the function evaluations, the parameters,
-the problem values and the helpers' calibration errors) pass the master plan's S7R6 filter, models/model.py's: each
+everything free, on a constant model; calibrateVolatilitiesIterative, unweighted, on the stepped model, whose record is
+its last step's; and calibrateReversionsIterative, unweighted, on a model with piecewise reversions on the same steps,
+which the wheel doesn't bind: its inline body (gsr.hpp:126-137), one calibration per helper with MoveReversion(i)'s
+flags, runs on the wheel's calibrate. Each calibration's outputs (the end criterion, the function evaluations, the
+parameters, the problem values and the helpers' calibration errors) pass the stability filter, models/model.py's: each
 case is refit with every nonzero real input of its helpers and its model one ulp up, then down, and an output is written
 only where both refits leave it within 1e-12 x max(|a|, |b|, 1), an integer only where they leave it equal; the counts
 print per case and per file.
 
-Left out: weighted iterative calibrations, which QuantLib 1.44 refuses for every weight vector (the S-g1d plan's
-G1R6 (xiv); tests/NanoQL.Tests/Divergences/GsrIterativeWeightsTests.cs); reversions between 0 and 1e-2 (G1R4 (i)).
-The wheel's Gsr(handle, dates, quotes, quotes, T), reversion, volatility, params, zerobond, calibrate and
-calibrateVolatilitiesIterative forward to the C++ members of those names. Read back by
-tests/NanoQL.Tests/Vectors/Models/GsrVectorTests.cs."""
+Left out: weighted iterative calibrations, which QuantLib 1.44 refuses for every weight vector
+(tests/NanoQL.Tests/Divergences/GsrIterativeWeightsTests.cs); reversions between 0 and 1e-2. The wheel's Gsr(handle,
+dates, quotes, quotes, T), reversion, volatility, params, zerobond, calibrate and calibrateVolatilitiesIterative forward
+to the C++ members of those names. Read back by tests/NanoQL.Tests/Vectors/Models/GsrVectorTests.cs."""
 import copy
 import importlib.util
 import math

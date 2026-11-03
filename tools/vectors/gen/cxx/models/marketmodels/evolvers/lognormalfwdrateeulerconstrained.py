@@ -5,17 +5,17 @@
 output computed by the C++ harness: whole evolutions with constraints, step by step.
 
 QuantLib's setConstraintType builds every step's covariances from the pseudo-root of the step it is called at, and its
-setThisConstraint displaces each step's constraint by the displacement at the step's index (the S-mm plan's MR3 (vi),
-(vii)). The harness calls setConstraintType again before each step, so each step's covariances are its own
-pseudo-root's, nanoql's fix, and every model's displacements are equal, so the step's displacement is the constrained
-rate's. On lognormalfwdratepc.py's grids and FlatVol models (six semi-annual and five irregular rates, an exponential
+setThisConstraint displaces each step's constraint by the displacement at the step's index. The harness calls
+setConstraintType again before each step, so each step's covariances are its own pseudo-root's, nanoql's fix, and
+every model's displacements are equal, so the step's displacement is the constrained rate's. On
+lognormalfwdratepc.py's grids and FlatVol models (six semi-annual and five irregular rates, an exponential
 correlation, the default evolution times and every other rate time, full and reduced factors, undisplaced and
 displaced 1% (full factors, terminal measure)), the Mersenne-twister generator (seed 42) and Sobol's (diagonal
-ordering, seed 1234), the terminal and money-market measures, from step 0 with the model's initial state and a set
-one and from step 1 (Mersenne twister, the model's state): each step's first alive rate constrained to its initial
-value plus 0.2%, at every step; and on the terminal measure and the Mersenne twister, the last rate constrained to
-its initial value less 0.3%, at even steps only. Each of two paths: its weight and each step's weight, current step,
-the curve state's forwards, discount ratios to the last bond and coterminal swap rates.
+ordering, seed 1234), the terminal and money-market measures, from step 0 with the model's initial state and a set one
+and from step 1 (Mersenne twister, the model's state): each step's first alive rate constrained to its initial value
+plus 0.2%, at every step; and on the terminal measure and the Mersenne twister, the last rate constrained to its
+initial value less 0.3%, at even steps only. Each of two paths: its weight and each step's weight, current step, the
+curve state's forwards, discount ratios to the last bond and coterminal swap rates.
 
 The harness call is tools/cxx/src/models/marketmodels/evolvers/evolvers.cpp's
 "LogNormalFwdRateEulerConstrained.evolve". Read back by

@@ -9,12 +9,11 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The SABR volatility surface's fixing read (the S-xeq plan's XER5 (xxiv)). QuantLib's smile at time t reads the
-/// index's fixing on the date ⌊365t⌋ days after the reference date, which the index refuses ("Fixing date … is not
-/// valid") on two days in seven [executed: the planner's XEP19]; nanoql reads it on that date adjusted on the fixing
-/// calendar by Following, the adjustment QuantLib's interest-rate surface makes to its reference date, the identity on
-/// a fixing date. Checks: on a weekend the section's forward is Monday's fixing and its date the weekend's; on business
-/// days the forward is the day's own fixing.
+/// The SABR volatility surface's fixing read. QuantLib's smile at time t reads the index's fixing on the date ⌊365t⌋
+/// days after the reference date, which the index refuses ("Fixing date … is not valid") on two days in seven (QuantLib
+/// 1.44); nanoql reads it on that date adjusted on the fixing calendar by Following, the adjustment QuantLib's
+/// interest-rate surface makes to its reference date, the identity on a fixing date. Checks: on a weekend the section's
+/// forward is Monday's fixing and its date the weekend's; on business days the forward is the day's own fixing.
 /// </summary>
 public class SabrVolSurfaceFixingTests
 {

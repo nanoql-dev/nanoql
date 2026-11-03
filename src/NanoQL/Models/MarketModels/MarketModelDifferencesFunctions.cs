@@ -22,12 +22,12 @@ public static class MarketModelDifferencesFunctions
     /// evolution's last time tₙ, whichever comes first.
     /// </summary>
     /// <remarks>
-    /// A rate's variance is divided by the time it accrues over (the S-mmp plan's MMPR4 (xiii), a documented
-    /// divergence): QuantLib divides rate i's by the i-th evolution time (<c>marketmodeldifferences.cpp:50</c>), √2 too
-    /// high on quarterly steps over semi-annual rates and a read past the evolution times where the rates outnumber the
-    /// steps. The total covariance accrues nothing past the evolution's last time, so on an evolution ending before a
-    /// rate resets, the rate's reset time alone would read it low (<c>Divergences/MarketModelDifferencesTests.cs</c>).
-    /// Where the evolution times are the rate times, QuantLib's value.
+    /// A rate's variance is divided by the time it accrues over (a documented divergence): QuantLib divides rate i's by
+    /// the i-th evolution time (<c>marketmodeldifferences.cpp:50</c>), √2 too high on quarterly steps over semi-annual
+    /// rates and a read past the evolution times where the rates outnumber the steps. The total covariance accrues
+    /// nothing past the evolution's last time, so on an evolution ending before a rate resets, the rate's reset time
+    /// alone would read it low (<c>Divergences/MarketModelDifferencesTests.cs</c>). Where the evolution times are the
+    /// rate times, QuantLib's value.
     /// </remarks>
     /// <param name="marketModel1">The first model.</param>
     /// <param name="marketModel2">The second model.</param>
@@ -56,9 +56,9 @@ public static class MarketModelDifferencesFunctions
     /// the step, the rate's variance difference over the step's length.
     /// </summary>
     /// <remarks>
-    /// The rate's index is checked against the number of rates (the S-mmp plan's MMPR4 (xiv), a documented divergence):
-    /// QuantLib checks it against the number of steps (<c>marketmodeldifferences.cpp:68</c>), refusing valid rates on
-    /// coarse steps and reading past the covariance on fine ones.
+    /// The rate's index is checked against the number of rates (a documented divergence): QuantLib checks it against
+    /// the number of steps (<c>marketmodeldifferences.cpp:68</c>), refusing valid rates on coarse steps and reading
+    /// past the covariance on fine ones.
     /// </remarks>
     /// <param name="marketModel1">The first model.</param>
     /// <param name="marketModel2">The second model.</param>

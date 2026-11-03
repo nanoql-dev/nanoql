@@ -18,7 +18,7 @@ namespace NanoQL.PricingEngines;
 /// <summary>
 /// <see cref="MCBarrierEngine"/> on low-discrepancy draws with QuantLib's default statistics: QuantLib-Python's
 /// <c>MCLDBarrierEngine</c>, QuantLib's <c>MCBarrierEngine&lt;LowDiscrepancy&gt;</c>, its calculations closed at
-/// <see cref="LowDiscrepancy"/> and <see cref="GeneralStatistics"/> (D12).
+/// <see cref="LowDiscrepancy"/> and <see cref="GeneralStatistics"/>.
 /// </summary>
 public static class MCLDBarrierEngine
 {

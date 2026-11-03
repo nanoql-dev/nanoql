@@ -23,7 +23,7 @@ namespace NanoQL.Coupons;
 /// A copy with another pricer (<see cref="InflationCouponExtensions.SetPricer"/>) carries the pricer into a copy of the
 /// underlying too, as QuantLib's own <c>setPricer</c> sets both; QuantLib's <c>setCouponPricer</c> calls the
 /// non-virtual <c>InflationCoupon::setPricer</c>, so a coupon built on an underlying keeps the underlying's old pricer
-/// there (the S-cms plan's CMR5 (xvii)), which the copy fixes by construction.
+/// there, which the copy fixes by construction.
 /// </para>
 /// </remarks>
 public sealed class CappedFlooredYoYInflationCoupon : YoYInflationCoupon

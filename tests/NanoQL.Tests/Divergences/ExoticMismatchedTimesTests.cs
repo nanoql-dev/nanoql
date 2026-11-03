@@ -12,20 +12,19 @@ using static NanoQL.Tests.Divergences.ExoticTermStructureMarkets;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// C3's engines on structures counted or dated apart (the playbook's dates row; the S-exo plan's ER5 (xxiv)). QuantLib's
-/// closed forms read each curve's rate on its own day counter and every time on the risk-free curve's, so with the
-/// dividend curve on Act/360 (its rate restated, the same discounts by date) the compound option moves +0.21%, the
-/// complex chooser +0.02%, the holder- and writer-extensible options +0.13% and +0.12%, and the simple chooser refuses
-/// ("Risk-free rate and dividend yield must have the same day counter"); with the risk-free curve settling two days
-/// on, against its restatement from the evaluation date, −0.36%, −0.41%, −0.24%, −0.23% and +0.01%. Its forward
+/// The exotic engines on structures counted or dated apart (the playbook's row for structures on another clock).
+/// QuantLib's closed forms read each curve's rate on its own day counter and every time on the risk-free curve's, so
+/// with the dividend curve on Act/360 (its rate restated, the same discounts by date) the compound option moves +0.21%,
+/// the complex chooser +0.02%, the holder- and writer-extensible options +0.13% and +0.12%, and the simple chooser
+/// refuses ("Risk-free rate and dividend yield must have the same day counter"); with the risk-free curve settling two
+/// days on, against its restatement from the evaluation date, −0.36%, −0.41%, −0.24%, −0.23% and +0.01%. Its forward
 /// engine's theta reads the dividend rate on that curve's own day counter (−1.4% on Act/360) and its dividend rho the
 /// reset on the risk-free curve's time (−0.10% at T+2); its Monte Carlo grids run on the risk-free curve's time, the
 /// forward engine's +0.16% on Act/360 dividends and +0.01% at T+2, the performance engine's +0.10% on Act/360. nanoql's
 /// forms read discounts and variances by date and every time on the process's clock, and the forward engines' reset
-/// terms in the dividend rho and the performance rho on the shifted curve's own time (C3's review, B3-1). The checks:
-/// nanoql on the market restated onto one clock, which on structures dated and counted alike keeps QuantLib's bits;
-/// for the reset terms, the cliquet and performance engines on the same one-period option and the prices bumped in the
-/// curve's own zero rate.
+/// terms in the dividend rho and the performance rho on the shifted curve's own time. The checks: nanoql on the market
+/// restated onto one clock, which on structures dated and counted alike keeps QuantLib's bits; for the reset terms, the
+/// cliquet and performance engines on the same one-period option and the prices bumped in the curve's own zero rate.
 /// </summary>
 public class ExoticMismatchedTimesTests
 {

@@ -429,7 +429,7 @@ With `"recordCalls": false` in the settings, a value cell can't export; a handle
 recipe.
 
 The replayer runs a folder of vectors through a tests' build, each on its own (a fresh store, the vector's conventions,
-date system and files), every number under R7:
+date system and files), every number within the vector suite's tolerance:
 
 ```
 dotnet run --project bindings/excel/replay -c Release -- vectors <folder> <the experimental tests' build> [--reverse]

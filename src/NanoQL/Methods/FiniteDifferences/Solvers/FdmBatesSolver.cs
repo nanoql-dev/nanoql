@@ -14,9 +14,9 @@ namespace NanoQL.Methods;
 /// by the variance, rolled back by the two-dimensional solver, read at a spot and a variance.
 /// </summary>
 /// <remarks>
-/// Computed at construction, where QuantLib's lazy object computes at the first read, and immutable after (the S-hes
-/// plan's HD8). The problem's times are <see cref="FdmHestonOp.Clock"/>'s (HR7 (ii)). The delta and gamma are the
-/// derivatives with respect to the spot, not the model-implied ones.
+/// Computed at construction, where QuantLib's lazy object computes at the first read, and immutable after. The
+/// problem's times are <see cref="FdmHestonOp.Clock"/>'s. The delta and gamma are the derivatives with respect to the
+/// spot, not the model-implied ones.
 /// </remarks>
 public sealed class FdmBatesSolver
 {

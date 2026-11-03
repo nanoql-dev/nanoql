@@ -83,7 +83,7 @@ public class ConstNotionalCrossCurrencyFixedVsFloatingSwapVectorTests
             CrossCurrencyInputs.CheckResults(check, c, results);
             check.Output(c, "fairRate", results.FairFixedRate);
 
-            // a floating leg compounding its spread has its fair spread left out (the S-rx plan's C3 review, B1-2)
+            // a floating leg compounding its spread has its fair spread left out
             if (c.Expected.TryGetProperty("fairSpread", out _))
             {
                 check.Output(c, "fairSpread", results.FairSpread);

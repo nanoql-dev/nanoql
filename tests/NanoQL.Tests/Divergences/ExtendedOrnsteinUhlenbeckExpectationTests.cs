@@ -6,13 +6,13 @@ using NanoQL.Experimental;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// Documented divergences of <see cref="ExtendedOrnsteinUhlenbeckProcess"/>'s expectation (the S-xeq plan's XER5 (xxix),
-/// (xxx)). The trapezoidal rule's (1 − e^(−a·dt))/(a·dt) is 0/0 at a speed of 0 (QuantLib's NaN) and cancels below
-/// (2.2e-5 lost at 1e-12); here it is a series below a·dt of 1e-2. QuantLib's Gauss-Lobatto rule integrates b(x)e^(ax)
-/// to an absolute 1e-4, out of reach once e^(a(t₀+dt)) is large: it throws from a(t₀+dt) of 35; here it integrates the
-/// bounded b(x)e^(−a(t₀+dt−x)) past 30, at a relative 1e-10 beside the absolute accuracy. Both against the closed form
-/// x₀e^(−a·dt) + (c₀ + c₁T)(1 − e^(−a·dt)) − c₁((1 − e^(−a·dt))/a − dt·e^(−a·dt)) for b(t) = c₀ + c₁t, T = t₀ + dt,
-/// which the trapezoidal rule matches exactly for linear b.
+/// Documented divergences of <see cref="ExtendedOrnsteinUhlenbeckProcess"/>'s expectation. The trapezoidal rule's (1 −
+/// e^(−a·dt))/(a·dt) is 0/0 at a speed of 0 (QuantLib's NaN) and cancels below (2.2e-5 lost at 1e-12); here it is a
+/// series below a·dt of 1e-2. QuantLib's Gauss-Lobatto rule integrates b(x)e^(ax) to an absolute 1e-4, out of reach
+/// once e^(a(t₀+dt)) is large: it throws from a(t₀+dt) of 35; here it integrates the bounded b(x)e^(−a(t₀+dt−x)) past
+/// 30, at a relative 1e-10 beside the absolute accuracy. Both against the closed form x₀e^(−a·dt) + (c₀ + c₁T)(1 −
+/// e^(−a·dt)) − c₁((1 − e^(−a·dt))/a − dt·e^(−a·dt)) for b(t) = c₀ + c₁t, T = t₀ + dt, which the trapezoidal rule
+/// matches exactly for linear b.
 /// </summary>
 public class ExtendedOrnsteinUhlenbeckExpectationTests
 {
@@ -67,8 +67,8 @@ public class ExtendedOrnsteinUhlenbeckExpectationTests
     [InlineData(100.0, 0.2, 0.1, 0.5)]
     public void AtTheCutTheGaussLobattoExpectationIsContinuous(double speed, double t0, double dt, double c1)
     {
-        // the last dt whose a(t₀ + dt) is 30 or less, QuantLib's integrand, and the next double, the bounded one past the
-        // cut, each the closed form (round 1's O1-1: speed 30 to an end of 1, and XEP37's speed 100 with a dt of 0.1)
+        // the last dt whose a(t₀ + dt) is 30 or less, QuantLib's integrand, and the next double, the bounded one past
+        // the cut, each the closed form (speed 30 to an end of 1, and speed 100 with a dt of 0.1)
         const double x0 = 3.0, c0 = 1.2;
         var process = new ExtendedOrnsteinUhlenbeckProcess(
             speed, 0.3, 0.0, t => c0 + (c1 * t), ExtendedOrnsteinUhlenbeckProcessDiscretization.GaussLobatto);

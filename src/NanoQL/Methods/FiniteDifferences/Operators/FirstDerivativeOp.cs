@@ -12,7 +12,7 @@ namespace NanoQL.Methods;
 /// The first-derivative operator in one direction: central differences on the mesher's non-uniform spacing, upwind
 /// at the lower edge and downwind at the upper one.
 /// </summary>
-/// <remarks>A working type, as its base is (the S-eq plan's SEQR1).</remarks>
+/// <remarks>A working type, as its base is.</remarks>
 [WorkingType]
 public sealed class FirstDerivativeOp : TripleBandLinearOp
 {

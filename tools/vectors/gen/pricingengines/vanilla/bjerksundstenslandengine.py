@@ -11,15 +11,14 @@ before the evaluation date, an expired one, and the refusals of a European exerc
 zero, a cash-or-nothing payoff and a call in the double-boundary case r < q < 0.
 
 The outputs nanoql fixes are left out, judged in the call frame QuantLib's put-call symmetry gives, by kept() below:
-- where the 1993 trigger I falls below B0 or isn't finite, which is where bT + 2√v < 0 (the S-van plan's VR9,
-  tests/NanoQL.Tests/Divergences/BjerksundStenslandTriggerTests.cs), with a margin;
+- where the 1993 trigger I falls below B0 or isn't finite, which is where bT + 2√v < 0
+  (tests/NanoQL.Tests/Divergences/BjerksundStenslandTriggerTests.cs), with a margin;
 - where a power (I/S)^κ of the phi family overflows or its normal tail, or erfc's, underflows, or a density's exponent
-  overflows (VR4 (xxxiii), BjerksundStenslandOverflowTests.cs), with a margin on each exponent;
-- below a variance of ε, where QuantLib's master floors the European value at intrinsic (VR5 (ii), #2854); the grid
-  holds none.
-Every structure is dated on the evaluation date and counts on Actual/365 (Fixed), and no window opens after it, so the
-mismatched-dates class (VR4 (viii), BjerksundStenslandMismatchedTimesTests.cs, ApproximationTheta...) and the window
-(ApproximationWindowTests.cs) don't reach the file.
+  overflows (BjerksundStenslandOverflowTests.cs), with a margin on each exponent;
+- below a variance of ε, where QuantLib's master floors the European value at intrinsic (#2854); the grid holds none.
+  Every structure is dated on the evaluation date and counts on Actual/365 (Fixed), and no window opens after it, so
+  the mismatched-dates class (BjerksundStenslandMismatchedTimesTests.cs, ApproximationTheta...) and the window
+  (ApproximationWindowTests.cs) don't reach the file.
 
 The wheel's calls, by QuantLib-SWIG 1.44's options.i: BjerksundStenslandApproximationEngine(process), the C++
 constructor, VanillaOption(payoff, exercise), and the option's NPV and Greeks, OneAssetOption's accessors. Read back by

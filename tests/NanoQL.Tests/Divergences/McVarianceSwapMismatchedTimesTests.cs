@@ -12,12 +12,13 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The Monte Carlo variance-swap engine on a risk-free curve settling later (the playbook's dates row; the S-exo plan's
-/// ER5 (xxix)). QuantLib's grid runs on the risk-free curve's time (<c>mcvarianceswapengine.hpp:191-201</c>), so with
-/// that curve settling two days on the paths run two days short and the volatility, dated today, is read at the shorter
-/// times. nanoql runs the grid on the process's clock, from the earliest structure's date, each structure read there
-/// accruing nothing before its own date, as the vanilla Monte Carlo engines do. The check is nanoql on the risk-free
-/// curve restated from the evaluation date (a discount of 1 to its date and its rate beyond): the same paths and value.
+/// The Monte Carlo variance-swap engine on a risk-free curve settling later (the playbook's row for structures on
+/// another clock). QuantLib's grid runs on the risk-free curve's time (<c>mcvarianceswapengine.hpp:191-201</c>), so
+/// with that curve settling two days on the paths run two days short and the volatility, dated today, is read at the
+/// shorter times. nanoql runs the grid on the process's clock, from the earliest structure's date, each structure read
+/// there accruing nothing before its own date, as the vanilla Monte Carlo engines do. The check is nanoql on the
+/// risk-free curve restated from the evaluation date (a discount of 1 to its date and its rate beyond): the same paths
+/// and value.
 /// </summary>
 public class McVarianceSwapMismatchedTimesTests
 {

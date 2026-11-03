@@ -8,8 +8,8 @@ Discount ratios of forwards on ten semi-annual, seven quarterly, six irregular a
 indexes 0, 2 and the last rate over buffers holding a marker (QuantLib's functions leave the entries below the index
 as they are); the constant-maturity swaps at spannings 0, 1, 2, 3 and past the rates. Throws: each size check.
 
-Left out (nanoql refuses them, the S-mm plan's MR3 (xx)): coterminal swaps of no rates, whose last annuity QuantLib
-writes before its vectors; a constant-maturity first valid index at or past the swaps, written past them.
+Left out (nanoql refuses them): coterminal swaps of no rates, whose last annuity QuantLib writes before its vectors; a
+constant-maturity first valid index at or past the swaps, written past them.
 
 The harness unit is tools/cxx/src/models/marketmodels/curvestate.cpp. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Models/MarketModels/CurveStateCxxVectorTests.cs."""

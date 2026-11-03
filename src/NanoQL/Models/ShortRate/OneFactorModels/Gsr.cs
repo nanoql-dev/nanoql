@@ -20,17 +20,16 @@ namespace NanoQL.Models;
 /// <remarks>
 /// <para>
 /// Immutable, a <see cref="Gaussian1dModel"/> implementing <see cref="ICalibratedModel"/> over its two arguments, the
-/// reversions and the volatilities, in QuantLib's order (the S-g1d plan's G1R2 (i); master plan §2.2's calibration
-/// row): a calibration returns a new model. QuantLib's quotes are values (master plan §2's quote row), so its four
-/// constructors are two. Its memo of the process's integrals lives for one call (G1R1 (iii)), so QuantLib's
-/// <c>flushCache</c> and its observers have no counterpart.
+/// reversions and the volatilities, in QuantLib's order (the playbook's calibration row): a calibration returns a new
+/// model. QuantLib's quotes are values (the playbook's quote row), so its four constructors are two. Its memo of the
+/// process's integrals lives for one call, so QuantLib's <c>flushCache</c> and its observers have no counterpart.
 /// </para>
 /// <para>
 /// <see cref="WithNumeraireTime"/> returns a copy, its process moved to the new forward measure time with its core, and
 /// refuses a time below the last step time, as QuantLib's master does after the pin (#2842); QuantLib 1.44's moves the
-/// process and leaves its core at the constructor's time. A curve given to the numeraire is read with extrapolation,
-/// as the model's own is, where QuantLib's reads a given one at the numeraire time without it (the plan's G1R6 (i);
-/// <c>Divergences/Gaussian1dNumeraireExtrapolationTests.cs</c>).
+/// process and leaves its core at the constructor's time. A curve given to the numeraire is read with extrapolation, as
+/// the model's own is, where QuantLib's reads a given one at the numeraire time without it
+/// (<c>Divergences/Gaussian1dNumeraireExtrapolationTests.cs</c>).
 /// </para>
 /// </remarks>
 public sealed class Gsr : Gaussian1dModel, ICalibratedModel
@@ -248,8 +247,8 @@ public sealed class Gsr : Gaussian1dModel, ICalibratedModel
     /// <exception cref="NanoQLException">An optimization or a helper's pricing fails.</exception>
     /// <remarks>
     /// QuantLib's passes the whole weight vector to each one-helper step, which its calibration refuses for every
-    /// non-empty vector of more than one weight: a documented divergence (the plan's G1R6 (xiv);
-    /// <c>Divergences/GsrIterativeWeightsTests.cs</c>). With no helper, QuantLib's loop does nothing and leaves the
+    /// non-empty vector of more than one weight: a documented divergence
+    /// (<c>Divergences/GsrIterativeWeightsTests.cs</c>). With no helper, QuantLib's loop does nothing and leaves the
     /// model's last record; here there is no record to return, so it is refused with its calibration's text.
     /// </remarks>
     public CalibrationResults<Gsr> CalibrateVolatilitiesIterative(
@@ -328,7 +327,7 @@ public sealed class Gsr : Gaussian1dModel, ICalibratedModel
 
     // Σᵢⱼ cᵢcⱼ Cov(x(tᵢ), x(tⱼ) | x(t0)) in O(n): Cov(x(tᵢ), x(tⱼ)) = V(tᵢ)·β(tᵢ, tⱼ) for tᵢ ≤ tⱼ, V the variance from
     // t0 and β the expectation's slope in its start, a product over the steps, so Sⱼ = Σᵢ₍ᵢ₋ⱼ₎ cᵢV(tᵢ)β(tᵢ, tⱼ) runs as
-    // Sⱼ₊₁ = (Sⱼ + cⱼV(tⱼ))·β(tⱼ, tⱼ₊₁) (the S-g1d plan's G1R6 (xx)).
+    // Sⱼ₊₁ = (Sⱼ + cⱼV(tⱼ))·β(tⱼ, tⱼ₊₁).
     internal override double? CompoundingLogVariance(double t0, ReadOnlySpan<double> times, ReadOnlySpan<double> coefficients, Gaussian1dMemo memo)
     {
         GsrProcessCoreMemo m = memo.For(process.Core);
@@ -400,7 +399,7 @@ public sealed class Gsr : Gaussian1dModel, ICalibratedModel
     }
 
     // QuantLib's iterative loop: one calibration per helper, each moving one parameter of the model the step before
-    // returned, weighted by its own helper's weight (G1R6 (xiv)).
+    // returned, weighted by its own helper's weight.
     private CalibrationResults<Gsr> CalibrateIterative(
         IEnumerable<BlackCalibrationHelper> helpers,
         OptimizationMethod method,

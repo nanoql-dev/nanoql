@@ -15,17 +15,17 @@ on subnormals and zeros and its price comes out negative and nanoql's distributi
 the test of chi2_refused below on the formula's arguments (coxingersollross.cpp's discountBondOption).
 
 Then setParams on a fresh model (QuantLib's model changes in place, nanoql's SetParams returns a new one), to a point
-inside the Feller region and to one outside it, which setParams doesn't check, and its refusals of too few and too
-many parameters, compared alone. Then calibrations to tools/vectors/gen/models/model.py's swaption helper sets, each
-helper priced by a JamshidianSwaptionEngine on the model and the helper's curve, through model.py's machinery and its
-S7R6 filter (each case's outputs those a one-ulp move of every input keeps): Levenberg-Marquardt and Simplex with theta
-and k fixed, where QuantLib's Feller test, on the constructor's k and theta (coxingersollross.cpp:24-37), and nanoql's,
-on each trial vector's (the S-sr plan's SSR7, K1), agree at every trial. The calibrations that free k or theta are
-generated and left out, since the two tests can disagree along them; the tree prices are generated and left out too,
-since nanoql's tree is QuantLib's before 1.23, on the square root of the short rate (K2), whose prices converge to
-QuantLib's own analytic ones where QuantLib's tree stalls (tests/NanoQL.Tests/Divergences/CirFellerConstraintTests.cs,
-CirTreeConvergenceTests.cs). Then the constructor's refusals: a level, speed or short rate zero, negative or NaN, and a
-volatility on or above the Feller bound ("<value>: invalid value").
+inside the Feller region and to one outside it, which setParams doesn't check, and its refusals of too few and too many
+parameters, compared alone. Then calibrations to tools/vectors/gen/models/model.py's swaption helper sets, each helper
+priced by a JamshidianSwaptionEngine on the model and the helper's curve, through model.py's machinery and its
+stability filter (each case's outputs those a one-ulp move of every input keeps): Levenberg-Marquardt and Simplex with
+theta and k fixed, where QuantLib's Feller test, on the constructor's k and theta (coxingersollross.cpp:24-37), and
+nanoql's, on each trial vector's, agree at every trial. The calibrations that free k or theta are generated and left
+out, since the two tests can disagree along them; the tree prices are generated and left out too, since nanoql's tree
+is QuantLib's before 1.23, on the square root of the short rate, whose prices converge to QuantLib's own analytic ones
+where QuantLib's tree stalls (tests/NanoQL.Tests/Divergences/CirFellerConstraintTests.cs, CirTreeConvergenceTests.cs).
+Then the constructor's refusals: a level, speed or short rate zero, negative or NaN, and a volatility on or above the
+Feller bound ("<value>: invalid value").
 
 The wheel's calls, by QuantLib-SWIG's shortratemodels.i: ql.CoxIngersollRoss(r0, theta, k, sigma), params(),
 discount(t), discountBond(now, maturity, rate) and (now, maturity, Array), discountBondOption(type, strike, maturity,

@@ -17,8 +17,7 @@ namespace NanoQL.Models;
 /// Immutable: <see cref="CalibratedModel.WithParams"/> returns a new model. The model's time runs from the earlier of
 /// its curves' reference dates on the risk-free curve's day counter, and its parameters' grid is on that clock, where
 /// QuantLib's runs from the risk-free curve's reference date and reads the dividend curve at the risk-free curve's
-/// times (the S-hes plan's HR7 (xi)); a market whose dividend curve isn't dated before the risk-free curve keeps
-/// QuantLib's times.
+/// times; a market whose dividend curve isn't dated before the risk-free curve keeps QuantLib's times.
 /// </para>
 /// <para>
 /// References: S. Heston, A Closed-Form Solution for Options with Stochastic Volatility with Applications to Bond and
@@ -102,7 +101,7 @@ public sealed class PiecewiseTimeDependentHestonModel : CalibratedModel
     public double Rho(double t) => Arguments[3].Evaluate(t);
 
     // The model's time to a date: the risk-free curve's year fraction from the earlier curve date, none before it;
-    // QuantLib's time, the risk-free curve's own, where the dividend curve isn't dated before it (HR7 (xi)).
+    // QuantLib's time, the risk-free curve's own, where the dividend curve isn't dated before it.
     internal double ModelTime(Date date)
     {
         Date origin = EarliestReferenceDate();

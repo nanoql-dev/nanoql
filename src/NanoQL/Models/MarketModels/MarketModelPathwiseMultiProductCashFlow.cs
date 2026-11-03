@@ -9,12 +9,12 @@ namespace NanoQL.Models;
 /// <summary>
 /// A cash flow a <see cref="MarketModelPathwiseMultiProduct"/> generates at a step: the index of its payment time and
 /// its amount followed by the amount's derivatives with respect to each forward rate. QuantLib's nested
-/// <c>MarketModelPathwiseMultiProduct::CashFlow</c> (R2's top-level name).
+/// <c>MarketModelPathwiseMultiProduct::CashFlow</c>, made top-level.
 /// </summary>
 /// <remarks>
-/// A working type (the S-mmp plan's MMPR1 (iii)): a product writes it in place, into the caller's buffer, whose
-/// <see cref="Amount"/> the caller sizes to 1 + the number of rates. <see cref="CopyFrom"/> copies another cash flow's
-/// values where QuantLib assigns one cash flow to another.
+/// A working type: a product writes it in place, into the caller's buffer, whose <see cref="Amount"/> the caller sizes
+/// to 1 + the number of rates. <see cref="CopyFrom"/> copies another cash flow's values where QuantLib assigns one cash
+/// flow to another.
 /// </remarks>
 [WorkingType]
 public sealed class MarketModelPathwiseMultiProductCashFlow

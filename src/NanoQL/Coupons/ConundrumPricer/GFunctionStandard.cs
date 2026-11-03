@@ -14,9 +14,9 @@ namespace NanoQL.Coupons;
 /// </summary>
 /// <remarks>
 /// QuantLib passes the swap's tenor as its length in the tenor's own units (<c>conundrumpricer.cpp:130</c>,
-/// <c>swapTenor_.length()</c> into a <c>Size</c>), so an 18-month index reads as 18 years; here the length is in years
-/// (the S-cms plan's CMR5 (i)), QuantLib's bits on whole years. The model presumes n equal periods, so the Hagan
-/// pricers refuse a tenor that isn't a whole number of fixed-leg periods.
+/// <c>swapTenor_.length()</c> into a <c>Size</c>), so an 18-month index reads as 18 years; here the length is in years,
+/// QuantLib's bits on whole years. The model presumes n equal periods, so the Hagan pricers refuse a tenor that isn't a
+/// whole number of fixed-leg periods.
 /// </remarks>
 internal sealed class GFunctionStandard : GFunction
 {

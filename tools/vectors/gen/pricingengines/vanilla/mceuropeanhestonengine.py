@@ -13,9 +13,8 @@ samples; pseudo-random numbers to a tolerance; low-discrepancy numbers on steps)
 numbers, the error estimate (low-discrepancy numbers give none, QuantLib's "not provided", read as null), or the engine's refusal. Then the refusal of a
 cash-or-nothing payoff.
 
-Left out (the S-hes plan's §2.10): every structure is dated on the evaluation date on Actual/365 (Fixed), the
-risk-free curve's clock (QuantLib's engine runs on the risk-free curve's times,
-tests/NanoQL.Tests/Divergences/McHestonMismatchedTimesTests.cs).
+Left out: every structure is dated on the evaluation date on Actual/365 (Fixed), the risk-free curve's clock (QuantLib's
+engine runs on the risk-free curve's times, tests/NanoQL.Tests/Divergences/McHestonMismatchedTimesTests.cs).
 
 An engine spec is {"traits": "PseudoRandom" | "LowDiscrepancy", "timeSteps", "timeStepsPerYear",
 "antitheticVariate", "requiredSamples", "requiredTolerance", "maxSamples", "seed"}, nulls for QuantLib's Null; a

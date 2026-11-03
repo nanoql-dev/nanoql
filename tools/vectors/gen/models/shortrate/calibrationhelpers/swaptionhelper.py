@@ -31,17 +31,17 @@ QuantLib refuses only in calibrationError), an unknown volatility type (in the m
 value and the error), an implied volatility whose guess, the quote, is outside the bracket or whose target the bracket
 doesn't hold, and no term structure. Amounts are compared at the nominal.
 
-A helper's times are generated and left out where nanoql's fix moves its discretized swaption (the S-cms plan's
-CMR4; the tree swaption file's snapping_moves): QuantLib snaps a swap date in the week after the exercise back to it,
-as the index's fixing days put the swap's start, so the times hold the exercise date where nanoql's hold the start
+A helper's times are generated and left out where nanoql's fix moves its discretized swaption (the tree swaption file's
+snapping_moves): QuantLib snaps a swap date in the week after the exercise back to it, as the index's fixing days put
+the swap's start, so the times hold the exercise date where nanoql's hold the start
 (tests/NanoQL.Tests/Divergences/TreeSwaptionSnappingTests.cs). Each such helper whose unlagged twin, the same helper on
 its index with no fixing days, nothing moves has that twin added (" / unlagged"), every output kept: 54 of the 57
-helpers' times are left out. The overnight-indexed ones, whose daily floating dates in the week after the exercise
-snap without a lag, and the exercise-date forms exercised on a Sunday (18 January 2026), whose swap starts the next
-business day without fixing days, get none.
+helpers' times are left out. The overnight-indexed ones, whose daily floating dates in the week after the exercise snap
+without a lag, and the exercise-date forms exercised on a Sunday (18 January 2026), whose swap starts the next business
+day without fixing days, get none.
 
-The at-par switch is set once for the run (at par, the wheel's default) and recorded in every case's settings, since
-the wheel's helper reads it whenever it recalculates (the plan's caveat 12); each case builds its own objects.
+The at-par switch is set once for the run (at par, the wheel's default) and recorded in every case's settings, since the
+wheel's helper reads it whenever it recalculates; each case builds its own objects.
 
 A helper spec is {"form" ("maturity", "exerciseDate" or "endDate"), "maturity" and "length" ([length, units]),
 "exerciseDate", "endDate" (serials), "volatility", "index" (a spec of instruments/fixedvsfloatingswap.py),
@@ -264,8 +264,8 @@ def today_of(spec):
 
 
 def times_move(spec):
-    """Whether nanoql's fix moves a helper's times (CMR4), its expiry unread: its times build the discretized
-    swaption whatever its expiry."""
+    """Whether nanoql's fix moves a helper's times, its expiry unread: its times build the discretized swaption whatever
+    its expiry."""
     with v.case_settings(today_of(spec), use_at_par_coupons=True):
         return tse.snapping_moves(make_helper(spec).swaption())
 

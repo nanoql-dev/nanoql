@@ -6,12 +6,10 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// Filon's coefficients at small θ = t·h (the S-core plan's CR7 (x)): QuantLib's closed forms for α, β and γ cancel as
-/// θ falls, so its ∫₀¹ cos(tx) dx on 100 intervals is 5.7e-13 off at t 1, 2.4e-4 off at 1e-4, 5.7e-16 for 1 at 1e-6
-/// and NaN at 0; nanoql takes their Taylor series below |θ| 1.7, within 1e-15 of sin t/t, and QuantLib's closed forms,
-/// bit for bit, from 1.7. The references are sin t/t and (1 − cos t)/t at 40 digits (this run's
-/// <c>c4work\refs_c4.py</c>, <c>refs_c4.out</c>); QuantLib's values are its own (<c>probes\c4_facts.cpp</c>,
-/// <c>c4_facts.out</c>).
+/// Filon's coefficients at small θ = t·h: QuantLib's closed forms for α, β and γ cancel as θ falls, so its ∫₀¹ cos(tx)
+/// dx on 100 intervals is 5.7e-13 off at t 1, 2.4e-4 off at 1e-4, 5.7e-16 for 1 at 1e-6 and NaN at 0; nanoql takes
+/// their Taylor series below |θ| 1.7, within 1e-15 of sin t/t, and QuantLib's closed forms, bit for bit, from 1.7. The
+/// references are sin t/t and (1 − cos t)/t at 40 digits; QuantLib's values are its own.
 /// </summary>
 public class FilonIntegralTests
 {

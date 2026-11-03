@@ -10,15 +10,14 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// Bjerksund-Stensland where its 1993 trigger falls below its lower bound B₀ (the S-van plan's VR9, the user's ruling of
-/// 2026-10-24). Where bT + 2√v &lt; 0 the trigger's exponent is positive and I falls below B₀
-/// (<c>bjerksundstenslandengine.cpp:196-206</c>): an infeasible exercise boundary, on which QuantLib's closed form falls
-/// below its European value, which its floor then returns, up to 3.4 below its own FD engine on its own Greeks case's
-/// inputs. nanoql puts the trigger at the perpetual boundary B∞ there: a flat boundary at or above B₀ is a feasible
-/// exercise rule, so its value is a lower bound of the American (Bjerksund and Stensland 2002, §3). QuantLib's check:
-/// its QD+ engine, which the trigger's value stays below and within 0.5% of, and its FD engine (1,000 × 1,000) recorded
-/// [executed on the wheel: <c>scratchpad\c2\oracle_c2.py</c>, section vr9, on <c>TestBjerksundStenslandAmericanGreeks</c>'
-/// market: q on Act/360, r on Act/365 (Fixed), the volatility on 30/360].
+/// Bjerksund-Stensland where its 1993 trigger falls below its lower bound B₀. Where bT + 2√v &lt; 0 the trigger's
+/// exponent is positive and I falls below B₀ (<c>bjerksundstenslandengine.cpp:196-206</c>): an infeasible exercise
+/// boundary, on which QuantLib's closed form falls below its European value, which its floor then returns, up to 3.4
+/// below its own FD engine on its own Greeks case's inputs. nanoql puts the trigger at the perpetual boundary B∞ there:
+/// a flat boundary at or above B₀ is a feasible exercise rule, so its value is a lower bound of the American (Bjerksund
+/// and Stensland 2002, §3). QuantLib's check: its QD+ engine, which the trigger's value stays below and within 0.5% of,
+/// and its FD engine (1,000 × 1,000) recorded (QuantLib-Python 1.44, on <c>TestBjerksundStenslandAmericanGreeks</c>'
+/// market: q on Act/360, r on Act/365 (Fixed), the volatility on 30/360).
 /// </summary>
 public class BjerksundStenslandTriggerTests
 {

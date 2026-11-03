@@ -10,13 +10,12 @@ using NanoQL.Numerics;
 namespace NanoQL.Models;
 
 /// <summary>
-/// The periodic caplet and swaption calibration's results, QuantLib's return value and out-parameters (the S-mm plan's
-/// MR2 (a)).
+/// The periodic caplet and swaption calibration's results, QuantLib's return value and out-parameters.
 /// </summary>
 /// <remarks>
 /// Immutable: a matrix read returns a copy. The failures are the last pass's inner calibration's and the iterations the
-/// passes run, where QuantLib returns the inner calibration's <c>bool</c> and counts one pass short when it converges
-/// (MR3 (xi)). The deformation size, which QuantLib never sets, is null (MR3 (xxi)).
+/// passes run, where QuantLib returns the inner calibration's <c>bool</c> and counts one pass short when it converges.
+/// The deformation size, which QuantLib never sets, is null.
 /// </remarks>
 public sealed class CapletSwaptionPeriodicCalibrationResults
 {
@@ -53,10 +52,10 @@ public sealed class CapletSwaptionPeriodicCalibrationResults
         this.modelSwaptionVolsMatrix = modelSwaptionVolsMatrix.Clone();
     }
 
-    /// <summary>Gets the last pass's inner calibration's failures (MR3 (xi)).</summary>
+    /// <summary>Gets the last pass's inner calibration's failures.</summary>
     public int Failures { get; }
 
-    /// <summary>Gets the deformation size: null, as QuantLib never computes it (MR3 (xxi)).</summary>
+    /// <summary>Gets the deformation size: null, as QuantLib never computes it.</summary>
     public double? DeformationSize => null;
 
     /// <summary>Gets the last pass's sum of the squared long swaption errors.</summary>
@@ -65,7 +64,7 @@ public sealed class CapletSwaptionPeriodicCalibrationResults
     /// <summary>Gets the long swaptions' scaling factors after the last pass.</summary>
     public ImmutableArray<double> FinalScales { get; }
 
-    /// <summary>Gets the passes run (MR3 (xi)).</summary>
+    /// <summary>Gets the passes run.</summary>
     public int IterationsDone { get; }
 
     /// <summary>Gets the last pass's improvement in the long swaptions' root-mean-square error.</summary>

@@ -12,11 +12,11 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Extensions;
 
 /// <summary>
-/// The plan's end to end: a file written by hand, with an override of <c>TARGET</c>, a joint calendar, an OIS convention
-/// and another tool's annotation, set as <see cref="ConventionProvider.Default"/>, reaches a direct construction, a
-/// set's lookup, an OIS rate helper, re-dated by a bootstrap after <c>Default</c> is set back, and a swap; inside a
-/// scope of QuantLib's provider the direct constructions are QuantLib's; and the file written back reads the same
-/// records, the annotation where it was. In the collection whose facts alone set <c>Default</c>.
+/// End to end: a file written by hand, with an override of <c>TARGET</c>, a joint calendar, an OIS convention and
+/// another tool's annotation, set as <see cref="ConventionProvider.Default"/>, reaches a direct construction, a set's
+/// lookup, an OIS rate helper, re-dated by a bootstrap after <c>Default</c> is set back, and a swap; inside a scope of
+/// QuantLib's provider the direct constructions are QuantLib's; and the file written back reads the same records, the
+/// annotation where it was. In the collection whose facts alone set <c>Default</c>.
 /// </summary>
 [Collection(DefaultProviderCollection.Name)]
 public class ConventionsEndToEndTests

@@ -14,7 +14,7 @@ namespace NanoQL.PricingEngines;
 /// <summary>
 /// <see cref="MCEuropeanHestonEngine"/> on low-discrepancy draws with QuantLib's default statistics: QuantLib-Python's
 /// <c>MCLDEuropeanHestonEngine</c>, QuantLib's <c>MCEuropeanHestonEngine&lt;LowDiscrepancy&gt;</c>, its calculations
-/// closed at <see cref="LowDiscrepancy"/> and <see cref="GeneralStatistics"/> (D12).
+/// closed at <see cref="LowDiscrepancy"/> and <see cref="GeneralStatistics"/>.
 /// </summary>
 public static class MCLDEuropeanHestonEngine
 {

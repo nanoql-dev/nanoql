@@ -9,7 +9,7 @@ namespace NanoQL.Extensions.Conventions;
 
 // What the instrument conventions' routes share: a field a route can't take is refused unless the route uses the
 // record's value anyway, a field a route ties to another is taken where the two agree, and a field a route needs and
-// no record gives is refused; each refusal names the route, the kind, the record and the field (CVD38).
+// no record gives is refused; each refusal names the route, the kind, the record and the field.
 internal static class ConventionRoutes
 {
     // A field the route can't take: refused where the record gives a value other than the one the route uses.

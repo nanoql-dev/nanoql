@@ -13,9 +13,8 @@ in each direction, solve_splitting in each direction at s = -0.3 and 0.7, precon
 (t1, t2), to_sparse_matrix (QuantLib's toMatrix, the sum of toMatrixDecomp's four parts: its row_idx, col_idx and data,
 the stored entries in order). Then the constructor's refusal of correlations whose squares sum past 1.
 
-Left out (the S-hes plan's §2.10): every structure is on the risk-free curve's day counter and reference date (on
-others QuantLib reads the dividend curve at the risk-free curve's times,
-tests/NanoQL.Tests/Divergences/HestonHullWhiteMismatchedTimesTests.cs).
+Left out: every structure is on the risk-free curve's day counter and reference date (on others QuantLib reads the
+dividend curve at the risk-free curve's times, tests/NanoQL.Tests/Divergences/HestonHullWhiteMismatchedTimesTests.cs).
 
 The specs are a "process" hestonprocess.py's, a "hullWhite" {"a", "sigma"} on the process's risk-free curve, the
 "correlation", and a "mesher" tools/vectors/gen/methods/finitedifferences/meshers/fdmmeshercomposite.py's composite.

@@ -25,16 +25,16 @@ namespace NanoQL.PricingEngines;
 /// <para>
 /// QuantLib's offset takes the Hull-White terms over the risk-free curve's time and the equity volatility as its own
 /// structure quotes it (<c>analyticbsmhullwhiteengine.cpp:86-102</c>), which differ where the two are counted
-/// differently; here the equity volatility in the covariance is its variance per unit of the risk-free curve's time, the
-/// offset's own, QuantLib's where they share their times (the S-van plan's VR4 (xi), the mismatched-dates class,
-/// <c>Divergences/BsmHullWhiteMismatchedTimesTests.cs</c>). Below a·t = 1e-2 the offset is its series to (a·t)⁴, QuantLib's
-/// three terms first, where QuantLib's closed form, used above (a·t)⁴ = ε, cancels to a relative error of about
-/// 3ε/(a·t)³ (VR4 (xxvii), <c>Divergences/BsmHullWhiteSmallReversionTests.cs</c>).
+/// differently; here the equity volatility in the covariance is its variance per unit of the risk-free curve's time,
+/// the offset's own, QuantLib's where they share their times (<c>Divergences/BsmHullWhiteMismatchedTimesTests.cs</c>).
+/// Below a·t = 1e-2 the offset is its series to (a·t)⁴, QuantLib's three terms first, where QuantLib's closed form,
+/// used above (a·t)⁴ = ε, cancels to a relative error of about 3ε/(a·t)³
+/// (<c>Divergences/BsmHullWhiteSmallReversionTests.cs</c>).
 /// </para>
 /// </remarks>
 public static class AnalyticBSMHullWhiteEngine
 {
-    // where the series to (a·t)⁴ replaces the closed form (the S-van plan's VR4 (xxvii))
+    // where the series to (a·t)⁴ replaces the closed form
     private const double SeriesCut = 1e-2;
 
     /// <summary>Prices a European vanilla option with a Hull-White short rate.</summary>
@@ -84,7 +84,7 @@ public static class AnalyticBSMHullWhiteEngine
         double a = model.A();
         double sigma = model.Sigma;
 
-        // the equity volatility per unit of the offset's time, QuantLib's quote where they share their times (VR4 (xi))
+        // the equity volatility per unit of the offset's time, QuantLib's quote where they share their times
         BlackVolTermStructure vol = process.BlackVolatility;
         double eta = vol.SharesTimes(process.RiskFreeRate)
             ? vol.BlackVol(lastDate, payoff.Strike)
@@ -102,7 +102,7 @@ public static class AnalyticBSMHullWhiteEngine
         }
         else
         {
-            // low-a algebraic limit, to (a·t)⁴ (VR4 (xxvii))
+            // low-a algebraic limit, to (a·t)⁴
             double v = sigma * sigma * t * t * t
                 * ((1 / 3.0) - (0.25 * a * t) + (7 / 60.0 * a * a * t * t)
                    - (a * a * a * t * t * t / 24.0) + (31 / 2520.0 * a * a * a * a * t * t * t * t));

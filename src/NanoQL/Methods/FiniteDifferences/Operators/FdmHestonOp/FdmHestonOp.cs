@@ -23,21 +23,21 @@ namespace NanoQL.Methods;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A working type (the S-hes plan's HD8, the S-eq plan's SEQR1): its parts are built at construction;
-/// <see cref="SetTime"/> rewrites them in place, and the apply, splitting solves and preconditioner write into the
-/// caller's spans through buffers it holds, so a step allocates nothing.
+/// A working type: its parts are built at construction; <see cref="SetTime"/> rewrites them in place, and the apply,
+/// splitting solves and preconditioner write into the caller's spans through buffers it holds, so a step allocates
+/// nothing.
 /// </para>
 /// <para>
 /// QuantLib's engines run from the risk-free curve's reference date (<c>process-&gt;time</c>), and its operator reads
 /// the dividend curve, the quanto helper's structures and the leverage function at the risk-free curve's times
-/// (<c>fdmhestonop.cpp:55-89</c>), each of which measures time from its own reference date in its own day counter:
-/// FD prices +0.28% on a dividend curve on Act/365 beside a risk-free curve on Act/360, and −0.38% beside a risk-free
+/// (<c>fdmhestonop.cpp:55-89</c>), each of which measures time from its own reference date in its own day counter: FD
+/// prices +0.28% on a dividend curve on Act/365 beside a risk-free curve on Act/360, and −0.38% beside a risk-free
 /// curve settling T+2. Here the operator's times are <see cref="Clock"/>'s, from the earliest reference date of the
 /// structures it reads, on the risk-free curve's day counter, and each structure is read at the instants they denote,
 /// on its own clock, accruing nothing before its own reference date: the rates between them per unit of the clock's
 /// time, the leverage, a multiplier of the Heston volatility, at its instant. Where every structure shares the
-/// risk-free curve's day counter and reference date, QuantLib's reads and bits (HR7 (ii), under R8;
-/// <c>Divergences/FdHestonMismatchedTimesTests.cs</c>).
+/// risk-free curve's day counter and reference date, QuantLib's reads and bits
+/// (<c>Divergences/FdHestonMismatchedTimesTests.cs</c>).
 /// </para>
 /// </remarks>
 [WorkingType]
@@ -195,8 +195,8 @@ public sealed class FdmHestonOp : FdmLinearOpComposite
     /// step conditions run on. Its day counter is the risk-free curve's and its reference date the earliest of the
     /// structures the engine reads, the process's curves, the quanto helper's and the leverage function, so the days
     /// before a later-dated structure's date are time on the grid, each structure accruing nothing before its own date
-    /// (the S-hes plan's HR7 (ii), <see cref="FdmBlackScholesOp.Clock"/>'s form). Where no structure is dated before the
-    /// risk-free curve, the clock is the risk-free curve itself, whose times are the process's.
+    /// (<see cref="FdmBlackScholesOp.Clock"/>'s form). Where no structure is dated before the risk-free curve, the
+    /// clock is the risk-free curve itself, whose times are the process's.
     /// </summary>
     /// <param name="process">The Heston process.</param>
     /// <param name="quantoHelper">The quanto helper, or <see langword="null"/> for none.</param>

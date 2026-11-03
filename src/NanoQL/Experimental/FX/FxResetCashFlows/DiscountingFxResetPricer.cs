@@ -22,8 +22,8 @@ namespace NanoQL.Experimental;
 /// Immutable, its spot a <see langword="double"/>. A reset fixed today is read from the registry unless the context
 /// enforces today's historic fixings, and forecast when the registry holds no rate for it, the only refusal QuantLib's
 /// comment means ("A today's fixing may not have been published yet"); QuantLib forecasts on any refusal, a published
-/// non-positive fixing among them, which a fixing on a past date refuses (the S-rx plan's SRXR3 (xiii);
-/// <c>tests/NanoQL.Tests/Divergences/FxResetTodaysFixingTests.cs</c>).
+/// non-positive fixing among them, which a fixing on a past date refuses
+/// (<c>tests/NanoQL.Tests/Divergences/FxResetTodaysFixingTests.cs</c>).
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]

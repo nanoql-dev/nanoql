@@ -20,10 +20,10 @@ namespace NanoQL.Coupons;
 /// <remarks>
 /// Unsealed, as in QuantLib, where the Black compounding pricer derives from it. Past fixings come from the context's
 /// store; the forward part is forecast on the index's curve, telescoped through one discount ratio wherever the
-/// coupon's <see cref="OvernightIndexedCoupon.CanApplyTelescopicFormula"/> holds. A nonzero spread compounded daily
-/// is compounded day by day over that range, on the forecast fixings, as QuantLib compounds it outside the range and
-/// once the fixings are published; QuantLib multiplies both compound factors by the discount ratio, which drops the
-/// spread (a documented divergence; the S-rx plan's C3 review, B1-1, ruled under R8).
+/// coupon's <see cref="OvernightIndexedCoupon.CanApplyTelescopicFormula"/> holds. A nonzero spread compounded daily is
+/// compounded day by day over that range, on the forecast fixings, as QuantLib compounds it outside the range and once
+/// the fixings are published; QuantLib multiplies both compound factors by the discount ratio, which drops the spread
+/// (a documented divergence).
 /// </remarks>
 public class CompoundingOvernightIndexedCouponPricer : OvernightIndexedCouponPricer
 {

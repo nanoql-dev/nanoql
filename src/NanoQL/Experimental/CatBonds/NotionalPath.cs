@@ -11,7 +11,7 @@ namespace NanoQL.Experimental;
 
 /// <summary>A path of a cat bond's notional: the fraction of the original notional left, from the reductions added in
 /// date order.</summary>
-/// <remarks>A working type (XR5's form): a notional risk writes each simulated path into it in place.</remarks>
+/// <remarks>A working type: a notional risk writes each simulated path into it in place.</remarks>
 [Experimental("NQL0001")]
 [WorkingType]
 public sealed class NotionalPath

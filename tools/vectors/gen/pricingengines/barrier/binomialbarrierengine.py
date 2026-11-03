@@ -12,11 +12,10 @@ Cox-Ross-Rubinstein, Jarrow-Rudd, additive EQP, Trigeorgis, Tian, Leisen-Reimer 
 two of them), each a call and a put at three strikes (90, 100 and 110% of the spot): the NPV, delta, gamma and theta.
 Then an expired option and the refusals: a spot beyond the barrier ("barrier touched") and a non-positive strike.
 
-The outputs nanoql fixes are left out (the S-bar plan's §2.10): every process here has one day counter and reference
-date, so the tree is QuantLib's (BR5 (ii), tests/NanoQL.Tests/Divergences/BinomialBarrierMismatchedTimesTests.cs);
-every step count is odd, so the Leisen-Reimer and Joshi trees, which take odd steps, build the grid QuantLib builds
-(the S-eq plan's SEQR7 (x)); and every exercise is European, clear of #2878's American window
-(BarrierUpstreamFixesTests.cs).
+The outputs nanoql fixes are left out: every process here has one day counter and reference date, so the tree is
+QuantLib's (tests/NanoQL.Tests/Divergences/BinomialBarrierMismatchedTimesTests.cs); every step count is odd, so the
+Leisen-Reimer and Joshi trees, which take odd steps, build the grid QuantLib builds; and every exercise is European,
+clear of #2878's American window (BarrierUpstreamFixesTests.cs).
 
 A case holds one process, exercise, barrier, tree and step count, its outputs one per payoff, the specs
 tools/vectors/gen/pricingengines/barrier/analyticbarrierengine.py's, the tree its name. The wheel's calls, by

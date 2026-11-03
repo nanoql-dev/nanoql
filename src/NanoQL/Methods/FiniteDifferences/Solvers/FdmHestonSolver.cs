@@ -18,9 +18,8 @@ namespace NanoQL.Methods;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Computed at construction, where QuantLib's lazy object computes at the first read, and immutable after (the S-hes
-/// plan's HD8, S-sr's <see cref="Fdm2DimSolver"/> form). The problem's times are <see cref="FdmHestonOp.Clock"/>'s
-/// (HR7 (ii)).
+/// Computed at construction, where QuantLib's lazy object computes at the first read, and immutable after (<see
+/// cref="Fdm2DimSolver"/>'s form). The problem's times are <see cref="FdmHestonOp.Clock"/>'s.
 /// </para>
 /// <para>
 /// The delta and gamma are the first and second derivatives with respect to the spot, not the model-implied ones (Fabio

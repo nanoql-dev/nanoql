@@ -9,9 +9,9 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Extensions;
 
 /// <summary>
-/// Batch 7's kinds in a set: each lookup against the object built by hand from the record's fields, a commodity index on
-/// an overridden calendar, the set's conversions over QuantLib's known factors, the settings through the set's units,
-/// the refusals, an alias of a unit, and each kind's record through the writer, the reader and <c>Describe</c>.
+/// The commodity kinds in a set: each lookup against the object built by hand from the record's fields, a commodity
+/// index on an overridden calendar, the set's conversions over QuantLib's known factors, the settings through the set's
+/// units, the refusals, an alias of a unit, and each kind's record through the writer, the reader and <c>Describe</c>.
 /// </summary>
 public class CommoditySetTests
 {
@@ -94,8 +94,8 @@ public class CommoditySetTests
     [Fact]
     public void AUnitsIdentityCheckBuildsNoPresetThroughTheSet()
     {
-        // F5-1: on Empty, gallons through a desk's own unit build without a barrel the set doesn't define; a preset
-        // record leaving its triangulation unit out takes QuantLib's, the barrel, which Empty then must define
+        // On Empty, gallons through a desk's own unit build without a barrel the set doesn't define; a preset record
+        // leaving its triangulation unit out takes QuantLib's, the barrel, which Empty then must define
         ConventionSet desk = ConventionSet.Empty.With(ConventionsText.Records(
             "<UnitOfMeasure name=\"CubicMetre\"><UnitName>Cubic metres</UnitName><Code>m3</Code><UnitType>Volume</UnitType></UnitOfMeasure>"
             + "<UnitOfMeasure name=\"GallonUnitOfMeasure\"><UnitName>US Gallons</UnitName><Code>GAL</Code><UnitType>Volume</UnitType>"

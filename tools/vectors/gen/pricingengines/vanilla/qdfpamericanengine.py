@@ -10,8 +10,8 @@ of their own sizes. Then an option whose window opened before the evaluation dat
 a European exercise, a payoff at expiry and a spot at zero, on the defaults.
 
 Every structure is dated on the evaluation date and counts on Actual/365 (Fixed), and no window opens after it, so
-neither the mismatched-dates class (the S-van plan's VR4 (ix), tests/NanoQL.Tests/Divergences/
-QdMismatchedTimesTests.cs) nor the window (ApproximationWindowTests.cs) reaches the file.
+neither the mismatched-dates class (tests/NanoQL.Tests/Divergences/QdMismatchedTimesTests.cs) nor the window
+(ApproximationWindowTests.cs) reaches the file.
 
 An engine spec is {"scheme", "fpEquation" (QuantLib's FixedPointEquation as an integer)}; a scheme {"type": "fast" |
 "accurate" | "highPrecision"} or {"type": "Legendre", "l", "m", "n", "p"} | {"type": "LegendreTanhSinh", "l", "m", "n",

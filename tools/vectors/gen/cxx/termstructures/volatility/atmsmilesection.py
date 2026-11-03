@@ -9,10 +9,10 @@ one: the inspectors, and at nine strikes around the level the volatility, the va
 digital call and put prices, the vega and the density. Then AtmAdjustedSmileSection with a level, without and with
 recentering: the inspectors, the volatility and the variance.
 
-Left out, where nanoql prices the adjusted section on its own level (the S-g1d plan's G1R6 (xxiii)): its option and
-digital prices, vega and density, which QuantLib's take from the source at the adjusted strike. A refused value is
-{"throws": true}. Each case's input "section" is the spec tools/cxx/src/termstructures/volatility/atmsmilesection.cpp
-reads; tests/NanoQL.Tests/Vectors/Cxx/TermStructures/AtmSmileSectionCxxVectorTests.cs reads it back."""
+Left out, where nanoql prices the adjusted section on its own level: its option and digital prices, vega and density,
+which QuantLib's take from the source at the adjusted strike. A refused value is {"throws": true}. Each case's input
+"section" is the spec tools/cxx/src/termstructures/volatility/atmsmilesection.cpp reads;
+tests/NanoQL.Tests/Vectors/Cxx/TermStructures/AtmSmileSectionCxxVectorTests.cs reads it back."""
 import importlib.util
 import os
 import sys

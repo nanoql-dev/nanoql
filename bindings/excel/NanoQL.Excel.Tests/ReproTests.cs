@@ -7,10 +7,10 @@ using static NanoQL.Excel.Tests.Xl;
 namespace NanoQL.Excel.Tests;
 
 /// <summary>
-/// Repro export (XLR14) on the test host: each call's recipe kept by its cell with its outcome, a cell's calls as the
-/// vector, and the export's refusals: a cell whose value isn't its call's outcome, an Excel error argument, an object
-/// inside a returned map or tuple, a tree mixing date systems, a tree reporting a read file's path, and value cells with
-/// the settings' <c>"recordCalls"</c> off (XLP55, XLP64, XLP72).
+/// Repro export on the test host: each call's recipe kept by its cell with its outcome, a cell's calls as the vector,
+/// and the export's refusals: a cell whose value isn't its call's outcome, an Excel error argument, an object inside a
+/// returned map or tuple, a tree mixing date systems, a tree reporting a read file's path, and value cells with the
+/// settings' <c>"recordCalls"</c> off.
 /// </summary>
 [Collection(TestSettings.Name)]
 public sealed class ReproTests
@@ -19,8 +19,9 @@ public sealed class ReproTests
     public ReproTests() => Reset();
 
     /// <summary>
-    /// Every committed vector's calls made again and exported: the committed bytes, XLD30's substitutions aside; each kind
-    /// and construct the vectors hold among them, a 1904 workbook's calls exported from a 1900 one's cell.
+    /// Every committed vector's calls made again and exported: the committed bytes, the generator's version and the
+    /// checkout's own path aside; each kind and construct the vectors hold among them, a 1904 workbook's calls exported
+    /// from a 1900 one's cell.
     /// </summary>
     [Fact]
     public void EveryCommittedVectorExportsAgainAsCommitted()
@@ -33,7 +34,7 @@ public sealed class ReproTests
             Reset();
             ExcelReference root = Vectors.Make(text);
 
-            // The date system is the calls' own, not the exporting workbook's (XLP64).
+            // The date system is the calls' own, not the exporting workbook's.
             if (name.EndsWith("-from-1900", StringComparison.Ordinal))
             {
                 Host.Shift = 0;
@@ -107,7 +108,8 @@ public sealed class ReproTests
         Assert.Equal("refused: nqlxlRepro: the cell's calls were made in workbooks of both date systems (1900 and 1904): export from one workbook's calls", Vectors.Export(TestHost.At(1, 0)));
     }
 
-    /// <summary>A tree calling a path reporter, by the name the generated build hands the runtime, is refused (F6-1).</summary>
+    /// <summary>A tree calling a path reporter, by the name the generated build hands the runtime, is
+    /// refused.</summary>
     [Fact]
     public void ATreeReportingAReadFilesPathIsRefused()
     {
@@ -185,7 +187,7 @@ public sealed class ReproTests
     {
         ExcelReference root = Vectors.Make(File.ReadAllText(Path.Combine(Vectors.Folder, "r7-names-curve.json")));
         Assert.StartsWith("{ \"upstream\": null, \"generator\": \"nanoql-excel ", Vectors.Export(root), StringComparison.Ordinal);
-        Assert.StartsWith("// nqlxlRepro: a cell's nanoql calls as C# (XLR14).", Vectors.Export(root, "csharp"), StringComparison.Ordinal);
+        Assert.StartsWith("// nqlxlRepro: a cell's nanoql calls as C#.", Vectors.Export(root, "csharp"), StringComparison.Ordinal);
         Assert.Contains("import nanoql", Vectors.Export(root, "python"), StringComparison.Ordinal);
         Assert.Equal("refused: nqlxlRepro: format: \"vector\", \"csharp\" or \"python\", not \"xml\" (Parameter 'format')", Vectors.Export(root, "xml"));
     }}

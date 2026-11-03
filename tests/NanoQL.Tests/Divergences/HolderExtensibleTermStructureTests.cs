@@ -14,11 +14,10 @@ namespace NanoQL.Tests.Divergences;
 /// yield and volatility, read at the first maturity, for both periods
 /// (<c>analyticholderextensibleoptionengine.cpp:279-297</c>), so on a rising market the call is −3.5% off; nanoql reads
 /// the variances to each date, the correlation from their ratio and the discounts by date, its critical prices solving
-/// the forward Black values from the first maturity, on West's bivariate normal (the S-exo plan's ER4, ER7, with
-/// #2892's fixes). The check is the option's exact value at the first maturity, the larger of the vanilla's payoff, the
-/// extended option less the premium and nothing, over the lognormal spot, within the critical prices' accuracy, 1e-4
-/// (QuantLib's Newton loops stop at 0.001); on a flat market, QuantLib's call within Drezner's accuracy and nearer the
-/// exact value.
+/// the forward Black values from the first maturity, on West's bivariate normal (with #2892's fixes). The check is the
+/// option's exact value at the first maturity, the larger of the vanilla's payoff, the extended option less the premium
+/// and nothing, over the lognormal spot, within the critical prices' accuracy, 1e-4 (QuantLib's Newton loops stop at
+/// 0.001); on a flat market, QuantLib's call within Drezner's accuracy and nearer the exact value.
 /// </summary>
 public class HolderExtensibleTermStructureTests
 {

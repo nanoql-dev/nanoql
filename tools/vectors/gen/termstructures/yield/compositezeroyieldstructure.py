@@ -16,8 +16,8 @@ dates (the zero-spreaded generator's), its discount, its Actual/365 (Fixed) cont
 (Fixed) semiannual forward rate over the six months after the date and its instantaneous continuous forward rate. A
 refused value is {"throws": true}.
 
-Left out (the S-sr plan's SSR6 (xv)): composites of two curves on different clocks, where QuantLib reads the second
-curve at the first's time and nanoql at the instant it denotes (tests/NanoQL.Tests/Divergences/CompositeClockTests.cs).
+Left out: composites of two curves on different clocks, where QuantLib reads the second curve at the first's time and
+nanoql at the instant it denotes (tests/NanoQL.Tests/Divergences/CompositeClockTests.cs).
 
 Each case's inputs hold its settings, the two curves' specs ("curve1", "curve2", the zero-spreaded generator's), the
 "function", the "compounding" and "frequency" as QuantLib's integers, and the "dates". Read back by

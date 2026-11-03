@@ -9,11 +9,11 @@ namespace NanoQL.Tests.Divergences;
 
 /// <summary>
 /// The refusal of a stripped optionlet's non-increasing strikes at a fixing date after the first. QuantLib checks each
-/// date's strikes but prints the first date's (<c>strippedoptionlet.cpp:106-113</c>), and reads past them where the first
-/// date has fewer: strikes 2%, 3%, 4% at the first date and 2%, 3.5%, 3% at the second give QuantLib's "non increasing
-/// strikes at date 1: 2nd is 3.000000 %, 3rd is 4.000000 %", the first date's. nanoql prints the offending date's strikes
-/// (S7D16), "non increasing strikes at date 1: 2nd is 3.500000 %, 3rd is 3.000000 %", and a shorter first date reads
-/// nothing past its end.
+/// date's strikes but prints the first date's (<c>strippedoptionlet.cpp:106-113</c>), and reads past them where the
+/// first date has fewer: strikes 2%, 3%, 4% at the first date and 2%, 3.5%, 3% at the second give QuantLib's "non
+/// increasing strikes at date 1: 2nd is 3.000000 %, 3rd is 4.000000 %", the first date's. nanoql prints the offending
+/// date's strikes, "non increasing strikes at date 1: 2nd is 3.500000 %, 3rd is 3.000000 %", and a shorter first date
+/// reads nothing past its end.
 /// </summary>
 public class StrippedOptionletStrikesTextTests
 {

@@ -6,15 +6,13 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The copulas where QuantLib's formulas fail (the S-core plan's CR7 (xx) and (xxi)): Clayton's maximum taken after the
-/// power, so a negative base gives a positive value; Clayton's, Frank's and Plackett's formulas cancelling near
-/// independence and near the edges; Frank's overflowing at large |θ|; Gumbel's and Galambos' powers leaving the
-/// doubles' range at large θ; Clayton's overflowing at large θ near 0; Ali-Mikhail-Haq's denominator cancelling as θ
-/// nears 1 and its arguments 0; and Galambos' and Ali-Mikhail-Haq's product x·y underflowing near (0, 0), Galambos' to
-/// NaN where x and y are subnormal. nanoql's forms are within a few ulps of a high-precision evaluation of QuantLib's own
-/// formula (this run's <c>c2work\copula_refs.py</c>, <c>copula_refs.out</c>, at 60 digits and more, and
-/// <c>c2work\refs_r2.py</c>, <c>refs_r2.out</c>, at 800), where QuantLib's double formula gives the values beside them
-/// (<c>probes\c2_facts.out</c>, <c>probes\c2r2_facts.out</c>).
+/// The copulas where QuantLib's formulas fail: Clayton's maximum taken after the power, so a negative base gives a
+/// positive value; Clayton's, Frank's and Plackett's formulas cancelling near independence and near the edges; Frank's
+/// overflowing at large |θ|; Gumbel's and Galambos' powers leaving the doubles' range at large θ; Clayton's overflowing
+/// at large θ near 0; Ali-Mikhail-Haq's denominator cancelling as θ nears 1 and its arguments 0; and Galambos' and
+/// Ali-Mikhail-Haq's product x·y underflowing near (0, 0), Galambos' to NaN where x and y are subnormal. nanoql's forms
+/// are within a few ulps of a high-precision evaluation of QuantLib's own formula (at 60 digits and more, and at 800),
+/// where QuantLib's double formula gives the values beside them.
 /// </summary>
 public class CopulaFormTests
 {

@@ -10,11 +10,11 @@ puts struck at 95, 101 and 110 under barriers at 101, 110 and 120 (a strike abov
 180 days, with the engine's γ and with γ 0, at QuantLib's point counts: the NPV at order 0. Then the refusals: a
 down-and-out, a rebate, a call, an order of 3 and a zero point count.
 
-The outputs nanoql fixes are left out (the S-xeq plan's §2.8; the S-xeq run's R1-5): orders 1 and 2 read the engine's
-bivariate normal, whose |ρ| ≥ 0.925 branch nanoql takes from Genz (XER5 (i)), and order 2 its trivariate normal and
-derivative helpers (XER5 (i), (ii)), so they are checked by tests/NanoQL.Tests/Divergences/PerturbativeBarrierEngineTests.cs
-and QuantLib's own cases; every structure shares the evaluation date and Act/365, the engine's clock (XER5 (xxxiii)).
-The process and option are tools/cxx/src/experimental/barrieroption/perturbativebarrieroptionengine.cpp's. Read back by
+The outputs nanoql fixes are left out: orders 1 and 2 read the engine's bivariate normal, whose |ρ| ≥ 0.925 branch
+nanoql takes from Genz, and order 2 its trivariate normal and derivative helpers, so they are checked by
+tests/NanoQL.Tests/Divergences/PerturbativeBarrierEngineTests.cs and QuantLib's own cases; every structure shares the
+evaluation date and Act/365, the engine's clock. The process and option are
+tools/cxx/src/experimental/barrieroption/perturbativebarrieroptionengine.cpp's. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Experimental/BarrierOption/PerturbativeBarrierOptionEngineCxxVectorTests.cs."""
 import os
 import sys

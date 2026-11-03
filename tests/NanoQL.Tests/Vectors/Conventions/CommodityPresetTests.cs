@@ -11,9 +11,10 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Vectors;
 
 /// <summary>
-/// Batch 7's shipped records, <c>commodities.cxx.xml</c>, against the coded classes and QuantLib's defaults: the eight
-/// units of measure, the seven known conversion factors with XRR4's two rows as nanoql's <c>Default</c> holds them,
-/// the commodity and quantity settings' defaults, and the generic indexes and their region.
+/// The experimental commodity records, <c>commodities.cxx.xml</c>, against the coded classes and QuantLib's defaults:
+/// the eight units of measure, the seven known conversion factors with the two rows QuantLib stores reversed as
+/// nanoql's <c>Default</c> holds them, the commodity and quantity settings' defaults, and the generic indexes and their
+/// region.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class CommodityPresetTests
@@ -68,7 +69,7 @@ public class CommodityPresetTests
     {
         UnitOfMeasureConversions built = Set.UnitOfMeasureConversions();
 
-        // S-xrt's equality: the same conversions in the same order
+        // The equality: the same conversions in the same order
         Assert.Equal(UnitOfMeasureConversions.Default, built);
         Assert.Equal(
             [("MB", "BBL", 1000.0), ("BBL", "GAL", 42.0), ("MB", "GAL", 42000.0), ("GAL", "l", 3.78541), ("BBL", "l", 158.987),
@@ -76,9 +77,9 @@ public class CommodityPresetTests
             built.Conversions.Select(c => (c.Source.Code, c.Target.Code, c.ConversionFactor)));
         Assert.All(built.Conversions, c => Assert.IsType<NullCommodityType>(c.CommodityType));
 
-        // XRR4: QuantLib stores (LitreUnitOfMeasure, GallonUnitOfMeasure, 3.78541) and (GallonUnitOfMeasure,
-        // MBUnitOfMeasure, 1000 * 42) (unitofmeasureconversionmanager.cpp:115-122), so its direct lookup converts 1,000
-        // litres into 3,785.41 gallons and 1,000 thousand-barrels into 2.381e-2 gallons; nanoql's, 264.17 and 42,000,000
+        // QuantLib stores (LitreUnitOfMeasure, GallonUnitOfMeasure, 3.78541) and (GallonUnitOfMeasure, MBUnitOfMeasure,
+        // 1000 * 42) (unitofmeasureconversionmanager.cpp:115-122), so its direct lookup converts 1,000 litres into
+        // 3,785.41 gallons and 1,000 thousand-barrels into 2.381e-2 gallons; nanoql's, 264.17 and 42,000,000
         var none = new NullCommodityType();
         double Gallons(UnitOfMeasure from) =>
             built.Lookup(none, from, new GallonUnitOfMeasure(), UnitOfMeasureConversionType.Direct).Convert(new Quantity(none, from, 1000)).Amount;

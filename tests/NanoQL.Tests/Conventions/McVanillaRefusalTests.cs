@@ -14,11 +14,11 @@ namespace NanoQL.Tests.Conventions;
 
 /// <summary>
 /// The refusals of the Monte Carlo vanilla engines' components and the American payoffs, with QuantLib's texts: each
-/// refusal's type, message and parameter asserted (the S-van plan's VD19). Where QuantLib's behaviour is undefined, the
-/// refusal is nanoql's: the least squares' arguments and values of different sizes, which QuantLib writes past the
-/// matrix's column; a Longstaff-Schwartz grid of fewer than two times, whose coefficient count wraps; a calibration path
-/// of a type nanoql can't copy; and an American payoff neither cash-or-nothing nor asset-or-nothing, whose paid amount
-/// QuantLib leaves unset.
+/// refusal's type, message and parameter asserted. Where QuantLib's behaviour is undefined, the refusal is nanoql's:
+/// the least squares' arguments and values of different sizes, which QuantLib writes past the matrix's column; a
+/// Longstaff-Schwartz grid of fewer than two times, whose coefficient count wraps; a calibration path of a type nanoql
+/// can't copy; and an American payoff neither cash-or-nothing nor asset-or-nothing, whose paid amount QuantLib leaves
+/// unset.
 /// </summary>
 public class McVanillaRefusalTests
 {

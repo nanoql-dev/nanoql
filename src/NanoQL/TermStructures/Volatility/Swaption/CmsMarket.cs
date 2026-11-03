@@ -112,7 +112,7 @@ public sealed class CmsMarket
         nSwapIndexes = this.swapIndexes.Length;
 
         // QuantLib reads the first row's size unchecked, and every row's two columns per index: refused, as their
-        // sizes differ, before the first read (R8).
+        // sizes differ, before the first read.
         int columns = this.bidAskSpreads.IsEmpty ? 0 : this.bidAskSpreads[0].Length;
         if (!(2 * nSwapIndexes == columns))
         {
@@ -448,7 +448,7 @@ public sealed class CmsMarket
     }
 
     // QuantLib reads the weights unchecked; its calibration checks their size when it is built, and the market's own
-    // members refuse them here (R8).
+    // members refuse them here.
     private void CheckWeights(Matrix w)
     {
         ArgumentNullException.ThrowIfNull(w);

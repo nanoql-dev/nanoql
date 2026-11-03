@@ -13,9 +13,8 @@ namespace NanoQL.Models;
 /// A parametric exercise rule on a market model: a node-data provider whose data are the rule's variables, and the rule.
 /// </summary>
 /// <remarks>
-/// A working type and an extension point (U13; the S-mmp plan's MMPR1 (i), (vi)). QuantLib derives it from
-/// <c>MarketModelNodeDataProvider</c> and <c>ParametricExercise</c>; the second is the interface
-/// <see cref="IParametricExercise"/> here.
+/// A working type and an extension point. QuantLib derives it from <c>MarketModelNodeDataProvider</c> and
+/// <c>ParametricExercise</c>; the second is the interface <see cref="IParametricExercise"/> here.
 /// </remarks>
 [WorkingType]
 public abstract class MarketModelParametricExercise : MarketModelNodeDataProvider, IParametricExercise

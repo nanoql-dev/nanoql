@@ -18,30 +18,29 @@ namespace NanoQL.Methods;
 /// distribution of the last jump's decayed size, ∫₀ᵗ λe^(−λu)/(1 − e^(−λt))·(1 − e^(−ηx·e^(βu))) du, integrated over u
 /// and split where ηx·e^(βu) crosses 1, or as 1 less its complement's integral where ηx is at least 1. QuantLib
 /// integrates its density over x from 1e-100 instead, which holds no mass while βt is below about 230; beyond, it
-/// misses mass (1.06e-4 at βt 500) and from βt 800 its integrator refuses (the S-core plan's CR7 (xvii), a documented
-/// divergence). Where its cut holds no mass the two meet within 4.4e-13, each within 4.5e-13 absolute of a 40-digit
-/// evaluation, the tolerance of both integrals being absolute; at an intensity at or above β, where QuantLib's density
-/// at t refuses, the route computes. Both routes take 1 − e^(−λt) by <c>expm1</c>, which QuantLib's subtraction loses
-/// at small λt.
+/// misses mass (1.06e-4 at βt 500) and from βt 800 its integrator refuses (a documented divergence). Where its cut
+/// holds no mass the two meet within 4.4e-13, each within 4.5e-13 absolute of a 40-digit evaluation, the tolerance of
+/// both integrals being absolute; at an intensity at or above β, where QuantLib's density at t refuses, the route
+/// computes. Both routes take 1 − e^(−λt) by <c>expm1</c>, which QuantLib's subtraction loses at small λt.
 /// <para>
-/// The density at a finite time, <see cref="JumpSizeDensity(double, double)"/>, is the route's derivative,
-/// integrated by tanh-sinh to a relative tolerance and split at the same point. QuantLib's closed form,
-/// Γ(1 − λ/β)·(P(1 − λ/β, ηx·e^(βt)) − P(1 − λ/β, ηx)) over its other factors, cancels as βt falls (9.9e-5 relative
-/// at β 10, λ 2, η 1, t 1e-12) and where ηx is large, both gammas near 1 (1.1e-7 relative at x 20, βt 0.01; 0
-/// for 4e-20 to 7e-18 where they underflow), and refuses at an intensity at or above β (its Γ's argument) and from
-/// βt about 750; it is replaced (an R8 fix, a documented divergence), within 5e-12 relative of a 40-digit evaluation
-/// (tanh-sinh's √ε), where the value is in the double range: it is refused where it leaves it at x 0
-/// (e^((β − λ)t) beyond it), 0 below it, and at subnormal sizes, where an integrand value leaves the double range, it
-/// is refused or not reliable. Both integrands take ηx·e^(βu) as one exponential, so neither leaves the double range
-/// before their peak. A time at or below 0, where QuantLib's density divides by 0, is refused; at x at or below 0 the
-/// distribution is QuantLib's 0, and below 0 the density is 0. The stationary forms are 0 below 0 too, where QuantLib's
-/// powers of a negative size give NaN, or at λ = β a negative probability.
+/// The density at a finite time, <see cref="JumpSizeDensity(double, double)"/>, is the route's derivative, integrated
+/// by tanh-sinh to a relative tolerance and split at the same point. QuantLib's closed form, Γ(1 − λ/β)·(P(1 − λ/β,
+/// ηx·e^(βt)) − P(1 − λ/β, ηx)) over its other factors, cancels as βt falls (9.9e-5 relative at β 10, λ 2, η 1, t
+/// 1e-12) and where ηx is large, both gammas near 1 (1.1e-7 relative at x 20, βt 0.01; 0 for 4e-20 to 7e-18 where they
+/// underflow), and refuses at an intensity at or above β (its Γ's argument) and from βt about 750; it is replaced (a
+/// fix, a documented divergence), within 5e-12 relative of a 40-digit evaluation (tanh-sinh's √ε), where the value is
+/// in the double range: it is refused where it leaves it at x 0 (e^((β − λ)t) beyond it), 0 below it, and at subnormal
+/// sizes, where an integrand value leaves the double range, it is refused or not reliable. Both integrands take
+/// ηx·e^(βu) as one exponential, so neither leaves the double range before their peak. A time at or below 0, where
+/// QuantLib's density divides by 0, is refused; at x at or below 0 the distribution is QuantLib's 0, and below 0 the
+/// density is 0. The stationary forms are 0 below 0 too, where QuantLib's powers of a negative size give NaN, or at λ =
+/// β a negative probability.
 /// </para>
 /// <para>
-/// The stationary distribution, <see cref="JumpSizeDistribution(double)"/>, is QuantLib's: a series below a cut and
-/// the stationary density's integral above it. QuantLib's series at min(x, ε) holds the mass to min(x, ε)/η, so with η
+/// The stationary distribution, <see cref="JumpSizeDistribution(double)"/>, is QuantLib's: a series below a cut and the
+/// stationary density's integral above it. QuantLib's series at min(x, ε) holds the mass to min(x, ε)/η, so with η
 /// below 1 and x below ε/η its integral is empty and it returns the mass to ε/η or x/η, not x (4.9% to 151% off); there
-/// the series is taken at ηx (an R8 fix, a documented divergence), QuantLib's bits elsewhere.
+/// the series is taken at ηx (a fix, a documented divergence), QuantLib's bits elsewhere.
 /// </para>
 /// </remarks>
 public sealed class ExponentialJump1dMesher : Fdm1dMesher

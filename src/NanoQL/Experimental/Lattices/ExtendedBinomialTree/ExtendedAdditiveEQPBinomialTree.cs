@@ -17,8 +17,8 @@ namespace NanoQL.Experimental;
 /// first two moments with the drift at the step's time: QuantLib's <c>ExtendedAdditiveEQPBinomialTree</c>.
 /// </summary>
 /// <remarks>
-/// Immutable; exact on constant parameters (<see cref="ExtendedBinomialTree{T}"/>, XRR6). The constructor checks the
-/// radicand at time 0 only, as QuantLib's.
+/// Immutable; exact on constant parameters (<see cref="ExtendedBinomialTree{T}"/>). The constructor checks the radicand
+/// at time 0 only, as QuantLib's.
 /// </remarks>
 [Experimental("NQL0001")]
 public sealed class ExtendedAdditiveEQPBinomialTree

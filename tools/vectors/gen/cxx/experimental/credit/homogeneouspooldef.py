@@ -5,8 +5,8 @@ doesn't expose, each output computed by the C++ harness (tools/cxx/src/experimen
 tools/vectors/gen/cxx/experimental/credit/defaultevent.py's specs: Gaussian and Student t models over one-factor
 constant-loss latent models, by correlation, on baskets of equal notionals, on equal and unequal hazards, equity,
 mezzanine and senior tranches; the expected tranche loss and the percentile at dates to ten years, and the statistics
-the model refuses. The shortfall reads Distribution's tranche and shortfall, whose defects nanoql fixes (the S-xcr
-plan's XR8 (xx)), so it is left out (held in Divergences/DistributionMembersTests.cs). Read back by
+the model refuses. The shortfall reads Distribution's tranche and shortfall, whose defects nanoql fixes, so it is left
+out (held in Divergences/DistributionMembersTests.cs). Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Experimental/Credit/HomogeneousPoolLossModelCxxVectorTests.cs through
 tests/NanoQL.Tests/Vectors/LossModelStatistics.cs."""
 import importlib.util

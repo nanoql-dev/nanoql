@@ -12,10 +12,9 @@ namespace NanoQL.Tests.Vectors;
 
 /// <summary>
 /// The overnight-indexed coupon vectors, <c>tests/vectors/cashflows/overnightindexedcoupon.json</c>: coupons over the
-/// conventions of <see cref="OvernightIndexedCoupon"/>, telescopic ones among them by the plan's telescopic rule, with
-/// their rates, amounts, accrued amounts, date lists, fixings, effective spread and index fixing; the three paths of a
-/// spread compounded daily; and legs built with <see cref="OvernightLeg"/>, with each cash flow's type, dates, nominal,
-/// rate and amount.
+/// conventions of <see cref="OvernightIndexedCoupon"/>, telescopic ones among them, with their rates, amounts, accrued
+/// amounts, date lists, fixings, effective spread and index fixing; the three paths of a spread compounded daily; and
+/// legs built with <see cref="OvernightLeg"/>, with each cash flow's type, dates, nominal, rate and amount.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class OvernightIndexedCouponVectorTests

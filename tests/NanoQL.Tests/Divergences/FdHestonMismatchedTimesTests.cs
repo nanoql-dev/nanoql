@@ -13,14 +13,13 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The finite-difference Heston and Bates engines on structures dated or counted differently (the S-hes plan's
-/// HR7 (ii), the mismatched-dates class of master Revision 58). QuantLib's engines run from the risk-free curve's
-/// reference date (<c>process-&gt;time</c>) and read the dividend curve, the leverage function and the Bates spread
-/// curve at the risk-free curve's times (<c>fdmhestonop.cpp:55-89</c>, <c>fdmbatesop.cpp:45-58</c>). nanoql's run on
-/// <see cref="FdmHestonOp.Clock"/>, from the earliest reference date of the structures read, on the risk-free curve's day
-/// counter, each structure read at the instants its times denote, nothing accruing before its own date, the leverage at
-/// its instant. QuantLib's check: its engines on the market restated on one clock, which nanoql's engines on the
-/// original market reproduce to rounding [executed on the wheel: <c>scratchpad\c1\oracle_c1.py</c>].
+/// The finite-difference Heston and Bates engines on structures dated or counted differently. QuantLib's engines run
+/// from the risk-free curve's reference date (<c>process-&gt;time</c>) and read the dividend curve, the leverage
+/// function and the Bates spread curve at the risk-free curve's times (<c>fdmhestonop.cpp:55-89</c>,
+/// <c>fdmbatesop.cpp:45-58</c>). nanoql's run on <see cref="FdmHestonOp.Clock"/>, from the earliest reference date of
+/// the structures read, on the risk-free curve's day counter, each structure read at the instants its times denote,
+/// nothing accruing before its own date, the leverage at its instant. QuantLib's check: its engines on the market
+/// restated on one clock, which nanoql's engines on the original market reproduce to rounding (QuantLib-Python 1.44).
 /// </summary>
 public class FdHestonMismatchedTimesTests
 {
@@ -73,7 +72,7 @@ public class FdHestonMismatchedTimesTests
     private static HestonModel Model(YieldTermStructure riskFree, YieldTermStructure dividends) =>
         new(new HestonProcess(riskFree, dividends, 100.0, 0.04, 1.5, 0.04, 0.4, -0.6));
 
-    // oracle_c1.py's leverage surface: 0.8 + 0.1·j + 0.002·√|K − 100| at the j-th date
+    // the leverage surface: 0.8 + 0.1·j + 0.002·√|K − 100| at the j-th date
     private static FixedLocalVolSurface Leverage(DayCounter dc)
     {
         Date[] dates = [Today + 90, Today + 180, Today + 365, Today + 730];

@@ -24,12 +24,12 @@ namespace NanoQL.Processes;
 /// QuantLib's arithmetic, where QuantLib's process recomputes them in each call. The in-place
 /// <see cref="Evolve(double, ReadOnlySpan{double}, double, ReadOnlySpan{double}, Span{double})"/> steps by QuantLib's
 /// arithmetic without allocating, its rates read without building QuantLib's rate objects, so its bits are the
-/// allocating form's (the S-hes plan's HR2).
+/// allocating form's.
 /// </para>
 /// <para>
 /// The model's time runs from the earliest reference date of the two curves on the risk-free curve's day counter, as
 /// <see cref="HestonProcess"/>'s does, where QuantLib's runs from the risk-free curve's date and its analytic engine's
-/// day count turns negative before a later-dated curve (HR7 (xviii)).
+/// day count turns negative before a later-dated curve.
 /// </para>
 /// <para>
 /// Reference: Glosten, L., Jagannathan, R., Runkle, D., 1993. Relationship between the expected value and the volatility
@@ -230,12 +230,12 @@ public sealed class GJRGARCHProcess : StochasticProcess
             : riskFreeRate.DayCounter.YearFraction(riskFreeRate.ReferenceDate, date);
     }
 
-    // The earliest reference date of the two curves, HestonProcess's (HR7 (xviii)).
+    // The earliest reference date of the two curves, HestonProcess's.
     internal Date EarliestReferenceDate() =>
         dividendYield.ReferenceDate < riskFreeRate.ReferenceDate ? dividendYield.ReferenceDate : riskFreeRate.ReferenceDate;
 
     // The model's time to a date: the risk-free curve's year fraction from the earliest reference date, none before it;
-    // QuantLib's time, the risk-free curve's own, where the dividend curve isn't dated before it (HR7 (xviii)).
+    // QuantLib's time, the risk-free curve's own, where the dividend curve isn't dated before it.
     internal double ModelTime(Date date)
     {
         Date origin = EarliestReferenceDate();

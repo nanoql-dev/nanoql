@@ -10,15 +10,14 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// A compounded overnight coupon's spread compounded daily over the forecast range (the S-rx plan's C3 review, B1-1,
-/// fixed under R8, reversing S3's D23). Where the telescopic formula applies, QuantLib's compounding pricer multiplies
-/// both compound factors, with and without the spread, by the same discount ratio
-/// (<c>overnightindexedcouponpricer.cpp:191-195</c>), so the spread is dropped: a SOFR coupon with a 1.23456% spread
-/// on a flat 3.12345% curve forecasts 0.030928216305566813, the no-spread rate, while the same coupon with the same
-/// fixings published compounds the spread, 0.043388368686242844 (−124.6bp). nanoql compounds the spread day by day
-/// on the forecast fixings, as QuantLib does outside the range and once the fixings are published; a spread added
-/// rather than compounded, a zero spread and a lookback that leaves the formula aside keep QuantLib's bits.
-/// QuantLib's check: its own published route [executed on the wheel].
+/// A compounded overnight coupon's spread compounded daily over the forecast range (fixed). Where the telescopic
+/// formula applies, QuantLib's compounding pricer multiplies both compound factors, with and without the spread, by
+/// the same discount ratio (<c>overnightindexedcouponpricer.cpp:191-195</c>), so the spread is dropped: a SOFR coupon
+/// with a 1.23456% spread on a flat 3.12345% curve forecasts 0.030928216305566813, the no-spread rate, while the same
+/// coupon with the same fixings published compounds the spread, 0.043388368686242844 (−124.6bp). nanoql compounds the
+/// spread day by day on the forecast fixings, as QuantLib does outside the range and once the fixings are published; a
+/// spread added rather than compounded, a zero spread and a lookback that leaves the formula aside keep QuantLib's
+/// bits. QuantLib's check: its own published route (QuantLib-Python 1.44).
 /// </summary>
 public class OvernightCompoundedSpreadForecastTests
 {

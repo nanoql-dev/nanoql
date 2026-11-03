@@ -19,8 +19,8 @@ namespace NanoQL.Experimental;
 /// A mutable working type (§2.7): each draw changes it, and it isn't thread-safe. A draw returns a view of its buffer,
 /// valid until its next draw, of weight 1, as QuantLib's. Its seed constructor is
 /// <see cref="LatentModelFactorSampler.Create{TCopula, TInitTraits, TUsng}"/>, a seed in [1, 4294967295] with no
-/// default, where QuantLib's defaults to 0, the clock (the S-xcr plan's XR4 (a)); a generator given instead is copied.
-/// QuantLib's two specializations by generator type are <see cref="BoxMullerFactorSampler{TUrng}"/> and
+/// default, where QuantLib's defaults to 0, the clock; a generator given instead is copied. QuantLib's two
+/// specializations by generator type are <see cref="BoxMullerFactorSampler{TUrng}"/> and
 /// <see cref="PolarStudentTFactorSampler{TUrng}"/>, chosen by the caller.
 /// </remarks>
 /// <typeparam name="TCopula">The copula policy.</typeparam>

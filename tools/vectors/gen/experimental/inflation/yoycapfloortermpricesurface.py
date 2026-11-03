@@ -13,8 +13,8 @@ YoYInflationCapFloorTermPriceSurface, QuantLib's InterpolatedYoYCapFloorTermPric
 
 Left out: the swap rates by date, a pair of vectors the wheel's binding can't return
 (tools/vectors/gen/cxx/experimental/inflation/yoycapfloortermpricesurface.py's harness vectors carry them), and the
-swap rates' dates where an intersection fails (the S-xrt plan's XRR5 (xii),
-tests/NanoQL.Tests/Divergences/YoYCapFloorPriceSurfaceTests.cs); on these markets every maturity's is found.
+swap rates' dates where an intersection fails (tests/NanoQL.Tests/Divergences/YoYCapFloorPriceSurfaceTests.cs); on
+these markets every maturity's is found.
 
 A case's inputs hold the settings, the market ({"nominal": {"dates", "rates"}, "yoy": {"referenceDate",
 "dates", "rates"}}, the curves on Actual/365 (Fixed), the year-on-year curve monthly) and the surface's {"fixingDays",

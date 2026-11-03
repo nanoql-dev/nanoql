@@ -22,8 +22,8 @@ namespace NanoQL.Numerics;
 /// Jäckel, Chapter 6.
 /// </para>
 /// <para>
-/// From QuantLib's master after the pin (#2846, the S-sr plan's SSR5): an empty matrix is refused with "matrix must not
-/// be empty" before the decomposition reads it, where 1.44 refuses it in the decomposition with "null matrix given"
+/// From QuantLib's master after the pin (#2846): an empty matrix is refused with "matrix must not be empty" before the
+/// decomposition reads it, where 1.44 refuses it in the decomposition with "null matrix given"
 /// (<c>Divergences/PseudoSqrtEmptyMatrixTests.cs</c>). The hypersphere and lower-diagonal salvaging read the conjugate
 /// gradient's result, whose current value is the last point its line search accepted
 /// (<c>Divergences/LineSearchReturnTests.cs</c>).

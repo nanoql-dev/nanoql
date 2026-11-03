@@ -23,8 +23,8 @@ namespace NanoQL.Methods;
 /// <typeparam name="TState">The early-exercise pricer's state type.</typeparam>
 /// <remarks>
 /// <para>
-/// A working type (S2R2) and an extension point, as in QuantLib: a Longstaff-Schwartz engine builds one per
-/// calculation, its stored paths, regression coefficients and exercise statistics the calculation's own, and
+/// A working type and an extension point, as in QuantLib: a Longstaff-Schwartz engine builds one per calculation, its
+/// stored paths, regression coefficients and exercise statistics the calculation's own, and
 /// <see cref="PostProcessing"/> is QuantLib's protected hook. Each calibration path is copied, since a path generator's
 /// path is a view of its buffer.
 /// </para>
@@ -32,8 +32,8 @@ namespace NanoQL.Methods;
 /// The pricer exercises only at the grid's exercise times, given beside the grid, and at its last time; QuantLib's
 /// exercises at every time of the grid, so a Bermudan option on a grid with steps between its dates, or an American
 /// option whose exercise window opens later, prices as an American option exercisable throughout: a documented
-/// divergence (the S-van plan's VR4 (xxiv), <c>Divergences/LongstaffSchwartzExerciseTimesTests.cs</c>). Where every
-/// time of the grid is an exercise time, the bits are QuantLib's.
+/// divergence (<c>Divergences/LongstaffSchwartzExerciseTimesTests.cs</c>). Where every time of the grid is an exercise
+/// time, the bits are QuantLib's.
 /// </para>
 /// </remarks>
 [WorkingType]
@@ -66,8 +66,8 @@ public class LongstaffSchwartzPathPricer<TPath, TState> : PathPricer<TPath>
     {
     }
 
-    // The engines' form: the grid's times on a clock other than the curve's own (the S-van plan's VR1 (v)), the curve's
-    // discounts read at the instants they denote, nothing accrued before its reference date.
+    // The engines' form: the grid's times on a clock other than the curve's own, the curve's discounts read at the
+    // instants they denote, nothing accrued before its reference date.
     internal LongstaffSchwartzPathPricer(
         TimeGrid times,
         IEarlyExercisePathPricer<TPath, TState> pathPricer,
@@ -98,7 +98,7 @@ public class LongstaffSchwartzPathPricer<TPath, TState> : PathPricer<TPath>
             dF[i] = termStructure.DiscountAt(clock, times[i + 1]) / termStructure.DiscountAt(clock, times[i]);
         }
 
-        // the grid's exercise times (the S-van plan's VR4 (xxiv)); the last time always is one, as QuantLib's
+        // the grid's exercise times; the last time always is one, as QuantLib's
         exercisable = new bool[times.Size];
         foreach (double t in exerciseTimes)
         {
@@ -209,7 +209,7 @@ public class LongstaffSchwartzPathPricer<TPath, TState> : PathPricer<TPath>
             //roll back step
             for (int j = 0; j < n; ++j)
             {
-                // no exercise off the exercise times (the S-van plan's VR4 (xxiv))
+                // no exercise off the exercise times
                 exercise[j] = exercisable[i] ? EarlyExercisePathPricer.Evaluate(paths[j], i) : 0.0;
                 if (exercise[j] > 0.0)
                 {

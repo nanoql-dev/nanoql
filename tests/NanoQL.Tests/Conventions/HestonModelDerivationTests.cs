@@ -11,9 +11,9 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The Bates models derive from <see cref="HestonModel"/> as QuantLib's do (the S-hes plan's HR1): no constructor calls
-/// the virtual <c>GenerateArguments</c>, which in C# would run a derived override before the derived constructor has set
-/// its arguments (CA2214); a Bates model builds its own process from its own arguments; and
+/// The Bates models derive from <see cref="HestonModel"/> as QuantLib's do: no constructor calls the virtual
+/// <c>GenerateArguments</c>, which in C# would run a derived override before the derived constructor has set its
+/// arguments (CA2214); a Bates model builds its own process from its own arguments; and
 /// <see cref="CalibratedModel.WithParams"/> keeps the derived type and rebuilds its process.
 /// </summary>
 public class HestonModelDerivationTests

@@ -26,12 +26,11 @@ namespace NanoQL.Numerics;
 /// Immutable: the section helpers are computed at construction. The derivatives aren't implemented, as in QuantLib.
 /// </para>
 /// <para>
-/// Three fixes of QuantLib's sections (the S-core plan's CR7 (i)–(iii); documented divergences in
-/// <c>Divergences/ConvexMonotoneTests.cs</c>): a section's quadratic is split to stay non-negative only where it dips
-/// below 0 inside the section, and a discriminant that rounds a hair below 0 is taken as 0, so every section keeps its
-/// average and the forwards their continuity; and positivity isn't forced on a section whose average is negative, nor
-/// is an end forward beside one floored at 0, so a negative-rate curve keeps its averages. Everywhere else QuantLib's
-/// values, bit for bit.
+/// Three fixes of QuantLib's sections (documented divergences in <c>Divergences/ConvexMonotoneTests.cs</c>): a
+/// section's quadratic is split to stay non-negative only where it dips below 0 inside the section, and a discriminant
+/// that rounds a hair below 0 is taken as 0, so every section keeps its average and the forwards their continuity; and
+/// positivity isn't forced on a section whose average is negative, nor is an end forward beside one floored at 0, so a
+/// negative-rate curve keeps its averages. Everywhere else QuantLib's values, bit for bit.
 /// </para>
 /// </remarks>
 public sealed class ConvexMonotoneInterpolation : Interpolation
@@ -167,7 +166,7 @@ public sealed class ConvexMonotoneInterpolation : Interpolation
 
         f[length - 1] = (1.5 * y[length - 1]) - (0.5 * f[length - 2]);
 
-        // positivity isn't forced on an end forward beside a section of negative average (CR7 (iii))
+        // positivity isn't forced on an end forward beside a section of negative average
         if (forcePositive)
         {
             if (f[0] < 0 && !(y[1] < 0.0))
@@ -198,7 +197,7 @@ public sealed class ConvexMonotoneInterpolation : Interpolation
             double gPrev = f[i - 1] - y[i];
             double gNext = f[i] - y[i];
 
-            // nor on a section of negative average (CR7 (iii))
+            // nor on a section of negative average
             bool sectionForcePositive = forcePositive && !(y[i] < 0.0);
 
             // first deal with the zero gradient case

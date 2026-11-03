@@ -7,15 +7,15 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The spread fitting method's discounting curve on another clock (the S-sr plan's SSR6 (xiv)). QuantLib's discount
-/// function reads the discounting curve at the fitted curve's time (<c>nonlinearfittingmethods.cpp:414-416</c>), which
-/// the discounting curve counts from its own reference date on its own day counter, rebased to the fitted curve's
-/// reference date. On the wheel, a curve fitted on 15 January 2025 over Nelson-Siegel parameters 0, 0, 0 and 0.5, whose
-/// factor is exactly 1, discounts 0.9810709211266746 at a year over a zero curve dated 30 days earlier, where QuantLib's
-/// own fit over that curve implied at the fitted curve's date gives 0.9790412094890624; over a flat 3% Actual/360 curve,
-/// 0.9704455335485082 where the curve restated on Actual/365 (Fixed) gives 0.9700412654712278. nanoql reads the
-/// discounting curve at the instant the fitted curve's time denotes. QuantLib's check: its own fitted curve over the
-/// discounting curve restated on the fitted curve's reference date and day counter.
+/// The spread fitting method's discounting curve on another clock. QuantLib's discount function reads the discounting
+/// curve at the fitted curve's time (<c>nonlinearfittingmethods.cpp:414-416</c>), which the discounting curve counts
+/// from its own reference date on its own day counter, rebased to the fitted curve's reference date. On the wheel, a
+/// curve fitted on 15 January 2025 over Nelson-Siegel parameters 0, 0, 0 and 0.5, whose factor is exactly 1, discounts
+/// 0.9810709211266746 at a year over a zero curve dated 30 days earlier, where QuantLib's own fit over that curve
+/// implied at the fitted curve's date gives 0.9790412094890624; over a flat 3% Actual/360 curve, 0.9704455335485082
+/// where the curve restated on Actual/365 (Fixed) gives 0.9700412654712278. nanoql reads the discounting curve at the
+/// instant the fitted curve's time denotes. QuantLib's check: its own fitted curve over the discounting curve restated
+/// on the fitted curve's reference date and day counter.
 /// </summary>
 public class SpreadFittingClockTests
 {

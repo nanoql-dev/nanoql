@@ -13,7 +13,7 @@ namespace NanoQL.Models;
 /// integers.
 /// </summary>
 /// <remarks>
-/// Immutable. Both seeds are explicit, in [1, 4294967295] (the S-mm plan's SD6); QuantLib's defaults are 42 and 43.
+/// Immutable. Both seeds are explicit, in [1, 4294967295]; QuantLib's defaults are 42 and 43.
 /// </remarks>
 public sealed class Burley2020SobolBrownianGeneratorFactory : BrownianGeneratorFactory
 {

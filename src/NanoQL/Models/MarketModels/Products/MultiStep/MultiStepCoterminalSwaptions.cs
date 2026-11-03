@@ -14,8 +14,8 @@ namespace NanoQL.Models;
 /// rate from rate i times the swap's annuity in its first bond, at its payment time.
 /// </summary>
 /// <remarks>
-/// A working type (the S-mmp plan's MMPR1 (i)); the payoffs are shared, immutable. Fewer payoffs or payment times than
-/// rates are refused, where QuantLib reads past them (MMPR4's refusals).
+/// A working type; the payoffs are shared, immutable. Fewer payoffs or payment times than rates are refused, where
+/// QuantLib reads past them.
 /// </remarks>
 [WorkingType]
 public sealed class MultiStepCoterminalSwaptions : MultiProductMultiStep

@@ -6,7 +6,7 @@ using ExcelDna.Integration;
 namespace NanoQL.Excel;
 
 /// <summary>
-/// An entry's RTD topic, keyed by the store's key (XLR3): it shows the entry while a cell holds the topic, and Excel's
+/// An entry's RTD topic, keyed by the store's key: it shows the entry while a cell holds the topic, and Excel's
 /// disposal of the topic, when its last cell goes, releases the entry.
 /// </summary>
 internal sealed class XlHolder : IExcelObservable, IDisposable

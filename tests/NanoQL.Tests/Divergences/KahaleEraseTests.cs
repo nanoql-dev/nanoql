@@ -9,14 +9,14 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// Kahale's failed interpolation (the S-g1d plan's G1R6 (xv)): a segment that fails to fit erases the grid's next
-/// point and, in QuantLib, the function slot at the grid index after the segment's (<c>kahalesmilesection.cpp:163</c>),
-/// past the slots' end once the core's left index is 2 or more, undefined behaviour: on a harness section whose smile is
-/// 0.2 − k + 10k² at a level of 3% over a year, interpolated on the default grid, the core's left index is 7 and the C++
-/// harness exits. nanoql erases the unfitted slot after the segment's own. QuantLib's check: its own section on the grid
-/// cut to start at the core, left index 1, where its erase is in range and every slot either erase removes is unfitted:
-/// from the core to the segment where nanoql's fit also refuses a cancelled function (KahaleSegmentFitTests), the
-/// prices agree bit for bit.
+/// Kahale's failed interpolation: a segment that fails to fit erases the grid's next point and, in QuantLib, the
+/// function slot at the grid index after the segment's (<c>kahalesmilesection.cpp:163</c>), past the slots' end once
+/// the core's left index is 2 or more, undefined behaviour: on a harness section whose smile is 0.2 − k + 10k² at a
+/// level of 3% over a year, interpolated on the default grid, the core's left index is 7 and the C++ harness exits.
+/// nanoql erases the unfitted slot after the segment's own. QuantLib's check: its own section on the grid cut to start
+/// at the core, left index 1, where its erase is in range and every slot either erase removes is unfitted: from the
+/// core to the segment where nanoql's fit also refuses a cancelled function (KahaleSegmentFitTests), the prices agree
+/// bit for bit.
 /// </summary>
 public class KahaleEraseTests
 {

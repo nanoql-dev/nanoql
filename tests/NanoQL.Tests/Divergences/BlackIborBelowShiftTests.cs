@@ -11,14 +11,14 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The Black Ibor pricer's option struck below −shift on a lognormal volatility (the S-cms plan's CMR5 (xxiii), its
-/// Ibor part): QuantLib's <c>BlackIborCouponPricer::optionletRate</c> calls <c>blackFormula</c> at the effective strike
+/// The Black Ibor pricer's option struck below −shift on a lognormal volatility (its Ibor part): QuantLib's
+/// <c>BlackIborCouponPricer::optionletRate</c> calls <c>blackFormula</c> at the effective strike
 /// (<c>couponpricer.cpp</c>), which refuses a strike below −shift ("strike + displacement (-0.005 + 0) must be
 /// non-negative"), so a capped or floored Ibor coupon struck there, and a digital Ibor coupon whose replication strikes
-/// reach there, refuse; at −shift itself the formula prices the intrinsic. As ruled: at or below −shift a caplet is
-/// the forward less the strike and a floorlet 0, the formula's limit there, on a forward above −shift; a forward at or
-/// below −shift reaches the formula and its refusal, as QuantLib's. QuantLib's check: its Black formula at
-/// −shift + 1e-12, and its digital coupon struck 1e-12 above its replication's reach (the wheel and the C++ harness).
+/// reach there, refuse; at −shift itself the formula prices the intrinsic. At or below −shift a caplet is the forward
+/// less the strike and a floorlet 0, the formula's limit there, on a forward above −shift; a forward at or below −shift
+/// reaches the formula and its refusal, as QuantLib's. QuantLib's check: its Black formula at −shift + 1e-12, and its
+/// digital coupon struck 1e-12 above its replication's reach (the wheel and the C++ harness).
 /// </summary>
 public class BlackIborBelowShiftTests
 {

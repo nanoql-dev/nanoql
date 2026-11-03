@@ -10,9 +10,9 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// A capped year-on-year coupon's effective strike without its option (found while porting the S-cms plan's C3):
-/// QuantLib's <c>CappedFlooredYoYInflationCoupon::effectiveCap</c> returns (C − b) / a whether or not the fixing is
-/// capped (<c>capflooredinflationcoupon.cpp:126-128</c>), and its constructor sets C only for a cap it was given
+/// A capped year-on-year coupon's effective strike without its option: QuantLib's
+/// <c>CappedFlooredYoYInflationCoupon::effectiveCap</c> returns (C − b) / a whether or not the fixing is capped
+/// (<c>capflooredinflationcoupon.cpp:126-128</c>), and its constructor sets C only for a cap it was given
 /// (<c>:27-49</c>, the member declared at <c>.hpp:135</c>), so the effective cap of a coupon with no cap reads a member
 /// nothing set, undefined behaviour; its <c>effectiveFloor</c> likewise. On the wheel, the vectors' at-the-money
 /// coupons gave such values as 1.69e-306 and 1.43e-311, and 0.029 for the effective floor of the coupon with neither

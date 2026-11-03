@@ -7,9 +7,9 @@ doesn't expose.
 The implied volatilities of LPP2HestonExpansion, LPP3HestonExpansion and FordeHestonExpansion at seven strikes on
 QuantLib's testExpansionOnFordeReference parameters (κ 1.15) at terms from 2 to 10 and at κ 4 at terms from 0.5 to 10;
 and the engine's NPVs of calls and puts at five strikes and two maturities, three and five years, on batesmodel.py's two
-Heston sets. Every κt is between 2 and 40, at or above every coefficient's cut and below HR11's, so the coefficients
-are QuantLib's double arithmetic (the S-hes plan's HR6, HR11); §2.10 leaves out the κt below the cuts, where
-QuantLib's rounding passes 1e-12 (HR7 (x)'s facts), and a term of 0 (HR7 (xxxii)'s).
+Heston sets. Every κt is between 2 and 40, at or above every coefficient's cut and below nanoql's large-κt cut, so the
+coefficients are QuantLib's double arithmetic; the κt below the cuts, where QuantLib's rounding passes 1e-12, and a term
+of 0 are left out.
 
 An expansion case holds "formula" (HestonExpansionEngine::HestonExpansionFormula's integer: LPP2 0, LPP3 1, Forde 2),
 "kappa", "theta", "sigma", "v0", "rho", "term", "strikes" and "forward"; an engine case the "process"

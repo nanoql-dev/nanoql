@@ -11,19 +11,17 @@ using NanoQL.Tests.Conventions;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The upper-bound engine's exercise values (the S-mmp plan's MMPR4 (vii), option (1), ruled by the user, with
-/// Revision 4's (a) and (b)). QuantLib's engine reads each exercise value at every exercise date from an
+/// The upper-bound engine's exercise values. QuantLib's engine reads each exercise value at every exercise date from an
 /// <c>ExerciseAdapter</c> done at its first, relying on its composite to step a finished part again
-/// (<c>upperboundengine.cpp</c>'s warning); under the composites' ruled end that adapter stops, so nanoql's two
+/// (<c>upperboundengine.cpp</c>'s warning); under the composites' end that adapter stops, so nanoql's two
 /// exercise-value parts pay the exercise value at every exercise date, done at their last step. On a hedge that ends
 /// before the last exercise date (a TARN's knock-out) the decorated hedge stops with it, so nanoql treats no date after
 /// the step at which the hedge ends as an exercise date, and a call-specified product stays ended after its underlying.
-/// On six semi-annual rates, FlatVol 20%, the money-market-plus measure (this run's <c>probes\c3_facts.cpp</c>; the
-/// planner's MPP21, MPP23): QuantLib's tested callable receiver swap and a Bermudan whose nothing-underlying ends at the
-/// last step, QuantLib's values bit for bit; a callable TARN with a cash rebate growing from 1% to 6%, against the same
-/// engine on the TARN made inert after its end, where QuantLib's engine is right: QuantLib's engine on the plain TARN
-/// +0.0226 ± 0.0007 (34 standard errors), nanoql's within 4. Checks: QuantLib's engine on its tested configurations
-/// and on the inert TARN, bit for bit; the paired difference.
+/// On six semi-annual rates, FlatVol 20%, the money-market-plus measure: QuantLib's tested callable receiver swap and a
+/// Bermudan whose nothing-underlying ends at the last step, QuantLib's values bit for bit; a callable TARN with a cash
+/// rebate growing from 1% to 6%, against the same engine on the TARN made inert after its end, where QuantLib's engine
+/// is right: QuantLib's engine on the plain TARN +0.0226 ± 0.0007 (34 standard errors), nanoql's within 4. Checks:
+/// QuantLib's engine on its tested configurations and on the inert TARN, bit for bit; the paired difference.
 /// </summary>
 public class UpperBoundEngineTests
 {
@@ -55,8 +53,8 @@ public class UpperBoundEngineTests
     public void OnAHedgeOfSixProductsTheBoundIsQuantLibs()
     {
         // QuantLib sums the hedge's products (upperboundengine.cpp:133, :257-259), its decorated hedge's rebate one
-        // product, fewer than the hedge's (:124-125): six forwards struck at K hedging the callable receiver swap, 255 x 64
-        // (this run's probes\c3_multihedge.cpp), QuantLib's bits
+        // product, fewer than the hedge's (:124-125): six forwards struck at K hedging the callable receiver swap, 255
+        // x 64, QuantLib's bits
         var forwards = new MultiStepForwards(Market.RateTimes, Market.Accruals, Market.PaymentTimes, [.. Enumerable.Repeat(K, 6)]);
         var stats = new GeneralStatistics();
         Engine(Receiver(), new NothingExerciseValue(Market.RateTimes), forwards).MultiplePathValues(stats, 255, 64);
@@ -98,7 +96,7 @@ public class UpperBoundEngineTests
     [Fact]
     public void OnCoterminalAndCmsEvolversTheBoundIsQuantLibs()
     {
-        // S-mm's MR3 (v): the evolvers set on the outer state, each on its own state type as QuantLib's
+        // The evolvers set on the outer state, each on its own state type as QuantLib's
         var cs = new LMMCurveState(Market.RateTimes);
         cs.SetOnForwardRates(Market.Forwards);
         var evolution = new EvolutionDescription(Market.RateTimes, ExerciseTimes);
@@ -129,7 +127,7 @@ public class UpperBoundEngineTests
     [Fact]
     public void OnANormalEvolverEveryPathsGapIsAtLeastZero()
     {
-        // S-mm's MR3 (iv): the inner paths start from the outer state, where QuantLib's start from the model's forwards
+        // The inner paths start from the outer state, where QuantLib's start from the model's forwards
         var evolution = new EvolutionDescription(Market.RateTimes, ExerciseTimes);
         int[] numeraires = [.. EvolutionDescriptionFunctions.MoneyMarketPlusMeasure(evolution, 1)];
         MarketModel normal = Market.FlatVol(evolution, 3, 0.006);
@@ -182,7 +180,7 @@ public class UpperBoundEngineTests
         return stats;
     }
 
-    // MPP23's TARN made inert after its end: no cash flow once ended, done at the last step.
+    // The TARN made inert after its end: no cash flow once ended, done at the last step.
     private sealed class ZeroTailProduct : MarketModelMultiProduct
     {
         private readonly MarketModelMultiProduct product;
@@ -240,7 +238,7 @@ public class UpperBoundEngineTests
         public override MarketModelMultiProduct Clone() => new ZeroTailProduct(this);
     }
 
-    // MPP23's cash rebate at each exercise, paid then; inert, nothing once the TARN's coupons reach its total.
+    // The cash rebate at each exercise, paid then; inert, nothing once the TARN's coupons reach its total.
     private sealed class ScheduleCash : MarketModelExerciseValue
     {
         private readonly double[] exerciseTimes;

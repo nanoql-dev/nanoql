@@ -14,8 +14,8 @@ harness (docs/porting-playbook.md §9.4), on the evaluation date 15 October 2026
   steps per year and the reverse, samples after a tolerance and the reverse, a tolerance under low-discrepancy
   numbers, and no steps.
 
-Left out (the S-hes plan's §2.10): structures off the process's reference date and day counter (HR7 (xviii)); a seed
-of 0, QuantLib's seed from the clock, which nanoql refuses (the master plan's S2R4): every case sets its seed first.
+Left out: structures off the process's reference date and day counter; a seed of 0, QuantLib's seed from the clock,
+which nanoql refuses: every case sets its seed first.
 
 A path case holds the "optionType", "strikes", "discount", "times" and "paths" (one list of values per asset, each of
 the grid's size); a builder case the "traits", the "process" ({"referenceDate", "dayCounter", "riskFree", "dividend",

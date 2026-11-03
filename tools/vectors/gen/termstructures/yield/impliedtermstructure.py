@@ -11,10 +11,10 @@ years; and at 30 dates from its reference date, to 30 years after it or 25 to th
 its discount, its Actual/365 (Fixed) continuous zero rate, its Actual/365 (Fixed) semiannual forward rate over the six
 months after the date and its instantaneous continuous forward rate. A refused value is {"throws": true}.
 
-Left out (the S-sr plan's SSR6 (viii)): the date reads of the original on 30/360 (Bond Basis), whose year fractions
-don't add, where QuantLib reads the original at the implied time plus the reference date's and misses the original's
-ratio P(d)/P(ref) by date, which nanoql reads there (tests/NanoQL.Tests/Divergences/ImpliedTermStructureClockTests.cs);
-its time reads stay, QuantLib's sum.
+Left out: the date reads of the original on 30/360 (Bond Basis), whose year fractions don't add, where QuantLib reads
+the original at the implied time plus the reference date's and misses the original's ratio P(d)/P(ref) by date, which
+nanoql reads there (tests/NanoQL.Tests/Divergences/ImpliedTermStructureClockTests.cs); its time reads stay, QuantLib's
+sum.
 
 Each case's inputs hold its settings, the "original" (the zero-spreaded generator's spec), the "referenceDate", the
 "times" and the "dates" (empty where left out). Read back by

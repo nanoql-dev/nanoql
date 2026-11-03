@@ -12,16 +12,16 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The Heston density, the PDF engine and exponential fitting at a tiny κ (the S-hes plan's HR7 (xxv), under R8).
-/// QuantLib's PDF engine window 8√(θt + (v₀ − θ)(1 − e^{−κt})/κ) (<c>analyticpdfhestonengine.cpp:46-48</c>) and
-/// exponential fitting's average variance (<c>exponentialfittinghestonengine.cpp:252</c>) lose the (v₀ − θ) term once
-/// 1 − e^{−κt} rounds to 0, and <see cref="HestonRNDCalculator"/>'s density, which the PDF engine integrates, throws
-/// "Interval contains no more machine number" at every x from κ = 1e-16, where its values agree to six digits from
-/// 1e-8 to 1e-14. nanoql takes −expm1(−κt) below κt = 1e-2 in both windows, and raises the density's κ to 1e-12/t
-/// where κt is below 1e-12, the density moving by about κt relative there, and its inverse distribution's starting
-/// guess takes the same κ, where QuantLib's (1 − e^{−κt})/(tκ) is NaN at κ 0 and the inversion throws (the code
-/// review's C2-F1-1). The check: the density at that κ, bit for bit, QuantLib's within its complex functions' last
-/// bits, QuantLib's analytic engine, and the distribution at the inverse's quantiles.
+/// The Heston density, the PDF engine and exponential fitting at a tiny κ. QuantLib's PDF engine window 8√(θt + (v₀ −
+/// θ)(1 − e^{−κt})/κ) (<c>analyticpdfhestonengine.cpp:46-48</c>) and exponential fitting's average variance
+/// (<c>exponentialfittinghestonengine.cpp:252</c>) lose the (v₀ − θ) term once 1 − e^{−κt} rounds to 0, and
+/// <see cref="HestonRNDCalculator"/>'s density, which the PDF engine integrates, throws "Interval contains no more
+/// machine number" at every x from κ = 1e-16, where its values agree to six digits from 1e-8 to 1e-14. nanoql takes
+/// −expm1(−κt) below κt = 1e-2 in both windows, and raises the density's κ to 1e-12/t where κt is below 1e-12, the
+/// density moving by about κt relative there, and its inverse distribution's starting guess takes the same κ, where
+/// QuantLib's (1 − e^{−κt})/(tκ) is NaN at κ 0 and the inversion throws. The check: the density at that κ, bit for bit,
+/// QuantLib's within its complex functions' last bits, QuantLib's analytic engine, and the distribution at the
+/// inverse's quantiles.
 /// </summary>
 public class HestonTinyKappaTests
 {
@@ -33,7 +33,7 @@ public class HestonTinyKappaTests
     public void AtATinyKappaThePdfEnginePrices()
     {
         // QuantLib 1.44's PDF engine throws "Interval contains no more machine number" at kappa 1e-16 and 1e-20
-        // [executed on the wheel]
+        // (QuantLib-Python 1.44)
         HestonModel model = Model(1e-20);
         double analytic = AnalyticHestonEngine.Calculate(Call, Context, model, 192).NPV!.Value;
         Assert.Equal(19.77783250232107, analytic, 1e-13);
@@ -44,7 +44,7 @@ public class HestonTinyKappaTests
     public void BelowTheFloorTheDensityIsQuantLibsAtTheFloor()
     {
         // the density at kappa 1e-20 is the density at kappa 1e-12/t, bit for bit; QuantLib 1.44's HestonRNDCalculator
-        // there [executed on the wheel], within the complex functions' last bits
+        // there (QuantLib-Python 1.44), within the complex functions' last bits
         var calculator = new HestonRNDCalculator(Model(1e-20).Process);
         var atTheFloor = new HestonRNDCalculator(Model(1e-12).Process);
         foreach ((double x, double quantLib) in new[] { (4.5, 0.7805470095696564), (4.605170185988092, 0.8089354908158081), (4.8, 0.7586820578313146) })
@@ -58,7 +58,7 @@ public class HestonTinyKappaTests
     public void ExponentialFittingIsContinuousAsKappaFalls()
     {
         // QuantLib 1.44 at kappa 1e-20: 19.777832868229584 against the analytic engine's 19.77783250232107, 3.7e-7 off
-        // [executed on the wheel]
+        // (QuantLib-Python 1.44)
         foreach (double kappa in new[] { 1e-8, 1e-14, 1e-16, 1e-20 })
         {
             HestonModel model = Model(kappa);
@@ -70,8 +70,8 @@ public class HestonTinyKappaTests
     [Fact]
     public void BelowTheFloorTheInverseDistributionInverts()
     {
-        // the process at kappa 0 (the model refuses it) and 1e-20, where the unfloored guess is NaN and 4.634
-        // [executed on the tree before the fold]
+        // the process at kappa 0 (the model refuses it) and 1e-20, where the unfloored guess is NaN and 4.634 (QuantLib
+        // 1.44, on the tree before the fold)
         foreach (double kappa in new[] { 0.0, 1e-20 })
         {
             var calculator = new HestonRNDCalculator(new HestonProcess(

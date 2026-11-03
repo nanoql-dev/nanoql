@@ -12,15 +12,15 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The analytic double-barrier engine's rebate (the S-bar plan's BR5 (xlvi), fixed under R8). QuantLib's engine never
-/// reads <c>DoubleBarrierOption</c>'s rebate, where its finite-difference Heston double-barrier engine pays a
-/// knock-out's at the hit (<c>fdhestondoublebarrierengine.cpp:96-99</c>): a knock-out call on [80, 120] prices 1.420391
-/// at rebates 0 and 5, where the FD engine at a vanishing vol of vol gives 1.426200 and 3.920732 (the planner's P16).
-/// nanoql takes QuantLib's single-barrier convention: a knock-out's rebate paid at the first touch of either barrier,
-/// R × (KIKO + KOKI) at unit cash through the double-barrier binary engine, and a knock-in's paid at expiry where
-/// neither is touched, R × the binary knock-out at unit cash and strike 0. Checks: the survival route on QuantLib's image
-/// series (the reviewer's r3a, 0.60784983008 per unit rebate on [80, 120] at 20% over a year), QuantLib's FD Heston
-/// engine on a corridor its grid resolves, and QuantLib's binary engine.
+/// The analytic double-barrier engine's rebate (fixed). QuantLib's engine never reads <c>DoubleBarrierOption</c>'s
+/// rebate, where its finite-difference Heston double-barrier engine pays a knock-out's at the hit
+/// (<c>fdhestondoublebarrierengine.cpp:96-99</c>): a knock-out call on [80, 120] prices 1.420391 at rebates 0 and 5,
+/// where the FD engine at a vanishing vol of vol gives 1.426200 and 3.920732. nanoql takes QuantLib's single-barrier
+/// convention: a knock-out's rebate paid at the first touch of either barrier, R × (KIKO + KOKI) at unit cash through
+/// the double-barrier binary engine, and a knock-in's paid at expiry where neither is touched, R × the binary knock-out
+/// at unit cash and strike 0. Checks: the survival route on QuantLib's image series (0.60784983008 per unit rebate on
+/// [80, 120] at 20% over a year), QuantLib's FD Heston engine on a corridor its grid resolves, and QuantLib's binary
+/// engine.
 /// </summary>
 public class DoubleBarrierRebateTests
 {

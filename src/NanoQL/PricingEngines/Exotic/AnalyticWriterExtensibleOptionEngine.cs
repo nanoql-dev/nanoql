@@ -21,16 +21,15 @@ namespace NanoQL.PricingEngines;
 /// <remarks>
 /// <para>
 /// Stateless. QuantLib evaluates the formula on one zero rate, dividend yield and volatility, read at the first
-/// exercise, for both periods, so it is exact only on flat markets; here each term reads the variances to each
-/// exercise date at the first strike, the correlation from their ratio and the discounts by date, which is exact under
-/// deterministic rates, dividends and volatility (the S-exo plan's ER4, <c>Divergences/WriterExtensibleTermStructureTests.cs</c>,
-/// against the exact integral at the first exercise) and QuantLib's algebra on a flat market, its value there within
-/// its last bits.
+/// exercise, for both periods, so it is exact only on flat markets; here each term reads the variances to each exercise
+/// date at the first strike, the correlation from their ratio and the discounts by date, which is exact under
+/// deterministic rates, dividends and volatility (<c>Divergences/WriterExtensibleTermStructureTests.cs</c>, against the
+/// exact integral at the first exercise) and QuantLib's algebra on a flat market, its value there within its last bits.
 /// </para>
 /// <para>
 /// Every structure is read by date, accruing nothing before its own date, where QuantLib times both periods on the
-/// risk-free curve (ER5 (xxiv), <c>Divergences/ExoticMismatchedTimesTests.cs</c>); a date before the process's clock
-/// keeps QuantLib's "negative time" refusal.
+/// risk-free curve (<c>Divergences/ExoticMismatchedTimesTests.cs</c>); a date before the process's clock keeps
+/// QuantLib's "negative time" refusal.
 /// </para>
 /// </remarks>
 public static class AnalyticWriterExtensibleOptionEngine
@@ -57,7 +56,7 @@ public static class AnalyticWriterExtensibleOptionEngine
         return option.FetchResults(new OneAssetOptionResults { NPV = Value(option, process) });
     }
 
-    // QuantLib's calculate(), ER4's form.
+    // QuantLib's calculate(), on discounts and variances by date.
     private static double Value(WriterExtensibleOption option, GeneralizedBlackScholesProcess process)
     {
         // We take all the arguments:

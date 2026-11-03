@@ -6,13 +6,12 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The sparse ILU's fill levels (the S-core plan's CR7 (xxiv)): QuantLib records each new entry's level from the levels'
-/// nonzero entries by the entries' rank among the row's nonzero values, which a value that cancels to 0 shifts, so a
-/// later row reads another entry's level; nanoql records each entry's own. On the first of the planner's random 8 × 8
-/// matrices with exact cancellations whose factors move at fill level 1 (Mersenne Twister seed 5, the 36th), QuantLib
-/// drops U's fill entry (4, 7) and keeps U(7, 7) at 4; the levels at their own positions keep (4, 7) at −0.5 and give
-/// U(7, 7) 4.1875. QuantLib's factors and those of its own constructor with the one read changed are its own (this run's
-/// <c>probes\c4_facts.cpp</c>, <c>c4_facts.out</c>).
+/// The sparse ILU's fill levels: QuantLib records each new entry's level from the levels' nonzero entries by the
+/// entries' rank among the row's nonzero values, which a value that cancels to 0 shifts, so a later row reads another
+/// entry's level; nanoql records each entry's own. On the first of random 8 × 8 matrices with exact cancellations whose
+/// factors move at fill level 1 (Mersenne Twister seed 5, the 36th), QuantLib drops U's fill entry (4, 7) and keeps
+/// U(7, 7) at 4; the levels at their own positions keep (4, 7) at −0.5 and give U(7, 7) 4.1875. QuantLib's factors and
+/// those of its own constructor with the one read changed are its own.
 /// </summary>
 public class SparseIluTests
 {

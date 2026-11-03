@@ -12,13 +12,12 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The extended binomial trees on a time-dependent process, QuantLib's design kept (the S-xrt plan's XRR6, ruled
-/// 2026-10-28), and their two route (§2.5). A tree built directly on the process reads its volatility at each step's
-/// time for the whole history to that step, so its spread at step i is a constant σ(tᵢ)'s, not the integrated one;
-/// QuantLib's binomial engine flattens its process to constant parameters before it builds any tree, so through the
-/// engine each extended tree prices as the standard tree, to the rounding of the flat process's reads at each step's
-/// time, 5e-13 relative (QuantLib 1.44's extended and standard Jarrow-Rudd at 101, 401 and 1,601 steps agree to every
-/// printed digit, the S-xrt planner's <c>xp_c3.cpp</c>).
+/// The extended binomial trees on a time-dependent process, QuantLib's design kept, and their two routes. A tree built
+/// directly on the process reads its volatility at each step's time for the whole history to that step, so its spread
+/// at step i is a constant σ(tᵢ)'s, not the integrated one; QuantLib's binomial engine flattens its process to constant
+/// parameters before it builds any tree, so through the engine each extended tree prices as the standard tree, to the
+/// rounding of the flat process's reads at each step's time, 5e-13 relative (QuantLib 1.44's extended and standard
+/// Jarrow-Rudd at 101, 401 and 1,601 steps agree to every printed digit).
 /// </summary>
 public class ExtendedTreeTimeDependenceTests
 {
@@ -64,7 +63,7 @@ public class ExtendedTreeTimeDependenceTests
         BinomialVanillaEngine.Calculate<TExtended>(option, context, process, steps).NPV!.Value
         / BinomialVanillaEngine.Calculate<TStandard>(option, context, process, steps).NPV!.Value;
 
-    // The planner's volatility: 0.10 to a year, 0.30 to two.
+    // The volatility: 0.10 to a year, 0.30 to two.
     private static GeneralizedBlackScholesProcess TimeDependent()
     {
         DayCounter dc = new Actual365Fixed();

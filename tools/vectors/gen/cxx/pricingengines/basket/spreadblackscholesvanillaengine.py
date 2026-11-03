@@ -3,14 +3,14 @@
 """Vectors for QuantLib's SpreadBlackScholesVanillaEngine (ql/pricingengines/basket/spreadblackscholesvanillaengine.hpp,
 .cpp), the spread engines' abstract base, which the wheel doesn't expose, each output computed by the C++ harness
 (docs/porting-playbook.md §9.4), on the evaluation date 15 October 2026: what the base hands its derived engine's
-formula, read through a derived engine of the harness's own that records its arguments and returns
-df·(f1 − f2 − strike) + rho (tests/NanoQL.Tests mirrors it). European spread calls and puts at positive, zero and
-negative strikes, at correlations of either sign, on two Black-Scholes-Merton processes with their own risk-free and
-dividend rates, each with a constant volatility or a surface (the variance read at its forward): the NPV, the two
-forwards (each on its own process's curves), the strike, the type, the two variances and the discount factor (on the
-first process's risk-free curve), and the correlation. Then the base's refusals, their messages QuantLib's: an American
-exercise, a maximum basket, and a cash-or-nothing payoff. Every structure is dated at the evaluation date and counts its
-days on Actual/365 (Fixed); structures dated apart are left out (the S-exo plan's §2.10).
+formula, read through a derived engine of the harness's own that records its arguments and returns df·(f1 − f2 − strike)
++ rho (tests/NanoQL.Tests mirrors it). European spread calls and puts at positive, zero and negative strikes, at
+correlations of either sign, on two Black-Scholes-Merton processes with their own risk-free and dividend rates, each
+with a constant volatility or a surface (the variance read at its forward): the NPV, the two forwards (each on its own
+process's curves), the strike, the type, the two variances and the discount factor (on the first process's risk-free
+curve), and the correlation. Then the base's refusals, their messages QuantLib's: an American exercise, a maximum
+basket, and a cash-or-nothing payoff. Every structure is dated at the evaluation date and counts its days on Actual/365
+(Fixed); structures dated apart are left out.
 
 A case holds "process1" and "process2" ([spot, r, q, volatility], the volatility a number or [dates, strikes, rows],
 a row of volatilities per strike), the "correlation", the "payoff" ([kind, base, optionType, strike]) and the

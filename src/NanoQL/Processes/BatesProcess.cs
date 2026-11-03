@@ -16,12 +16,12 @@ namespace NanoQL.Processes;
 /// intensity λ and J normal with mean ν and standard deviation δ, m = e^{ν + δ²/2} − 1.
 /// </summary>
 /// <remarks>
-/// Immutable, a <see cref="HestonProcess"/> as QuantLib's derives from it (the S-hes plan's HR1 (iii)): its drift less
-/// λm, two more factors, the first drawing the step's number of jumps through the inverse Poisson distribution and the
-/// second their sizes, and QuantLib's default discretization, full truncation, where the Heston process's is the
-/// quadratic-exponential martingale scheme. The in-place
+/// Immutable, a <see cref="HestonProcess"/> as QuantLib's derives from it: its drift less λm, two more factors, the
+/// first drawing the step's number of jumps through the inverse Poisson distribution and the second their sizes, and
+/// QuantLib's default discretization, full truncation, where the Heston process's is the quadratic-exponential
+/// martingale scheme. The in-place
 /// <see cref="Evolve(double, ReadOnlySpan{double}, double, ReadOnlySpan{double}, Span{double})"/> allocates nothing
-/// where the Heston step doesn't (HR2).
+/// where the Heston step doesn't.
 /// </remarks>
 public sealed class BatesProcess : HestonProcess
 {

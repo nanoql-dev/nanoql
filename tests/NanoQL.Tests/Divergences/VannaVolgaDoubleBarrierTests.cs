@@ -14,33 +14,30 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The Vanna-Volga double-barrier engine's classes (the S-xeq plan's XER5 (viii), (ix); the user's ruling at the S-xeq
-/// run's stop 1). QuantLib passes the foreign discount twice to the smile's interpolation
-/// (<c>vannavolgadoublebarrierengine.hpp:144</c>), whose constructor takes the domestic one first, as QuantLib's
-/// single-barrier engine passes it: the vanilla on the smile moves by 1.4e-4 at QuantLib's rates and 6.0e-4 at a
-/// foreign rate of 3% [executed: the planner's <c>xp_c1.cpp vv</c>]. nanoql passes the domestic discount first; its
-/// vanilla equals the single-barrier engine's on the same quotes. nanoql also carries S-rx's single-barrier classes
-/// (SRXR3 (xvi), (xx)): each curve read at the instant the quotes' time denotes on the volatility's clock, an out
-/// option on or beyond a barrier worth its rebate, an in option's rebate the inner engine's, and the already-out and
-/// already-in tests inclusive at the barriers. QuantLib's own case builds its curves on Actual360 beside the engine's
-/// Actual/365F volatility, where QuantLib's inner engine accrues the variance over 365/360 risk-free years and its own
-/// discounts read each curve's clock: the ruled reads (S-bar's BR5 (i), SRXR3 (xx)) move 16 of its 40 values past its
-/// 1e-4, by up to 1.11e-3 (eight strikes, each knock-in and knock-out: the calls at 1.13321 and 1.22687 and the puts at
-/// 1.38843 and 1.46047 over a year, the calls at 1.06145 and 1.19545 and the puts at 1.44298 and 1.56345 over two;
-/// QuantLib's cached 0.036217, 0.144130, 0.025532, 0.074560, 0.036798, 0.060490, 0.047325, 0.111030, 0.059136,
-/// 0.199810, 0.042694, 0.103890, 0.061539, 0.093460, 0.081464, 0.177040 against nanoql's 0.035420, 0.144927, 0.025147,
-/// 0.074945, 0.036576, 0.060712, 0.046837, 0.111519, 0.058023, 0.200923, 0.042200, 0.104384, 0.061129, 0.093870,
-/// 0.080606, 0.177897), and QuantLib's own engine misses 20 of the 40 on the case restated to Actual/365F (worst
-/// 1.04e-3): the cache belongs to QuantLib's mixed clocks [executed: this run's <c>probes\cxx\xq_vvdb_dc.cpp</c>,
-/// <c>out_vvdb_360.txt</c>, <c>out_vvdb_365.txt</c>; <c>probes\vvdb\</c>]. On the restated case nanoql is QuantLib's
-/// engine with the domestic discount, within 1e-12 on all 40.
+/// The Vanna-Volga double-barrier engine's classes. QuantLib passes the foreign discount twice to the smile's
+/// interpolation (<c>vannavolgadoublebarrierengine.hpp:144</c>), whose constructor takes the domestic one first, as
+/// QuantLib's single-barrier engine passes it: the vanilla on the smile moves by 1.4e-4 at QuantLib's rates and 6.0e-4
+/// at a foreign rate of 3% (QuantLib 1.44). nanoql passes the domestic discount first; its vanilla equals the
+/// single-barrier engine's on the same quotes. nanoql also carries the single-barrier engine's fixes: each curve read
+/// at the instant the quotes' time denotes on the volatility's clock, an out option on or beyond a barrier worth its
+/// rebate, an in option's rebate the inner engine's, and the already-out and already-in tests inclusive at the
+/// barriers. QuantLib's own case builds its curves on Actual360 beside the engine's Actual/365F volatility, where
+/// QuantLib's inner engine accrues the variance over 365/360 risk-free years and its own discounts read each curve's
+/// clock: these reads move 16 of its 40 values past its 1e-4, by up to 1.11e-3 (eight strikes, each knock-in and
+/// knock-out: the calls at 1.13321 and 1.22687 and the puts at 1.38843 and 1.46047 over a year, the calls at 1.06145
+/// and 1.19545 and the puts at 1.44298 and 1.56345 over two; QuantLib's cached 0.036217, 0.144130, 0.025532, 0.074560,
+/// 0.036798, 0.060490, 0.047325, 0.111030, 0.059136, 0.199810, 0.042694, 0.103890, 0.061539, 0.093460, 0.081464,
+/// 0.177040 against nanoql's 0.035420, 0.144927, 0.025147, 0.074945, 0.036576, 0.060712, 0.046837, 0.111519, 0.058023,
+/// 0.200923, 0.042200, 0.104384, 0.061129, 0.093870, 0.080606, 0.177897), and QuantLib's own engine misses 20 of the 40
+/// on the case restated to Actual/365F (worst 1.04e-3): the cache belongs to QuantLib's mixed clocks (QuantLib 1.44).
+/// On the restated case nanoql is QuantLib's engine with the domestic discount, within 1e-12 on all 40.
 /// </summary>
 public class VannaVolgaDoubleBarrierTests
 {
     private static readonly DayCounter A365 = new Actual365Fixed();
 
     // QuantLib's 40 values on its case restated to Actual/365F, its engine with the domestic discount first and the
-    // Suo-Wang inner engine (this run's probes\cxx\xq_vvdb_dc.cpp at 365, the planner's PatchedVVDB, out_vvdb_365.txt)
+    // Suo-Wang inner engine
     [Theory]
     [InlineData(OptionType.Call, DoubleBarrierType.KnockIn, 1.13321, 1.0, 0.035399683999394)]
     [InlineData(OptionType.Call, DoubleBarrierType.KnockOut, 1.13321, 1.0, 0.144947703744088)]
@@ -114,7 +111,7 @@ public class VannaVolgaDoubleBarrierTests
     [InlineData(0.03, 1.31179)]
     public void TheSmilesVanillaIsTheSingleBarrierEngines(double q, double strike)
     {
-        // the planner's xp_c1.cpp vv market: the smile 0.11638, 0.09979, 0.11545 over a year on Actual/365F
+        // the market: the smile 0.11638, 0.09979, 0.11545 over a year on Actual/365F
         var today = new Date(15, May, 2026);
         var context = new EvaluationContext { EvaluationDate = today };
         var qTS = new FlatForward(today, q, A365);
@@ -208,9 +205,8 @@ public class VannaVolgaDoubleBarrierTests
     [Fact]
     public void TheSurvivalProbabilityIsItsConvergedSeries()
     {
-        // the code review's O1-5: on a narrow corridor over a year QuantLib's ten terms give a survival probability of
-        // 7.2e-4 where fifty give 1.6e-15 (its out_vv_series.txt); QuantLib's one-year quotes and spot, the analytic
-        // inner engine
+        // On a narrow corridor over a year QuantLib's ten terms give a survival probability of 7.2e-4 where fifty give
+        // 1.6e-15; QuantLib's one-year quotes and spot, the analytic inner engine
         var today = new Date(15, May, 2026);
         var context = new EvaluationContext { EvaluationDate = today };
         (DeltaVolQuote atm, DeltaVolQuote put25, DeltaVolQuote call25) = Quotes(1.0, 0.10087, 0.08925, 0.08463);

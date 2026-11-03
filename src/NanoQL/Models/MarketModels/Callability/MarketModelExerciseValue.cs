@@ -13,8 +13,8 @@ namespace NanoQL.Models;
 /// each exercise time the cash flow exercising pays.
 /// </summary>
 /// <remarks>
-/// A working type and an extension point (U13; the S-mmp plan's MMPR1 (i), (vi)): <see cref="Reset"/> and
-/// <see cref="NextStep"/> change it, and it isn't thread-safe; a holder steps its own <see cref="Clone"/>.
+/// A working type and an extension point: <see cref="Reset"/> and <see cref="NextStep"/> change it, and it isn't
+/// thread-safe; a holder steps its own <see cref="Clone"/>.
 /// </remarks>
 [WorkingType]
 public abstract class MarketModelExerciseValue

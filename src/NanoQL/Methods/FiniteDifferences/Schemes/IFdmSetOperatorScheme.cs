@@ -7,8 +7,8 @@
 namespace NanoQL.Methods;
 
 /// <summary>
-/// A scheme that can step on an operator TR-BDF2 has already set over its whole step (the S-eq plan's SEQR9): nanoql's
-/// one-step schemes, which <see cref="TrBDF2Scheme{TTrapezoidalScheme}"/> runs as its trapezoidal sub-step.
+/// A scheme that can step on an operator TR-BDF2 has already set over its whole step: nanoql's one-step schemes, which
+/// <see cref="TrBDF2Scheme{TTrapezoidalScheme}"/> runs as its trapezoidal sub-step.
 /// </summary>
 /// <remarks>
 /// Internal, so that <see cref="IFdmScheme"/> stays the whole concept a scheme of one's own implements: TR-BDF2 steps

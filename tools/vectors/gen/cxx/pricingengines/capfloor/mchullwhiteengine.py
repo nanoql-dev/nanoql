@@ -9,10 +9,10 @@ builder on one cap, its refusals among them.
 The instruments cover caps and floors from the spot date at, in and out of the money, a quarterly cap on Euribor 3M,
 gearings and spreads, amortizing notionals, seasoned instruments with past fixings (their past caplets skipped, those
 fixed on or before the evaluation date paying their known forwards), a caplet fixing today with its fixing stored, an
-instrument paid in full, negative rates and a discount curve dated at the spot date. The model is a HullWhite
-(a = 0.05, sigma = 0.01) on the case's discount curve, the engine's process a HullWhiteForwardProcess in the measure of
-the last payment, its grid the fixings after the reference date and the last payment. Every seed is explicit: QuantLib's
-0, a seed from the clock and the builder's default, which nanoql refuses (the S-sr plan's SSR1 (iv)), is never given.
+instrument paid in full, negative rates and a discount curve dated at the spot date. The model is a HullWhite (a = 0.05,
+sigma = 0.01) on the case's discount curve, the engine's process a HullWhiteForwardProcess in the measure of the last
+payment, its grid the fixings after the reference date and the last payment. Every seed is explicit: QuantLib's 0, a
+seed from the clock and the builder's default, which nanoql refuses, is never given.
 
 The engines: pseudo-random with 2,000 samples, plain and antithetic; with a Brownian bridge and 1,500; to an absolute
 tolerance of 1e-4 times the leg's largest notional within 100,000 samples, antithetic; low-discrepancy with a Brownian

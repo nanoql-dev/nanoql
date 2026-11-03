@@ -14,16 +14,16 @@ namespace NanoQL.Models;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A working type (the S-mmp plan's MMPR1 (i)): it holds its own clone of the pathwise product.
+/// A working type: it holds its own clone of the pathwise product.
 /// </para>
 /// <para>
-/// <b>An already-deflated product</b> (MMPR4 (xvii), a documented divergence): its amounts are in units of the
-/// money-market numeraire, so the wrapper divides each by its payment time's money-market deflator on the current
-/// state (<see cref="MarketModelDiscounter"/> in bond 0, the factor the pathwise engine skips for it), giving the
-/// ordinary engines an amount to discount. QuantLib's wrapper hands them the deflated amount
-/// (<c>multisteppathwisewrapper.cpp:69</c>), which the accounting engine discounts again: wrapped deflated caplets 11.8%
-/// below <see cref="MultiStepOptionlets"/> on the same paths (<c>Divergences/MultiProductPathwiseWrapperDeflatedTests.cs</c>).
-/// A product not deflated gives QuantLib's amounts.
+/// <b>An already-deflated product</b> (a documented divergence): its amounts are in units of the money-market
+/// numeraire, so the wrapper divides each by its payment time's money-market deflator on the current state (<see
+/// cref="MarketModelDiscounter"/> in bond 0, the factor the pathwise engine skips for it), giving the ordinary engines
+/// an amount to discount. QuantLib's wrapper hands them the deflated amount (<c>multisteppathwisewrapper.cpp:69</c>),
+/// which the accounting engine discounts again: wrapped deflated caplets 11.8% below <see cref="MultiStepOptionlets"/>
+/// on the same paths (<c>Divergences/MultiProductPathwiseWrapperDeflatedTests.cs</c>). A product not deflated gives
+/// QuantLib's amounts.
 /// </para>
 /// </remarks>
 [WorkingType]

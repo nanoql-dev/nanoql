@@ -5,8 +5,8 @@ mass at zero, the density, the cumulative distribution and its inverse of the CE
 forwards of 100 and 2.1, elasticities from 0.1 to 2 on both sides of 1 (δ below 2, where the forward reaches zero, and
 above), volatility parameters alpha = sigma f0^(1 - beta) at sigma 10% and 30%, and times from 0.1 to 5 years; the
 density and distribution at forwards from 0.3 to 2.5 times f0, the inverse at probabilities from 1e-3 to 0.99, among
-them some below the mass at zero (0). |β - 1| < 1e-3, where nanoql departs (the S-van plan's VR10,
-tests/NanoQL.Tests/Divergences/CevNearOneTests.cs), is none of the grid's. The inverse leaves out the points where
+them some below the mass at zero (0). |β - 1| < 1e-3, where nanoql departs
+(tests/NanoQL.Tests/Divergences/CevNearOneTests.cs), is none of the grid's. The inverse leaves out the points where
 QuantLib's second Brent steps below zero, where X(f) is NaN or negative and Boost refuses the non-centrality, which
 nanoql prices (tests/NanoQL.Tests/Divergences/CevDensityBelowZeroTests.cs); its points are listed as (t, p) pairs. The
 wheel's calls, by QuantLib-SWIG 1.44: CEVRNDCalculator(f0, alpha, beta) and its massAtZero, pdf, cdf and invcdf. Read

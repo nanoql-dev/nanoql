@@ -63,7 +63,7 @@ public sealed record EvaluationContext
     }
 
     /// <summary>
-    /// Gets a value indicating whether events on the reference date count as occurred; QuantLib's default is
+    /// Gets a value indicating whether events on the reference date count as not yet occurred; QuantLib's default is
     /// <see langword="false"/>.
     /// </summary>
     public bool IncludeReferenceDateEvents { get; init; }

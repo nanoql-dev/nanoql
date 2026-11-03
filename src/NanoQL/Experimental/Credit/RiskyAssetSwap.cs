@@ -18,19 +18,19 @@ namespace NanoQL.Experimental;
 /// <para>
 /// An instrument QuantLib prices without an engine: <see cref="Calculate"/> computes it. Its NPV is the package's
 /// value, the risky bond's price less the fixed leg plus the floating leg and the spread, so at the fair spread it is
-/// the par nominal, QuantLib's (the S-xcr plan's XR8 (xxxix)). Without a coupon the par coupon is used on every
-/// calculation, where QuantLib's first calculation stores it in place of the coupon for later ones.
+/// the par nominal, QuantLib's. Without a coupon the par coupon is used on every calculation, where QuantLib's first
+/// calculation stores it in place of the coupon for later ones.
 /// </para>
 /// <para>
-/// <b>The annuities</b> (XR8 (xii)): the fixed annuity runs over the fixed schedule, where QuantLib's runs over the
-/// float schedule's dates with the fixed day counter, and the fair spread's denominator is the float annuity, the leg
-/// the spread is paid on, where QuantLib's is that fixed annuity: an annual-fixed, quarterly-float swap's fair spread
-/// reads 0.0118084 in QuantLib for 0.0115616 on equal schedules, and its package 99.58 on 100 at the fair spread. Where
-/// the schedules and the day counters coincide the values are QuantLib's. <b>The recovery value</b> (XR8 (xxi)): the
-/// daily Euler sum runs to each period's end, where QuantLib's stops a day short, −2.74e-3 relative on annual periods.
-/// Reads between the evaluation date and a curve's later reference date are a discount and a survival of 1, where
-/// QuantLib's refuses them (XR8 (x)); before the evaluation date, a seasoned swap's past periods, they are QuantLib's,
-/// which refuses a date before the curve's (the S-xcr code review's C4 O1-1); <c>Divergences/RiskyAssetSwapTests.cs</c>.
+/// <b>The annuities</b>: the fixed annuity runs over the fixed schedule, where QuantLib's runs over the float
+/// schedule's dates with the fixed day counter, and the fair spread's denominator is the float annuity, the leg the
+/// spread is paid on, where QuantLib's is that fixed annuity: an annual-fixed, quarterly-float swap's fair spread reads
+/// 0.0118084 in QuantLib for 0.0115616 on equal schedules, and its package 99.58 on 100 at the fair spread. Where the
+/// schedules and the day counters coincide the values are QuantLib's. <b>The recovery value</b>: the daily Euler sum
+/// runs to each period's end, where QuantLib's stops a day short, −2.74e-3 relative on annual periods. Reads between
+/// the evaluation date and a curve's later reference date are a discount and a survival of 1, where QuantLib's refuses
+/// them; before the evaluation date, a seasoned swap's past periods, they are QuantLib's, which refuses a date before
+/// the curve's (<c>Divergences/RiskyAssetSwapTests.cs</c>).
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]
@@ -175,8 +175,7 @@ public sealed class RiskyAssetSwap : Instrument
         return annuity;
     }
 
-    // The fixed leg's annuity, over the fixed schedule, where QuantLib's runs over the float schedule's dates (XR8
-    // (xii)).
+    // The fixed leg's annuity, over the fixed schedule, where QuantLib's runs over the float schedule's dates.
     private double FixedAnnuity(Date today)
     {
         double annuity = 0;
@@ -196,7 +195,7 @@ public sealed class RiskyAssetSwap : Instrument
     {
         double recoveryValue = 0;
 
-        // simple Euler integral to evaluate the recovery value, to each period's end (XR8 (xxi))
+        // simple Euler integral to evaluate the recovery value, to each period's end
         for (int i = 1; i < fixedSchedule.Dates.Length; i++)
         {
             Date d = fixedSchedule.Dates[i - 1] >= defaultTS.ReferenceDate ? fixedSchedule.Dates[i - 1] : defaultTS.ReferenceDate;
@@ -234,7 +233,7 @@ public sealed class RiskyAssetSwap : Instrument
     }
 
     // The spread at which the package is worth par, over the float annuity, where QuantLib's divides by its fixed
-    // annuity (XR8 (xii)).
+    // annuity.
     private double FairSpread(double c, double recoveryValue, double floatAnnuity, Date today)
     {
         double value = 0;
@@ -250,13 +249,13 @@ public sealed class RiskyAssetSwap : Instrument
         return (1.0 - initialDiscount + value - recoveryValue) / floatAnnuity;
     }
 
-    // A discount: 1 between the evaluation date and the curve's reference date, where QuantLib's read throws (XR8 (x));
-    // before the evaluation date QuantLib's read, which refuses a date before the curve's (the S-xcr code review's C4
-    // O1-1: a seasoned swap's past periods would otherwise enter at par).
+    // A discount: 1 between the evaluation date and the curve's reference date, where QuantLib's read throws; before
+    // the evaluation date QuantLib's read, which refuses a date before the curve's (a seasoned swap's past periods
+    // would otherwise enter at par).
     private double Discount(Date today, Date d) => d < today ? yieldTS.Discount(d) : yieldTS.AccruedDiscount(d);
 
-    // A survival probability, extrapolated as QuantLib's: 1 between the evaluation date and the curve's reference date
-    // (XR8 (x)); before the evaluation date QuantLib's read.
+    // A survival probability, extrapolated as QuantLib's: 1 between the evaluation date and the curve's reference date;
+    // before the evaluation date QuantLib's read.
     private double Survival(Date today, Date d) =>
         d >= today && d < defaultTS.ReferenceDate ? 1.0 : defaultTS.SurvivalProbability(d, true);
 }

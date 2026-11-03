@@ -8,17 +8,17 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The implied curve on a day counter whose year fractions don't add (the S-sr plan's SSR6 (viii)). QuantLib reads the
-/// original at the implied time plus the reference date's time on the original's clock
-/// (<c>impliedtermstructure.hpp:85-95</c>), where its own formula states the original's ratio P(d)/P(ref). On the wheel,
-/// a zero curve of 1%, 2%, 3% and 3.5% at 15 January 2016 and 1, 3 and 7 years later, implied at 31 March 2016, misses
-/// the ratio over every date of four years by up to 1.25e-4 relative on Thirty360 Bond Basis and USA, and 3.7e-3 on
-/// Actual/Actual ISMA without a schedule, and gives 30 and 31 March 2020, one time on Thirty360 from a month-end, one
-/// discount, 0.8779622361147446, where the ratios are 0.878051925283182 and 0.8779622361147446; on Actual/365 (Fixed)
-/// it holds within 2.2e-16. nanoql reads a date by date where QuantLib's sum and the date's own time on the original's
-/// clock differ by more than 1e-12 relative, so a date's discount, zero rate and forward hold the ratio, and keeps
-/// QuantLib's sum, and bits, elsewhere and for a time; a date before the implied reference date is refused first, with
-/// QuantLib's text. QuantLib's check: the original curve's discounts by date.
+/// The implied curve on a day counter whose year fractions don't add. QuantLib reads the original at the implied time
+/// plus the reference date's time on the original's clock (<c>impliedtermstructure.hpp:85-95</c>), where its own
+/// formula states the original's ratio P(d)/P(ref). On the wheel, a zero curve of 1%, 2%, 3% and 3.5% at 15 January
+/// 2016 and 1, 3 and 7 years later, implied at 31 March 2016, misses the ratio over every date of four years by up to
+/// 1.25e-4 relative on Thirty360 Bond Basis and USA, and 3.7e-3 on Actual/Actual ISMA without a schedule, and gives 30
+/// and 31 March 2020, one time on Thirty360 from a month-end, one discount, 0.8779622361147446, where the ratios are
+/// 0.878051925283182 and 0.8779622361147446; on Actual/365 (Fixed) it holds within 2.2e-16. nanoql reads a date by date
+/// where QuantLib's sum and the date's own time on the original's clock differ by more than 1e-12 relative, so a date's
+/// discount, zero rate and forward hold the ratio, and keeps QuantLib's sum, and bits, elsewhere and for a time; a date
+/// before the implied reference date is refused first, with QuantLib's text. QuantLib's check: the original curve's
+/// discounts by date.
 /// </summary>
 public class ImpliedTermStructureClockTests
 {

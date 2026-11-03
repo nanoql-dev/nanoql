@@ -12,10 +12,10 @@ namespace NanoQL.Tests.Conventions;
 
 /// <summary>
 /// A Heston calibration returns a new model, with QuantLib's record of the calibration, and leaves the receiver as it
-/// was (S-bond's SBR2, the S-eq plan's SEQR5): QuantLib's writes each trial's parameters, and then the result, into the
-/// model its helpers' engines hold, and rebuilds the model's process from them (<c>hestonmodel.cpp:45-50</c>). Here
-/// each trial is a copy whose process the copy's parameters build, so the calibrated model's process carries its
-/// parameters and the given process's curves and spot.
+/// was: QuantLib's writes each trial's parameters, and then the result, into the model its helpers' engines hold, and
+/// rebuilds the model's process from them (<c>hestonmodel.cpp:45-50</c>). Here each trial is a copy whose process the
+/// copy's parameters build, so the calibrated model's process carries its parameters and the given process's curves and
+/// spot.
 /// </summary>
 public class HestonCalibrationTests
 {

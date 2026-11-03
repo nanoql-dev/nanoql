@@ -15,15 +15,15 @@
 - Refusals: one date, a date on the reference date, dates out of order, no deltas, and a matrix whose columns or rows
   don't match the deltas or dates.
 
-Left out (the S-van plan's §2.10): curves on another clock, which nanoql reads at the instants the surface's times
-denote and QuantLib at those times (VR4 (xxi); tests/NanoQL.Tests/Divergences/DeltaSurfaceMismatchedTimesTests.cs); and
-the smile section's prices, which QuantLib's section takes on the at-the-money volatility as its forward (VR4 (xxxii);
-DeltaSurfaceSmileSectionTests.cs); the wheel binds neither blackVolSmile nor the section. The wheel's call, by
-QuantLib-SWIG 1.44: BlackVolatilitySurfaceDelta(referenceDate, dates, putDeltas, callDeltas, hasAtm, matrix,
-dayCounter, calendar, spot, domesticTS, foreignTS, dt, at, atmDeltaType, interpolationMethod, flatStrikeExtrapolation,
-timeExtrapolationType, switchTenor, ltdt, ltat, longTermAtmDeltaType); its typemap refuses an explicit optional delta
-type (argument 14, "std::optional< DeltaVolQuote::DeltaType >"), so the cases leave both unset: QuantLib's defaults, the
-delta type and the long-term delta type. Read back by tests/NanoQL.Tests/Vectors/TermStructures/BlackVolSurfaceDeltaVectorTests.cs."""
+Left out: curves on another clock, which nanoql reads at the instants the surface's times denote and QuantLib at those
+times (tests/NanoQL.Tests/Divergences/DeltaSurfaceMismatchedTimesTests.cs); and the smile section's prices, which
+QuantLib's section takes on the at-the-money volatility as its forward (DeltaSurfaceSmileSectionTests.cs); the wheel
+binds neither blackVolSmile nor the section. The wheel's call, by QuantLib-SWIG 1.44:
+BlackVolatilitySurfaceDelta(referenceDate, dates, putDeltas, callDeltas, hasAtm, matrix, dayCounter, calendar, spot,
+domesticTS, foreignTS, dt, at, atmDeltaType, interpolationMethod, flatStrikeExtrapolation, timeExtrapolationType,
+switchTenor, ltdt, ltat, longTermAtmDeltaType); its typemap refuses an explicit optional delta type (argument 14,
+"std::optional< DeltaVolQuote::DeltaType >"), so the cases leave both unset: QuantLib's defaults, the delta type and the
+long-term delta type. Read back by tests/NanoQL.Tests/Vectors/TermStructures/BlackVolSurfaceDeltaVectorTests.cs."""
 import importlib.util
 import os
 import sys

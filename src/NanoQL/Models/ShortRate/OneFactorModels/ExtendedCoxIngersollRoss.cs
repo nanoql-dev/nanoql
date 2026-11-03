@@ -27,7 +27,7 @@ namespace NanoQL.Models;
 /// </para>
 /// <para>
 /// As <see cref="CoxIngersollRoss"/>'s, its Feller constraint reads each parameter vector's own k and θ, and its tree
-/// is on the square root of the process, y = √(r − φ(t)), the short rate y² + φ(t) (the S-sr plan's SSR7).
+/// is on the square root of the process, y = √(r − φ(t)), the short rate y² + φ(t).
 /// </para>
 /// </remarks>
 public sealed class ExtendedCoxIngersollRoss : CoxIngersollRoss, ITermStructureConsistentModel

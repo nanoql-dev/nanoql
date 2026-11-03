@@ -38,53 +38,50 @@ namespace NanoQL.Experimental;
 /// recoveries would have to be passed to the conditional methods as the probabilities are.
 /// </para>
 /// <para>
-/// <b>Kept</b>, QuantLib's method (the S-xcr plan's XR8 (xxxvi), the user's choice): the expected tranche loss is the
-/// tranche of the conditional expected loss, a large-pool reading, not a saddle-point expansion; at correlation 0 on
-/// 100 names its four tranches read 292.78, 0, 0, 0 where the exact recursive model reads 245.40, 46.48, 0.89, 0.0003.
+/// <b>Kept</b>, QuantLib's method: the expected tranche loss is the tranche of the conditional expected loss, a
+/// large-pool reading, not a saddle-point expansion; at correlation 0 on 100 names its four tranches read 292.78, 0, 0,
+/// 0 where the exact recursive model reads 245.40, 46.48, 0.89, 0.0003.
 /// </para>
 /// <para>
-/// <b>The tail's degenerate nodes and domain</b> (XR8 (xlvii); <c>Divergences/SaddlePointLossModelTests.cs</c>).
-/// QuantLib's saddle search brackets on the name of the largest loss, taking the logarithm of a ratio of its
-/// conditional probability p and 1 − p, so a node where that name is at 0 or 1 throws ("invalid range"): at the
-/// evaluation date every probability is 0, and on ten names every correlation from 0.9 throws. Here the bracket's name
-/// is the largest among those strictly between 0 and 1, the certain ones carried by the cumulants (a name at 1 a linear
-/// term, one at 0 nothing), and a node where every name is at 0 or 1 reads its exact conditional loss: its tail 1 or
-/// 0, its density 0, its split and shortfall exact. Where QuantLib's throws (100 names, hazard 0.03, recovery 0.4), the
-/// tail at 10% of the pool reads the exact (recursive) model's within 1.2% through correlation 0.9 and within 5% at
-/// 0.95, below it (5.0% at three months), the expansion's own accuracy on near-comonotonic pools, where QuantLib's runs
-/// reading it within 1% at 0.7 and 0.75 (the S-xcr run's stop 2, ruled on 2026-10-28). Refused, naming the saddle-point
-/// expansion: a tail outside [0, 1] (beyond the quadrature's rounding, 1e-12), and a largest relative loss at or below
-/// the bracket's 1e-5, whose logarithm QuantLib takes of a negative number. The factor nodes' tails are QuantLib's, inside [0, 1] or not: at low
-/// losses single nodes read up to 6.31 or slightly below 0 where the integrated tail and the percentile are right (on
-/// 100 names, hazard 0.03, the percentile at 50%, 90% and 99% within the exact distribution's loss unit at correlations
-/// 0.1 to 0.5 and 30 days to ten years; the S-xcr run's stop 1, ruled on 2026-10-28). <b>Kept</b>, the method's domain:
-/// on small pools the expansion misreads the tail inside [0, 1], on ten names at correlation 0.3 P(L ≥ 1%) 0.983 for an
-/// exact 0.0223 at a month and 0.754 for 0.603 at five years, where 100 names read 0.4389 for 0.4387 at a year; outside
-/// it (26.78 a day out at correlation 0.548, 2.61 at a week on ten names) the refusal.
+/// <b>The tail's degenerate nodes and domain</b> (<c>Divergences/SaddlePointLossModelTests.cs</c>). QuantLib's saddle
+/// search brackets on the name of the largest loss, taking the logarithm of a ratio of its conditional probability p
+/// and 1 − p, so a node where that name is at 0 or 1 throws ("invalid range"): at the evaluation date every probability
+/// is 0, and on ten names every correlation from 0.9 throws. Here the bracket's name is the largest among those
+/// strictly between 0 and 1, the certain ones carried by the cumulants (a name at 1 a linear term, one at 0 nothing),
+/// and a node where every name is at 0 or 1 reads its exact conditional loss: its tail 1 or 0, its density 0, its split
+/// and shortfall exact. Where QuantLib's throws (100 names, hazard 0.03, recovery 0.4), the tail at 10% of the pool
+/// reads the exact (recursive) model's within 1.2% through correlation 0.9 and within 5% at 0.95, below it (5.0% at
+/// three months), the expansion's own accuracy on near-comonotonic pools, where QuantLib's runs reading it within 1% at
+/// 0.7 and 0.75. Refused, naming the saddle-point expansion: a tail outside [0, 1] (beyond the quadrature's rounding,
+/// 1e-12), and a largest relative loss at or below the bracket's 1e-5, whose logarithm QuantLib takes of a negative
+/// number. The factor nodes' tails are QuantLib's, inside [0, 1] or not: at low losses single nodes read up to 6.31 or
+/// slightly below 0 where the integrated tail and the percentile are right (on 100 names, hazard 0.03, the percentile
+/// at 50%, 90% and 99% within the exact distribution's loss unit at correlations 0.1 to 0.5 and 30 days to ten years).
+/// <b>Kept</b>, the method's domain: on small pools the expansion misreads the tail inside [0, 1], on ten names at
+/// correlation 0.3 P(L ≥ 1%) 0.983 for an exact 0.0223 at a month and 0.754 for 0.603 at five years, where 100 names
+/// read 0.4389 for 0.4387 at a year; outside it (26.78 a day out at correlation 0.548, 2.61 at a week on ten names) the
+/// refusal.
 /// </para>
 /// <para>
-/// <b>The saddle search</b> (the S-xcr run's stop 3, ruled on 2026-10-28; the S-xcr code review's C3 O1-3). QuantLib's
-/// brackets the point on the name of the largest loss and, below or above the bracket's losses, returns the bracket's
-/// end instead of solving, so on pools whose largest loss is a name unlikely to default it reads up to 40 times the
-/// exact tail (0.978 for 0.198 at 1% of 100 names a year out at correlation 0.7, 0.2008 for 0.0049 at 10% at 0.9);
-/// here the bracket widens until it holds the level and the point is solved, QuantLib's search wherever its bracket
-/// holds it. The cumulants keep QuantLib's arithmetic but for names at 0, out of the sums, names at 1, their linear
-/// terms, and where QuantLib's form overflows the logistic form, so a widened point reads no 0·∞; the split's
-/// contributions take the same treatment, where QuantLib's form reads ∞/∞ (the S-xcr code review's C3 O2-2). Above
-/// the largest loss a factor node reaches, its names' losses given default but those certain not to default, no point
-/// exists: the tail reads 0 there by QuantLib's own return above 1 less the average recovery, and the density and the
-/// conditional shortfall read 0 too, where at the widened end QuantLib's expressions read 0/0, so the shortfall of a
-/// tranche detaching above the pool's largest loss was NaN (QuantLib's TO DO list: "Failing when the tranche upper
-/// loss limit goes over the max attainable loss"; O2-1).
-/// <c>Divergences/SaddlePointLossModelTests.cs</c>.
+/// <b>The saddle search</b>. QuantLib's brackets the point on the name of the largest loss and, below or above the
+/// bracket's losses, returns the bracket's end instead of solving, so on pools whose largest loss is a name unlikely to
+/// default it reads up to 40 times the exact tail (0.978 for 0.198 at 1% of 100 names a year out at correlation 0.7,
+/// 0.2008 for 0.0049 at 10% at 0.9); here the bracket widens until it holds the level and the point is solved,
+/// QuantLib's search wherever its bracket holds it. The cumulants keep QuantLib's arithmetic but for names at 0, out of
+/// the sums, names at 1, their linear terms, and where QuantLib's form overflows the logistic form, so a widened point
+/// reads no 0·∞; the split's contributions take the same treatment, where QuantLib's form reads ∞/∞. Above the largest
+/// loss a factor node reaches, its names' losses given default but those certain not to default, no point exists: the
+/// tail reads 0 there by QuantLib's own return above 1 less the average recovery, and the density and the conditional
+/// shortfall read 0 too, where at the widened end QuantLib's expressions read 0/0, so the shortfall of a tranche
+/// detaching above the pool's largest loss was NaN (QuantLib's TO DO list: "Failing when the tranche upper loss limit
+/// goes over the max attainable loss"). <c>Divergences/SaddlePointLossModelTests.cs</c>.
 /// </para>
 /// <para>
 /// <see cref="ProbOverLoss"/> reads 0 above the whole tranche, where QuantLib's compares the fraction with the
 /// detachment amount; <see cref="ExpectedShortfall"/> is the tranche loss's, at most the tranche's remaining notional,
 /// where QuantLib's integrates the whole portfolio's tail above the tranche's percentile and caps it at the tranche
-/// notional times the remaining ratio (9 for a 300 tranche; "ESF &lt;- tranched????!!" in its TO DO list) (XR8 (xxiii);
-/// the S-xcr code review's C3 O1-2). Bound to a basket with realized defaults, the model prices its live names over
-/// the restated tranche (XR8 (ii)).
+/// notional times the remaining ratio (9 for a 300 tranche; "ESF &lt;- tranched????!!" in its TO DO list). Bound to a
+/// basket with realized defaults, the model prices its live names over the restated tranche.
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]
@@ -918,7 +915,7 @@ public class SaddlePointLossModel<TCopula, TInitTraits> : DefaultLossModel
     }
 
     /// <summary>The live tranche's expected loss conditional on the factor: the tranche of the conditional expected
-    /// loss, QuantLib's large-pool reading (XR8 (xxxvi)).</summary>
+    /// loss, QuantLib's large-pool reading.</summary>
     /// <param name="invUncondProbs">The inverse cumulatives of the names' default probabilities.</param>
     /// <param name="mktFactor">The factor's values.</param>
     /// <returns>The conditional expected tranche loss, an amount.</returns>

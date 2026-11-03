@@ -13,9 +13,9 @@ namespace NanoQL;
 
 /// <summary>The open, close, high and low prices of an interval.</summary>
 /// <remarks>
-/// Immutable (the S-bar plan's BR3 (iv)): QuantLib's <c>setValue</c> and <c>setValues</c> change the object, where
-/// <see cref="SetValue"/> and <see cref="SetValues"/> return a copy. Two prices are equal when their four values are,
-/// by <see cref="double.Equals(double)"/>; QuantLib has no equality on the type. QuantLib's parameterless constructor
+/// Immutable: QuantLib's <c>setValue</c> and <c>setValues</c> change the object, where <see cref="SetValue"/> and
+/// <see cref="SetValues"/> return a copy. Two prices are equal when their four values are, by
+/// <see cref="double.Equals(double)"/>; QuantLib has no equality on the type. QuantLib's parameterless constructor
 /// isn't ported: its nulls serve QuantLib's default insertion into a mutable time series, and no QuantLib test builds
 /// one.
 /// </remarks>

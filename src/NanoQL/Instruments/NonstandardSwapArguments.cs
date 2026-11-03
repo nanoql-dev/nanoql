@@ -15,7 +15,7 @@ namespace NanoQL.Instruments;
 /// <summary>
 /// QuantLib's <c>NonstandardSwap::arguments</c>, which its <c>setupArguments</c> fills from the legs: per cash flow, in
 /// the legs' order, the reset, fixing and payment dates, the amounts, the accrual times, spreads and gearings, and
-/// whether it is a redemption, a redemption taking the dates of the coupon paid with it (the S-g1d plan's G1D6).
+/// whether it is a redemption, a redemption taking the dates of the coupon paid with it.
 /// </summary>
 /// <remarks>
 /// A floating coupon whose amount can't be computed (a missing fixing) has no amount, QuantLib's

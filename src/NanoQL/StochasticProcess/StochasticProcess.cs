@@ -24,10 +24,11 @@ namespace NanoQL;
 /// discretization, as QuantLib's do; a process built without one overrides the three, or they refuse.
 /// </para>
 /// <para>
-/// <see cref="InitialValues(Span{double})"/> and <see cref="Evolve(double, ReadOnlySpan{double}, double,
-/// ReadOnlySpan{double}, Span{double})"/> are the in-place forms the multi-dimensional Monte Carlo loop steps through
-/// (the S-hes plan's HR2): each defaults to its allocating form and a copy, so a process that doesn't override them
-/// keeps its bits; a process overrides them to step without allocating, by QuantLib's arithmetic.
+/// <see cref="InitialValues(Span{double})"/> and
+/// <see cref="Evolve(double, ReadOnlySpan{double}, double, ReadOnlySpan{double}, Span{double})"/> are the in-place
+/// forms the multi-dimensional Monte Carlo loop steps through: each defaults to its allocating form and a copy, so a
+/// process that doesn't override them keeps its bits; a process overrides them to step without allocating, by
+/// QuantLib's arithmetic.
 /// </para>
 /// </remarks>
 public abstract class StochasticProcess

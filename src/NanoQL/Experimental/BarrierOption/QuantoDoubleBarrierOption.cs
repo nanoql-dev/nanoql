@@ -14,9 +14,8 @@ namespace NanoQL.Experimental;
 /// one.
 /// </summary>
 /// <remarks>
-/// Immutable and sealed: QuantLib derives nothing from it. <c>QuantoEngine</c> prices it through a double-barrier engine
-/// on its own terms, its results a <see cref="QuantoOptionResults"/> (the S-xeq plan's §2.0, S-bar's
-/// <see cref="QuantoBarrierOption"/> form).
+/// Immutable and sealed: QuantLib derives nothing from it. <c>QuantoEngine</c> prices it through a double-barrier
+/// engine on its own terms, its results a <see cref="QuantoOptionResults"/> (<see cref="QuantoBarrierOption"/>'s form).
 /// </remarks>
 [Experimental("NQL0001")]
 public sealed class QuantoDoubleBarrierOption : DoubleBarrierOption

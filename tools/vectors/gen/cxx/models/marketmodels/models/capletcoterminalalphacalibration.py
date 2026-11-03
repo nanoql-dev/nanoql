@@ -13,18 +13,17 @@ ones, the inverse-linear form at bounds ±0.5 among them: its α, a, b and pseud
 rates.
 
 Maximum homogeneity is left out: QuantLib's Minimize tests the objective's value where it means the trial α, so it stops
-at its first trial where that value isn't an acceptable α, its α and pseudo-roots then other than the fix's (the S-mm
-plan's MR3 (x), tests/NanoQL.Tests/Divergences/AlphaFinderTests.cs); with QuantLib's test restored nanoql reproduces
-both cases bit for bit. One maximum-homogeneity case stays, caplets × 0.95 on eight factors, where the fixed
-minimization leaves a caplet no α and the pass runs again on QuantLib's test (the user's ruling of 2026-10-27), so
-nanoql's results are QuantLib's; and the pass function on it.
+at its first trial where that value isn't an acceptable α, its α and pseudo-roots then other than the fix's
+(tests/NanoQL.Tests/Divergences/AlphaFinderTests.cs); with QuantLib's test restored nanoql reproduces both cases bit for
+bit. One maximum-homogeneity case stays, caplets × 0.95 on eight factors, where the fixed minimization leaves a caplet
+no α and the pass runs again on QuantLib's test, so nanoql's results are QuantLib's; and the pass function on it.
 
 Where a step's final part fails, QuantLib 1.44's solve returns it as solved, and QuantLib's master's, which nanoql
-takes, returns false, so the calibration throws "alpha form failure" (#2910, the upstream sweep's SWR2 (a) and SWD14;
-tests/NanoQL.Tests/Divergences/CTSMMCapletAlphaFormCalibrationTests.cs). So no case has such a step: a calibration
-whose swaptions miss by more than 1e-10, the mark of one, or a pass whose b is QuantLib's caller's 0 stops the
-generator. The inverse-linear form's cases are at bounds ±0.5, where every step solves; at ±1 six of its steps are
-half-solved, and the refusal on those inputs is checked in that class.
+takes, returns false, so the calibration throws "alpha form failure" (#2910;
+tests/NanoQL.Tests/Divergences/CTSMMCapletAlphaFormCalibrationTests.cs). So no case has such a step: a calibration whose
+swaptions miss by more than 1e-10, the mark of one, or a pass whose b is QuantLib's caller's 0 stops the generator. The
+inverse-linear form's cases are at bounds ±0.5, where every step solves; at ±1 six of its steps are half-solved, and the
+refusal on those inputs is checked in that class.
 
 The harness unit is tools/cxx/src/models/marketmodels/models/calibrations.cpp. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Models/MarketModels/CTSMMCapletAlphaFormCalibrationCxxVectorTests.cs."""

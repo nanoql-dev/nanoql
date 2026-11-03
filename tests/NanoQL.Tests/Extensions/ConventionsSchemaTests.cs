@@ -15,7 +15,7 @@ namespace NanoQL.Tests.Extensions;
 /// attribute in the conventions' namespace, unqualified foreign content, a duplicate name in a value kind, a date
 /// outside QuantLib's range or with a time zone, and a DTD are refused, a schema violation as .NET's exception with its
 /// line and position; a <c>Conventions</c> element inside another document reads; several files read into one snapshot
-/// refuse a name two of them define; and no schema name hints at time or versioning (CVR2).
+/// refuse a name two of them define; and no schema name hints at time or versioning.
 /// </summary>
 public class ConventionsSchemaTests
 {
@@ -183,8 +183,8 @@ public class ConventionsSchemaTests
     [Fact]
     public void NoSchemaNameHintsAtTimeOrVersioning()
     {
-        // CVR2: a convention has no validity dates and the format no version: no word of a name starts with one of
-        // these, and no two read "as of" (QuantLib's unit conversions are no versions)
+        // A convention has no validity dates and the format no version: no word of a name starts with one of these, and
+        // no two read "as of" (QuantLib's unit conversions are no versions)
         string[] banned = ["valid", "known", "asof", "version", "effective", "expir"];
         string[] names = [.. SchemaDocument().Descendants().Attributes("name").Select(a => a.Value)];
 
@@ -201,7 +201,7 @@ public class ConventionsSchemaTests
     [Fact]
     public void EveryElementAndAttributeTheSchemaDeclaresIsDocumented()
     {
-        // CVD17: editors show each item's documentation
+        // Editors show each item's documentation
         XNamespace xs = "http://www.w3.org/2001/XMLSchema";
         XElement[] declared = [.. SchemaDocument().Descendants()
             .Where(e => (e.Name == xs + "element" || e.Name == xs + "attribute") && e.Attribute("name") is not null)];

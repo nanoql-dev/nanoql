@@ -6,13 +6,11 @@ using NanoQL.Models;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The square-root volatility process's number of steps (the S-mm plan's MR3 (xiii), fixed under R8). QuantLib's
-/// <c>SquareRootAndersen::numberSteps</c> is <c>dt_.size()*numberSubSteps_</c> (<c>squarerootandersen.cpp:80</c>),
-/// where
-/// <c>dt_</c> already holds every sub-step: 48 for 3 evolution times of 4 sub-steps (this run's
-/// <c>probes\c2_facts.cpp</c>; the planner's MP3), though <c>variatesPerStep</c> counts per evolution step. nanoql's is
-/// the evolution steps a path takes. Checks: the <c>nextstep</c> calls a path takes, as QuantLib's own sizing of its
-/// path (<c>vPath_</c>, one value per sub-step and the start) allows, the next refused.
+/// The square-root volatility process's number of steps (fixed). QuantLib's <c>SquareRootAndersen::numberSteps</c> is
+/// <c>dt_.size()*numberSubSteps_</c> (<c>squarerootandersen.cpp:80</c>), where <c>dt_</c> already holds every sub-step:
+/// 48 for 3 evolution times of 4 sub-steps, though <c>variatesPerStep</c> counts per evolution step. nanoql's is the
+/// evolution steps a path takes. Checks: the <c>nextstep</c> calls a path takes, as QuantLib's own sizing of its path
+/// (<c>vPath_</c>, one value per sub-step and the start) allows, the next refused.
 /// </summary>
 public class SquareRootAndersenStepsTests
 {

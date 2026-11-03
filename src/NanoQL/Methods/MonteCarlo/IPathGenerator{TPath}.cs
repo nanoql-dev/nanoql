@@ -13,8 +13,8 @@ namespace NanoQL.Methods;
 /// </summary>
 /// <typeparam name="TPath">The path type.</typeparam>
 /// <remarks>
-/// A generator is a working type (S2R2): each draw changes it, and the sample's value is a view of its own buffer,
-/// valid until its next draw.
+/// A generator is a working type: each draw changes it, and the sample's value is a view of its own buffer, valid
+/// until its next draw.
 /// </remarks>
 [WorkingType]
 public interface IPathGenerator<TPath>

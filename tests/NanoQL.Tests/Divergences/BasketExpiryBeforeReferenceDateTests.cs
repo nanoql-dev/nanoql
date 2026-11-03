@@ -14,12 +14,12 @@ namespace NanoQL.Tests.Divergences;
 /// <summary>
 /// The basket engines that read their structures by date on an option expiring before a later structure's date.
 /// QuantLib reads each discount, variance and deviation by date from the structure's own reference date
-/// (<c>vectorbsmprocessextractor.cpp:48</c>, <c>:71</c>, <c>:80</c>, <c>:89-90</c>, which Choi's, the single-factor
-/// and the n-dimensional engines read, and <c>choibasketengine.cpp:174-188</c>, Choi's nodes), so an option expiring
-/// before a risk-free curve's or a volatility's date is refused with "negative time". Each read here accrues nothing
-/// before its structure's date (the playbook's dates row, the S-exo plan's ER5 (i) class, round 1's B1-1): the option
-/// is priced as QuantLib prices the market restated from the evaluation date, a curve's discount 1 and a volatility's
-/// variance 0 up to its date, and as nanoql's 2-D finite-difference engine prices it on its clock.
+/// (<c>vectorbsmprocessextractor.cpp:48</c>, <c>:71</c>, <c>:80</c>, <c>:89-90</c>, which Choi's, the single-factor and
+/// the n-dimensional engines read, and <c>choibasketengine.cpp:174-188</c>, Choi's nodes), so an option expiring before
+/// a risk-free curve's or a volatility's date is refused with "negative time". Each read here accrues nothing before
+/// its structure's date (the playbook's row for structures on another clock): the option is priced as QuantLib prices
+/// the market restated from the evaluation date, a curve's discount 1 and a volatility's variance 0 up to its date, and
+/// as nanoql's 2-D finite-difference engine prices it on its clock.
 /// </summary>
 public class BasketExpiryBeforeReferenceDateTests
 {

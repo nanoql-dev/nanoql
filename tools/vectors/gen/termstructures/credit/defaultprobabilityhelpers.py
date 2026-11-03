@@ -8,10 +8,10 @@ wheel's SpreadCdsHelper and UpfrontCdsHelper, bound to the PiecewiseFlatHazardRa
   upfront helpers under the 2009 rule (mid-point and ISDA models). For each helper, its earliest, latest, pillar,
   maturity and latest relevant dates, and its implied quote and quote error on the curve.
 
-The implied quotes and quote errors are solved, so the stability filter of the S-infl plan's SID20 (the S7 plan's
-S7R6) runs on them: the curve is rebuilt with the helpers' quotes moved one ulp up, then down, together and each
-alone, and an output is written only where every move leaves it within 1e-12 x max(|a|, |b|, 1); a dropped one is
-written null and its index listed in the case's inputs "dropped".
+The implied quotes and quote errors are solved, so the stability filter runs on them: the curve is rebuilt with the
+helpers' quotes moved one ulp up, then down, together and each alone, and an output is written only where every move
+leaves it within 1e-12 x max(|a|, |b|, 1); a dropped one is written null and its index listed in the case's inputs
+"dropped".
 
 A case's inputs hold its settings, the helper specs {"kind", "quote", "runningSpread", "tenor", "settlementDays",
 "calendar", "frequency", "convention", "rule", "dayCounter", "recoveryRate", "discount", "upfrontSettlementDays",

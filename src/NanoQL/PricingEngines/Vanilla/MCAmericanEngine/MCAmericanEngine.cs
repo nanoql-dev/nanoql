@@ -21,17 +21,16 @@ namespace NanoQL.PricingEngines;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A static class over <see cref="MCLongstaffSchwartzEngine{TOption, TMc, TMcCalibration, TPath, TState, TStats}"/>
-/// (the S-van plan's VR1): <c>Calculate</c> builds the simulation for the call, with QuantLib's checks, and returns the
-/// NPV, its error estimate where the pricing traits allow one, and the additional result "exerciseProbability". With
-/// the control variate, on QuantLib's analytic European engine and the European path pricer, the value is floored at
-/// 0, as QuantLib floors it. The exercise must be American or Bermudan with the payoff at exercise. The Brownian
-/// bridge is off in both phases, as QuantLib's engine sets it.
+/// A static class over <see cref="MCLongstaffSchwartzEngine{TOption, TMc, TMcCalibration, TPath, TState, TStats}"/>:
+/// <c>Calculate</c> builds the simulation for the call, with QuantLib's checks, and returns the NPV, its error estimate
+/// where the pricing traits allow one, and the additional result "exerciseProbability". With the control variate, on
+/// QuantLib's analytic European engine and the European path pricer, the value is floored at 0, as QuantLib floors it.
+/// The exercise must be American or Bermudan with the payoff at exercise. The Brownian bridge is off in both phases, as
+/// QuantLib's engine sets it.
 /// </para>
 /// <para>
-/// The paths and the discounts run on the engine's clock (the S-van plan's VR1 (v), as
-/// <see cref="MCEuropeanEngine"/>); the calibration seed's default is QuantLib's documented one (VR4 (v)); the pricer
-/// exercises only at the exercise times (VR4 (xxiv)); and the seeds are explicit (S2R4).
+/// The paths and the discounts run on the engine's clock (as <see cref="MCEuropeanEngine"/>); the calibration seed's
+/// default is QuantLib's documented one; the pricer exercises only at the exercise times; and the seeds are explicit.
 /// </para>
 /// </remarks>
 public static class MCAmericanEngine
@@ -60,7 +59,7 @@ public static class MCAmericanEngine
     /// <exception cref="ArgumentNullException">The option, the context or the process is <see langword="null"/>.</exception>
     /// <exception cref="ArgumentException">
     /// The time steps are given neither or both ways, or aren't positive; the basis family is insufficient; a
-    /// regression's matrix isn't finite (the second-kind Chebyshev basis on a call, VR7).
+    /// regression's matrix isn't finite (the second-kind Chebyshev basis on a call).
     /// </exception>
     /// <exception cref="ArgumentOutOfRangeException">
     /// A number of samples is negative, a seed is outside its range, or the default calibration seed is 0.

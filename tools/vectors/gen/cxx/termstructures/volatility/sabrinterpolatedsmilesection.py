@@ -8,11 +8,11 @@ the volatilities spreads over the at-the-money one; the quote form with one vola
 and the shifted smile. Each gives the fitted alpha, beta, nu and rho, the errors, the end criteria, the strike range,
 the level and the exercise time, and at nine strikes the volatility and the variance.
 
-**The stability filter** (the S7 plan's S7R6) runs on the outputs the fit computes, the parameters, the errors, the end
-criteria and the volatilities and variances: each section is refitted with every given volatility moved one ulp up,
-then down, by math.nextafter, together; then each alone, up and down; an output is written only where every refit
-leaves it within 1e-12 x max(|base|, |moved|, 1) (the end criteria where every refit gives the same), and the generator
-prints "dropped n of m outputs" per case. A refused value is {"throws": true}. Each case's input "section" is the spec
+**The stability filter** runs on the outputs the fit computes, the parameters, the errors, the end criteria and the
+volatilities and variances: each section is refitted with every given volatility moved one ulp up, then down, by
+math.nextafter, together; then each alone, up and down; an output is written only where every refit leaves it within
+1e-12 x max(|base|, |moved|, 1) (the end criteria where every refit gives the same), and the generator prints "dropped n
+of m outputs" per case. A refused value is {"throws": true}. Each case's input "section" is the spec
 tools/cxx/src/termstructures/volatility/sabrinterpolatedsmilesection.cpp reads;
 tests/NanoQL.Tests/Vectors/Cxx/TermStructures/SabrInterpolatedSmileSectionCxxVectorTests.cs reads it back."""
 import math

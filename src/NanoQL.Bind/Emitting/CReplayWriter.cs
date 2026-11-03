@@ -130,7 +130,7 @@ internal sealed class CReplayWriter(Surface surface)
 
                 case "tuple":
                 {
-                    // A tuple's elements from its JSON array, each in its own form (B2R3).
+                    // A tuple's elements from its JSON array, each in its own form.
                     c.AppendLine($"    const jv* {p}t = rd_tuple(r, a, {j});");
                     for (int i = 0; i < k.Items.Count; i++)
                     {
@@ -159,7 +159,7 @@ internal sealed class CReplayWriter(Surface surface)
 
                 case "array" when k.Element!.Name == "tuple":
                 {
-                    // A collection of tuples, one array per element, a nullable one with its flags, then the count (B2R3).
+                    // A collection of tuples, one array per element, a nullable one with its flags, then the count.
                     CKind te = k.Element;
                     int n = te.Items.Count;
                     c.AppendLine($"    static const int {p}k[] = {{{string.Join(", ", te.Items.Select(K))}}}; const void* {p}e[{n}]; const bool* {p}h[{n}]; int32_t {p}n;");
@@ -284,7 +284,7 @@ internal sealed class CReplayWriter(Surface surface)
                 return;
             case "array" when k.Element!.Name is "tuple" or "tuple?":
             {
-                // A returned collection of tuples, one out array per element, a nullable tuple's flags, the count (B2R10).
+                // A returned collection of tuples, one out array per element, a nullable tuple's flags, the count.
                 CKind te = k.Element;
                 var ptrs = new List<string>();
                 for (int i = 0; i < te.Items.Count; i++)

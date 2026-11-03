@@ -8,8 +8,8 @@ using static NanoQL.Numerics.PseudoSqrtFunctions;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// QuantLib's master after the pin (#2846, the S-sr plan's SSR5) adds coverage cases for the pseudo square root
-/// (test-suite/matrices.cpp at a23190af1: testPseudoSqrtSalvagingAlgorithms, testPseudoSqrtValidationAndPrincipalTolerance,
+/// QuantLib's master after the pin (#2846) adds coverage cases for the pseudo square root (test-suite/matrices.cpp at
+/// a23190af1: testPseudoSqrtSalvagingAlgorithms, testPseudoSqrtValidationAndPrincipalTolerance,
 /// testRankReducedPseudoSqrtBranches, testPseudoSqrtDegenerateInputs). Their lines that pass on 1.44 are here; the one
 /// that doesn't, an empty matrix's text, is <c>Divergences/PseudoSqrtEmptyMatrixTests.cs</c>.
 /// </summary>

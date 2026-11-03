@@ -23,10 +23,9 @@ namespace NanoQL.Coupons;
 /// </para>
 /// <para>
 /// QuantLib's leg is built as <c>Leg leg(n)</c> and then filled with <c>push_back</c>, so it holds n null cash flows
-/// before its n coupons (the S-cms plan's CMR5 (xii)); here it holds the coupons alone. With no observation tenor,
-/// QuantLib's <c>Period()</c>, a coupon has no observation dates and QuantLib's rate is 0/0 (CMR5 (xiii)); here such a
-/// leg is refused. A missing trigger is QuantLib's <c>Null&lt;Rate&gt;()</c>, its value, which a coupon's checks and
-/// pricer read as QuantLib's do.
+/// before its n coupons; here it holds the coupons alone. With no observation tenor, QuantLib's <c>Period()</c>, a
+/// coupon has no observation dates and QuantLib's rate is 0/0; here such a leg is refused. A missing trigger is
+/// QuantLib's <c>Null&lt;Rate&gt;()</c>, its value, which a coupon's checks and pricer read as QuantLib's do.
 /// </para>
 /// </remarks>
 public sealed record RangeAccrualLeg
@@ -205,8 +204,8 @@ public sealed record RangeAccrualLeg
     /// <returns>The leg, one coupon per schedule period.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="context"/> is null.</exception>
     /// <exception cref="NanoQLException">No notional was given; more notionals, fixing days, gearings, spreads or
-    /// triggers were given than there are periods; or a floating coupon is built with no observation tenor (CMR5
-    /// (xiii)); each with QuantLib's text where it has one.</exception>
+    /// triggers were given than there are periods; or a floating coupon is built with no observation tenor; each with
+    /// QuantLib's text where it has one.</exception>
     /// <exception cref="ArgumentException">A coupon refuses its terms, with QuantLib's text.</exception>
     public ImmutableArray<CashFlow> ToLeg(EvaluationContext context)
     {

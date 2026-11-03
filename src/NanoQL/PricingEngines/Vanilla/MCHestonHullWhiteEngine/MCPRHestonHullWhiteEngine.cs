@@ -12,9 +12,9 @@ namespace NanoQL.PricingEngines;
 
 /// <summary>
 /// <see cref="MCHestonHullWhiteEngine"/> on pseudo-random draws with QuantLib's default statistics:
-/// <c>MCPRHestonHullWhiteEngine</c>, named as QuantLib-Python names its siblings (B2R2), QuantLib's
+/// <c>MCPRHestonHullWhiteEngine</c>, named as QuantLib-Python names its siblings, QuantLib's
 /// <c>MCHestonHullWhiteEngine&lt;PseudoRandom&gt;</c>, its calculations closed at <see cref="PseudoRandom"/> and
-/// <see cref="GeneralStatistics"/> (D12).
+/// <see cref="GeneralStatistics"/>.
 /// </summary>
 public static class MCPRHestonHullWhiteEngine
 {

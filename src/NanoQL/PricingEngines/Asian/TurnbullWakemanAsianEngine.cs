@@ -23,14 +23,13 @@ namespace NanoQL.PricingEngines;
 /// certain exercise, priced in closed form (Haug, "Option Pricing Formulas", 2nd ed., p. 193).
 /// </para>
 /// <para>
-/// Documented divergences (the S-bar plan's BR5). With every fixing past, the known payoff discounted, as Choi's engine
-/// prices it, where QuantLib's reads the last of no fixing times and crashes the process ((xxix),
-/// <c>Divergences/TurnbullWakemanPastFixingsTests.cs</c>); QuantLib's master prices it so after 1.44 (#2954), its
+/// Documented divergences. With every fixing past, the known payoff discounted, as Choi's engine prices it, where
+/// QuantLib's reads the last of no fixing times and crashes the process
+/// (<c>Divergences/TurnbullWakemanPastFixingsTests.cs</c>); QuantLib's master prices it so after 1.44 (#2954), its
 /// branch ahead of the certain exercise's, as here. A seasoned option reads its variances and spot volatilities at the
 /// future average's own strike, K_f = (K − A/m)·m/f for f of m fixings to come, so it prices as (f/m) times the
 /// unseasoned option at K_f, where QuantLib reads them at K − A/m, +42% and +1,302% off on a smile varying with
-/// maturity ((xxx),
-/// <c>Divergences/SeasonedAsianSmileTests.cs</c>).
+/// maturity (<c>Divergences/SeasonedAsianSmileTests.cs</c>).
 /// </para>
 /// <para>
 /// The last fixing on the evaluation date, at time 0, is priced with a zero standard deviation and σ, its delta
@@ -42,8 +41,7 @@ namespace NanoQL.PricingEngines;
 /// <para>
 /// A fixing dated from the evaluation date to the latest structure's date, where the structures settle after the
 /// evaluation date, is taken there, the spot with no variance and no discount accrued, so as a past fixing at the spot
-/// (the S-bar code review's B3-1 and B3-2, <c>Divergences/AsianLateSettlementTests.cs</c>), where QuantLib reads its
-/// negative time and refuses it.
+/// (<c>Divergences/AsianLateSettlementTests.cs</c>), where QuantLib reads its negative time and refuses it.
 /// </para>
 /// </remarks>
 public static class TurnbullWakemanAsianEngine
@@ -119,7 +117,7 @@ public static class TurnbullWakemanAsianEngine
         additional["effective_strike"] = effectiveStrike;
 
         // every fixing past: the known payoff discounted, QuantLib's master's (#2954) and Choi's engine's, where
-        // QuantLib 1.44 reads the last of no fixing times (BR5 (xxix))
+        // QuantLib 1.44 reads the last of no fixing times
         if (futureFixings == 0)
         {
             if (!(pastFixings > 0))
@@ -164,7 +162,7 @@ public static class TurnbullWakemanAsianEngine
             return new OneAssetOptionResults { NPV = value, Delta = delta, Gamma = 0, AdditionalResults = additional.ToImmutable() };
         }
 
-        // the future average's own strike, where the smile is read (BR5 (xxx)), where QuantLib reads it at K − A/m
+        // the future average's own strike, where the smile is read, where QuantLib reads it at K − A/m
         double futureStrike = effectiveStrike * m / futureFixings;
 
         // Expected value of the non-accrued portion of the average prices

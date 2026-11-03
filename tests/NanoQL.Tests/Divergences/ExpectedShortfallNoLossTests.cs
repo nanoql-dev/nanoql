@@ -6,13 +6,12 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The expected shortfall where no sample lies below the value-at-risk's level (the S-sr plan's SSR6 (xx)): QuantLib
-/// refuses "no data below the target" (riskstatistics.hpp:196-202). With no loss the level is 0, and the port returns
-/// it, the value QuantLib's own comment gives ("must be a loss, i.e., capped at 0.0 and negated", line 203); where the
-/// tail is an atom at the level, every tail sample sits at it, and the port returns the level, the value-at-risk,
-/// QuantLib's own limit as the atom splits. The average shortfall keeps QuantLib's refusal: a conditional average over
-/// no data has no value. QuantLib's checks: its own shortfall and value-at-risk on the same samples, and its expected
-/// shortfall on the split atom.
+/// The expected shortfall where no sample lies below the value-at-risk's level: QuantLib refuses "no data below the
+/// target" (riskstatistics.hpp:196-202). With no loss the level is 0, and the port returns it, the value QuantLib's own
+/// comment gives ("must be a loss, i.e., capped at 0.0 and negated", line 203); where the tail is an atom at the level,
+/// every tail sample sits at it, and the port returns the level, the value-at-risk, QuantLib's own limit as the atom
+/// splits. The average shortfall keeps QuantLib's refusal: a conditional average over no data has no value. QuantLib's
+/// checks: its own shortfall and value-at-risk on the same samples, and its expected shortfall on the split atom.
 /// </summary>
 public class ExpectedShortfallNoLossTests
 {

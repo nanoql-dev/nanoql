@@ -19,12 +19,11 @@ namespace NanoQL.PricingEngines;
 /// <remarks>
 /// <para>
 /// An immutable object over its <see cref="HestonModel"/>, the control variate, the scaling and the damping exponent,
-/// holding QuantLib's order-1 <see cref="AnalyticHestonEngine"/> for the control variate (the S-hes plan's HD7); the
-/// static <c>Calculate</c> builds one. The node table is QuantLib's, generated (HD15). The model's time runs from the
-/// earliest curve date and the forward and discount are read by date (HR7 (xi)); at the model's time 0 the price is the
-/// forward's discounted intrinsic value, where QuantLib's average variance is 0/0 and it throws (HR7 (xxxi)); and below
-/// κt = 1e-2 the average variance's factor (1 − e^{−κt})/(κt) is −expm1(−κt)/(κt), where QuantLib's loses the
-/// (v₀ − θ) term as 1 − e^{−κt} rounds to 0 (HR7 (xxv)).
+/// holding QuantLib's order-1 <see cref="AnalyticHestonEngine"/> for the control variate; the static <c>Calculate</c>
+/// builds one. The node table is QuantLib's, generated. The model's time runs from the earliest curve date and the
+/// forward and discount are read by date; at the model's time 0 the price is the forward's discounted intrinsic value,
+/// where QuantLib's average variance is 0/0 and it throws; and below κt = 1e-2 the average variance's factor (1 −
+/// e^{−κt})/(κt) is −expm1(−κt)/(κt), where QuantLib's loses the (v₀ − θ) term as 1 − e^{−κt} rounds to 0.
 /// </para>
 /// <para>
 /// References: D. Conte, L. Ixaru, B. Paternoster, G. Santomauro, Exponentially-fitted Gauss–Laguerre quadrature rule
@@ -113,7 +112,7 @@ public sealed class ExponentialFittingHestonEngine
 
     private static double Min(double a, double b) => b < a ? b : a;
 
-    // QuantLib's calculate, the model's time from the earliest curve date and the curves read by date (HR7 (xi))
+    // QuantLib's calculate, the model's time from the earliest curve date and the curves read by date
     private double Value(VanillaOption option)
     {
         if (!(option.Exercise.Type == ExerciseType.European))
@@ -160,7 +159,7 @@ public sealed class ExponentialFittingHestonEngine
 
         if (t == 0.0)
         {
-            // no variance has accrued: the forward's discounted intrinsic value (HR7 (xxxi))
+            // no variance has accrued: the forward's discounted intrinsic value
             return rd * payoff.Evaluate(fwd);
         }
 
@@ -170,7 +169,7 @@ public sealed class ExponentialFittingHestonEngine
 
         var helper = new AnalyticHestonEngineAPHelper(t, fwd, strike, analyticCV, analyticEngine, alpha);
 
-        // below kappa t = 1e-2, (1 - e^{-kappa t}) by -expm1(-kappa t), which keeps the (v0 - theta) term (HR7 (xxv))
+        // below kappa t = 1e-2, (1 - e^{-kappa t}) by -expm1(-kappa t), which keeps the (v0 - theta) term
         double kt = kappa * t;
         double vAvg = kt < 1e-2
             ? (-Expm1Functions.StdExpm1(-kt) * (v0 - theta) / kt) + theta

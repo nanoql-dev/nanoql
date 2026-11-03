@@ -20,7 +20,7 @@ namespace NanoQL.Methods;
 /// direction, floored at the grid's lowest underlying.
 /// </summary>
 /// <remarks>
-/// A working type (the S-eq plan's SEQR1): the interpolation runs on buffers the handler holds, by
+/// A working type: the interpolation runs on buffers the handler holds, by
 /// <see cref="NanoQL.Numerics.LinearInterpolation"/>'s arithmetic, so applying it allocates nothing, where QuantLib
 /// copies the values at every step and builds an interpolation at each dividend.
 /// <para>

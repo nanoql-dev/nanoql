@@ -12,12 +12,12 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The FD Heston knock-in's legs (the S-bar plan's BR5 (xviii), fixed under R8). QuantLib prices a knock-in as the
-/// vanilla, plus the rebate, less the knock-out, and prices the vanilla and the rebate legs without the leverage
-/// function and mixing factor the knock-out leg uses (<c>fdhestonbarrierengine.cpp:173-194</c>), so a stochastic-local
-/// knock-in mixes pure Heston into it: on the market below the pure-Heston vanilla is 8.782 for the stochastic-local
-/// 7.419. nanoql prices every leg on the model it is given. Check: in-out parity on the stochastic-local model against
-/// QuantLib's FD Heston vanilla and rebate engines with the leverage function.
+/// The FD Heston knock-in's legs (fixed). QuantLib prices a knock-in as the vanilla, plus the rebate, less the
+/// knock-out, and prices the vanilla and the rebate legs without the leverage function and mixing factor the knock-out
+/// leg uses (<c>fdhestonbarrierengine.cpp:173-194</c>), so a stochastic-local knock-in mixes pure Heston into it: on
+/// the market below the pure-Heston vanilla is 8.782 for the stochastic-local 7.419. nanoql prices every leg on the
+/// model it is given. Check: in-out parity on the stochastic-local model against QuantLib's FD Heston vanilla and
+/// rebate engines with the leverage function.
 /// </summary>
 public class FdHestonKnockInLeverageTests
 {

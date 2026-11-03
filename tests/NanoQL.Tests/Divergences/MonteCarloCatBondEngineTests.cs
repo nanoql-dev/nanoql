@@ -14,8 +14,7 @@ namespace NanoQL.Tests.Divergences;
 /// The Monte Carlo cat bond engine on a simulation of no path (QuantLib's #2839, taken from its master after the pin):
 /// refused ("no Monte Carlo paths were generated"), where 1.44 divides 0 by 0. On <c>testCatBondInDoomScenario</c>'s
 /// floating cat bond (22 November 2004, the index on a 2.5% curve, discounted on 3%) and an event set of no events
-/// covering 2000 to 2003, which ends before the bond's first period, QuantLib 1.44 reads NPV and loss probability NaN
-/// (the S-xcr run's <c>c4_facts.cpp</c>).
+/// covering 2000 to 2003, which ends before the bond's first period, QuantLib 1.44 reads NPV and loss probability NaN.
 /// </summary>
 public class MonteCarloCatBondEngineTests
 {

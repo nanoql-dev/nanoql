@@ -7,30 +7,29 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// <see cref="AlphaFinder"/>'s fixes (the S-mm plan's MR3 (ix), (x), (xii), under R8), QuantLib's master's finder after
-/// the pin (#2910, <c>dbe958954</c>, the upstream sweep's SWR2 (a)), and its b where a final part fails (the S-mm run's
-/// R4-4). QuantLib's master fixes (ix) and (x) on the same quantities, returns from its bisection at an exact root and
-/// where its point stops moving, and returns the final part's success; its cases are below.
+/// <see cref="AlphaFinder"/>'s fixes, QuantLib's master's finder after the pin (#2910, <c>dbe958954</c>), and its b
+/// where a final part fails. QuantLib's master fixes (a) and (b) on the same quantities, returns from its bisection at
+/// an exact root and where its point stops moving, and returns the final part's success; its cases are below.
 /// <list type="bullet">
-/// <item>(viii) <c>alphafinder.cpp:335-346</c>, <c>:405-415</c>: where the turning point's value at α₀ is at most the
-/// target, QuantLib 1.44 returns α₀ without checking <c>finalPart</c>'s result, which fails where the variance left is
+/// <item><c>alphafinder.cpp:335-346</c>, <c>:405-415</c>: where the turning point's value at α₀ is at most the target,
+/// QuantLib 1.44 returns α₀ without checking <c>finalPart</c>'s result, which fails where the variance left is
 /// negative, and its search returns its α unchecked too. nanoql returns false there, as QuantLib's master does, its α
 /// QuantLib's and its b NaN; the alpha calibration refuses the step, as the master's does
 /// (<c>Divergences/CTSMMCapletAlphaFormCalibrationTests.cs</c>).</item>
-/// <item>(ix) <c>:372-373</c>: the downward search's loop tests <c>topValue</c>, which it never changes; on the
-/// planner's MP25 inputs QuantLib's <c>solve</c> returns false where the acceptable α lie strictly below α₀, and
-/// nanoql's loop, testing <c>bottomValue</c>, finds α −0.3111 at the target; on round 1's m10 inputs (the
-/// reviewer's), QuantLib's returns false and nanoql's α 0.41286, whose final part fails.</item>
-/// <item>(x) <c>:117</c>, <c>:145</c>: <c>Minimize</c> calls the feasibility test on the objective's value, not on the
-/// trial α, so where that value isn't an acceptable α it stops at its first trial: on MP25's inputs QuantLib returns α
-/// −0.48497 with homogeneity failure 3.3880, where the acceptable α run from −0.7519 to −0.3112 and the least failure
-/// is 3.3628 at −0.7519 (MP25; the run's harness gives QuantLib's alpha-form calibration at maximum homogeneity, and
-/// nanoql with QuantLib's test restored reproduces it bit for bit, the run's R4-2); on round 1's m15 inputs, QuantLib's
-/// α 0.5168373510089983 fails by 0.12497903935064759 and nanoql's 0.4467697074628475 by 0.12229674463151122, and where
-/// the small α QuantLib's test reads are acceptable both return 1.2307430953608208e-08.</item>
-/// <item>(xii) <c>:30-111</c>: the bisections and <c>Minimize</c> loop on the bracket's width alone, so at tolerance 0
-/// QuantLib's search never ends (MP8: killed after 20 s); nanoql's also stops when the bracket no longer moves.</item>
-/// <item>R4-4: where a final part fails QuantLib leaves b at its caller's value; nanoql's is NaN.</item>
+/// <item>(a) <c>:372-373</c>: the downward search's loop tests <c>topValue</c>, which it never changes; on the
+/// hyperbolic inputs QuantLib's <c>solve</c> returns false where the acceptable α lie strictly below α₀, and nanoql's
+/// loop, testing <c>bottomValue</c>, finds α −0.3111 at the target; on a second set of inputs, QuantLib's returns false
+/// and nanoql's α 0.41286, whose final part fails.</item>
+/// <item>(b) <c>:117</c>, <c>:145</c>: <c>Minimize</c> calls the feasibility test on the objective's value, not on the
+/// trial α, so where that value isn't an acceptable α it stops at its first trial: on the hyperbolic inputs QuantLib
+/// returns α −0.48497 with homogeneity failure 3.3880, where the acceptable α run from −0.7519 to −0.3112 and the least
+/// failure is 3.3628 at −0.7519 (nanoql with QuantLib's test restored reproduces QuantLib's alpha-form calibration at
+/// maximum homogeneity bit for bit); on a third set of inputs, QuantLib's α 0.5168373510089983 fails by
+/// 0.12497903935064759 and nanoql's 0.4467697074628475 by 0.12229674463151122, and where the small α QuantLib's test
+/// reads are acceptable both return 1.2307430953608208e-08.</item>
+/// <item>(c) <c>:30-111</c>: the bisections and <c>Minimize</c> loop on the bracket's width alone, so at tolerance 0
+/// QuantLib's search never ends (killed after 20 s); nanoql's also stops when the bracket no longer moves.</item>
+/// <item>(d) Where a final part fails QuantLib leaves b at its caller's value; nanoql's is NaN.</item>
 /// <item>The master's minimization tests the trial α before it reads the objective there, as nanoql's does; the alpha
 /// calibration's fallback keeps 1.44's order, the objective's value read first and tested.</item>
 /// </list>
@@ -39,7 +38,7 @@ namespace NanoQL.Tests.Divergences;
 /// </summary>
 public class AlphaFinderTests
 {
-    // MP25's inputs: the hyperbolic form on 0.5, 1, 1.5; the step index 1.
+    // The hyperbolic inputs: the hyperbolic form on 0.5, 1, 1.5; the step index 1.
     private static readonly double[] Times = [0.5, 1.0, 1.5];
     private static readonly double[] RateOne = [0.2, 0.2356];
     private static readonly double[] RateTwo = [1.0, 1.0, 1.0];
@@ -103,7 +102,7 @@ public class AlphaFinderTests
     {
         var form = new AlphaFormLinearHyperbolic(Times);
 
-        // QuantLib's solve returns false here (MP25); the turning point's values at -1, -0.5, 0 and 1
+        // QuantLib's solve returns false here; the turning point's values at -1, -0.5, 0 and 1
         Assert.True(Restated.TurningPointValue(form, 0.0, RateOne, RateTwo, Correlations) > Target);
         Assert.True(Restated.TurningPointValue(form, 1.0, RateOne, RateTwo, Correlations) > Target);
         Assert.True(Restated.TurningPointValue(form, -1.0, RateOne, RateTwo, Correlations) > Target);
@@ -146,7 +145,7 @@ public class AlphaFinderTests
     [Fact]
     public async Task ToleranceZeroEnds()
     {
-        // QuantLib's case: QuantLib's search at tolerance 0 never ends (MP8)
+        // QuantLib's case: QuantLib's search at tolerance 0 never ends
         double[] times = [.. Enumerable.Range(1, 11).Select(i => 0.5 * i)];
         var cs = new LMMCurveState(times);
         cs.SetOnForwardRates([.. Enumerable.Range(0, 10).Select(i => 0.03 + (0.0025 * i))]);
@@ -170,7 +169,7 @@ public class AlphaFinderTests
             Assert.Equal(fine.Alpha!.Value[i], exact.Alpha!.Value[i], 1e-12);
         }
 
-        // MP25's maximum homogeneity at tolerance 0
+        // The hyperbolic inputs' maximum homogeneity at tolerance 0
         var homogeneous = Task.Run(() =>
         {
             double[] vols = new double[3];

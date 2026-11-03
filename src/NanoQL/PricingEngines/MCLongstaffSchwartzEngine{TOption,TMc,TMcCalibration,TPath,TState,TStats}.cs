@@ -27,25 +27,24 @@ namespace NanoQL.PricingEngines;
 /// <typeparam name="TStats">The statistics accumulator.</typeparam>
 /// <remarks>
 /// <para>
-/// An extension point and an immutable object (the S-van plan's VR1 (ii)): a concrete engine's static
-/// <c>Calculate</c> builds one per call and implements <see cref="LsmPathPricer"/>. <see cref="Run"/> builds the
-/// pricer, adds the calibration samples on the calibration traits' generator, calibrates, prices on the same pricer and
-/// returns the model with the call's exercise probability: QuantLib's mutable pricer and calibration model are the
-/// call's working state, and the pricer reaches the pricing model as the call's argument, not as a member, so two calls
-/// can share one engine object.
+/// An extension point and an immutable object: a concrete engine's static <c>Calculate</c> builds one per call and
+/// implements <see cref="LsmPathPricer"/>. <see cref="Run"/> builds the pricer, adds the calibration samples on the
+/// calibration traits' generator, calibrates, prices on the same pricer and returns the model with the call's exercise
+/// probability: QuantLib's mutable pricer and calibration model are the call's working state, and the pricer reaches
+/// the pricing model as the call's argument, not as a member, so two calls can share one engine object.
 /// </para>
 /// <para>
 /// The calibration samples default to 2,048, and the calibration's Brownian bridge and antithetic variates to the
 /// pricing's. The calibration seed defaults to the pricing seed plus 1,768,237,423, modulo 2³² as MSVC's 32-bit
 /// <c>unsigned long</c> computes it, as QuantLib's documentation says; QuantLib's code compares the narrowed
 /// <c>Null&lt;Size&gt;()</c> with <c>Null&lt;Real&gt;()</c>, so its default is always the narrowed null: a
-/// documented divergence (the S-van plan's VR4 (v), <c>Divergences/LongstaffSchwartzCalibrationSeedTests.cs</c>);
-/// QuantLib's engine with that seed passed reproduces this one's default. Where that default is 0, at the pricing seed
-/// 2,526,729,873, it is refused (S2R4), since QuantLib reads 0 as a seed from the clock.
+/// documented divergence (<c>Divergences/LongstaffSchwartzCalibrationSeedTests.cs</c>); QuantLib's engine with that
+/// seed passed reproduces this one's default. Where that default is 0, at the pricing seed 2,526,729,873, it is
+/// refused, since QuantLib reads 0 as a seed from the clock.
 /// </para>
 /// <para>
 /// The pricer exercises only at the exercise times on the grid (<see cref="ExerciseTimes"/>): a Bermudan option's
-/// dates, and an American option's grid times from its earliest exercise (the S-van plan's VR4 (xxiv)).
+/// dates, and an American option's grid times from its earliest exercise.
 /// </para>
 /// </remarks>
 public abstract class MCLongstaffSchwartzEngine<TOption, TMc, TMcCalibration, TPath, TState, TStats> : McSimulation<TPath, TStats>
@@ -249,8 +248,8 @@ public abstract class MCLongstaffSchwartzEngine<TOption, TMc, TMcCalibration, TP
     }
 
     /// <summary>
-    /// The grid's exercise times, beside its last, for the Longstaff-Schwartz pricer (the S-van plan's VR4 (xxiv)): a
-    /// Bermudan option's exercise times after the start, and an American option's grid times from its earliest exercise.
+    /// The grid's exercise times, beside its last, for the Longstaff-Schwartz pricer: a Bermudan option's exercise
+    /// times after the start, and an American option's grid times from its earliest exercise.
     /// </summary>
     /// <param name="grid">The grid.</param>
     /// <returns>The times.</returns>
@@ -305,8 +304,8 @@ public abstract class MCLongstaffSchwartzEngine<TOption, TMc, TMcCalibration, TP
         return requiredTimes;
     }
 
-    // QuantLib's documented default, (seed + 1768237423) mod 2^32 in MSVC's 32-bit unsigned long (the S-van plan's
-    // VR4 (v)); 0 there, a seed from the clock in QuantLib, refused (S2R4).
+    // QuantLib's documented default, (seed + 1768237423) mod 2^32 in MSVC's 32-bit unsigned long; 0 there, a seed from
+    // the clock in QuantLib, refused.
     private static long DefaultedSeedCalibration(long seed, long? seedCalibration)
     {
         if (seedCalibration is long given)

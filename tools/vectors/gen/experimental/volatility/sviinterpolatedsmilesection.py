@@ -5,12 +5,12 @@
 fixed), on an equity skew and on floating strikes over an at-the-money volatility: each fit's a, b, sigma, rho and m, its
 errors and end criterion, its at-the-money level and strike range, and its volatilities at the strikes and between them.
 
-No output is left out (the S-xeq plan's §2.8); the landed fit's own departures (the S-rx plan's SRXR3 (x), (xvii)) are
-kept clear: no guess sits at an edge of SVI's transforms and no parameter's check acts.
+No output is left out; the fit's own departures are kept clear: no guess sits at an edge of SVI's transforms and no
+parameter's check acts.
 
-**The stability filter** (the S7 plan's S7R6), as tools/vectors/gen/experimental/volatility/
-noarbsabrinterpolatedsmilesection.py applies it: refits with every input moved one ulp, together, and each volatility,
-the forward and each guess alone; an output is written only where every refit leaves it within 1e-12 x max(|base|, |moved|, 1).
+**The stability filter**, as tools/vectors/gen/experimental/volatility/noarbsabrinterpolatedsmilesection.py applies it:
+refits with every input moved one ulp, together, and each volatility, the forward and each guess alone; an output is
+written only where every refit leaves it within 1e-12 x max(|base|, |moved|, 1).
 
 The specs: a fit {"optionDays", "forward", "strikes", "floating", "atmVolatility", "vols", "a", "b", "sigma", "rho",
 "m", "fixed" [5], "vegaWeighted"}. The wheel's calls, by QuantLib-SWIG 1.44's volatilities.i:

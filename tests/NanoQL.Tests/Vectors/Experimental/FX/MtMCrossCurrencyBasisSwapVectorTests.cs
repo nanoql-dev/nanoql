@@ -78,7 +78,7 @@ public class MtMCrossCurrencyBasisSwapVectorTests
     {
         CrossCurrencyInputs.CheckResults(check, c, results, inCcyLegBps: false);
 
-        // a leg compounding its spread has its fair spreads left out (the S-rx plan's C3 review, B1-2)
+        // a leg compounding its spread has its fair spreads left out
         foreach ((string output, double? fair) in new[]
                  {
                      ("fairFxBaseSpread", results.FairFxBaseSpread), ("fairFxQuoteSpread", results.FairFxQuoteSpread),

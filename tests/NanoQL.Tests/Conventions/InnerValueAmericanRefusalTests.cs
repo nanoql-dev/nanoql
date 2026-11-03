@@ -11,10 +11,10 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The swap's inner value off its exercise dates (the S-sr plan's SSR6 (x)): QuantLib's
-/// <c>FdmAffineModelSwapInnerValue</c> reads its exercise map's <c>find(t)->second</c> at the step condition's time, and an
-/// American exercise's condition reads it at every step of its window, where <c>find</c> returns the map's end
-/// (undefined behaviour, master §2.2's undefined-path row); nanoql refuses a time not among the exercise times.
+/// The swap's inner value off its exercise dates: QuantLib's <c>FdmAffineModelSwapInnerValue</c> reads its exercise
+/// map's <c>find(t)->second</c> at the step condition's time, and an American exercise's condition reads it at every
+/// step of its window, where <c>find</c> returns the map's end (undefined behaviour, the playbook's undefined-behaviour
+/// row); nanoql refuses a time not among the exercise times.
 /// </summary>
 public class InnerValueAmericanRefusalTests
 {

@@ -6,8 +6,8 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The immutable matrix utilities copy the vectors and matrices they're given and return copies (master §2.2's working
-/// types row): changing a <see cref="HouseholderTransformation"/>'s, a <see cref="HouseholderReflection"/>'s or a
+/// The immutable matrix utilities copy the vectors and matrices they're given and return copies (the playbook's
+/// working types): changing a <see cref="HouseholderTransformation"/>'s, a <see cref="HouseholderReflection"/>'s or a
 /// <see cref="CovarianceDecomposition"/>'s argument afterwards, or a vector or matrix it returned, changes nothing.
 /// </summary>
 public class MatrixUtilitiesInputCopyTests

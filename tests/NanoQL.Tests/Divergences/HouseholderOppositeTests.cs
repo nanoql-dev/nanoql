@@ -11,7 +11,7 @@ namespace NanoQL.Tests.Divergences;
 /// and the zero vector maps a to itself, −|a|e, and near −e the series branch, derived for a ≈ |a|e, maps a to neither,
 /// where the reflection maps a to |a|e, as QuantLib's test holds for vectors on e's side
 /// (<c>matrices.cpp:951-1002</c>). nanoql takes QuantLib's general branch, (a − |a|e)/|a − |a|e|, wherever a·e is
-/// negative, which has no cancellation there (the S-exo plan's ER5 (iv)): QuantLib's general branch is the check.
+/// negative, which has no cancellation there: QuantLib's general branch is the check.
 /// </summary>
 public class HouseholderOppositeTests
 {

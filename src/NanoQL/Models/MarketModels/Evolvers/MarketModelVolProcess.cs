@@ -11,9 +11,9 @@ namespace NanoQL.Models;
 /// "shifted BGM" with Heston volatility of Brace's "Engineering BGM": it scales each evolution step's variance.
 /// </summary>
 /// <remarks>
-/// A working type (the S-mm plan's MR1 (ii)): it keeps its state along a path, owned by one computation, and isn't
-/// thread-safe. <see cref="Clone"/>, a nanoql addition, is deep: an evolver holding a process owns a copy of it
-/// (MR1 (iv)). An extension point, as in QuantLib.
+/// A working type: it keeps its state along a path, owned by one computation, and isn't thread-safe.
+/// <see cref="Clone"/>, a nanoql addition, is deep: an evolver holding a process owns a copy of it. An extension
+/// point, as in QuantLib.
 /// </remarks>
 [WorkingType]
 public abstract class MarketModelVolProcess

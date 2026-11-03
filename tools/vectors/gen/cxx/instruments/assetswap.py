@@ -5,12 +5,12 @@ harness (docs/porting-playbook.md §9.4), on tools/vectors/gen/instruments/asset
 Euribor 6M index: 14 swaps on fixed-rate bonds of face 100, at par and at market, paying and receiving the bond's
 coupons, with and without a spread and a non-par repayment, priced by DiscountingSwapEngine on the curve.
 
-Each swap's outputs are its fair non-par repayment, its floating leg's NPV and BPS, its clean price, non-par
-repayment, spread, par flag and coupon side, and its bond's settlement date. Generated and left out: on a bond
-redeemed above par with no repayment given, the non-par repayment and the fair one, which QuantLib reads as 100
-whatever the redemption, where nanoql reads the redemption per 100 of notional (the S-cms plan's CMR5 (xx);
-tests/NanoQL.Tests/Divergences/AssetSwapNonParRepaymentTests.cs); on a face of 100 a repayment given is the same on
-both readings, so (xix) moves nothing here.
+Each swap's outputs are its fair non-par repayment, its floating leg's NPV and BPS, its clean price, non-par repayment,
+spread, par flag and coupon side, and its bond's settlement date. Generated and left out: on a bond redeemed above par
+with no repayment given, the non-par repayment and the fair one, which QuantLib reads as 100 whatever the redemption,
+where nanoql reads the redemption per 100 of notional
+(tests/NanoQL.Tests/Divergences/AssetSwapNonParRepaymentTests.cs); on a face of 100 a repayment given is the same on
+both readings, so the fix moves nothing here.
 
 A case's inputs hold its settings and the method's arguments (the bond, an instruments/bondspec.hpp spec; the curve;
 the coupon side, clean price, index, spread, par flag and repayment, null for none). Read back by
@@ -78,7 +78,7 @@ def cases():
                     expected = dict(zip(OUTPUTS, H.call("AssetSwap", *args)))
                     if expected["fairNonParRepayment"] is None:
                         expected["fairNonParRepayment"] = dict(v.THROWS)
-                    # QuantLib stores 100 whatever the redemption: CMR5 (xx)
+                    # QuantLib stores 100 whatever the redemption, where nanoql stores the redemption
                     if bond_name.endswith("101") and repayment is None:
                         del expected["fairNonParRepayment"], expected["nonParRepayment"]
                     out.append({"name": f"{bond_name} / {swap_name}", "inputs": {"settings": st, "arguments": args},

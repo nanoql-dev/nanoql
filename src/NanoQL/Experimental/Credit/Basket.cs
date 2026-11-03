@@ -14,50 +14,51 @@ using NanoQL.Time;
 
 namespace NanoQL.Experimental;
 
+// The realized defaults' form is the Open Source Risk Engine's (ORE).
 /// <summary>
 /// A credit basket: credit names, each with a notional, drawn from a pool of issuers, and a tranche of the pool's loss,
 /// with the default loss model that gives its loss statistics.
 /// </summary>
 /// <remarks>
 /// <para>
-/// Immutable, of its terms and its evaluation context (the S-xcr plan's XR1 (a)): it computes QuantLib's
-/// <c>computeBasket()</c> at the context's evaluation date at construction, its live names, notionals and keys, its
-/// settled loss and its remaining tranche, and keeps the context, since QuantLib's statistics take no date of
-/// evaluation and its cached state is that date's. QuantLib's constructor computes that state before it sets the
-/// tranche's attachment and detachment amounts, so its remaining amounts read 0 until the first statistic
-/// (<c>basket.cpp:57-68</c>); here they are computed after them (XR8 (xliii); <c>Divergences/BasketConstructionOrderTests.cs</c>).
+/// Immutable, of its terms and its evaluation context: it computes QuantLib's <c>computeBasket()</c> at the context's
+/// evaluation date at construction, its live names, notionals and keys, its settled loss and its remaining tranche, and
+/// keeps the context, since QuantLib's statistics take no date of evaluation and its cached state is that date's.
+/// QuantLib's constructor computes that state before it sets the tranche's attachment and detachment amounts, so its
+/// remaining amounts read 0 until the first statistic (<c>basket.cpp:57-68</c>); here they are computed after them
+/// (<c>Divergences/BasketConstructionOrderTests.cs</c>).
 /// </para>
 /// <para>
 /// <see cref="SetLossModel"/> returns a basket of the same terms and context whose <see cref="LossModel"/> is the model
-/// bound to it, its precomputation run once, there (XR1 (b)): QuantLib's flows set a model on a basket and change it
-/// through observers, which become rebuilds. A basket with no model refuses its statistics with QuantLib's "Basket has
-/// no default loss model assigned."
+/// bound to it, its precomputation run once, there: QuantLib's flows set a model on a basket and change it through
+/// observers, which become rebuilds. A basket with no model refuses its statistics with QuantLib's "Basket has no
+/// default loss model assigned."
 /// </para>
 /// <para>
 /// The live reads take the live names' positions: QuantLib's <c>remainingNotionals(d)</c> and
 /// <c>remainingProbabilities(d)</c> index the live list's positions, not its names (<c>basket.cpp:196-220</c>), so after
-/// the first of three names defaults they read the first two names' values (XR8 (ii); <c>Divergences/BasketLiveReadsTests.cs</c>).
+/// the first of three names defaults they read the first two names' values (<c>Divergences/BasketLiveReadsTests.cs</c>).
 /// Every curve read before a curve's reference date is a default probability of 0, where QuantLib's refuses it
-/// ("negative time"; XR8 (x)).
+/// ("negative time").
 /// </para>
 /// <para>
-/// <b>Realized defaults</b> (XR8 (ii), ORE's form). QuantLib's basket misprices once a name has defaulted: its expected
-/// tranche loss adds the whole settled loss, its models tranche the live names' loss against
-/// min(D, A + max(0, L − A)) where its own header means max(0, A − L), its n-th-to-default probabilities ignore the
-/// defaults, and an unsettled default's recovery is a null; its header warns "Baskets with realized defaults not
-/// tested/WIP." Here the names defaulted by the evaluation date leave the pricing basket: the lost notional L writes
-/// the tranche down from its attachment, the recovered notional amortizes it from its detachment's side (min(D, N −
-/// recovered)), and the model is bound to a basket of the live names over that restated tranche, each latent model
-/// restricted to their rows (<see cref="PricingBasket"/>). Its statistics add the realized tranche loss: the expected
-/// tranche loss, the percentile and the expected shortfall add it to the live model's; <see cref="ProbOverLoss"/> maps
-/// its inception fraction onto the restated tranche, 1 at or below the realized loss; the loss distribution is the live
-/// one shifted by the realized loss; the event counts take the order less the realized defaults, 1 (and QuantLib's
-/// zeros) once they reach it; the vectors run over the live names; the name-indexed reads take pool positions, a
-/// defaulted name's recovery its settled one and its default correlation refused. A default not settled for the name's
-/// key's seniority is refused, QuantLib's own <c>\todo</c> (<c>basket.cpp:128-131</c>). An event dated after the
-/// evaluation date isn't realized there, so it stays out of the restatement, and the reads with a date argument keep
-/// QuantLib's use of such "programmed" events for jump-to-default analysis (<c>basket.hpp:138-141</c>). On a basket with
-/// no realized default, QuantLib's values, bit for bit. <c>Divergences/BasketRealizedDefaultsTests.cs</c>.
+/// <b>Realized defaults</b>. QuantLib's basket misprices once a name has defaulted: its expected tranche loss adds the
+/// whole settled loss, its models tranche the live names' loss against min(D, A + max(0, L − A)) where its own header
+/// means max(0, A − L), its n-th-to-default probabilities ignore the defaults, and an unsettled default's recovery is a
+/// null; its header warns "Baskets with realized defaults not tested/WIP." Here the names defaulted by the evaluation
+/// date leave the pricing basket: the lost notional L writes the tranche down from its attachment, the recovered
+/// notional amortizes it from its detachment's side (min(D, N − recovered)), and the model is bound to a basket of the
+/// live names over that restated tranche, each latent model restricted to their rows (<see cref="PricingBasket"/>). Its
+/// statistics add the realized tranche loss: the expected tranche loss, the percentile and the expected shortfall add
+/// it to the live model's; <see cref="ProbOverLoss"/> maps its inception fraction onto the restated tranche, 1 at or
+/// below the realized loss; the loss distribution is the live one shifted by the realized loss; the event counts take
+/// the order less the realized defaults, 1 (and QuantLib's zeros) once they reach it; the vectors run over the live
+/// names; the name-indexed reads take pool positions, a defaulted name's recovery its settled one and its default
+/// correlation refused. A default not settled for the name's key's seniority is refused, QuantLib's own <c>\todo</c>
+/// (<c>basket.cpp:128-131</c>). An event dated after the evaluation date isn't realized there, so it stays out of the
+/// restatement, and the reads with a date argument keep QuantLib's use of such "programmed" events for jump-to-default
+/// analysis (<c>basket.hpp:138-141</c>). On a basket with no realized default, QuantLib's values, bit for bit.
+/// <c>Divergences/BasketRealizedDefaultsTests.cs</c>.
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]

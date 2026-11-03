@@ -10,16 +10,15 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The jump-diffusion engine on structures dated differently (the S-van plan's VR4 (xiii), and the run's own find on its
-/// rho and theta). QuantLib rebuilds each term's flat curve and constant volatility on the risk-free curve's reference
-/// date with the time measured from the volatility's (<c>jumpdiffusionengine.cpp:62-67</c>, <c>:113-114</c>), so with
-/// no jumps it isn't the Black-Scholes price on a curve settling T+2. nanoql builds both on the volatility's reference
-/// date; its rho is then per unit of the risk-free curve's own rate over its own time, and theta's risk-free term runs
-/// over that time, as the analytic European engine's (the mismatched-dates class). QuantLib's check: with no jumps, its
-/// analytic European engine on the same market, every output but the theta, which is S-eq's
-/// (<c>Divergences/AnalyticThetaMismatchedTimesTests.cs</c>) [executed on the wheel, QuantLib's jump-diffusion engine
-/// emulated by its rebuilt structures: <c>scratchpad\c2\oracle_c2.py</c>, section jd]. Where the structures share their
-/// dates and counts, QuantLib's bits (the engine's harness vectors).
+/// The jump-diffusion engine on structures dated differently. QuantLib rebuilds each term's flat curve and constant
+/// volatility on the risk-free curve's reference date with the time measured from the volatility's
+/// (<c>jumpdiffusionengine.cpp:62-67</c>, <c>:113-114</c>), so with no jumps it isn't the Black-Scholes price on a
+/// curve settling T+2. nanoql builds both on the volatility's reference date; its rho is then per unit of the risk-free
+/// curve's own rate over its own time, and theta's risk-free term runs over that time, as the analytic European
+/// engine's. QuantLib's check: with no jumps, its analytic European engine on the same market, every output but the
+/// theta, which is the analytic engine's (<c>Divergences/AnalyticThetaMismatchedTimesTests.cs</c>) (QuantLib-Python
+/// 1.44, QuantLib's jump-diffusion engine emulated by its rebuilt structures). Where the structures share their dates
+/// and counts, QuantLib's bits (the engine's harness vectors).
 /// </summary>
 public class JumpDiffusionReferenceDateTests
 {

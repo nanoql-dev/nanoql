@@ -17,10 +17,9 @@ namespace NanoQL.Experimental;
 /// <para>
 /// The index has no forwarding curve of its own: its forecast at a fixing date is the gearing times the proxied index's
 /// fixing there, plus the spread. QuantLib's multiplies by the spread, gearing × proxied × spread, 5.96e-5 where a
-/// gearing of 2 and a spread of 0.001 on a 2.98% fixing mean 0.0606 (the S-xrt plan's XRR5 (xxi);
-/// <c>Divergences/ProxyIborTests.cs</c>). A coupon on it forecasts through this forecast; QuantLib's coupons forecast
-/// from the index's forwarding curve between their dates, which it lacks ("null term structure set to this instance of
-/// …"), so they can't price.
+/// gearing of 2 and a spread of 0.001 on a 2.98% fixing mean 0.0606 (<c>Divergences/ProxyIborTests.cs</c>). A coupon on
+/// it forecasts through this forecast; QuantLib's coupons forecast from the index's forwarding curve between their
+/// dates, which it lacks ("null term structure set to this instance of …"), so they can't price.
 /// </para>
 /// <para>
 /// <see cref="IborIndex.Clone"/> is QuantLib's inherited one: a plain Ibor index with the proxy's conventions on the
@@ -69,7 +68,7 @@ public sealed class ProxyIbor : IborIndex
     }
 
     /// <inheritdoc/>
-    /// <remarks>The gearing times the proxied index's fixing at the date, plus the spread (XRR5 (xxi)).</remarks>
+    /// <remarks>The gearing times the proxied index's fixing at the date, plus the spread.</remarks>
     /// <exception cref="ArgumentNullException"><paramref name="context"/> is null.</exception>
     /// <exception cref="NanoQLException">The proxied index can't give its fixing at the date.</exception>
     public override double ForecastFixing(Date fixingDate, EvaluationContext context)

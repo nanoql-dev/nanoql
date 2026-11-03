@@ -111,7 +111,7 @@ internal static class OptimizationSpecs
     /// <summary>
     /// Compares a line-search-based minimization's results with a case's outputs, its current value with the point
     /// QuantLib's line search last accepted (<c>lastAcceptedPoint</c>): QuantLib's own current value is the point before
-    /// where it returns on the function tolerance or the iteration limit (the S-sr plan's SSR6 (xvii)).
+    /// where it returns on the function tolerance or the iteration limit.
     /// </summary>
     /// <param name="check">The comparison.</param>
     /// <param name="c">The case.</param>

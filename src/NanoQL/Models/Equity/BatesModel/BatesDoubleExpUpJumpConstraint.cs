@@ -10,7 +10,7 @@ namespace NanoQL.Models;
 
 /// <summary>
 /// The double-exponential models' constraint on the up-jumps' mean size: in the open interval (0, 1), where the
-/// up-jumps' exponential moment is finite (the S-hes plan's HR7 (v)); QuantLib's is a positive constraint.
+/// up-jumps' exponential moment is finite; QuantLib's is a positive constraint.
 /// </summary>
 internal sealed class BatesDoubleExpUpJumpConstraint : Constraint
 {

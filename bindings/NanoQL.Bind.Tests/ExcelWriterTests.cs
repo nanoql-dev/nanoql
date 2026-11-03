@@ -11,15 +11,15 @@ using static NanoQL.Bind.Tests.ExcelSurfaces;
 namespace NanoQL.Bind.Tests;
 
 /// <summary>
-/// The generated worksheet functions (XLR2, XLR6, XLR15, XLD11): each argument's conversion by its kind, an object left
-/// out none where C# lets it be, the codes a member documents, the loop masks, the help text, the repro templates, the
-/// tuple forms, the path-like refusal and the budget.
+/// The generated worksheet functions: each argument's conversion by its kind, an object left out none where C# lets it
+/// be, the codes a member documents, the loop masks, the help text, the repro templates, the tuple forms, the path-like
+/// refusal and the budget.
 /// </summary>
 public class ExcelWriterTests
 {
     private const string X = "global::NanoQL.Excel.X";
 
-    /// <summary>An optional handle and an optional snapshot left out are none (XLP84); a required handle C# annotates nullable too (C0); a plain required one is refused by its conversion.</summary>
+    /// <summary>An optional handle and an optional snapshot left out are none; a required handle C# annotates nullable too; a plain required one is refused by its conversion.</summary>
     [Fact]
     public void ObjectsLeftOutAreNone()
     {
@@ -38,12 +38,12 @@ public class ExcelWriterTests
         Assert.Contains($"global::NanoQL.Bind.Tests.Fixtures.Optionals.Scaled({X}.Dbl(a[0], \"x\"), null, null)", Function(x, "fxOptionalsScaled"), StringComparison.Ordinal);
     }
 
-    /// <summary>The codes a member documents for kinds outside the table, emitted as its shims catch them (F4-2).</summary>
+    /// <summary>The codes a member documents for kinds outside the table, emitted as its shims catch them.</summary>
     [Fact]
     public void DocumentedCodesAreEmitted()
         => Assert.Contains("static e_ => e_ switch { global::", Function(WholeExperimental, "nqlTCopulaPolicyCumulativeY"), StringComparison.Ordinal);
 
-    /// <summary>The loop mask per kind (XLR15): every scalar kind loops, an array's argument doesn't, a function returning a range doesn't loop.</summary>
+    /// <summary>The loop mask per kind: every scalar kind loops, an array's argument doesn't, a function returning a range doesn't loop.</summary>
     [Fact]
     public void TheLoopMaskPerKind()
     {
@@ -55,7 +55,7 @@ public class ExcelWriterTests
         Assert.Contains(", \"11111\")", Function(WholeExperimental, "nqlCalendarAdvance2"), StringComparison.Ordinal);
     }
 
-    /// <summary>Each template's mask is the manifest's (B7-1), a family's member its own arguments' part.</summary>
+    /// <summary>Each template's mask is the manifest's, a family's member its own arguments' part.</summary>
     [Fact]
     public void TheTemplatesMasksAreTheManifests()
     {
@@ -70,7 +70,7 @@ public class ExcelWriterTests
         }
     }
 
-    /// <summary>The tuple forms (XLR17): an array of tuples converted by rows, each item by its kind, its help naming the items; the templates' items.</summary>
+    /// <summary>The tuple forms: an array of tuples converted by rows, each item by its kind, its help naming the items; the templates' items.</summary>
     [Fact]
     public void TheTupleForms()
     {
@@ -84,7 +84,7 @@ public class ExcelWriterTests
     }
 
     /// <summary>
-    /// The help text (XLD11): a getter's from its property, an <c>&lt;inheritdoc/&gt;</c>'s from its nearest base (F7-5), an
+    /// The help text: a getter's from its property, an <c>&lt;inheritdoc/&gt;</c>'s from its nearest base, an
     /// argument's <c>&lt;param&gt;</c> with its form, a family's with its constructions' count, the signature without
     /// documentation, every text at most 253 characters.
     /// </summary>
@@ -98,12 +98,12 @@ public class ExcelWriterTests
         Assert.Contains("Description = \"new Linear()\"", Function(WholeExperimental, "nqlLinear"), StringComparison.Ordinal);
         Assert.Matches("constructions\"\\)\\]", Function(WholeExperimental, "nqlTimeSeriesSize"));
         var descriptions = System.Text.RegularExpressions.Regex.Matches(string.Concat(WholeExperimental.Files.Values), "Description = (\"(?:[^\"\\\\]|\\\\.)*\")").Select(m => JsonSerializer.Deserialize<string>(m.Groups[1].Value)!).ToList();
-        // Excel-DNA's own cut for a function's and the last argument's description, which ExcelDocs.Limit follows (XLD11).
+        // Excel-DNA's own cut for a function's and the last argument's description, which ExcelDocs.Limit follows.
         Assert.All(descriptions, d => Assert.True(d.Length <= 253, d));
         Assert.Contains(descriptions, d => d.EndsWith('…'));
     }
 
-    /// <summary>A kept function with a path-like parameter outside the readers' list is refused (XLR3), synthesized.</summary>
+    /// <summary>A kept function with a path-like parameter outside the readers' list is refused, synthesized.</summary>
     [Fact]
     public void APathLikeParameterIsRefused()
     {
@@ -127,7 +127,7 @@ public class ExcelWriterTests
         Assert.Contains("fx_Files_Load: a path-like parameter outside the file readers' list", e.Message, StringComparison.Ordinal);
     }
 
-    /// <summary>The budget (XLR5): a build past the ceiling is refused, naming its count and its largest namespaces; one under it passes.</summary>
+    /// <summary>The budget: a build past the ceiling is refused, naming its count and its largest namespaces; one under it passes.</summary>
     [Fact]
     public void TheBudget()
     {

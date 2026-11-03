@@ -10,7 +10,7 @@ last; the default collection factor by factor and by rate; coterminal swaptions 
 first forward, testPathwiseMarketVegas' instruments, and the swaptions alone; the finder at its multiplier 50 and
 tolerance 1e-6, and at 2 and 1e-2.
 
-Left out (nanoql refuses at every read where a pseudo-derivative refuses, the S-mmp plan's MMPR4 (xx);
+Left out (nanoql refuses at every read where a pseudo-derivative refuses;
 tests/NanoQL.Tests/Divergences/VolatilityBumpInstrumentJacobianTests.cs): refused instruments.
 
 The harness unit is tools/cxx/src/models/marketmodels/pathwisegreeks/pathwisegreeks.cpp. Read back by

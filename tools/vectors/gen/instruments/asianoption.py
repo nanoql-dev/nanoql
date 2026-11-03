@@ -9,7 +9,7 @@ on the flat Merton process of tools/vectors/gen/processes/blackscholesprocess.py
 accumulator and a count of past fixings, and from every fixing date with the past fixings' values, which the option
 splits at the evaluation date (a fixing on it is to come). Then the refusals: too few past fixings given, a negative
 running sum, a running product of 0, and an expired option. The fixing dates are sorted, as both constructors' outputs
-are left out where they aren't (the S-bar plan's §2.10: QuantLib sorts the first constructor's only, BR5 (xl)).
+are left out where they aren't (QuantLib sorts the first constructor's only).
 
 An option spec is {"averageType" (QuantLib's Average::Type, Arithmetic 0, Geometric 1), "fixingDates" (serials),
 "payoff", "exercise", and either "runningAccumulator" and "pastFixings" or "allPastFixings"}; the payoff spec is

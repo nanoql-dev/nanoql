@@ -5,9 +5,9 @@ one case each, as tools/vectors/gen/indexes/ibor/euribor.py writes them, with it
 name, conventions and fixing calendar, the fixing, value and maturity dates, and the forecasts on its two curves. The
 wheel's classes are QuantLib-SWIG's proxies of the C++ classes of those names, their constructors QuantLib's. Each
 case's "skip" input lists the outputs that move when the wheel's two Romanian calendars carry the holidays QuantLib's
-master adds (#2919, tools/vectors/gen/time/calendars/romania.py's added_holidays(), taken ahead of the pin as the
-upstream sweep's SWD14 rules), as [output, date index] or ["forecast", curve index, date index]; each is null, and the
-reader nulls the same entries. Read back by tests/NanoQL.Tests/Vectors/Indexes/Ibor/RoborVectorTests.cs."""
+master adds (#2919, tools/vectors/gen/time/calendars/romania.py's added_holidays(), taken ahead of the pin), as
+[output, date index] or ["forecast", curve index, date index]; each is null, and the reader nulls the same entries.
+Read back by tests/NanoQL.Tests/Vectors/Indexes/Ibor/RoborVectorTests.cs."""
 import importlib.util
 import os
 import sys

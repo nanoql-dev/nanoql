@@ -11,10 +11,9 @@ using static NanoQL.Tests.Conventions.CreditPortfolioBuilders;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The simulation models' and the CDO's own rules (the S-xcr plan's XR4 (a), XR8 (xxix), (xxxiv), (xliv), (xlv)): the
-/// path count, the seed and the horizon required within their ranges, a statistic past the horizon or reading past
-/// the sorted losses refused, the spot model's parameter of 0 refused, and the CDO's engines refusing a basket of
-/// another evaluation date; each refusal's type and parameter.
+/// The simulation models' and the CDO's own rules: the path count, the seed and the horizon required within their
+/// ranges, a statistic past the horizon or reading past the sorted losses refused, the spot model's parameter of 0
+/// refused, and the CDO's engines refusing a basket of another evaluation date; each refusal's type and parameter.
 /// </summary>
 public class RandomModelConventionTests
 {

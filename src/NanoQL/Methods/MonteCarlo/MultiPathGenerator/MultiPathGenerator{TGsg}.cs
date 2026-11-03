@@ -15,13 +15,14 @@ namespace NanoQL.Methods;
 /// <typeparam name="TGsg">The Gaussian sequence generator, whose dimension is the factors times the time steps.</typeparam>
 /// <remarks>
 /// <para>
-/// A working type (S2R2), not thread-safe: <see cref="Next()"/> and <see cref="Antithetic"/> draw from its generator
-/// and write its own paths, so the sample's value is a view valid until the next draw. It copies the generator it is
-/// given. Each step evolves the process over the step's increments through the process's in-place
-/// <see cref="StochasticProcess.InitialValues(Span{double})"/> and <see cref="StochasticProcess.Evolve(double,
-/// ReadOnlySpan{double}, double, ReadOnlySpan{double}, Span{double})"/>, into buffers the generator holds, where
-/// QuantLib's process returns a new array a step: a process that overrides the two steps without allocating (the S-hes
-/// plan's HR2), and the loop allocates nothing per sample; one that doesn't keeps its allocating forms' bits.
+/// A working type, not thread-safe: <see cref="Next()"/> and <see cref="Antithetic"/> draw from its generator and write
+/// its own paths, so the sample's value is a view valid until the next draw. It copies the generator it is given. Each
+/// step evolves the process over the step's increments through the process's in-place
+/// <see cref="StochasticProcess.InitialValues(Span{double})"/> and
+/// <see cref="StochasticProcess.Evolve(double, ReadOnlySpan{double}, double, ReadOnlySpan{double}, Span{double})"/>,
+/// into buffers the generator holds, where QuantLib's process returns a new array a step: a process that overrides the
+/// two steps without allocating, and the loop allocates nothing per sample; one that doesn't keeps its allocating
+/// forms' bits.
 /// </para>
 /// <para>
 /// QuantLib refuses a Brownian bridge at the first draw ("Brownian bridge not supported"); this generator refuses it

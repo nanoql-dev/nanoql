@@ -15,15 +15,15 @@ namespace NanoQL.Models;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A working type (the S-mmp plan's MMPR1 (i)): its scratch is QuantLib's members, so an instance serves one caller
-/// at a time. It copies the pseudo-root and the bumps.
+/// A working type: its scratch is QuantLib's members, so an instance serves one caller at a time. It copies the
+/// pseudo-root and the bumps.
 /// </para>
 /// <para>
-/// <b>The derivative</b> (MMPR4 (iv), a documented divergence; <c>Divergences/RatePseudoRootJacobianTests.cs</c>): the
-/// drift's sum carries each rate's own accrual period, e_j = Σ_{k&lt;j} τ_k (f_k + d_k) P_k a_k, and the derivative of
-/// rate j along rate k's root carries f_j + d_j. QuantLib's sums the terms without τ_k and multiplies by τ_j, right on
-/// equal periods only, and carries f_j (<c>ratepseudorootjacobian.cpp:183</c>, <c>:191</c>, <c>:197</c>). On equal
-/// periods of a power of two and no displacement, QuantLib's bits.
+/// <b>The derivative</b> (a documented divergence; <c>Divergences/RatePseudoRootJacobianTests.cs</c>): the drift's sum
+/// carries each rate's own accrual period, e_j = Σ_{k&lt;j} τ_k (f_k + d_k) P_k a_k, and the derivative of rate j along
+/// rate k's root carries f_j + d_j. QuantLib's sums the terms without τ_k and multiplies by τ_j, right on equal periods
+/// only, and carries f_j (<c>ratepseudorootjacobian.cpp:183</c>, <c>:191</c>, <c>:197</c>). On equal periods of a power
+/// of two and no displacement, QuantLib's bits.
 /// </para>
 /// </remarks>
 [WorkingType]

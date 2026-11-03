@@ -22,17 +22,17 @@ namespace NanoQL.PricingEngines;
 /// <remarks>
 /// <para>
 /// The value and, where the generator allows one, its error estimate, with the grid as the additional result
-/// <c>"TimeGrid"</c>, as QuantLib's (the S-bar plan's BR1 (iii)): a static class over a private simulation deriving
-/// <see cref="MCDiscreteAveragingAsianEngineBase{TMc, TPath, TStats}"/>, the seed explicit (S2R4).
+/// <c>"TimeGrid"</c>, as QuantLib's: a static class over a private simulation deriving
+/// <see cref="MCDiscreteAveragingAsianEngineBase{TMc, TPath, TStats}"/>, the seed explicit.
 /// </para>
 /// <para>
-/// Documented divergences (BR5). The paths and the discounts run on the engine's clock,
+/// Documented divergences. The paths and the discounts run on the engine's clock,
 /// <see cref="FdmBlackScholesOp.Clock"/>, from the earliest reference date of the structures, where QuantLib's run on
-/// the risk-free curve's (BR1 (v), <c>Divergences/AsianMismatchedTimesTests.cs</c>). The control path is discounted
-/// to the exercise, as its analytic value is, where QuantLib's discounts it to the last fixing and biases the controlled
-/// price where the exercise follows ((xxvii), <c>Divergences/McAsianControlVariateTests.cs</c>). A fixing date given
-/// twice counts twice in both averages, as in the analytic engines ((xxviii), <c>Divergences/AsianDuplicateFixingsTests.cs</c>).
-/// The control's geometric product is kept in double's normal range ((xli), <see cref="GeometricAPOPathPricer"/>).
+/// the risk-free curve's (<c>Divergences/AsianMismatchedTimesTests.cs</c>). The control path is discounted to the
+/// exercise, as its analytic value is, where QuantLib's discounts it to the last fixing and biases the controlled price
+/// where the exercise follows (<c>Divergences/McAsianControlVariateTests.cs</c>). A fixing date given twice counts
+/// twice in both averages, as in the analytic engines (<c>Divergences/AsianDuplicateFixingsTests.cs</c>). The control's
+/// geometric product is kept in double's normal range (<see cref="GeometricAPOPathPricer"/>).
 /// </para>
 /// </remarks>
 public static class MCDiscreteArithmeticAPEngine
@@ -134,8 +134,8 @@ public static class MCDiscreteArithmeticAPEngine
                 payoff.OptionType, payoff.Strike, discount, RunningAccumulator, PastFixings, FixingMultiplicities(TimeGrid()));
         }
 
-        // the control discounted to the exercise, as its analytic value is (BR5 (xxvii)), where QuantLib discounts it
-        // to the grid's end, the last fixing
+        // the control discounted to the exercise, as its analytic value is, where QuantLib discounts it to the grid's
+        // end, the last fixing
         protected override PathPricer<MonteCarloPath>? ControlPathPricer()
         {
             (PlainVanillaPayoff payoff, double discount) = Terms();

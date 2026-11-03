@@ -30,15 +30,16 @@ public static class EvolutionDescriptionFunctions
     /// <remarks>
     /// <para>
     /// QuantLib's loop stops before the last step, so a last step's numeraire may mature inside that step, which its
-    /// documentation's contract ("each numeraire must not have expired before the end of the step") excludes. It is kept
-    /// (the S-mm plan's MR4 (c), as the user re-ruled it): the models cut each forward's covariance at its own fixing,
-    /// so the drifts under such a numeraire are those under the bond rolled into the next at its maturity, and the curve
-    /// state's discount ratio to the matured bond reads its frozen forward, the rolled position's value, which prices
-    /// correctly (bonds stay martingales and caplets within their Monte Carlo errors of Black's).
+    /// documentation's contract ("each numeraire must not have expired before the end of the step") excludes. It is
+    /// kept: the models cut each forward's covariance at its own fixing, so the drifts under such a numeraire are those
+    /// under the bond rolled into the next at its maturity, and the curve state's discount ratio to the matured bond
+    /// reads its frozen forward, the rolled position's value, which prices correctly (bonds stay martingales and
+    /// caplets within their Monte Carlo errors of Black's).
     /// </para>
     /// <para>
-    /// A numeraire past the rate times at a step QuantLib checks is read past its vector, and refused (MR3 (xx);
-    /// <c>Divergences/MarketModelUndefinedReadsTests.cs</c>); the last step's numeraire isn't read here, as in QuantLib.
+    /// A numeraire past the rate times at a step QuantLib checks is read past its vector, and refused
+    /// (<c>Divergences/MarketModelUndefinedReadsTests.cs</c>); the last step's numeraire isn't read here, as in
+    /// QuantLib.
     /// </para>
     /// </remarks>
     public static void CheckCompatibility(EvolutionDescription evolution, ReadOnlySpan<int> numeraires)
@@ -87,8 +88,7 @@ public static class EvolutionDescriptionFunctions
     /// <exception cref="ArgumentException">There is no numeraire.</exception>
     /// <exception cref="ArgumentOutOfRangeException">A numeraire is negative.</exception>
     /// <remarks>
-    /// QuantLib takes the smallest of no numeraires by dereferencing an empty range's end, undefined, which is refused
-    /// (the S-mm plan's MR3 (xx)).
+    /// QuantLib takes the smallest of no numeraires by dereferencing an empty range's end, undefined, which is refused.
     /// </remarks>
     public static bool IsInTerminalMeasure(EvolutionDescription evolution, ReadOnlySpan<int> numeraires)
     {
@@ -121,8 +121,7 @@ public static class EvolutionDescriptionFunctions
     /// <exception cref="ArgumentException">The offset is past the last numeraire, or there are fewer numeraires than steps.</exception>
     /// <exception cref="ArgumentOutOfRangeException">The offset or a numeraire is negative.</exception>
     /// <remarks>
-    /// QuantLib reads a numeraire per step, past the vector where there are fewer, undefined, which is refused (the
-    /// S-mm plan's MR3 (xx)).
+    /// QuantLib reads a numeraire per step, past the vector where there are fewer, undefined, which is refused.
     /// </remarks>
     public static bool IsInMoneyMarketPlusMeasure(EvolutionDescription evolution, ReadOnlySpan<int> numeraires, int offset = 1)
     {

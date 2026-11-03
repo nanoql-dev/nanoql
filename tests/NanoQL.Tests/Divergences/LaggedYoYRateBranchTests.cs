@@ -14,7 +14,7 @@ namespace NanoQL.Tests.Divergences;
 /// next; otherwise it interpolates the ratios. So a fixing it never reads changes the rate it returns: with UK RPI
 /// fixings to June 2025 and the evaluation date 20 August 2025, the rate for 15 July 2025 with a three-month lag is
 /// 0.035461466318187446 on the wheel, and 0.03545866305332557 once July's fixing is stored, a change of
-/// -2.8032648618780964e-06 (QuantLib's defect, R8). nanoql asks whether the latest fixing the ratio branch reads needs a
+/// -2.8032648618780964e-06 (QuantLib's defect). nanoql asks whether the latest fixing the ratio branch reads needs a
 /// forecast (the next period's first day, or the lagged period's own when the date starts its period), so the rate is
 /// 0.03545866305332557 with or without July's fixing: QuantLib's own answer with that fixing added, and its
 /// interpolate-then-divide value from the same April and May fixings. The other face: where the lag is shorter than the

@@ -12,7 +12,7 @@ namespace NanoQL.TermStructures;
 /// </summary>
 /// <remarks>
 /// Immutable, as its base. It catches <see cref="NanoQLException"/>, the refusals of the surface's reads, where
-/// QuantLib's catches its <c>Error</c> (the S-van plan's VD21).
+/// QuantLib's catches its <c>Error</c>.
 /// </remarks>
 public sealed class NoExceptLocalVolSurface : LocalVolSurface
 {

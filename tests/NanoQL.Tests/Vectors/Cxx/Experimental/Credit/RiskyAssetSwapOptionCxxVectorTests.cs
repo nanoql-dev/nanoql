@@ -10,9 +10,9 @@ namespace NanoQL.Tests.Vectors;
 
 /// <summary>
 /// The C++ harness's risky asset swap option vectors,
-/// <c>tests/vectors/cxx/experimental/credit/riskyassetswapoption.json</c>: <see cref="RiskyAssetSwapOption"/>'s value on
-/// payer and receiver swaps, at expiries, market spreads and volatilities from 1e-9 (its zero volatility is the S-xcr
-/// plan's XR8 (xxii)).
+/// <c>tests/vectors/cxx/experimental/credit/riskyassetswapoption.json</c>: <see cref="RiskyAssetSwapOption"/>'s value
+/// on payer and receiver swaps, at expiries, market spreads and volatilities from 1e-9 (its zero volatility is in the
+/// Divergences record).
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class RiskyAssetSwapOptionCxxVectorTests

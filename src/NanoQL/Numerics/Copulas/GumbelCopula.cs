@@ -11,10 +11,10 @@ namespace NanoQL.Numerics;
 /// <summary>The Gumbel copula, C(x, y) = exp(−((−ln x)^θ + (−ln y)^θ)^(1/θ)).</summary>
 /// <remarks>
 /// Immutable. On the unit square's edges it returns the boundary values, C(u, 0) = C(0, v) = 0, C(u, 1) = u and C(1, v)
-/// = v, before its formula, as every copula here does (the S-core plan's CR7 (xxxiii)). Above θ 19, where (−ln x)^θ can
-/// underflow (from θ 19.3 at the largest x below 1, so QuantLib's is 1e-8 off at θ 50 and reads C(0.9, 0.7) as 1 for
-/// 0.7 at θ 1000), the larger logarithm M is factored out, exp(−M(1 + r^θ)^(1/θ)) with r the ratio of the two (the
-/// plan's CR7 (xxi)); QuantLib's formula to θ 19, where no power leaves the doubles' normal range.
+/// = v, before its formula, as every copula here does. Above θ 19, where (−ln x)^θ can underflow (from θ 19.3 at the
+/// largest x below 1, so QuantLib's is 1e-8 off at θ 50 and reads C(0.9, 0.7) as 1 for 0.7 at θ 1000), the larger
+/// logarithm M is factored out, exp(−M(1 + r^θ)^(1/θ)) with r the ratio of the two; QuantLib's formula to θ 19, where
+/// no power leaves the doubles' normal range.
 /// </remarks>
 public sealed class GumbelCopula
 {

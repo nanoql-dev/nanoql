@@ -48,8 +48,8 @@ D = ql.Date
 
 
 # The effective convexity's recorded tolerance: a second difference of tree prices over bump^2, which amplifies the
-# prices' last-bit moves by about 1/bump^2; the Ornstein-Uhlenbeck variance's cancellation-free form, nanoql's by the
-# user's ruling of 2026-10-22 (the S-sr plan's SSR3 class), moves it by up to 8.2e-9 relative.
+# prices' last-bit moves by about 1/bump^2; the Ornstein-Uhlenbeck variance's cancellation-free form, nanoql's, moves it
+# by up to 8.2e-9 relative.
 CONVEXITY_TOLERANCE = 1e-7
 
 

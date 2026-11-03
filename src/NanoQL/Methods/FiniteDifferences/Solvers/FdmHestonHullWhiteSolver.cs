@@ -11,9 +11,9 @@ namespace NanoQL.Methods;
 /// <summary>The Heston-Hull-White finite-difference solver: <see cref="FdmHestonHullWhiteOp"/> under
 /// <see cref="Fdm3DimSolver"/>, queried at a spot, a variance and a short-rate state.</summary>
 /// <remarks>
-/// Immutable: the solve runs in the constructor, where QuantLib's runs lazily on the first query (the S-hes plan's
-/// HD8). The delta and gamma are central differences in the spot, not the model-implied ones (Mercurio and Morini,
-/// <i>A Note on Hedging with Local and Stochastic Volatility Models</i>).
+/// Immutable: the solve runs in the constructor, where QuantLib's runs lazily on the first query. The delta and gamma
+/// are central differences in the spot, not the model-implied ones (Mercurio and Morini, <i>A Note on Hedging with
+/// Local and Stochastic Volatility Models</i>).
 /// </remarks>
 public sealed class FdmHestonHullWhiteSolver
 {

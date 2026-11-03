@@ -14,10 +14,10 @@ namespace NanoQL.Tests.Divergences;
 /// yield and volatility per maturity and solves its critical value on the times between the dates
 /// (<c>analyticcomplexchooserengine.cpp:161-179</c>), so on a rising market it is −19.5% off with #2891's defect; nanoql
 /// reads the variances to each date, the correlations from their ratios and the discounts by date, its critical spot
-/// solving the forward Black values from the choosing date, on West's bivariate normal (the S-exo plan's ER4, ER7). The
-/// check is the option's exact value at the choosing date, the larger of the call and the put there over the lognormal
-/// spot, within the critical value's accuracy, 1e-4 (QuantLib's Newton stops at 0.001 in the difference of the two);
-/// on a flat market, the exact value likewise and Haug's, QuantLib's master case, within its 1e-4.
+/// solving the forward Black values from the choosing date, on West's bivariate normal. The check is the option's exact
+/// value at the choosing date, the larger of the call and the put there over the lognormal spot, within the critical
+/// value's accuracy, 1e-4 (QuantLib's Newton stops at 0.001 in the difference of the two); on a flat market, the exact
+/// value likewise and Haug's, QuantLib's master case, within its 1e-4.
 /// </summary>
 public class ComplexChooserTermStructureTests
 {

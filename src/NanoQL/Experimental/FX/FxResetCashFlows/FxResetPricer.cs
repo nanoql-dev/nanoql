@@ -11,7 +11,7 @@ namespace NanoQL.Experimental;
 /// <summary>The interface for obtaining the rate of an FX-reset observation.</summary>
 /// <remarks>
 /// An extension point, stateless as the coupon pricers are (§2.2's pricer row): the rate is a function of the
-/// observation and the context. QuantLib's observer interface isn't ported (R1).
+/// observation and the context. QuantLib's observer interface isn't ported.
 /// </remarks>
 [Experimental("NQL0001")]
 public abstract class FxResetPricer

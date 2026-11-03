@@ -13,9 +13,9 @@ using NanoQL.Time;
 namespace NanoQL.Coupons;
 
 /// <summary>
-/// What QuantLib's <c>HaganPricer::initialize(coupon)</c> stores in the pricer for its queries, built for one call
-/// (the S-cms plan's CMR1 (i)): the coupon's terms, the discount, and while its fixing is in the future the swap's rate
-/// and annuity, the g-function and the option pricer the replication integrates.
+/// What QuantLib's <c>HaganPricer::initialize(coupon)</c> stores in the pricer for its queries, built for one call: the
+/// coupon's terms, the discount, and while its fixing is in the future the swap's rate and annuity, the g-function and
+/// the option pricer the replication integrates.
 /// </summary>
 internal sealed class HaganPricerState
 {

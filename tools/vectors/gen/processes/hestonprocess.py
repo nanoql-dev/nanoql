@@ -6,21 +6,20 @@
 Three processes (a typical equity set, a high volatility of variance with a positive correlation, and one far from
 Feller's condition) on flat and linear zero curves, each under every discretization: size, factors and initial values;
 the drift and diffusion at four states (the variance positive, small and negative) and two times; the expectation,
-standard deviation and covariance of S2's Euler discretization at two states and steps, the multi-dimensional members
-of tools/vectors/gen/processes/eulerdiscretization.py's (C1's review, O1-2); and evolve from those states over three
-steps with three draws (Broadie and Kaya's schemes take a third). The steps keep the non-central chi-squared
-variance's non-centrality below 1,416.8, from which nanoql's inverse refuses where QuantLib's series stops unconverged
-(the S-eq plan's SEQR7 (xvii)). Broadie and Kaya's schemes solve for the integrated variance, by Brent's method at an
-absolute accuracy of 1e-5 on an adaptively integrated distribution, so the stability filter of the S7 plan's S7R6 runs on
-their evolve outputs: each is evolved again with the process's v0, kappa, theta, sigma and rho, the state, the step and
-the draws moved one ulp, together up and down and each alone, and written only where every move leaves it within
-1e-12 x max(|a|, |b|, 1); the generator prints "dropped n of m outputs" per case, none for the Gauss-Laguerre and
-trapezoid schemes, which move by 1e-15. The Gauss-Lobatto scheme's price moves by up to 2.7e-3 under one ulp of a
-parameter, and under relative moves up to 1e-12, the size of the C runtime's last-bit differences in the complex
-functions, it takes two to five discrete values, its solve landing on another branch: its file holds the variance
-alone ("evolveVariance"), which no solve computes, and the reader checks the price at one input where QuantLib's is
-steady (HestonProcessVectorTests.BroadieKayaGaussLobattoPrice). The Fokker-Planck density, pdf, waits on HestonProcess.cs' Partial
-line.
+standard deviation and covariance of the Euler discretization at two states and steps, the multi-dimensional members of
+tools/vectors/gen/processes/eulerdiscretization.py's; and evolve from those states over three steps with three draws
+(Broadie and Kaya's schemes take a third). The steps keep the non-central chi-squared variance's non-centrality below
+1,416.8, from which nanoql's inverse refuses where QuantLib's series stops unconverged. Broadie and Kaya's schemes solve
+for the integrated variance, by Brent's method at an absolute accuracy of 1e-5 on an adaptively integrated distribution,
+so the stability filter runs on their evolve outputs: each is evolved again with the process's v0, kappa, theta, sigma
+and rho, the state, the step and the draws moved one ulp, together up and down and each alone, and written only where
+every move leaves it within 1e-12 x max(|a|, |b|, 1); the generator prints "dropped n of m outputs" per case, none for
+the Gauss-Laguerre and trapezoid schemes, which move by 1e-15. The Gauss-Lobatto scheme's price moves by up to 2.7e-3
+under one ulp of a parameter, and under relative moves up to 1e-12, the size of the C runtime's last-bit differences in
+the complex functions, it takes two to five discrete values, its solve landing on another branch: its file holds the
+variance alone ("evolveVariance"), which no solve computes, and the reader checks the price at one input where
+QuantLib's is steady (HestonProcessVectorTests.BroadieKayaGaussLobattoPrice). The Fokker-Planck density, pdf, waits on
+HestonProcess.cs' Partial line.
 
 A case holds one process {"riskFree", "dividend", "s0", "v0", "kappa", "theta", "sigma", "rho", "discretization"
 (QuantLib's integer)}, the curves tools/vectors/gen/processes/blackscholesprocess.py's specs. The wheel's calls, by
@@ -82,8 +81,8 @@ def within(a, b):
 
 def stable_evolve(spec, x, dt, dw, base):
     """Whether every refit with the inputs moved one ulp, together up and down and each alone, leaves base's state
-    within the filter's measure (the S7 plan's S7R6): the inputs the process's v0, kappa, theta, sigma and rho, the
-    state, the step and the draws."""
+    within the filter's measure: the inputs the process's v0, kappa, theta, sigma and rho, the state, the step and the
+    draws."""
     names = ["v0", "kappa", "theta", "sigma", "rho"]
     inputs = [spec[n] for n in names] + list(x) + [dt] + list(dw)
     moves = []
@@ -134,7 +133,7 @@ def cases():
                     expected["evolveVariance"] = [x if isinstance(x, dict) else x[1] for x in values]
                 else:
                     if scheme.startswith("BroadieKaya"):
-                        # the integrated variance's solve: S7R6's stability filter
+                        # the integrated variance's solve: the stability filter
                         keep = [i for i, (x, dt, dw) in enumerate(evolves)
                                 if isinstance(values[i], dict) or stable_evolve(spec, x, dt, dw, values[i])]
                         print(f"{pname}, {cname} curves, {scheme}: dropped {len(evolves) - len(keep)} of "

@@ -21,7 +21,7 @@ namespace NanoQL.Numerics;
 /// QuantLib user calls at once. A new fit is a new interpolation, so <c>update()</c> isn't ported. A guess given as
 /// <see langword="null"/> takes QuantLib's default and is free, as QuantLib's <c>Null&lt;Real&gt;()</c>. QuantLib's
 /// abcd volatility curve calls <c>update()</c> a second time, a refit from the first fit's coefficients without the
-/// constructor's guess check; an internal refit gives it (the S-xeq plan's §2.0).
+/// constructor's guess check; an internal refit gives it.
 /// </para>
 /// <para>Immutable and thread-safe once built.</para>
 /// </remarks>

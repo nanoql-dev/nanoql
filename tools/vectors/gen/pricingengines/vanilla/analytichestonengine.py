@@ -3,27 +3,27 @@
 """Vectors for QuantLib's AnalyticHestonEngine (ql/pricingengines/vanilla/analytichestonengine.hpp, .cpp), on the
 evaluation date 15 October 2026: European options under the Heston model by Fourier transform.
 
-Four models (the S-eq plan's SP4 sets, and one with a volatility of variance of 1e-9, the characteristic function's
-expansion branch) on flat curves: chF and lnChF at three maturities on SP4's contours, the real line and the shifted
-lines z = u - 0.5i and u - 1.75i and -u + 0.25i, u from 0.0025 to 4 quadratically; the NPV and numberOfEvaluations of
-puts and calls at five strikes and three maturities under each complex-log formula and control variate (Gauss-Laguerre
-at QuantLib's default order 144 and others, Gauss-Legendre and both Gauss-Chebyshev rules for Gatheral's form, and the
-adaptive integrations C2's review sent here: Gauss-Lobatto at a relative tolerance, which QuantLib's engine runs with
-the optimal control variate over Andersen and Piterbarg's integration limit, and Gauss-Lobatto, Simpson and the
-trapezoid rule for Gatheral's form); OptimalAlpha's searches above 0 and below -1, its choice and the count it reports
-after it, its bounds, M and k, each on a fresh object, with the count it reports after that one call (C2's review:
-Boost's brent_find_minima), on the first three models and on a fifth, a volatility of variance of 5 at 10 years, where
-the search above 0 finds no minimum and the choice is QuantLib's fallback, -0.5. Then the engine's refusal of the branch
-correction with an adaptive integration ("Branch correction does not work in conjunction with adaptive integration
-methods").
+Four models (three typical sets, and one with a volatility of variance of 1e-9, the characteristic function's expansion
+branch) on flat curves: chF and lnChF at three maturities on the real line and the shifted lines z = u - 0.5i and u -
+1.75i and -u + 0.25i, u from 0.0025 to 4 quadratically; the NPV and numberOfEvaluations of puts and calls at five
+strikes and three maturities under each complex-log formula and control variate (Gauss-Laguerre at QuantLib's default
+order 144 and others, Gauss-Legendre and both Gauss-Chebyshev rules for Gatheral's form, and the adaptive integrations:
+Gauss-Lobatto at a relative tolerance, which QuantLib's engine runs with the optimal control variate over Andersen and
+Piterbarg's integration limit, and Gauss-Lobatto, Simpson and the trapezoid rule for Gatheral's form); OptimalAlpha's
+searches above 0 and below -1, its choice and the count it reports after it, its bounds, M and k, each on a fresh
+object, with the count it reports after that one call (Boost's brent_find_minima), on the first three models and on a
+fifth, a volatility of variance of 5 at 10 years, where the search above 0 finds no minimum and the choice is QuantLib's
+fallback, -0.5. Then the engine's refusal of the branch correction with an adaptive integration ("Branch correction does
+not work in conjunction with adaptive integration methods").
 
-**The stability filter** (the S7 plan's S7R6) runs on every NPV, count and OptimalAlpha output: each is computed again
-with the model's v0, kappa, theta, sigma and rho moved one ulp, together up and down and each alone, and written only
-where every move leaves it within 1e-12 x max(|a|, |b|, 1) (a count, where every move gives the same); the generator
-prints "dropped n of m outputs". QuantLib's own values move there: OptimalAlpha's searches and choice by up to 9e-7
-(brent_find_minima at 26 bits), where their counts don't move, the asymptotic control variate on the fast-reversion model, outside its domain, by up to 1e-6, and an
-adaptive integration's count on the small-sigma model over 7,490 to 9,110. The characteristic function and M and k
-compute no search and aren't filtered. A price case's NPVs are its "strikes"' and its counts its "countStrikes"'.
+**The stability filter** runs on every NPV, count and OptimalAlpha output: each is computed again with the model's v0,
+kappa, theta, sigma and rho moved one ulp, together up and down and each alone, and written only where every move leaves
+it within 1e-12 x max(|a|, |b|, 1) (a count, where every move gives the same); the generator prints "dropped n of m
+outputs". QuantLib's own values move there: OptimalAlpha's searches and choice by up to 9e-7 (brent_find_minima at 26
+bits), where their counts don't move, the asymptotic control variate on the fast-reversion model, outside its domain, by
+up to 1e-6, and an adaptive integration's count on the small-sigma model over 7,490 to 9,110. The characteristic
+function and M and k compute no search and aren't filtered. A price case's NPVs are its "strikes"' and its counts its
+"countStrikes"'.
 
 A case holds one model {"riskFree", "dividend", "s0", "v0", "kappa", "theta", "sigma", "rho"}, the curves
 tools/vectors/gen/processes/blackscholesprocess.py's specs, and an engine {"cpxLog" (QuantLib's integer, or null for the
@@ -61,9 +61,9 @@ bsp = _load("blackscholesprocess", "processes/blackscholesprocess.py")
 R = bsp.R
 RF, Q = bsp.flat_spec(R, 0.03), bsp.flat_spec(R, 0.01)
 MODELS = [  # v0, kappa, theta, sigma, rho
-    ("SP4 equity", 0.04, 1.5, 0.04, 0.3, -0.7),
-    ("SP4 high correlation", 0.09, 0.5, 0.06, 0.8, -0.9),
-    ("SP4 fast reversion", 0.0225, 3.0, 0.03, 0.15, 0.2),
+    ("equity", 0.04, 1.5, 0.04, 0.3, -0.7),
+    ("high correlation", 0.09, 0.5, 0.06, 0.8, -0.9),
+    ("fast reversion", 0.0225, 3.0, 0.03, 0.15, 0.2),
     ("small sigma", 0.03, 1.25, 0.01, 1e-9, -0.9),
 ]
 ALPHA_MODELS = [("high volatility of variance", 0.04, 0.1, 0.04, 5.0, 0.9)]
@@ -140,7 +140,7 @@ PARAMETERS = ["v0", "kappa", "theta", "sigma", "rho"]
 
 
 def moved_specs(mspec):
-    """The model's parameters moved one ulp, together up and down and each alone (the S7 plan's S7R6)."""
+    """The model's parameters moved one ulp, together up and down and each alone."""
     out = []
     for d in (math.inf, -math.inf):
         out.append({**mspec, **{p: math.nextafter(mspec[p], d) for p in PARAMETERS}})

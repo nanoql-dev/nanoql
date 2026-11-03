@@ -13,14 +13,14 @@
 // diffWeights, startIndexOfConstraint, endIndexOfConstraint, product, initialNumeraireValue, paths), each group a list
 // of bumped models for constrained Euler evolvers, and gives {"mean", "errorEstimate", "greeks"}, the greeks' means by
 // group and weights; each constrained evolver's setConstraintType is called again before each step, so each step's
-// covariances are its own pseudo-root's, nanoql's fix (the S-mm plan's MR3 (vi); every model's displacements equal,
-// its MR3 (vii) holds). "RatePseudoRootJacobian.bumps" takes (kind, pseudoRoot, aliveIndex, numeraire, taus, pseudoBumps,
-// displacements, oldRates, oneStepDFs, newRates, gaussians), kind "Numerical", "Analytic" or "AllElements", and gives
-// B (a matrix, or a matrix a rate). "SwaptionPseudoDerivative.values" takes (model, startIndex, endIndex);
-// "CapPseudoDerivative.values" (model, strike, startIndex, endIndex, firstDF); "VegaBumpCluster.checks" (cluster,
-// comparee, model), each cluster six sizes; "VegaBumpCollection.bumps" (model, factorwise);
-// "VolatilityBumpInstrumentJacobian.values" (model, factorwise, swaptions, caps), each swaption [start, end] and each
-// cap [start, end, strike]; "OrthogonalizedBumpFinder.bumps" the same and (multiplierCutOff, tolerance).
+// covariances are its own pseudo-root's, nanoql's fix (every model's displacements equal).
+// "RatePseudoRootJacobian.bumps" takes (kind, pseudoRoot, aliveIndex, numeraire, taus, pseudoBumps, displacements,
+// oldRates, oneStepDFs, newRates, gaussians), kind "Numerical", "Analytic" or "AllElements", and gives B (a matrix, or
+// a matrix a rate). "SwaptionPseudoDerivative.values" takes (model, startIndex, endIndex); "CapPseudoDerivative.values"
+// (model, strike, startIndex, endIndex, firstDF); "VegaBumpCluster.checks" (cluster, comparee, model), each cluster six
+// sizes; "VegaBumpCollection.bumps" (model, factorwise); "VolatilityBumpInstrumentJacobian.values" (model, factorwise,
+// swaptions, caps), each swaption [start, end] and each cap [start, end, strike]; "OrthogonalizedBumpFinder.bumps" the
+// same and (multiplierCutOff, tolerance).
 
 #include "convert.hpp"
 #include "models/marketmodels/marketmodelspec.hpp"
@@ -108,7 +108,7 @@ namespace harness::marketmodels {
         }
 
         // QuantLib's constrained Euler evolver with setConstraintType called again before each step: each step's
-        // covariances its own pseudo-root's (the S-mm plan's MR3 (vi)).
+        // covariances its own pseudo-root's.
         class StepConstrained : public ConstrainedEvolver {
           public:
             explicit StepConstrained(ext::shared_ptr<LogNormalFwdRateEulerConstrained> e) : e_(std::move(e)) {}

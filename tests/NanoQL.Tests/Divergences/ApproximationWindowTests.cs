@@ -10,16 +10,15 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The American approximations on an exercise window opening after the reference date (the S-van plan's VR4 (xxvi),
-/// VD27). QuantLib's Barone-Adesi-Whaley, Bjerksund-Stensland, Ju, QD+ and QD fixed-point engines read only the last
-/// date (<c>baroneadesiwhaleyengine.cpp:161-166</c>, <c>bjerksundstenslandengine.cpp:463-469</c>,
+/// The American approximations on an exercise window opening after the reference date. QuantLib's Barone-Adesi-Whaley,
+/// Bjerksund-Stensland, Ju, QD+ and QD fixed-point engines read only the last date
+/// (<c>baroneadesiwhaleyengine.cpp:161-166</c>, <c>bjerksundstenslandengine.cpp:463-469</c>,
 /// <c>juquadraticengine.cpp:61-66</c>, <c>qdplusamericanengine.cpp:178-184</c>), so a put (S 80, K 100, σ 25%, r 5%, a
 /// year) exercisable in its last 3 months prices as exercisable now: 20.28 to 20.40, where QuantLib's FD engine gives
 /// 18.999. nanoql prices the window by the discount to its opening times the expectation, over S(t₁)'s density, of the
 /// engine's own American from the opening (<see cref="ApproximationWindow"/>). QuantLib's check: its FD engine on the
 /// window (4,000 × 4,000), each engine within its own error on the option exercisable now (its value against the FD
-/// engine's there) [executed on the wheel: <c>scratchpad\c2\oracle_c2.py</c>, section window]. A window opening on the
-/// reference date is QuantLib's, bit for bit.
+/// engine's there) (QuantLib-Python 1.44). A window opening on the reference date is QuantLib's, bit for bit.
 /// </summary>
 public class ApproximationWindowTests
 {

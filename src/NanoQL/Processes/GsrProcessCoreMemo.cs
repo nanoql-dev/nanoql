@@ -11,10 +11,10 @@ namespace NanoQL.Processes;
 /// QuantLib keys them.
 /// </summary>
 /// <remarks>
-/// A working type (the S-g1d plan's G1R1 (iii)): an engine call or a public member builds one and passes it through the
-/// core's members, so a price computes each term once, as QuantLib's first price does, and nothing outlives the call.
-/// QuantLib's maps live in the core and are flushed on every parameter or time change; here a parameter change builds
-/// a new core, and no map outlives the call that filled it.
+/// A working type: an engine call or a public member builds one and passes it through the core's members, so a price
+/// computes each term once, as QuantLib's first price does, and nothing outlives the call. QuantLib's maps live in the
+/// core and are flushed on every parameter or time change; here a parameter change builds a new core, and no map
+/// outlives the call that filled it.
 /// </remarks>
 [WorkingType]
 internal sealed class GsrProcessCoreMemo

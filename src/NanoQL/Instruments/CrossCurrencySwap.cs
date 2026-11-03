@@ -166,7 +166,7 @@ public class CrossCurrencySwap : Swap
     }
 
     // Whether a leg compounds its spread daily, so the leg's amount isn't linear in its spread and its fair spread's
-    // derivation from the BPS is inexact (the S-rx plan's C3 review, B1-2).
+    // derivation from the BPS is inexact.
     internal bool CompoundsSpreadDaily(int j) =>
         Legs[j].Any(cf => cf is FloatingRateCoupon { SpreadIsCompoundedDaily: true });
 

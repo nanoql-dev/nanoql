@@ -21,9 +21,9 @@ namespace NanoQL.Experimental;
 /// While deriving from the hazard rate structure, its hazard rate is the deterministic part of the model alone, which
 /// derived classes give where there is one (none here); the probabilities depend on it and the stochastic part. The
 /// density is that deterministic hazard rate times the survival over the model's bond price, QuantLib's, kept: 0 here
-/// where −dS/dt is 0.0187 (the S-xcr plan's XR8 (xxxviii)). The model's initial intensity is its dynamics' short rate at
-/// the process's x0. QuantLib's reference-date constructor drops its calendar argument; here it is kept. The structure
-/// whose reference date follows the evaluation date is built by <see cref="Create"/> (D15).
+/// where −dS/dt is 0.0187. The model's initial intensity is its dynamics' short rate at the process's x0. QuantLib's
+/// reference-date constructor drops its calendar argument; here it is kept. The structure whose reference date follows
+/// the evaluation date is built by <see cref="Create"/>.
 /// </para>
 /// <para>
 /// Curve extrapolation means something else on different curves: on curves matched to the market the credit curves

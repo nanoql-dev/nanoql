@@ -26,8 +26,8 @@ namespace NanoQL.PricingEngines;
 /// </para>
 /// <para>
 /// At zero variance QuantLib's bounds collapse and its density divides by zero (<c>integralengine.cpp:78-83</c>), NaN;
-/// here the value is the payoff at the forward, discounted, the density's limit. A documented divergence (the S-van
-/// plan's VR4 (x), <c>Divergences/IntegralEngineZeroVarianceTests.cs</c>).
+/// here the value is the payoff at the forward, discounted, the density's limit. A documented divergence
+/// (<c>Divergences/IntegralEngineZeroVarianceTests.cs</c>).
 /// </para>
 /// </remarks>
 public static class IntegralEngine
@@ -73,7 +73,7 @@ public static class IntegralEngine
         double value;
         if (!(variance > 0.0))
         {
-            // the density's limit, where QuantLib divides by the variance (the S-van plan's VR4 (x))
+            // the density's limit, where QuantLib divides by the variance
             value = riskFreeDiscount * payoff.Evaluate(s0 * dividendDiscount / riskFreeDiscount);
         }
         else

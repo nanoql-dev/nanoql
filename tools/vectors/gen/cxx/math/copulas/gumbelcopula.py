@@ -4,9 +4,9 @@
 since the wheel doesn't bind it.
 
 At theta of 1.0, 1.5, 3.0, 10.0, on the points 0.05 to 0.95 in each argument; the unit square's edges and corners are
-left out, where nanoql returns the boundary values before the formula (the S-core plan's CR7 (xxxiii);
-tests/NanoQL.Tests/Divergences/CopulaEdgeTests.cs). Theta above 19, where nanoql factors the larger logarithm out (the
-S-core plan's CR7 (xxi)), is left out. Each case's "values" are the rows of C(x, y), one per x. The harness unit is
+left out, where nanoql returns the boundary values before the formula
+(tests/NanoQL.Tests/Divergences/CopulaEdgeTests.cs). Theta above 19, where nanoql factors the larger logarithm out, is
+left out. Each case's "values" are the rows of C(x, y), one per x. The harness unit is
 tools/cxx/src/math/copulas/copulas.cpp. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Numerics/Copulas/CopulaCxxVectorTests.cs."""
 import os

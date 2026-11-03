@@ -9,22 +9,21 @@ using NanoQL.Tests.Conventions;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The pathwise delta engine's recursion and layout (the S-mmp plan's MMPR4 (i)–(iii), ruled by the user). QuantLib's
-/// Euler-step Jacobian reads the drift's derivative at the step's end, where the Euler drift is taken at its start
-/// (<c>pathwiseaccountingengine.cpp:167</c>), and drops the displacement from the rates' ratios and the drift term
-/// (<c>:169-170</c>, <c>:285</c>); its results put product i's deltas at (i + 1)·P + j, which overwrites another
-/// product's when P ≠ R (<c>:306</c>). On caplets at the forwards, FlatVol 20%, 3 factors, the money-market measure, the
-/// Mersenne twister (seed 42), 1,023 paths: six semi-annual rates at displacements 0 and 2%, six unequal periods at 2%,
-/// and the semi-annual rates paid 0.2 before their periods' ends, which takes MMPR4 (ix)'s bracket through the engine
-/// (this run's <c>probes\c4_facts.cpp</c>, <c>c4_facts2.cpp</c>; the planner's MPP6, MPP9): nanoql's deltas are the
-/// same-path differences of the engine's price, whose bits are QuantLib's where the payments are on rate times;
-/// QuantLib's are off by its recursion. Checks: same-path central differences of the price; each product alone.
+/// The pathwise delta engine's recursion and layout. QuantLib's Euler-step Jacobian reads the drift's derivative at the
+/// step's end, where the Euler drift is taken at its start (<c>pathwiseaccountingengine.cpp:167</c>), and drops the
+/// displacement from the rates' ratios and the drift term (<c>:169-170</c>, <c>:285</c>); its results put product i's
+/// deltas at (i + 1)·P + j, which overwrites another product's when P ≠ R (<c>:306</c>). On caplets at the forwards,
+/// FlatVol 20%, 3 factors, the money-market measure, the Mersenne twister (seed 42), 1,023 paths: six semi-annual rates
+/// at displacements 0 and 2%, six unequal periods at 2%, and the semi-annual rates paid 0.2 before their periods' ends,
+/// which takes the discounter's bracket through the engine: nanoql's deltas are the same-path differences of the
+/// engine's price, whose bits are QuantLib's where the payments are on rate times; QuantLib's are off by its recursion.
+/// Checks: same-path central differences of the price; each product alone.
 /// </summary>
 public class PathwiseDeltaTests
 {
     private const int Paths = 1023;
 
-    // QuantLib's deltas of caplet 3 to rates 0 to 3 (this run's c4_facts.out, c4_facts2.out)
+    // QuantLib's deltas of caplet 3 to rates 0 to 3
     private static readonly double[] QuantLibCaplet3 = [-0.00077168531756829787, -0.00077276517792356045, -0.00074448587202238857, 0.25462252006226355];
     private static readonly double[] QuantLibCaplet3Displaced = [-0.0013499844272610462, -0.0014737376614757625, -0.0015347909139734781, 0.2822468172566247];
     private static readonly double[] QuantLibCaplet3Unequal = [-0.00061715914390902005, -0.00034298880723417042, -0.0010305442656196337, 0.13636036580869937];

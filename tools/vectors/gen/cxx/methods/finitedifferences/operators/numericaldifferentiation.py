@@ -5,9 +5,8 @@ which the wheel doesn't bind, each output computed by the C++ harness: Fornberg'
 not, symmetric and one-sided, for derivatives of order 0 to 4, and the derivative of four functions at five points; the
 central, backward and forward schemes at step sizes 1e-3 and 0.1 and 3 to 9 steps; and the inputs QuantLib refuses (no
 more points than the order; a central scheme of an even number of steps or fewer than three, a one-sided one of fewer
-than two). Repeated offsets, which nanoql refuses where QuantLib's weights are NaN and its derivative drops them (the
-S-core plan's CR7 (xxxviii); tests/NanoQL.Tests/Conventions/FiniteDifferenceRemainderConventionTests.cs), are left out.
-Read back by
+than two). Repeated offsets, which nanoql refuses where QuantLib's weights are NaN and its derivative drops them
+(tests/NanoQL.Tests/Conventions/FiniteDifferenceRemainderConventionTests.cs), are left out. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Methods/FiniteDifferences/Operators/NumericalDifferentiationCxxVectorTests.cs."""
 import os
 import sys

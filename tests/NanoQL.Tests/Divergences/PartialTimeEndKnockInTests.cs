@@ -11,13 +11,12 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The partial-time end-window knock-ins (the S-bar plan's BR8 (a), a refusal lifted under the user's rule of
-/// 2026-10-20). QuantLib refuses "Down-and-in partial-time end barrier is not implemented" and its up twin
-/// (<c>analyticpartialtimebarrieroptionengine.cpp:66</c>, <c>:91</c>), where it prices the start window's knock-in as its
-/// European less its knock-out (<c>CIA</c>). nanoql applies the same parity to QuantLib's end-window knock-out: B1 at any
-/// strike, B2 wherever QuantLib prices its knock-out. Checks: the parity on QuantLib's own engines, and an independent
-/// Monte Carlo for a call at 100, barrier 90, window [6 months, 1 year], r 5%, q 2%, σ 25%: 0.934510 ± 0.019692 (the
-/// reviewer's r2b), against parity's 11.123762 − 10.161263 = 0.962499.
+/// The partial-time end-window knock-ins (a refusal lifted). QuantLib refuses "Down-and-in partial-time end barrier is
+/// not implemented" and its up twin (<c>analyticpartialtimebarrieroptionengine.cpp:66</c>, <c>:91</c>), where it prices
+/// the start window's knock-in as its European less its knock-out (<c>CIA</c>). nanoql applies the same parity to
+/// QuantLib's end-window knock-out: B1 at any strike, B2 wherever QuantLib prices its knock-out. Checks: the parity on
+/// QuantLib's own engines, and an independent Monte Carlo for a call at 100, barrier 90, window [6 months, 1 year], r
+/// 5%, q 2%, σ 25%: 0.934510 ± 0.019692, against parity's 11.123762 − 10.161263 = 0.962499.
 /// </summary>
 public class PartialTimeEndKnockInTests
 {

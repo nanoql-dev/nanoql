@@ -6,9 +6,9 @@ using NanoQL.Extensions.Conventions;
 namespace NanoQL.Excel;
 
 /// <summary>
-/// The file readers (XLR3): a call reading files keys their content beside the paths' text; the single-path read parses
-/// the very bytes the key hashed, and the multi-path read hashes again after it reads and refuses a file changed in
-/// between. A path in a cell must be absolute (XLD7).
+/// The file readers: a call reading files keys their content beside the paths' text; the single-path read parses the
+/// very bytes the key hashed, and the multi-path read hashes again after it reads and refuses a file changed in
+/// between. A path in a cell must be absolute.
 /// </summary>
 public static partial class X
 {
@@ -30,7 +30,7 @@ public static partial class X
             ? Lifted(fn, args, lift, rows, cols, e => RunReaderOne(fn, e, body))
             : RunReaderOne(fn, args, body);
 
-    /// <summary>A path, which must be absolute: Excel's current folder isn't the workbook's (XLD7).</summary>
+    /// <summary>A path, which must be absolute: Excel's current folder isn't the workbook's.</summary>
     /// <param name="a">The Excel value.</param>
     /// <param name="p">The argument's name.</param>
     /// <returns>The path.</returns>

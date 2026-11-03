@@ -1133,8 +1133,8 @@ public class DistributionsTests
         CheckEqual(nonCentral.Evaluate(-1.0), 0.0);
     }
 
-    // Upstream: QuantLib's master's case for #2908 (the S-van plan's VR11). Adapted: Boost's
-    // non_central_chi_squared_distribution is nanoql's internal port, bound through reflection.
+    // Upstream: QuantLib's master's case for #2908. Adapted: Boost's non_central_chi_squared_distribution is nanoql's
+    // internal port, bound through reflection.
     [Fact]
     public void TestNonCentralChiSquareLargeArguments()
     {

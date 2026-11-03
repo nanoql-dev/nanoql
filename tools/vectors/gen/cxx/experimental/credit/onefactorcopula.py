@@ -3,10 +3,9 @@
 """Vectors for QuantLib's OneFactorCopula (ql/experimental/credit/onefactorcopula.hpp), which the wheel doesn't
 expose, each output computed by the C++ harness (tools/cxx/src/experimental/credit/onefactorcopula.cpp) on its four
 forms: the moments' check at two tolerances (its result, or its refusal), the loss distribution of a bucketing
-integrated over the factor, and the integral of a function of the conditional probabilities (their sum). On the
-Student forms all three are null: QuantLib's Student classes integrate the factor over [-5, 10], where nanoql
-integrates over [-maximum, maximum] (the S-xcr code review's C3 O1-4; Divergences/OneFactorStudentCopulaRangeTests.cs).
-Read back by
+integrated over the factor, and the integral of a function of the conditional probabilities (their sum). On the Student
+forms all three are null: QuantLib's Student classes integrate the factor over [-5, 10], where nanoql integrates over
+[-maximum, maximum] (Divergences/OneFactorStudentCopulaRangeTests.cs). Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Experimental/Credit/OneFactorCopulaCxxVectorTests.cs."""
 import os
 import sys

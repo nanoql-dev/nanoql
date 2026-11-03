@@ -6,9 +6,9 @@ writer-extensible calls and puts struck at 90, 100 or 110, expiring in six or ni
 money there, to a year at 95, 105 or 115, on analyticcompoundoptionengine.py's flat markets: the NPV. QuantLib's
 engine reads West's bivariate normal, as nanoql's does.
 
-Flat markets only: on term structures QuantLib reads one constant rate, yield and volatility per maturity, nanoql's
-ER4 form the discounts and variances by date (tests/NanoQL.Tests/Divergences/WriterExtensibleTermStructureTests.cs),
-and on structures dated apart QuantLib's times differ (ExoticMismatchedTimesTests.cs).
+Flat markets only: on term structures QuantLib reads one constant rate, yield and volatility per maturity, nanoql's form
+the discounts and variances by date (tests/NanoQL.Tests/Divergences/WriterExtensibleTermStructureTests.cs), and on
+structures dated apart QuantLib's times differ (ExoticMismatchedTimesTests.cs).
 
 A case holds analyticcompoundoptionengine.py's process spec and an option {"payoff1", "exercise1", "payoff2",
 "exercise2"}. The wheel's calls, by QuantLib-SWIG 1.44's options.i: WriterExtensibleOption(payoff1, exercise1,

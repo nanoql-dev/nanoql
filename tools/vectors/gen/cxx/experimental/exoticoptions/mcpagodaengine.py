@@ -7,13 +7,12 @@ Carlo prices of pagoda options.
 QuantLib's case's four assets, at spots of 0.15 to 0.35 and a roof of 0.20, on four quarterly fixings, pseudo-random at
 its seed 86421 and at 42, with and without antithetic paths, and low-discrepancy; two assets at a spot of 100 with a
 roof of 20 on two fixings and on one; the NPV, and the error estimate under the pseudo-random traits. Then an expired
-option (low-discrepancy, as an expired multi-asset option's error estimate is QuantLib's unset value and nanoql's 0, the
-S-xeq run's R2-6).
+option (low-discrepancy, as an expired multi-asset option's error estimate is QuantLib's unset value and nanoql's 0).
 
-The outputs nanoql fixes are left out (the S-xeq plan's §2.8): the processes' structures share the evaluation date and
-Act/365, so the engine's clock is the risk-free curve's; every option has a fixing, where QuantLib's engine reads past
-an empty list and nanoql's option refuses it (tests/NanoQL.Tests/Conventions/ExperimentalExoticConventionTests.cs). The
-processes and option are tools/cxx/src/experimental/exoticoptions/mcpagodaengine.cpp's. Read back by
+The outputs nanoql fixes are left out: the processes' structures share the evaluation date and Act/365, so the engine's
+clock is the risk-free curve's; every option has a fixing, where QuantLib's engine reads past an empty list and nanoql's
+option refuses it (tests/NanoQL.Tests/Conventions/ExperimentalExoticConventionTests.cs). The processes and option are
+tools/cxx/src/experimental/exoticoptions/mcpagodaengine.cpp's. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Experimental/ExoticOptions/MCPagodaEngineCxxVectorTests.cs."""
 import os
 import sys

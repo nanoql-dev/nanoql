@@ -13,8 +13,7 @@ namespace NanoQL.Models;
 /// pseudo-root: the numerical form <see cref="RatePseudoRootJacobian"/> is tested against.
 /// </summary>
 /// <remarks>
-/// A working type (the S-mmp plan's MMPR1 (i)): its scratch is QuantLib's members, so an instance serves one caller
-/// at a time.
+/// A working type: its scratch is QuantLib's members, so an instance serves one caller at a time.
 /// </remarks>
 [WorkingType]
 public sealed class RatePseudoRootJacobianNumerical

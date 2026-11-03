@@ -18,12 +18,12 @@ namespace NanoQL.Models;
 /// <summary>A calibration helper for at-the-money caps: a cap on the index, struck at the fair rate of a swap on it.</summary>
 /// <remarks>
 /// <para>
-/// Immutable (the S-sr plan's SSD8). The constructor builds what QuantLib's helper builds at its first calculation,
-/// under the context it is given: the floating leg on the index from the curve's reference date (or a period of the
-/// index's tenor after it, without the first caplet) to the length after it, with no fixing days; a fixed leg on the
-/// fixed-leg frequency, unadjusted, at a dummy 4%; their swap's fair rate on the term structure, without the settlement
-/// date's flows; the cap on the floating leg at that rate; and the market value. QuantLib's helper also builds a dummy
-/// index it never reads, which this one leaves out.
+/// Immutable. The constructor builds what QuantLib's helper builds at its first calculation, under the context it is
+/// given: the floating leg on the index from the curve's reference date (or a period of the index's tenor after it,
+/// without the first caplet) to the length after it, with no fixing days; a fixed leg on the fixed-leg frequency,
+/// unadjusted, at a dummy 4%; their swap's fair rate on the term structure, without the settlement date's flows; the
+/// cap on the floating leg at that rate; and the market value. QuantLib's helper also builds a dummy index it never
+/// reads, which this one leaves out.
 /// </para>
 /// <para>
 /// The model value is the pricing engine's, set by <see cref="SetPricingEngine{TModel}"/>, which takes the model being

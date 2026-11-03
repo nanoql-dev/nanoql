@@ -15,10 +15,10 @@ namespace NanoQL.Tests.Divergences;
 /// (<c>analyticeuropeanengine.cpp:81-86</c>), exact only where the two curves share their times. Against the value's
 /// central difference with both curves' zero rates moved, it is 3.5% off at a week and 0.19% at a year with the
 /// risk-free curve settling T+2 and the discount curve dated today, 1.6% and 0.19% the other way round, and 1.4% and
-/// 1.1% with the discount curve on Act/360. nanoql moves each rate over its own curve's time (the user's ruling): the
-/// identity −(T_r / T_q) ρ_q − T_d V over QuantLib's own dividend rho and value, each time its own curve's, which meets
-/// the central difference to 2e-9; no QuantLib function computes it. Where the two curves share their date and day
-/// counter, the rho is QuantLib's.
+/// 1.1% with the discount curve on Act/360. nanoql moves each rate over its own curve's time: the identity −(T_r / T_q)
+/// ρ_q − T_d V over QuantLib's own dividend rho and value, each time its own curve's, which meets the central
+/// difference to 2e-9; no QuantLib function computes it. Where the two curves share their date and day counter, the rho
+/// is QuantLib's.
 /// </summary>
 public class EuropeanRhoDiscountCurveTests
 {

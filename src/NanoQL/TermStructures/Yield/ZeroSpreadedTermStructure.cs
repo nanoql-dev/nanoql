@@ -85,9 +85,9 @@ public sealed class ZeroSpreadedTermStructure : ZeroYieldStructure
     }
 
     // The spreaded zero yield for a continuously compounded spread, by the InterestRate route's arithmetic and checks
-    // without building the rate objects, so a finite-difference step reading the curve allocates nothing (the S-hes
-    // plan's HD8, FdmBatesOp's spreaded dividend curve): ZeroRate(t, Continuous)'s log(1/D(t))/t, the time 1e-4 at
-    // t = 0, plus the spread, then EquivalentRate(Continuous)'s log(exp(r·t))/t.
+    // without building the rate objects, so a finite-difference step reading the curve allocates nothing (FdmBatesOp's
+    // spreaded dividend curve): ZeroRate(t, Continuous)'s log(1/D(t))/t, the time 1e-4 at t = 0, plus the spread, then
+    // EquivalentRate(Continuous)'s log(exp(r·t))/t.
     private double ContinuousZeroYield(double t)
     {
         const double Dt = 0.0001;

@@ -27,7 +27,7 @@ std::size_t slots_used = 0;
 long long shown = 20;  // how many mismatches to print (NANOQL_REPLAY_SHOW)
 long long stops = 0;   // how many facts' stops to print (NANOQL_REPLAY_STOPS)
 // NANOQL_REPLAY_TOLERANCE and NANOQL_REPLAY_ABS_TOLERANCE: off the reference platform, a double within this relative
-// difference, or else within this absolute one, is a match, each kind tallied with its widest (R19, R26).
+// difference, or else within this absolute one, is a match, each kind tallied with its widest.
 double tolerance = 0, abs_tolerance = 0;
 long long near_doubles = 0, small_doubles = 0;
 double widest = 0, widest_abs = 0;

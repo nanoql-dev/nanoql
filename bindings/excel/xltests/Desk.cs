@@ -3,10 +3,11 @@
 
 namespace NanoQL.Excel.XlTests;
 
-/// <summary>A desk's cells the tests share, and the bits the plan's readings give for them (XLP6, XLP39, XLP85).</summary>
+/// <summary>A desk's cells the tests share, and their reference bits.</summary>
 internal static class Desk
 {
-    /// <summary>S-bind's swap (BIP4): 15 September 2015, a flat 3% curve, Euribor 6M, 10 years at 3.1%; its NPV in A11.</summary>
+    /// <summary>The bindings' reference swap: 15 September 2015, a flat 3% curve, Euribor 6M, 10 years at 3.1%; its NPV
+    /// in A11.</summary>
     public static readonly (string Cell, string Formula)[] Swap =
     [
         ("A1", "=DATE(2015,9,15)"),
@@ -22,22 +23,22 @@ internal static class Desk
         ("A11", "=nqlInstrumentResultsNPV(A10)"),
     ];
 
-    /// <summary>The swap's NPV, S-bind's bits through the C ABI.</summary>
+    /// <summary>The swap's NPV, its bits through the C ABI.</summary>
     public const string SwapNpv = "BF721BC276DF73C0";
 
-    /// <summary>The swap's fair rate, S-bind's bits.</summary>
+    /// <summary>The swap's fair rate, its bits through the C ABI.</summary>
     public const string SwapFairRate = "3F9F363E5F9DD6C0";
 
-    /// <summary>The fixed rate the builder solves through the bound swap engine (XLP39), the C# reference's bits.</summary>
+    /// <summary>The fixed rate the builder solves through the bound swap engine, the C# reference's bits.</summary>
     public const string BoundFixedRate = "3F9F363E5F9DD6B4";
 
-    /// <summary>The flat curve's 5-year discount factor (XLP6).</summary>
+    /// <summary>The flat curve's 5-year discount factor.</summary>
     public const string Discount5Y = "3FEB8AEB7444DCE0";
 
-    /// <summary>A one-year European call's NPV (XLP6).</summary>
+    /// <summary>A one-year European call's NPV.</summary>
     public const string CallNpv = "4021A796A5CC591A";
 
-    /// <summary>Its delta (XLP6).</summary>
+    /// <summary>Its delta.</summary>
     public const string CallDelta = "3FE25A143D49FA3E";
 
     /// <summary>

@@ -11,9 +11,8 @@ namespace NanoQL.Methods;
 
 /// <summary>The Bermudan exercise condition: at each exercise time, each value floored at its inner value.</summary>
 /// <remarks>
-/// A working type (the S-eq plan's SEQR1): it walks the layout with an iterator it holds and resets, so applying it
-/// allocates nothing. QuantLib fills an array of each point's locations it never reads (the S-eq plan's SEQR1); the
-/// port drops it.
+/// A working type: it walks the layout with an iterator it holds and resets, so applying it allocates nothing. QuantLib
+/// fills an array of each point's locations it never reads; the port drops it.
 /// </remarks>
 [WorkingType]
 public sealed class FdmBermudanStepCondition : StepCondition

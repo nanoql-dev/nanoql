@@ -30,7 +30,7 @@ public sealed record MultipleResetsLeg
     /// <exception cref="ArgumentNullException"><paramref name="fullResetSchedule"/> is null, or
     /// <paramref name="index"/> is, QuantLib's "no index provided".</exception>
     /// <exception cref="ArgumentOutOfRangeException"><paramref name="resetsPerCoupon"/> isn't positive, where
-    /// QuantLib's check divides by it (the S-cms plan's CMR5 (xiv)).</exception>
+    /// QuantLib's check divides by it.</exception>
     /// <exception cref="ArgumentException">The schedule is empty, or <paramref name="resetsPerCoupon"/> doesn't divide
     /// its periods, each with QuantLib's text.</exception>
     public MultipleResetsLeg(Schedule fullResetSchedule, IborIndex index, int resetsPerCoupon)

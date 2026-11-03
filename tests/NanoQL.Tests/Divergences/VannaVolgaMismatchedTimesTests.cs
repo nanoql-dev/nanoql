@@ -11,20 +11,19 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The Vanna-Volga engine's own reads on curves that measure time differently from its volatility (the S-rx plan's
-/// SRXR3 (xx), fixed under R8). QuantLib dates the volatility by the evaluation date on Actual/365 Fixed
-/// (<c>vannavolgabarrierengine.cpp:83-86</c>) and prices its barrier through the analytic engine on it, but reads
-/// everything else at the quotes' time on each curve's own clock (<c>:97-137</c>, <c>:194-231</c>, <c>:313</c>): on
-/// Actual/360 curves a one-year up-and-out call at 1.40, strike 1.25, on a skewed smile, is 0.008044987558286639
-/// against 0.007989598182293868 on the Actual/365 Fixed curves with the same discount factors, and on curves dated at
-/// the FX spot date, two days later, the common set-up, it is off its own engine on the curves restated from the
-/// evaluation date by 9.1e-5 to 2.8e-2, the down-and-in most [executed on the wheel]. nanoql reads each curve at the
-/// instant the quotes' time denotes on the volatility's clock, nothing accrued before the curve's own date (the
-/// mismatched-dates row of the master plan's §2.2): its discount factors, and the touch probability's zero rates, the
-/// logarithms of those discounts over the time, as SRXR3 (iii) reads the analytic engine's. Where the curves are dated
-/// today on Actual/365 Fixed the reads are QuantLib's, with its bits. QuantLib's check: its own engine on the curves
-/// restated from the evaluation date on Actual/365 Fixed (a curve dated later a discount curve at 1 up to its date),
-/// where the quotes' time is the exercise's and where it isn't.
+/// The Vanna-Volga engine's own reads on curves that measure time differently from its volatility (fixed). QuantLib
+/// dates the volatility by the evaluation date on Actual/365 Fixed (<c>vannavolgabarrierengine.cpp:83-86</c>) and
+/// prices its barrier through the analytic engine on it, but reads everything else at the quotes' time on each curve's
+/// own clock (<c>:97-137</c>, <c>:194-231</c>, <c>:313</c>): on Actual/360 curves a one-year up-and-out call at 1.40,
+/// strike 1.25, on a skewed smile, is 0.008044987558286639 against 0.007989598182293868 on the Actual/365 Fixed curves
+/// with the same discount factors, and on curves dated at the FX spot date, two days later, the common set-up, it is
+/// off its own engine on the curves restated from the evaluation date by 9.1e-5 to 2.8e-2, the down-and-in most
+/// (QuantLib-Python 1.44). nanoql reads each curve at the instant the quotes' time denotes on the volatility's clock,
+/// nothing accrued before the curve's own date (the playbook's row for structures on another clock): its discount
+/// factors, and the touch probability's zero rates, the logarithms of those discounts over the time, as the analytic
+/// engine's are read. Where the curves are dated today on Actual/365 Fixed the reads are QuantLib's, with its bits.
+/// QuantLib's check: its own engine on the curves restated from the evaluation date on Actual/365 Fixed (a curve dated
+/// later a discount curve at 1 up to its date), where the quotes' time is the exercise's and where it isn't.
 /// </summary>
 public class VannaVolgaMismatchedTimesTests
 {

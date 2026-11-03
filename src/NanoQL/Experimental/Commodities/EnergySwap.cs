@@ -14,9 +14,9 @@ namespace NanoQL.Experimental;
 /// <summary>The base of energy swaps: a calendar, a pay and a receive currency, and pricing periods.</summary>
 /// <remarks>
 /// <para>
-/// An extension point (U13): <see cref="EnergyVanillaSwap"/> and <see cref="EnergyBasisSwap"/> derive from it. A swap
-/// prices each pricing day of each period on its calendar, from the adjusted start, reading its index's stored fixing up
-/// to the index's last quote date and its forward price after it. The fixing is read as the index reads it, so a day the
+/// An extension point: <see cref="EnergyVanillaSwap"/> and <see cref="EnergyBasisSwap"/> derive from it. A swap prices
+/// each pricing day of each period on its calendar, from the adjusted start, reading its index's stored fixing up to
+/// the index's last quote date and its forward price after it. The fixing is read as the index reads it, so a day the
 /// index doesn't fix is refused ("… is not a valid fixing date"): a swap's calendar must be its index's on its fixed
 /// days, as QuantLib's.
 /// </para>
@@ -24,14 +24,14 @@ namespace NanoQL.Experimental;
 /// Each payment is made in the currency of the leg the net amount goes through, the receive leg's when the discounted
 /// amount is positive, at that currency's exchange rate, and discounted on that leg's curve. QuantLib pairs the
 /// payment's currency with the other leg's rate in the basis swap and a payer vanilla swap, and a receiver vanilla
-/// swap's payment never changes currency, its pay-receive flag 0 where −1 would switch it (the S-xrt plan's XRR5
-/// (viii); <c>Divergences/EnergySwapPaymentTests.cs</c>), so only a receiver's payments to the holder are QuantLib's;
-/// the NPV, in the base currency, is the same either way.
+/// swap's payment never changes currency, its pay-receive flag 0 where −1 would switch it
+/// (<c>Divergences/EnergySwapPaymentTests.cs</c>), so only a receiver's payments to the holder are QuantLib's; the NPV,
+/// in the base currency, is the same either way.
 /// </para>
 /// <para>
 /// A swap whose index has no fixings prices every day from its forward curve, with QuantLib's warning, where QuantLib's
-/// throws "empty timeseries" (XRR5 (vi)). <see cref="Quantity"/> sums the periods' amounts under the first period's unit,
-/// as QuantLib's, right for periods in one unit.
+/// throws "empty timeseries". <see cref="Quantity"/> sums the periods' amounts under the first period's unit, as
+/// QuantLib's, right for periods in one unit.
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]
@@ -180,7 +180,7 @@ public abstract class EnergySwap : EnergyCommodity
     }
 
     // A period's payment: its legs discounted on their curves from two days after the evaluation date, the payment in
-    // the currency of the leg the net amount goes through at that currency's rate (XRR5 (viii)).
+    // the currency of the leg the net amount goes through at that currency's rate.
     private protected (double DDelta, CommodityCashFlow CashFlow) Payment(
         PricingPeriod period,
         double payLegValue,

@@ -14,14 +14,14 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The finite-difference inner value's curve (the S-sr plan's SSR4): QuantLib's <c>FdmAffineModelSwapInnerValue</c> links
-/// relinkable handles, at each point of the mesh, to a new <c>FdmAffineModelTermStructure</c> at the point's state, and
-/// its swap's floating coupons, cloned onto them, forecast on it (<c>fdmaffinemodelswapinnervalue.hpp</c>). nanoql has no
-/// relinkable handles: the inner value holds, for each exercise date, a private proxy curve pair whose state it sets at
-/// each point, its swap rebuilt on the index cloned onto the forwarding proxy. QuantLib's route, a fresh immutable
-/// <see cref="FdmAffineModelTermStructure"/> pair and a swap rebuilt on it for every point, gives the same value bit for
-/// bit, at five points of each of three exercise dates, on Hull-White discounting on a flat 2.7% curve and forwarding on
-/// a flat 3.1% one.
+/// The finite-difference inner value's curve: QuantLib's <c>FdmAffineModelSwapInnerValue</c> links relinkable handles,
+/// at each point of the mesh, to a new <c>FdmAffineModelTermStructure</c> at the point's state, and its swap's floating
+/// coupons, cloned onto them, forecast on it (<c>fdmaffinemodelswapinnervalue.hpp</c>). nanoql has no relinkable
+/// handles: the inner value holds, for each exercise date, a private proxy curve pair whose state it sets at each
+/// point, its swap rebuilt on the index cloned onto the forwarding proxy. QuantLib's route, a fresh immutable
+/// <see cref="FdmAffineModelTermStructure"/> pair and a swap rebuilt on it for every point, gives the same value bit
+/// for bit, at five points of each of three exercise dates, on Hull-White discounting on a flat 2.7% curve and
+/// forwarding on a flat 3.1% one.
 /// </summary>
 public class InnerValueProxyTests
 {

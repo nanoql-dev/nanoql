@@ -14,7 +14,7 @@ namespace NanoQL.Tests.Divergences;
 /// <summary>
 /// <see cref="CPISwap"/>'s fair rate. QuantLib derives it as <c>fixedRate - NPV / (legBPS[0] / 1bp)</c>
 /// (<c>cpiswap.cpp:195-199</c>), but a CPI coupon's sensitivity to its rate carries its index ratio, which the BPS
-/// leaves out, so the swap repriced at QuantLib's fair rate isn't worth zero (QuantLib's defect, R8). nanoql's
+/// leaves out, so the swap repriced at QuantLib's fair rate isn't worth zero (QuantLib's defect). nanoql's
 /// <see cref="DiscountingSwapEngine"/> gives the rate that zeroes the swap, <c>fixedRate - NPV / (payer[0] S)</c>, S
 /// the NPV of the swap's CPI coupons rebuilt at a unit rate. On <see cref="InflationFixture"/>'s market, for a
 /// five-year payer swap of 1,000,000 against a 6-month Ibor leg on a curve flat at 4.5% plus 0.1%, at 2% on a base CPI

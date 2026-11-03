@@ -781,10 +781,10 @@ public class PiecewiseYieldCurveTests
 
     // Adapted: QuantLib's volatility quote, which its bootstrap optimizes and its futures helpers read through their
     // convexity-adjustment quotes (lines 1503-1528), is the additional variable's value, from which the variable
-    // helpers build the futures at each evaluation (the S-core plan's CR3 (b)); they follow the curve's helpers, as the
-    // futures follow the deposits and swaps in QuantLib's helper vector. The penalty reads the first swap from the
-    // working state's additional helpers, the copy the bootstrap has bound to the curve (line 1530 reads the fixture's
-    // own, which QuantLib's bootstrap binds).
+    // helpers build the futures at each evaluation; they follow the curve's helpers, as the futures follow the deposits
+    // and swaps in QuantLib's helper vector. The penalty reads the first swap from the working state's additional
+    // helpers, the copy the bootstrap has bound to the curve (line 1530 reads the fixture's own, which QuantLib's
+    // bootstrap binds).
     [Fact]
     public void TestGlobalBootstrapVariables()
     {

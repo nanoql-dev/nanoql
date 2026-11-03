@@ -8,13 +8,13 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The shape of the Hagan g-function's shift (the S-cms plan's CMR5 (v)): QuantLib's <c>shapeOfShift</c> computes
-/// (1 − e^(−a·x))/a, which cancels as the reversion a nears 0 from above, and reads a negative reversion as 0
-/// (<c>conundrumpricer.cpp:929-938</c>): on the wheel, on a flat 3% curve and a 20% volatility, a 1-year coupon fixing
-/// in 10 years prices 0.03239868837727989 on the numeric pricer's non-parallel shifts at a = 0 and at every negative a,
-/// and 0.032398699033410853 at a = 1e-12, 1.1e-8 away (the analytic pricer 9.5e-9). nanoql takes −expm1(−a·x)/a below
-/// 1e-4, negative reversions included, and x at 0, with QuantLib's form at and above 1e-4. QuantLib's checks: its own
-/// values at 0 and at 1e-4, on the numeric pricer, whose values CMR5 (xxii) leaves QuantLib's.
+/// The shape of the Hagan g-function's shift: QuantLib's <c>shapeOfShift</c> computes (1 − e^(−a·x))/a, which cancels
+/// as the reversion a nears 0 from above, and reads a negative reversion as 0 (<c>conundrumpricer.cpp:929-938</c>): on
+/// the wheel, on a flat 3% curve and a 20% volatility, a 1-year coupon fixing in 10 years prices 0.03239868837727989 on
+/// the numeric pricer's non-parallel shifts at a = 0 and at every negative a, and 0.032398699033410853 at a = 1e-12,
+/// 1.1e-8 away (the analytic pricer 9.5e-9). nanoql takes −expm1(−a·x)/a below 1e-4, negative reversions included, and
+/// x at 0, with QuantLib's form at and above 1e-4. QuantLib's checks: its own values at 0 and at 1e-4, on the numeric
+/// pricer, whose values stay QuantLib's.
 /// </summary>
 public class HaganShiftShapeTests
 {

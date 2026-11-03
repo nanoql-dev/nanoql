@@ -9,7 +9,7 @@ last) and 12 (on the last), unseasoned and with two past fixings, on the ten pro
 tools/vectors/gen/processes/blackscholesprocess.py, 511 pseudo-random samples at seeds 42 and 1234, with and without the
 Brownian bridge and antithetic variates: the NPV and the error estimate. Then the refusals of a payoff that isn't plain
 vanilla, an exercise that isn't European, every fixing in the past and one fixing left today, and an expired option.
-Fixing dates given twice are left out (the S-bar plan's §2.10: BR5 (xxviii)).
+Fixing dates given twice are left out.
 
 The engine's settings go in as "engine". The wheel's calls, by QuantLib-SWIG 1.44's options.i:
 MCPRDiscreteArithmeticASEngine(process, brownianBridge, antitheticVariate, requiredSamples, requiredTolerance,

@@ -9,11 +9,10 @@ using Big = System.Numerics.BigInteger;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The internal quad-double arithmetic the Heston expansions and COS cumulants evaluate below double-double's floor (the
-/// S-hes plan's HR6, as the user ruled R2-1): a value is an unevaluated sum X0 + X1 + X2 + X3 of four doubles, about 62
-/// digits. A sum or product whose exact value four doubles hold is exact; division, the square root, the exponential
-/// and the logarithm are within 2^-190 relative of the exact or 80-digit values; a non-finite input propagates. Read
-/// through reflection, the type being internal.
+/// The internal quad-double arithmetic the Heston expansions and COS cumulants evaluate below double-double's floor: a
+/// value is an unevaluated sum X0 + X1 + X2 + X3 of four doubles, about 62 digits. A sum or product whose exact value
+/// four doubles hold is exact; division, the square root, the exponential and the logarithm are within 2^-190 relative
+/// of the exact or 80-digit values; a non-finite input propagates. Read through reflection, the type being internal.
 /// </summary>
 public class QuadDoubleTests
 {

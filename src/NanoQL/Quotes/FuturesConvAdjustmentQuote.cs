@@ -16,10 +16,10 @@ namespace NanoQL.Quotes;
 /// </summary>
 /// <remarks>
 /// Immutable: its value is Hull-White's convexity bias (<see cref="HullWhite.ConvexityBias"/>) at the context's
-/// evaluation date, computed once at construction (§2.2's quote row; the S-core plan's CR1 (c)). QuantLib's quote
-/// recomputes when the evaluation date or an input changes; here a new date or input is a new quote. The futures'
-/// start and the index's maturity are year fractions of the index's day counter from the evaluation date. QuantLib's
-/// <c>isValid</c> isn't ported: a value is always valid.
+/// evaluation date, computed once at construction (§2.2's quote row). QuantLib's quote recomputes when the evaluation
+/// date or an input changes; here a new date or input is a new quote. The futures' start and the index's maturity are
+/// year fractions of the index's day counter from the evaluation date. QuantLib's <c>isValid</c> isn't ported: a value
+/// is always valid.
 /// </remarks>
 public sealed class FuturesConvAdjustmentQuote
 {

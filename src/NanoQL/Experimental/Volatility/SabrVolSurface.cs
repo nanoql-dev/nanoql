@@ -23,16 +23,16 @@ namespace NanoQL.Experimental;
 /// <para>
 /// The surface's reference date, calendar, day counter, settlement days and maximum date are the at-the-money curve's,
 /// as QuantLib's overrides give them. It keeps the context it was built with, which the index's fixings and forecasts
-/// read and on which each smile section is dated (the S-xeq plan's §2.0); each section is fitted per query, uncached.
-/// Quotes are values. QuantLib's <c>updateSabrGuesses</c>, private and never called, isn't ported (it writes past its
-/// guesses); its guess search is kept, every guess equal (XER5 (xxxv)). QuantLib's acyclic visitor isn't ported.
+/// read and on which each smile section is dated; each section is fitted per query, uncached. Quotes are values.
+/// QuantLib's <c>updateSabrGuesses</c>, private and never called, isn't ported (it writes past its guesses); its guess
+/// search is kept, every guess equal. QuantLib's acyclic visitor isn't ported.
 /// </para>
 /// <para>
 /// Documented divergence (<c>Divergences/SabrVolSurfaceFixingTests.cs</c>): the section at time t reads the index's
 /// fixing on the date ⌊365t⌋ days after the reference date adjusted on the index's fixing calendar by Following, the
 /// adjustment QuantLib's interest-rate surface makes to its reference date, where QuantLib reads the unadjusted date,
-/// refused ("Fixing date … is not valid") two days in seven (XER5 (xxiv)); the section keeps the unadjusted date. Rows of
-/// volatility spreads fewer than the option tenors are refused, where QuantLib reads past them.
+/// refused ("Fixing date … is not valid") two days in seven; the section keeps the unadjusted date. Rows of volatility
+/// spreads fewer than the option tenors are refused, where QuantLib reads past them.
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]
@@ -160,7 +160,7 @@ public sealed class SabrVolSurface : InterestRateVolSurface
         double[] sabrParameters1 = SabrGuesses(d);
 
         // the fixing on the date adjusted on the fixing calendar, as the interest-rate surface adjusts its reference
-        // date (XER5 (xxiv))
+        // date
         Date fixingDate = Index.FixingCalendar.Adjust(d, BusinessDayConvention.Following);
         return SabrInterpolatedSmileSection.Create(
             d,
@@ -181,7 +181,7 @@ public sealed class SabrVolSurface : InterestRateVolSurface
             VegaWeighted);
     }
 
-    // QuantLib's search, kept: every guess equal, so the first is QuantLib's value (XER5 (xxxv))
+    // QuantLib's search, kept: every guess equal, so the first is QuantLib's value
     private double[] SabrGuesses(Date d)
     {
         if (d <= optionDates[0])

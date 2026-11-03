@@ -8,8 +8,8 @@ namespace NanoQL.Tests.Vectors;
 
 /// <summary>
 /// The QdFpAmericanEngine vectors, <c>tests/vectors/pricingengines/vanilla/qdfpamericanengine.json</c>: the NPVs of
-/// American calls and puts over S-van's grid, priced by the engine's three named schemes, the fast scheme on each
-/// fixed-point equation and a scheme of each kind of its own sizes, and the refusals.
+/// American calls and puts over the vanilla engines' grid, priced by the engine's three named schemes, the fast scheme
+/// on each fixed-point equation and a scheme of each kind of its own sizes, and the refusals.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class QdFpAmericanEngineVectorTests

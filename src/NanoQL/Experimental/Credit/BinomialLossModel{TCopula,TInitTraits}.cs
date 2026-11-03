@@ -30,22 +30,22 @@ namespace NanoQL.Experimental;
 /// <para>
 /// The binomial's weight α mixes it with a two-point mass at the floor and ceiling of the expected count m, both of
 /// mean m, so the conditional variance matches the pool's: α = (V − V₂)/(V_B − V₂) with V the pool's count variance,
-/// V_B the binomial's and V₂ = (c − m)(m − f) the two-point mass's, all in QuantLib's units of a count over n². QuantLib
-/// takes V₂'s place with −(c − m)² − ((f − m)² − c²)(c − m), not a variance, so its conditional distribution misses the
-/// variance it exists to match, 10,656 for 11,718 on three names (the S-xcr plan's XR8 (xviii);
-/// <c>Divergences/BinomialLossModelTests.cs</c>); on a homogeneous pool V = V_B and α = 1, QuantLib's, taken where V
-/// equals V_B to 1e-12 in these units, since V_B − V₂ vanishes like the squared distance of the probability from 0
-/// or 1, where the two variances' rounding differs most, and would move α (by 2e-7 at a distance of 1e-10); below
-/// that difference the variance a weight of 1 misses is negligible.
+/// V_B the binomial's and V₂ = (c − m)(m − f) the two-point mass's, all in QuantLib's units of a count over n².
+/// QuantLib takes V₂'s place with −(c − m)² − ((f − m)² − c²)(c − m), not a variance, so its conditional distribution
+/// misses the variance it exists to match, 10,656 for 11,718 on three names
+/// (<c>Divergences/BinomialLossModelTests.cs</c>); on a homogeneous pool V = V_B and α = 1, QuantLib's, taken where V
+/// equals V_B to 1e-12 in these units, since V_B − V₂ vanishes like the squared distance of the probability from 0 or
+/// 1, where the two variances' rounding differs most, and would move α (by 2e-7 at a distance of 1e-10); below that
+/// difference the variance a weight of 1 misses is negligible.
 /// </para>
 /// <para>
-/// Bound to a basket with realized defaults, the model prices its live names over the restated tranche (XR8 (ii)). The
-/// statistics read the notionals of the names alive at the evaluation date: QuantLib's read those alive at the
-/// statistic's date beside the evaluation date's recoveries, so a default programmed after the evaluation date reads
-/// past a vector, undefined; here it reads QuantLib's model without the event. A percentile or shortfall whose search
-/// leaves the loss distribution, which QuantLib reads before its start or past its end, is refused (XR8 (xxix)). The
-/// percentile at 1 is the tranche's loss at the largest attainable loss, as its interior's are tranche losses, where
-/// QuantLib's returns the pool's largest loss (<c>binomiallossmodel.hpp:355</c>; the S-xcr code review's C3 O1-1).
+/// Bound to a basket with realized defaults, the model prices its live names over the restated tranche. The statistics
+/// read the notionals of the names alive at the evaluation date: QuantLib's read those alive at the statistic's date
+/// beside the evaluation date's recoveries, so a default programmed after the evaluation date reads past a vector,
+/// undefined; here it reads QuantLib's model without the event. A percentile or shortfall whose search leaves the loss
+/// distribution, which QuantLib reads before its start or past its end, is refused. The percentile at 1 is the
+/// tranche's loss at the largest attainable loss, as its interior's are tranche losses, where QuantLib's returns the
+/// pool's largest loss (<c>binomiallossmodel.hpp:355</c>).
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]

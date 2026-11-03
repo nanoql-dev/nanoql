@@ -14,9 +14,8 @@ namespace NanoQL.Quotes;
 /// </summary>
 /// <remarks>
 /// Immutable: its value is computed once, at construction, from the elements' values, which the function receives as
-/// a new <see cref="Vector"/> (§2.2's quote row; the S-core plan's CR1 (a)). QuantLib's quote recomputes when an element
-/// notifies it; here new element values are a new quote. QuantLib's <c>isValid</c> isn't ported: a value is always
-/// valid.
+/// a new <see cref="Vector"/> (§2.2's quote row). QuantLib's quote recomputes when an element notifies it; here new
+/// element values are a new quote. QuantLib's <c>isValid</c> isn't ported: a value is always valid.
 /// </remarks>
 public sealed class MultiCompositeQuote
 {

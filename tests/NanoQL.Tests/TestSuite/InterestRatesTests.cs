@@ -16,7 +16,7 @@ namespace NanoQL.Tests.TestSuite;
 public class InterestRatesTests
 {
     // Adapted: without lines 179-180, whose discountFactorFirstDerivative and discountFactorSecondDerivative wait for
-    // the slot that ports the cash-flow duration and convexity.
+    // the port of the cash-flow duration and convexity.
     [Fact]
     public void TestConversions()
     {

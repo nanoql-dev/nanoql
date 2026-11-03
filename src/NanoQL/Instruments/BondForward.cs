@@ -17,24 +17,24 @@ namespace NanoQL.Instruments;
 /// <remarks>
 /// <para>
 /// QuantLib's <c>spotValue()</c> is the bond's dirty price on the bond's own engine; here
-/// <see cref="Calculate(EvaluationContext, Func{Bond, EvaluationContext, BondResults})"/> takes the bond's engine (the
-/// S-cms plan's CMD5), and <see cref="CleanForwardPrice"/> and <see cref="ForwardPrice"/> read its results.
+/// <see cref="Calculate(EvaluationContext, Func{Bond, EvaluationContext, BondResults})"/> takes the bond's engine, and
+/// <see cref="CleanForwardPrice"/> and <see cref="ForwardPrice"/> read its results.
 /// </para>
 /// <para>
 /// The income, the coupons paid after the settlement date and up to the delivery date discounted on the income curve,
 /// is per 100 of the bond's notional at its settlement date, as the dirty price is, where QuantLib's sums the coupons'
 /// amounts on the bond's face (<c>bondforward.cpp:59-83</c>), so on a face other than 100 delivering after a coupon its
-/// forward value mixes the two (the S-cms plan's CMR5 (xxv)). The forward value and the prices are then per 100.
+/// forward value mixes the two. The forward value and the prices are then per 100.
 /// </para>
 /// <para>
 /// The spot value, the bond's dirty price, is a value at the bond's settlement date: it is carried back to the discount
 /// curve's reference date before the income, discounted to that date, is netted and the rest carried to delivery, where
 /// QuantLib's grows the settlement-date price from the reference date (<c>bondforward.cpp:86-87</c>,
 /// <c>forward.cpp:61-65</c>), so for a bond that doesn't settle on the curve's reference date its forward is high by
-/// 1/P(ref, settlement) (C4's review, C4-O1). On a bond settling on the reference date the two agree. The clean forward
-/// price takes the accrued amount at delivery on the forward's basis, per 100 of the notional at settlement, where
-/// QuantLib's subtracts it per 100 of the notional at delivery (<c>bondforward.cpp:49-51</c>), another basis once the
-/// bond amortizes between the two (C4's review, C4-O2).
+/// 1/P(ref, settlement). On a bond settling on the reference date the two agree. The clean forward price takes the
+/// accrued amount at delivery on the forward's basis, per 100 of the notional at settlement, where QuantLib's subtracts
+/// it per 100 of the notional at delivery (<c>bondforward.cpp:49-51</c>), another basis once the bond amortizes between
+/// the two.
 /// </para>
 /// </remarks>
 public sealed class BondForward : Forward
@@ -127,8 +127,7 @@ public sealed class BondForward : Forward
 
     /// <inheritdoc/>
     /// <remarks>The coupons paid after the settlement date and up to the delivery date, per 100 of the bond's notional
-    /// at its settlement date (the S-cms plan's CMR5 (xxv)); the cash flows are taken in date order, as QuantLib's
-    /// assume.</remarks>
+    /// at its settlement date; the cash flows are taken in date order, as QuantLib's assume.</remarks>
     /// <exception cref="ArgumentNullException"><paramref name="context"/> is null.</exception>
     /// <exception cref="NanoQLException">A coupon falls in the window and there is no income curve.</exception>
     public override double SpotIncome(YieldTermStructure? incomeDiscountCurve, EvaluationContext context)
@@ -176,7 +175,7 @@ public sealed class BondForward : Forward
         ArgumentNullException.ThrowIfNull(context);
 
         // the accrued amount is per 100 of the notional at delivery: on the forward's basis once the bond amortizes
-        // between settlement and delivery (C4-O2)
+        // between settlement and delivery
         double accrued = Bond.AccruedAmount(context, MaturityDate);
         double settlementNotional = Bond.Notional(context, Bond.SettlementDate(context));
         double deliveryNotional = Bond.Notional(context, MaturityDate);

@@ -13,10 +13,10 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The Monte Carlo vanilla engines' builders and constructors (the S-van plan's VR1 (iv)): QuantLib's checks with its
-/// texts, each refusal's type, message and parameter asserted (VD19). QuantLib's builders check the samples beside a
-/// tolerance and an error estimate the traits can't give as they are set, and the steps at the conversion to an engine;
-/// its engines' constructors check the steps; and the engines check the payoff and exercise as they price.
+/// The Monte Carlo vanilla engines' builders and constructors: QuantLib's checks with its texts, each refusal's type,
+/// message and parameter asserted. QuantLib's builders check the samples beside a tolerance and an error estimate the
+/// traits can't give as they are set, and the steps at the conversion to an engine; its engines' constructors check the
+/// steps; and the engines check the payoff and exercise as they price.
 /// </summary>
 public class MakeMcEngineTests
 {

@@ -9,9 +9,9 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// A forward-measure process is immutable (the S-sr plan's SSD6): QuantLib's <c>setForwardMeasureTime</c>, which changes
-/// the process, is <c>WithForwardMeasureTime</c>, which returns a copy of the process's own type at the new time and
-/// leaves the receiver as it was, its drift and expectation those of its own time, or refused where it has none.
+/// A forward-measure process is immutable: QuantLib's <c>setForwardMeasureTime</c>, which changes the process, is
+/// <c>WithForwardMeasureTime</c>, which returns a copy of the process's own type at the new time and leaves the
+/// receiver as it was, its drift and expectation those of its own time, or refused where it has none.
 /// </summary>
 public class ForwardMeasureProcessTests
 {

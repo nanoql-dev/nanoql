@@ -13,17 +13,16 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The singular value decomposition of a non-finite matrix (the S-van plan's VR7). QuantLib's main loop has no test
-/// for too many iterations (<c>svd.cpp:276-280</c>, "Here is where a test for too many iterations would go"): on a
-/// 5 × 3 matrix with one NaN or one ∞ it runs past 20 seconds [executed: the planner's VP50]. And the American Monte
-/// Carlo engine accepts the second-kind Chebyshev basis, √w(x)Pₙ(x) with w = (1 − x)^½(1 + x)^½, NaN above 1: a call
-/// regresses its in-the-money paths, S/K &gt; 1, so every regression meets NaN columns and QuantLib's engine hangs
-/// [executed by the plan's reviewer, round 1's p11]. nanoql refuses a non-finite entry on entry, naming it, and the
-/// engine's call reaches its caller refused, as raised. A finite matrix whose singular values lie past the range of
-/// doubles never ends either, in QuantLib and in the port of its arithmetic; nanoql refuses it at the main loop's first
-/// non-finite singular value or superdiagonal entry (the user's ruling of 2026-10-24, extending VR7), which none of 578
-/// matrices QuantLib decomposes reaches [executed: a probe over entries from 1e290 to the limit, four shapes]. Each
-/// fact runs under a timeout, since without the refusal it doesn't return.
+/// The singular value decomposition of a non-finite matrix. QuantLib's main loop has no test for too many iterations
+/// (<c>svd.cpp:276-280</c>, "Here is where a test for too many iterations would go"): on a 5 × 3 matrix with one NaN or
+/// one ∞ it runs past 20 seconds (QuantLib 1.44). And the American Monte Carlo engine accepts the second-kind Chebyshev
+/// basis, √w(x)Pₙ(x) with w = (1 − x)^½(1 + x)^½, NaN above 1: a call regresses its in-the-money paths, S/K &gt; 1, so
+/// every regression meets NaN columns and QuantLib's engine hangs. nanoql refuses a non-finite entry on entry, naming
+/// it, and the engine's call reaches its caller refused, as raised. A finite matrix whose singular values lie past the
+/// range of doubles never ends either, in QuantLib and in the port of its arithmetic; nanoql refuses it at the main
+/// loop's first non-finite singular value or superdiagonal entry, which none of 578 matrices QuantLib decomposes
+/// reaches (a probe over entries from 1e290 to the limit, four shapes). Each fact runs under a timeout, since without
+/// the refusal it doesn't return.
 /// </summary>
 public class SvdNonFiniteRefusalTests
 {
@@ -56,7 +55,7 @@ public class SvdNonFiniteRefusalTests
     {
         // the 5 × 3 matrix (1 + ij + 0.1i)·c: QuantLib's decomposition returns at c = 1e307, its largest singular value
         // 1.5770025263428427e308, and is still running after 20 s at 1.8e307, where that value is about 2.8e308
-        // [executed on the wheel, child processes]
+        // (QuantLib-Python 1.44, in child processes)
         static Matrix Scaled(double c)
         {
             var m = new Matrix(5, 3);

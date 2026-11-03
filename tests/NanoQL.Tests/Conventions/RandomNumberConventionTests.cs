@@ -7,12 +7,11 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The random numbers' conventions (the S-core plan's C3): the seed rules (CR2: xoshiro's 64 bits, the 32-bit range
-/// elsewhere, Ranlux's seed sequence and Knuth's mask, QuantLib's own reductions), the composites' copies of their
-/// generators (CR2 (d)), xoshiro's all-zero state and a lattice beyond its generating vector refused (CR7 (xxx),
-/// (xxvii)), the lattice tables (CD7) and Faure's digits under MSVC's 32-bit <c>long</c> (CD6); and §2.6's two routes:
-/// each Gaussian composite's moments and tails against the normal's, the Student quantile against its cumulative
-/// function, and the discrepancy against its definition.
+/// The random numbers' conventions: the seed rules (xoshiro's 64 bits, the 32-bit range elsewhere, Ranlux's seed
+/// sequence and Knuth's mask, QuantLib's own reductions), the composites' copies of their generators, xoshiro's
+/// all-zero state and a lattice beyond its generating vector refused, the lattice tables and Faure's digits under
+/// MSVC's 32-bit <c>long</c>; and two routes to one value: each Gaussian composite's moments and tails against the
+/// normal's, the Student quantile against its cumulative function, and the discrepancy against its definition.
 /// </summary>
 public class RandomNumberConventionTests
 {
@@ -179,7 +178,7 @@ public class RandomNumberConventionTests
     public void TheStudentQuantileInvertsItsCumulativeFunctionAtLargeNu()
     {
         // §2.6's two routes at degrees of freedom QuantLib's test doesn't reach, where the cumulative function's
-        // complementary argument (CR7 (xxiii)) keeps the round trip within 1e-13
+        // complementary argument keeps the round trip within 1e-13
         foreach (int n in new[] { 1000, 1000000, 100000000 })
         {
             var inverse = new InverseCumulativeStudent(n);

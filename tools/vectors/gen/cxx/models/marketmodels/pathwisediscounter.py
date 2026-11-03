@@ -7,9 +7,8 @@ a step and their derivatives in each rate, from the step's discount factors.
 Payments on every rate time, before the first, after the last and inside the last period, discounter.py's, on
 products/multistep/multistepforwards.py's grids; two steps' discount factors, the grid's forwards and forwards 1% higher.
 
-Left out (nanoql interpolates a payment's own period where QuantLib extrapolates from the next; the S-mmp plan's MMPR4
-(ix); tests/NanoQL.Tests/Divergences/MarketModelDiscounterBracketTests.cs): payments strictly inside a period but the
-last.
+Left out (nanoql interpolates a payment's own period where QuantLib extrapolates from the next;
+tests/NanoQL.Tests/Divergences/MarketModelDiscounterBracketTests.cs): payments strictly inside a period but the last.
 
 The harness unit is tools/cxx/src/models/marketmodels/pathwisegreeks/pathwisegreeks.cpp. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Models/MarketModels/MarketModelPathwiseDiscounterCxxVectorTests.cs."""

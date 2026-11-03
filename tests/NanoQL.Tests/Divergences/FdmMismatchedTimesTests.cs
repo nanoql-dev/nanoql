@@ -16,21 +16,20 @@ namespace NanoQL.Tests.Divergences;
 /// curve's, measured from its reference date in its day counter (<c>blackscholesprocess.cpp:149-152</c>), and QuantLib
 /// reads the dividend curve, the volatility, the local volatility's curves, the quanto helper's structures and the
 /// escrowed dividends' curve at those times (<c>fdmblackscholesop.cpp:51-66</c>,
-/// <c>fdmblackscholesmesher.cpp:63-103</c>,
-/// <c>fdmquantohelper.cpp:43-55</c>, <c>localvolsurface.cpp:82-118</c>, <c>escroweddividendadjustment.cpp</c>), each of
-/// which measures time from its own reference date in its own day counter: a one-year put on a risk-free curve on
-/// Act/360, with the discount of one on Act/365 at every date, prices 0.93% above the same market restated on one day
-/// counter, and one on a risk-free curve settling two business days after its other structures 0.74% below QuantLib's
-/// analytic engine, which counts each structure from its own reference date. nanoql's grid runs on the risk-free
-/// curve's day counter from the earliest reference date of the structures it reads, and reads each structure at the
-/// instants its times denote, on its own clock, accruing nothing before its own reference date, as the analytic engine
-/// counts it (the user's rulings): the days before a later-dated structure's date are calendar time on the grid. So the
-/// engine prices the market restated from the earliest date, each structure accruing nothing before its own, and
-/// QuantLib's own engine on that market is the check, price and theta: exact between Actual/N day counters, and on
-/// others, read through the dates and linear within a day, its analytic engine within the grid's error. The theta is
-/// the change over the grid's first calendar day, QuantLib's engine's on the restated market: where a structure is
-/// dated after the evaluation date, that day accrues none of its dividends or variance, so the theta differs from the
-/// formula theta of the analytic and binomial engines, even in sign. The clock is public
+/// <c>fdmblackscholesmesher.cpp:63-103</c>, <c>fdmquantohelper.cpp:43-55</c>, <c>localvolsurface.cpp:82-118</c>,
+/// <c>escroweddividendadjustment.cpp</c>), each of which measures time from its own reference date in its own day
+/// counter: a one-year put on a risk-free curve on Act/360, with the discount of one on Act/365 at every date, prices
+/// 0.93% above the same market restated on one day counter, and one on a risk-free curve settling two business days
+/// after its other structures 0.74% below QuantLib's analytic engine, which counts each structure from its own
+/// reference date. nanoql's grid runs on the risk-free curve's day counter from the earliest reference date of the
+/// structures it reads, and reads each structure at the instants its times denote, on its own clock, accruing nothing
+/// before its own reference date, as the analytic engine counts it: the days before a later-dated structure's date are
+/// calendar time on the grid. So the engine prices the market restated from the earliest date, each structure accruing
+/// nothing before its own, and QuantLib's own engine on that market is the check, price and theta: exact between
+/// Actual/N day counters, and on others, read through the dates and linear within a day, its analytic engine within the
+/// grid's error. The theta is the change over the grid's first calendar day, QuantLib's engine's on the restated
+/// market: where a structure is dated after the evaluation date, that day accrues none of its dividends or variance, so
+/// the theta differs from the formula theta of the analytic and binomial engines, even in sign. The clock is public
 /// (<c>FdmBlackScholesOp.Clock</c>), and a solver assembled from the engine's types on it is the engine. A market whose
 /// structures are dated with the risk-free curve, on its day counter, is read as QuantLib reads it, and keeps
 /// QuantLib's bits.

@@ -4,28 +4,26 @@
 the evaluation date 15 October 2026: soft-barrier options, knocked in or out in proportion to the depth the spot
 reaches into a band [L, U], by Haug's closed form.
 
-Down-and-in and down-and-out calls under two bands below the spot (85-90% and 75-85% of it) and up-and-in and
-up-and-out puts under two above it (110-115% and 115-125%), over six months, a year and two years, on the processes of
-tools/vectors/gen/processes/blackscholesprocess.py whose carry is clear of Haug's singular points, at three strikes
-(90, 100 and 110% of the spot): the NPV, the engine's one result. Then the degenerate branches, a knock-in already in
-(the vanilla) and a knock-out already out (0), an expired option and the refusals: a cash-or-nothing payoff and
-barriers out of order. Then the option's implied volatility at 105% of its value at the first process's 22%, for
-down-and-in and down-and-out calls at 100 and 110 on [85, 90], at accuracies 1e-4 and 1e-10, its bracket [5%, 400%],
-and its refusal on an expired option. QuantLib's default bracket starts at 1e-6, where Haug's form is NaN (BR5 (xvii)),
-so QuantLib's solve refuses "root not bracketed" for every one of these options, where the port's band average solves:
-left out; a case holding "impliedVolatility" {"target", "accuracy", "maxEvaluations", "minVol", "maxVol"} and
-one payoff.
+Down-and-in and down-and-out calls under two bands below the spot (85-90% and 75-85% of it) and up-and-in and up-and-out
+puts under two above it (110-115% and 115-125%), over six months, a year and two years, on the processes of
+tools/vectors/gen/processes/blackscholesprocess.py whose carry is clear of Haug's singular points, at three strikes (90,
+100 and 110% of the spot): the NPV, the engine's one result. Then the degenerate branches, a knock-in already in (the
+vanilla) and a knock-out already out (0), an expired option and the refusals: a cash-or-nothing payoff and barriers out
+of order. Then the option's implied volatility at 105% of its value at the first process's 22%, for down-and-in and
+down-and-out calls at 100 and 110 on [85, 90], at accuracies 1e-4 and 1e-10, its bracket [5%, 400%], and its refusal on
+an expired option. QuantLib's default bracket starts at 1e-6, where Haug's form is NaN, so QuantLib's solve refuses
+"root not bracketed" for every one of these options, where the port's band average solves: left out; a case holding
+"impliedVolatility" {"target", "accuracy", "maxEvaluations", "minVol", "maxVol"} and one payoff.
 
-The outputs nanoql fixes are left out (the S-bar plan's §2.10): every process here has one day counter and reference
-date (BR5 (i), tests/NanoQL.Tests/Divergences/BarrierClosedFormMismatchedTimesTests.cs); every case is in Haug's
-domain, a down band at or below a call's strike or an up band at or above a put's, the spot outside it (BR5 (xlv),
-SoftBarrierDomainTests.cs, and the directions #2883 refuses, BarrierUpstreamFixesTests.cs); its carry b and b + sigma^2
-are at least 4e-3 from 0, twice the port's switch (BR5 (x), SoftBarrierSingularCarryTests.cs), so the Black processes,
-of zero carry, aren't here; every band is at least 5% wide, above (U - L)/U of 3e-3 and U - L of 1e-4 (BR5 (xi),
-SoftBarrierCoincidentBarriersTests.cs); every volatility is 10% or more, where Haug's form is finite (BR5 (xvii),
-SoftBarrierLowVolatilityTests.cs); every rate is inside QuantLib's limits (BR8 (d), SoftBarrierRateLimitsTests.cs);
-and every exercise is European, where QuantLib prices any other to its last date and nanoql refuses it
-(SoftBarrierExerciseTests.cs).
+The outputs nanoql fixes are left out: every process here has one day counter and reference date
+(tests/NanoQL.Tests/Divergences/BarrierClosedFormMismatchedTimesTests.cs); every case is in Haug's domain, a down band
+at or below a call's strike or an up band at or above a put's, the spot outside it (SoftBarrierDomainTests.cs, and the
+directions #2883 refuses, BarrierUpstreamFixesTests.cs); its carry b and b + sigma^2 are at least 4e-3 from 0, twice the
+port's switch (SoftBarrierSingularCarryTests.cs), so the Black processes, of zero carry, aren't here; every band is at
+least 5% wide, above (U - L)/U of 3e-3 and U - L of 1e-4 (SoftBarrierCoincidentBarriersTests.cs); every volatility is
+10% or more, where Haug's form is finite (SoftBarrierLowVolatilityTests.cs); every rate is inside QuantLib's limits
+(SoftBarrierRateLimitsTests.cs); and every exercise is European, where QuantLib prices any other to its last date and
+nanoql refuses it (SoftBarrierExerciseTests.cs).
 
 A case holds one process, exercise and soft barrier {"barrierType", "barrierLo", "barrierHi"}, its outputs one per
 payoff, the specs otherwise tools/vectors/gen/pricingengines/barrier/analyticbarrierengine.py's. The wheel's calls, by

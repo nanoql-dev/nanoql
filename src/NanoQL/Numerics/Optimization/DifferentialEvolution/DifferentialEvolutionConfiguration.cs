@@ -18,9 +18,9 @@ namespace NanoQL.Numerics;
 /// </para>
 /// <para>
 /// Immutable, with QuantLib's defaults: each <c>With…</c> method returns a modified copy, where QuantLib's setters
-/// change the configuration and return it (the S-core plan's CD12). QuantLib's <c>seed</c> isn't here: the seed is
-/// the optimizer's own argument, required (<see cref="DifferentialEvolution"/>). Its vectors compare by reference, so
-/// two configurations are equal only when they share them.
+/// change the configuration and return it. QuantLib's <c>seed</c> isn't here: the seed is the optimizer's own argument,
+/// required (<see cref="DifferentialEvolution"/>). Its vectors compare by reference, so two configurations are equal
+/// only when they share them.
 /// </para>
 /// </remarks>
 public sealed record DifferentialEvolutionConfiguration
@@ -97,7 +97,7 @@ public sealed record DifferentialEvolutionConfiguration
     /// <returns>The copy.</returns>
     /// <exception cref="ArgumentException">
     /// <paramref name="c"/> is empty, which QuantLib accepts and whose minimization then reads the front of an empty
-    /// population (the S-core plan's CR7 (xxxvi)).
+    /// population.
     /// </exception>
     public DifferentialEvolutionConfiguration WithInitialPopulation(IEnumerable<Vector> c)
     {

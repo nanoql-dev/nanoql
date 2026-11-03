@@ -8,8 +8,8 @@ namespace NanoQL.Models;
 
 /// <summary>A factory of <see cref="BrownianGenerator"/>s.</summary>
 /// <remarks>
-/// Immutable (the S-hes plan's HR3 (iv)): <see cref="Create"/> returns a new generator at each call, so the
-/// computations that draw from them share nothing. An extension point, as in QuantLib.
+/// Immutable: <see cref="Create"/> returns a new generator at each call, so the computations that draw from
+/// them share nothing. An extension point, as in QuantLib.
 /// </remarks>
 public abstract class BrownianGeneratorFactory
 {

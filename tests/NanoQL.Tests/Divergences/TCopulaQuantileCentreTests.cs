@@ -9,11 +9,12 @@ namespace NanoQL.Tests.Divergences;
 
 /// <summary>
 /// The Student t copula policy's quantile near ½ at 4 and 6 degrees of freedom, one Newton step on Boost's cumulative
-/// function there (S-core's C3-O4, applied where the policy reads Boost's quantile): Boost's quantile takes Shaw's
-/// forms, which cancel near ½, returning ±0 for ±2.67e-9 within 1e-9 of ½ and 58% off at ½ − 1e-8 at 4 degrees of
-/// freedom (<see cref="Numerics.InverseCumulativeStudent"/>). The convolution refuses even orders, so only a policy
-/// built without variables reads them. QuantLib's value is Boost's quantile times the variance factor; the check is
-/// Boost's cumulative function at the result, which returns the probability within the quantile's conditioning.
+/// function there (as the inverse cumulative Student distribution does, applied where the policy reads Boost's
+/// quantile): Boost's quantile takes Shaw's forms, which cancel near ½, returning ±0 for ±2.67e-9 within 1e-9 of ½ and
+/// 58% off at ½ − 1e-8 at 4 degrees of freedom (<see cref="Numerics.InverseCumulativeStudent"/>). The convolution
+/// refuses even orders, so only a policy built without variables reads them. QuantLib's value is Boost's quantile times
+/// the variance factor; the check is Boost's cumulative function at the result, which returns the probability within
+/// the quantile's conditioning.
 /// </summary>
 public class TCopulaQuantileCentreTests
 {

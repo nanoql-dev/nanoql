@@ -16,12 +16,12 @@ namespace NanoQL.Experimental;
 /// </summary>
 /// <remarks>
 /// <para>
-/// The fit (<see cref="NoArbSabrInterpolation"/>) runs when the section is built: QuantLib's lazy calculation (the S-xeq
-/// plan's §2.0, S-g1d's <see cref="SabrInterpolatedSmileSection"/>). QuantLib's quote forms are the value forms here, a
-/// quote being its value, and a volatility quote that isn't valid is a <see langword="null"/> value, its strike left out
-/// of the fit. With floating strikes, the strikes are offsets from the forward and the volatilities spreads over the
-/// at-the-money volatility. QuantLib's sections float with the evaluation date, having no reference date; here the
-/// <c>Create</c> factories take the evaluation context and fix the date.
+/// The fit (<see cref="NoArbSabrInterpolation"/>) runs when the section is built: QuantLib's lazy calculation (as
+/// <see cref="SabrInterpolatedSmileSection"/>'s). QuantLib's quote forms are the value forms here, a quote being its
+/// value, and a volatility quote that isn't valid is a <see langword="null"/> value, its strike left out of the fit.
+/// With floating strikes, the strikes are offsets from the forward and the volatilities spreads over the at-the-money
+/// volatility. QuantLib's sections float with the evaluation date, having no reference date; here the <c>Create</c>
+/// factories take the evaluation context and fix the date.
 /// </para>
 /// <para>QuantLib reads one strike per volatility, past the strikes' end where there are fewer strikes; they are refused
 /// here.</para>

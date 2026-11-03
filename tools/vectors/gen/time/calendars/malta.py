@@ -24,7 +24,7 @@ MARKETS = [("MSE", 0)]
 
 
 def skipped(market, c):
-    """The dates SCR3 (iv) changes: every Friday and Sunday, whose weekend QuantLib's Friday-and-Saturday override
+    """The dates the fix changes: every Friday and Sunday, whose weekend QuantLib's Friday-and-Saturday override
     swaps."""
     out = []
     d = FROM

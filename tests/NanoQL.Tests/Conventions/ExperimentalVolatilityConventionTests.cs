@@ -10,11 +10,12 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// C3's documented behaviours and refusals (the S-xeq plan's XER5 (xxvii); the run's R3-1): the no-arbitrage SABR
-/// model's forward adjustment failing at extreme parameters, as QuantLib's header documents, read off
-/// <see cref="NoArbSabrModel.NumericalForward"/>; the abcd curve refusing times outside its fitted tenors, as QuantLib's
-/// adjustment factor does; the no-arbitrage SABR factory's traits, QuantLib's <c>global</c>; the structures' refusals
-/// with QuantLib's texts, and the SABR surface's refusal of fewer rows than tenors, where QuantLib reads past them.
+/// The experimental volatility structures' documented behaviours and refusals: the no-arbitrage SABR model's forward
+/// adjustment failing at extreme parameters, as QuantLib's header documents, read off
+/// <see cref="NoArbSabrModel.NumericalForward"/>; the abcd curve refusing times outside its fitted tenors, as
+/// QuantLib's adjustment factor does; the no-arbitrage SABR factory's traits, QuantLib's <c>global</c>; the structures'
+/// refusals with QuantLib's texts, and the SABR surface's refusal of fewer rows than tenors, where QuantLib reads past
+/// them.
 /// </summary>
 public class ExperimentalVolatilityConventionTests
 {
@@ -25,7 +26,7 @@ public class ExperimentalVolatilityConventionTests
     public void AtExtremeParametersTheForwardAdjustmentFailsAsDocumented()
     {
         // T 30, ρ 0.9, ν 0.8, σ_I 0.3: the numerical forward 0.0157 off and the call flat in strike, 0.0143261 from K 0
-        // to 0.12 (QuantLib's noarbsabr.hpp:41-47; the planner's XEP20)
+        // to 0.12 (QuantLib's noarbsabr.hpp:41-47)
         double f = 0.03, beta = 0.5, alpha = 0.3 / Math.Pow(f, beta - 1.0);
         var model = new NoArbSabrModel(30.0, f, alpha, beta, 0.8, 0.9);
         Assert.Equal(-0.01567, model.NumericalForward - model.Forward, 1e-5);

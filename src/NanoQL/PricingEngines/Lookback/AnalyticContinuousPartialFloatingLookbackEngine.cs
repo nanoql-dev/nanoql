@@ -23,27 +23,25 @@ namespace NanoQL.PricingEngines;
 /// The value alone, as QuantLib's, its bivariate normal QuantLib's We04DP.
 /// </para>
 /// <para>
-/// Documented divergences (BR5). Each rate is read on the volatility's clock and each time is the volatility's, as
+/// Documented divergences. Each rate is read on the volatility's clock and each time is the volatility's, as
 /// <see cref="AnalyticBarrierEngine"/> reads them, where QuantLib reads every structure at the risk-free curve's times
-/// (BR5 (xix), <c>Divergences/LookbackMismatchedTimesTests.cs</c>). The extremum observed so far is read as the spot
-/// where it lies beyond it, the spot being observed (BR5 (xxii), <c>Divergences/LookbackExtremeBeyondSpotTests.cs</c>).
-/// Near zero carry, where QuantLib's terms over 2b/σ² cancel and it is NaN at r = q, the value is the cubic in the
-/// carry through QuantLib's values either side of a cut (BR5 (xxiii), <see cref="LookbackSmallCarry"/>,
-/// <c>Divergences/LookbackSmallCarryTests.cs</c>). At small volatilities, where λ = 2b/σ² is large and QuantLib's power
-/// of s times its normal or bivariate normal factor is +∞ times 0, NaN, the product is taken in logs (BR5 (xxiv)'s
-/// class, the S-bar code review's B2-1, <see cref="LookbackTails"/>,
+/// (<c>Divergences/LookbackMismatchedTimesTests.cs</c>). The extremum observed so far is read as the spot where it lies
+/// beyond it, the spot being observed (<c>Divergences/LookbackExtremeBeyondSpotTests.cs</c>). Near zero carry, where
+/// QuantLib's terms over 2b/σ² cancel and it is NaN at r = q, the value is the cubic in the carry through QuantLib's
+/// values either side of a cut (<see cref="LookbackSmallCarry"/>, <c>Divergences/LookbackSmallCarryTests.cs</c>). At
+/// small volatilities, where λ = 2b/σ² is large and QuantLib's power of s times its normal or bivariate normal factor
+/// is +∞ times 0, NaN, the product is taken in logs (<see cref="LookbackTails"/>,
 /// <c>Divergences/LookbackSmallVolatilityTests.cs</c>). A window closing from the evaluation date to the volatility
 /// clock's origin, inclusive, is the European at λ times the extremum with the spot, where QuantLib's f₁ is 0/0 at the
 /// money, and one closed before the evaluation date the European at λ times the extremum as given, the spot not in its
-/// window, where QuantLib throws its bivariate normal's check of ρ (the review's B2-2 and B2-3,
-/// <c>Divergences/LookbackPartialWindowTodayTests.cs</c>). And below machine-epsilon variance the underlying follows
-/// its forward, where QuantLib divides by the volatility (BR5 (xxiv),
-/// <c>Divergences/LookbackZeroVolatilityTests.cs</c>).
+/// window, where QuantLib throws its bivariate normal's check of ρ
+/// (<c>Divergences/LookbackPartialWindowTodayTests.cs</c>). And below machine-epsilon variance the underlying follows
+/// its forward, where QuantLib divides by the volatility (<c>Divergences/LookbackZeroVolatilityTests.cs</c>).
 /// </para>
 /// <para>
 /// The formula is a first-passage closed form in equivalent-constant rates and a volatility, the variance and discounts
-/// to expiry: no exact closed form exists for a first passage under general deterministic term structures (the S-bar
-/// plan's BR4 (d)); the term-structure-exact route is <see cref="MCLookbackEngine"/>.
+/// to expiry: no exact closed form exists for a first passage under general deterministic term structures; the
+/// term-structure-exact route is <see cref="MCLookbackEngine"/>.
 /// </para>
 /// </remarks>
 public static class AnalyticContinuousPartialFloatingLookbackEngine
@@ -88,9 +86,9 @@ public static class AnalyticContinuousPartialFloatingLookbackEngine
             _ => throw new NanoQLException("Unknown type"),
         };
 
-        // a window closing before the evaluation date, or from it to the volatility clock's origin, inclusive (the
-        // S-bar code review's B2-2 and B2-3): the European at λ times the extremum, the spot among the values observed
-        // unless the window closed before the evaluation date, where QuantLib's formulas take 0/0 or NaN times
+        // a window closing before the evaluation date, or from it to the volatility clock's origin, inclusive: the
+        // European at λ times the extremum, the spot among the values observed unless the window closed before the
+        // evaluation date, where QuantLib's formulas take 0/0 or NaN times
         bool closed = option.LookbackPeriodEnd < context.EvaluationDate;
         if (closed || !(process.BlackVolatility.TimeFromReference(option.LookbackPeriodEnd) > 0.0))
         {
@@ -109,7 +107,7 @@ public static class AnalyticContinuousPartialFloatingLookbackEngine
         return option.FetchResults(new OneAssetOptionResults { NPV = new Formulas(option, process, eta).A() });
     }
 
-    // QuantLib's members, each read once on the volatility's clock (BR5 (xix))
+    // QuantLib's members, each read once on the volatility's clock
     private sealed class Formulas
     {
         private readonly double eta;
@@ -129,7 +127,7 @@ public static class AnalyticContinuousPartialFloatingLookbackEngine
             this.eta = eta;
             underlying = process.X0;
 
-            // a call's minimum and a put's maximum, the spot among the values observed (BR5 (xxii))
+            // a call's minimum and a put's maximum, the spot among the values observed
             minmax = eta > 0.0 ? Math.Min(option.Minmax, underlying) : Math.Max(option.Minmax, underlying);
             lambda = option.Lambda;
             Date lastDate = option.Exercise.LastDate();
@@ -146,7 +144,7 @@ public static class AnalyticContinuousPartialFloatingLookbackEngine
         private double StdDeviation => volatility * Math.Sqrt(residualTime);
 
         // QuantLib's A(eta), and below the small-carry cut the cubic in the carry through its values at the cut and
-        // twice it, either side of 0, the dividend discount moved with the carry (BR5 (xxiii))
+        // twice it, either side of 0, the dividend discount moved with the carry
         internal double A()
         {
             if (volatility * volatility * residualTime < NumericLimits.QL_EPSILON)
@@ -230,7 +228,7 @@ public static class AnalyticContinuousPartialFloatingLookbackEngine
             double powL = Math.Pow(lambda, x);
 
             // QuantLib's two power products, each in logs where it isn't finite, as at small volatilities, where
-            // QuantLib's are NaN (the S-bar code review's B2-1)
+            // QuantLib's are NaN
             double rho3 = fullLookbackPeriod ? 1.0 : Math.Sqrt(lookbackPeriodEndTime / residualTime);
             double product3 = LookbackTails.PowerTimesM(powS * n3, 1.0, s, -x, h3, k3, rho3);
             double product4 = fullLookbackPeriod
@@ -258,8 +256,7 @@ public static class AnalyticContinuousPartialFloatingLookbackEngine
                     * (product3 - product4)));
         }
 
-        // the forward path's payoff (BR5 (xxiv)): the path is monotone, so its extremum over the window [0, t₁] is at
-        // an end
+        // the forward path's payoff: the path is monotone, so its extremum over the window [0, t₁] is at an end
         private double DeterministicValue()
         {
             double forward = underlying * dividendDiscount / riskFreeDiscount;

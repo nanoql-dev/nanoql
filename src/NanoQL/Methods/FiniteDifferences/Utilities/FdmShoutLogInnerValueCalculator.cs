@@ -26,8 +26,7 @@ namespace NanoQL.Methods;
 /// read there, where QuantLib strikes it and reads its volatility at s_t (<c>fdmshoutloginnervaluecalculator.cpp:47-73</c>):
 /// a shout locks in S_τ − K and leaves (S_T − S_τ)⁺, so struck at the escrowed level QuantLib's residual hands the
 /// dividends' present value back (24.90999 where the shout is worth 20.116 on QuantLib's
-/// <c>testLargeDividendShoutNPV</c> option) (the S-van plan's VR4 (xxx)). Without dividends the two levels are one, and
-/// QuantLib's bits stand.
+/// <c>testLargeDividendShoutNPV</c> option). Without dividends the two levels are one, and QuantLib's bits stand.
 /// </para>
 /// </remarks>
 public sealed class FdmShoutLogInnerValueCalculator : FdmInnerValueCalculator
@@ -87,7 +86,7 @@ public sealed class FdmShoutLogInnerValueCalculator : FdmInnerValueCalculator
 
         double fwd = s_t * qf / df;
 
-        // the residual struck at the spot, its volatility read there (VR4 (xxx))
+        // the residual struck at the spot, its volatility read there
         double spot = s_t - escrowedDividendAdj.DividendAdjustment(t);
 
         double stdDev = blackVolatility.SharesTimes(clock)

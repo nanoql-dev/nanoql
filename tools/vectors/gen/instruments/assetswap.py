@@ -16,13 +16,13 @@ maturity before the bond's, an ESTR-style overnight index (its floating schedule
 engine given a settlement date and an NPV date (and the settlement date's flows), and a seasoned deal, its floating
 schedule starting before the evaluation date (its fair clean price refused, "not available for seasoned deal").
 
-A swap's outputs are its NPV, fair spread and fair clean price, each leg's NPV, BPS and start and end discounts, the
-NPV date's discount, and each leg's payment dates and amounts. The swap on the 1e6 face with a repayment of 100 is
-generated and its outputs that read the repayment left out (the NPV, fair spread, fair clean price, the legs' NPVs and
-the bond leg's amounts): QuantLib pays the number given as an amount, where nanoql pays it per 100 of the notional (the
-S-cms plan's CMR5 (xix); tests/NanoQL.Tests/Divergences/AssetSwapNonParRepaymentTests.cs). The fair non-par repayment,
-the floating leg's NPV and BPS and the swap's terms, which the wheel hides, are in
-tools/vectors/gen/cxx/instruments/assetswap.py. Amounts are compared at the bond's face.
+A swap's outputs are its NPV, fair spread and fair clean price, each leg's NPV, BPS and start and end discounts, the NPV
+date's discount, and each leg's payment dates and amounts. The swap on the 1e6 face with a repayment of 100 is generated
+and its outputs that read the repayment left out (the NPV, fair spread, fair clean price, the legs' NPVs and the bond
+leg's amounts): QuantLib pays the number given as an amount, where nanoql pays it per 100 of the notional
+(tests/NanoQL.Tests/Divergences/AssetSwapNonParRepaymentTests.cs). The fair non-par repayment, the floating leg's NPV
+and BPS and the swap's terms, which the wheel hides, are in tools/vectors/gen/cxx/instruments/assetswap.py. Amounts are
+compared at the bond's face.
 
 A case's inputs hold its settings, the bond (bond.py's spec), the curve, and the swap ({"payBondCoupon", "cleanPrice",
 "index", "spread", "floatSchedule", "floatingDayCount", "parSwap", "gearing", "nonParRepayment", "dealMaturity"}, a
@@ -205,7 +205,7 @@ def stored_fixings(spec, swap):
     return as_list()
 
 
-# QuantLib pays a given repayment as an amount (CMR5 (xix)): the outputs that read it, on a face other than 100
+# QuantLib pays a given repayment as an amount: the outputs that read it, on a face other than 100
 REPAYMENT_OUTPUTS = ("NPV", "fairSpread", "fairCleanPrice", "legNPV", "bondLegAmounts")
 
 

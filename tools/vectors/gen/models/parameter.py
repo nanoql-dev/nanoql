@@ -19,10 +19,10 @@ tools/vectors/gen/math/optimization/constraint.py.
 
 For each built parameter, after the case's setParam calls in order: size(), params(), its value at the case's times
 (operator(), the wheel's __call__, nanoql's Evaluate) and testParams at the case's arrays, of its size and others
-(NonhomogeneousBoundaryConstraint refuses an array of another size than its bounds). setParam is called only within
-the parameter's size: out of range, QuantLib writes past its array, and on a NullParameter it ends the process
-(caveat 13; nanoql refuses, MD3). Parameter() isn't public in nanoql (MD4), and the wheel's
-TermStructureFittingParameter isn't bound: Hull-White's harness vectors reach it through the fitted tree.
+(NonhomogeneousBoundaryConstraint refuses an array of another size than its bounds). setParam is called only within the
+parameter's size: out of range, QuantLib writes past its array, and on a NullParameter it ends the process (caveat 13;
+nanoql refuses). Parameter() isn't public in nanoql, and the wheel's TermStructureFittingParameter isn't bound:
+Hull-White's harness vectors reach it through the fitted tree.
 
 The wheel's calls, by QuantLib-SWIG's parameter.i: the classes' constructors, params(), setParam(i, x), size(),
 testParams(Array) and __call__(t), each forwarding to the C++ member of that name. Each case's inputs hold its settings,

@@ -8,14 +8,13 @@ using NanoQL.Tests.Conventions;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The call-specified product's counts at an idle step (the S-mmp plan's MMPR4 (xvi), Revision 2's O1-2, fixed under
-/// R8). At a step where neither its underlying nor its rebate steps, an exercise, strategy or rebate time off the
-/// underlying's grid, QuantLib's product writes no counts (<c>callspecifiedmultiproduct.cpp:144-167</c>,
-/// <c>pathwiseproductcallspecified.cpp:136-153</c>), and the accounting engine adds the previous step's flows again: a
-/// 2% receiver swap on six semi-annual rates callable 0.1 before each rate time and never called, 8,191 paths, QuantLib
-/// −0.061168 ± 0.00039 against the swap's exact −0.033604 (this run's <c>probes\c3_facts.cpp</c>; the planner's MPP21).
-/// nanoql zeroes every count at each step's start, as QuantLib's composites zero the parts they don't step. Checks:
-/// QuantLib's bits on schedules on the grid (QuantLib's cases, the vectors); off it, the swap's exact value.
+/// The call-specified product's counts at an idle step (fixed). At a step where neither its underlying nor its rebate
+/// steps, an exercise, strategy or rebate time off the underlying's grid, QuantLib's product writes no counts
+/// (<c>callspecifiedmultiproduct.cpp:144-167</c>, <c>pathwiseproductcallspecified.cpp:136-153</c>), and the accounting
+/// engine adds the previous step's flows again: a 2% receiver swap on six semi-annual rates callable 0.1 before each
+/// rate time and never called, 8,191 paths, QuantLib −0.061168 ± 0.00039 against the swap's exact −0.033604. nanoql
+/// zeroes every count at each step's start, as QuantLib's composites zero the parts they don't step. Checks: QuantLib's
+/// bits on schedules on the grid (QuantLib's cases, the vectors); off it, the swap's exact value.
 /// </summary>
 public class CallSpecifiedIdleStepTests
 {

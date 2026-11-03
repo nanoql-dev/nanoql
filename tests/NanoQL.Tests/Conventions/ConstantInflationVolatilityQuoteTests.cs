@@ -7,10 +7,10 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// A constant inflation volatility's quote is its value (the S-xrt plan's XRD10, S-infl's precedent): QuantLib's
-/// <c>testConstantVolatilityQuoteIsObserved</c> builds a constant CPI and a constant year-on-year volatility on a quote
-/// of 1%, moves the quote to 2%, checks that both notify their observers, and reads 2% from each. Here a moved quote is a
-/// volatility built from the new value, which reads it; the first volatility still reads 1%.
+/// A constant inflation volatility's quote is its value: QuantLib's <c>testConstantVolatilityQuoteIsObserved</c> builds
+/// a constant CPI and a constant year-on-year volatility on a quote of 1%, moves the quote to 2%, checks that both
+/// notify their observers, and reads 2% from each. Here a moved quote is a volatility built from the new value, which
+/// reads it; the first volatility still reads 1%.
 /// </summary>
 public class ConstantInflationVolatilityQuoteTests
 {

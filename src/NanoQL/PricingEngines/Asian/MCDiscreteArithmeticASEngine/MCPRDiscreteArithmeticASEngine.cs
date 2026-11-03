@@ -14,7 +14,7 @@ namespace NanoQL.PricingEngines;
 /// <see cref="MCDiscreteArithmeticASEngine"/> on pseudo-random draws with QuantLib's default statistics:
 /// QuantLib-Python's <c>MCPRDiscreteArithmeticASEngine</c>, QuantLib's
 /// <c>MCDiscreteArithmeticASEngine&lt;PseudoRandom&gt;</c>, its calculations closed at <see cref="PseudoRandom"/> and
-/// <see cref="GeneralStatistics"/> (D12).
+/// <see cref="GeneralStatistics"/>.
 /// </summary>
 public static class MCPRDiscreteArithmeticASEngine
 {

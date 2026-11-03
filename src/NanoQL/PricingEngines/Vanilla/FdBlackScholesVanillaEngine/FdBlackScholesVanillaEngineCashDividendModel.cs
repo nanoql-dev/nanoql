@@ -11,7 +11,7 @@ namespace NanoQL.PricingEngines;
 /// <summary>
 /// How the finite-difference Black-Scholes engine models cash dividends: QuantLib's
 /// <c>FdBlackScholesVanillaEngine::CashDividendModel</c>, whose values it takes from the cash-dividend European
-/// engine's (the S-eq plan's SEQD4).
+/// engine's.
 /// </summary>
 public enum FdBlackScholesVanillaEngineCashDividendModel
 {

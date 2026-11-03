@@ -21,21 +21,20 @@ namespace NanoQL.Coupons;
 /// <remarks>
 /// <para>
 /// Immutable: each public member computes, inside the call, what QuantLib's <c>initialize(coupon)</c> stores in the
-/// pricer before its queries (the S-cms plan's CMR1 (i)), the g-function with its memo among it, and a capped or
-/// collared coupon's rate reads its three rates from one such state. <see cref="WithMeanReversion"/> and
-/// <see cref="WithSwaptionVolatility"/> return copies of the pricer's own type, where QuantLib's setters replace its
-/// quote and handle in place.
+/// pricer before its queries, the g-function with its memo among it, and a capped or collared coupon's rate reads its
+/// three rates from one such state. <see cref="WithMeanReversion"/> and <see cref="WithSwaptionVolatility"/> return
+/// copies of the pricer's own type, where QuantLib's setters replace its quote and handle in place.
 /// </para>
 /// <para>
 /// The standard model reads the swap index's tenor as its length in years, where QuantLib reads its length in the
 /// tenor's own units, so an 18-month index was 18 years; a tenor that isn't a whole number of fixed-leg periods (18
-/// months on an annual leg) starts with a stub the model can't price, and is refused (the S-cms plan's CMR5 (i)).
+/// months on an annual leg) starts with a stub the model can't price, and is refused.
 /// </para>
 /// <para>
 /// On a lognormal volatility a caplet struck at or below 0, on a forward above 0, where QuantLib prices the caplet at a
 /// strike of 1e-10 and so drops the strike, is the coupon's expected rate less the strike, the limit of the
-/// replication's own formula there; the floorlet there is 0, as QuantLib's (the S-cms plan's CMR5 (xxiii)). A forward
-/// at or below 0 has no lognormal rate distribution, and its caplet refuses, as QuantLib's.
+/// replication's own formula there; the floorlet there is 0, as QuantLib's. A forward at or below 0 has no lognormal
+/// rate distribution, and its caplet refuses, as QuantLib's.
 /// </para>
 /// <para>Derived inside the library only, by <see cref="NumericHaganPricer"/> and <see cref="AnalyticHaganPricer"/>,
 /// since its per-coupon state is internal.</para>
@@ -136,7 +135,7 @@ public abstract class HaganPricer : CmsCouponPricer, IMeanRevertingPricer
     private protected abstract double OptionletPrice(HaganPricerState s, OptionType optionType, double strike);
 
     // The price of the fixing itself on the replication, the swaplet's at a gearing of 1 and no spread: a caplet struck
-    // at or below 0 on a lognormal volatility is this less the strike's price (CMR5 (xxiii)).
+    // at or below 0 on a lognormal volatility is this less the strike's price.
     private protected abstract double ExpectedRatePrice(HaganPricerState s);
 
     // QuantLib's HaganPricer::initialize(coupon), for one call.
@@ -201,7 +200,7 @@ public abstract class HaganPricer : CmsCouponPricer, IMeanRevertingPricer
 
         GFunction gFunction = modelOfYieldCurve switch
         {
-            // the swap's length in years, where QuantLib reads the tenor's length in its own units (CMR5 (i))
+            // the swap's length in years, where QuantLib reads the tenor's length in its own units
             GFunctionFactoryYieldCurveModel.Standard =>
                 GFunctionFactory.NewGFunctionStandard(q, delta, StandardSwapLength(swapTenor, swapIndex.FixedLegTenor, q)),
             GFunctionFactoryYieldCurveModel.ExactYield => GFunctionFactory.NewGFunctionExactYield(cms, context),
@@ -236,8 +235,8 @@ public abstract class HaganPricer : CmsCouponPricer, IMeanRevertingPricer
     private static double Max0(double x) => x < 0.0 ? 0.0 : x;
 
     // The standard model's swap length in years, which it reads as a whole number of equal fixed-leg periods; a tenor
-    // that isn't one starts with a stub, which the model's delay, counted in the first period's length, can't price,
-    // so it is refused (the S-cms plan's CMR5 (i), as the user ruled during its run).
+    // that isn't one starts with a stub, which the model's delay, counted in the first period's length, can't price, so
+    // it is refused.
     private static double StandardSwapLength(Period swapTenor, Period fixedLegTenor, int q)
     {
         bool whole = swapTenor.Units switch

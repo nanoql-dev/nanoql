@@ -14,8 +14,8 @@ namespace NanoQL.Models;
 /// exercise's parameters and the variables the rule reads in the state.
 /// </summary>
 /// <remarks>
-/// A working type (the S-mmp plan's MMPR1 (i)): it steps its own clone of the rule, and its variables' buffer is sized
-/// at construction, so a decision allocates nothing.
+/// A working type: it steps its own clone of the rule, and its variables' buffer is sized at construction, so a
+/// decision allocates nothing.
 /// </remarks>
 [WorkingType]
 public sealed class ParametricExerciseAdapter : ExerciseStrategy<CurveState>

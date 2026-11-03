@@ -16,10 +16,10 @@ namespace NanoQL.Methods;
 /// maturity, each discounted by the risk-free curve and compounded by the dividend curve.
 /// </summary>
 /// <remarks>
-/// Immutable (the S-eq plan's SEQR1). Its times are the risk-free curve's, or in the finite-difference engine the
-/// engine's; QuantLib reads the dividend curve at them, where here each curve is read at the instants they denote, on
-/// its own clock, as <see cref="FdmBlackScholesOp"/> reads it, and as QuantLib reads it where the curves share the
-/// times' day counter and reference date (the S-eq plan's rulings of 2026-10-20 and 2026-10-21, under R8).
+/// Immutable. Its times are the risk-free curve's, or in the finite-difference engine the engine's; QuantLib reads the
+/// dividend curve at them, where here each curve is read at the instants they denote, on its own clock, as
+/// <see cref="FdmBlackScholesOp"/> reads it, and as QuantLib reads it where the curves share the times' day counter and
+/// reference date.
 /// </remarks>
 public sealed class EscrowedDividendAdjustment
 {

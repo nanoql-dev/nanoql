@@ -11,9 +11,9 @@ using NanoQL.Time;
 namespace NanoQL.Coupons;
 
 /// <summary>
-/// What QuantLib's <c>LinearTsrPricer::initialize(coupon)</c> stores in the pricer for its queries, built for one call
-/// (the S-cms plan's CMR1 (i)): the coupon's terms and discounts, and while its fixing is in the future the swap's rate
-/// and annuity, the smile section, the adjusted bounds and the linear model's coefficients.
+/// What QuantLib's <c>LinearTsrPricer::initialize(coupon)</c> stores in the pricer for its queries, built for one call:
+/// the coupon's terms and discounts, and while its fixing is in the future the swap's rate and annuity, the smile
+/// section, the adjusted bounds and the linear model's coefficients.
 /// </summary>
 internal sealed class LinearTsrPricerState
 {

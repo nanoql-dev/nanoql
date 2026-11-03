@@ -3,16 +3,16 @@
 """Vectors for QuantLib's Distribution (ql/experimental/credit/distribution.hpp, .cpp), which the wheel doesn't expose,
 each output computed by the C++ harness (tools/cxx/src/experimental/credit/distribution.cpp).
 
-Distributions of added values (a fixed pseudo-random sample, with values below and above the range), of added
-densities (a uniform and a two-point distribution) and of added averages; their buckets, densities, cumulative and
-excess probabilities and averages; the expected value, and of the square; the confidence levels; the cumulative density at coordinates
-past the first bucket (in it, QuantLib's reads index -1, the S-xcr plan's XR8 (xx), held in
-Divergences/DistributionMembersTests.cs), refused at 0 and beyond the range; the tranche expected values and the
-integrated excess probabilities; the buckets located and their widths, refused outside the range; and the tranches'
-coordinates, cumulative probabilities and their densities and excess probabilities but the last, which QuantLib
-computes after setting the last cumulative to 1 (XR8 (xx)). And the convolutions QuantLib refuses (unequal or varying
-buckets, an offset), its others assigning where they add (XR8 (xxvii)). The shortfall is left out, QuantLib's form wrong at every
-level (XR8 (xx)). Read back by tests/NanoQL.Tests/Vectors/Cxx/Experimental/Credit/DistributionCxxVectorTests.cs."""
+Distributions of added values (a fixed pseudo-random sample, with values below and above the range), of added densities
+(a uniform and a two-point distribution) and of added averages; their buckets, densities, cumulative and excess
+probabilities and averages; the expected value, and of the square; the confidence levels; the cumulative density at
+coordinates past the first bucket (in it, QuantLib's reads index -1, held in Divergences/DistributionMembersTests.cs),
+refused at 0 and beyond the range; the tranche expected values and the integrated excess probabilities; the buckets
+located and their widths, refused outside the range; and the tranches' coordinates, cumulative probabilities and their
+densities and excess probabilities but the last, which QuantLib computes after setting the last cumulative to 1. And the
+convolutions QuantLib refuses (unequal or varying buckets, an offset), its others assigning where they add. The
+shortfall is left out, QuantLib's form wrong at every level. Read back by
+tests/NanoQL.Tests/Vectors/Cxx/Experimental/Credit/DistributionCxxVectorTests.cs."""
 import os
 import sys
 

@@ -11,29 +11,28 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The tree swaption's snapping and payments (the S-cms plan's CMR4): QuantLib's discretized swaption snaps a swap date
-/// within a week of an exercise date to it, either way (<c>discretizedswaption.cpp:93-111</c>), so a swap starting on
-/// its usual two-day lag after the exercise is valued from the exercise date; it rebuilds the swap on its snapped
-/// schedules' dates with a <c>NullCalendar</c> (<c>:113-119</c>), so its coupons pay on those dates, without the swap's
-/// payment calendar, convention or lag; and its discretized swap values a floating coupon as a par floater to its
-/// payment date (<c>discretizedswap.cpp:199-218</c>). On Hull-White (0.1, 0.01) on a flat 4% curve, 800 steps: a
-/// European 5Y into 5Y payer on 1e6 at 4% errs against Jamshidian's engine by 50.521421552461106 on the lag and
-/// 13.786750153689354 without it (at 5%, 11.848729083691069 and −6.138422108044324); the Bermudan exercised two
-/// business days before each fixed reset, against the finite-difference engine (400 × 800), by 69.91132298134835 and
-/// 12.102443341802427; a Bermudan on an ESTR swap paying two days late, against the finite-difference engine (400 ×
-/// 400), by 82.16860415945848 and 71.98241275852342 at 3.5% (64.7080268507616 and 60.15433851566377 at 4.5%) with and
-/// without the payment lag. QuantLib's tree swap engine, on a 5-year payer on 1e6 at 4% whose unadjusted floating
-/// dates fall three times on a weekend and pay the next business day, prices 3,947.8257420389527 against the
-/// discounting engine's 3,461.83299033012 (on the harness: the wheel has no tree swap engine). nanoql snaps no date
-/// after an exercise date (the week before still snaps, with #1327's post-adjustment, which fixed #1143), pays each
-/// coupon on the swap's own payment date, a snapped one on the swap's payment rule applied to its snapped date, and
-/// values a floating coupon paid after its accrual end as its forward over its own accrual period paid on its payment
-/// date; its tree swap is then within 1.34 of the discounting engine, at 50 steps as at 3,200, the model's adjustment
-/// for the payment delay (1.26) and the par coupons' fixing periods (0.08, its value when the same coupons pay on their
-/// accrual ends). QuantLib's checks: Jamshidian's and the finite-difference engines, within the tree's own error on the
-/// unlagged swap; the discounting engine; and QuantLib 1.25's cached tree values, which
-/// <c>TestSuite/BermudanSwaptionTests.cs</c> restates, with QuantLib's
-/// <c>testTreeEngineTimeSnapping</c> there within its 1.0.
+/// The tree swaption's snapping and payments: QuantLib's discretized swaption snaps a swap date within a week of an
+/// exercise date to it, either way (<c>discretizedswaption.cpp:93-111</c>), so a swap starting on its usual two-day lag
+/// after the exercise is valued from the exercise date; it rebuilds the swap on its snapped schedules' dates with a
+/// <c>NullCalendar</c> (<c>:113-119</c>), so its coupons pay on those dates, without the swap's payment calendar,
+/// convention or lag; and its discretized swap values a floating coupon as a par floater to its payment date
+/// (<c>discretizedswap.cpp:199-218</c>). On Hull-White (0.1, 0.01) on a flat 4% curve, 800 steps: a European 5Y into 5Y
+/// payer on 1e6 at 4% errs against Jamshidian's engine by 50.521421552461106 on the lag and 13.786750153689354 without
+/// it (at 5%, 11.848729083691069 and −6.138422108044324); the Bermudan exercised two business days before each fixed
+/// reset, against the finite-difference engine (400 × 800), by 69.91132298134835 and 12.102443341802427; a Bermudan on
+/// an ESTR swap paying two days late, against the finite-difference engine (400 × 400), by 82.16860415945848 and
+/// 71.98241275852342 at 3.5% (64.7080268507616 and 60.15433851566377 at 4.5%) with and without the payment lag.
+/// QuantLib's tree swap engine, on a 5-year payer on 1e6 at 4% whose unadjusted floating dates fall three times on a
+/// weekend and pay the next business day, prices 3,947.8257420389527 against the discounting engine's 3,461.83299033012
+/// (on the harness: the wheel has no tree swap engine). nanoql snaps no date after an exercise date (the week before
+/// still snaps, with #1327's post-adjustment, which fixed #1143), pays each coupon on the swap's own payment date, a
+/// snapped one on the swap's payment rule applied to its snapped date, and values a floating coupon paid after its
+/// accrual end as its forward over its own accrual period paid on its payment date; its tree swap is then within 1.34
+/// of the discounting engine, at 50 steps as at 3,200, the model's adjustment for the payment delay (1.26) and the par
+/// coupons' fixing periods (0.08, its value when the same coupons pay on their accrual ends). QuantLib's checks:
+/// Jamshidian's and the finite-difference engines, within the tree's own error on the unlagged swap; the discounting
+/// engine; and QuantLib 1.25's cached tree values, which <c>TestSuite/BermudanSwaptionTests.cs</c> restates, with
+/// QuantLib's <c>testTreeEngineTimeSnapping</c> there within its 1.0.
 /// </summary>
 public class TreeSwaptionSnappingTests
 {

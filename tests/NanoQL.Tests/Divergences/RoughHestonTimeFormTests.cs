@@ -11,19 +11,19 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The rough Heston engine's time form of the price (the S-hes plan's HR7 (xii), under R8, the dates class of HR7 (xi)).
-/// QuantLib's <c>priceVanillaPayoff(payoff, Time)</c> reads both curves at the risk-free curve's time
-/// (<c>analyticroughhestonengine.cpp:594-600</c>), where its date form reads each by date: on a dividend curve on
-/// another day counter the two forms of one maturity price apart. nanoql's time form is on the model's clock, each curve
-/// read at the instant the time denotes, so a time and the date it denotes price alike, the date form QuantLib's.
+/// The rough Heston engine's time form of the price. QuantLib's <c>priceVanillaPayoff(payoff, Time)</c> reads both
+/// curves at the risk-free curve's time (<c>analyticroughhestonengine.cpp:594-600</c>), where its date form reads each
+/// by date: on a dividend curve on another day counter the two forms of one maturity price apart. nanoql's time form is
+/// on the model's clock, each curve read at the instant the time denotes, so a time and the date it denotes price
+/// alike, the date form QuantLib's.
 /// </summary>
 public class RoughHestonTimeFormTests
 {
     [Fact]
     public void ATimeAndTheDateItDenotesPriceAlike()
     {
-        // the risk-free curve on Actual/360 and the dividend curve on Actual/365 (Fixed), both dated today: QuantLib 1.44's
-        // date form prices 4.542308190960499 and 2.0498193225348307 [executed on the wheel]; its time form at the
+        // the risk-free curve on Actual/360 and the dividend curve on Actual/365 (Fixed), both dated today: QuantLib
+        // 1.44's date form prices 4.542308190960499 and 2.0498193225348307 (QuantLib-Python 1.44); its time form at the
         // risk-free curve's times 1.01389 and 2.02778 reads the dividend curve at those times on Actual/365 (Fixed),
         // 1.4 and 2.8 days past the instants
         var today = new Date(15, Month.October, 2026);

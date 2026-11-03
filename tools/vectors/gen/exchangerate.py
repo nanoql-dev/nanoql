@@ -2,12 +2,12 @@
 # SPDX-License-Identifier: Apache-2.0
 """Vectors for QuantLib's ExchangeRate (ql/exchangerate.hpp, .cpp): direct rates and their chains, and exchanges.
 
-Direct rates between three pairs; chains of two rates in each of chain()'s four configurations (the sources shared,
-the first's source the second's target, the first's target the second's source, the targets shared), each pair of
-rates in both orders; a chain of a chain; and two rates sharing no currency, which chain() refuses. For each rate,
-its source, target, value and type, and the exchange of an amount in each currency the rate or its chain involves and
-in one it doesn't. Chains of two rates over one pair are left out: QuantLib returns a rate from a currency to itself,
-which nanoql refuses (the S-rx plan's SRXR3 (xii); Divergences/ExchangeRateChainRefusalTests.cs).
+Direct rates between three pairs; chains of two rates in each of chain()'s four configurations (the sources shared, the
+first's source the second's target, the first's target the second's source, the targets shared), each pair of rates in
+both orders; a chain of a chain; and two rates sharing no currency, which chain() refuses. For each rate, its source,
+target, value and type, and the exchange of an amount in each currency the rate or its chain involves and in one it
+doesn't. Chains of two rates over one pair are left out: QuantLib returns a rate from a currency to itself, which
+nanoql refuses (Divergences/ExchangeRateChainRefusalTests.cs).
 
 A case holds "rates", a list of direct rates {"source", "target" (codes), "rate"}, and "chain", how they combine: null
 for the one direct rate, [0, 1] for chain(rates[0], rates[1]), [[0, 1], 2] for chain(chain(...), rates[2]); and

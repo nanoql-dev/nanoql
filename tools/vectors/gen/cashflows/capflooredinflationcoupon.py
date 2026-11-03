@@ -11,8 +11,7 @@ yoyInflationLeg with caps and floors.
   fixingDate and indexFixing. QuantLib's effectiveCap of a fixing that isn't capped reads a member nothing set
   (capflooredinflationcoupon.cpp:127, .hpp:135), and its effectiveFloor likewise, so neither is recorded there
   (tests/NanoQL.Tests/Divergences/CappedYoYEffectiveStrikeTests.cs). Every effective strike is positive: a Black
-  optionlet struck at or below 0 is the S-cms plan's CMR5 (xxiii)
-  (tests/NanoQL.Tests/Divergences/BlackYoYBelowShiftTests.cs).
+  optionlet struck at or below 0 diverges (tests/NanoQL.Tests/Divergences/BlackYoYBelowShiftTests.cs).
 - "leg" cases: yoyInflationLeg with caps, floors or both, one value or one per coupon, a null entry leaving its coupon
   without an option, and a zero gearing, whose fixed coupon pays the spread capped and floored; the Black pricer set by
   setCouponPricer: per flow its kind ("CappedFlooredYoYInflationCoupon", "YoYInflationCoupon" or "FixedRateCoupon"),

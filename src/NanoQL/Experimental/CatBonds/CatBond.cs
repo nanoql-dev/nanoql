@@ -14,11 +14,10 @@ namespace NanoQL.Experimental;
 /// A catastrophe bond: a bond whose notional a catastrophe risk reduces, priced by simulating the risk's events.
 /// </summary>
 /// <remarks>
-/// On the bond contract's protected constructor (the S-xcr plan's XD5): a derived bond writes the leg, as
-/// <see cref="FloatingCatBond"/> does. An engine for plain bonds refuses it, as QuantLib's does with "wrong arguments
-/// type"; its engine is <see cref="MonteCarloCatBondEngine"/>, whose results carry the loss statistics QuantLib's bond
-/// keeps. An expired bond's statistics are null, which QuantLib's leaves at their last values. An extension point, as
-/// in QuantLib.
+/// On the bond contract's protected constructor: a derived bond writes the leg, as <see cref="FloatingCatBond"/> does.
+/// An engine for plain bonds refuses it, as QuantLib's does with "wrong arguments type"; its engine is
+/// <see cref="MonteCarloCatBondEngine"/>, whose results carry the loss statistics QuantLib's bond keeps. An expired
+/// bond's statistics are null, which QuantLib's leaves at their last values. An extension point, as in QuantLib.
 /// </remarks>
 [Experimental("NQL0001")]
 public class CatBond : Bond

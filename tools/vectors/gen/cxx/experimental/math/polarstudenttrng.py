@@ -3,8 +3,8 @@
 """Vectors for QuantLib's PolarStudentTRng (ql/experimental/math/polarstudenttrng.hpp), which the wheel doesn't expose,
 each output computed by the C++ harness (tools/cxx/src/experimental/math/polarstudenttrng.cpp) on QuantLib's Mersenne
 Twister: fifty draws at degrees of freedom from 0.5 to 1e3 and three seeds (QuantLib's default 0, the clock, is refused
-by nanoql, the S-xcr plan's XR4 (a), so no case takes it); and the degrees of freedom refused (0 and negative). Read
-back by tests/NanoQL.Tests/Vectors/Cxx/Experimental/Math/PolarStudentTRngCxxVectorTests.cs."""
+by nanoql, so no case takes it); and the degrees of freedom refused (0 and negative). Read back by
+tests/NanoQL.Tests/Vectors/Cxx/Experimental/Math/PolarStudentTRngCxxVectorTests.cs."""
 import os
 import sys
 

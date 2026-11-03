@@ -12,7 +12,7 @@ namespace NanoQL.Tests.Divergences;
 /// (<c>bacheliercalculator.cpp:102-114</c>, <c>:183-188</c>), and a put's alpha, N(d) − 1, rounds to 0 where N(d)
 /// rounds to 1, so a put far out of the money prices as the call: F 100, K 50, σ√T 1, D 0.95 prices 47.5 where its value
 /// is 0, and at a zero deviation an out-of-the-money put (K 99) prices 0.95. nanoql tells them apart by the payoff's
-/// type (the S-exo plan's ER5 (xxvi)). The checks: Bachelier's put formula, and QuantLib's own call through parity.
+/// type. The checks: Bachelier's put formula, and QuantLib's own call through parity.
 /// </summary>
 public class BachelierPutBranchTests
 {

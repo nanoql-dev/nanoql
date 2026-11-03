@@ -13,7 +13,7 @@ namespace NanoQL.Tests.Vectors;
 /// <summary>
 /// The AnalyticCompoundOptionEngine vectors, <c>tests/vectors/pricingengines/exotic/analyticcompoundoptionengine.json</c>:
 /// <see cref="AnalyticCompoundOptionEngine"/>'s NPV and Greeks for compound options on flat markets, the value, delta
-/// and theta within Drezner's accuracy of QuantLib's (the S-exo plan's ER7).
+/// and theta within Drezner's accuracy of QuantLib's.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class AnalyticCompoundOptionEngineVectorTests

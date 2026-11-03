@@ -26,7 +26,7 @@ namespace NanoQL.Experimental;
 /// every flow, flows on its reference date included. The implied margin is the swap's NPV over its overnight leg's BPS.
 /// </para>
 /// <para>
-/// A helper built on a tenor follows the evaluation date: re-dated for another context, it rebuilds its swap (S5R1).
+/// A helper built on a tenor follows the evaluation date: re-dated for another context, it rebuilds its swap.
 /// QuantLib's margin quote is a <see cref="double"/>.
 /// </para>
 /// </remarks>

@@ -8,11 +8,11 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// An event set's simulation from 29 February (the S-xcr plan's XR8 (xvii)): its periods take 28 February in years
-/// without one, where QuantLib throws ("day outside month (2) day-range [1,28]"). On events of 100 on 1 March 2001, 50
-/// on 15 June 2002, 70 on 28 February 2003, 30 on 1 March 2004 and 20 on 10 January 2006, covering 2001 to 2010, the
-/// simulation from 28 February 2012 to 28 February 2014 reads in QuantLib the paths (serial numbers) 40969 100,
-/// 41440 50, 41698 70; 41334 30; 41284 20; and an empty one, then none (the S-xcr run's <c>c4_facts.cpp</c>).
+/// An event set's simulation from 29 February: its periods take 28 February in years without one, where QuantLib
+/// throws ("day outside month (2) day-range [1,28]"). On events of 100 on 1 March 2001, 50 on 15 June 2002, 70 on 28
+/// February 2003, 30 on 1 March 2004 and 20 on 10 January 2006, covering 2001 to 2010, the simulation from 28 February
+/// 2012 to 28 February 2014 reads in QuantLib the paths (serial numbers) 40969 100, 41440 50, 41698 70; 41334 30;
+/// 41284 20; and an empty one, then none.
 /// </summary>
 public class EventSetTests
 {

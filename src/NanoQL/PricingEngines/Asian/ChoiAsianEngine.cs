@@ -23,22 +23,21 @@ namespace NanoQL.PricingEngines;
 /// <para>
 /// The value alone, as QuantLib's. The basket's processes are QuantLib's: each fixing's forward as the spot, zero rates,
 /// and a constant volatility scaled to the last fixing's time; the basket priced by <see cref="ChoiBasketEngine"/>
-/// with QuantLib's λ and integration steps (the S-bar plan's SD16).
+/// with QuantLib's λ and integration steps.
 /// </para>
 /// <para>
-/// Documented divergences (the S-bar plan's BR5, BR7). A seasoned option reads its correlations and volatilities at the
-/// future average's own strike, K_f = (K − A/m)·m/f for f of m fixings to come, so it prices as (f/m) times the
-/// unseasoned option at K_f, where QuantLib reads its correlations at K − A/m and its volatilities at K, −2.6% to
-/// +306% off on a smile varying with maturity (BR5 (xxx), <c>Divergences/SeasonedAsianSmileTests.cs</c>). An effective
-/// strike below zero is the certain exercise, priced as Turnbull and Wakeman's engine prices it, its value alone, where
-/// QuantLib refuses it (BR7 (a), <c>Divergences/ChoiCertainExerciseTests.cs</c>). Its times run on the engine's clock,
-/// <see cref="FdmBlackScholesOp.Clock"/>, where QuantLib takes them from the process (BR5 (xxvi)).
+/// Documented divergences. A seasoned option reads its correlations and volatilities at the future average's own
+/// strike, K_f = (K − A/m)·m/f for f of m fixings to come, so it prices as (f/m) times the unseasoned option at K_f,
+/// where QuantLib reads its correlations at K − A/m and its volatilities at K, −2.6% to +306% off on a smile varying
+/// with maturity (<c>Divergences/SeasonedAsianSmileTests.cs</c>). An effective strike below zero is the certain
+/// exercise, priced as Turnbull and Wakeman's engine prices it, its value alone, where QuantLib refuses it
+/// (<c>Divergences/ChoiCertainExerciseTests.cs</c>). Its times run on the engine's clock,
+/// <see cref="FdmBlackScholesOp.Clock"/>, where QuantLib takes them from the process.
 /// </para>
 /// <para>
 /// A fixing dated from the evaluation date to the latest structure's date, where the structures settle after the
 /// evaluation date, is taken there, the spot with no variance and no discount accrued, so as a past fixing at the spot
-/// (the S-bar code review's B3-1 and B3-2, <c>Divergences/AsianLateSettlementTests.cs</c>), where QuantLib refuses it
-/// as past.
+/// (<c>Divergences/AsianLateSettlementTests.cs</c>), where QuantLib refuses it as past.
 /// </para>
 /// </remarks>
 public static class ChoiAsianEngine
@@ -157,8 +156,8 @@ public static class ChoiAsianEngine
         YieldTermStructure qTS = process.DividendYield;
         if (!(strike >= 0.0))
         {
-            // the certain exercise, Turnbull and Wakeman's value (BR7 (a)), where QuantLib refuses "effective strike
-            // should to be positive"
+            // the certain exercise, Turnbull and Wakeman's value, where QuantLib refuses "effective strike should to be
+            // positive"
             if (payoff.OptionType == OptionType.Put)
             {
                 return 0.0;
@@ -175,8 +174,8 @@ public static class ChoiAsianEngine
             return rTS.Discount(exerciseDate) * (sAHat - payoff.Strike);
         }
 
-        // the future average's own strike, where the smile is read (BR5 (xxx)), where QuantLib reads its correlations
-        // at K − A/m and its volatilities at K
+        // the future average's own strike, where the smile is read, where QuantLib reads its correlations at K − A/m
+        // and its volatilities at K
         double futureStrike = strike * (pastFixings + futureFixings) / futureFixings;
 
         BlackVolTermStructure volTS = process.BlackVolatility;

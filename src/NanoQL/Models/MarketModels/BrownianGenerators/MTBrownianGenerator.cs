@@ -14,9 +14,9 @@ namespace NanoQL.Models;
 /// times the steps, drawn eagerly, each step's slice turned into Gaussian variates by the inverse cumulative normal.
 /// </summary>
 /// <remarks>
-/// A working type (the S-hes plan's HR3 (iv)). Its seed is explicit, in [1, 4294967295]: QuantLib's seed 0, which draws
-/// a seed from the clock, is refused, as <see cref="MersenneTwisterUniformRng"/> refuses it. A step's output length
-/// and a path's exhaustion are checked always, QuantLib's extra-safety checks.
+/// A working type. Its seed is explicit, in [1, 4294967295]: QuantLib's seed 0, which draws a seed from the clock, is
+/// refused, as <see cref="MersenneTwisterUniformRng"/> refuses it. A step's output length and a path's exhaustion are
+/// checked always, QuantLib's extra-safety checks.
 /// </remarks>
 [WorkingType]
 public sealed class MTBrownianGenerator : BrownianGenerator

@@ -11,9 +11,9 @@ namespace NanoQL.Tests.TestSuite;
 
 /// <summary>
 /// QuantLib's commodity unit-of-measure cases. <c>testDirect</c> builds its "actual" conversions the right way round
-/// for the two known factors QuantLib stores backward (the S-xrt plan's XRR4): one gallon is 3.78541 litres and one
-/// thousand-barrel 42,000 gallons, so 1,000 litres are 264.17 gallons and 1,000 MB 42,000,000 gallons, where QuantLib's
-/// case asserts 3,785.41 and 2.381e-2 (kept beside in <c>Divergences/CommodityKnownFactorsTests.cs</c>).
+/// for the two known factors QuantLib stores backward: one gallon is 3.78541 litres and one thousand-barrel 42,000
+/// gallons, so 1,000 litres are 264.17 gallons and 1,000 MB 42,000,000 gallons, where QuantLib's case asserts 3,785.41
+/// and 2.381e-2 (kept beside in <c>Divergences/CommodityKnownFactorsTests.cs</c>).
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class CommodityUnitOfMeasureTests
@@ -67,7 +67,7 @@ public class CommodityUnitOfMeasureTests
             .Convert(new Quantity(none, new KilolitreUnitOfMeasure(), 1000));
         Assert.True(QuantityFunctions.Close(calc, actual, context), Message("BBL to KiloLitre", actual, calc));
 
-        // MB to Gallon: one thousand-barrel is 42,000 gallons (XRR4; QuantLib's (GAL, MB, 42000))
+        // MB to Gallon: one thousand-barrel is 42,000 gallons (QuantLib's (GAL, MB, 42000))
         actual = new UnitOfMeasureConversion(none, new MBUnitOfMeasure(), new GallonUnitOfMeasure(), 42000)
             .Convert(new Quantity(none, new MBUnitOfMeasure(), 1000));
         calc = uomManager.Lookup(
@@ -75,7 +75,7 @@ public class CommodityUnitOfMeasureTests
             .Convert(new Quantity(none, new MBUnitOfMeasure(), 1000));
         Assert.True(QuantityFunctions.Close(calc, actual, context), Message("MB to Gallon", actual, calc));
 
-        // Gallon to Litre: one gallon is 3.78541 litres (XRR4; QuantLib's (l, GAL, 3.78541))
+        // Gallon to Litre: one gallon is 3.78541 litres (QuantLib's (l, GAL, 3.78541))
         actual = new UnitOfMeasureConversion(none, new GallonUnitOfMeasure(), new LitreUnitOfMeasure(), 3.78541)
             .Convert(new Quantity(none, new LitreUnitOfMeasure(), 1000));
         calc = uomManager.Lookup(

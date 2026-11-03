@@ -9,9 +9,8 @@ using static NanoQL.Tests.Conventions.CommodityMarkets;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The commodities' conventions (the S-xrt plan's XRR1 and XRR5 (v)): the context's three fields and their defaults,
-/// <see cref="Quantity"/>'s operators without a context, the delivery schedules refused, and the refusals' types and
-/// texts.
+/// The commodities' conventions: the context's three fields and their defaults, <see cref="Quantity"/>'s operators
+/// without a context, the delivery schedules refused, and the refusals' types and texts.
 /// </summary>
 public class CommodityConventionTests
 {
@@ -120,7 +119,7 @@ public class CommodityConventionTests
     [InlineData(EnergyCommodityDeliverySchedule.Yearly)]
     public void ADeliveryScheduleOtherThanMonthlyOrDailyIsRefused(EnergyCommodityDeliverySchedule schedule)
     {
-        // QuantLib returns no period, and its swaps then refuse "no pricing periods" or price as expired (XRR5 (v))
+        // QuantLib returns no period, and its swaps then refuse "no pricing periods" or price as expired
         var e = Assert.Throws<NanoQLException>(() => CommodityPricingHelperFunctions.CreatePricingPeriods(
             Today, Today + 90, TenBarrels, schedule, EnergyCommodityQuantityPeriodicity.PerWeek,
             new PaymentTerm("Pricing end", PaymentTermEventType.PricingDate, 0, new NullCalendar())));

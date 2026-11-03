@@ -12,7 +12,7 @@ using NanoQL.Numerics;
 namespace NanoQL.Methods;
 
 /// <summary>A mesher composed of one one-dimensional mesher per direction.</summary>
-/// <remarks>Immutable once built (the S-eq plan's SEQR1).</remarks>
+/// <remarks>Immutable once built.</remarks>
 public sealed class FdmMesherComposite : FdmMesher
 {
     private readonly ImmutableArray<Fdm1dMesher> mesher;

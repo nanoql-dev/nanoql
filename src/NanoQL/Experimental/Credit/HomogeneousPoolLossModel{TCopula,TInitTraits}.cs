@@ -20,10 +20,9 @@ namespace NanoQL.Experimental;
 /// <remarks>
 /// <para>
 /// The losses are split into buckets from 0 to the tranche's detachment, the atoms at their buckets' left edges, and
-/// the expected tranche loss is a left Riemann sum of the excess probability: QuantLib's design, kept (the S-xcr plan's
-/// XR8 (xxxv)), 3% above the recursive model's exact value on a [3%, 6%] tranche at 200 buckets and converging with
-/// the bucket count. Bound to a basket with realized defaults, the model prices its live names over the restated
-/// tranche (XR8 (ii)).
+/// the expected tranche loss is a left Riemann sum of the excess probability: QuantLib's design, kept, 3% above the
+/// recursive model's exact value on a [3%, 6%] tranche at 200 buckets and converging with the bucket count. Bound to a
+/// basket with realized defaults, the model prices its live names over the restated tranche.
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]

@@ -10,14 +10,13 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The default-probability traits' model-aware members (the S-xcr plan's XR3 (c)) and the hazard and density bases'
-/// default survival (XR3 (a)). The members are additive: a user's traits that leave them out compile and bootstrap
-/// unchanged, and refuse a model; the affine traits refuse a curve without one. A piecewise curve on the affine traits
-/// reprices its helpers, and the interpolated affine curve on its nodes is that curve. The bases integrate with
-/// QuantLib's 48-point Gauss-Chebyshev rule: on a hazard rate of 0.02 + 0.01t and a density of 0.03e^(−0.03t) (Actual/365
-/// Fixed, from 31 August 2006) QuantLib reads S(0.5, 1, 5, 10) 0.9888110588521104, 0.97530555949635511,
-/// 0.79848414736582995, 0.49652325618078996 and 0.98510928189932623, 0.97044025741200013, 0.86068306487848101,
-/// 0.74077160751429916 (the S-xcr run's <c>c4_facts.cpp</c>).
+/// The default-probability traits' model-aware members and the hazard and density bases' default survival. The members
+/// are additive: a user's traits that leave them out compile and bootstrap unchanged, and refuse a model; the affine
+/// traits refuse a curve without one. A piecewise curve on the affine traits reprices its helpers, and the interpolated
+/// affine curve on its nodes is that curve. The bases integrate with QuantLib's 48-point Gauss-Chebyshev rule: on a
+/// hazard rate of 0.02 + 0.01t and a density of 0.03e^(−0.03t) (Actual/365 Fixed, from 31 August 2006) QuantLib reads
+/// S(0.5, 1, 5, 10) 0.9888110588521104, 0.97530555949635511, 0.79848414736582995, 0.49652325618078996 and
+/// 0.98510928189932623, 0.97044025741200013, 0.86068306487848101, 0.74077160751429916.
 /// </summary>
 public class AffineCreditCurveConventionTests
 {

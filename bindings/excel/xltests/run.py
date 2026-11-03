@@ -1,11 +1,10 @@
 # SPDX-FileCopyrightText: 2026 The nanoql Authors
 # SPDX-License-Identifier: Apache-2.0
-"""The in-Excel suite's wrapper (docs/excel.md, XLD18):
-python -I bindings/excel/xltests/run.py [--python <interpreter>] [dotnet test arguments]
-python -I bindings/excel/xltests/run.py --self-test
+"""The in-Excel suite's wrapper (docs/excel.md): python -I bindings/excel/xltests/run.py [--python <interpreter>]
+[dotnet test arguments] python -I bindings/excel/xltests/run.py --self-test
 
 Builds what the suite loads into obj/: the runtime package, then with nanoql-bind the two shipped add-ins, the test
-build (S-bind's test types and nqlxlStats), a user's add-in over Acme.Models, the experimental tests' build and the
+build (the bindings' test types and nqlxlStats), a user's add-in over Acme.Models, the experimental tests' build and the
 replayer the repro tests replay through, and the package, whose stable add-in a test loads. --python names an
 interpreter with nanoql's Python package and NumPy, which runs the swap's Python repro; without it that test is left
 out, and the run says so. When every failure of a finished run is a test Excel rejected as busy
@@ -78,7 +77,7 @@ def build():
                 "--assembly", "acme=" + os.path.join(ACME, "Acme.Models.dll"), "--out", os.path.join(ADDINS, "acme")])
     run(tool + ["--experimental", "--list", "nql=none", "--no-pack", "--out", os.path.join(ADDINS, "texp")])
     run(["dotnet", TOOL, "excel", "package", "--runtime-source", FEED, "--out", PACKAGE])
-    # The stable add-in as a user unzips it (X6).
+    # The stable add-in as a user unzips it.
     zips = [n for n in os.listdir(PACKAGE) if n.endswith("-win-x64.zip")]
     assert len(zips) == 1, zips
     with zipfile.ZipFile(os.path.join(PACKAGE, zips[0])) as z:
@@ -188,7 +187,7 @@ def summary(output):
 
 
 def passed(counts):
-    """A run's passed tests of its total, as the run's lines report them."""
+    """A run's passed tests of its total, as its lines report them."""
     return "it didn't finish" if counts is None else f"{counts[1] - counts[0]}/{counts[1]} passed"
 
 
@@ -279,13 +278,13 @@ def main():
             rc = rc or 1
     reds = [] if rc == 0 else [f"dotnet test exit {rc}"]
 
-    # The runner's instance ends once its last reference is released; any of the run's left is killed, by its identifier.
+    # The runner's instance ends once its last reference is released; any this run left is killed, by its identifier.
     deadline = time.time() + 60
     while excel_pids() - before and time.time() < deadline:
         time.sleep(1)
     for pid in sorted(excel_pids() - before):
         subprocess.run(["taskkill", "/PID", str(pid), "/F"], capture_output=True)
-        reds.append(f"the run's Excel process {pid} didn't end by itself; killed")
+        reds.append(f"this run's Excel process {pid} didn't end by itself; killed")
     if not before <= excel_pids():
         reds.append(f"Excel processes the run didn't start ended: {sorted(before - excel_pids())}")
 

@@ -21,14 +21,13 @@ namespace NanoQL.PricingEngines;
 /// <para>
 /// The method is intrinsically weak for out-of-the-money options, as QuantLib warns. The pricing and the calibration
 /// draw from the same traits; the value, its error estimate where the traits allow one, and the exercise probability
-/// among the additional results as "exerciseProbability", as QuantLib's. The calibration is one call's working state
-/// (the S-van plan's VR1).
+/// among the additional results as "exerciseProbability", as QuantLib's. The calibration is one call's working state.
 /// </para>
 /// <para>
 /// The paths run on the clock spanning every Black-Scholes process's structures, each process read on it, and the
 /// payoffs are discounted on the first process's risk-free curve at that clock's times, where QuantLib evolves every
-/// process on the first's times (the S-exo plan's ER5 (i), <c>Divergences/TwoAssetMismatchedTimesTests.cs</c>); a
-/// market on one clock keeps QuantLib's arithmetic.
+/// process on the first's times (<c>Divergences/TwoAssetMismatchedTimesTests.cs</c>); a market on one clock keeps
+/// QuantLib's arithmetic.
 /// </para>
 /// </remarks>
 public static class MCAmericanBasketEngine
@@ -52,8 +51,8 @@ public static class MCAmericanBasketEngine
     /// <param name="polynomialType">The regression basis' family.</param>
     /// <param name="seedCalibration">
     /// The calibration seed, in [1, 4294967295], or <see langword="null"/> for the Longstaff-Schwartz base's default;
-    /// QuantLib's engine takes none, and its base's default is always 4294967295, the narrowed null (the S-van plan's
-    /// VR4 (v)), which passing that seed reproduces.
+    /// QuantLib's engine takes none, and its base's default is always 4294967295, the narrowed null, which passing that
+    /// seed reproduces.
     /// </param>
     /// <returns>The option's results: the value, its error estimate, and the exercise probability.</returns>
     /// <exception cref="ArgumentNullException">An argument is <see langword="null"/>.</exception>

@@ -105,7 +105,7 @@ public abstract class CostFunction
             xx[i] += eps;
 
             // QuantLib's values returns an Array by value, so fp is always its own. A C# Values may return its argument
-            // (QuantLib's "return x;") or a buffer it reuses, which the next two lines would change: copy it (S2R1).
+            // (QuantLib's "return x;") or a buffer it reuses, which the next two lines would change: copy it.
             fp = Values(xx).Clone();
             xx[i] -= 2.0 * eps;
             fm = Values(xx);

@@ -60,11 +60,11 @@ internal static class CForms
             case "span":
                 return [new(Element(k.Element!).CType + "*", n, Element(k.Element!).CsType + "*"), new("int32_t", n + "_count", "int")];
             case "tuple":
-                // One parameter per element, in its own form (B2R3).
+                // One parameter per element, in its own form.
                 return [.. k.Items.SelectMany((item, i) => In(new CParam(ItemParam(p.Name, k, i), item, false, null)))];
             case "array" when k.Element!.Name == "tuple":
             {
-                // One array per element, a nullable one with its flags, and one count (B2R3).
+                // One array per element, a nullable one with its flags, and one count.
                 var slots = new List<CSlot>();
                 CKind tk = k.Element;
                 for (int i = 0; i < tk.Items.Count; i++)
@@ -147,7 +147,7 @@ internal static class CForms
             case "vector": return [new("double**", r, "double**"), new("int32_t*", r + "_count", "int*")];
             case "array" when k.Element!.Name is "tuple" or "tuple?":
             {
-                // One array per element, named by the element; a nullable tuple's flags; the count (B2R10).
+                // One array per element, named by the element; a nullable tuple's flags; the count.
                 CKind te = k.Element;
                 var slots = new List<CSlot>();
                 for (int i = 0; i < te.Items.Count; i++)

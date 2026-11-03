@@ -13,18 +13,18 @@ discountBondOption at sixteen points, calls and puts, a zero maturity among them
 Then setParams on a fresh model (QuantLib's model changes in place, nanoql's SetParams returns a new one), the
 parameters before and, after a call that succeeds, the parameters and the affine outputs; its refusals of too few and
 too many parameters, whose model the case doesn't read again. Then the tree: eighteen of
-tools/vectors/gen/pricingengines/swaption/treeswaptionengine.py's swaptions, European, Bermudan and American, a
-started swap and an expired one among them, priced by TreeSwaptionEngine on a G2 (a = 0.07, sigma = 0.011, b = 0.3,
-eta = 0.008, rho = -0.6) on that file's discount curve with 10 and 25 time steps, seven of them their unlagged
-twins, as that file prices them, their lagged swaps' values nanoql's discretized swaption moves (the S-cms plan's
-CMR4); QuantLib's G2 tree is its only public route to TwoFactorModel's ShortRateTree and TreeLattice2D. Then the constructor's refusals of a reversion or
-volatility that is zero, negative or NaN, or a correlation outside [-1, 1] ("<value>: invalid value").
+tools/vectors/gen/pricingengines/swaption/treeswaptionengine.py's swaptions, European, Bermudan and American, a started
+swap and an expired one among them, priced by TreeSwaptionEngine on a G2 (a = 0.07, sigma = 0.011, b = 0.3, eta = 0.008,
+rho = -0.6) on that file's discount curve with 10 and 25 time steps, seven of them their unlagged twins, as that file
+prices them, their lagged swaps' values nanoql's discretized swaption moves; QuantLib's G2 tree is its only public route
+to TwoFactorModel's ShortRateTree and TreeLattice2D. Then the constructor's refusals of a reversion or volatility that
+is zero, negative or NaN, or a correlation outside [-1, 1] ("<value>: invalid value").
 
 The models at a = 1e-9, b = 1e-9 and a = 1e-4 are generated and left out: QuantLib 1.44's sigmaP and its V, A and B
 cancel there (to 9e-9 relative in the bonds at a = 1e-4, against a 60-digit evaluation of the same formulas), and
-nanoql's are QuantLib's master's (#2885, the S-sr plan's SSR3), which move their outputs beyond the tolerance;
-upstream's new test lines and those references check them (tests/NanoQL.Tests/Divergences/G2CancellationTests.cs).
-Elsewhere the forms move the last bits only.
+nanoql's are QuantLib's master's (#2885), which move their outputs beyond the tolerance; upstream's new test lines and
+those references check them (tests/NanoQL.Tests/Divergences/G2CancellationTests.cs). Elsewhere the forms move the last
+bits only.
 
 The wheel's calls, by QuantLib-SWIG's shortratemodels.i: ql.G2(YieldTermStructureHandle, a, sigma, b, eta, rho),
 params(), termStructure(), discount(t), discountBond(now, maturity, Array), discountBondOption(type, strike, maturity,
@@ -129,7 +129,7 @@ REFUSED = [("a zero", (0.0, 0.01, 0.1, 0.01, -0.75)), ("sigma negative", (0.1, -
            ("rho above 1", (0.1, 0.01, 0.1, 0.01, 1.5)), ("rho below -1", (0.1, 0.01, 0.1, 0.01, -1.000001)),
            ("rho NaN", (0.1, 0.01, 0.1, 0.01, math.nan))]
 
-# The models SSR3's forms move beyond the tolerance, generated and left out.
+# The models the cancellation-free forms move beyond the tolerance, generated and left out.
 LEFT_OUT = {2, 6, 12}
 
 
@@ -192,7 +192,7 @@ def model_cases():
 
 def tree_cases():
     out = []
-    # the tree swaption file's kept swaptions, a moved one's unlagged twin under its own name (CMR4)
+    # the tree swaption file's kept swaptions, a moved one's unlagged twin under its own name
     for name, spec, settings in tse.tree_rows():
         if name.removesuffix(" / unlagged") not in TREE_SWAPTIONS:
             continue

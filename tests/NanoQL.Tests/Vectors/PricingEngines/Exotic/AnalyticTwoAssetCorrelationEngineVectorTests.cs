@@ -16,7 +16,7 @@ namespace NanoQL.Tests.Vectors;
 /// The AnalyticTwoAssetCorrelationEngine vectors,
 /// <c>tests/vectors/pricingengines/exotic/analytictwoassetcorrelationengine.json</c>:
 /// <see cref="AnalyticTwoAssetCorrelationEngine"/>'s NPV for European two-asset correlation calls and puts, every value
-/// within Drezner's accuracy of QuantLib's (the S-exo plan's ER7).
+/// within Drezner's accuracy of QuantLib's.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class AnalyticTwoAssetCorrelationEngineVectorTests

@@ -10,21 +10,21 @@ using static NanoQL.Tests.Conventions.CommodityMarkets;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The energy future's lots, secondary costs and quote (the S-xrt plan's XRR5 (vii), (xxxix) and (xl), fixed under R8 with
-/// Revision 69), on the S-xrt planner's probes' future: 10 units at 1.5 a unit on an index at 2 a unit.
+/// The energy future's lots, secondary costs and quote (fixed), on a future of 10 units at 1.5 a unit on an index at 2
+/// a unit.
 /// <list type="bullet">
-/// <item><description>(vii) QuantLib's quantity conversion factor already carries the index's lot and the value
-/// multiplies by it again: lot 1,000 prices 5,000,000 for (2 − 1.5) × 10 × 1,000 = 5,000 (<c>xp_c1.cpp</c>). nanoql
-/// multiplies once.</description></item>
-/// <item><description>(xxxix) QuantLib charges a unit cost converted to the base unit on the quantity in its own unit
-/// without its lots (<c>energyfuture.cpp:107-108</c>): a fee of 0.1 a unit on 10 units reads 1 in barrels, 42 in gallons
-/// and 1,000 in thousand-barrels, 1 each by hand (<c>xr_c1.cpp</c>: the future prices 4, 8,778 and 4,999,000). nanoql
-/// charges it on the base-unit quantity the value uses, lots included.</description></item>
-/// <item><description>(xl) Within QuantLib's window (the last quote date the evaluation date or the day before) QuantLib
-/// reads the evaluation date's fixing alone, so with the last fixing yesterday it refuses ("missing quote for [FIDX1]",
-/// <c>xr_c1.cpp</c>), and reads it through the index's fixing, which refuses a Saturday evaluation on a TARGET index with
-/// Friday's fixing ("January 18th, 2025 is not a valid fixing date", the run's <c>probes\xi_c1.cpp</c>). nanoql reads the
-/// stored history's entry for the evaluation date, else the day before's.</description></item>
+/// <item><description>QuantLib's quantity conversion factor already carries the index's lot and the value multiplies by
+/// it again: lot 1,000 prices 5,000,000 for (2 − 1.5) × 10 × 1,000 = 5,000. nanoql multiplies
+/// once.</description></item>
+/// <item><description>QuantLib charges a unit cost converted to the base unit on the quantity in its own unit without
+/// its lots (<c>energyfuture.cpp:107-108</c>): a fee of 0.1 a unit on 10 units reads 1 in barrels, 42 in gallons and
+/// 1,000 in thousand-barrels, 1 each by hand (the future prices 4, 8,778 and 4,999,000). nanoql charges it on the
+/// base-unit quantity the value uses, lots included.</description></item>
+/// <item><description>Within QuantLib's window (the last quote date the evaluation date or the day before) QuantLib
+/// reads the evaluation date's fixing alone, so with the last fixing yesterday it refuses ("missing quote for
+/// [FIDX1]"), and reads it through the index's fixing, which refuses a Saturday evaluation on a TARGET index with
+/// Friday's fixing ("January 18th, 2025 is not a valid fixing date"). nanoql reads the stored history's entry for the
+/// evaluation date, else the day before's.</description></item>
 /// </list>
 /// </summary>
 public class EnergyFutureTests
@@ -71,7 +71,7 @@ public class EnergyFutureTests
     [Fact]
     public void TodaysFixingQuotesTheFutureAsQuantLibs()
     {
-        // QuantLib's 4 at a fixing of 1.9 today (xr_c1.cpp's 2 less a fee of 1; here no fee)
+        // QuantLib's 4 at a fixing of 1.9 today (2 less a fee of 1; here no fee)
         CommodityIndex index = Index(new BarrelUnitOfMeasure(), 2.0, 1.0, "IDXTDAY");
         EvaluationContext context = WithFixing(WithFixing(Context(), index, 2.2, Today - 1), index, 1.9, Today);
         Assert.Equal((1.9 - 1.5) * 10.0, Future(index, new BarrelUnitOfMeasure(), null).Calculate(context).NPV!.Value, 1e-12 * 4.0);

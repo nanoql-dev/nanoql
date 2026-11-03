@@ -11,12 +11,11 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The two-asset barrier engine's exercise (the S-bar code review's B1-3). QuantLib's engine never reads the exercise's
-/// type and prices any exercise to its last date: a down-and-out call struck at 100 on the first asset (spot 100, r 5%,
-/// q 1%, σ 20%), barrier 90 on the second (q 2%, σ 30%), ρ 0.5, over a year prices 4.219587870592 for an American
-/// exercise, its European value (the review's <c>r14_exercise_ql.py</c>). nanoql refuses a non-European exercise, as the
-/// family's European engines do: the formula prices a European exercise only. The European value stands, within ER7's
-/// measured 3.3e-5 of QuantLib's (West's bivariate normal for Drezner's).
+/// The two-asset barrier engine's exercise. QuantLib's engine never reads the exercise's type and prices any exercise
+/// to its last date: a down-and-out call struck at 100 on the first asset (spot 100, r 5%, q 1%, σ 20%), barrier 90 on
+/// the second (q 2%, σ 30%), ρ 0.5, over a year prices 4.219587870592 for an American exercise, its European value.
+/// nanoql refuses a non-European exercise, as the family's European engines do: the formula prices a European exercise
+/// only. The European value stands, within a measured 3.3e-5 of QuantLib's (West's bivariate normal for Drezner's).
 /// </summary>
 public class TwoAssetBarrierExerciseTests
 {

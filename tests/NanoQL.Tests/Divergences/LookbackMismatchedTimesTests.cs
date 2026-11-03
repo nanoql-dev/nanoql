@@ -11,16 +11,15 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The analytic lookback engines on structures that measure time differently (the S-bar plan's BR5 (xix), the dates
-/// class, fixed under R8). QuantLib's engines read each rate as its curve's zero rate over the risk-free curve's time,
-/// and the volatility over the same time, so on an Actual/360 risk-free curve beside an Actual/365 Fixed volatility
-/// they are off their own values on the market restated onto one clock with the same discounts by date: on spot 100, r
-/// 5% (Actual/360), q 2%, σ 25% over a year, the floating call +0.468%, the fixed call +0.599%, the partial floating
-/// call +0.435% and the partial fixed call +0.563% (the S-bar run's <c>c2_lb_facts.py</c>). nanoql reads each rate on
-/// the volatility's clock, the curve's zero rate times its own time over the volatility's, and each time on it, as the
-/// analytic barrier engine reads them. QuantLib's check: its own engine on the restated market, the risk-free rate
-/// scaled to Actual/365 Fixed so its discounts by date are unchanged, which nanoql's engines price with QuantLib's bits
-/// (the vectors).
+/// The analytic lookback engines on structures that measure time differently (fixed). QuantLib's engines read each rate
+/// as its curve's zero rate over the risk-free curve's time, and the volatility over the same time, so on an Actual/360
+/// risk-free curve beside an Actual/365 Fixed volatility they are off their own values on the market restated onto one
+/// clock with the same discounts by date: on spot 100, r 5% (Actual/360), q 2%, σ 25% over a year, the floating call
+/// +0.468%, the fixed call +0.599%, the partial floating call +0.435% and the partial fixed call +0.563%. nanoql reads
+/// each rate on the volatility's clock, the curve's zero rate times its own time over the volatility's, and each time
+/// on it, as the analytic barrier engine reads them. QuantLib's check: its own engine on the restated market, the
+/// risk-free rate scaled to Actual/365 Fixed so its discounts by date are unchanged, which nanoql's engines price with
+/// QuantLib's bits (the vectors).
 /// </summary>
 public class LookbackMismatchedTimesTests
 {

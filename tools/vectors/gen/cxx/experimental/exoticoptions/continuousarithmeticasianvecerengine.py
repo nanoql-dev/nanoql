@@ -9,10 +9,9 @@ year and two on 200 steps a side; puts, by Vecer's parity, at r = q and r != q; 
 evaluation date; other grids and step counts; the NPV. Then the refusals: an average starting before the evaluation date
 ("Seasoned Asian not yet implemented"), a grid that excludes 0 and a grid that excludes the initial point.
 
-The outputs nanoql fixes are left out (the S-xeq plan's §2.8): the process's structures share the evaluation date and
-Act/365, so the engine's clock is QuantLib's (XER5 (xxii)), and no initial point lies on a grid's upper end (XER5
-(xxi)). The process and option are tools/cxx/src/experimental/exoticoptions/continuousarithmeticasianvecerengine.cpp's.
-Read back by
+The outputs nanoql fixes are left out: the process's structures share the evaluation date and Act/365, so the engine's
+clock is QuantLib's, and no initial point lies on a grid's upper end. The process and option are
+tools/cxx/src/experimental/exoticoptions/continuousarithmeticasianvecerengine.cpp's. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Experimental/ExoticOptions/ContinuousArithmeticAsianVecerEngineCxxVectorTests.cs."""
 import os
 import sys

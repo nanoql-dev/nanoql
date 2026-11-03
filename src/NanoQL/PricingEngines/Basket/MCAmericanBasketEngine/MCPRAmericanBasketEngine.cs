@@ -16,7 +16,7 @@ namespace NanoQL.PricingEngines;
 /// <summary>
 /// <see cref="MCAmericanBasketEngine"/> on pseudo-random draws with QuantLib's default statistics: QuantLib-Python's
 /// <c>MCPRAmericanBasketEngine</c>, QuantLib's <c>MCAmericanBasketEngine&lt;PseudoRandom&gt;</c>, its calculations
-/// closed at <see cref="PseudoRandom"/> and <see cref="GeneralStatistics"/> (D12).
+/// closed at <see cref="PseudoRandom"/> and <see cref="GeneralStatistics"/>.
 /// </summary>
 public static class MCPRAmericanBasketEngine
 {
@@ -37,8 +37,8 @@ public static class MCPRAmericanBasketEngine
     /// <param name="polynomialType">The regression basis' family.</param>
     /// <param name="seedCalibration">
     /// The calibration seed, in [1, 4294967295], or <see langword="null"/> for the Longstaff-Schwartz base's default;
-    /// QuantLib's engine takes none, and its base's default is always 4294967295, the narrowed null (the S-van plan's
-    /// VR4 (v)), which passing that seed reproduces.
+    /// QuantLib's engine takes none, and its base's default is always 4294967295, the narrowed null, which passing that
+    /// seed reproduces.
     /// </param>
     /// <returns>The option's results: the value, its error estimate, and the exercise probability.</returns>
     /// <exception cref="ArgumentNullException">An argument is <see langword="null"/>.</exception>

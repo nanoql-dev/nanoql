@@ -10,10 +10,10 @@ using NanoQL.PricingEngines;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The market-model product families of the S-mmp plan's second commit: the refusals of inputs QuantLib reads past
-/// (MMPR4's refusals) beside QuantLib's own checks; the one-step products against their multi-step twins and the
-/// deflated caplets against the undeflated through the pathwise wrapper (two routes to one value); and QuantLib's
-/// <c>testPeriodAdapter</c> on quarterly rates in periods of 4 and annual rates in periods of 2 (S-mm's MR3 (i)).
+/// The market-model product families: the refusals of inputs QuantLib reads past beside QuantLib's own checks; the
+/// one-step products against their multi-step twins and the deflated caplets against the undeflated through the
+/// pathwise wrapper (two routes to one value); and QuantLib's <c>testPeriodAdapter</c> on quarterly rates in periods of
+/// 4 and annual rates in periods of 2.
 /// </summary>
 public class MarketModelProductFamilyTests
 {

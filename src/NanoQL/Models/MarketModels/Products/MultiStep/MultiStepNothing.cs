@@ -13,8 +13,8 @@ namespace NanoQL.Models;
 /// option on <see cref="MarketModelMultiProduct"/>'s callable framework, and a placeholder.
 /// </summary>
 /// <remarks>
-/// A working type (the S-mmp plan's MMPR1 (i)). Its evolution is <see cref="MultiProductMultiStep"/>'s on the given
-/// evolution's rate times, its evolution times not read, as QuantLib's.
+/// A working type. Its evolution is <see cref="MultiProductMultiStep"/>'s on the given evolution's rate times, its
+/// evolution times not read, as QuantLib's.
 /// </remarks>
 [WorkingType]
 public sealed class MultiStepNothing : MultiProductMultiStep

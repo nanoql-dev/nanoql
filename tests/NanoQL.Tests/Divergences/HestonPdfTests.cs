@@ -12,19 +12,18 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// <see cref="HestonProcess.Pdf"/>, the joint density of the log spot and the variance (a run find of S-van's C3, ruled
-/// by the user on 2026-10-24: fixed). QuantLib's (<c>hestonprocess.cpp:300-334</c>) integrates over the integrated
-/// variance up to twice a Cornish-Fisher quantile whose skew and kurtosis are finite differences of the characteristic
-/// function at a step of 1e-2: they rest on its last bits (one ulp on v moves QuantLib's value at κ 2, a quarter of a
-/// year, from −5.27 to 9.31), and the cut-off can fall where the integrand is still a fifth of its peak; and its
-/// 128-point Gauss-Laguerre rule stops near u = 500, where at short times the characteristic function hasn't decayed.
-/// nanoql inverts the log spot's characteristic function given the variance, from the integrated variance's. The
-/// checks: the log spot's marginal, the density integrated over the variance, is the log spot's density from Heston's
-/// characteristic function as QuantLib's analytic Heston engine computes it (<see cref="AnalyticHestonEngine.ChF"/>),
-/// inverted here, on a process meeting Feller's condition and one far from it, from under three weeks to a year; and
-/// where QuantLib's range holds the integrand, QuantLib's value [executed on the C++ harness and QuantLib's own
-/// functions: <c>scratchpad\c3\heston_harness\</c>, <c>scratchpad\c3\probe\heston_pdf.cpp</c>; r and q on flat
-/// Actual/365 (Fixed) curves from 15 October 2026].
+/// <see cref="HestonProcess.Pdf"/>, the joint density of the log spot and the variance (fixed). QuantLib's
+/// (<c>hestonprocess.cpp:300-334</c>) integrates over the integrated variance up to twice a Cornish-Fisher quantile
+/// whose skew and kurtosis are finite differences of the characteristic function at a step of 1e-2: they rest on its
+/// last bits (one ulp on v moves QuantLib's value at κ 2, a quarter of a year, from −5.27 to 9.31), and the cut-off can
+/// fall where the integrand is still a fifth of its peak; and its 128-point Gauss-Laguerre rule stops near u = 500,
+/// where at short times the characteristic function hasn't decayed. nanoql inverts the log spot's characteristic
+/// function given the variance, from the integrated variance's. The checks: the log spot's marginal, the density
+/// integrated over the variance, is the log spot's density from Heston's characteristic function as QuantLib's analytic
+/// Heston engine computes it (<see cref="AnalyticHestonEngine.ChF"/>), inverted here, on a process meeting Feller's
+/// condition and one far from it, from under three weeks to a year; and where QuantLib's range holds the integrand,
+/// QuantLib's value (the C++ harness and QuantLib's own functions; r and q on flat Actual/365 (Fixed) curves from 15
+/// October 2026).
 /// </summary>
 public class HestonPdfTests
 {

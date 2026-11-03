@@ -14,9 +14,8 @@ deltaAt, gammaAt, meanVarianceDeltaAt and meanVarianceGammaAt; and thetaAt at th
 cancel ("thetaPoints", tools/vectors/gen/methods/finitedifferences/solvers/fdm2dimsolver.py's rule: kept where the
 value is at most 1e4 times the theta's change over its snapshot interval).
 
-Left out (the S-hes plan's §2.10): every structure is on the risk-free curve's day counter and reference date (on
-others QuantLib reads them at the risk-free curve's times, tests/NanoQL.Tests/Divergences/
-FdHestonMismatchedTimesTests.cs).
+Left out: every structure is on the risk-free curve's day counter and reference date (on others QuantLib reads them at
+the risk-free curve's times, tests/NanoQL.Tests/Divergences/FdHestonMismatchedTimesTests.cs).
 
 A case holds the set-up spec {"process", "payoff", "exercise", "dividends", "mesher", "tGrid", "dampingSteps"}, the
 process hestonprocess.py's, the payoff and exercise tools/vectors/gen/pricingengines/vanilla/

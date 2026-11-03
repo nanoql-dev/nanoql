@@ -21,13 +21,13 @@ namespace NanoQL.PricingEngines;
 /// <para>
 /// The engine reports the value, delta, gamma and theta, the delta and gamma by central differences at 1% of the spot;
 /// the theta is <see langword="null"/> when the problem's first stopping time is time 0, as QuantLib's is. Its
-/// finite-difference working types are built inside each calculation and dropped after it (the S-eq plan's SEQR1).
+/// finite-difference working types are built inside each calculation and dropped after it.
 /// </para>
 /// <para>
 /// The exercises are timed by the swing exercise's date times (<see cref="SwingExercise.ExerciseTimes"/>), seconds
 /// included, on <see cref="FdmBlackScholesOp.Clock"/>, the maturity the last of them, where QuantLib times each by its
-/// date alone and the maturity by the last date, so that 60 half-daily exercises price as 30 daily ones (the S-van
-/// plan's VR4 (xvi)). On whole dates and where no structure is dated before the risk-free curve, QuantLib's times.
+/// date alone and the maturity by the last date, so that 60 half-daily exercises price as 30 daily ones. On whole dates
+/// and where no structure is dated before the risk-free curve, QuantLib's times.
 /// </para>
 /// </remarks>
 public static class FdSimpleBSSwingEngine
@@ -84,7 +84,7 @@ public static class FdSimpleBSSwingEngine
             throw new NanoQLException("Strike type payoff expected");
         }
 
-        // the exercise times, seconds included, on the engine's clock (VR4 (xvi)), the maturity the last of them
+        // the exercise times, seconds included, on the engine's clock, the maturity the last of them
         TermStructure clock = FdmBlackScholesOp.Clock(process);
         ImmutableArray<double> exerciseTimes = option.SwingExercise.ExerciseTimes(clock.DayCounter, clock.ReferenceDate);
         double maturity = exerciseTimes[^1];

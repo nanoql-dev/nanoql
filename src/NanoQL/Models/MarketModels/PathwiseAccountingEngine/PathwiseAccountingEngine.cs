@@ -20,23 +20,22 @@ namespace NanoQL.Models;
 /// It reads the model's pseudo-roots and displacements, and works in the discretely compounding money-market account.
 /// </para>
 /// <para>
-/// A working type (the S-mmp plan's MMPR1 (i)): it holds the caller's evolver, as QuantLib's <c>shared_ptr</c>, and
-/// steps it, so an evolver serves one engine at a time; it holds its own clone of the product and a copy of each
-/// step's pseudo-root (MMPR1 (iv)). Its buffers are sized at construction, so a path allocates nothing after a warm-up
-/// path (MMPR1 (v)).
+/// A working type: it holds the caller's evolver, as QuantLib's <c>shared_ptr</c>, and steps it, so an evolver serves
+/// one engine at a time; it holds its own clone of the product and a copy of each step's pseudo-root. Its buffers are
+/// sized at construction, so a path allocates nothing after a warm-up path.
 /// </para>
 /// <para>
-/// Three departures from QuantLib (MMPR4 (i)–(iii), documented divergences;
-/// <c>Divergences/PathwiseDeltaTests.cs</c>): the Euler drift's derivative reads the step's start forwards, where
-/// QuantLib's reads the step's end state (<c>pathwiseaccountingengine.cpp:167</c>); the rates' ratios and the drift
-/// term carry the displacement, f + d, and the drift's derivative its factor 1 − τd, where QuantLib's read f
-/// (<c>:169-170</c>, <c>:285</c>); and product i's deltas sit at P + i·R + j, where QuantLib's (i + 1)·P + j overwrites
-/// another product's deltas when P ≠ R and writes past the values when P &gt; R (<c>:306</c>). The prices are QuantLib's.
+/// Three departures from QuantLib (documented divergences; <c>Divergences/PathwiseDeltaTests.cs</c>): the Euler drift's
+/// derivative reads the step's start forwards, where QuantLib's reads the step's end state
+/// (<c>pathwiseaccountingengine.cpp:167</c>); the rates' ratios and the drift term carry the displacement, f + d, and
+/// the drift's derivative its factor 1 − τd, where QuantLib's read f (<c>:169-170</c>, <c>:285</c>); and product i's
+/// deltas sit at P + i·R + j, where QuantLib's (i + 1)·P + j overwrites another product's deltas when P ≠ R and writes
+/// past the values when P &gt; R (<c>:306</c>). The prices are QuantLib's.
 /// </para>
 /// <para>
-/// Refused (MMPR5 (a)): an evolver not in the money-market measure, which QuantLib requires and doesn't check
-/// (<c>:99</c>): the adjoint recursion is the spot measure's. Refused too, where QuantLib reads past its buffers: a
-/// product whose rates or evolution aren't the model's, and a product not finished at the evolver's last step.
+/// Refused: an evolver not in the money-market measure, which QuantLib requires and doesn't check (<c>:99</c>): the
+/// adjoint recursion is the spot measure's. Refused too, where QuantLib reads past its buffers: a product whose rates
+/// or evolution aren't the model's, and a product not finished at the evolver's last step.
 /// </para>
 /// </remarks>
 [WorkingType]
@@ -229,7 +228,7 @@ public sealed class PathwiseAccountingEngine
 
             for (int i = 0; i < numberRates; ++i)
             {
-                // the drift's derivative at the step's start (MMPR4 (i)), the rates displaced (MMPR4 (ii))
+                // the drift's derivative at the step's start, the rates displaced
                 double x = 1.0 / (1.0 + (taus[i] * lastForwards[i]));
                 stepsDiscountsSquared[storeStep, i] = x * x;
 
@@ -337,7 +336,7 @@ public sealed class PathwiseAccountingEngine
             }
         }
 
-        // write answer into values: product i's deltas at P + i·R + j (MMPR4 (iii))
+        // write answer into values: product i's deltas at P + i·R + j
         for (int i = 0; i < numberProducts; ++i)
         {
             pathValues[i] = numerairesHeld[i] * initialNumeraireValue;

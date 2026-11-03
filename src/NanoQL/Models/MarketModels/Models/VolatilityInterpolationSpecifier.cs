@@ -14,9 +14,9 @@ namespace NanoQL.Models;
 /// volatility.
 /// </summary>
 /// <remarks>
-/// Immutable (the S-mm plan's MR2 (c)): QuantLib's <c>setScalingFactors</c> and <c>setLastCapletVol</c> are
-/// <see cref="WithScalingFactors"/> and <see cref="WithLastCapletVol"/>, each returning a new specifier and leaving
-/// this one unchanged. An extension point, as in QuantLib.
+/// Immutable: QuantLib's <c>setScalingFactors</c> and <c>setLastCapletVol</c> are <see cref="WithScalingFactors"/>
+/// and <see cref="WithLastCapletVol"/>, each returning a new specifier and leaving this one unchanged. An extension
+/// point, as in QuantLib.
 /// </remarks>
 public abstract class VolatilityInterpolationSpecifier
 {

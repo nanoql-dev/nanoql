@@ -11,12 +11,12 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// A bootstrapped year-on-year volatility curve's nodes from its dates and data (the S-xrt plan's XRR2 (b): QuantLib's
-/// master's #2941, taken ahead of the pin). QuantLib 1.44's <c>nodes()</c> returns a list only the data constructor
-/// fills (<c>yoyinflationoptionletvolatilitystructure2.hpp</c>), so a <c>PiecewiseYoYOptionletVolatilityCurve</c>'s is
-/// empty: on QuantLib 1.44 (the run's <c>c2\probes\xb_nodes.cpp</c>, QuantLib's <c>testYoYPriceSurfaceToVol</c> with
-/// #2941's inspectable stripper) each of the 11 stripped curves has 0 nodes beside 8 dates and 8 data. nanoql's, as
-/// master's, are its dates with its data; #2941's own check is in <c>TestSuite/InflationVolatilityTests.cs</c>.
+/// A bootstrapped year-on-year volatility curve's nodes from its dates and data (QuantLib's master's #2941, taken ahead
+/// of the pin). QuantLib 1.44's <c>nodes()</c> returns a list only the data constructor fills
+/// (<c>yoyinflationoptionletvolatilitystructure2.hpp</c>), so a <c>PiecewiseYoYOptionletVolatilityCurve</c>'s is empty:
+/// on QuantLib 1.44 (QuantLib's <c>testYoYPriceSurfaceToVol</c> with #2941's inspectable stripper) each of the 11
+/// stripped curves has 0 nodes beside 8 dates and 8 data. nanoql's, as master's, are its dates with its data; #2941's
+/// own check is in <c>TestSuite/InflationVolatilityTests.cs</c>.
 /// </summary>
 public class PiecewiseYoYVolatilityNodesTests
 {

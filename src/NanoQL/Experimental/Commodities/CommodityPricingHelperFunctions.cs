@@ -64,7 +64,7 @@ public static class CommodityPricingHelperFunctions
     /// conversion's own <see cref="UnitOfMeasureConversion.Convert"/> of a unit quantity.</returns>
     /// <remarks>QuantLib returns the looked-up conversion's stored factor whatever its orientation, so its factor is
     /// one of the first in the second for 25 of the 30 ordered pairs of its six petroleum units and the reciprocal for
-    /// five (BBL→MB, BBL→kl, BBL→KL_tk, GAL→BBL, l→BBL; the S-xrt plan's XRR5 (i)).</remarks>
+    /// five (BBL→MB, BBL→kl, BBL→KL_tk, GAL→BBL, l→BBL).</remarks>
     /// <exception cref="ArgumentNullException">An argument is null.</exception>
     /// <exception cref="NanoQLException">No conversion is held.</exception>
     public static double CalculateUomConversionFactor(
@@ -102,7 +102,7 @@ public static class CommodityPricingHelperFunctions
     /// <remarks>QuantLib converts the cost by its lookup's stored factor between the cost's unit and the base unit,
     /// which inverts a price where that factor is stored from the cost's unit: a cost of 0.1 a thousand-barrels reads
     /// 100 a barrel there and 1e-4 here; a gallon's is stored from the barrel, so 0.1 a gallon reads 4.2 a barrel in
-    /// both (the S-xrt plan's XRR5 (i)).</remarks>
+    /// both.</remarks>
     /// <exception cref="ArgumentNullException">An argument is null.</exception>
     /// <exception cref="NanoQLException">The cost's currency or unit is QuantLib's empty one, or a conversion or rate
     /// can't be found.</exception>
@@ -152,17 +152,17 @@ public static class CommodityPricingHelperFunctions
     /// end.</returns>
     /// <remarks>
     /// <para>
-    /// A daily period's quantity is the daily quantity times its days, both ends counted: QuantLib's counts
-    /// <c>end − start</c>, one day short, 300 barrels for January at 10 a day (the S-xrt plan's XRR5 (iv),
-    /// <c>Divergences/PricingPeriodTests.cs</c>; FpML's <c>PerCalendarDay</c>, "deemed to apply once per Calendar Day").
+    /// A daily period's quantity is the daily quantity times its days, both ends counted: QuantLib's counts <c>end −
+    /// start</c>, one day short, 300 barrels for January at 10 a day (<c>Divergences/PricingPeriodTests.cs</c>; FpML's
+    /// <c>PerCalendarDay</c>, "deemed to apply once per Calendar Day").
     /// </para>
     /// <para>
     /// The other schedules are refused, where QuantLib returns no period and its swaps then refuse "no pricing
     /// periods" or price as expired: its two branches read a schedule two ways, monthly as periods of its own tenor and
     /// daily as monthly periods summing its quantity, and no QuantLib case or caller says which a weekly, quarterly or
-    /// yearly schedule means, while a constant, window or hourly one has no tenor (XRR5 (v)). A caller builds such
-    /// periods directly. A period starting on a month's last day ends the day before the same day next month (31
-    /// January to 27 February), and the last period may run past the end date, as QuantLib's.
+    /// yearly schedule means, while a constant, window or hourly one has no tenor. A caller builds such periods
+    /// directly. A period starting on a month's last day ends the day before the same day next month (31 January to 27
+    /// February), and the last period may run past the end date, as QuantLib's.
     /// </para>
     /// </remarks>
     /// <exception cref="ArgumentNullException"><paramref name="paymentTerm"/> is null.</exception>

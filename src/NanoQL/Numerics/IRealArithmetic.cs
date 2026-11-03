@@ -6,8 +6,7 @@ namespace NanoQL.Numerics;
 /// <summary>
 /// The arithmetic in which an expression of QuantLib's written once over it evaluates: <see cref="RealDouble"/>,
 /// QuantLib's own double operations and bits; <see cref="DoubleDouble"/>, about 31 digits, where double cancels; and
-/// <see cref="ExtendedDouble"/>, double's mantissa with an unbounded exponent, where double overflows (the S-hes plan's
-/// HR6 and HR11).
+/// <see cref="ExtendedDouble"/>, double's mantissa with an unbounded exponent, where double overflows.
 /// </summary>
 /// <typeparam name="T">The implementing type.</typeparam>
 /// <remarks>

@@ -27,21 +27,20 @@ namespace NanoQL.PricingEngines;
 /// <para>
 /// QuantLib's three constructors are the overloads of <see cref="Calculate(FixedVsFloatingSwap, EvaluationContext,
 /// YieldTermStructure, Func{Swaption, EvaluationContext, InstrumentResults}, DefaultProbabilityTermStructure, double,
-/// DefaultProbabilityTermStructure?, double)"/>, its volatility quote and constant volatility one overload (the S-cms
-/// plan's CMD11); with no investor curve, QuantLib's default-free one, a flat hazard rate of 1e-12 on the counterparty
-/// curve's day counter, is built per call under the context. QuantLib's loop over the fixed payment dates skips those
-/// before the counterparty curve's reference date with no end check (<c>cvaswapengine.cpp:128</c>), reading past the
-/// dates when every one is before it; here it stops at the end, and the swap is then worth its NPV (the S-cms plan's
-/// CMR5 (xvi)).
+/// DefaultProbabilityTermStructure?, double)"/>, its volatility quote and constant volatility one overload; with no
+/// investor curve, QuantLib's default-free one, a flat hazard rate of 1e-12 on the counterparty curve's day counter, is
+/// built per call under the context. QuantLib's loop over the fixed payment dates skips those before the counterparty
+/// curve's reference date with no end check (<c>cvaswapengine.cpp:128</c>), reading past the dates when every one is
+/// before it; here it stops at the end, and the swap is then worth its NPV.
 /// </para>
 /// <para>
 /// QuantLib strikes every swaptionlet and its reverse at the swap's risk-free fair rate (<c>cvaswapengine.cpp:147</c>,
 /// <c>:170</c>, <c>:179</c>), so its adjustment is the same whatever the swap's fixed rate: a swap away from par takes
 /// the at-the-money swap's CVA and DVA. Here the NPV's are struck at the swap's fixed rate, the exposure of the
-/// contract itself, which is QuantLib's within a few ulps where the fixed rate is the fair rate (C3's review, C3-O2,
-/// ruled by the user on 2026-10-24, (a)). The fair rate keeps QuantLib's: its first-order root of the adjusted NPV,
-/// taken on swaptionlets struck at the risk-free fair rate, the market's, so the same whatever the fixed rate (C3's
-/// review, C3R2-O1); on the contract's strikes it would move with the fixed rate, away from the root off par.
+/// contract itself, which is QuantLib's within a few ulps where the fixed rate is the fair rate. The fair rate keeps
+/// QuantLib's: its first-order root of the adjusted NPV, taken on swaptionlets struck at the risk-free fair rate, the
+/// market's, so the same whatever the fixed rate; on the contract's strikes it would move with the fixed rate, away
+/// from the root off par.
 /// </para>
 /// </remarks>
 public static class CounterpartyAdjSwapEngine
@@ -129,8 +128,8 @@ public static class CounterpartyAdjSwapEngine
         double baseSwapNPV = vSResults.NPV ?? throw new NanoQLException("result not available");
         SwapType reversedType = swap.Type == SwapType.Payer ? SwapType.Receiver : SwapType.Payer;
 
-        // Swaplet options summatory: struck at the swap's own rate for the NPV (C3-O2), and at QuantLib's strike, the
-        // fair rate, for the fair rate (C3R2-O1)
+        // Swaplet options summatory: struck at the swap's own rate for the NPV, and at QuantLib's strike, the fair
+        // rate, for the fair rate
         while (nextFD < fixedPayDates.Length)
         {
             // iFD coupon not fixed, create swaptionlet:

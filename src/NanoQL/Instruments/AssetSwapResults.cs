@@ -10,7 +10,7 @@ namespace NanoQL.Instruments;
 
 /// <summary>
 /// The results of an <see cref="AssetSwap"/>'s calculation: the swap's results, and the fair spread, clean price and
-/// non-par repayment derived from them (the S-cms plan's CMD6).
+/// non-par repayment derived from them.
 /// </summary>
 /// <remarks>
 /// QuantLib's <c>fairSpread()</c>, <c>fairCleanPrice()</c> and <c>fairNonParRepayment()</c> compute these from the

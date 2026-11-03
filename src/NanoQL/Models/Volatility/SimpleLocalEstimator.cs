@@ -16,8 +16,7 @@ namespace NanoQL.Models;
 /// <remarks>
 /// <para>Immutable.</para>
 /// <para>
-/// A documented divergence (the S-bar plan's BR5 (xxxv)): an empty series is refused, where QuantLib increments its
-/// begin past its end.
+/// A documented divergence: an empty series is refused, where QuantLib increments its begin past its end.
 /// </para>
 /// </remarks>
 public sealed class SimpleLocalEstimator : LocalVolatilityEstimator<double>

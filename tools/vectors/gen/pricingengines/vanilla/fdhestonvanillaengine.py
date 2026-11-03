@@ -11,13 +11,13 @@ leverage function (a constant local volatility, and a fixed local volatility sur
 grid's times and whose strikes span every spot and forward the engine reads it at), a leverage function with dividends and a quanto helper, and an
 expired option.
 
-Left out (the S-hes plan's §2.10): every structure is on the risk-free curve's day counter and reference date (on
-others QuantLib reads them at the risk-free curve's times, tests/NanoQL.Tests/Divergences/
-FdHestonMismatchedTimesTests.cs); no case has a mixed sigma over kappa above 2 (HR9,
-tests/NanoQL.Tests/Divergences/FdHestonSkewFactorTests.cs) or a variance distribution on which the variance mesher's
-quantile grid falls back (HR8, tests/NanoQL.Tests/Divergences/FdmHestonVarianceMesherFallbackTests.cs); the
+Left out: every structure is on the risk-free curve's day counter and reference date (on others QuantLib reads them at
+the risk-free curve's times, tests/NanoQL.Tests/Divergences/FdHestonMismatchedTimesTests.cs); no case has a mixed sigma
+over kappa above 2 (tests/NanoQL.Tests/Divergences/FdHestonSkewFactorTests.cs) or a variance distribution on which the
+variance mesher's quantile grid falls back (tests/NanoQL.Tests/Divergences/FdmHestonVarianceMesherFallbackTests.cs); the
 leverage surface read outside its strikes past its last time, where QuantLib's interpolator extrapolates and nanoql
-holds the volatility (the S-van plan's VR4 (xviii)); and the multiple-strikes calculation is the harness's (tools/vectors/gen/cxx/pricingengines/vanilla/fdhestonvanillaengine.py).
+holds the volatility; and the multiple-strikes calculation is the harness's
+(tools/vectors/gen/cxx/pricingengines/vanilla/fdhestonvanillaengine.py).
 
 The specs are a pricing {"process", "payoff", "exercise", "dividends", "quanto", "tGrid", "xGrid", "vGrid",
 "dampingSteps", "scheme", "leverage", "mixingFactor"}: the process hestonprocess.py's, the exercise and the scheme

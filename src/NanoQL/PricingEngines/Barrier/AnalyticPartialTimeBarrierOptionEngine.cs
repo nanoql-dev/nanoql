@@ -20,32 +20,31 @@ namespace NanoQL.PricingEngines;
 /// <para>
 /// The value alone, as QuantLib's. The bivariate normal is QuantLib's default,
 /// <see cref="BivariateCumulativeNormalDistributionWe04DP"/>, where QuantLib's engine reads Drezner's 1978 algorithm,
-/// to six decimal places (the S-bar plan's BR4 (e), the S-exo plan's ER7); on QuantLib's 40 cases the values move by at
-/// most 3.3e-5, within QuantLib's tolerance. The put's symmetric call runs on a process whose curves QuantLib's
-/// constructor call binds in each other's places, the standard put-call symmetry P(S, K, r, q) = (K/S)·C(S, S²/K, q, r),
-/// and prices a start-window knock-in's European on that call's payoff and process, upstream's fix after v1.44 (#2876,
-/// <c>Divergences/BarrierUpstreamFixesTests.cs</c>).
+/// to six decimal places; on QuantLib's 40 cases the values move by at most 3.3e-5, within QuantLib's tolerance. The
+/// put's symmetric call runs on a process whose curves QuantLib's constructor call binds in each other's places, the
+/// standard put-call symmetry P(S, K, r, q) = (K/S)·C(S, S²/K, q, r), and prices a start-window knock-in's European on
+/// that call's payoff and process, upstream's fix after v1.44 (#2876, <c>Divergences/BarrierUpstreamFixesTests.cs</c>).
 /// </para>
 /// <para>
-/// Documented divergences (BR5). Each rate is read on the volatility's clock, the curve's zero rate times its own time
-/// over the volatility's, and each time is the volatility's, as <see cref="AnalyticBarrierEngine"/> reads them, where
-/// QuantLib reads every structure at the risk-free curve's times (BR5 (i),
-/// <c>Divergences/BarrierClosedFormMismatchedTimesTests.cs</c>). A start-window knock-out's rebate, paid at the hit
+/// Documented divergences. Each rate is read on the volatility's clock, the curve's zero rate times its own time over
+/// the volatility's, and each time is the volatility's, as <see cref="AnalyticBarrierEngine"/> reads them, where
+/// QuantLib reads every structure at the risk-free curve's times
+/// (<c>Divergences/BarrierClosedFormMismatchedTimesTests.cs</c>). A start-window knock-out's rebate, paid at the hit
 /// before the cover event, is priced as the analytic barrier engine prices a knock-out's rebate to the cover event,
 /// where QuantLib's engine ignores the rebate; no formula covers the end windows' or the knock-ins' rebates, which are
-/// refused (BR5 (xii)). A cover event on the evaluation date takes the formulas' limit: the start window's, the vanilla
-/// for a knock-out and 0 for a knock-in; the end windows', the standard barrier option through the analytic barrier
-/// engine, where QuantLib's formulas take infinite arguments (BR5 (xiii)). A start-window option whose spot lies beyond
-/// the barrier is refused ("barrier touched"), as the family's other engines refuse it, where QuantLib's prices it
-/// (BR5 (xiv)). The end-window knock-ins, which QuantLib refuses, are priced by in-out parity on QuantLib's European
-/// and end-window knock-out, the parity QuantLib applies to the start window's (the S-bar plan's BR8 (a)). And a
-/// non-European exercise is refused, as the family's European engines refuse it, where QuantLib prices it to its last
-/// date and its start-window knock-in crashes (<c>Divergences/PartialTimeExerciseTests.cs</c>).
+/// refused. A cover event on the evaluation date takes the formulas' limit: the start window's, the vanilla for a
+/// knock-out and 0 for a knock-in; the end windows', the standard barrier option through the analytic barrier engine,
+/// where QuantLib's formulas take infinite arguments. A start-window option whose spot lies beyond the barrier is
+/// refused ("barrier touched"), as the family's other engines refuse it, where QuantLib's prices it. The end-window
+/// knock-ins, which QuantLib refuses, are priced by in-out parity on QuantLib's European and end-window knock-out, the
+/// parity QuantLib applies to the start window's. And a non-European exercise is refused, as the family's European
+/// engines refuse it, where QuantLib prices it to its last date and its start-window knock-in crashes
+/// (<c>Divergences/PartialTimeExerciseTests.cs</c>).
 /// </para>
 /// <para>
 /// The formulas are first-passage closed forms in equivalent-constant rates and volatilities: no exact closed form
 /// exists under general deterministic term structures, and on shaped markets they miss an independent Monte Carlo by
-/// up to +3.9% (BR4 (d)).
+/// up to +3.9%.
 /// </para>
 /// </remarks>
 public static class AnalyticPartialTimeBarrierOptionEngine
@@ -77,11 +76,11 @@ public static class AnalyticPartialTimeBarrierOptionEngine
         return option.FetchResults(new OneAssetOptionResults { NPV = Value(option, process) });
     }
 
-    // QuantLib's calculate(), with BR5 (xii)–(xiv) and BR8 (a)
+    // QuantLib's calculate(), with the class's fixes
     private static double Value(PartialTimeBarrierOption option, GeneralizedBlackScholesProcess process)
     {
         // QuantLib prices any exercise to its last date, its start-window knock-in crashing on an American one: the
-        // formulas price a European exercise only (the S-bar code review's B1-3)
+        // formulas price a European exercise only
         if (option.Exercise.Type != ExerciseType.European)
         {
             throw new NanoQLException("only european style option are supported");
@@ -109,7 +108,7 @@ public static class AnalyticPartialTimeBarrierOptionEngine
         bool down = barrierType is BarrierType.DownIn or BarrierType.DownOut;
         double barrier = option.Barrier;
 
-        // no formula reads a rebate but a start-window knock-out's (BR5 (xii))
+        // no formula reads a rebate but a start-window knock-out's
         bool startKnockOut = range == PartialBarrierRange.Start && !knockIn;
         if (option.Rebate != 0.0 && !startKnockOut)
         {
@@ -120,7 +119,7 @@ public static class AnalyticPartialTimeBarrierOptionEngine
         BlackVolTermStructure volatility = process.BlackVolatility;
         _ = volatility.BlackVol(option.CoverEventDate, payoff.Strike);
 
-        // a start-window spot beyond the barrier is already touched (BR5 (xiv))
+        // a start-window spot beyond the barrier is already touched
         if (range == PartialBarrierRange.Start && (down ? spot < barrier : spot > barrier))
         {
             throw new NanoQLException("barrier touched");
@@ -134,7 +133,7 @@ public static class AnalyticPartialTimeBarrierOptionEngine
         if (option.Rebate != 0.0)
         {
             // a start-window knock-out's rebate, paid at the hit before the cover event, as the analytic barrier engine
-            // prices a knock-out's rebate to the cover event (BR5 (xii))
+            // prices a knock-out's rebate to the cover event
             var toCover = new BarrierOption(
                 down ? BarrierType.DownOut : BarrierType.UpOut,
                 barrier,
@@ -169,10 +168,10 @@ public static class AnalyticPartialTimeBarrierOptionEngine
         return payoff.Strike / spot * call;
     }
 
-    // The limit at a cover event on the evaluation date (BR5 (xiii)): the start window monitors only the spot, so a
-    // knock-out is the vanilla and a knock-in 0 (the spot beyond the barrier refused before, BR5 (xiv)); the end
-    // windows monitor the barrier to expiry, so B1 is the standard knock-out on the spot's side of the barrier and B2 the
-    // standard knock-out on its own side, out at once with the spot beyond it; the end-window knock-ins by parity
+    // The limit at a cover event on the evaluation date: the start window monitors only the spot, so a knock-out is the
+    // vanilla and a knock-in 0 (the spot beyond the barrier refused before); the end windows monitor the barrier to
+    // expiry, so B1 is the standard knock-out on the spot's side of the barrier and B2 the standard knock-out on its
+    // own side, out at once with the spot beyond it; the end-window knock-ins by parity
     private static double CoverEventToday(
         PartialTimeBarrierOption option, GeneralizedBlackScholesProcess process, PlainVanillaPayoff payoff, double spot)
     {
@@ -213,8 +212,8 @@ public static class AnalyticPartialTimeBarrierOptionEngine
         AnalyticEuropeanEngine.Body(new VanillaOption(payoff, exercise), process, process.RiskFreeRate).NPV!.Value;
 
     // QuantLib's members on the volatility's clock: each time the volatility's, each volatility read at its date, each
-    // rate re-expressed on it (BR5 (i)). The call's process gives the rates (the put's symmetric call's, its curves in
-    // each other's places), the option's process the spot, the times and the volatilities, as in QuantLib.
+    // rate re-expressed on it. The call's process gives the rates (the put's symmetric call's, its curves in each
+    // other's places), the option's process the spot, the times and the volatilities, as in QuantLib.
     private sealed class Formulas
     {
         private readonly PartialTimeBarrierOption option;
@@ -242,7 +241,7 @@ public static class AnalyticPartialTimeBarrierOptionEngine
             t2 = volatility.TimeFromReference(option.Exercise.LastDate());
         }
 
-        // QuantLib's calculate(arguments, payoff, process), with the end-window knock-ins by parity (BR8 (a))
+        // QuantLib's calculate(arguments, payoff, process), with the end-window knock-ins by parity
         internal double Value(BarrierType barrierType, PartialBarrierRange barrierRange, double barrier, double strike)
         {
             Date lastDate = option.Exercise.LastDate();
@@ -407,7 +406,7 @@ public static class AnalyticPartialTimeBarrierOptionEngine
         private double F2(double barrier, double strike, double b) =>
             F1(barrier, strike, b) - (VolatilityAtExpiry(strike) * Math.Sqrt(t2));
 
-        // QuantLib's M, on We04DP where QuantLib's reads Dr78 (BR4 (e))
+        // QuantLib's M, on We04DP where QuantLib's reads Dr78
         private static double M(double a, double b, double rho) =>
             new BivariateCumulativeNormalDistributionWe04DP(rho).Evaluate(a, b);
 

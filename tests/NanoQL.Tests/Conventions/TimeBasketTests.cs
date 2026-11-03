@@ -8,10 +8,10 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// <see cref="TimeBasket"/> (the S-cms plan's CMD10): QuantLib's basket is a map its <c>+=</c>, <c>-=</c> and indexer
-/// change in place, the indexer inserting a zero for a date it doesn't hold (<c>timebasket.hpp</c>, its <c>std::map</c>
-/// base); nanoql's is immutable: the operators and <see cref="TimeBasket.Rebin"/> return new baskets, and the indexer
-/// reads 0 for an absent date, QuantLib's value, without adding the date.
+/// <see cref="TimeBasket"/>: QuantLib's basket is a map its <c>+=</c>, <c>-=</c> and indexer change in place, the
+/// indexer inserting a zero for a date it doesn't hold (<c>timebasket.hpp</c>, its <c>std::map</c> base); nanoql's is
+/// immutable: the operators and <see cref="TimeBasket.Rebin"/> return new baskets, and the indexer reads 0 for an
+/// absent date, QuantLib's value, without adding the date.
 /// </summary>
 public class TimeBasketTests
 {

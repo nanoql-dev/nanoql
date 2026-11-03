@@ -13,7 +13,7 @@ namespace NanoQL.Methods;
 /// variables, and a first guess of the parameters. QuantLib's <c>ParametricExercise</c>.
 /// </summary>
 /// <remarks>
-/// An extension point (U13): QuantLib's mixin base, an interface here (the playbook's renames), which
+/// An extension point: QuantLib's mixin base, an interface here (the playbook's renames), which
 /// <c>MarketModelParametricExercise</c> implements beside its node-data provider base.
 /// </remarks>
 public interface IParametricExercise

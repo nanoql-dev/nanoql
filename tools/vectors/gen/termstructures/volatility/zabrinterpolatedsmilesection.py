@@ -13,11 +13,11 @@ parameter fixed. And the refusals: an option date before the evaluation date, an
 ρ, the errors and the end criteria, the exercise date and time, the reference date, the day counter, the strike range
 and the level, and at nine strikes the volatility and the variance.
 
-**The stability filter** (the S7 plan's S7R6) runs on the outputs the fit computes, the parameters, the errors, the end
-criteria and the volatilities and variances: each section is refitted with its forward, its at-the-money volatility and
-every given volatility moved one ulp up, then down, by math.nextafter, together; then each alone, up and down; an output
-is written only where every refit leaves it within 1e-12 x max(|base|, |moved|, 1) (the end criteria where every refit
-gives the same), and the generator prints "dropped n of m outputs" per case. The full finite-difference kernel's errors,
+**The stability filter** runs on the outputs the fit computes, the parameters, the errors, the end criteria and the
+volatilities and variances: each section is refitted with its forward, its at-the-money volatility and every given
+volatility moved one ulp up, then down, by math.nextafter, together; then each alone, up and down; an output is written
+only where every refit leaves it within 1e-12 x max(|base|, |moved|, 1) (the end criteria where every refit gives the
+same), and the generator prints "dropped n of m outputs" per case. The full finite-difference kernel's errors,
 volatilities and variances are left out: its prices fail the filter at every strike
 (tools/vectors/gen/termstructures/volatility/zabrsmilesection.py), which moving the volatilities of a section with every
 parameter fixed can't show. A refused value is {"throws": true}.

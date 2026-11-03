@@ -12,18 +12,17 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The linear TSR pricer's forward on a section with an at-the-money level of its own (the S-cms plan's CMR5 (xxvii),
-/// as the user ruled on its round 2): QuantLib wraps a section without an at-the-money level at the coupon's forward
-/// and keeps one that has its own (<c>lineartsrpricer.cpp:177-181</c>), so on such a section the options price on the
-/// section's forward while the model's split and singular terms take the coupon's. S7's SABR and ZABR cubes build each
-/// section on an interpolated forward (<c>sabrswaptionvolatilitycube.hpp:1015-1029</c>): on QuantLib's cms.cpp SABR
-/// cube over a 1%–5% zero curve, a 1-year coupon fixing in 5 years has a section forward 5.7e-3 below its own, and
-/// QuantLib's TSR prices its caplet at F + 1% 1.83e-3 below QuantLib's numeric Hagan pricer and its floorlet at F − 1%
-/// 1.29e-3 above (the S-cms planner's <c>tsrwrap.cpp</c>). nanoql wraps every section at the coupon's forward, so every
-/// TSR price on those cubes moves; a matrix's sections have no at-the-money level, and the interpolated cube's carry
-/// the coupon's forward, so there the prices are QuantLib's. A ZABR section, whose own price is its kernel's, is priced
-/// through the volatility it reports. QuantLib's checks: its values on a matrix and the interpolated cube, and its
-/// numeric Hagan pricer on the SABR cube.
+/// The linear TSR pricer's forward on a section with an at-the-money level of its own: QuantLib wraps a section without
+/// an at-the-money level at the coupon's forward and keeps one that has its own (<c>lineartsrpricer.cpp:177-181</c>),
+/// so on such a section the options price on the section's forward while the model's split and singular terms take the
+/// coupon's. The SABR and ZABR cubes build each section on an interpolated forward
+/// (<c>sabrswaptionvolatilitycube.hpp:1015-1029</c>): on QuantLib's cms.cpp SABR cube over a 1%–5% zero curve, a 1-year
+/// coupon fixing in 5 years has a section forward 5.7e-3 below its own, and QuantLib's TSR prices its caplet at F + 1%
+/// 1.83e-3 below QuantLib's numeric Hagan pricer and its floorlet at F − 1% 1.29e-3 above. nanoql wraps every section
+/// at the coupon's forward, so every TSR price on those cubes moves; a matrix's sections have no at-the-money level,
+/// and the interpolated cube's carry the coupon's forward, so there the prices are QuantLib's. A ZABR section, whose
+/// own price is its kernel's, is priced through the volatility it reports. QuantLib's checks: its values on a matrix
+/// and the interpolated cube, and its numeric Hagan pricer on the SABR cube.
 /// </summary>
 public class LinearTsrSectionForwardTests
 {

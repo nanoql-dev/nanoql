@@ -12,17 +12,17 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The fixes QuantLib's master made to the barrier family after the pin, which nanoql takes (the S-bar plan's BR6),
-/// each with the master's own case. #2876 (<c>5f4811e7e</c>): a start-window knock-in put prices the European on the
-/// call payoff and process the put-call symmetry builds, where 1.44 prices the put's, so in-out parity fails off the
-/// money. #2880 (<c>ca8e70946</c>): Dr78's degenerate correlations, taken with S-exo's bivariate normal; the partial-time
-/// engine finite where d2 is near 0 on a term-structure market. #2881 (<c>014321f39</c>): double knock-outs struck
-/// outside the corridor integrate only over terminal spots inside it, and price 0 beyond the far barrier; and a
-/// one-term series at low volatility. #2883 (<c>b9bb7bedb</c>): the soft barrier against the average of single-barrier
-/// options with barriers in [L, U], by Simpson's rule over QuantLib's analytic barrier engine; the master refuses the
-/// directions Haug's form doesn't cover, which nanoql prices by the average (BR7 (b)), so the case asserts the average
-/// there too. #2878 (<c>eaeac5651</c>): the binomial barrier asset's American window bounded by <c>isOnTime</c> at both
-/// ends, so the exercise at expiry isn't skipped.
+/// The fixes QuantLib's master made to the barrier family after the pin, which nanoql takes, each with the master's own
+/// case. #2876 (<c>5f4811e7e</c>): a start-window knock-in put prices the European on the call payoff and process the
+/// put-call symmetry builds, where 1.44 prices the put's, so in-out parity fails off the money. #2880
+/// (<c>ca8e70946</c>): Dr78's degenerate correlations, taken with the bivariate normal; the partial-time engine finite
+/// where d2 is near 0 on a term-structure market. #2881 (<c>014321f39</c>): double knock-outs struck outside the
+/// corridor integrate only over terminal spots inside it, and price 0 beyond the far barrier; and a one-term series at
+/// low volatility. #2883 (<c>b9bb7bedb</c>): the soft barrier against the average of single-barrier options with
+/// barriers in [L, U], by Simpson's rule over QuantLib's analytic barrier engine; the master refuses the directions
+/// Haug's form doesn't cover, which nanoql prices by the average, so the case asserts the average there too. #2878
+/// (<c>eaeac5651</c>): the binomial barrier asset's American window bounded by <c>isOnTime</c> at both ends, so the
+/// exercise at expiry isn't skipped.
 /// </summary>
 public class BarrierUpstreamFixesTests
 {
@@ -199,7 +199,7 @@ public class BarrierUpstreamFixesTests
     public void TestSoftBarrierDirection()
     {
         // Upstream: QuantLib's master's case for #2883 (softbarrieroption.cpp's testSoftBarrierDirection), the
-        // directions it refuses asserted as the average too (BR7 (b))
+        // directions it refuses asserted as the average too
         DayCounter dc = new Actual360();
         var today = new Date(8, August, 2025);
         var context = new EvaluationContext { EvaluationDate = today };

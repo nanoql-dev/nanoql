@@ -10,8 +10,7 @@ using NanoQL.Time;
 namespace NanoQL.PricingEngines;
 
 /// <summary>
-/// The American approximations' market reads and their price of an exercise window opening after the reference date
-/// (the S-van plan's VR4 (xxvi) and VD27).
+/// The American approximations' market reads and their price of an exercise window opening after the reference date.
 /// </summary>
 /// <remarks>
 /// <para>

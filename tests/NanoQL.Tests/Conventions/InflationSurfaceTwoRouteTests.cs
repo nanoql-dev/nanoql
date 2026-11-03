@@ -13,9 +13,9 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// Two routes to the inflation surfaces' values (the S-xrt plan's §2.5): the CPI engine against its price surface read
-/// at the effective maturity's inflation periods; and each strike's stripped year-on-year curve repricing the price
-/// surface's caps or floors, through the stripper's own helpers.
+/// Two routes to the inflation surfaces' values: the CPI engine against its price surface read at the effective
+/// maturity's inflation periods; and each strike's stripped year-on-year curve repricing the price surface's caps or
+/// floors, through the stripper's own helpers.
 /// </summary>
 public class InflationSurfaceTwoRouteTests
 {

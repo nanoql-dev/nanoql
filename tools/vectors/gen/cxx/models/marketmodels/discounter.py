@@ -7,9 +7,8 @@ state of the rate times set on the forwards, in each bond as numeraire.
 Payments on every rate time, before the first, after the last and inside the last period, on products/multistep/
 multistepforwards.py's grids and on forwards rising 0.5% a period.
 
-Left out (nanoql interpolates a payment's own period where QuantLib extrapolates from the next; the S-mmp plan's MMPR4
-(ix); tests/NanoQL.Tests/Divergences/MarketModelDiscounterBracketTests.cs): payments strictly inside a period but the
-last.
+Left out (nanoql interpolates a payment's own period where QuantLib extrapolates from the next;
+tests/NanoQL.Tests/Divergences/MarketModelDiscounterBracketTests.cs): payments strictly inside a period but the last.
 
 The harness unit is tools/cxx/src/models/marketmodels/accountingengine.cpp. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Models/MarketModels/MarketModelDiscounterCxxVectorTests.cs."""

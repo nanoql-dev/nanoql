@@ -7,9 +7,9 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The pathwise engines' facts' grids: six semi-annual rates from 0.5, six unequal periods from 0.25 (the S-mmp plan's
-/// MPP7, MPP8), and the semi-annual rates paid 0.2 before their periods' ends; forwards 3% rising 0.1% a period, the
-/// evolution at every rate time but the last.
+/// The pathwise engines' facts' grids: six semi-annual rates from 0.5, six unequal periods from 0.25, and the
+/// semi-annual rates paid 0.2 before their periods' ends; forwards 3% rising 0.1% a period, the evolution at every rate
+/// time but the last.
 /// </summary>
 internal sealed class PathwiseGrid
 {

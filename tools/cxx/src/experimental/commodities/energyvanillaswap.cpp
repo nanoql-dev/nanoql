@@ -6,7 +6,7 @@
 // "fixedPriceUnit", "index", "payCurrency", "receiveCurrency", "periods", "commodityType", "secondaryCosts",
 // "payLegCurve", "receiveLegCurve", "discountCurve"}, the specs of commodityspec.hpp, the curves indexes::curve's;
 // the case's fixings are the Settings call's. It returns commodities::swapResult's, or {"throws": true}. The
-// generator prices on the base unit and currency, where QuantLib's unit factors are 1 (the S-xrt plan's §2.8).
+// generator prices on the base unit and currency, where QuantLib's unit factors are 1.
 
 #include "experimental/commodities/commodityspec.hpp"
 

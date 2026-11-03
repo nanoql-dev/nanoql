@@ -12,7 +12,7 @@ namespace NanoQL.Tests.Vectors;
 /// <summary>
 /// The GJRGARCHProcess vectors, <c>tests/vectors/processes/gjrgarchprocess.json</c>: two parameter sets on flat and zero
 /// curves under the three discretizations: size, factors, initial values, drift, diffusion and evolve, the in-place
-/// initial values and evolve read against the same outputs (the S-hes plan's HR2).
+/// initial values and evolve read against the same outputs.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class GJRGARCHProcessVectorTests

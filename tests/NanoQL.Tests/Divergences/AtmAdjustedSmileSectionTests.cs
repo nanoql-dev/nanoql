@@ -7,13 +7,13 @@ using static NanoQL.PricingEngines.BlackFormulaFunctions;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The ATM-adjusted section's prices (the S-g1d plan's G1R6 (xxiii)): QuantLib's option price, digital, vega and
-/// density are the source's at the adjusted strike (<c>atmadjustedsmilesection.hpp:49-69</c>), priced on the source's
-/// forward, while the section's level is the given one and its volatility the source's recentred: without recentering
-/// every price ignores the level it reports, and with it the prices agree with the section's own level and volatility
-/// only under Bachelier's formula. On the harness, over a SABR smile at a forward of 2% shifted by 1% with an exercise
-/// time of 2, a section at a level of 2.5% prices a call at 1% at 0.010130320486628017, the source's, and recentred a
-/// call at 2.5% at 0.002100781256289137, the source's at 2%. nanoql prices on the section's own level and volatility, as
+/// The ATM-adjusted section's prices: QuantLib's option price, digital, vega and density are the source's at the
+/// adjusted strike (<c>atmadjustedsmilesection.hpp:49-69</c>), priced on the source's forward, while the section's
+/// level is the given one and its volatility the source's recentred: without recentering every price ignores the level
+/// it reports, and with it the prices agree with the section's own level and volatility only under Bachelier's formula.
+/// On the harness, over a SABR smile at a forward of 2% shifted by 1% with an exercise time of 2, a section at a level
+/// of 2.5% prices a call at 1% at 0.010130320486628017, the source's, and recentred a call at 2.5% at
+/// 0.002100781256289137, the source's at 2%. nanoql prices on the section's own level and volatility, as
 /// AtmSmileSection does. QuantLib's check: its own SmileSection formulas on that level and volatility.
 /// </summary>
 public class AtmAdjustedSmileSectionTests

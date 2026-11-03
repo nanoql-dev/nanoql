@@ -17,9 +17,9 @@ namespace NanoQL.Experimental;
 /// <remarks>
 /// The two indexes must share their fixing days and calendar, currency, day counter, and fixed leg's tenor and
 /// convention; the index takes the first one's tenor, fixing days, currency, calendar and day counter. Its name is
-/// QuantLib's, "&lt;name₁&gt;(&lt;gearing₁&gt;) + &lt;name₂&gt;(&lt;gearing₂&gt;)", each gearing to four decimals (the
-/// S-g1d plan's G1D8). It stores no fixings of its own: a past fixing is the two indexes' past fixings combined.
-/// Immutable. Experimental, as in QuantLib.
+/// QuantLib's, "&lt;name₁&gt;(&lt;gearing₁&gt;) + &lt;name₂&gt;(&lt;gearing₂&gt;)", each gearing to four decimals. It
+/// stores no fixings of its own: a past fixing is the two indexes' past fixings combined. Immutable. Experimental, as
+/// in QuantLib.
 /// </remarks>
 [Experimental("NQL0001")]
 public sealed class SwapSpreadIndex : InterestRateIndex

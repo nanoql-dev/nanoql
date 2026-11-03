@@ -13,7 +13,7 @@ namespace NanoQL.Tests.Vectors;
 /// The AnalyticGJRGARCHEngine vectors, <c>tests/vectors/pricingengines/vanilla/analyticgjrgarchengine.json</c>: four
 /// GJR-GARCH models on a flat and a zero risk-free curve, the NPVs of calls and puts at six strikes and five maturities,
 /// each priced through one engine object, its moments' memo warm, and through the static <c>Calculate</c>, a fresh
-/// engine, bit for bit (the S-hes plan's HR4 (iv)).
+/// engine, bit for bit.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class AnalyticGJRGARCHEngineVectorTests

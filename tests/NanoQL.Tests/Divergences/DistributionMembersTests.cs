@@ -6,13 +6,12 @@ using NanoQL.Experimental;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// Distribution's members on its own density, uniform within each bucket (the S-xcr plan's XR8 (xx)), and the unused
-/// classes' slips (XR8 (xxvii)), each checked against its closed form. QuantLib's values are the S-xcr run's
-/// <c>c2_facts.cpp</c>: on a uniform of ten buckets over [0, 10] its shortfalls read 5.625 and 9 for 5.25 and 9.5, and
-/// its tranche on [2, 5] keeps a probability of 0.6, its shortfall reading the tranche's 3 at 0.5 to 0.99 (the S-xcr
-/// code review's C2 O1-1); its cumulative density in the first bucket reads index −1
-/// (<c>distribution.cpp:228</c>), its convolution assigns where it adds, its binomial distribution reads a member it
-/// never sets, and its binomial probability of at least 0 events wraps to 0.
+/// Distribution's members on its own density, uniform within each bucket, and the unused classes' slips, each checked
+/// against its closed form. QuantLib's values: on a uniform of ten buckets over [0, 10] its shortfalls read 5.625 and 9
+/// for 5.25 and 9.5, and its tranche on [2, 5] keeps a probability of 0.6, its shortfall reading the tranche's 3 at 0.5
+/// to 0.99; its cumulative density in the first bucket reads index −1 (<c>distribution.cpp:228</c>), its convolution
+/// assigns where it adds, its binomial distribution reads a member it never sets, and its binomial probability of at
+/// least 0 events wraps to 0.
 /// </summary>
 public class DistributionMembersTests
 {

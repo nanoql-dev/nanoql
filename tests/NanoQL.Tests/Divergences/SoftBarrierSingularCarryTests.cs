@@ -11,13 +11,12 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The soft barrier at Haug's singular carries (the S-bar plan's BR5 (x), fixed under R8). Haug's term 1 divides by
-/// 2(μ + ½), zero at b = −σ² (<c>analyticsoftbarrierengine.cpp:141-142</c>): 47.207 at r 0, q 4%, σ 20% where both sides
-/// give 1.37353; around both singular points, b = 0 and b = −σ², its double cancels beyond R7 out to about 1e-5 of the
-/// carry, and QuantLib's nudge at |r − q| &lt; 1e-10, r moved by 1e-6, is itself off by 1.2e-6 to 4.2e-6 (the planner's
-/// P13). nanoql takes the band average, the soft barrier's definition, wherever |b| or |b + σ²| is below 2e-3,
-/// superseding the nudge. Check: the band average of QuantLib's analytic barrier engine, by Simpson's rule
-/// (<see cref="SoftBarrierBandAverage"/>).
+/// The soft barrier at Haug's singular carries (fixed). Haug's term 1 divides by 2(μ + ½), zero at b = −σ²
+/// (<c>analyticsoftbarrierengine.cpp:141-142</c>): 47.207 at r 0, q 4%, σ 20% where both sides give 1.37353; around
+/// both singular points, b = 0 and b = −σ², its double cancels beyond the tolerance out to about 1e-5 of the carry, and
+/// QuantLib's nudge at |r − q| &lt; 1e-10, r moved by 1e-6, is itself off by 1.2e-6 to 4.2e-6. nanoql takes the band
+/// average, the soft barrier's definition, wherever |b| or |b + σ²| is below 2e-3, superseding the nudge. Check: the
+/// band average of QuantLib's analytic barrier engine, by Simpson's rule (<see cref="SoftBarrierBandAverage"/>).
 /// </summary>
 public class SoftBarrierSingularCarryTests
 {

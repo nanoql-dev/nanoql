@@ -12,9 +12,10 @@ using static NanoQL.Tests.Vectors.EquityInputs;
 namespace NanoQL.Tests.Vectors;
 
 /// <summary>
-/// The AnalyticComplexChooserEngine vectors, <c>tests/vectors/pricingengines/exotic/analyticcomplexchooserengine.json</c>:
-/// <see cref="AnalyticComplexChooserEngine"/>'s NPV for complex choosers on flat markets, QuantLib's fixed engine (the
-/// S-exo plan's ER6 (ii)) within Drezner's accuracy (ER7).
+/// The AnalyticComplexChooserEngine vectors,
+/// <c>tests/vectors/pricingengines/exotic/analyticcomplexchooserengine.json</c>:
+/// <see cref="AnalyticComplexChooserEngine"/>'s NPV for complex choosers on flat markets, QuantLib's fixed engine
+/// within Drezner's accuracy.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class AnalyticComplexChooserEngineVectorTests

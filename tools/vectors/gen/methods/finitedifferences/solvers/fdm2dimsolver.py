@@ -12,7 +12,7 @@ derivativeYY and derivativeXY; and thetaAt at those of them where the theta does
 Generated and left out: the theta at a point where it cancels, the value there more than 1e4 times the theta's change
 over its snapshot interval, |v|/|theta·t| with t QuantLib's 0.99·min(1/365, the first stopping time)
 (fdm2dimsolver.cpp): the theta is the difference of two rollbacks over that interval, which turns the values' agreement
-within R7 into an error that much larger.
+within the tolerance into an error that much larger.
 
 The specs are fdmg2solver.py's. The wheel's calls, by QuantLib-SWIG 1.44's fdm.i: fdmg2solver.py's set-up,
 FdmG2Op(mesher, model, 0, 1) and Fdm2DimSolver(solverDesc, schemeDesc, op), the C++ constructors; interpolateAt,

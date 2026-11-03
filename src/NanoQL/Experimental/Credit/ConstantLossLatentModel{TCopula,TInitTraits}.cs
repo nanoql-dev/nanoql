@@ -12,8 +12,7 @@ namespace NanoQL.Experimental;
 
 /// <summary>The constant-loss default latent model: each name's loss given default a deterministic constant, its
 /// recovery; integrable. QuantLib's <c>ConstantLossLatentmodel</c>.</summary>
-/// <remarks>Unsealed and immutable; restricted to a basket's live names, it keeps their recoveries (the S-xcr plan's
-/// XR2 (f)).</remarks>
+/// <remarks>Unsealed and immutable; restricted to a basket's live names, it keeps their recoveries.</remarks>
 /// <typeparam name="TCopula">The copula policy.</typeparam>
 /// <typeparam name="TInitTraits">The policy's initialization parameters.</typeparam>
 [Experimental("NQL0001")]

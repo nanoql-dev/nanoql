@@ -13,7 +13,7 @@ namespace NanoQL.Models;
 /// A swaption on a contiguous run of the rates: at the swap's start its payoff of the swap rate times the annuity, paid
 /// at the start, the path finished. It steps through every rate time up to the swap's start; mainly a test product.
 /// </summary>
-/// <remarks>A working type (the S-mmp plan's MMPR1 (i)); the payoff is shared, immutable.</remarks>
+/// <remarks>A working type; the payoff is shared, immutable.</remarks>
 [WorkingType]
 public sealed class MultiStepSwaption : MultiProductMultiStep
 {

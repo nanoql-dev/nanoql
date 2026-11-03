@@ -10,7 +10,7 @@ using static NanoQL.NumericLimits;
 namespace NanoQL.PricingEngines;
 
 // QuantLib's detail::SumExponentialsRootSolver: the root of Σ aᵢ·exp(σᵢx) − K, its function, derivatives and root.
-// Immutable: QuantLib's mutable call counters are each root solve's, returned with its root (PR6.9).
+// Immutable: QuantLib's mutable call counters are each root solve's, returned with its root.
 internal sealed class SumExponentialsRootSolver
 {
     private readonly double[] a;

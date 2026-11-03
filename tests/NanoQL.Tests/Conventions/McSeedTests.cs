@@ -13,9 +13,9 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The Monte Carlo vanilla engines' seeds (S2R4; the S-van plan's VR1 (iii)): each seed explicit, in [1, 4294967295],
-/// QuantLib's 0, a seed drawn from the clock, refused, naming the parameter; and the Longstaff-Schwartz calibration
-/// seed's default, (seed + 1768237423) mod 2³², refused where it wraps to 0, at the pricing seed 2,526,729,873.
+/// The Monte Carlo vanilla engines' seeds: each seed explicit, in [1, 4294967295], QuantLib's 0, a seed drawn from the
+/// clock, refused, naming the parameter; and the Longstaff-Schwartz calibration seed's default, (seed + 1768237423) mod
+/// 2³², refused where it wraps to 0, at the pricing seed 2,526,729,873.
 /// </summary>
 public class McSeedTests
 {

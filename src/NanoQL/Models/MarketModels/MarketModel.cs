@@ -20,14 +20,14 @@ namespace NanoQL.Models;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Immutable and thread-safe (the S-mm plan's MR1 (i)): a model may serve many evolvers on many threads, each evolver
-/// copying the pseudo-roots it reads (MR1 (iv)). A matrix read returns a copy. An extension point, as in QuantLib.
+/// Immutable and thread-safe: a model may serve many evolvers on many threads, each evolver copying the pseudo-roots it
+/// reads. A matrix read returns a copy. An extension point, as in QuantLib.
 /// </para>
 /// <para>
-/// QuantLib's covariance caches are kept (SD3, the rule on QuantLib's speed caches): each step's covariance, the
-/// pseudo-root times its transpose, and their running totals are computed once, at the first read of either, from the
-/// model's own pseudo-roots, under a lock, and every read returns a copy, so an answer is what a fresh model returns,
-/// whatever was read before and on whichever thread.
+/// QuantLib's covariance caches are kept (the rule on QuantLib's speed caches): each step's covariance, the pseudo-root
+/// times its transpose, and their running totals are computed once, at the first read of either, from the model's own
+/// pseudo-roots, under a lock, and every read returns a copy, so an answer is what a fresh model returns, whatever was
+/// read before and on whichever thread.
 /// </para>
 /// </remarks>
 public abstract class MarketModel

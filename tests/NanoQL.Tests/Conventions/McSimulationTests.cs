@@ -11,7 +11,7 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// <see cref="McSimulation{TPath, TStats}"/>'s contract (the S-sr plan's SSR1): its calculation builds a new
+/// <see cref="McSimulation{TPath, TStats}"/>'s contract: its calculation builds a new
 /// <see cref="MonteCarloModel{TPath, TStats}"/> and returns it, so one engine runs calculations in any order, each its
 /// own; the control-variate correction in QuantLib's order; and its refusals, with QuantLib's texts. The engine is
 /// <see cref="McSimulationVectorTests"/>' test-only European engine, whose values the McSimulation vectors check

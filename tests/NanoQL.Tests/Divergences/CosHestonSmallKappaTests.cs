@@ -11,15 +11,15 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The COS Heston engine's cumulants at small κt (the S-hes plan's HR7 (ix), under R8, by HR6). QuantLib's c₁ to c₄
-/// (<c>coshestonengine.cpp:177-286</c>) are expansions in e^{κt} that cancel in double as κt falls: c₄ is off by 2.7%
-/// at κt = 5e-3, c₃ by 0.23% at 1e-3, c₂ by 600% at 1e-6 and c₁ by 8e-8 at 1e-9. nanoql evaluates each below its cut
-/// (2e-3, 0.2, 0.5 and 1), where QuantLib's double first departs from the expression's exact value by more than 1e-12
-/// relative, in double-double, QuantLib's expression unchanged; below double-double's own floor (1e-9, 1e-6, 1e-3 and
-/// 5e-3) in quad-double; below quad-double's floor (1e-12, 1e-12, 5e-10 and 2e-7) by the cubic in κ through four
-/// quad-double values there; and in QuantLib's double, and so its bits, from the cut up. The check: QuantLib's
-/// expressions in Boost's <c>cpp_bin_float</c> at 100 digits, and at 250 below the double-double floors [executed at the
-/// run], QuantLib's cumulants at the cuts, and QuantLib's analytic engine.
+/// The COS Heston engine's cumulants at small κt. QuantLib's c₁ to c₄ (<c>coshestonengine.cpp:177-286</c>) are
+/// expansions in e^{κt} that cancel in double as κt falls: c₄ is off by 2.7% at κt = 5e-3, c₃ by 0.23% at 1e-3, c₂ by
+/// 600% at 1e-6 and c₁ by 8e-8 at 1e-9. nanoql evaluates each below its cut (2e-3, 0.2, 0.5 and 1), where QuantLib's
+/// double first departs from the expression's exact value by more than 1e-12 relative, in double-double, QuantLib's
+/// expression unchanged; below double-double's own floor (1e-9, 1e-6, 1e-3 and 5e-3) in quad-double; below
+/// quad-double's floor (1e-12, 1e-12, 5e-10 and 2e-7) by the cubic in κ through four quad-double values there; and in
+/// QuantLib's double, and so its bits, from the cut up. The check: QuantLib's expressions in Boost's
+/// <c>cpp_bin_float</c> at 100 digits, and at 250 below the double-double floors, QuantLib's cumulants at the cuts, and
+/// QuantLib's analytic engine.
 /// </summary>
 public class CosHestonSmallKappaTests
 {
@@ -30,7 +30,7 @@ public class CosHestonSmallKappaTests
     {
         // set 1: theta 0.04, sigma 0.3, v0 0.04, rho -0.5 at t = 1; set 2: theta 0.09, sigma 0.5, v0 0.0625, rho 0.3 at
         // t = 0.5; the reference values at kappa t, QuantLib 1.44's double beside each above the double-double floor
-        // [executed in the same probe, QuantLib's expressions in double], quad-double and the cubic below it
+        // (QuantLib's expressions in double), quad-double and the cubic below it
         foreach ((int i, (int set, double kt, double digits)[] points) in new[]
                  {
                      (1, new[]
@@ -87,7 +87,7 @@ public class CosHestonSmallKappaTests
             }
         }
 
-        // QuantLib 1.44's c1 to c4 at each one's cut on set 1 [executed through the harness's COSHestonEngine::members]
+        // QuantLib 1.44's c1 to c4 at each one's cut on set 1 (the C++ harness's COSHestonEngine::members)
         Assert.Equal(-0.01999999999999883, Engine(1, 2e-3).C1(1.0));
         Assert.Equal(0.043068529814738486, Engine(1, 0.2).C2(1.0));
         Assert.Equal(-0.009372745273513682, Engine(1, 0.5).C3(1.0));
@@ -116,7 +116,7 @@ public class CosHestonSmallKappaTests
     public void AtASmallKappaThePriceMatchesTheAnalyticEngine()
     {
         // a year's call at 100 on set 1, r = q = 3%: QuantLib 1.44's COS engine prices 6.907740835233824,
-        // 6.902453996086095, 6.901922259219731 and 6.901869044519003 [executed on the wheel], 5.7e-8 above its analytic
+        // 6.902453996086095, 6.901922259219731 and 6.901869044519003 (QuantLib-Python 1.44), 5.7e-8 above its analytic
         // engine as nanoql's, which the cumulants move only through the truncation range
         var context = new EvaluationContext { EvaluationDate = Today };
         var call = new VanillaOption(new PlainVanillaPayoff(OptionType.Call, 100.0), new EuropeanExercise(Today + 365));
@@ -125,7 +125,7 @@ public class CosHestonSmallKappaTests
                      (1e-2, 6.907740487801554), (1e-3, 6.90245360436016), (1e-4, 6.901921862817677), (1e-5, 6.9018686579504145),
                  })
         {
-            // QuantLib 1.44's analytic engine at 192 points [executed on the wheel]
+            // QuantLib 1.44's analytic engine at 192 points (QuantLib-Python 1.44)
             HestonModel model = Model(1, kappa);
             Assert.Equal(analytic, AnalyticHestonEngine.Calculate(call, context, model, 192).NPV!.Value, 1e-13);
             double cos = COSHestonEngine.Calculate(call, context, model).NPV!.Value;

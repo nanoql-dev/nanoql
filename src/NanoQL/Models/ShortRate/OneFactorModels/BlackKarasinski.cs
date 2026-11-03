@@ -24,9 +24,9 @@ namespace NanoQL.Models;
 /// <see cref="Dynamics"/> reads the fitting of a 50-step tree over the curve's maximum time, as QuantLib's does.
 /// </para>
 /// <para>
-/// Each tree owns its fitting (the S-sr plan's SSR6 (i)): a divergence, QuantLib's writing the model's one fitting
-/// parameter, so a second tree on another grid rewrites the first's, which then refuses "fitting parameter not set!"
-/// at its own times (<c>Divergences/BlackKarasinskiTreeFittingTests.cs</c>), as S-bond's Hull-White tree already does.
+/// Each tree owns its fitting: a divergence, QuantLib's writing the model's one fitting parameter, so a second tree on
+/// another grid rewrites the first's, which then refuses "fitting parameter not set!" at its own times
+/// (<c>Divergences/BlackKarasinskiTreeFittingTests.cs</c>), as the Hull-White tree already does.
 /// </para>
 /// </remarks>
 public sealed class BlackKarasinski : OneFactorModel, ITermStructureConsistentModel

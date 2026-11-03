@@ -8,9 +8,9 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The market the market-model product facts run on, the S-mmp probes' <c>common.hpp</c>: rate times t₀, t₀ + τ, …;
-/// forwards f₀ + slope · i, paid at each period's end on its accrual; discounts from 0.95; a FlatVol model on an
-/// exponential correlation (0.5, 0.2); and QuantLib's <c>simulate</c> through the accounting engine.
+/// The market the market-model product facts run on: rate times t₀, t₀ + τ, …; forwards f₀ + slope · i, paid at each
+/// period's end on its accrual; discounts from 0.95; a FlatVol model on an exponential correlation (0.5, 0.2); and
+/// QuantLib's <c>simulate</c> through the accounting engine.
 /// </summary>
 internal sealed class MarketModelProductMarket
 {

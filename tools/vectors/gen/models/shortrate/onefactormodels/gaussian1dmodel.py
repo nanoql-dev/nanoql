@@ -14,11 +14,10 @@ reference date) at three (reference date, y) points, also on a given curve; and 
 a flat 2.5%; every curve is on Actual/365 (Fixed) from the evaluation date, the model's clock, and every fixing is
 after it.
 
-Left out, each a documented divergence: a curve on another clock (the S-g1d plan's G1R6 (xvi),
-tests/NanoQL.Tests/Divergences/Gaussian1dMismatchedTimesTests.cs); flat payoff extrapolation (G1R6 (xxi)); an index
-that overrides its maturity date, whose period QuantLib 1.44 ends by the plain advance (#2848,
-Gaussian1dForwardRateEndDateTests.cs); a fixing on or before the evaluation date, which reads the context's fixings,
-Gaussian1dModelContextTests.cs's.
+Left out, each a documented divergence: a curve on another clock
+(tests/NanoQL.Tests/Divergences/Gaussian1dMismatchedTimesTests.cs); flat payoff extrapolation; an index that overrides
+its maturity date, whose period QuantLib 1.44 ends by the plain advance (#2848, Gaussian1dForwardRateEndDateTests.cs);
+a fixing on or before the evaluation date, which reads the context's fixings, Gaussian1dModelContextTests.cs's.
 
 The wheel's calls, by QuantLib-SWIG's gaussian1dmodel.i: zerobond, numeraire, forwardRate, swapRate, swapAnnuity,
 compoundedRate and zerobondOption, each forwarding to the C++ member of that name and overload. Each case's inputs

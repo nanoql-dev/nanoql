@@ -7,14 +7,13 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The coinitial Z matrix (the S-mm plan's MR3 (xxii), fixed under R8). QuantLib's
-/// <c>SwapForwardMappings::coinitialSwapZedMatrix</c> scales each row from its diagonal rightward
-/// (<c>for (Size j=i; j&lt;n; ++j)</c>, <c>swapforwardmappings.cpp:152-153</c>), the coterminal version's loop, though a
-/// coinitial swap's row is nonzero left of its diagonal, so those entries stay raw derivatives, blind to the
-/// displacement: on six semi-annual rates at 3% + 0.4% i, entry [5][0] is 0.174871 at displacements 0 and 2%, where the
-/// elasticity of S₅ + d in f₀ + d is 0.131951 and 0.146315 (the planner's MP26, <c>probes\round1.out.txt</c>). No
-/// QuantLib code calls it. nanoql scales every entry. Checks: each row is QuantLib's own <c>cmSwapZedMatrix(cs, i + 1,
-/// d)</c>'s first row, the same calls in the same order, bit for bit; and the bumped elasticity.
+/// The coinitial Z matrix (fixed). QuantLib's <c>SwapForwardMappings::coinitialSwapZedMatrix</c> scales each row from
+/// its diagonal rightward (<c>for (Size j=i; j&lt;n; ++j)</c>, <c>swapforwardmappings.cpp:152-153</c>), the coterminal
+/// version's loop, though a coinitial swap's row is nonzero left of its diagonal, so those entries stay raw
+/// derivatives, blind to the displacement: on six semi-annual rates at 3% + 0.4% i, entry [5][0] is 0.174871 at
+/// displacements 0 and 2%, where the elasticity of S₅ + d in f₀ + d is 0.131951 and 0.146315. No QuantLib code calls
+/// it. nanoql scales every entry. Checks: each row is QuantLib's own <c>cmSwapZedMatrix(cs, i + 1, d)</c>'s first row,
+/// the same calls in the same order, bit for bit; and the bumped elasticity.
 /// </summary>
 public class CoinitialZedMatrixTests
 {

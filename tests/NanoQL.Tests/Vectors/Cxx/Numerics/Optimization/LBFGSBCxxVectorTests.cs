@@ -12,7 +12,7 @@ namespace NanoQL.Tests.Vectors;
 /// The C++ harness's L-BFGS-B vectors, <c>tests/vectors/cxx/math/optimization/lbfgsb.json</c>: <see cref="LBFGSB"/>'s
 /// results on QuantLib's test problems, through the constraint's bounds and the constructor's, under QuantLib's test's
 /// end criteria and an iteration limit. Where a case ends on the stationary function value its gradient norm is left out
-/// of the file (the S-core plan's CR7 (xviii)).
+/// of the file.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class LBFGSBCxxVectorTests

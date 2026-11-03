@@ -10,10 +10,11 @@ using static NanoQL.Tests.Vectors.EquityInputs;
 namespace NanoQL.Tests.Vectors;
 
 /// <summary>
-/// The HybridHestonHullWhiteProcess harness vectors, <c>tests/vectors/cxx/processes/hybridhestonhullwhiteprocess.json</c>:
-/// two Heston processes with two forward Hull-White processes at two correlations under both discretizations: size,
-/// factors, initial values and eta, drift, diffusion, evolve, the in-place evolve read against the same outputs (the
-/// S-hes plan's HR2), and the numeraire; and the refusal of correlations whose squares sum past 1.
+/// The HybridHestonHullWhiteProcess harness vectors,
+/// <c>tests/vectors/cxx/processes/hybridhestonhullwhiteprocess.json</c>: two Heston processes with two forward
+/// Hull-White processes at two correlations under both discretizations: size, factors, initial values and eta, drift,
+/// diffusion, evolve, the in-place evolve read against the same outputs, and the numeraire; and the refusal of
+/// correlations whose squares sum past 1.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class HybridHestonHullWhiteProcessCxxVectorTests

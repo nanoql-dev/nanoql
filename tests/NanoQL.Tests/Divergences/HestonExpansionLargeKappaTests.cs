@@ -12,13 +12,12 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The LPP2 and LPP3 expansions past κt = 100 (the S-hes plan's HR11, under R8). QuantLib's coefficients
-/// (<c>hestonexpansionengine.cpp:128-720</c>) take powers of e^{κt} whose products overflow: LPP3's z₀ is inf at
-/// κt = 140, its z₁ NaN and its z₃ 0, LPP2's z₀ inf at κt = 200 and NaN from 300, so the engine prices the forward's
-/// discounted intrinsic value under the volatility's 1e-8 floor, or throws. nanoql evaluates each coefficient past its
-/// upper cut in an extended-range double, QuantLib's expression unchanged, and QuantLib's double, and so its bits, up
-/// to it. The check: QuantLib's expressions in Boost's 50-digit <c>cpp_bin_float_50</c> [executed at the run],
-/// QuantLib's analytic engine, and QuantLib's implied volatilities at κt ≤ 100.
+/// The LPP2 and LPP3 expansions past κt = 100. QuantLib's coefficients (<c>hestonexpansionengine.cpp:128-720</c>) take
+/// powers of e^{κt} whose products overflow: LPP3's z₀ is inf at κt = 140, its z₁ NaN and its z₃ 0, LPP2's z₀ inf at κt
+/// = 200 and NaN from 300, so the engine prices the forward's discounted intrinsic value under the volatility's 1e-8
+/// floor, or throws. nanoql evaluates each coefficient past its upper cut in an extended-range double, QuantLib's
+/// expression unchanged, and QuantLib's double, and so its bits, up to it. The check: QuantLib's expressions in Boost's
+/// 50-digit <c>cpp_bin_float_50</c>, QuantLib's analytic engine, and QuantLib's implied volatilities at κt ≤ 100.
 /// </summary>
 public class HestonExpansionLargeKappaTests
 {
@@ -28,9 +27,9 @@ public class HestonExpansionLargeKappaTests
     [Fact]
     public void PastTheUpperCutTheCoefficientsAreTheFiftyDigitValues()
     {
-        // QuantLib 1.44's double values [executed in the same probe, QuantLib's expressions in double]: at kappa t 140
-        // LPP3's z0 to z3 are inf, NaN, 3.4940051897423107e-05 and 0; at 200 LPP2's z0 is inf; at 300 and 600 every
-        // value below is NaN but LPP2's z1 and z2 at 300 (-0.0012365211458333332, 7.7861979166666756e-06)
+        // QuantLib 1.44's double values (QuantLib's expressions in double): at kappa t 140 LPP3's z0 to z3 are inf,
+        // NaN, 3.4940051897423107e-05 and 0; at 200 LPP2's z0 is inf; at 300 and 600 every value below is NaN but
+        // LPP2's z1 and z2 at 300 (-0.0012365211458333332, 7.7861979166666756e-06)
         foreach ((double kappa, double t, int order, int i, double digits) in new[]
                  {
                      (2.0, 70.0, 3, 0, 0.1960484488789410277485996),
@@ -65,15 +64,15 @@ public class HestonExpansionLargeKappaTests
         // QuantLib 1.44's LPP3 prices 32.480028059335794, 26.991911698395533 and 21.503795337455266 at kappa 10 over
         // twenty years, and both expansions 23.81010194224134, 16.40191973542416 and 8.99373752860698 at kappa 40 over
         // ten, the forward's discounted intrinsic values; its LPP2 throws at kappa 10 ("negative value (-nan(ind)) for
-        // inf stdDev") [executed through the harness's HestonExpansionEngine::results]. The expansions' errors against
-        // the analytic engine here: LPP2 up to 6.6e-7 relative, LPP3 up to 7.9e-8
+        // inf stdDev") (the C++ harness's HestonExpansionEngine::results). The expansions' errors against the analytic
+        // engine here: LPP2 up to 6.6e-7 relative, LPP3 up to 7.9e-8
         foreach ((double kappa, int years, double strike, double analytic) in new[]
                  {
                      (10.0, 20, 90.0, 42.133664423046774), (10.0, 20, 100.0, 39.24666073592091), (10.0, 20, 110.0, 36.60264044923597),
                      (40.0, 10, 90.0, 33.5597981528422), (40.0, 10, 100.0, 29.607252376646898), (40.0, 10, 110.0, 26.120627368108316),
                  })
         {
-            // QuantLib 1.44's analytic engine at 192 points [executed on the wheel]
+            // QuantLib 1.44's analytic engine at 192 points (QuantLib-Python 1.44)
             HestonModel model = Model(kappa);
             var call = new VanillaOption(
                 new PlainVanillaPayoff(OptionType.Call, strike), new EuropeanExercise(Today + new Period(years, TimeUnit.Years)));
@@ -90,7 +89,7 @@ public class HestonExpansionLargeKappaTests
     public void UpToTheUpperCutTheImpliedVolatilitiesAreQuantLibs()
     {
         // QuantLib 1.44's LPP2HestonExpansion and LPP3HestonExpansion at strikes 90, 100 and 110 on a forward of 100
-        // [executed through the harness's HestonExpansion::impliedVolatility]
+        // (the C++ harness's HestonExpansion::impliedVolatility)
         foreach ((double kappa, double t, double[] lpp2, double[] lpp3) in new[]
                  {
                      (2.0, 10.0, new[] { 0.19668150003959978, 0.1948194335903817, 0.19316667630409656 },

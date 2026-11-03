@@ -11,8 +11,8 @@ For each and for (t1, t2) of (0, 0.25), (0.5, 0.75) and (0.9, 1): apply, apply_d
 (and in the other one, which returns zeros), apply_mixed (zeros), solve_splitting at s = -0.01 (in the other direction,
 the vector itself) and preconditioner at s = -0.01, each on a seeded vector; and to_sparse_matrix's stored elements.
 Every structure is on the risk-free curve's day counter and reference date: on others QuantLib reads them at the
-risk-free curve's times, where nanoql reads them at their instants (the S-van plan's VR4 (xxiii);
-tests/NanoQL.Tests/Divergences/LocalVolMismatchedTimesTests.cs).
+risk-free curve's times, where nanoql reads them at their instants
+(tests/NanoQL.Tests/Divergences/LocalVolMismatchedTimesTests.cs).
 
 The specs are tools/vectors/gen/methods/finitedifferences/operators/fdmblackscholesop.py's, without a quanto helper.
 The wheel's calls, by QuantLib-SWIG 1.44: FdmBlackScholesFwdOp(mesher, process, strike, localVol,

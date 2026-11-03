@@ -10,10 +10,10 @@ Black and Garman-Kohlhagen processes), each a call and a put at three strikes (9
 the engine's one result. An expired option's NPV is QuantLib's, 0. Then the refusals: an American exercise, a
 cash-or-nothing payoff and a spot beyond the barrier ("barrier touched").
 
-The outputs nanoql fixes are left out (the S-rx plan's §2.5): every process here has positive rates and volatilities
-and one day counter and reference date, so none is at zero volatility (SRXR3 (i)), on structures dated or day-counted
-apart ((iii)) or a knock-out whose rebate has no real λ ((xv)), and no rebate is negative ((ii)). Their divergence
-facts are tests/NanoQL.Tests/Divergences/BarrierZeroVolatilityTests.cs, BarrierNegativeRebateTests.cs,
+The outputs nanoql fixes are left out: every process here has positive rates and volatilities and one day counter and
+reference date, so none is at zero volatility, on structures dated or day-counted apart or a knock-out whose rebate has
+no real λ, and no rebate is negative. Their divergence facts are
+tests/NanoQL.Tests/Divergences/BarrierZeroVolatilityTests.cs, BarrierNegativeRebateTests.cs,
 BarrierMismatchedTimesTests.cs and BarrierNegativeRateRebateTests.cs.
 
 A case holds one process, exercise, barrier type, barrier and rebate, its outputs one per payoff. The process specs

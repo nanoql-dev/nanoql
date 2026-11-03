@@ -18,10 +18,9 @@ namespace NanoQL.Experimental;
 /// <summary>The Monte Carlo engine for Himalaya options on correlated processes.</summary>
 /// <remarks>
 /// The paths step from the evaluation date to each fixing date on the clock spanning every Black-Scholes process's
-/// structures, as <see cref="MCEuropeanBasketEngine"/>'s do (the S-exo plan's ER5 (i); the S-xeq plan's XER5
-/// (xxxiii)), and the payoff is discounted on the first process's risk-free curve to the last fixing date, nothing
-/// accrued before its reference date; a market on one clock keeps QuantLib's draws and arithmetic. The seed is explicit
-/// and required (the S-xeq plan's XED3).
+/// structures, as <see cref="MCEuropeanBasketEngine"/>'s do, and the payoff is discounted on the first process's
+/// risk-free curve to the last fixing date, nothing accrued before its reference date; a market on one clock keeps
+/// QuantLib's draws and arithmetic. The seed is explicit and required.
 /// </remarks>
 [Experimental("NQL0001")]
 public static class MCHimalayaEngine

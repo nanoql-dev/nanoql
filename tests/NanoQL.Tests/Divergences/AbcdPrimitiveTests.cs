@@ -7,13 +7,13 @@ using NanoQL.TermStructures;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The abcd function's primitive at a small c (the S-g1d plan's G1R6 (x)): QuantLib's closed form divides by powers of
-/// c and cancels, so the covariance of a = 0.1, b = 0.2, d = 0.15 over the first year for fixings at 2 and 3 years
-/// reads, on the wheel, 0.41570091639483625 at c = 1e-4, 0.4112554826093383 at 1e-5, 0.26249003480977007 at 1e-6 and
-/// −2220.182821037571 at 1e-7, where its Gauss-Lobatto integral is 0.4157007, 0.4158201, 0.4158320 and 0.41583320.
-/// nanoql switches to a cancellation-free series where QuantLib's form cancels; the check is the integral of the
-/// covariance's integrand, <see cref="AbcdSquared"/>, by Gauss-Lobatto, the <c>integrals</c> cases' route, and
-/// QuantLib's bits where it doesn't cancel.
+/// The abcd function's primitive at a small c: QuantLib's closed form divides by powers of c and cancels, so the
+/// covariance of a = 0.1, b = 0.2, d = 0.15 over the first year for fixings at 2 and 3 years reads, on the wheel,
+/// 0.41570091639483625 at c = 1e-4, 0.4112554826093383 at 1e-5, 0.26249003480977007 at 1e-6 and −2220.182821037571 at
+/// 1e-7, where its Gauss-Lobatto integral is 0.4157007, 0.4158201, 0.4158320 and 0.41583320. nanoql switches to a
+/// cancellation-free series where QuantLib's form cancels; the check is the integral of the covariance's integrand,
+/// <see cref="AbcdSquared"/>, by Gauss-Lobatto, the <c>integrals</c> cases' route, and QuantLib's bits where it
+/// doesn't cancel.
 /// </summary>
 public class AbcdPrimitiveTests
 {

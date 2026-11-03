@@ -13,9 +13,9 @@ namespace NanoQL.Models;
 /// evolution's times, it fills the current exercise's values.
 /// </summary>
 /// <remarks>
-/// A working type and an extension point (U13; the S-mmp plan's MMPR1 (i), (iii), (vi)): <see cref="Reset"/> and
-/// <see cref="NextStep"/> change it, and it isn't thread-safe. <see cref="Values"/> fills a span of the current
-/// exercise's count of data, which QuantLib's resizes its caller's vector to.
+/// A working type and an extension point: <see cref="Reset"/> and <see cref="NextStep"/> change it, and it isn't
+/// thread-safe. <see cref="Values"/> fills a span of the current exercise's count of data, which QuantLib's resizes its
+/// caller's vector to.
 /// </remarks>
 [WorkingType]
 public abstract class MarketModelNodeDataProvider

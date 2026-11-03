@@ -12,12 +12,12 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The analytic GJR-GARCH engine with a dividend yield (the S-hes plan's HR7 (xxix)). QuantLib's engine prices on the
-/// rate r − q and discounts the call's payoff at r − q too (<c>analyticgjrgarchengine.cpp</c>), so its price at (r, q) is
-/// its price at (r − q, 0): a 180-day call at the money on the gjrgarchmodel test's model, r 5% and q 3%, is 3.49762, where
-/// the forward's measure gives D_q times that, 3.44608. nanoql's call is D_q times QuantLib's engine at (r − q, 0), and its
-/// put follows by parity, C − P = D_q·S − D_r·K. QuantLib's check: its engine at q = 0, where nanoql's is QuantLib's bit
-/// for bit (the engine's vectors), and parity.
+/// The analytic GJR-GARCH engine with a dividend yield. QuantLib's engine prices on the rate r − q and discounts the
+/// call's payoff at r − q too (<c>analyticgjrgarchengine.cpp</c>), so its price at (r, q) is its price at (r − q, 0): a
+/// 180-day call at the money on the gjrgarchmodel test's model, r 5% and q 3%, is 3.49762, where the forward's measure
+/// gives D_q times that, 3.44608. nanoql's call is D_q times QuantLib's engine at (r − q, 0), and its put follows by
+/// parity, C − P = D_q·S − D_r·K. QuantLib's check: its engine at q = 0, where nanoql's is QuantLib's bit for bit (the
+/// engine's vectors), and parity.
 /// </summary>
 public class AnalyticGjrGarchDividendTests
 {

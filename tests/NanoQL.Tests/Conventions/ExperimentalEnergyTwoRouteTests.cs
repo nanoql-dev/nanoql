@@ -10,10 +10,10 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// C4's two routes to one value (the S-xeq plan's §2.5): Kluge's jump model at a vanishing jump intensity against the
-/// extended Ornstein-Uhlenbeck closed form (a Black call on the lognormal spot e^X); a swing option with one exercise
-/// and one right against the European option at its date, on the same grids; and the VPP's finite-difference value at
-/// vanishing volatility against its intrinsic value by dynamic programming.
+/// Two routes to one value for the experimental energy models: Kluge's jump model at a vanishing jump intensity against
+/// the extended Ornstein-Uhlenbeck closed form (a Black call on the lognormal spot e^X); a swing option with one
+/// exercise and one right against the European option at its date, on the same grids; and the VPP's finite-difference
+/// value at vanishing volatility against its intrinsic value by dynamic programming.
 /// </summary>
 public class ExperimentalEnergyTwoRouteTests
 {

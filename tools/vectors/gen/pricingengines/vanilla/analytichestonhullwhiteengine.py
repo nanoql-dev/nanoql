@@ -10,9 +10,9 @@ Hull-White models on the risk-free curve (reversion 0.1 and 0.03, volatility 0.0
 10,000 evaluations): the NPVs of calls and puts at three strikes (0.8, 1 and 1.2 of the spot) and three maturities
 (half a year, a year and five years).
 
-Left out (the S-hes plan's §2.10): every structure is on the risk-free curve's day counter and reference date; and
-a·t below 1e-2, where nanoql takes S-van's series for QuantLib's cancelling variance offset (HR7 (xiv),
-tests/NanoQL.Tests/Divergences/AnalyticHestonHullWhiteSmallReversionTests.cs): the smallest here is 0.015.
+Left out: every structure is on the risk-free curve's day counter and reference date; and a·t below 1e-2, where
+nanoql takes a series for QuantLib's cancelling variance offset
+(tests/NanoQL.Tests/Divergences/AnalyticHestonHullWhiteSmallReversionTests.cs): the smallest here is 0.015.
 
 A case holds one process, hestonprocess.py's spec without its discretization, the Hull-White model {"a", "sigma"} on
 the risk-free curve, the engine {"integrationOrder"} or {"relTolerance", "maxEvaluations"}, its maturities in days

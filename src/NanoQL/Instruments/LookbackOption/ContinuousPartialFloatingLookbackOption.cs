@@ -17,7 +17,7 @@ namespace NanoQL.Instruments;
 /// </summary>
 /// <remarks>
 /// Immutable. Its terms are checked before they are read, where QuantLib's validation dereferences a European exercise
-/// and a floating payoff unchecked (the S-bar plan's BR5 (xxv)).
+/// and a floating payoff unchecked.
 /// </remarks>
 public sealed class ContinuousPartialFloatingLookbackOption : ContinuousFloatingLookbackOption
 {

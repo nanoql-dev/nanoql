@@ -15,8 +15,8 @@ namespace NanoQL.TermStructures;
 /// </summary>
 /// <remarks>
 /// <para>
-/// An extension point, as in QuantLib: S-van's local-volatility surface that doesn't refuse derives from it.
-/// QuantLib marks the class as untested and probably unreliable.
+/// An extension point, as in QuantLib: the local-volatility surface that doesn't refuse derives from it. QuantLib marks
+/// the class as untested and probably unreliable.
 /// </para>
 /// <para>
 /// QuantLib's surface answers its reference date, day counter and maximum date from its Black surface's, which can
@@ -29,7 +29,7 @@ namespace NanoQL.TermStructures;
 /// each measuring time from its own reference date in its own day counter. Here a curve on another day counter or
 /// reference date is read at the instant the surface's time denotes, on its own clock (between Actual/N day counters
 /// exactly, on others through the date, linear within the day); a curve that shares the surface's is read as QuantLib
-/// reads it. A documented divergence (the S-eq plan's ruling of 2026-10-20, under R8).
+/// reads it. A documented divergence.
 /// </para>
 /// </remarks>
 public class LocalVolSurface : LocalVolTermStructure

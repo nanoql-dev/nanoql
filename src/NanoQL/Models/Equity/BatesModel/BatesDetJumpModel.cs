@@ -14,7 +14,7 @@ namespace NanoQL.Models;
 /// </summary>
 /// <remarks>
 /// Its arguments are <see cref="BatesModel"/>'s eight, then κ_λ and θ_λ, both positive; its process the Bates
-/// model's, as QuantLib's (the S-hes plan's HR1 (ii)).
+/// model's, as QuantLib's.
 /// </remarks>
 public sealed class BatesDetJumpModel : BatesModel
 {

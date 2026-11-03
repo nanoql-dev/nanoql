@@ -3,7 +3,7 @@
 
 namespace NanoQL.Bind.Tests.Fixtures.Excel;
 
-/// <summary>A type only <see cref="PlateMaker"/> makes, so a list without the maker leaves it unmade (XLD34).</summary>
+/// <summary>A type only <see cref="PlateMaker"/> makes, so a list without the maker leaves it unmade.</summary>
 public sealed class Plate
 {
     internal Plate(double size) => Size = size;

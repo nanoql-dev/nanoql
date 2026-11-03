@@ -12,7 +12,7 @@ namespace NanoQL.Tests.Divergences;
 /// A year-on-year pricer with no volatility. QuantLib's <c>optionletRate</c> reads
 /// <c>capletVolatility()-&gt;baseDate()</c> before anything else (<c>inflationcouponpricer.cpp:99</c>), so its "missing
 /// optionlet volatility" check (<c>:112</c>) is unreachable and an empty handle throws "empty Handle cannot be
-/// dereferenced" on the wheel, for a fixed optionlet too (QuantLib's defect, R8). nanoql checks the volatility first,
+/// dereferenced" on the wheel, for a fixed optionlet too (QuantLib's defect). nanoql checks the volatility first,
 /// refusing every optionlet with QuantLib's own "missing optionlet volatility".
 /// </summary>
 public class YoYPricerMissingVolatilityTests

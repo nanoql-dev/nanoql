@@ -10,12 +10,12 @@ tools/vectors/gen/processes/blackscholesprocess.py, each solved for the values t
 of 15, 25 and 40%, at an accuracy of 1e-10; then with cash dividends, the finite-difference engine's values at 25%; and
 the refusals: an expired option ("option expired"), an American exercise and a value no volatility reaches.
 
-**The stability filter** (the S7R6 filter of the S7 plan): each solve is repeated with its target value moved one ulp up
-and one down (math.nextafter); a target is written only where both solves give its volatility within 1e-12 × max(1,
-|base|, |moved|), and dropped otherwise. The generator prints the dropped targets.
+**The stability filter**: each solve is repeated with its target value moved one ulp up and one down (math.nextafter); a
+target is written only where both solves give its volatility within 1e-12 × max(1, |base|, |moved|), and dropped
+otherwise. The generator prints the dropped targets.
 
-The outputs nanoql fixes are left out (the S-rx plan's §2.5): every process here has positive rates and one day counter
-and reference date, and no rebate is negative, so no solve meets SRXR3 (ii), (iii) or (xv) (round 3's O3-2).
+The outputs nanoql fixes are left out: every process here has positive rates and one day counter and reference date, and
+no rebate is negative, so no solve meets nanoql's fixes.
 
 A case holds one process, exercise, barrier and payoff, its "targets", its "dividends"
 (tools/vectors/gen/pricingengines/ vanilla/fdblackscholesvanillaengine.py's), "accuracy", "maxEvaluations", "minVol" and

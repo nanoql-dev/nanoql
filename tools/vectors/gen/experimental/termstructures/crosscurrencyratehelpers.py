@@ -14,10 +14,10 @@ overnight index with no payment frequency.
 Each case's outputs are whether the curve builds, QuantLib's refusal (a helper's or the bootstrap's) recorded as its
 throw; then the curve's dates and maximum date; each helper's earliest, maturity, latest relevant, pillar and latest
 dates; and the solved outputs: the curve's data, its discounts at 12 dates and each helper's implied quote on it. The
-stability filter of the S7 plan's S7R6 runs on each case, as in experimental/termstructures/basisswapratehelpers.py:
-a solved output is written only where moving every quote one ulp, together and alone, leaves it within
-1e-12 x max(|a|, |b|, 1); a dropped one is written null and its index listed in the inputs' "dropped". The generator
-prints "dropped n of m outputs" per case and for the file.
+stability filter runs on each case, as in experimental/termstructures/basisswapratehelpers.py: a solved output is
+written only where moving every quote one ulp, together and alone, leaves it within 1e-12 x max(|a|, |b|, 1); a
+dropped one is written null and its index listed in the inputs' "dropped". The generator prints "dropped n of m
+outputs" per case and for the file.
 
 Each case's inputs hold its settings, "curve" ({"traits": "Discount" or "ZeroYield", "dayCounter"}, built on the
 evaluation date), "helpers" (a list of {"kind": "ConstNotionalBasis", "MtMBasis" or "FixedVsFloating", "quote",

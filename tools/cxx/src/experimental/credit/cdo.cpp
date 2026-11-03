@@ -4,10 +4,10 @@
 // ql/experimental/credit/cdo.hpp, QuantLib's older CDO, which the wheel doesn't expose, on
 // experimental/credit/portfoliospec's copula and termstructures/credit/creditspec's curves, schedule and discount:
 //
-//     CDO::calculate (copula, attachment, detachment, nominals, curves, protectionSeller, schedule, premiumRate,
-//         dayCounter, recoveryRate, upfrontPremiumRate, discount, nBuckets, integrationStep ([length, units])):
-//         [NPV, premiumValue, protectionValue, fairPremium, error, nominal, isExpired]; not lgd(), which QuantLib sums
-//         onto an uninitialized value (the S-xcr plan's XR8 (xxvii))
+// CDO::calculate (copula, attachment, detachment, nominals, curves, protectionSeller, schedule, premiumRate,
+// dayCounter, recoveryRate, upfrontPremiumRate, discount, nBuckets, integrationStep ([length, units])): [NPV,
+// premiumValue, protectionValue, fairPremium, error, nominal, isExpired]; not lgd(), which QuantLib sums onto an
+// uninitialized value
 
 // MSVC's C4714, a __forceinline function left out of line, which Boost's gamma code raises at /O2: a note on
 // inlining, not on the code, so it is off here and /WX still stops on every other warning.

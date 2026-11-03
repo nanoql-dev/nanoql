@@ -9,10 +9,9 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The CMS pricers' state (the S-cms plan's CMR1 (i) and (ii)): each query builds QuantLib's <c>initialize</c> state
-/// for itself, so two queries in either order, or on any number of threads, give the same bits; and a capped or
-/// collared coupon's rate reads its three rates from one state, as QuantLib's one <c>initialize</c> serves them, with
-/// the bits of the three public calls.
+/// The CMS pricers' state: each query builds QuantLib's <c>initialize</c> state for itself, so two queries in either
+/// order, or on any number of threads, give the same bits; and a capped or collared coupon's rate reads its three rates
+/// from one state, as QuantLib's one <c>initialize</c> serves them, with the bits of the three public calls.
 /// </summary>
 public class CmsPricerStateTests
 {

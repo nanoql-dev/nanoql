@@ -10,8 +10,8 @@ it.
 Each case's outputs are, per coupon, tools/cxx/src/cashflows/digitalspec.hpp's leg outputs, flattened into a list per
 name over the coupons: "digital", "date", the digital inspectors and the rates, null for a fixed coupon but its rate, a
 refused value {"throws": true}. Each case's inputs hold its settings and the leg ("leg": digitalspec.hpp's leg spec,
-always setting the naked option flag, which QuantLib's builder leaves uninitialized otherwise, the S-cms plan's CMR5
-(viii)). tests/NanoQL.Tests/Vectors/Cxx/Coupons/DigitalIborCouponCxxVectorTests.cs reads it back."""
+always setting the naked option flag, which QuantLib's builder leaves uninitialized otherwise).
+tests/NanoQL.Tests/Vectors/Cxx/Coupons/DigitalIborCouponCxxVectorTests.cs reads it back."""
 import importlib.util
 import os
 import sys

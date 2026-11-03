@@ -29,10 +29,10 @@ namespace NanoQL.Instruments;
 /// start and the schedule's rule, and the cash settlement date from the trade date. An empty schedule is refused before
 /// its first date is read, where QuantLib, given no protection start, reads it first for one, an undefined read (a
 /// documented divergence). The accrual rebate reads its first live coupon's amount or accrued amount through the
-/// coupon's context-free forms (SID10). The engines are static (<see cref="MidPointCdsEngine"/>,
-/// <see cref="IsdaCdsEngine"/>), and the results are a <see cref="CreditDefaultSwapResults"/>. An expired swap's
-/// results are all 0, its accrual rebate's NPV included, where QuantLib leaves that one unset and reads an
-/// uninitialized value, a documented divergence. Equality is by reference.
+/// coupon's context-free forms. The engines are static (<see cref="MidPointCdsEngine"/>, <see cref="IsdaCdsEngine"/>),
+/// and the results are a <see cref="CreditDefaultSwapResults"/>. An expired swap's results are all 0, its accrual
+/// rebate's NPV included, where QuantLib leaves that one unset and reads an uninitialized value, a documented
+/// divergence. Equality is by reference.
 /// </para>
 /// <para>
 /// <see cref="ImpliedHazardRate"/> and <see cref="ConventionalSpread"/> refuse an expired swap ("instrument expired"),

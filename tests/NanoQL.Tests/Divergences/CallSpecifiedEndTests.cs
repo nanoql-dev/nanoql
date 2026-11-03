@@ -9,15 +9,13 @@ using NanoQL.Tests.Conventions;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The call-specified product's end (the S-mmp plan's MMPR4 (vii), option (1), ruled by the user, with Revision 4's
-/// (b)). QuantLib's ends with its underlying (<c>callspecifiedmultiproduct.cpp:167</c>), so its tested Bermudan, a
-/// call-specified product on <c>MultiStepNothing</c> done at its first step, ends at once alone and is worth its value
-/// only inside a composite that steps a finished part again: on six semi-annual rates, 8,191 Sobol paths,
-/// <c>testCallableSwapNaif</c>'s Bermudan 0.0069062 in QuantLib's composite and 0.0053606 alone (this run's
-/// <c>probes\c3_facts.cpp</c>; the planner's MPP14, MPP21). nanoql keeps QuantLib's end but on an underlying with no
-/// possible cash-flow times, which can't end it while an exercise time remains, stops stepping a finished underlying,
-/// and, once ended with its underlying, stays ended, with no call and no cash flow. Checks: QuantLib's composite values,
-/// bit for bit, alone and inside; QuantLib's callable identity.
+/// The call-specified product's end. QuantLib's ends with its underlying (<c>callspecifiedmultiproduct.cpp:167</c>), so
+/// its tested Bermudan, a call-specified product on <c>MultiStepNothing</c> done at its first step, ends at once alone
+/// and is worth its value only inside a composite that steps a finished part again: on six semi-annual rates, 8,191
+/// Sobol paths, <c>testCallableSwapNaif</c>'s Bermudan 0.0069062 in QuantLib's composite and 0.0053606 alone. nanoql
+/// keeps QuantLib's end but on an underlying with no possible cash-flow times, which can't end it while an exercise
+/// time remains, stops stepping a finished underlying, and, once ended with its underlying, stays ended, with no call
+/// and no cash flow. Checks: QuantLib's composite values, bit for bit, alone and inside; QuantLib's callable identity.
 /// </summary>
 public class CallSpecifiedEndTests
 {

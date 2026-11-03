@@ -13,15 +13,15 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The analytic PDF Heston engine's tails beyond its window (the code review's C2-B1-2, ruled (d)). QuantLib integrates
-/// the payoff against the density over ln F ± 8√V (<c>analyticpdfhestonengine.cpp:54-65</c>) and drops the mass beyond:
-/// on its own markets a half-year put at 0.7F 7% low and at 0.5F 53% low (the far-from-Feller set), at a vol of
-/// variance of 1 and correlation −0.9 a five-year put at half the forward 18% low [executed on the wheel:
-/// <c>scratchpad\c2b12\oracle_tails.py</c>]; its own test checks calls, whose right tail is thin there. nanoql adds the
-/// tails' values where they're worth more than the integrations' accuracy: the payoff a line a + bS between its strikes,
-/// a piece's value is a times its probability plus bF times its probability under the share measure, both from the
-/// spot's distribution at the window's edges and the strikes; QuantLib's price where they aren't. The window's value is
-/// QuantLib's to the bit, the price less the additional result <c>tailsValue</c>. The check: QuantLib's analytic engine.
+/// The analytic PDF Heston engine's tails beyond its window. QuantLib integrates the payoff against the density over ln
+/// F ± 8√V (<c>analyticpdfhestonengine.cpp:54-65</c>) and drops the mass beyond: on its own markets a half-year put at
+/// 0.7F 7% low and at 0.5F 53% low (the far-from-Feller set), at a vol of variance of 1 and correlation −0.9 a
+/// five-year put at half the forward 18% low (QuantLib-Python 1.44); its own test checks calls, whose right tail is
+/// thin there. nanoql adds the tails' values where they're worth more than the integrations' accuracy: the payoff a
+/// line a + bS between its strikes, a piece's value is a times its probability plus bF times its probability under the
+/// share measure, both from the spot's distribution at the window's edges and the strikes; QuantLib's price where they
+/// aren't. The window's value is QuantLib's to the bit, the price less the additional result <c>tailsValue</c>. The
+/// check: QuantLib's analytic engine.
 /// </summary>
 public class AnalyticPdfHestonTailsTests
 {

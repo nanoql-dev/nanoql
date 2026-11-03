@@ -15,17 +15,16 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The forward Hull-White process at small mean reversion (the S-sr plan's SSR6 (ii), round 1's O1-6):
-/// QuantLib's <c>M_T</c> (<c>hullwhiteprocess.cpp:134-146</c>), σ²/a²[(1 − e^(−u)) − ½(e^(−v) − e^(−v−2u))], cuts at
-/// QL_EPSILON and above it cancels two terms of order σ²(t − s)/a: on the wheel, on a flat 4% curve with σ = 0.01,
-/// M_T(0, 0.5, 10) is 0.005551115122216288 at a = 1e-9, 0 at 1e-12 and 5,551,115,123.125778 at 1e-15, against its
-/// limit σ²(t − s)[(T − t) + ½(t − s)] = 4.875e-4, so the half-year expectation from 0.04 is −5,551,115,123.085763 at
-/// 1e-15; its drift is NaN at a = 0; and the Monte Carlo cap engine that reads it prices a 5-year cap on Euribor 6M at
-/// 3% (notional 1,000,000, on a flat 2.7% discount curve) 13,362.29 ± 129.78 at a = 1e-9, 10,000 antithetic samples,
-/// seed 42, on the harness, against the analytic engine's 19,600.69. nanoql's M_T is
-/// σ²(t − s)f(u)[(T − t)f(v) + ½e^(−v)(t − s)f(u)], f(x) = (1 − e^(−x))/x, every term positive. QuantLib's check: the
-/// limit; QuantLib's closed form at ordinary a, 3.0368938327613056e-4 at a = 0.1, within the tolerance; and the
-/// analytic engine for the Monte Carlo one.
+/// The forward Hull-White process at small mean reversion: QuantLib's <c>M_T</c> (<c>hullwhiteprocess.cpp:134-146</c>),
+/// σ²/a²[(1 − e^(−u)) − ½(e^(−v) − e^(−v−2u))], cuts at QL_EPSILON and above it cancels two terms of order σ²(t − s)/a:
+/// on the wheel, on a flat 4% curve with σ = 0.01, M_T(0, 0.5, 10) is 0.005551115122216288 at a = 1e-9, 0 at 1e-12 and
+/// 5,551,115,123.125778 at 1e-15, against its limit σ²(t − s)[(T − t)
+/// + ½(t − s)] = 4.875e-4, so the half-year expectation from 0.04 is −5,551,115,123.085763 at 1e-15; its drift is NaN
+/// at a = 0; and the Monte Carlo cap engine that reads it prices a 5-year cap on Euribor 6M at 3% (notional 1,000,000,
+/// on a flat 2.7% discount curve) 13,362.29 ± 129.78 at a = 1e-9, 10,000 antithetic samples, seed 42, on the harness,
+/// against the analytic engine's 19,600.69. nanoql's M_T is σ²(t − s)f(u)[(T − t)f(v) + ½e^(−v)(t − s)f(u)], f(x) = (1
+/// − e^(−x))/x, every term positive. QuantLib's check: the limit; QuantLib's closed form at ordinary a,
+/// 3.0368938327613056e-4 at a = 0.1, within the tolerance; and the analytic engine for the Monte Carlo one.
 /// </summary>
 public class HullWhiteForwardProcessSmallReversionTests
 {

@@ -6,13 +6,12 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// CMA-ES's generator, one per minimization (the S-core plan's CR2 (c)), and its ranking of equal costs (CD5): QuantLib's
-/// optimizer keeps its Mersenne Twister as a member (<c>cmaes.cpp:50</c>), so a second minimization on the same object
-/// continues the first's stream, where nanoql's builds one from the seed in each minimization; and QuantLib ranks the
-/// samples with <c>std::sort</c> (<c>cmaes.cpp:190-191</c>), which MSVC runs as an insertion sort up to 32 elements and an
-/// introsort beyond, where nanoql sorts stably: equal costs keep QuantLib's order in a population of 32 or fewer, and
-/// their own beyond. QuantLib's values are its own class's, from this run's <c>probes\c2_facts.cpp</c>
-/// (<c>c2_facts.out</c>).
+/// CMA-ES's generator, one per minimization, and its ranking of equal costs: QuantLib's optimizer keeps its Mersenne
+/// Twister as a member (<c>cmaes.cpp:50</c>), so a second minimization on the same object continues the first's stream,
+/// where nanoql's builds one from the seed in each minimization; and QuantLib ranks the samples with <c>std::sort</c>
+/// (<c>cmaes.cpp:190-191</c>), which MSVC runs as an insertion sort up to 32 elements and an introsort beyond, where
+/// nanoql sorts stably: equal costs keep QuantLib's order in a population of 32 or fewer, and their own beyond.
+/// QuantLib's values are its own class's.
 /// </summary>
 public class CmaesTests
 {

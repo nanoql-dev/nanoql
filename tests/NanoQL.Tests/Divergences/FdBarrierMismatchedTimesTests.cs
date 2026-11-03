@@ -21,13 +21,13 @@ namespace NanoQL.Tests.Divergences;
 /// the other structures at those times on their own clocks: on a risk-free curve on Actual/360, settling two days
 /// later, or beside a dividend curve and volatility dated later, its barrier engine is off its own engine on the market
 /// restated from the earliest date by 1.6e-3 to 9.6e-3 relative, the knock-ins most, and its rebate engine by 1.1e-4 to
-/// 3.6e-4 [executed on the wheel]. nanoql's engines take their times from the engine's clock
-/// (<see cref="FdmBlackScholesOp.Clock"/>), the earliest reference date of the structures on the risk-free curve's day
-/// counter, the operator reading each structure at the instants those times denote, nothing accrued before its own
-/// date (the mismatched-dates row of the master plan's §2.2), so a knock-in's three parts price on one clock.
-/// QuantLib's check: its own engines on the market restated from the earliest date on the clock's day counter (a curve
-/// dated later a discount curve at 1 up to its date, a volatility dated later a variance curve at 0 up to its date), to
-/// 1e-12, as S-eq's finite-difference engine meets it. Where every structure shares the risk-free curve's date and day
+/// 3.6e-4 (QuantLib-Python 1.44). nanoql's engines take their times from the engine's clock (<see
+/// cref="FdmBlackScholesOp.Clock"/>), the earliest reference date of the structures on the risk-free curve's day
+/// counter, the operator reading each structure at the instants those times denote, nothing accrued before its own date
+/// (the playbook's row for structures on another clock), so a knock-in's three parts price on one clock. QuantLib's
+/// check: its own engines on the market restated from the earliest date on the clock's day counter (a curve dated later
+/// a discount curve at 1 up to its date, a volatility dated later a variance curve at 0 up to its date), to 1e-12, as
+/// the finite-difference vanilla engine meets it. Where every structure shares the risk-free curve's date and day
 /// counter, the clock is the risk-free curve, and the engines keep QuantLib's bits.
 /// </summary>
 public class FdBarrierMismatchedTimesTests

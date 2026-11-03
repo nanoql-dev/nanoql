@@ -12,16 +12,15 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The Monte Carlo vanilla engines on structures dated or counted differently (the S-van plan's VR1 (v), the
-/// mismatched-dates class of master Revision 58). QuantLib's engines run their paths on the process's times, the
-/// risk-free curve's from its reference date (<c>mcvanillaengine.hpp:152-163</c>,
+/// The Monte Carlo vanilla engines on structures dated or counted differently. QuantLib's engines run their paths on
+/// the process's times, the risk-free curve's from its reference date (<c>mcvanillaengine.hpp:152-163</c>,
 /// <c>mclongstaffschwartzengine.hpp:213-237</c>), and read the other structures at those times: a dividend curve or a
 /// volatility dated before the risk-free curve, or on another day counter, is read off its own clock. nanoql's engines
 /// run their paths from the earliest structure's reference date on the risk-free curve's day counter
 /// (<c>FdmBlackScholesOp.Clock</c>), each structure read at the instants the grid's times denote, nothing accruing
 /// before its own date, and the payoffs discounted there. QuantLib's check: its own engines on the market restated on
-/// one clock, from the same seeds, which the fixed engines on the original market reproduce to rounding [executed on
-/// the wheel: <c>oracle_c1.py</c>, <c>oracle_c1b.py</c> in the run's scratchpad].
+/// one clock, from the same seeds, which the fixed engines on the original market reproduce to rounding
+/// (QuantLib-Python 1.44).
 /// </summary>
 public class McMismatchedTimesTests
 {

@@ -11,7 +11,7 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Extensions;
 
 /// <summary>
-/// The SOFR curve example, which <c>docs/conventions.md</c> walks through (CVD36): an illustrative <c>USD-SOFR</c> OIS
+/// The SOFR curve example, which <c>docs/conventions.md</c> walks through: an illustrative <c>USD-SOFR</c> OIS
 /// convention in a file of its own, <c>SofrCurveExample.xml</c>, a curve bootstrapped from a handful of illustrative
 /// SOFR swap quotes through its rate helpers, and a 5-year SOFR swap priced on the curve on the example's conventions
 /// and on <see cref="MakeOIS"/>'s defaults. The quotes are illustrative, not market data, and the curve's list of

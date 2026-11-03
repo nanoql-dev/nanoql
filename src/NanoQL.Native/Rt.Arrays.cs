@@ -262,8 +262,8 @@ internal static unsafe partial class Rt
         where TKey : notnull => d is null ? null! : System.Collections.Frozen.FrozenDictionary.ToFrozenDictionary(d);
 
     /// <summary>
-    /// Pairs from their elements' arrays in step (B2R3): a null first array gives null, the collection a <c>Bind</c>
-    /// leaves open; a later one null where the first isn't is refused.
+    /// Pairs from their elements' arrays in step: a null first array gives null, the collection a <c>Bind</c> leaves
+    /// open; a later one null where the first isn't is refused.
     /// </summary>
     /// <typeparam name="T1">The first element's type.</typeparam>
     /// <typeparam name="T2">The second element's type.</typeparam>
@@ -288,7 +288,7 @@ internal static unsafe partial class Rt
         return r;
     }
 
-    /// <summary>Triples from their elements' arrays in step (B2R3), as <see cref="Zip{T1, T2}"/>.</summary>
+    /// <summary>Triples from their elements' arrays in step, as <see cref="Zip{T1, T2}"/>.</summary>
     /// <typeparam name="T1">The first element's type.</typeparam>
     /// <typeparam name="T2">The second element's type.</typeparam>
     /// <typeparam name="T3">The third element's type.</typeparam>
@@ -376,7 +376,7 @@ internal static unsafe partial class Rt
     /// <returns>The vector, or null.</returns>
     public static Vector Vector(double* p, int n) => p == null ? null! : new Vector(new ReadOnlySpan<double>(p, Count(n)));
 
-    /// <summary>A vector the member wrote into, copied back into the caller's values (R15).</summary>
+    /// <summary>A vector the member wrote into, copied back into the caller's values.</summary>
     /// <param name="v">The vector, or null.</param>
     /// <param name="p">The caller's values, or NULL.</param>
     /// <param name="n">Their count.</param>
@@ -396,7 +396,7 @@ internal static unsafe partial class Rt
         v.AsSpan().CopyTo(new Span<double>(p, n));
     }
 
-    /// <summary>A matrix the member wrote into, copied back into the caller's values by rows (R15).</summary>
+    /// <summary>A matrix the member wrote into, copied back into the caller's values by rows.</summary>
     /// <param name="m">The matrix, or null.</param>
     /// <param name="p">The caller's values, or NULL.</param>
     /// <param name="rows">The rows.</param>

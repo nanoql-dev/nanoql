@@ -11,11 +11,11 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Extensions;
 
 /// <summary>
-/// Field sensitivity (CVD38) on the instrument convention kinds: every field of every kind, given two values, changes
-/// what each of its routes builds, or the route refuses the second value, naming the route, the kind, the record and
-/// the field. Each kind's base record gives a value to every field its routes take, on a test calendar, TARGET with a
-/// holiday on every 30th, so that each schedule option shows in the dates; a second, with a holiday on every 29th,
-/// pays where the first moves the dates.
+/// Field sensitivity on the instrument convention kinds: every field of every kind, given two values, changes what each
+/// of its routes builds, or the route refuses the second value, naming the route, the kind, the record and the field.
+/// Each kind's base record gives a value to every field its routes take, on a test calendar, TARGET with a holiday on
+/// every 30th, so that each schedule option shows in the dates; a second, with a holiday on every 29th, pays where the
+/// first moves the dates.
 /// </summary>
 public class InstrumentFieldSensitivityTests
 {

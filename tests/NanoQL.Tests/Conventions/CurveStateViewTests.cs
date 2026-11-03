@@ -6,10 +6,10 @@ using NanoQL.Models;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The working types' views and copies (the S-mm plan's MR1 (ii), (iii)): a curve state's vector read is a view of its
-/// own buffer, valid until the state is next set, or the same read is made with another argument (two spannings'
-/// constant-maturity rates share QuantLib's one buffer); <see cref="CurveState.Clone"/> is deep; an evolver's current
-/// state is its own curve state, the same object from step to step.
+/// The working types' views and copies: a curve state's vector read is a view of its own buffer, valid until the state
+/// is next set, or the same read is made with another argument (two spannings' constant-maturity rates share QuantLib's
+/// one buffer); <see cref="CurveState.Clone"/> is deep; an evolver's current state is its own curve state, the same
+/// object from step to step.
 /// </summary>
 public class CurveStateViewTests
 {

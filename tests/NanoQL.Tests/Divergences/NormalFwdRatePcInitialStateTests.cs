@@ -6,13 +6,12 @@ using NanoQL.Models;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The normal predictor-corrector evolver's set initial state (the S-mm plan's MR3 (iv), fixed under R8). QuantLib's
-/// <c>NormalFwdRatePc::setForwards</c> has the drift computation for its loop body (<c>normalfwdratepc.cpp:80-81</c>),
-/// so the starting forwards stay the model's while the drifts are the new state's: on four semi-annual rates at 4%,
-/// normal volatility 0.8%, a state set at 7% starts its first path at the model's 4%, the first step's forwards
-/// 0.040197, 0.038239, 0.036115 and 0.038379 (this run's <c>probes\c2_facts.cpp</c>; the planner's MP3). nanoql starts
-/// from the forwards given, as the log-normal evolvers do. Check: QuantLib's own evolver on a model whose initial rates
-/// are the given forwards (its arithmetic, the vectors'), bit for bit.
+/// The normal predictor-corrector evolver's set initial state (fixed). QuantLib's <c>NormalFwdRatePc::setForwards</c>
+/// has the drift computation for its loop body (<c>normalfwdratepc.cpp:80-81</c>), so the starting forwards stay the
+/// model's while the drifts are the new state's: on four semi-annual rates at 4%, normal volatility 0.8%, a state set
+/// at 7% starts its first path at the model's 4%, the first step's forwards 0.040197, 0.038239, 0.036115 and 0.038379.
+/// nanoql starts from the forwards given, as the log-normal evolvers do. Check: QuantLib's own evolver on a model whose
+/// initial rates are the given forwards (its arithmetic, the vectors'), bit for bit.
 /// </summary>
 public class NormalFwdRatePcInitialStateTests
 {

@@ -12,11 +12,11 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The barrier engines' refusals of a touched barrier and of a partial-time rebate, each a <see cref="NanoQLException"/>
-/// with its text (the S-bar plan's BR5 (xii) and (xiv), the S-van plan's VD19): QuantLib's "barrier touched" from the
-/// two-asset and binomial engines and its "barrier(s) already touched" from the analytic double-barrier engine;
-/// nanoql's "barrier touched" from the partial-time engine's start window, the family's text; and "rebate not supported
-/// for this partial-time barrier" where no formula prices the rebate.
+/// The barrier engines' refusals of a touched barrier and of a partial-time rebate, each a
+/// <see cref="NanoQLException"/> with its text: QuantLib's "barrier touched" from the two-asset and binomial engines
+/// and its "barrier(s) already touched" from the analytic double-barrier engine; nanoql's "barrier touched" from the
+/// partial-time engine's start window, the family's text; and "rebate not supported for this partial-time barrier"
+/// where no formula prices the rebate.
 /// </summary>
 public class BarrierRefusalTests
 {

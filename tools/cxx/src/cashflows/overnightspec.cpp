@@ -225,7 +225,7 @@ namespace harness::overnight {
         s.refPeriodEnd = date(key(o, "refPeriodEnd", "a coupon"));
         s.dayCounter = optionalDayCounter(key(o, "dayCounter", "a coupon"));
         if (boolean(key(o, "telescopicValueDates", "a coupon")))
-            throw InvalidParams("the harness builds no telescopic coupon: the plan's telescopic rule takes their "
+            throw InvalidParams("the harness builds no telescopic coupon: the telescopic rule takes their "
                                 "expected values from the wheel");
         s.averagingMethod = enumeration<RateAveraging::Type>(key(o, "averagingMethod", "a coupon"));
         s.lookbackDays = optionalNatural(key(o, "lookbackDays", "a coupon"));
@@ -290,7 +290,7 @@ namespace harness::overnight {
         s.gearings = reals(key(o, "gearings", "a leg"));
         s.spreads = reals(key(o, "spreads", "a leg"));
         if (boolean(key(o, "telescopicValueDates", "a leg")))
-            throw InvalidParams("the harness builds no telescopic leg: the plan's telescopic rule takes their "
+            throw InvalidParams("the harness builds no telescopic leg: the telescopic rule takes their "
                                 "expected values from the wheel");
         s.averagingMethod = enumeration<RateAveraging::Type>(key(o, "averagingMethod", "a leg"));
         s.lookbackDays = optionalNatural(key(o, "lookbackDays", "a leg"));

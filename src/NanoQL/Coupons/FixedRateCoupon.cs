@@ -102,12 +102,12 @@ public sealed class FixedRateCoupon : Coupon
         return AccruedAmount(d);
     }
 
-    // The amount, which reads no context: the coupon's nominal is its contract nominal (SID10). The credit default
-    // swap's constructor, which takes no context, reads its accrual rebate through it.
+    // The amount, which reads no context: the coupon's nominal is its contract nominal. The credit default swap's
+    // constructor, which takes no context, reads its accrual rebate through it.
     internal double Amount() =>
         ContractNominal * (rate.CompoundFactor(AccrualStartDate, AccrualEndDate, ReferencePeriodStart, ReferencePeriodEnd) - 1.0);
 
-    // The accrued amount at a date, which reads no context (SID10).
+    // The accrued amount at a date, which reads no context.
     internal double AccruedAmount(Date d)
     {
         NanoQL.Time.Date.ThrowIfDefault(d, nameof(d));

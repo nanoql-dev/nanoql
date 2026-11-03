@@ -21,11 +21,11 @@ namespace NanoQL.Models;
 /// </summary>
 /// <remarks>
 /// Three departures from QuantLib: the coinitial Z matrix scales every entry of its rows, where QuantLib's scales from
-/// the diagonal rightward, as the coterminal one does, though a coinitial row is nonzero left of it (the S-mm plan's
-/// MR3 (xxii); <c>Divergences/CoinitialZedMatrixTests.cs</c>); and the swaption's implied volatility refuses an
-/// evolution whose times don't hold the swaption's expiry, and unequal displacements, as QuantLib's frozen-coefficient
-/// adapters refuse them, since it sums whole steps up to the expiry and reads the first displacement alone (MR4 (a);
-/// <c>Divergences/SwaptionImpliedVolatilityGridTests.cs</c>).
+/// the diagonal rightward, as the coterminal one does, though a coinitial row is nonzero left of it
+/// (<c>Divergences/CoinitialZedMatrixTests.cs</c>); and the swaption's implied volatility refuses an evolution whose
+/// times don't hold the swaption's expiry, and unequal displacements, as QuantLib's frozen-coefficient adapters refuse
+/// them, since it sums whole steps up to the expiry and reads the first displacement alone
+/// (<c>Divergences/SwaptionImpliedVolatilityGridTests.cs</c>).
 /// </remarks>
 public static class SwapForwardMappings
 {
@@ -36,7 +36,7 @@ public static class SwapForwardMappings
     /// <param name="numeraireIndex">The numeraire bond.</param>
     /// <returns>The annuity.</returns>
     /// <exception cref="ArgumentOutOfRangeException">An index is outside the rates.</exception>
-    /// <remarks>QuantLib reads the accrual periods past their vector at an end past the rates, refused (MR3 (xx)).</remarks>
+    /// <remarks>QuantLib reads the accrual periods past their vector at an end past the rates, refused.</remarks>
     public static double Annuity(CurveState cs, int startIndex, int endIndex, int numeraireIndex)
     {
         ArgumentNullException.ThrowIfNull(cs);
@@ -198,7 +198,7 @@ public static class SwapForwardMappings
     /// <returns>A new matrix, swap rates by forwards.</returns>
     /// <remarks>
     /// Each row is scaled whole: QuantLib's scales from the diagonal rightward, leaving the entries left of it, nonzero
-    /// for a coinitial swap, raw derivatives blind to the displacement (MR3 (xxii)). Each row then equals QuantLib's own
+    /// for a coinitial swap, raw derivatives blind to the displacement. Each row then equals QuantLib's own
     /// <see cref="CmSwapZedMatrix"/>'s first row at a spanning of the row's swap, bit for bit.
     /// </remarks>
     public static Matrix CoinitialSwapZedMatrix(CurveState cs, double displacement)
@@ -310,8 +310,8 @@ public static class SwapForwardMappings
     }
 
     // QuantLib reads the first displacement alone, and sums whole steps up to the expiry: unequal displacements and an
-    // evolution that doesn't stop at the expiry are refused, with its adapters' texts (MR4 (a)); the S-mmp plan's
-    // MMPR5 (b) applies the rule to SwaptionPseudoDerivative.
+    // evolution that doesn't stop at the expiry are refused, with its adapters' texts; SwaptionPseudoDerivative follows
+    // the same rule.
     internal static void CheckSwaption(MarketModel volStructure, int startIndex, int endIndex)
     {
         if (!(startIndex < endIndex))

@@ -8,11 +8,11 @@ namespace NanoQL.Numerics;
 
 /// <summary>
 /// The default statistics of N-dimensional samples, each component a <see cref="GeneralStatistics"/>, which keeps its
-/// samples: QuantLib's <c>SequenceStatistics</c>, <c>GenericSequenceStatistics&lt;Statistics&gt;</c> (D12), with the
+/// samples: QuantLib's <c>SequenceStatistics</c>, <c>GenericSequenceStatistics&lt;Statistics&gt;</c>, with the
 /// empirical risk measures of <see cref="GenericSequenceStatisticsExtensions"/>.
 /// </summary>
 /// <remarks>
-/// Unsealed, an extension point (U13): QuantLib's <c>DiscrepancyStatistics</c> derives from it.
+/// Unsealed, an extension point: QuantLib's <c>DiscrepancyStatistics</c> derives from it.
 /// </remarks>
 public class SequenceStatistics : GenericSequenceStatistics<GeneralStatistics>
 {

@@ -17,7 +17,7 @@ namespace NanoQL.Instruments;
 /// <remarks>
 /// Immutable. QuantLib's arguments carry an accrued coupon, a last fixing and local and global caps and floors, which
 /// its instrument never sets ("add local/global caps/floors", its header's to-do), so they and the engines' refusals of
-/// them aren't ported (the S-exo plan's ED8).
+/// them aren't ported.
 /// </remarks>
 public sealed class CliquetOption : OneAssetOption
 {

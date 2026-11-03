@@ -9,8 +9,8 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Extensions;
 
 /// <summary>
-/// The no-bypass walk (CVD34) over batch 7's kinds: what each builds in the marker set reaches only the set's calendars,
-/// currencies and units of measure.
+/// The no-bypass walk over the experimental commodity kinds: what each builds in the marker set reaches only the set's
+/// calendars, currencies and units of measure.
 /// </summary>
 public class CommodityWalkTests
 {

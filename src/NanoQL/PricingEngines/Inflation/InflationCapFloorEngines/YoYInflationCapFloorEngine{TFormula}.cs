@@ -24,7 +24,7 @@ namespace NanoQL.PricingEngines;
 /// convexity adjustment. The time from the base date is read with no lag, as QuantLib's master reads it after 1.44
 /// (#2877), where 1.44's default lag leaves an optionlet fixing within one lag of the base date at its intrinsic value
 /// (<c>Divergences/InflationUpstreamFixesTests.cs</c>). QuantLib's public base class has no instance form under the
-/// static engines (D14), so it is an internal body generic in its formula, as S5's Black-style swaption engine is.
+/// static engines, so it is an internal body generic in its formula, as the Black-style swaption engine is.
 /// </para>
 /// <para>
 /// Each forward is the coupon's own fixing, <see cref="CPI.LaggedYoYRate"/> on the engine's index with the coupon's

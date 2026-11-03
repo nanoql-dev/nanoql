@@ -18,10 +18,10 @@ namespace NanoQL.Methods;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A working type (the S-eq plan's SEQR1): <see cref="SetTime"/> rewrites the operator in buffers it holds, where
-/// QuantLib builds new bands per call, and the applies and solves write into the caller's span, which mustn't overlap
-/// the input. The value-returning forms are QuantLib's. An extension point, as in QuantLib: later units derive their
-/// operators from it.
+/// A working type: <see cref="SetTime"/> rewrites the operator in buffers it holds, where QuantLib builds new bands
+/// per call, and the applies and solves write into the caller's span, which mustn't overlap the input. The
+/// value-returning forms are QuantLib's. An extension point, as in QuantLib: later units derive their operators from
+/// it.
 /// </para>
 /// </remarks>
 [WorkingType]

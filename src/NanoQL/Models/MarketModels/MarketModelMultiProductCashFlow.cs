@@ -9,10 +9,10 @@ namespace NanoQL.Models;
 /// <summary>
 /// A cash flow a <see cref="MarketModelMultiProduct"/> generates at a step: its amount and the index of its payment
 /// time in the product's <see cref="MarketModelMultiProduct.PossibleCashFlowTimes"/>. QuantLib's nested
-/// <c>MarketModelMultiProduct::CashFlow</c> (R2's top-level name).
+/// <c>MarketModelMultiProduct::CashFlow</c>, made top-level.
 /// </summary>
 /// <remarks>
-/// A mutable struct: a product writes it in place, into the caller's buffer (the S-mmp plan's MMPR1 (iii)).
+/// A mutable struct: a product writes it in place, into the caller's buffer.
 /// </remarks>
 public struct MarketModelMultiProductCashFlow
 {

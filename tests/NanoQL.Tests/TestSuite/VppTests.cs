@@ -77,7 +77,7 @@ public class VppTests
     ];
 
     // Adapted: the evaluation date is the context's, which nothing here reads; the process's jump generator is the
-    // working state QuantLib's hidden generator is (the S-xrt plan's XRR3).
+    // working state QuantLib's hidden generator is.
     [Fact]
     public void TestGemanRoncoroniProcess()
     {

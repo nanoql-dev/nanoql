@@ -21,9 +21,9 @@ namespace NanoQL.Quotes;
 /// only that price.
 /// </para>
 /// <para>
-/// Immutable: its value is solved once, at construction, from the guess given (§2.2's quote row; the S-core plan's CR1
-/// (d)). QuantLib's quote starts each solve after the first from the last one's result; here a new price is a new quote,
-/// solved from its caller's guess, a documented divergence. A solve that fails is refused, as QuantLib's is
+/// Immutable: its value is solved once, at construction, from the guess given (§2.2's quote row). QuantLib's quote
+/// starts each solve after the first from the last one's result; here a new price is a new quote, solved from its
+/// caller's guess, a documented divergence. A solve that fails is refused, as QuantLib's is
 /// (<c>eurodollarfuturesquote.cpp:58-75</c>). QuantLib's <c>isValid</c> isn't ported.
 /// </para>
 /// </remarks>

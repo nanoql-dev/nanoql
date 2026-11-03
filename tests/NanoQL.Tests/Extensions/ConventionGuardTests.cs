@@ -12,10 +12,10 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Extensions;
 
 /// <summary>
-/// The guards against a bypass (CVD34) on C2's kinds: the no-bypass walk over every kind built in the marker set, and
+/// The guards against a bypass on the convention kinds: the no-bypass walk over every kind built in the marker set, and
 /// its own check; and two scans of the built assemblies, in place of a text search, which a target-typed <c>new()</c>
-/// would pass: the extensions build a preset only through their factory table, and use no reflection to build one
-/// (CVD30); nothing in the extensions sets <see cref="ConventionProvider.Default"/>; and only
+/// would pass: the extensions build a preset only through their factory table, and use no reflection to build one;
+/// nothing in the extensions sets <see cref="ConventionProvider.Default"/>; and only
 /// <see cref="DefaultProviderCollection"/>'s tests set it.
 /// </summary>
 public class ConventionGuardTests
@@ -162,7 +162,7 @@ public class ConventionGuardTests
     [Fact]
     public void NothingInTheExtensionsSetsTheDefault()
     {
-        // CVD34: no code in src/ sets the default, the extensions, which build sets, among it
+        // No code in src/ sets the default, the extensions, which build sets, among it
         MethodInfo setter = typeof(ConventionProvider).GetProperty(nameof(ConventionProvider.Default))!.SetMethod!;
 
         Assert.Empty(Bodies(typeof(ConventionSet).Assembly).Where(m => IlScanner.References(m).Any(r => r.Member == setter)).Select(IlScanner.Owner));

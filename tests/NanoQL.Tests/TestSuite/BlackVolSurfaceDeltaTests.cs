@@ -73,9 +73,9 @@ public class BlackVolSurfaceDeltaTests
         double atmStrike = 1.18;
 
         // Moved: the case's curves are floating from 1 January 2010, a TARGET holiday, so dated 4 January; QuantLib
-        // reads them at the surface's times, nanoql at the instants (the S-van plan's VR4 (xxi)): QuantLib's own
-        // surface on the curves restated on the surface's clock gives these values; QuantLib's cached ones are its
-        // read on the floating curves (Divergences/DeltaSurfaceMismatchedTimesTests.cs)
+        // reads them at the surface's times, nanoql at the instants: QuantLib's own surface on the curves restated on
+        // the surface's clock gives these values; QuantLib's cached ones are its read on the floating curves
+        // (Divergences/DeltaSurfaceMismatchedTimesTests.cs)
 
         // ask for volatility at 1M (present in the matrix)
         SmileSection smile1M = surface.BlackVolSmile(RefDate + new Period(1, TimeUnit.Months));
@@ -107,9 +107,9 @@ public class BlackVolSurfaceDeltaTests
         Date twoYears = RefDate + new Period(2, TimeUnit.Years), threeYears = RefDate + new Period(3, TimeUnit.Years);
 
         // Moved: the case's curves are floating from 1 January 2010, a TARGET holiday, so dated 4 January; QuantLib
-        // reads them at the surface's times, nanoql at the instants (the S-van plan's VR4 (xxi)): QuantLib's own
-        // surface on the curves restated on the surface's clock gives these values; QuantLib's cached ones are its
-        // read on the floating curves (Divergences/DeltaSurfaceMismatchedTimesTests.cs)
+        // reads them at the surface's times, nanoql at the instants: QuantLib's own surface on the curves restated on
+        // the surface's clock gives these values; QuantLib's cached ones are its read on the floating curves
+        // (Divergences/DeltaSurfaceMismatchedTimesTests.cs)
 
         // flat volatility extrapolation
 
@@ -165,9 +165,9 @@ public class BlackVolSurfaceDeltaTests
         // just cache some values to check that they're not insane and that they don't change unexpectedly
 
         // Moved: the case's curves are floating from 1 January 2010, a TARGET holiday, so dated 4 January; QuantLib
-        // reads them at the surface's times, nanoql at the instants (the S-van plan's VR4 (xxi)): QuantLib's own
-        // surface on the curves restated on the surface's clock gives these values; QuantLib's cached ones are its
-        // read on the floating curves (Divergences/DeltaSurfaceMismatchedTimesTests.cs)
+        // reads them at the surface's times, nanoql at the instants: QuantLib's own surface on the curves restated on
+        // the surface's clock gives these values; QuantLib's cached ones are its read on the floating curves
+        // (Divergences/DeltaSurfaceMismatchedTimesTests.cs)
 
         SmileSection smile = Surface(
             DeltaVolQuoteAtmType.AtmSpot,

@@ -6,13 +6,12 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// Simulated annealing's generator, copied per minimization (the S-core plan's CR2 (c)), and its NaN guard (CR7 (xix)):
-/// QuantLib's optimizer holds its generator and continues its stream in a second minimization, where nanoql's draws from
-/// a copy each time; and QuantLib's guard on the initial vertices tests <c>ytry_</c>, the previous trial's value, left
-/// from an earlier minimization or unset (<c>simulatedannealing.hpp:166</c>), where its trial path tests the value just
-/// computed (<c>:121-123</c>), so a vertex whose value is NaN enters the simplex. nanoql's guards each vertex's value,
-/// and the vertices a contraction moves alike. QuantLib's values are its own class's, from this run's
-/// <c>probes\c2_facts.cpp</c> (<c>c2_facts.out</c>).
+/// Simulated annealing's generator, copied per minimization, and its NaN guard: QuantLib's optimizer holds its
+/// generator and continues its stream in a second minimization, where nanoql's draws from a copy each time; and
+/// QuantLib's guard on the initial vertices tests <c>ytry_</c>, the previous trial's value, left from an earlier
+/// minimization or unset (<c>simulatedannealing.hpp:166</c>), where its trial path tests the value just computed
+/// (<c>:121-123</c>), so a vertex whose value is NaN enters the simplex. nanoql's guards each vertex's value, and the
+/// vertices a contraction moves alike. QuantLib's values are its own class's.
 /// </summary>
 public class SimulatedAnnealingTests
 {

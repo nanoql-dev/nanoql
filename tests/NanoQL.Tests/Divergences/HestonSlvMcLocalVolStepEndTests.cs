@@ -13,7 +13,7 @@ namespace NanoQL.Tests.Divergences;
 /// <summary>
 /// The Monte Carlo SLV calibration reads the local volatility at each step's end, where QuantLib 1.44 reads it at the
 /// step's start (<c>hestonslvmcmodel.cpp:181</c>), so a time-dependent local volatility's leverage lags it by a step;
-/// QuantLib's master takes the step's end (#2860, the S-hes plan's HR8 (i); its case is
+/// QuantLib's master takes the step's end (#2860; its case is
 /// <see cref="TestSuite.HestonSlvModelTests.TestMonteCarloCalibrationTimeDependentLocalVol"/>). On that case's market,
 /// at the grid's third time, QuantLib 1.44's leverage is the second time's local volatility over √v₀ (QuantLib-SWIG
 /// 1.44), nanoql's the third's.

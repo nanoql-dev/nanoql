@@ -13,8 +13,8 @@ namespace NanoQL.Tests.Conventions;
 
 /// <summary>
 /// <see cref="HestonSLVFDMModel.LogEntries"/> is filled while the constructor calibrates, with logging on, and empty
-/// with it off (the S-hes plan's HR3 (ii)): QuantLib's <c>logEntries()</c> recalibrates on each read; here every read
-/// returns the one list built at construction, an entry per step, its densities and meshers the calibration's.
+/// with it off: QuantLib's <c>logEntries()</c> recalibrates on each read; here every read returns the one list built at
+/// construction, an entry per step, its densities and meshers the calibration's.
 /// </summary>
 public class HestonSlvFdmLogTests
 {

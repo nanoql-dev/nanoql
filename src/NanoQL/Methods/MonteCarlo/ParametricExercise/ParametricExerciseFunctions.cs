@@ -20,7 +20,7 @@ public static class ParametricExerciseFunctions
     /// <remarks>
     /// The data are QuantLib's: n exercises give n + 1 rows, row 0 each path's cash flows before the first exercise and
     /// row i + 1 its data at exercise i. The cash flows of every row before the last are changed in place, as QuantLib
-    /// changes them (the S-mmp plan's SMD6). Each optimisation starts from the rule's guess, unconstrained.
+    /// changes them. Each optimisation starts from the rule's guess, unconstrained.
     /// </remarks>
     /// <param name="simulationData">The node data, an exercise a row and a path a column, changed in place.</param>
     /// <param name="exercise">The exercise rule.</param>

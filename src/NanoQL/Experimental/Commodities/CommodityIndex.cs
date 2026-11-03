@@ -21,13 +21,12 @@ namespace NanoQL.Experimental;
 /// <para>
 /// <see cref="ForwardPrice"/> converts the curve's price per curve unit into a price per index unit by the factor from
 /// the index's unit to the curve's, a price's conversion; QuantLib multiplies by the factor from the curve's unit to the
-/// index's, which inverts it (the S-xrt plan's XRR5 (i)), and computes the factor when the index is built, where it is
-/// read from the context here.
+/// index's, which inverts it, and computes the factor when the index is built, where it is read from the context here.
 /// </para>
 /// <para>
 /// <see cref="LastQuoteDate"/> is <see langword="null"/> for an index with no fixings, where QuantLib's reads the empty
 /// history's last date and throws "empty timeseries", so its swaps and future refuse an index with no fixings that their
-/// own branch prices from the forward curve (XRR5 (vi); <c>Divergences/CommodityIndexNoFixingsTests.cs</c>).
+/// own branch prices from the forward curve (<c>Divergences/CommodityIndexNoFixingsTests.cs</c>).
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]

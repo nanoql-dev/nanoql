@@ -11,7 +11,7 @@ namespace NanoQL.Numerics;
 /// <summary>The min copula, C(x, y) = max(x + y − 1, 0), the Fréchet-Hoeffding lower bound.</summary>
 /// <remarks>
 /// Immutable. On the unit square's edges it returns the boundary values, C(u, 0) = C(0, v) = 0, C(u, 1) = u and C(1, v)
-/// = v, before its formula, as every copula here does (the S-core plan's CR7 (xxxiii)); this one's formula meets them.
+/// = v, before its formula, as every copula here does; this one's formula meets them.
 /// </remarks>
 public sealed class MinCopula
 {

@@ -24,28 +24,28 @@ namespace NanoQL.Processes;
 /// own curve isn't read. QuantLib builds its model on the Heston curve but takes the short rate from the given
 /// process's curve (<c>hybridhestonhullwhiteprocess.cpp:37-46</c>, <c>:64</c>, <c>:137</c>, <c>:179</c>), so the numeraire
 /// prices a bond on one curve at a rate taken from the other; here all of it runs on the one curve, QuantLib's bits
-/// where the two curves are one (the S-hes plan's HR10).
+/// where the two curves are one.
 /// </para>
 /// <para>
 /// The process's times run on the Heston process's model clock, from the earliest reference date of its curves on the
 /// risk-free curve's day counter, each curve read at the instant a time denotes, the Hull-White parts on the risk-free
-/// curve restated on that clock; QuantLib's process reads the dividend curve at the risk-free curve's times (HR7 (xix)).
+/// curve restated on that clock; QuantLib's process reads the dividend curve at the risk-free curve's times.
 /// </para>
 /// <para>
-/// The step's terms m₂, m₄, m₅, v₁ and v₁₂, QuantLib's expressions, cancel as a·dt falls (HR6, HR7 (xv)): below a·dt of
+/// The step's terms m₂, m₄, m₅, v₁ and v₁₂, QuantLib's expressions, cancel as a·dt falls: below a·dt of
 /// <see cref="StepCut"/> they are evaluated in double-double, below its floor in quad-double and below that by the
 /// cubic in a through four quad-double values, QuantLib's double and bits from the cut up, the cut where QuantLib's
 /// double first departs from the expressions' exact values by more than 1e-12 relative, measured at the run. The
 /// in-place <see cref="Evolve(double, ReadOnlySpan{double}, double, ReadOnlySpan{double}, Span{double})"/> steps by the
-/// same arithmetic without allocating (HR2).
+/// same arithmetic without allocating.
 /// </para>
 /// </remarks>
 public sealed class HybridHestonHullWhiteProcess : StochasticProcess
 {
-    /// <summary>The a·dt below which the step's terms run in double-double (HR6), measured at the run.</summary>
+    /// <summary>The a·dt below which the step's terms run in double-double, measured at the run.</summary>
     internal const double StepCut = 1e-1;
 
-    // the a·dt below which double-double and quad-double cancel past 1e-12 relative (HR6), measured at the run
+    // the a·dt below which double-double and quad-double cancel past 1e-12 relative, measured at the run
     private const double StepFloor = 5e-7;
     private const double StepQuadFloor = 1e-12;
 
@@ -119,7 +119,7 @@ public sealed class HybridHestonHullWhiteProcess : StochasticProcess
     public HestonProcess HestonProcess => hestonProcess;
 
     /// <summary>Gets the forward Hull-White process the hybrid evolves: on the Heston process's risk-free curve, with
-    /// the given process's reversion, volatility and forward-measure time (HR10).</summary>
+    /// the given process's reversion, volatility and forward-measure time.</summary>
     public HullWhiteForwardProcess HullWhiteProcess => hullWhiteProcess;
 
     /// <summary>Gets the correlation of the equity with the short rate: QuantLib's <c>eta()</c>.</summary>
@@ -213,7 +213,7 @@ public sealed class HybridHestonHullWhiteProcess : StochasticProcess
     internal double NumeraireAt(double t, double rate) => hullWhiteModel.DiscountBond(t, forwardMeasureTime, rate) / endDiscount;
 
     /// <summary>The time of a date: on the Heston process's model clock, QuantLib's, the risk-free curve's, where the
-    /// dividend curve isn't dated before it (HR7 (xix)).</summary>
+    /// dividend curve isn't dated before it.</summary>
     /// <param name="date">The date.</param>
     /// <returns>The time.</returns>
     /// <exception cref="ArgumentException"><paramref name="date"/> is <c>default(Date)</c>.</exception>
@@ -296,20 +296,20 @@ public sealed class HybridHestonHullWhiteProcess : StochasticProcess
     }
 
     // q over [s, t] on the model's clock: QuantLib's read where the dividend curve shares the clock's times, otherwise
-    // at the instants they denote (HR7 (xix)); in place without QuantLib's rate objects, the same arithmetic
+    // at the instants they denote; in place without QuantLib's rate objects, the same arithmetic
     private double DividendRate(double s, double t, bool inPlace) =>
         dividends.SharesTimes(clock)
             ? (inPlace ? dividends.ContinuousForwardRate(s, t) : dividends.ForwardRate(s, t, Compounding.Continuous, Frequency.NoFrequency).Rate)
             : dividends.ContinuousForwardRateAt(clock, s, t);
 
-    // one of the step's terms, in the arithmetic a·dt calls for (HR6)
+    // one of the step's terms, in the arithmetic a·dt calls for
     private static double Term(StepTerm term, double a, double sigma, double eta, double rho, double s, double t, double dt, double tMeasure) =>
         IKappaTExpression.Evaluate(
             new StepTermExpression(term, sigma, eta, rho, s, t, dt, tMeasure), a, dt, StepCut, StepFloor, StepQuadFloor, double.PositiveInfinity);
 
-    // QuantLib's step terms (hybridhestonhullwhiteprocess.cpp:127-165), its powers of e^{-a·} computed as it computes them;
-    // in the wider arithmetics the step's length is t - s, exact, where QuantLib's dt may differ from it by a rounding,
-    // which the terms divide by a² and a³ (D3-2 of the S-hes run record)
+    // QuantLib's step terms (hybridhestonhullwhiteprocess.cpp:127-165), its powers of e^{-a·} computed as it computes
+    // them; in the wider arithmetics the step's length is t - s, exact, where QuantLib's dt may differ from it by a
+    // rounding, which the terms divide by a² and a³
     internal static T StepTermValue<T>(StepTerm term, T a, double sigma, double eta, double rho, double s, double t, double dt, double tMeasure)
         where T : struct, IRealArithmetic<T>
     {

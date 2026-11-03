@@ -15,11 +15,11 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// C2's two routes to one value (the S-xeq plan's §2.5): Everest, Himalaya and Pagoda on one asset and one fixing
+/// Two routes to one value for the experimental exotics: Everest, Himalaya and Pagoda on one asset and one fixing
 /// against a forward, a call and a call spread; the path basket engine against Stulz's two-asset maximum call; the
-/// American path engine against S-van's Longstaff-Schwartz engine on a Bermudan put. Each Monte Carlo price within three
-/// of its error estimates (the Longstaff-Schwartz pair within three of their combined estimates). Variance gamma's and
-/// the FFT engine's routes sit with QuantLib's cases and the divergence facts.
+/// American path engine against the Longstaff-Schwartz engine on a Bermudan put. Each Monte Carlo price within three of
+/// its error estimates (the Longstaff-Schwartz pair within three of their combined estimates). Variance gamma's and the
+/// FFT engine's routes sit with QuantLib's cases and the divergence facts.
 /// </summary>
 public class ExperimentalExoticTwoRouteTests
 {
@@ -101,7 +101,8 @@ public class ExperimentalExoticTwoRouteTests
     [Fact]
     public void TheAmericanPathEngineIsTheLongstaffSchwartzEngine()
     {
-        // a put exercisable at four quarterly fixings, 91 days apart, against S-van's engine on four steps of 91 days
+        // a put exercisable at four quarterly fixings, 91 days apart, against the Longstaff-Schwartz engine on four
+        // steps of 91 days
         const double strike = 100.0;
         Date[] fixings = [Today + 91, Today + 182, Today + 273, Maturity];
         var option = new PathOption(new BermudanPut(strike), [.. fixings]);

@@ -62,7 +62,7 @@ public class BlackCalculatorVannaVolgaTests
         }
     }
 
-    // A central difference with one Richardson step, as the plan's premise measured the general formulas against.
+    // A central difference with one Richardson step, as the general formulas were measured against.
     private static double Richardson(Func<double, double> f, double x, double h)
     {
         double d1 = (f(x + h) - f(x - h)) / (2 * h);

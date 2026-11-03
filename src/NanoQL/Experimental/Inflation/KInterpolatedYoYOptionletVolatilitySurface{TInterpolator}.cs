@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/experimental/inflation/kinterpolatedyoyoptionletvolatilitysurface.hpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: KInterpolatedYoYOptionletVolatilitySurface::volatilityImpl(const Date&, Rate), never ported: only its time form calls it, and the time form reads the stripped curves by time (XRR5 (xiii))
+// Partial: KInterpolatedYoYOptionletVolatilitySurface::volatilityImpl(const Date&, Rate), never ported: only its time form calls it, and the time form reads the stripped curves by time
 
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
@@ -24,19 +24,18 @@ namespace NanoQL.Experimental;
 /// The stripper strips the price surface at construction (<see cref="Create"/>), in the context given, and the surface
 /// holds the result; a volatility is the strikes' interpolation of the stripped curves' volatilities at the time,
 /// extrapolated only when the surface allows it. The index is observed flat, at the start of its inflation period, as
-/// QuantLib's. QuantLib's memo of the last date's slice isn't ported (the S-xrt plan's XRD12): each query reads its
-/// slice.
+/// QuantLib's. QuantLib's memo of the last date's slice isn't ported: each query reads its slice.
 /// </para>
 /// <para>
-/// A volatility reads the stripped curves at the surface's time for the observed date (the S-xrt plan's XRR5 (xiii);
-/// <c>Divergences/KInterpolatedYoYVolatilityTests.cs</c>): each strike's stripped curve at that date when the surface
-/// is on the stripper's clock, the price surface's reference date and day counter, and on another clock the curves
-/// read early or late by the clocks' difference (on QuantLib's euro case, up to 2.7e-5 at 2 settlement days and 4.2e-5
-/// on Actual/360, where QuantLib's lag error on the stripper's clock is 6.1e-4). QuantLib's turns the time back into a date, its whole years
-/// and the fraction's days at 365 a year, and reads each curve at that date through the curve's own lag, so the curves
-/// are read a lag early, and off Actual/365 a day or so further. QuantLib's case reads <see cref="Dslice"/>, the
-/// curves' own date route, which is QuantLib's here; its protected date form, which only its time form calls, isn't
-/// ported.
+/// A volatility reads the stripped curves at the surface's time for the observed date
+/// (<c>Divergences/KInterpolatedYoYVolatilityTests.cs</c>): each strike's stripped curve at that date when the surface
+/// is on the stripper's clock, the price surface's reference date and day counter, and on another clock the curves read
+/// early or late by the clocks' difference (on QuantLib's euro case, up to 2.7e-5 at 2 settlement days and 4.2e-5 on
+/// Actual/360, where QuantLib's lag error on the stripper's clock is 6.1e-4). QuantLib's turns the time back into a
+/// date, its whole years and the fraction's days at 365 a year, and reads each curve at that date through the curve's
+/// own lag, so the curves are read a lag early, and off Actual/365 a day or so further. QuantLib's case reads
+/// <see cref="Dslice"/>, the curves' own date route, which is QuantLib's here; its protected date form, which only its
+/// time form calls, isn't ported.
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]
@@ -156,7 +155,7 @@ public class KInterpolatedYoYOptionletVolatilitySurface<TInterpolator> : YoYOpti
     public (ImmutableArray<double> Strikes, ImmutableArray<double> Volatilities) Dslice(Date d) => Stripped.Slice(d);
 
     /// <inheritdoc/>
-    /// <remarks>The strikes' interpolation of the stripped curves' volatilities at the time (XRR5 (xiii)).</remarks>
+    /// <remarks>The strikes' interpolation of the stripped curves' volatilities at the time.</remarks>
     protected override double VolatilityImpl(double length, double strike)
     {
         (ImmutableArray<double> strikes, ImmutableArray<double> vols) = Stripped.Slice(length);

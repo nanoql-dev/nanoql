@@ -9,10 +9,9 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The risky asset swap's annuities, recovery integral and reads before the discount curve's date (the S-xcr plan's
-/// XR8 (xii), (xxi), (x)), on 31 August 2006 with the discount curve 5% flat (Actual/360) and the hazard rate 0.02
-/// flat (Actual/365 Fixed), nominal 100, spread 0.01, an annual fixed and a quarterly float schedule on TARGET to 31
-/// August 2011, both legs Actual/360 (the S-xcr run's <c>c4_facts.cpp</c>):
+/// The risky asset swap's annuities, recovery integral and reads before the discount curve's date, on 31 August 2006
+/// with the discount curve 5% flat (Actual/360) and the hazard rate 0.02 flat (Actual/365 Fixed), nominal 100, spread
+/// 0.01, an annual fixed and a quarterly float schedule on TARGET to 31 August 2011, both legs Actual/360:
 /// <list type="bullet">
 /// <item>QuantLib's fixed annuity runs over the float schedule: at recovery 0.4 its fair spread reads
 /// 0.011808418663949119 and the package at it 99.57571577267737, not par. Where the schedules coincide, at recovery 0
@@ -24,10 +23,10 @@ namespace NanoQL.Tests.Divergences;
 /// <item>On a discount curve from two TARGET days out QuantLib throws ("negative time (-0.0111111) given"); on that
 /// curve restated from today, discounting 1 to its date, it reads NPV 95.971197157591376 and fair spread
 /// 0.019044839323900529 where the schedules coincide at recovery 0.</item>
-/// <item>A seasoned swap's past periods are QuantLib's reads, which refuse a date before the curve's: on 15 January 2026,
-/// the curves from today, a swap from 15 March 2024 to 15 March 2030 (annual fixed, quarterly float, no calendar)
-/// refuses in QuantLib ("negative time (-1.60833) given"), where reading 1 there would price every past period at par
-/// (the S-xcr code review's C4 O1-1).</item>
+/// <item>A seasoned swap's past periods are QuantLib's reads, which refuse a date before the curve's: on 15 January
+/// 2026, the curves from today, a swap from 15 March 2024 to 15 March 2030 (annual fixed, quarterly float, no calendar)
+/// refuses in QuantLib ("negative time (-1.60833) given"), where reading 1 there would price every past period at
+/// par.</item>
 /// </list>
 /// </summary>
 public class RiskyAssetSwapTests
@@ -53,8 +52,8 @@ public class RiskyAssetSwapTests
     [InlineData(0.04, 96.20668598227455, 0.018778123653103697)]
     public void OnEqualSchedulesWithOtherDayCountersTheFairSpreadIsOverTheFloatAnnuity(double? coupon, double npv, double quantLibs)
     {
-        // the fixed leg Actual/365 Fixed, the float Actual/360, recovery 0: QuantLib's NPV, and its fair spread over its
-        // fixed annuity here over the float annuity (the S-xcr code review's C4 O1-4 (a); the S-xcr run's c4_r1.cpp)
+        // the fixed leg Actual/365 Fixed, the float Actual/360, recovery 0: QuantLib's NPV, and its fair spread over
+        // its fixed annuity here over the float annuity
         var context = new EvaluationContext { EvaluationDate = Today };
         Schedule fl = Float();
         var swap = new RiskyAssetSwap(true, 100.0, fl, fl, new Actual365Fixed(), new Actual360(), 0.01, 0.0, Discount(), Hazard(), coupon);

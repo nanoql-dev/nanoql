@@ -7,15 +7,14 @@ using static NanoQL.Tests.Conventions.CdoBuilders;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The CDO engines' leverage, additional fair premium and fair upfront (the S-xcr plan's XR8 (ix)): every leg and the
-/// upfront levered, the fair rates unlevered, the additional fair premium the instrument's, the fair upfront the
-/// side-invariant rate that zeroes the value over the first accrual's discount. QuantLib's values on the eight-name
-/// [3%, 7%] tranche at 2% running are the S-xcr run's <c>c2_facts.cpp</c>: unlevered, the mid-point fair premium
-/// 0.10676171982795336 and NPV −0.94866792850998161, the integral 0.10608680303646907 and −0.94135991232162608; at
-/// twice the notional, the mid-point's 0.053380859913976682 and −0.72998440531768671 (its premium leg alone levered),
-/// the integral's unchanged; the additional fair premium the instrument's negated; the buyer's fair upfront
-/// −0.2964587276593692 where the seller's is 0.2964587276593692, its NPV at it 1.8972059114097959; a forward start's
-/// NPV at its fair upfront −0.020592559070216399.
+/// The CDO engines' leverage, additional fair premium and fair upfront: every leg and the upfront levered, the fair
+/// rates unlevered, the additional fair premium the instrument's, the fair upfront the side-invariant rate that zeroes
+/// the value over the first accrual's discount. QuantLib's values on the eight-name [3%, 7%] tranche at 2% running:
+/// unlevered, the mid-point fair premium 0.10676171982795336 and NPV −0.94866792850998161, the integral
+/// 0.10608680303646907 and −0.94135991232162608; at twice the notional, the mid-point's 0.053380859913976682 and
+/// −0.72998440531768671 (its premium leg alone levered), the integral's unchanged; the additional fair premium the
+/// instrument's negated; the buyer's fair upfront −0.2964587276593692 where the seller's is 0.2964587276593692, its NPV
+/// at it 1.8972059114097959; a forward start's NPV at its fair upfront −0.020592559070216399.
 /// </summary>
 public class CdoLeverageTests
 {

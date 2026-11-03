@@ -14,7 +14,7 @@ namespace NanoQL.Tests.Divergences;
 /// A year-on-year cap on a leg holding a null cash flow. QuantLib builds the instrument, and its <c>isExpired()</c>
 /// dereferences each cash flow (<c>inflationcapfloor.cpp:94-99</c>), which is undefined for a null one; the wheel
 /// refuses <c>None</c> in a <c>Leg</c>. nanoql refuses it at construction with <see cref="ArgumentException"/>, "null
-/// cash flow in leg", from every constructor, naming the leg, as S7's <see cref="CapFloor"/> does.
+/// cash flow in leg", from every constructor, naming the leg, as <see cref="CapFloor"/> does.
 /// </summary>
 public class YoYInflationCapFloorNullCashFlowTests
 {

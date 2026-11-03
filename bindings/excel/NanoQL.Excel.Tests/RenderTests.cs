@@ -12,15 +12,15 @@ using ExcelDna.Integration;
 namespace NanoQL.Excel.Tests;
 
 /// <summary>
-/// The repro renderers (XLR14): every committed vector rendered as C# from the experimental tests' build's templates and
-/// adapters, compiled against nanoql alone in a scratch project and run, each program's outcome compared with its cell's
-/// as a grid, cell by cell (XLP66, XLP71); and the forms the renders take for a looped call, a name, a range where one
-/// value goes and the template's mask (XLR15, XLR16, B7-1), in C# and in Python.
+/// The repro renderers: every committed vector rendered as C# from the experimental tests' build's templates and
+/// adapters, compiled against nanoql alone in a scratch project and run, each program's outcome compared with its
+/// cell's as a grid, cell by cell; and the forms the renders take for a looped call, a name, a range where one value
+/// goes and the template's mask, in C# and in Python.
 /// </summary>
 [Collection(TestSettings.Name)]
 public sealed partial class RenderTests
 {
-    // The current convention set, which a name where a day counter or a calendar goes reads (XLR16).
+    // The current convention set, which a name where a day counter or a calendar goes reads.
     private const string Set = "(global::NanoQL.ConventionProvider.Current as global::NanoQL.Extensions.Conventions.ConventionSet ?? global::NanoQL.Extensions.Conventions.ConventionSet.QuantLib)";
 
     private static readonly string Gen = typeof(RenderTests).Assembly.GetCustomAttributes<AssemblyMetadataAttribute>().Single(x => x.Key == "NanoQLExcelGen").Value!;
@@ -81,8 +81,8 @@ public sealed partial class RenderTests
     }
 
     /// <summary>
-    /// A looped call is its loop, each element guarded as Excel shows a failed element (XLR15): a date's loop, and an
-    /// element no date holds failing in its place; in C# and in Python.
+    /// A looped call is its loop, each element guarded as Excel shows a failed element: a date's loop, and an element
+    /// no date holds failing in its place; in C# and in Python.
     /// </summary>
     [Fact]
     public void ALoopedCallIsItsLoopEachElementGuarded()
@@ -95,7 +95,8 @@ public sealed partial class RenderTests
         Assert.Contains("_elem(lambda: _raise('date: expected a date (a whole-number serial), got text \"x\"'))", Python("r7-loop-element"), StringComparison.Ordinal);
     }
 
-    /// <summary>A name where a day counter or a calendar goes is the convention set's lookup (XLR16), alone or in an array of calendars (B7-1).</summary>
+    /// <summary>A name where a day counter or a calendar goes is the convention set's lookup, alone or in an array of
+    /// calendars.</summary>
     [Fact]
     public void ANameIsTheConventionSetsLookup()
     {
@@ -105,7 +106,8 @@ public sealed partial class RenderTests
         Assert.Contains("nanoql.JointCalendar([nanoql.ConventionSet.calendar(None, 'TARGET'), nanoql.ConventionSet.calendar(None, 'UnitedStates.Settlement')])", Python("r8-z-namesarray"), StringComparison.Ordinal);
     }
 
-    /// <summary>A range where one value goes, which the template's mask doesn't loop, is the add-in's refusal, never its first cell (B7-1).</summary>
+    /// <summary>A range where one value goes, which the template's mask doesn't loop, is the add-in's refusal, never
+    /// its first cell.</summary>
     [Fact]
     public void ARangeWhereOneValueGoesIsTheAddInsRefusal()
     {
@@ -115,7 +117,8 @@ public sealed partial class RenderTests
         Assert.Contains("v2 = _raise('nqlCalendarBusinessDayList: from: a range where one value goes, which the add-in does not loop')", Python("r8-y-rangeret"), StringComparison.Ordinal);
     }
 
-    /// <summary>The template's mask is followed (B7-1): a bind looped over booleans and draws looped over counts, each element its own.</summary>
+    /// <summary>The template's mask is followed: a bind looped over booleans and draws looped over counts, each element
+    /// its own.</summary>
     [Fact]
     public void TheTemplatesMaskIsFollowed()
     {
@@ -228,8 +231,8 @@ public sealed partial class RenderTests
 
     private static string Python(string name) => string.Join("\n", XlPython.Render(File.ReadAllText(Path.Combine(Vectors.Folder, name + ".json")), Templates));
 
-    // The C# repro's outcome against the cell's (the check C0 ran on the planner's renders): a grid of cells, each a
-    // double's bits, a text, a boolean, an object's type or an error's code; a Complex by its parts against the cell's text.
+    // The C# repro's outcome against the cell's: a grid of cells, each a double's bits, a text, a boolean, an object's
+    // type or an error's code; a Complex by its parts against the cell's text.
     private static bool Outcome(JsonElement expected, string got)
     {
         using JsonDocument d = JsonDocument.Parse(got);

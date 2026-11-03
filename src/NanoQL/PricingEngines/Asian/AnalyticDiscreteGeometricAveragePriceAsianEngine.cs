@@ -25,21 +25,19 @@ namespace NanoQL.PricingEngines;
 /// arithmetic Monte Carlo engine, reading no past fixing, as QuantLib's does.
 /// </para>
 /// <para>
-/// Documented divergences (the S-bar plan's BR4 (a), BR5 (xxvi), (xli)). The average is priced exactly under
-/// deterministic term structures: ln G is normal with mean (1/N)(the past fixings' log-sum + Σ[ln F(tᵢ) − V(tᵢ)/2])
-/// and variance (1/N²)ΣΣV(min(tᵢ, tⱼ)) over the future fixings, F the forward and V the Black variance at the strike,
-/// each read by date, where QuantLib reads one volatility at the exercise date and the zero rates to it for every
-/// fixing, +37.4% and −18.9% off on shaped markets (<c>Divergences/GeometricAsianTermStructureTests.cs</c>). The Greeks
-/// are the form's: vega under a parallel shift of the volatilities, rho and dividend rho under parallel shifts of the
-/// curves, each on its own structure's clock; on a flat market they are QuantLib's. A running product that has left
-/// double's range is read through the past fixings' log-sum, where QuantLib prices ∞
-/// (<c>Divergences/GeometricAsianProductRangeTests.cs</c>).
+/// Documented divergences. The average is priced exactly under deterministic term structures: ln G is normal with mean
+/// (1/N)(the past fixings' log-sum + Σ[ln F(tᵢ) − V(tᵢ)/2]) and variance (1/N²)ΣΣV(min(tᵢ, tⱼ)) over the future
+/// fixings, F the forward and V the Black variance at the strike, each read by date, where QuantLib reads one
+/// volatility at the exercise date and the zero rates to it for every fixing, +37.4% and −18.9% off on shaped markets
+/// (<c>Divergences/GeometricAsianTermStructureTests.cs</c>). The Greeks are the form's: vega under a parallel shift of
+/// the volatilities, rho and dividend rho under parallel shifts of the curves, each on its own structure's clock; on a
+/// flat market they are QuantLib's. A running product that has left double's range is read through the past fixings'
+/// log-sum, where QuantLib prices ∞ (<c>Divergences/GeometricAsianProductRangeTests.cs</c>).
 /// </para>
 /// <para>
 /// A fixing dated from the evaluation date to the clock's origin, where the structures settle after the evaluation
 /// date, is taken at the origin, the spot with no variance and no discount accrued, so as a past fixing at the spot
-/// (the S-bar code review's B3-1, <c>Divergences/AsianLateSettlementTests.cs</c>), where QuantLib drops it from the
-/// average.
+/// (<c>Divergences/AsianLateSettlementTests.cs</c>), where QuantLib drops it from the average.
 /// </para>
 /// </remarks>
 public static class AnalyticDiscreteGeometricAveragePriceAsianEngine

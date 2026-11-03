@@ -9,8 +9,8 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The numeric Hagan pricer's integration limits (the S-cms plan's CMR1 (iv)): QuantLib's optionlet price sets them in
-/// mutable members, which <c>upperLimit()</c>, <c>lowerLimit()</c> and <c>stdDeviations()</c> read afterwards;
+/// The numeric Hagan pricer's integration limits: QuantLib's optionlet price sets them in mutable members, which
+/// <c>upperLimit()</c>, <c>lowerLimit()</c> and <c>stdDeviations()</c> read afterwards;
 /// <see cref="NumericHaganPricer.IntegrationLimits"/> computes them from the coupon and the optionlet's type (the
 /// harness vectors check them against QuantLib's). A coupon whose fixing is known integrates nothing: the constructor's
 /// limits, and no number of standard deviations. A coupon that isn't a CMS coupon and a type outside

@@ -12,13 +12,13 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The COS Heston engine's characteristic function at small σ (the S-hes plan's HR7 (viii), under R8). QuantLib's COS
-/// engine computes the classic form, divided by σ² (<c>coshestonengine.cpp:132-150</c>), which cancels as σ falls: its
-/// at-the-money price is off by 2.9e-11 relative at σ = 1e-3, 3.7e-5 at 1e-6 and 3.4% at 1e-8, where the analytic
-/// engine's Andersen and Lake form, QuantLib's own, holds. nanoql's COS engine takes the analytic engine's form of the
-/// same function below σ = 0.07, the cut where the classic form first departs from it by more than 1e-12 relative,
-/// measured on a grid of six parameter sets, ten u and nine times to 30 years; above it QuantLib's form and bits. The
-/// check: QuantLib's analytic engine, and the two forms within 1e-12 at the cut.
+/// The COS Heston engine's characteristic function at small σ. QuantLib's COS engine computes the classic form, divided
+/// by σ² (<c>coshestonengine.cpp:132-150</c>), which cancels as σ falls: its at-the-money price is off by 2.9e-11
+/// relative at σ = 1e-3, 3.7e-5 at 1e-6 and 3.4% at 1e-8, where the analytic engine's Andersen and Lake form,
+/// QuantLib's own, holds. nanoql's COS engine takes the analytic engine's form of the same function below σ = 0.07, the
+/// cut where the classic form first departs from it by more than 1e-12 relative, measured on a grid of six parameter
+/// sets, ten u and nine times to 30 years; above it QuantLib's form and bits. The check: QuantLib's analytic engine,
+/// and the two forms within 1e-12 at the cut.
 /// </summary>
 public class CosHestonSmallSigmaTests
 {
@@ -29,7 +29,7 @@ public class CosHestonSmallSigmaTests
     public void BelowTheCutCosMatchesTheAnalyticEngine()
     {
         // QuantLib 1.44's COS engine prices 8.827318003627013, 8.82732259535544, 8.827645320471433 and 9.13180644107807
-        // at sigma 1e-3, 1e-5, 1e-6 and 1e-8 [executed on the wheel]
+        // at sigma 1e-3, 1e-5, 1e-6 and 1e-8 (QuantLib-Python 1.44)
         var call = new VanillaOption(new PlainVanillaPayoff(OptionType.Call, 100.0), new EuropeanExercise(Today + 365));
         foreach ((double sigma, double analytic) in new[]
                  {

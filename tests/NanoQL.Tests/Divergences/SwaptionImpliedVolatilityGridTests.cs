@@ -6,15 +6,14 @@ using NanoQL.Models;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The frozen-coefficient swaption volatility on an evolution that doesn't hold its expiry (the S-mm plan's MR4 (a), a
-/// refusal the user ruled). QuantLib's <c>SwapForwardMappings::swaptionImpliedVolatility</c> sums every step starting
-/// before the expiry (<c>swapforwardmappings.cpp:194</c>, <c>:216-217</c>), so a step straddling it adds the later
-/// variance: FlatVol at 20% on eleven semi-annual rates at 4%, yearly steps, swaption (0, 2) 0.221024 against 0.197607
-/// on every fixing (+11.9%), (0, 10) +34.3%, (2, 10) +12.0% (the planner's MP26, <c>probes\round1.out.txt</c>); and it
-/// reads the first displacement alone (<c>:183</c>). QuantLib's frozen-coefficient adapters refuse both ("skipping …
-/// rate time", "not equal to the previous ones", <c>fwdtocotswapadapter.cpp:44</c>, <c>:50-57</c>), and so does
-/// nanoql here. A grid that holds the expiry keeps QuantLib's value: (1, 4) on yearly steps is the every-fixing value,
-/// 0.195828.
+/// The frozen-coefficient swaption volatility on an evolution that doesn't hold its expiry (a refusal). QuantLib's
+/// <c>SwapForwardMappings::swaptionImpliedVolatility</c> sums every step starting before the expiry
+/// (<c>swapforwardmappings.cpp:194</c>, <c>:216-217</c>), so a step straddling it adds the later variance: FlatVol at
+/// 20% on eleven semi-annual rates at 4%, yearly steps, swaption (0, 2) 0.221024 against 0.197607 on every fixing
+/// (+11.9%), (0, 10) +34.3%, (2, 10) +12.0%; and it reads the first displacement alone (<c>:183</c>). QuantLib's
+/// frozen-coefficient adapters refuse both ("skipping … rate time", "not equal to the previous ones",
+/// <c>fwdtocotswapadapter.cpp:44</c>, <c>:50-57</c>), and so does nanoql here. A grid that holds the expiry keeps
+/// QuantLib's value: (1, 4) on yearly steps is the every-fixing value, 0.195828.
 /// </summary>
 public class SwaptionImpliedVolatilityGridTests
 {

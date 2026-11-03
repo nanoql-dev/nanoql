@@ -19,12 +19,12 @@ namespace NanoQL.Coupons;
 /// A fixing on or before the evaluation date gives the caplet and floorlet their intrinsic values; a later one is
 /// priced with Black's formula on a shifted lognormal volatility, or Bachelier's on a normal one. On a shifted
 /// lognormal volatility a strike at or below −shift, on an adjusted fixing above −shift, which QuantLib's Black formula
-/// refuses, prices a caplet at the adjusted fixing less the strike and a floorlet at 0, the formula's limits there (R8,
-/// the S-cms plan's CMR5 (xxiii); QuantLib's check, its Black formula at −shift + 1e-12), so a capped coupon struck
-/// there pays its cap and a digital coupon struck at 0 on an unshifted volatility replicates to probability 1. The
-/// timing adjustment corrects the fixing of an in-arrears coupon
-/// (<see cref="BlackIborCouponPricerTimingAdjustment.Black76"/>), or of any coupon not paid at the index's maturity
-/// (<see cref="BlackIborCouponPricerTimingAdjustment.BivariateLognormal"/>, with the correlation given).
+/// refuses, prices a caplet at the adjusted fixing less the strike and a floorlet at 0, the formula's limits there
+/// (QuantLib's check, its Black formula at −shift + 1e-12), so a capped coupon struck there pays its cap and a digital
+/// coupon struck at 0 on an unshifted volatility replicates to probability 1. The timing adjustment corrects the fixing
+/// of an in-arrears coupon (<see cref="BlackIborCouponPricerTimingAdjustment.Black76"/>), or of any coupon not paid at
+/// the index's maturity (<see cref="BlackIborCouponPricerTimingAdjustment.BivariateLognormal"/>, with the correlation
+/// given).
 /// </para>
 /// <para>
 /// Unsealed, as in QuantLib, whose subclasses override <see cref="AdjustedFixing"/>. Every member computes the
@@ -265,8 +265,8 @@ public class BlackIborCouponPricer : IborCouponPricer
             if (shiftedLn && effStrike <= -shift)
             {
                 // where Black's formula refuses the strike, the caplet is the forward less the strike and the
-                // floorlet 0, the formula's limits there (CMR5 (xxiii)); on a forward at or below −shift the model has
-                // no rate distribution, and the formula's refusal stands
+                // floorlet 0, the formula's limits there; on a forward at or below −shift the model has no rate
+                // distribution, and the formula's refusal stands
                 double forward = AdjustedFixing(coupon, context);
                 if (forward > -shift)
                 {

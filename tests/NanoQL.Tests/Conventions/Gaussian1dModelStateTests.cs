@@ -12,10 +12,10 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The Gaussian1d models' state (the S-g1d plan's G1R1 (iii); master plan §2.2's Gaussian1d row): QuantLib's model
-/// keeps its swaps and GSR's process core its integrals for the model's life, flushed at every parameter change; here a
-/// memo lives for one call, so prices on one model are each their own: in either order, from several threads at once,
-/// and a public member before and after an engine call give the same bits.
+/// The Gaussian1d models' state (the playbook's Gaussian1d row): QuantLib's model keeps its swaps and GSR's process
+/// core its integrals for the model's life, flushed at every parameter change; here a memo lives for one call, so
+/// prices on one model are each their own: in either order, from several threads at once, and a public member before
+/// and after an engine call give the same bits.
 /// </summary>
 public class Gaussian1dModelStateTests
 {

@@ -4,11 +4,11 @@
 .cpp), on the evaluation date 15 October 2026: the Black volatility of a Heston model's out-of-the-money option prices.
 
 Two Heston parameter sets (tools/vectors/gen/processes/hestonprocess.py's equity and far-from-Feller sets) on flat and
-linear zero curves, by Gatheral's form, the angled contour and Andersen and Piterbarg's form, each on Gauss-Laguerre
-of order 164 (the wheel's surface takes the form alone, its integration QuantLib-SWIG's default; QuantLib's C++
-defaults, the angled contour at order 160, are a convention fact's): the Black volatility and variance
-at three times and five strikes, the at-the-money level at those times, and the reference date. The curves share their
-reference date and day counter, so the surface's clock is QuantLib's (the S-hes plan's HR7 (xi)).
+linear zero curves, by Gatheral's form, the angled contour and Andersen and Piterbarg's form, each on Gauss-Laguerre of
+order 164 (the wheel's surface takes the form alone, its integration QuantLib-SWIG's default; QuantLib's C++ defaults,
+the angled contour at order 160, are a convention fact's): the Black volatility and variance at three times and five
+strikes, the at-the-money level at those times, and the reference date. The curves share their reference date and day
+counter, so the surface's clock is QuantLib's.
 
 A case holds one model {"process" (hestonprocess.py's spec, no discretization)} and a surface {"cpxLog"
 (AnalyticHestonEngine's ComplexLogFormula integer), "order" (164)}. The wheel's calls, by QuantLib-SWIG 1.44's

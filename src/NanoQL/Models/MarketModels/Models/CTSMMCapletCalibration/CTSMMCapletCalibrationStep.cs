@@ -14,7 +14,7 @@ namespace NanoQL.Models;
 /// One pass of a coterminal swap market model's caplet calibration: the swap rates' pseudo-roots and the failures, and
 /// what the calibration computes besides (the alpha form's α, a and b; the max-homogeneity calibration's deformation
 /// size and swaption error). <see cref="CTSMMCapletCalibration"/>'s hook returns it, and the calibrations' static
-/// functions return it in place of QuantLib's out-parameters (the S-mm plan's MR2 (a)).
+/// functions return it in place of QuantLib's out-parameters.
 /// </summary>
 /// <remarks>Immutable: a pseudo-root read returns a copy.</remarks>
 public sealed class CTSMMCapletCalibrationStep

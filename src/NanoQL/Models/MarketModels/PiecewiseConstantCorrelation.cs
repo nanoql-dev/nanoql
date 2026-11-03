@@ -16,7 +16,7 @@ namespace NanoQL.Models;
 /// include every rate time but the last.
 /// </summary>
 /// <remarks>
-/// Immutable (the S-mm plan's MR1 (i)): a matrix read returns a copy. An extension point, as in QuantLib.
+/// Immutable: a matrix read returns a copy. An extension point, as in QuantLib.
 /// </remarks>
 public abstract class PiecewiseConstantCorrelation
 {

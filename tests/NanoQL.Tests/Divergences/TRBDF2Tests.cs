@@ -7,13 +7,12 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The old TR-BDF2's trapezoidal stage (the S-core plan's CR7 (xvi)): QuantLib builds the stage's implicit part at
-/// t − Δt, where the stage ends at t − αΔt, so a time-dependent operator steps at first order; nanoql builds it at
-/// t − αΔt. On u_t = c(t)·u_xx on 101 points from sin(πx), rolled back from 1 to 0 with Dirichlet rows, sin(πx) is the
-/// discrete operator's eigenvector, so the semi-discrete solution at x ½ is exp(−λ_h ∫c), λ_h = (2/h²)(1 − cos πh), and
-/// the errors are the scheme's own (this run's <c>c4work\refs_c4.py</c>, <c>refs_c4.out</c>). At c = 1 nanoql's values
-/// are QuantLib's, bit for bit; at c = 1 + t nanoql's errors fall fourfold per halving, QuantLib's don't. QuantLib's
-/// values are its own (<c>probes\c4_facts.cpp</c>, <c>c4_facts.out</c>).
+/// The old TR-BDF2's trapezoidal stage: QuantLib builds the stage's implicit part at t − Δt, where the stage ends at t
+/// − αΔt, so a time-dependent operator steps at first order; nanoql builds it at t − αΔt. On u_t = c(t)·u_xx on 101
+/// points from sin(πx), rolled back from 1 to 0 with Dirichlet rows, sin(πx) is the discrete operator's eigenvector, so
+/// the semi-discrete solution at x ½ is exp(−λ_h ∫c), λ_h = (2/h²)(1 − cos πh), and the errors are the scheme's own. At
+/// c = 1 nanoql's values are QuantLib's, bit for bit; at c = 1 + t nanoql's errors fall fourfold per halving,
+/// QuantLib's don't. QuantLib's values are its own.
 /// </summary>
 public class TRBDF2Tests
 {

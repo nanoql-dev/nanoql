@@ -9,17 +9,16 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The standard g-function's swap length (the S-cms plan's CMR5 (i), as the user ruled during its run): QuantLib passes
-/// the swap index's tenor as its length in the tenor's own units (<c>conundrumpricer.cpp:130</c>,
-/// <c>swapTenor_.length()</c> into a <c>Size</c>), so an 18-month index reads as 18 years: on the wheel, on a flat 3%
-/// curve and a 20% volatility, a 1-year coupon fixing in 10 years on an 18-month index with an annual fixed leg prices
-/// 0.030653808259814307 on the analytic Hagan pricer's standard model, a convexity adjustment of 3.04e-4 against the
-/// exact-yield model's 7.13e-5. Read in years the length doesn't repair it: that swap starts with a 6-month stub, and
-/// the payment's delay δ is counted in the first period's length (<c>:126</c>), where the model presumes equal periods,
-/// so the adjustment comes out −3.25e-4. nanoql reads the length in years where the tenor is a whole number of
-/// fixed-leg periods (18 months on a semiannual leg, 3 periods), and refuses the standard model otherwise, naming the
-/// exact-yield model, which reads the schedule. QuantLib's checks: its own whole-year tenors, and its exact-yield model
-/// on the same swap.
+/// The standard g-function's swap length: QuantLib passes the swap index's tenor as its length in the tenor's own units
+/// (<c>conundrumpricer.cpp:130</c>, <c>swapTenor_.length()</c> into a <c>Size</c>), so an 18-month index reads as 18
+/// years: on the wheel, on a flat 3% curve and a 20% volatility, a 1-year coupon fixing in 10 years on an 18-month
+/// index with an annual fixed leg prices 0.030653808259814307 on the analytic Hagan pricer's standard model, a
+/// convexity adjustment of 3.04e-4 against the exact-yield model's 7.13e-5. Read in years the length doesn't repair it:
+/// that swap starts with a 6-month stub, and the payment's delay δ is counted in the first period's length
+/// (<c>:126</c>), where the model presumes equal periods, so the adjustment comes out −3.25e-4. nanoql reads the length
+/// in years where the tenor is a whole number of fixed-leg periods (18 months on a semiannual leg, 3 periods), and
+/// refuses the standard model otherwise, naming the exact-yield model, which reads the schedule. QuantLib's checks: its
+/// own whole-year tenors, and its exact-yield model on the same swap.
 /// </summary>
 public class StandardGFunctionTenorTests
 {

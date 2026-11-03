@@ -8,8 +8,8 @@ namespace NanoQL.Tests.Divergences;
 /// <summary>
 /// France's Ascension and Whit Monday. QuantLib 1.44 holds them on May 10th and May 21st (<c>france.cpp:60-63</c>),
 /// right only when Easter Monday is April 2nd; QuantLib's master moves them with Easter, Easter Monday plus 38 and 49
-/// days (#2893, <c>16414224f</c>), with five new test lines, which nanoql takes ahead of the pin, as R8 directs. The
-/// lines below are upstream's; QuantLib 1.44's answers are recorded beside them.
+/// days (#2893, <c>16414224f</c>), with five new test lines, which nanoql takes ahead of the pin, as a fix. The lines
+/// below are upstream's; QuantLib 1.44's answers are recorded beside them.
 /// </summary>
 public class FranceMoveableFeastTests
 {

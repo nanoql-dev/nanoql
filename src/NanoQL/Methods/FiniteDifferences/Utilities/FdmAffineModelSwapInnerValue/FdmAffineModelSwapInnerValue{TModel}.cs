@@ -27,12 +27,12 @@ namespace NanoQL.Methods;
 /// <see cref="FdmAffineModelTermStructure"/> for the point's state, whose notifications make the floating coupons
 /// forecast on it. nanoql has no relinkable handles; the inner value holds, for each exercise date as QuantLib links a
 /// new curve there, a private proxy curve pair whose state it sets at each point, the swap rebuilt on its index cloned
-/// onto the forwarding proxy (the S-sr plan's SSR4). The proxies and the swap are a working state: they never leave the
-/// object, which is owned by one computation and not thread-safe. The models' dynamics are built once.
+/// onto the forwarding proxy. The proxies and the swap are a working state: they never leave the object, which is owned
+/// by one computation and not thread-safe. The models' dynamics are built once.
 /// </para>
 /// <para>
 /// A time not in the exercise map is refused, where QuantLib reads <c>find(t)->second</c> on <c>end()</c>, undefined
-/// behaviour, which an American exercise's step condition reaches (SSR6 (x), master §2.2's undefined-path row).
+/// behaviour, which an American exercise's step condition reaches (the playbook's undefined-behaviour row).
 /// </para>
 /// <para>An extension point only for QuantLib-Python's two named classes, <see cref="FdmAffineG2ModelSwapInnerValue"/> and <see cref="FdmAffineHullWhiteModelSwapInnerValue"/>.</para>
 /// </remarks>

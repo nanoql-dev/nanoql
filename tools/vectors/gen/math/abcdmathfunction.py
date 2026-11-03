@@ -8,9 +8,9 @@ derivative's, the rolling-window definite integral's and derivative's coefficien
 value; and validate's four refusals, each as {"throws": true}.
 
 Left out where 1.44 and nanoql differ, each a documented divergence (AbcdMaximumTests): maximumLocation for b < 0
-(QuantLib's master's #2841, the S-g1d plan's G1R5 (iii)), and maximumValue wherever 1.44's returns d for b = 0 or
-a <= 0 or reads 1.44's location (G1R6 (ix)); each kept where the two agree. Each case's input "abcd" is the four
-coefficients. Read back by tests/NanoQL.Tests/Vectors/Numerics/AbcdMathFunctionVectorTests.cs."""
+(QuantLib's master's #2841), and maximumValue wherever 1.44's returns d for b = 0 or a <= 0 or reads 1.44's location;
+each kept where the two agree. Each case's input "abcd" is the four coefficients. Read back by
+tests/NanoQL.Tests/Vectors/Numerics/AbcdMathFunctionVectorTests.cs."""
 import os
 import sys
 

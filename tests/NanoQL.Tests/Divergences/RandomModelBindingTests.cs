@@ -9,9 +9,9 @@ using static NanoQL.Tests.Conventions.CreditPortfolioBuilders;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// A random model bound to two baskets in turn (the S-xcr plan's XR8 (viii), fixed by XR1's binding): each binding is a
-/// fresh model's simulation. QuantLib's model keeps its first basket's paths: set on three names at 2% then on three at
-/// 5%, it reads 3.447 on both, where a fresh model reads 8.007 on the second (the S-xcr run's <c>c2_facts.cpp</c>).
+/// A random model bound to two baskets in turn: each binding is a fresh model's simulation. QuantLib's model keeps its
+/// first basket's paths: set on three names at 2% then on three at 5%, it reads 3.447 on both, where a fresh model
+/// reads 8.007 on the second.
 /// </summary>
 public class RandomModelBindingTests
 {

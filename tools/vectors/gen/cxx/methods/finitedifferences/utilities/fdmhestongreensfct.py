@@ -10,9 +10,9 @@ years, the leverage 1, and at 0.8 for the first set; on a mesher of 13 log-spot 
 variances (uniform from 0.002 to 0.5, or their logs under the log transformation). For each, the density at every
 point.
 
-Left out (the S-hes plan's §2.10): the semi-analytical algorithm, which reads S-van's fixed HestonProcess.Pdf where
-QuantLib's is NaN (tests/NanoQL.Tests/Divergences/HestonGreensFctSemiAnalyticalTests.cs); structures dated or
-day-counted apart (tests/NanoQL.Tests/Divergences/HestonSlvMismatchedTimesTests.cs).
+Left out: the semi-analytical algorithm, which reads nanoql's fixed HestonProcess.Pdf where QuantLib's is NaN
+(tests/NanoQL.Tests/Divergences/HestonGreensFctSemiAnalyticalTests.cs); structures dated or day-counted apart
+(tests/NanoQL.Tests/Divergences/HestonSlvMismatchedTimesTests.cs).
 
 The harness's call is tools/cxx/src/methods/finitedifferences/utilities/fdmhestongreensfct.cpp's. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Methods/FiniteDifferences/Utilities/FdmHestonGreensFctCxxVectorTests.cs."""

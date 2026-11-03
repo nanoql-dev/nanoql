@@ -23,7 +23,7 @@ MARKETS = [(None, None)]
 
 
 def skipped(market, c):
-    """The dates SCR3 (xiv) changes: the Tuesday after a Monday Boxing Day or a Monday October 1st, 86 from 1901 to
+    """The dates the fix changes: the Tuesday after a Monday Boxing Day or a Monday October 1st, 86 from 1901 to
     2199."""
     out = []
     for y in range(1901, 2200):

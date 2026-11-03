@@ -30,10 +30,10 @@ namespace NanoQL.Models;
 /// that the class "was not tested enough to guarantee its functionality".
 /// </para>
 /// <para>
-/// V(t) and B(x, t) are QuantLib's master's forms after the pin (#2885, the S-sr plan's SSR3), free of cancellation at
-/// small mean reversion; the members QuantLib leaves, the bond option's σ_P, the fitting parameter and the swaption
-/// function's means, standard deviations and correlation, are written in the same forms (SSR6 (iii)), exact in the limit
-/// a, b → 0, so their last bits differ from 1.44's at every reversion.
+/// V(t) and B(x, t) are QuantLib's master's forms after the pin (#2885), free of cancellation at small mean reversion;
+/// the members QuantLib leaves, the bond option's σ_P, the fitting parameter and the swaption function's means,
+/// standard deviations and correlation, are written in the same forms, exact in the limit a, b → 0, so their last bits
+/// differ from 1.44's at every reversion.
 /// </para>
 /// </remarks>
 public sealed class G2 : TwoFactorModel, IAffineModel, ITermStructureConsistentModel
@@ -165,9 +165,8 @@ public sealed class G2 : TwoFactorModel, IAffineModel, ITermStructureConsistentM
     /// <remarks>
     /// The fixed coupons are the swap's: each the corrected rate times the coupon's own accrual period, the last with
     /// the notional, where QuantLib's are the rate times the interval between pay times on the curve's day counter
-    /// (<c>g2.cpp:162-163</c>), which the swap's fixed day counter and accruals never enter (the S-sr plan's
-    /// SSR6 (xiii)). QuantLib's member takes the engine's arguments, internal here: <see cref="G2SwaptionEngine"/> is
-    /// its public route.
+    /// (<c>g2.cpp:162-163</c>), which the swap's fixed day counter and accruals never enter. QuantLib's member takes
+    /// the engine's arguments, internal here: <see cref="G2SwaptionEngine"/> is its public route.
     /// </remarks>
     internal double Swaption(FixedVsFloatingSwapArguments arguments, double fixedRate, double range, int intervals)
     {
@@ -258,7 +257,7 @@ public sealed class G2 : TwoFactorModel, IAffineModel, ITermStructureConsistentM
             public override double Value(ImmutableArray<double> parameters, double t)
             {
                 // ForwardRate(t, t, Continuous)'s rate without its InterestRate, so a finite-difference step allocates
-                // nothing (the S-sr plan's SSD10)
+                // nothing
                 double forward = termStructure.ContinuousForwardRate(t, t);
                 double temp1 = sigma * t * G2Functions.OneMinusExpOverX(a * t);
                 double temp2 = eta * t * G2Functions.OneMinusExpOverX(b * t);

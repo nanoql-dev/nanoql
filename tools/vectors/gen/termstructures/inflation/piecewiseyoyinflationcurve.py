@@ -11,7 +11,7 @@ IterativeBootstrap) and YearOnYearInflationSwapHelper.
   bootstraps the curve again, its data and yoyRate at the same dates. A linear helper on the ratio index observes its
   coupons where QuantLib's test of its ratio branch and nanoql's agree, all of them forecast.
 
-The stability filter of the S-infl plan's SID20 (the S7 plan's S7R6) runs on each case as on the zero curve's
+The stability filter runs on each case as on the zero curve's
 (tools/vectors/gen/termstructures/inflation/piecewisezeroinflationcurve.py): a solved output is written only where
 every move of the helpers' quotes by one ulp leaves it within 1e-12 x max(|a|, |b|, 1), a dropped one null and its
 index in the case's inputs "dropped"; the generator prints "dropped n of m outputs".

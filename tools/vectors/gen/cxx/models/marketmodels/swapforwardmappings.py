@@ -10,10 +10,9 @@ Jacobians and Z matrices at spannings 0, 1, 2, 3 and past the rates. swaptionImp
 equal displacements whose evolution times hold each swaption's expiry: every rate time; every other one with the
 swaptions expiring on them; and finer ones. Throws: a start index not before the end.
 
-Left out (the S-mm plan's MR3 (xxii) and MR4 (a); tests/NanoQL.Tests/Divergences/CoinitialZedMatrixTests.cs and
-SwaptionImpliedVolatilityGridTests.cs): the coinitial Z matrix's entries left of its diagonal, which nanoql scales and
-QuantLib leaves raw; swaptions whose expiry the evolution times don't hold, and models of unequal displacements, which
-nanoql refuses.
+Left out (tests/NanoQL.Tests/Divergences/CoinitialZedMatrixTests.cs and SwaptionImpliedVolatilityGridTests.cs): the
+coinitial Z matrix's entries left of its diagonal, which nanoql scales and QuantLib leaves raw; swaptions whose expiry
+the evolution times don't hold, and models of unequal displacements, which nanoql refuses.
 
 The harness unit is tools/cxx/src/models/marketmodels/swapforwardmappings.cpp. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Models/MarketModels/SwapForwardMappingsCxxVectorTests.cs."""

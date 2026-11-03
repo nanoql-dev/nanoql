@@ -11,10 +11,10 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The fix QuantLib's master made to the lookback family after the pin, which nanoql takes (the S-bar plan's BR6 (v)),
-/// with the master's own case. #2856 (<c>9c44b7345</c>): the full fixed and floating lookbacks at zero carry, where
-/// 1.44's formulas are 0/0, take their limit; the master switches to it below |λ| of 1e-7, nanoql at zero carry alone,
-/// the formula in double-double around it (BR5 (xxiii), <c>LookbackSmallCarryTests</c>).
+/// The fix QuantLib's master made to the lookback family after the pin, which nanoql takes, with the master's own case.
+/// #2856 (<c>9c44b7345</c>): the full fixed and floating lookbacks at zero carry, where 1.44's formulas are 0/0, take
+/// their limit; the master switches to it below |λ| of 1e-7, nanoql at zero carry alone, the formula in double-double
+/// around it (<c>LookbackSmallCarryTests</c>).
 /// </summary>
 public class LookbackUpstreamFixesTests
 {

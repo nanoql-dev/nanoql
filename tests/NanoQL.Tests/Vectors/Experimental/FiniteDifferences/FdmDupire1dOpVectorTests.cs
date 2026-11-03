@@ -12,7 +12,7 @@ namespace NanoQL.Tests.Vectors;
 /// <summary>
 /// The Dupire operator vectors, <c>tests/vectors/experimental/finitedifferences/fdmdupire1dop.json</c>: on three strike
 /// meshers with a local volatility per point, at three time steps, the size, apply, each direction's apply and
-/// splitting solutions, and the preconditioner; apply_mixed left out, QuantLib's returning its input (G1R6 (xi)).
+/// splitting solutions, and the preconditioner; apply_mixed left out, QuantLib's returning its input.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class FdmDupire1dOpVectorTests

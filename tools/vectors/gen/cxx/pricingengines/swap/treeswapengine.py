@@ -15,11 +15,11 @@ sigma = 0.009), which has no curve, with the discount curve given to the engine,
 swap's.
 
 Generated and left out: swaps that start on the spot date, whose first floating coupon is fixed on the evaluation date
-and starts after it: QuantLib's discretized swap knows a coupon by its start date, so it values that coupon as a
-forward on the tree's bonds, ignoring its fixing, where nanoql's, behind this engine, knows it by its fixing date and
-pays its amount (the S-sr plan's SSR6 (xvi); tests/NanoQL.Tests/Divergences/TreeKnownCouponTests.cs). Each case's
-inputs hold the swaption (treeswaptionengine.py's spec), the discount curve, the models, the steps and the grid. Read
-back by tests/NanoQL.Tests/Vectors/Cxx/PricingEngines/TreeSwapEngineCxxVectorTests.cs."""
+and starts after it: QuantLib's discretized swap knows a coupon by its start date, so it values that coupon as a forward
+on the tree's bonds, ignoring its fixing, where nanoql's, behind this engine, knows it by its fixing date and pays its
+amount (tests/NanoQL.Tests/Divergences/TreeKnownCouponTests.cs). Each case's inputs hold the swaption
+(treeswaptionengine.py's spec), the discount curve, the models, the steps and the grid. Read back by
+tests/NanoQL.Tests/Vectors/Cxx/PricingEngines/TreeSwapEngineCxxVectorTests.cs."""
 import importlib.util
 import json
 import os

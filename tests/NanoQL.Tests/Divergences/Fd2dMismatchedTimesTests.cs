@@ -17,9 +17,9 @@ namespace NanoQL.Tests.Divergences;
 /// their discounts and variances by date unchanged, a spread call prices 0.22% below the same market restated on
 /// Act/365, and on a risk-free curve settling two business days after the other structures 0.53% below. nanoql's grid
 /// runs on the clock spanning both processes' structures, from their earliest reference date on the first process's
-/// risk-free day counter, each structure read at the instants its times denote and accruing nothing before its own
-/// date (master §2.2's mismatched-dates row, the S-exo plan's ER5 (i)), so it prices the restated market: QuantLib's
-/// engine on that market is the check. A market on one clock keeps QuantLib's arithmetic.
+/// risk-free day counter, each structure read at the instants its times denote and accruing nothing before its own date
+/// (the playbook's row for structures on another clock), so it prices the restated market: QuantLib's engine on that
+/// market is the check. A market on one clock keeps QuantLib's arithmetic.
 /// </summary>
 public class Fd2dMismatchedTimesTests
 {

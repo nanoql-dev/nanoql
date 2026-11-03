@@ -13,14 +13,13 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The hybrid Heston-Hull-White process with its forward Hull-White process on another curve (the S-hes plan's HR10).
-/// QuantLib builds the hybrid's Hull-White model on the Heston process's risk-free curve but steps the short rate on the
-/// given process's curve (<c>hybridhestonhullwhiteprocess.cpp:37-46</c>, <c>:64</c>, <c>:137</c>, <c>:179</c>), so its
-/// numeraire prices a bond on one curve at a rate taken from the other: a year's put at the money, priced 6.23248 with
-/// the forward process on the Heston curve, is 6.11498 with it on a flat 3% curve, 3.6 Monte Carlo errors away
-/// [executed: <c>scratchpad\cxxprobe\src\c3oracle.cpp</c>]. nanoql rebuilds the forward process on the Heston curve with
-/// the given reversion, volatility and forward-measure time, so the hybrid is the one on the Heston curve, and the
-/// three engines agree on it.
+/// The hybrid Heston-Hull-White process with its forward Hull-White process on another curve. QuantLib builds the
+/// hybrid's Hull-White model on the Heston process's risk-free curve but steps the short rate on the given process's
+/// curve (<c>hybridhestonhullwhiteprocess.cpp:37-46</c>, <c>:64</c>, <c>:137</c>, <c>:179</c>), so its numeraire prices
+/// a bond on one curve at a rate taken from the other: a year's put at the money, priced 6.23248 with the forward
+/// process on the Heston curve, is 6.11498 with it on a flat 3% curve, 3.6 Monte Carlo errors away (QuantLib 1.44).
+/// nanoql rebuilds the forward process on the Heston curve with the given reversion, volatility and forward-measure
+/// time, so the hybrid is the one on the Heston curve, and the three engines agree on it.
 /// </summary>
 public class HybridHestonHullWhiteCurveTests
 {

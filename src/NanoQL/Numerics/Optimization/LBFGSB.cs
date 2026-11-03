@@ -28,9 +28,9 @@ namespace NanoQL.Numerics;
 /// <para>
 /// Immutable: each minimization keeps its correction pairs and working arrays to itself. On the relative
 /// function-reduction stop the problem's gradient norm is the projected gradient's at the point returned, where
-/// QuantLib's keeps the previous iterate's (the S-core plan's CR7 (xviii); <c>Divergences/LBFGSBTests.cs</c>). The
-/// breakpoints of the Cauchy search are sorted stably, so equal breakpoints keep QuantLib's order up to 32 variables
-/// (MSVC's insertion sort) and their own beyond, where MSVC's introsort reorders them.
+/// QuantLib's keeps the previous iterate's (<c>Divergences/LBFGSBTests.cs</c>). The breakpoints of the Cauchy search
+/// are sorted stably, so equal breakpoints keep QuantLib's order up to 32 variables (MSVC's insertion sort) and their
+/// own beyond, where MSVC's introsort reorders them.
 /// </para>
 /// </remarks>
 public sealed class LBFGSB : OptimizationMethod

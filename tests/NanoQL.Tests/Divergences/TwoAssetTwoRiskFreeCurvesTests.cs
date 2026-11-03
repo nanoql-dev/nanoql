@@ -17,12 +17,12 @@ namespace NanoQL.Tests.Divergences;
 /// <c>mceuropeanbasketengine.hpp:196</c>); Stulz and the European Margrabe engine build the second forward on the first
 /// process's discount (<c>stulzengine.cpp:140-152</c>, <c>analyticeuropeanmargrabeengine.cpp:61-72</c>), the two-asset
 /// correlation engine takes its rate from the first process alone (<c>:64-66</c>), and the American Margrabe engine
-/// reads no risk-free rate (<c>analyticamericanmargrabeengine.cpp:69-79</c>); at r₁ 5%, r₂ 10% on the plan's market
+/// reads no risk-free rate (<c>analyticamericanmargrabeengine.cpp:69-79</c>); at r₁ 5%, r₂ 10% on the test's market
 /// Stulz's minimum call is −94 standard errors from the Monte Carlo engine and Margrabe's exchange +134. nanoql reads
 /// Kirk's way in each, the American Margrabe engine's transformed rate the second asset's yield on the first curve (q₂
-/// + r₁ − r₂), and the European Margrabe theta the second asset's carry there (the S-exo plan's ER5 (xxxii)): each
-/// engine on the market restated onto the first process's curve, the second asset's yield q₂ + r₁ − r₂ for the same
-/// forward, is the check, the European Margrabe theta's among them, with the Monte Carlo basket engines beside.
+/// + r₁ − r₂), and the European Margrabe theta the second asset's carry there: each engine on the market restated onto
+/// the first process's curve, the second asset's yield q₂ + r₁ − r₂ for the same forward, is the check, the European
+/// Margrabe theta's among them, with the Monte Carlo basket engines beside.
 /// </summary>
 public class TwoAssetTwoRiskFreeCurvesTests
 {

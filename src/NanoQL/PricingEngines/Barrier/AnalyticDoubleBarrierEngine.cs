@@ -19,32 +19,32 @@ namespace NanoQL.PricingEngines;
 /// </summary>
 /// <remarks>
 /// <para>
-/// The value alone, as QuantLib's. Strikes outside the corridor integrate only over terminal spots inside it, upstream's
-/// fix after v1.44 (#2881, the S-bar plan's BR6 (ii); <c>Divergences/BarrierUpstreamFixesTests.cs</c>).
+/// The value alone, as QuantLib's. Strikes outside the corridor integrate only over terminal spots inside it,
+/// upstream's fix after v1.44 (#2881; <c>Divergences/BarrierUpstreamFixesTests.cs</c>).
 /// </para>
 /// <para>
-/// Documented divergences (BR5). Each rate is read on the volatility's clock and each time is the volatility's, as
-/// <see cref="AnalyticBarrierEngine"/> reads them, where QuantLib reads every structure at the risk-free curve's times
-/// (BR5 (i)). The series runs from −<c>series</c> to <c>series</c>, QuantLib's terms, and on while the next pair of
-/// terms exceeds machine epsilon of the sum, where QuantLib stops, unconverged on narrow corridors and long terms
-/// (BR5 (xliii), <c>Divergences/DoubleBarrierSeriesTests.cs</c>). Where a term's power overflows, as at low volatility,
-/// it is taken in logs with its normal difference, QuantLib's own technique in the binary barrier engine, where
-/// QuantLib's product is NaN and its <c>max(0, ·)</c> prices 0; each difference of two normal probabilities whose
-/// arguments share a sign is taken from the small tail, ½erfc, where the plain difference cancels (BR5 (xvi);
-/// <c>Divergences/DoubleBarrierLowVolatilityTests.cs</c>). QuantLib's value and bits stand wherever its five terms agree
-/// with this converged series within 1e-12 on the value's scale, max(|value|, 1), which QuantLib's own rounding of the
-/// plain sum's cancelling terms stays inside, QuantLib's cases among them. Below machine-epsilon variance
-/// the underlying follows its forward, a knock-out paying its payoff where the forward stays inside the corridor. And
-/// the rebate is priced, QuantLib's single-barrier convention, where QuantLib's engine reads none: a knock-out's paid
-/// at the first touch of either barrier, through the double-barrier binary engine's KIKO and KOKI at unit cash; a
-/// knock-in's paid at expiry where neither is touched, through its knock-out at unit cash (BR5 (xlvi),
-/// <c>Divergences/DoubleBarrierRebateTests.cs</c>).
+/// Documented divergences. Each rate is read on the volatility's clock and each time is the volatility's, as
+/// <see cref="AnalyticBarrierEngine"/> reads them, where QuantLib reads every structure at the risk-free curve's times.
+/// The series runs from −<c>series</c> to <c>series</c>, QuantLib's terms, and on while the next pair of terms exceeds
+/// machine epsilon of the sum, where QuantLib stops, unconverged on narrow corridors and long terms
+/// (<c>Divergences/DoubleBarrierSeriesTests.cs</c>). Where a term's power overflows, as at low volatility, it is taken
+/// in logs with its normal difference, QuantLib's own technique in the binary barrier engine, where QuantLib's product
+/// is NaN and its <c>max(0, ·)</c> prices 0; each difference of two normal probabilities whose arguments share a sign
+/// is taken from the small tail, ½erfc, where the plain difference cancels
+/// (<c>Divergences/DoubleBarrierLowVolatilityTests.cs</c>). QuantLib's value and bits stand wherever its five terms
+/// agree with this converged series within 1e-12 on the value's scale, max(|value|, 1), which QuantLib's own rounding
+/// of the plain sum's cancelling terms stays inside, QuantLib's cases among them. Below machine-epsilon variance the
+/// underlying follows its forward, a knock-out paying its payoff where the forward stays inside the corridor. And the
+/// rebate is priced, QuantLib's single-barrier convention, where QuantLib's engine reads none: a knock-out's paid at
+/// the first touch of either barrier, through the double-barrier binary engine's KIKO and KOKI at unit cash; a
+/// knock-in's paid at expiry where neither is touched, through its knock-out at unit cash
+/// (<c>Divergences/DoubleBarrierRebateTests.cs</c>).
 /// </para>
 /// <para>
-/// The formula is a first-passage closed form in equivalent-constant rates and a volatility, the variance and
-/// discounts to expiry: no exact closed form exists for a first passage under general deterministic term structures,
-/// and on shaped markets an independent Monte Carlo finds a knock-out within two of its standard errors, +0.04% (BR4
-/// (d)); the term-structure-exact route is a Monte Carlo on the process.
+/// The formula is a first-passage closed form in equivalent-constant rates and a volatility, the variance and discounts
+/// to expiry: no exact closed form exists for a first passage under general deterministic term structures, and on
+/// shaped markets an independent Monte Carlo finds a knock-out within two of its standard errors, +0.04%; the
+/// term-structure-exact route is a Monte Carlo on the process.
 /// </para>
 /// </remarks>
 public static class AnalyticDoubleBarrierEngine
@@ -138,8 +138,7 @@ public static class AnalyticDoubleBarrierEngine
     }
 
     // The knock-out's value without its rebate on this engine's routes (its converged series in logs, its deterministic
-    // limit), each read on the volatility's clock: the Suo-Wang engine's value where its own series overflows (the
-    // S-xeq plan's XER5 (vi))
+    // limit), each read on the volatility's clock: the Suo-Wang engine's value where its own series overflows
     internal static double KnockOutValue(
         DoubleBarrierOption option, PlainVanillaPayoff payoff, GeneralizedBlackScholesProcess process, int series)
     {
@@ -147,8 +146,7 @@ public static class AnalyticDoubleBarrierEngine
         return payoff.OptionType == OptionType.Call ? f.CallKO() : f.PutKO();
     }
 
-    // The rebate's value as this engine prices it (BR5 (xlvi)): the Suo-Wang engine's rebate (the S-xeq plan's XER5
-    // (v))
+    // The rebate's value as this engine prices it: the Suo-Wang engine's rebate
     internal static double RebateValue(
         DoubleBarrierOption option, PlainVanillaPayoff payoff, GeneralizedBlackScholesProcess process, int series) =>
         new Formulas(option, payoff, process, series).RebateValue();
@@ -157,8 +155,8 @@ public static class AnalyticDoubleBarrierEngine
     // for terminal spots in [lo, hi]: Pₙ = (U/L)ⁿ, Qₙ = L^(n+1)/(Uⁿ S), a₁, a₃ at lo and a₂, a₄ at hi, the exponent m
     // μ₁ for the asset part and μ₁ − 2 for the cash part, the shift s 0 and −σ√T. QuantLib's callKO and putKO sum it as
     // acc1 and acc2. Here each term is taken in logs, its normal difference from the small tail where its arguments
-    // share a sign, summed from −series to series and on while the next pair exceeds machine epsilon of the sum (BR5
-    // (xvi), (xliii)); the double-barrier binary engine's image route reads it too (BR8 (c)).
+    // share a sign, summed from −series to series and on while the next pair exceeds machine epsilon of the sum; the
+    // double-barrier binary engine's image route reads it too.
     internal static double ImageSum(
         double logS,
         double logL,
@@ -223,9 +221,9 @@ public static class AnalyticDoubleBarrierEngine
         return sign == 0 ? 0.0 : sign * Math.Exp(lf + logAbs);
     }
 
-    // N(a) − N(b) as a sign and the logarithm of its magnitude: from the small tail where a and b share a sign,
-    // Q(b) − Q(a) for positive ones and N(a) − N(b) = Q(−a) − Q(−b) for negative ones, Q(x) = ½erfc(x/√2), each in logs
-    // so neither underflows (F3-1 of the S-bar plan's round 3); plainly where they don't, which doesn't cancel
+    // N(a) − N(b) as a sign and the logarithm of its magnitude: from the small tail where a and b share a sign, Q(b) −
+    // Q(a) for positive ones and N(a) − N(b) = Q(−a) − Q(−b) for negative ones, Q(x) = ½erfc(x/√2), each in logs so
+    // neither underflows; plainly where they don't, which doesn't cancel
     internal static (int Sign, double LogAbs) LogNormalDifference(double a, double b)
     {
         if (a == b || (double.IsNaN(a) || double.IsNaN(b)))
@@ -299,7 +297,7 @@ public static class AnalyticDoubleBarrierEngine
         return Math.Log(u) * x / (u - 1.0);
     }
 
-    // QuantLib's members, each read once on the volatility's clock (BR5 (i))
+    // QuantLib's members, each read once on the volatility's clock
     private sealed class Formulas
     {
         private readonly DoubleBarrierOption option;
@@ -405,8 +403,8 @@ public static class AnalyticDoubleBarrierEngine
             // Haug p. 154 KI = vanilla - KO
             Max(0.0, VanillaEquivalent() - PutKO());
 
-        // The rebate (BR5 (xlvi)): a knock-out's paid at the first touch of either barrier, R × (KIKO + KOKI) at unit
-        // cash; a knock-in's at expiry where neither is touched, R × the unit-cash knock-out at strike 0, through the
+        // The rebate: a knock-out's paid at the first touch of either barrier, R × (KIKO + KOKI) at unit cash; a
+        // knock-in's at expiry where neither is touched, R × the unit-cash knock-out at strike 0, through the
         // double-barrier binary engine's routes, the variance read at the option's strike
         internal double RebateValue()
         {
@@ -425,7 +423,7 @@ public static class AnalyticDoubleBarrierEngine
         }
 
         // QuantLib's value where its five terms (series) agree with the converged series within 1e-12 on the value's
-        // scale, max(|value|, 1); the converged series elsewhere (BR5 (xvi), (xliii))
+        // scale, max(|value|, 1); the converged series elsewhere
         private static double Agreed(double quantLib, double converged) =>
             double.IsFinite(quantLib)
             && Math.Abs(quantLib - converged) <= QuantLibAgreement * Math.Max(Math.Abs(converged), 1.0)

@@ -16,9 +16,9 @@ namespace NanoQL.PricingEngines;
 /// double-exponential jumps' term at the intensity's average over the maturity.
 /// </summary>
 /// <remarks>
-/// A <see cref="BatesDoubleExpEngine"/>, as QuantLib's derives from it (the S-hes plan's HR1 (iv)), over its
+/// A <see cref="BatesDoubleExpEngine"/>, as QuantLib's derives from it, over its
 /// <see cref="BatesDoubleExpDetJumpModel"/>; the average's weights as <see cref="BatesDetJumpEngine"/>'s, without
-/// cancellation below κ_λt = 1e-2 (HR7 (iv)); η_u below 1 (HR7 (v)).
+/// cancellation below κ_λt = 1e-2; η_u below 1.
 /// </remarks>
 public sealed class BatesDoubleExpDetJumpEngine : BatesDoubleExpEngine
 {

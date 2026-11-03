@@ -7,14 +7,14 @@ using NanoQL.Tests.Harness;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// <see cref="IncrementalStatistics"/>' variance after samples of no weight (the S-sr plan's C1 review, B1-2):
-/// QuantLib's <c>variance()</c> (<c>incrementalstatistics.cpp:47-54</c>) reads Boost's iterative weighted variance,
-/// σ² ← σ²(S − w)/S + (x − μ)²w/(S − w) from the second sample on (<c>weighted_variance.hpp:89-97</c>), whose second
-/// term is 0/0 while every earlier sample weighs 0, and x/0 while their weights vanish in the sum, below its rounding,
-/// so the variance is NaN or infinite for good. The port resets the variance to 0 there, the first term's value and
-/// the second's limit (the review's B2-1: a skip there would keep the earlier samples' variance as the set's). QuantLib's
-/// check: its <c>Statistics</c> on the same samples, and its <c>IncrementalStatistics</c> with the samples of no weight
-/// moved after the first one that carries weight, which Boost's recurrence reads without a 0/0.
+/// <see cref="IncrementalStatistics"/>' variance after samples of no weight: QuantLib's <c>variance()</c>
+/// (<c>incrementalstatistics.cpp:47-54</c>) reads Boost's iterative weighted variance, σ² ← σ²(S − w)/S + (x − μ)²w/(S
+/// − w) from the second sample on (<c>weighted_variance.hpp:89-97</c>), whose second term is 0/0 while every earlier
+/// sample weighs 0, and x/0 while their weights vanish in the sum, below its rounding, so the variance is NaN or
+/// infinite for good. The port resets the variance to 0 there, the first term's value and the second's limit (a skip
+/// there would keep the earlier samples' variance as the set's). QuantLib's check: its <c>Statistics</c> on the same
+/// samples, and its <c>IncrementalStatistics</c> with the samples of no weight moved after the first one that carries
+/// weight, which Boost's recurrence reads without a 0/0.
 /// </summary>
 public class IncrementalStatisticsLeadingZeroWeightTests
 {

@@ -14,7 +14,7 @@ namespace NanoQL.Tests.Divergences;
 /// date gave: built on 16 June 2025 with two settlement days and moved through 20, 25 and 30 June, the wheel's surface has
 /// the reference date 2 July 2025 and the option dates of 27 June's (29 June 2026, 28 June 2027, 27 June 2028, 27 June
 /// 2030), and its volatility at 1.5 years and 3.5% is 0.22743898630625792, at 30 June 2027 0.22282736247815785. nanoql's
-/// surfaces have fixed reference dates (R1): the surface for 30 June is built under that date, and gives the values of a
+/// surfaces have fixed reference dates: the surface for 30 June is built under that date, and gives the values of a
 /// surface QuantLib builds on it: the option dates of 2 July (2 July 2026, 2 July 2027, 3 July 2028, 2 July 2030),
 /// 0.2273976824337007 and 0.22280134235888954.
 /// </summary>

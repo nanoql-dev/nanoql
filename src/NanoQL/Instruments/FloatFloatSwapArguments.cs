@@ -14,8 +14,7 @@ namespace NanoQL.Instruments;
 /// <summary>
 /// QuantLib's <c>FloatFloatSwap::arguments</c>, which its <c>setupArguments</c> fills from the legs: per cash flow, in
 /// each leg's order, the reset, fixing and payment dates, the amounts, the accrual times, spreads, gearings, caps and
-/// floors, and whether it is a redemption, a redemption taking the dates of the coupon paid with it (the S-g1d plan's
-/// G1D6).
+/// floors, and whether it is a redemption, a redemption taking the dates of the coupon paid with it.
 /// </summary>
 /// <remarks>
 /// A coupon whose amount can't be computed (a missing fixing, a CMS coupon without a pricer) has no amount, and an

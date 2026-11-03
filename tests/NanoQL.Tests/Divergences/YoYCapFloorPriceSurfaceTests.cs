@@ -11,18 +11,18 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The year-on-year price surface's swap-rate dates and repricing check (the S-xrt plan's XRR5 (xii) and (xiv), fixed
-/// under R8). (xii): QuantLib takes a valid maturity's date as <c>cfMaturities_.at(counter)</c>, counting only the valid
-/// maturities (<c>yoycapfloortermpricesurface.hpp:506-508</c>), so once an intersection fails every later date is an
-/// earlier maturity's. On QuantLib 1.44 (the run's <c>c2\probes\xd_c2d.py</c> through the harness: test-suite/
-/// inflationvolatility.cpp's euro market with the nominal curve's first date on the surface's reference date, observed
-/// flat, its 3-year caps ten times their quotes, so the 3-year intersection isn't found) the dates are 40505, 40505,
-/// 41236, 41966, 43062, 44888 and 46714, the 5-year rate on the 3-year date. nanoql's are each maturity's option date,
-/// 40505 to 50367, at the times QuantLib's time list gives; the rates are QuantLib's. (xiv): QuantLib checks the curve
-/// reprices its helpers at the surface's reference date plus whole years, where the helpers sit on the nominal curve's;
-/// with the nominal curve's dates 91 days later it refuses, "could not reprice helper 0, data 0.0244147, implied quote
-/// 0.0244373" (<c>xd_c2b.py</c>). nanoql checks each helper at its own maturity and builds the surface; where the two
-/// reference dates are 4 days apart, as in QuantLib's case, the check passes either way and the values are QuantLib's.
+/// The year-on-year price surface's swap-rate dates and repricing check (fixed). The dates: QuantLib takes a valid
+/// maturity's date as <c>cfMaturities_.at(counter)</c>, counting only the valid maturities
+/// (<c>yoycapfloortermpricesurface.hpp:506-508</c>), so once an intersection fails every later date is an earlier
+/// maturity's. On QuantLib 1.44 (through the C++ harness: test-suite/inflationvolatility.cpp's euro market with the
+/// nominal curve's first date on the surface's reference date, observed flat, its 3-year caps ten times their quotes,
+/// so the 3-year intersection isn't found) the dates are 40505, 40505, 41236, 41966, 43062, 44888 and 46714, the 5-year
+/// rate on the 3-year date. nanoql's are each maturity's option date, 40505 to 50367, at the times QuantLib's time list
+/// gives; the rates are QuantLib's. The check: QuantLib checks the curve reprices its helpers at the surface's
+/// reference date plus whole years, where the helpers sit on the nominal curve's; with the nominal curve's dates 91
+/// days later it refuses, "could not reprice helper 0, data 0.0244147, implied quote 0.0244373". nanoql checks each
+/// helper at its own maturity and builds the surface; where the two reference dates are 4 days apart, as in QuantLib's
+/// case, the check passes either way and the values are QuantLib's.
 /// </summary>
 public class YoYCapFloorPriceSurfaceTests
 {

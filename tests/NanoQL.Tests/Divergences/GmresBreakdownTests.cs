@@ -27,7 +27,7 @@ public class GmresBreakdownTests
 
         GMRESResult result = new GMRES(x => a * x, 5, 1e-10).Solve(b);
 
-        // QuantLib's process crashes here (exit 0xC0000005); its check is S2's inverse, the system's LU solve
+        // QuantLib's process crashes here (exit 0xC0000005); its check is the system's LU solve
         Vector exact = MatrixFunctions.Inverse(a) * b;
         Assert.Equal(exact.ToArray(), result.X.ToArray());
         Assert.Equal([1.0, 0.0], result.Errors);

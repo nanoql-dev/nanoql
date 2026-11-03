@@ -13,8 +13,7 @@ namespace NanoQL.Models;
 /// of its periods' fixed coupon −K τᶠⁱˣ and floating coupon f τᶠˡᵒᵃᵗ at the period's payment time.
 /// </summary>
 /// <remarks>
-/// A working type (the S-mmp plan's MMPR1 (i)). Fewer accruals or payment times than rates are refused, where QuantLib
-/// reads past them (MMPR4's refusals).
+/// A working type. Fewer accruals or payment times than rates are refused, where QuantLib reads past them.
 /// </remarks>
 [WorkingType]
 public sealed class OneStepCoterminalSwaps : MultiProductOneStep

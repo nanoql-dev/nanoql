@@ -19,13 +19,13 @@ namespace NanoQL.TermStructures;
 /// </summary>
 /// <remarks>
 /// <para>
-/// An extension point. Every built structure has a fixed reference date (D15): QuantLib's constructor that takes
-/// neither a reference date nor settlement days is the reference-date form, and the settlement-days form takes the
-/// reference date its concrete class's <c>Create</c> computed from the evaluation context.
+/// An extension point. Every built structure has a fixed reference date: QuantLib's constructor that takes neither a
+/// reference date nor settlement days is the reference-date form, and the settlement-days form takes the reference date
+/// its concrete class's <c>Create</c> computed from the evaluation context.
 /// </para>
 /// <para>
-/// QuantLib's jumps are quotes; here they are values (PR6.8), each multiplying the survival probabilities past its
-/// date, and each checked to lie in (0, 1] when a probability reads it, with QuantLib's "invalid … jump value".
+/// QuantLib's jumps are quotes; here they are values, each multiplying the survival probabilities past its date, and
+/// each checked to lie in (0, 1] when a probability reads it, with QuantLib's "invalid … jump value".
 /// </para>
 /// </remarks>
 public abstract class DefaultProbabilityTermStructure : TermStructure
@@ -196,10 +196,10 @@ public abstract class DefaultProbabilityTermStructure : TermStructure
         return p2 - p1;
     }
 
-    // The survival the curve has accrued by a date: 1 before its reference date, where QuantLib's read throws ("negative
-    // time"). No default before the reference date is QuantLib's own premise for its two-date default probability,
-    // which excuses its first date; the CDS engines read every survival and default probability through these (the
-    // S-core plan's CR7 (xxxiv)).
+    // The survival the curve has accrued by a date: 1 before its reference date, where QuantLib's read throws
+    // ("negative time"). No default before the reference date is QuantLib's own premise for its two-date default
+    // probability, which excuses its first date; the CDS engines read every survival and default probability through
+    // these.
     internal double AccruedSurvivalProbability(Date d) => d < ReferenceDate ? 1.0 : SurvivalProbability(d);
 
     // The default probability accrued by a date: 0 before the reference date.
@@ -280,12 +280,11 @@ public abstract class DefaultProbabilityTermStructure : TermStructure
         return HazardRateImpl(t);
     }
 
-    // exp(-∫ h), the integral from 0 of the hazard rate the curve reports, where the curve's kind gives it in closed form:
-    // the spreaded curves read it exactly where QuantLib's integrates their hazard rates numerically, and integrate
-    // numerically, as QuantLib does, on a curve that gives none (null, the default). A kind gives it on its own classes
-    // alone, by exact type: a user's subclass may report another rate, as QuantLib's affine header asks its derived
-    // classes to. Range checks have already been performed (the S-xcr plan's XR3 (b); the S-xcr code review's C4 O1-2,
-    // O2-1).
+    // exp(-∫ h), the integral from 0 of the hazard rate the curve reports, where the curve's kind gives it in closed
+    // form: the spreaded curves read it exactly where QuantLib's integrates their hazard rates numerically, and
+    // integrate numerically, as QuantLib does, on a curve that gives none (null, the default). A kind gives it on its
+    // own classes alone, by exact type: a user's subclass may report another rate, as QuantLib's affine header asks its
+    // derived classes to. Range checks have already been performed.
     internal virtual double? HazardRateSurvival(double t) => null;
 
     // HazardRateSurvival on a curve whose hazard rate is the base's, the default density over the survival with its

@@ -11,11 +11,11 @@ using NanoQL.Extensions.Conventions;
 namespace NanoQL.Excel.Replay;
 
 /// <summary>
-/// The repro vectors' replay (XLR14, X7): each vector exported from a cell, replayed through the build's worksheet
-/// functions on its own, as the cell ran them: a fresh store, the provider's identity and conventions as recorded, its
-/// date system, its files in temporary paths removed after, the process's state restored. Each number is compared under
-/// R7, and its bits counted; a failed call's vector expects an Excel error, a handle its whole text, or its type where
-/// the calls read a file.
+/// The repro vectors' replay: each vector exported from a cell, replayed through the build's worksheet functions on its
+/// own, as the cell ran them: a fresh store, the provider's identity and conventions as recorded, its date system, its
+/// files in temporary paths removed after, the process's state restored. Each number is compared under the tolerance,
+/// and its bits counted; a failed call's vector expects an Excel error, a handle its whole text, or its type where the
+/// calls read a file.
 /// </summary>
 internal sealed class VectorReplay
 {
@@ -63,7 +63,7 @@ internal sealed class VectorReplay
         }
 
         Console.WriteLine($"Excel vectors{(reverse ? ", in reverse" : string.Empty)}{(shared ? ", the state shared" : string.Empty)}: {files.Length - failed} of {files.Length} replayed to their outcome; "
-            + $"numbers within R7 {replay.numbers}, bit for bit {replay.identical} of {replay.numbers}");
+            + $"numbers within the tolerance {replay.numbers}, bit for bit {replay.identical} of {replay.numbers}");
         return failed == 0 ? 0 : 1;
     }
 
@@ -115,7 +115,7 @@ internal sealed class VectorReplay
                 JsonValueKind.False => false,
                 JsonValueKind.String => paths.TryGetValue(e.GetString()!, out string? tp) ? tp : e.GetString()!,
 
-                // An object inside a returned array: its parent call's spill at the item's row (round 4's B4-2).
+                // An object inside a returned array: its parent call's spill at the item's row.
                 JsonValueKind.Object when e.TryGetProperty("item", out JsonElement it) => made[e.GetProperty("ref").GetString()!] is object[,] sm
                     ? (it.GetInt32() < sm.GetLength(0) ? sm[it.GetInt32(), 0] : ExcelError.ExcelErrorRef) : ExcelError.ExcelErrorRef,
                 JsonValueKind.Object when e.TryGetProperty("ref", out JsonElement rf) => made[rf.GetString()!],

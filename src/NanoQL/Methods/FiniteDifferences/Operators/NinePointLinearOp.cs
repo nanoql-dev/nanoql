@@ -16,10 +16,9 @@ namespace NanoQL.Methods;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A working type (the S-eq plan's SEQR1; the S-sr plan's SSD10): mutable, owned by one computation and not
-/// thread-safe. <see cref="Apply(ReadOnlySpan{double}, Span{double})"/> writes into the caller's span, which mustn't
-/// overlap the input; <see cref="Mult"/> returns a new operator, as QuantLib's does, since it runs while an operator is
-/// built.
+/// A working type: mutable, owned by one computation and not thread-safe.
+/// <see cref="Apply(ReadOnlySpan{double}, Span{double})"/> writes into the caller's span, which mustn't overlap the
+/// input; <see cref="Mult"/> returns a new operator, as QuantLib's does, since it runs while an operator is built.
 /// </para>
 /// <para>
 /// An extension point, as in QuantLib: the mixed second-derivative operator derives from it and fills the protected

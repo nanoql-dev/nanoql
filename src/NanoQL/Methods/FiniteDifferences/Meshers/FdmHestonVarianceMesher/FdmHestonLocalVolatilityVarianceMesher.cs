@@ -19,7 +19,7 @@ namespace NanoQL.Methods;
 /// <remarks>
 /// <para>
 /// Immutable. Without a leverage function it is the variance mesher. The skew factor is the variance mesher's,
-/// bounded at σ_m/κ = 2 (the S-hes plan's HR9), and its fallbacks master's (HR8).
+/// bounded at σ_m/κ = 2, and its fallbacks master's.
 /// </para>
 /// <para>
 /// QuantLib reads the curves and the leverage function at the risk-free curve's times
@@ -27,7 +27,7 @@ namespace NanoQL.Methods;
 /// (<see cref="FdmHestonOp.Clock"/>), from the earliest reference date of the structures it reads, and each structure
 /// is read at the instants they denote, on its own clock, accruing nothing before its own reference date; the leverage,
 /// a multiplier of the Heston volatility, at its instant. Where every structure shares the risk-free curve's day
-/// counter and reference date, QuantLib's reads (the S-hes plan's HR7 (ii), under R8).
+/// counter and reference date, QuantLib's reads.
 /// </para>
 /// </remarks>
 public sealed class FdmHestonLocalVolatilityVarianceMesher : Fdm1dMesher
@@ -138,8 +138,8 @@ public sealed class FdmHestonLocalVolatilityVarianceMesher : Fdm1dMesher
     /// leverage function, by the leverage's average.</summary>
     public double VolaEstimate { get; }
 
-    // The leverage function's own time at the instant a time on the engine's clock denotes (HR7 (ii)): the time itself
-    // where the two share their times, QuantLib's read.
+    // The leverage function's own time at the instant a time on the engine's clock denotes: the time itself where the
+    // two share their times, QuantLib's read.
     internal static double LeverageTime(LocalVolTermStructure leverageFct, TermStructure clock, double t) =>
         leverageFct.SharesTimes(clock) ? t : leverageFct.AccrualTime(clock, t);
 }

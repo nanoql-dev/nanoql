@@ -17,19 +17,19 @@ namespace NanoQL.PricingEngines;
 /// <remarks>
 /// <para>
 /// An immutable calculator over the spot, the discount and dividend discount to expiry and the variance to expiry, as
-/// QuantLib's; its value. QuantLib's master after the pin keeps the price at low volatility (#2855, taken under R8, the
-/// S-van plan's VR5 (i)): where N(D₂) underflows or the power it multiplies overflows, their finite product is taken in
-/// logs, through log N's asymptotic tail. Only where N(D₂) is the formula's: with the strike on the spot, a knock-out
-/// is already knocked out and QuantLib sets N(D₂) to 0, which #2855's test reads as an underflow, pricing −D·K·N(D₂)
-/// where QuantLib 1.44 prices 0; here 1.44's 0 stands, a documented divergence found by the S-van run
+/// QuantLib's; its value. QuantLib's master after the pin keeps the price at low volatility (#2855, taken as a fix):
+/// where N(D₂) underflows or the power it multiplies overflows, their finite product is taken in logs, through log N's
+/// asymptotic tail. Only where N(D₂) is the formula's: with the strike on the spot, a knock-out is already knocked out
+/// and QuantLib sets N(D₂) to 0, which #2855's test reads as an underflow, pricing −D·K·N(D₂) where QuantLib 1.44
+/// prices 0; here 1.44's 0 stands, a documented divergence
 /// (<c>Divergences/AmericanPayoffAtExpiryKnockedOutTests.cs</c>).
 /// </para>
 /// <para>
 /// Below a variance of ε, QuantLib takes the spot's side of the strike for both probabilities
 /// (<c>americanpayoffatexpiry.cpp:112-121</c>), so a call whose forward passes the strike is worth nothing; here the
 /// underlying follows its forward, which reaches the strike by expiry where the forward is past it, and the payoff is
-/// paid at expiry if it did (knock-in) or didn't (knock-out): a documented divergence (the S-van plan's VR4 (ii),
-/// <c>Divergences/AmericanPayoffZeroVarianceTests.cs</c>).
+/// paid at expiry if it did (knock-in) or didn't (knock-out): a documented divergence
+/// (<c>Divergences/AmericanPayoffZeroVarianceTests.cs</c>).
 /// </para>
 /// <para>
 /// A payoff other than a cash-or-nothing or asset-or-nothing one is refused, where QuantLib leaves the paid amount
@@ -45,7 +45,7 @@ public sealed class AmericanPayoffAtExpiry
     private readonly double x;
     private readonly double y;
 
-    // The value below a variance of ε (the S-van plan's VR4 (ii)).
+    // The value below a variance of ε.
     private readonly double? deterministic;
 
     /// <summary>Initializes a new instance of the <see cref="AmericanPayoffAtExpiry"/> class.</summary>
@@ -209,11 +209,11 @@ public sealed class AmericanPayoffAtExpiry
             x = 1.0;
             y = Math.Pow(strike / spot, 2.0 * mu);
 
-            // #2855's log form only where N(D2) is the formula's: at the strike, a knock-out already knocked out has
-            // N(D2) set to 0, which #2855's test reads as an underflow, pricing −D·K·N(D2) where 1.44 prices 0
+            // #2855's log form only where N is the formula's: at the strike, a knock-out already knocked out has N set
+            // to 0, which #2855's test reads as an underflow, pricing −D·K·N where 1.44 prices 0
             if (!reached && variance >= NumericLimits.QL_EPSILON && (cumD2 == 0.0 || !double.IsFinite(y)))
             {
-                // the power overflows where N(D2) underflows, but their product is finite
+                // the power overflows where N underflows, but their product is finite
                 cumD2 = Math.Exp((2.0 * mu * logHS) + LogCumNormalAtExpiry(d2Value));
                 y = 1.0;
             }
@@ -230,8 +230,8 @@ public sealed class AmericanPayoffAtExpiry
 
         if (!(variance >= NumericLimits.QL_EPSILON) && !reached)
         {
-            // the underlying on its forward (the S-van plan's VR4 (ii)): it reaches the strike by expiry where the forward
-            // is past it; paid at expiry if it did (knock-in) or didn't (knock-out)
+            // the underlying on its forward: it reaches the strike by expiry where the forward is past it; paid at
+            // expiry if it did (knock-in) or didn't (knock-out)
             bool reachesByExpiry = type == OptionType.Call ? forward >= strike : forward <= strike;
             deterministic = reachesByExpiry == knockIn ? discount * k : 0.0;
         }

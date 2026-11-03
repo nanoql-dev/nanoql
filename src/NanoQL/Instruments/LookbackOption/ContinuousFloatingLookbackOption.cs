@@ -14,8 +14,7 @@ namespace NanoQL.Instruments;
 /// </summary>
 /// <remarks>
 /// Immutable. Unsealed: <see cref="ContinuousPartialFloatingLookbackOption"/> derives from it, as in QuantLib; an
-/// engine for the full-period option refuses the partial one held as this type, QuantLib's "wrong argument type" (the
-/// S-bar plan's SD8).
+/// engine for the full-period option refuses the partial one held as this type, QuantLib's "wrong argument type".
 /// </remarks>
 public class ContinuousFloatingLookbackOption : OneAssetOption
 {

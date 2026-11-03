@@ -31,7 +31,7 @@ class Stop(Exception):
 
 STOPS = int(__import__("os").environ.get("NANOQL_REPLAY_STOPS", "0"))  # how many facts' stops to print
 # Off the reference platform, a double within this relative difference, or else within this absolute one, is a match,
-# each kind tallied with its widest (R19, R26).
+# each kind tallied with its widest.
 TOLERANCE = float(__import__("os").environ.get("NANOQL_REPLAY_TOLERANCE", "0"))
 ABS_TOLERANCE = float(__import__("os").environ.get("NANOQL_REPLAY_ABS_TOLERANCE", "0"))
 NEAR = [0, 0.0]  # doubles within the relative tolerance, not bit for bit, and the widest relative difference
@@ -150,7 +150,7 @@ class Replay:
             e = _split(rest)[0]
             return np.array([self.element(e, None, x) for x in (v or [])], dtype=np.float64 if e == "double" else np.int32)
         if head == "tuple":
-            # A tuple from its JSON array, each element by its kind (B2R3).
+            # A tuple from its JSON array, each element by its kind.
             kinds = _runtime._top_split(rest.partition("|")[2])
             return tuple(self.arg(k, x) for k, x in zip(kinds, v))
         if head == "array" and rest.startswith("tuple:"):
@@ -242,7 +242,7 @@ class Replay:
                 self.check(ke, rk, gk)
                 self.check(ve, rv, gv)
         elif head == "tuple?":
-            # A returned collection's nullable tuple: null against None (B2R10).
+            # A returned collection's nullable tuple: null against None.
             if (res is None) != (got is None):
                 self.mismatch("has-value", "none" if res is None else "a tuple", "none" if got is None else "a tuple")
             elif res is not None:
@@ -332,7 +332,7 @@ class Replay:
                 self.mismatch("result", repr(rec.get("r"))[:80], f"{type(e).__name__}: {e}")
         after = rec.get("w")
         if after:
-            # A span's values after the call, and an in-out Matrix's or Vector's (R15), in order.
+            # A span's values after the call, and an in-out Matrix's or Vector's, in order.
             spans = [a for k, a in zip(ins, args) if k.startswith("span:") or k in ("vector&", "matrix&")]
             for r, g in zip(after, spans):
                 if g is None:

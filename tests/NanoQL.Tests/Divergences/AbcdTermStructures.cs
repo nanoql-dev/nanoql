@@ -6,7 +6,7 @@ using NanoQL.TermStructures;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The term structures of Black volatilities the abcd facts fit, the S-g1d plan's sets 0 to 6 over 0.5 to 20 years
+/// The term structures of Black volatilities the abcd facts fit, sets 0 to 6 over 0.5 to 20 years
 /// (<c>tools/vectors/gen/cxx/termstructures/volatility/abcdcalibration.py</c>'s): falling (0), rising (1), two whose
 /// total variance shrinks (2, 3), two dips whose total variance grows (4, 5), and a dip QuantLib refuses (6); and the
 /// cost's gradient a fit is checked by.

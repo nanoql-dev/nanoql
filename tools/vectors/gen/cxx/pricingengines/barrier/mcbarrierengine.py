@@ -11,9 +11,9 @@ given, steps per year given, neither ("number of steps not given") and both ("nu
 samples then a tolerance ("number of samples already set"), a tolerance then samples ("tolerance already set"); and a
 tolerance on low-discrepancy paths ("chosen random generator policy does not allow an error estimate").
 
-The pricers' process and the builder's are tools/cxx/src/pricingengines/barrier/mcbarrierengine.cpp's, on the
-evaluation date 15 October 2026. nanoql's builder takes its seed at construction (the S-bar plan's BR1); the harness
-sets QuantLib's to 42. Read back by tests/NanoQL.Tests/Vectors/Cxx/PricingEngines/Barrier/MCBarrierEngineCxxVectorTests.cs."""
+The pricers' process and the builder's are tools/cxx/src/pricingengines/barrier/mcbarrierengine.cpp's, on the evaluation
+date 15 October 2026. nanoql's builder takes its seed at construction; the harness sets QuantLib's to 42. Read back by
+tests/NanoQL.Tests/Vectors/Cxx/PricingEngines/Barrier/MCBarrierEngineCxxVectorTests.cs."""
 import math
 import os
 import sys

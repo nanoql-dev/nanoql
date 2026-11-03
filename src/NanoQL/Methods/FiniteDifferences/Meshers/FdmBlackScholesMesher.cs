@@ -24,7 +24,7 @@ namespace NanoQL.Methods;
 /// as <see cref="FdmBlackScholesOp"/> reads them, on the engine's times from the earliest reference date of the
 /// structures, each accruing nothing before its own: the curves' discounts there, and the variance accrued to maturity.
 /// A structure that shares the risk-free curve's day counter and reference date is read as QuantLib reads it; a
-/// documented divergence (the S-eq plan's rulings of 2026-10-20 and 2026-10-21, under R8).
+/// documented divergence.
 /// </remarks>
 public sealed class FdmBlackScholesMesher : Fdm1dMesher
 {
@@ -87,8 +87,8 @@ public sealed class FdmBlackScholesMesher : Fdm1dMesher
     {
     }
 
-    // The finite-difference Heston engines' form (the S-hes plan's HR7 (ii)): the engine's clock given, its own and
-    // not the helper process's, whose curves QuantLib's engines bind in each other's places.
+    // The finite-difference Heston engines' form: the engine's clock given, its own and not the helper process's, whose
+    // curves QuantLib's engines bind in each other's places.
     internal FdmBlackScholesMesher(
         int size,
         GeneralizedBlackScholesProcess process,

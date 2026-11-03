@@ -7,13 +7,12 @@ using static NanoQL.Numerics.MatrixFunctions;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The least squares' standard errors (the S-van plan's VR4 (vi), under R8). QuantLib's
-/// <c>GeneralLinearLeastSquares</c> scales the modelling uncertainty by the residuals' standard deviation over n − 2
-/// degrees of freedom whatever the basis' size (<c>generallinearleastsquares.hpp:142-147</c>): for a quadratic fitted to
-/// seven points, a multiplier of 0.20401 where R's <c>lm</c>, over n − p, gives 0.22809 [executed:
-/// <c>vanprobe</c> D2, the planner's]. nanoql's errors are R's: σ̂ √[(AᵀA)⁻¹]ⱼⱼ with σ̂² the residual sum of squares
-/// over n − p, p the coefficients estimated. QuantLib's checks: that closed form, its own modelling uncertainty times
-/// σ̂; and at p = 2, where n − 2 is R's, QuantLib's own errors.
+/// The least squares' standard errors. QuantLib's <c>GeneralLinearLeastSquares</c> scales the modelling uncertainty by
+/// the residuals' standard deviation over n − 2 degrees of freedom whatever the basis' size
+/// (<c>generallinearleastsquares.hpp:142-147</c>): for a quadratic fitted to seven points, a multiplier of 0.20401
+/// where R's <c>lm</c>, over n − p, gives 0.22809 (QuantLib 1.44). nanoql's errors are R's: σ̂ √[(AᵀA)⁻¹]ⱼⱼ with σ̂²
+/// the residual sum of squares over n − p, p the coefficients estimated. QuantLib's checks: that closed form, its own
+/// modelling uncertainty times σ̂; and at p = 2, where n − 2 is R's, QuantLib's own errors.
 /// </summary>
 public class LeastSquaresStandardErrorTests
 {

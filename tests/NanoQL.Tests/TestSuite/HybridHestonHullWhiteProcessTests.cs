@@ -245,9 +245,9 @@ public class HybridHestonHullWhiteProcessTests
         int factors = jointProcess.Factors;
         int steps = grid.Size - 1;
 
-        // QuantLib's rsg_type(factors, steps): the diagonal ordering and seed 0 by default, a seed from the clock
-        // (S2R4), which the Sobol sequence reads only past its tabulated dimensions (sobolrsg.cpp's random
-        // initialization); these 3 factors over the grid's steps read none, so a fixed seed draws QuantLib's numbers.
+        // QuantLib's rsg_type(factors, steps): the diagonal ordering and seed 0 by default, a seed from the clock,
+        // which the Sobol sequence reads only past its tabulated dimensions (sobolrsg.cpp's random initialization);
+        // these 3 factors over the grid's steps read none, so a fixed seed draws QuantLib's numbers.
         var rsg = new SobolBrownianBridgeRsg(factors, steps, SobolBrownianGeneratorBaseOrdering.Diagonal, 42);
         var generator = new MultiPathGenerator<SobolBrownianBridgeRsg>(jointProcess, grid, rsg, false);
 
@@ -821,7 +821,7 @@ public class HybridHestonHullWhiteProcessTests
                     int tSteps = (int)(maturity * u);
 
                     // QuantLib's engine with enableMultipleStrikesCaching(strikes), its cache filled by the first
-                    // strike's option: CalculateStrikes on it (the S-hes plan's HR4 (ii))
+                    // strike's option: CalculateStrikes on it
                     ImmutableArray<OneAssetOptionResults> fdResults = FdHestonHullWhiteVanillaEngine.CalculateStrikes(
                         MakeVanillaOption(new VanillaOptionData(strikes[0], maturity, OptionType.Call), context),
                         strikes,
@@ -885,7 +885,7 @@ public class HybridHestonHullWhiteProcessTests
                     int tSteps = (int)(maturity * u);
 
                     // QuantLib's engine with enableMultipleStrikesCaching(strikes), its cache filled by the first
-                    // strike's option: CalculateStrikes on it (the S-hes plan's HR4 (ii))
+                    // strike's option: CalculateStrikes on it
                     ImmutableArray<OneAssetOptionResults> fdResults =
                         FdHestonVanillaEngine.CalculateStrikes(
                             MakeVanillaOption(new VanillaOptionData(strikes[0], maturity, OptionType.Call), context),
@@ -1148,10 +1148,9 @@ public class HybridHestonHullWhiteProcessTests
     }
 
     // QuantLib's engine with enableMultipleStrikesCaching(strikes), shared by one maturity's helpers, as a pricing
-    // delegate (the S-hes plan's HR4 (ii)): its cache emptied when the calibration hands it another model, QuantLib's
-    // update(); a helper whose option type matches the last solve's reads its strike from that solve, any other solves
-    // again with its own option as the reference, as QuantLib's cache lookup does
-    // (fdhestonhullwhitevanillaengine.cpp:78-93)
+    // delegate: its cache emptied when the calibration hands it another model, QuantLib's update(); a helper whose
+    // option type matches the last solve's reads its strike from that solve, any other solves again with its own option
+    // as the reference, as QuantLib's cache lookup does (fdhestonhullwhitevanillaengine.cpp:78-93)
     private static Func<VanillaOption, EvaluationContext, HestonModel, InstrumentResults> MultipleStrikesEngine(
         HullWhiteProcess hwProcess, double corrEquityShortRate, Real[] strikes, int tGrid)
     {

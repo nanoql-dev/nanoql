@@ -3,22 +3,22 @@
 """Vectors for QuantLib's OvernightIndexedCoupon and OvernightLeg (ql/cashflows/overnightindexedcoupon.hpp), on the
 wheel: about 150 coupons over the conventions of the coupon, 20 legs, and the three paths of a spread compounded daily.
 
-The coupons sample, for five overnight indexes (fixing 0, 1 or 2 days back, on the SOFR, TARGET and UK calendars),
-the averaging (compounded or simple) × the lookback (none, 0 or 2) × the lockout (0 or 2) × the observation shift ×
-telescopic value dates (where QuantLib accepts them) × the spread (added or compounded daily) × the rounding (none, 4
-or 8) × past, spanning and future periods, with gearings, explicit day counters, ex-coupon dates, payment lags and
+The coupons sample, for five overnight indexes (fixing 0, 1 or 2 days back, on the SOFR, TARGET and UK calendars), the
+averaging (compounded or simple) × the lookback (none, 0 or 2) × the lockout (0 or 2) × the observation shift ×
+telescopic value dates (where QuantLib accepts them) × the spread (added or compounded daily) × the rounding (none, 4 or
+8) × past, spanning and future periods, with gearings, explicit day counters, ex-coupon dates, payment lags and
 in-advance rate-computation dates among them; a few combinations QuantLib refuses (simple averaging with a lookback, a
-lockout or the shift; telescopic dates with a lookback and no shift; a lockout as long as the period) record its
-throw. Each coupon's outputs are whether it builds, its rate, amount and accrued amounts at four dates, its fixing,
-value and interest dates, dt, index fixings, effective spread and index fixing, the rate-computation dates and its
-conventions' inspectors. Two coupons start on a Saturday with the shift, one with a null lookback and one with a
-lookback of 0, so dt[0] accrues on the value date or on the interest date (D10, SD26); one misses a past fixing.
+lockout or the shift; telescopic dates with a lookback and no shift; a lockout as long as the period) record its throw.
+Each coupon's outputs are whether it builds, its rate, amount and accrued amounts at four dates, its fixing, value and
+interest dates, dt, index fixings, effective spread and index fixing, the rate-computation dates and its conventions'
+inspectors. Two coupons start on a Saturday with the shift, one with a null lookback and one with a lookback of 0, so
+dt[0] accrues on the value date or on the interest date; one misses a past fixing.
 
-Telescopic cases take QuantLib's expected values by the plan's telescopic rule (S3R11, SD11): QuantLib builds the case
-with the flag first, so a refusal is its own; the values are then the same case's built without the flag, an averaged
-coupon given ArithmeticAveragedOvernightIndexedCouponPricer(byApprox=True), the pricer the flag selects. So no output
-is overridden. The wheel's ArithmeticAveragedOvernightIndexedCouponPricer is built with keyword arguments only: a
-positional True binds to meanReversion.
+Telescopic cases take QuantLib's expected values by the telescopic rule: QuantLib builds the case with the flag first,
+so a refusal is its own; the values are then the same case's built without the flag, an averaged coupon given
+ArithmeticAveragedOvernightIndexedCouponPricer(byApprox=True), the pricer the flag selects. So no output is overridden.
+The wheel's ArithmeticAveragedOvernightIndexedCouponPricer is built with keyword arguments only: a positional True binds
+to meanReversion.
 
 The legs (QuantLib-Python's OvernightLeg, which forwards each keyword to the C++ builder's setter of the same meaning:
 nominals to withNotionals, paymentConvention to withPaymentAdjustment, paymentCalendar to withPaymentCalendar, or the
@@ -33,13 +33,12 @@ wheel gives as a default-constructed schedule's calendar) with Unadjusted conven
 its payment calendar, or on WeekendsOnly when it has none (overnightindexedcoupon.cpp:583-588), with a payment lag, in
 advance and with a short front stub.
 
-The paths of a spread compounded daily (S3's D23, plan premise SP26): a 3-month SOFR coupon on a flat 3.12345% curve
-with a 1.23456% spread, with a lookback of 2 days and no shift, where the telescopic formula doesn't apply, and the same
-coupon once fixed. Where the formula applies and a fixing is ahead, QuantLib 1.44 drops a spread compounded daily over
-the forecast range, which nanoql compounds (the S-rx plan's C3 review, B1-1, fixed under R8, reversing D23;
-tests/NanoQL.Tests/Divergences/OvernightCompoundedSpreadForecastTests.cs): such a coupon or leg, SP26's telescopic path
-among them, is generated and left out (spread_dropped, where the coupon's averaging gives it the compounding pricer),
-so the random sequence of the cases after it is kept.
+The paths of a spread compounded daily: a 3-month SOFR coupon on a flat 3.12345% curve with a 1.23456% spread, with a
+lookback of 2 days and no shift, where the telescopic formula doesn't apply, and the same coupon once fixed. Where the
+formula applies and a fixing is ahead, QuantLib 1.44 drops a spread compounded daily over the forecast range, which
+nanoql compounds (fixed; tests/NanoQL.Tests/Divergences/OvernightCompoundedSpreadForecastTests.cs): such a coupon or
+leg, this coupon's telescopic path among them, is generated and left out (spread_dropped, where the coupon's averaging
+gives it the compounding pricer), so the random sequence of the cases after it is kept.
 
 Each case's inputs hold its settings (with the fixings stored, by vectors.case_settings) and its "coupon" or "leg"
 spec. The spec functions here are shared by the other overnight generators, which import this file. Read back by
@@ -301,8 +300,8 @@ def fixings_for(index, first, last, rng, skip=None):
 def spread_dropped(c, today):
     """Whether QuantLib's compounding pricer may drop the coupon's spread compounded daily over the telescopic forecast
     range (overnightindexedcouponpricer.cpp:191-195): the spread compounded daily and nonzero, the telescopic formula
-    applicable and a fixing on or after the evaluation date. nanoql compounds the spread there (B1-1), so the
-    generators leave out a case that prices such a coupon with a compounding pricer."""
+    applicable and a fixing on or after the evaluation date. nanoql compounds the spread there, so the generators leave
+    out a case that prices such a coupon with a compounding pricer."""
     return (c.compoundSpreadDaily() and c.spread() != 0.0 and c.canApplyTelescopicFormula()
             and c.fixingDates()[-1] >= today)
 
@@ -415,10 +414,10 @@ def invalid_coupons(today):
 
 
 def named_coupons():
-    """D10's two Saturday starts and the D23 paths, each (name, spec, today, accrual dates, fixings window); the
-    telescopic one is left out (B1-1)."""
+    """The two Saturday starts and the compounded-spread paths, each (name, spec, today, accrual dates, fixings window);
+    the telescopic one is left out."""
     out = []
-    # D10, SD26: a SOFR coupon starting on Saturday 14 June 2025 with the shift, the lookback null or 0.
+    # A SOFR coupon starting on Saturday 14 June 2025 with the shift, the lookback null or 0.
     today = ql.Date(2, 6, 2025)
     index = index_spec(0, today, 0.042)
     for lookback in (None, 0):
@@ -426,7 +425,7 @@ def named_coupons():
                            lookback=lookback)
         out.append((f"D10 Saturday start, shift, lookback {lookback}", spec, today,
                     [ql.Date(16, 6, 2025), ql.Date(1, 7, 2025), ql.Date(14, 7, 2025), ql.Date(15, 7, 2025)], None))
-    # D23 (SP26): the spread compounded daily, on SP26's coupon.
+    # The spread compounded daily, on the docstring's 3-month SOFR coupon.
     today = ql.Date(15, 1, 2024)
     index = index_spec(0, today, 0.0312345, A360)
     start, end = ql.Date(17, 4, 2024), ql.Date(17, 7, 2024)

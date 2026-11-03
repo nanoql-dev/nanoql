@@ -16,13 +16,13 @@ namespace NanoQL.PricingEngines;
 /// <remarks>
 /// <para>
 /// A static engine over a private simulation deriving <see cref="MCVanillaEngine{TMc, TPath, TStats}"/>, QuantLib's
-/// <c>MCVanillaEngine&lt;MultiVariate, RNG, S&gt;</c> (the S-hes plan's HR2 (iv)); the seed is explicit
-/// (<see cref="MakeMCHestonHullWhiteEngine{TRng, TStats}"/>). The control variate is QuantLib's: the same hybrid at
-/// zero equity-rate correlation, its paths on the pricing seed, priced by <see cref="AnalyticHestonHullWhiteEngine"/>;
-/// with it the value is floored at 0, where deep out-of-the-money options can price slightly negative.
+/// <c>MCVanillaEngine&lt;MultiVariate, RNG, S&gt;</c>; the seed is explicit (<see
+/// cref="MakeMCHestonHullWhiteEngine{TRng, TStats}"/>). The control variate is QuantLib's: the same hybrid at zero
+/// equity-rate correlation, its paths on the pricing seed, priced by <see cref="AnalyticHestonHullWhiteEngine"/>; with
+/// it the value is floored at 0, where deep out-of-the-money options can price slightly negative.
 /// </para>
 /// <para>
-/// The path grid runs on the process's times, its model clock (HR7 (xix)).
+/// The path grid runs on the process's times, its model clock.
 /// </para>
 /// </remarks>
 public static class MCHestonHullWhiteEngine

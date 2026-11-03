@@ -5,9 +5,9 @@ over AnalyticEuropeanEngine), on the evaluation date 15 October 2026: forward-st
 and 1.1, reset today, in three months or in six, expiring in six months, a year or two, on two flat markets and one of
 zero curves under a flat volatility: the NPV, delta, gamma, theta, vega, rho and dividend rho.
 
-Left out (the S-exo plan's §2.10): volatilities off flat, where QuantLib's vega is the derivative in the period's
-forward volatility (tests/NanoQL.Tests/Divergences/ForwardVegaTermStructureTests.cs); payoffs that aren't plain
-vanilla, which nanoql refuses (ForwardNonPlainPayoffTests.cs).
+Left out: volatilities off flat, where QuantLib's vega is the derivative in the period's forward volatility
+(tests/NanoQL.Tests/Divergences/ForwardVegaTermStructureTests.cs); payoffs that aren't plain vanilla, which nanoql
+refuses (ForwardNonPlainPayoffTests.cs).
 
 The setups, which mcforwardeuropeanbsengine.py, mcforwardeuropeanhestonengine.py and
 tools/vectors/gen/pricingengines/quanto/quantoengine.py share: an option {"moneyness", "resetDate", "payoff" (a

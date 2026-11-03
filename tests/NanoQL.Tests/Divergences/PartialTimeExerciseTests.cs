@@ -11,13 +11,13 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The partial-time barrier engine's exercise (the S-bar code review's B1-3). QuantLib's engine never reads the
-/// exercise's type: on spot 100, r 5%, q 1%, σ 20% over a year, a call struck at 100, barrier 90, cover event at 182
-/// days, its start-window and end-window B1 down-and-outs price an American exercise at their European values,
-/// 8.258475774804 and 9.269946137985, and its start-window down-and-in crashes ("Boost assertion failed: px != 0", the
-/// European leg built on a null exercise) (the review's <c>r14_exercise_ql.py</c>). nanoql refuses a non-European
-/// exercise, as the family's European engines do: Heynen and Kat's formulas price a European exercise only. The
-/// European values stand, within ER7's measured 3.3e-5 of QuantLib's (West's bivariate normal for Drezner's).
+/// The partial-time barrier engine's exercise. QuantLib's engine never reads the exercise's type: on spot 100, r 5%, q
+/// 1%, σ 20% over a year, a call struck at 100, barrier 90, cover event at 182 days, its start-window and end-window B1
+/// down-and-outs price an American exercise at their European values, 8.258475774804 and 9.269946137985, and its
+/// start-window down-and-in crashes ("Boost assertion failed: px != 0", the European leg built on a null exercise).
+/// nanoql refuses a non-European exercise, as the family's European engines do: Heynen and Kat's formulas price a
+/// European exercise only. The European values stand, within a measured 3.3e-5 of QuantLib's (West's bivariate normal
+/// for Drezner's).
 /// </summary>
 public class PartialTimeExerciseTests
 {

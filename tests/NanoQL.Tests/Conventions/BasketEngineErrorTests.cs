@@ -14,12 +14,12 @@ namespace NanoQL.Tests.Conventions;
 
 /// <summary>
 /// The exception type, message and parameter name of the basket engines' refusals: Choi's, the N-dimensional
-/// finite-difference (ED28's limit among them), the single-factor and the Monte Carlo European engine's, each QuantLib's
-/// text (the S-exo plan's ED14). Four of QuantLib's checks can't fire, here as in QuantLib, and stand as the guards
-/// before them: the Monte Carlo engine's step checks come before its time grid's "time steps not specified"; a basket
-/// option's payoff is a <see cref="BasketPayoff"/> by its type, so the engine's "non-basket payoff given" has no input;
-/// and a multi-path with no asset or no step is refused by <see cref="MultiPath"/> itself before the path pricer's
-/// "there must be some paths" and "the path cannot be empty".
+/// finite-difference (its dimension limit among them), the single-factor and the Monte Carlo European engine's, each
+/// QuantLib's text. Four of QuantLib's checks can't fire, here as in QuantLib, and stand as the guards before them: the
+/// Monte Carlo engine's step checks come before its time grid's "time steps not specified"; a basket option's payoff is
+/// a <see cref="BasketPayoff"/> by its type, so the engine's "non-basket payoff given" has no input; and a multi-path
+/// with no asset or no step is refused by <see cref="MultiPath"/> itself before the path pricer's "there must be some
+/// paths" and "the path cannot be empty".
 /// </summary>
 public class BasketEngineErrorTests
 {
@@ -82,7 +82,7 @@ public class BasketEngineErrorTests
             "xGrids",
             "minimum grid size is four");
 
-        // ED28: QuantLib's text without its remark on recompiling
+        // QuantLib's text without its remark on recompiling
         ImmutableArray<GeneralizedBlackScholesProcess> five = [P1, P2, P1, P2, P1];
         var fiveAssets = new BasketOption(
             new AverageBasketPayoff(new PlainVanillaPayoff(OptionType.Put, 100.0), [0.2, 0.2, 0.2, 0.2, 0.2]), European());

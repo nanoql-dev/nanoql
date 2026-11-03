@@ -7,8 +7,8 @@ using Microsoft.Office.Interop.Excel;
 namespace NanoQL.Excel.XlTests;
 
 /// <summary>
-/// A bound engine in cells (XLR10, XLP39): the swap engine bound with its curve in one cell and given to the swap's
-/// builder in another, which solves its fixed rate to the C# reference's bits; an engine of the wrong shape refused.
+/// A bound engine in cells: the swap engine bound with its curve in one cell and given to the swap's builder in
+/// another, which solves its fixed rate to the C# reference's bits; an engine of the wrong shape refused.
 /// </summary>
 [ExcelTestSettings(OutOfProcess = true)]
 public class BoundEngineTests : RunnerTest

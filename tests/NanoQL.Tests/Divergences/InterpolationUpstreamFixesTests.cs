@@ -6,11 +6,10 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The fix QuantLib's master made to Kruger's cubic after the pin, which nanoql takes (R8, the upstream sweep): #2952
-/// (<c>32de8d923</c>), a zero derivative at a node where the adjacent slopes' product is at most 0, as the harmonic
-/// scheme has it. QuantLib 1.44 tests <c>S_[i-1]*S_[i] &lt; 0.0</c> (<c>cubicinterpolation.hpp:634</c>), so where a −0
-/// slope meets a +0 one the harmonic mean 2/(1/S₀ + 1/S₁) is 2/(−∞ + ∞), NaN, and the interpolation is NaN on both
-/// adjacent intervals.
+/// The fix QuantLib's master made to Kruger's cubic after the pin, which nanoql takes: #2952 (<c>32de8d923</c>), a zero
+/// derivative at a node where the adjacent slopes' product is at most 0, as the harmonic scheme has it. QuantLib 1.44
+/// tests <c>S_[i-1]*S_[i] &lt; 0.0</c> (<c>cubicinterpolation.hpp:634</c>), so where a −0 slope meets a +0 one the
+/// harmonic mean 2/(1/S₀ + 1/S₁) is 2/(−∞ + ∞), NaN, and the interpolation is NaN on both adjacent intervals.
 /// </summary>
 public class InterpolationUpstreamFixesTests
 {

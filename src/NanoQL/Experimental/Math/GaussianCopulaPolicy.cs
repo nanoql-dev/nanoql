@@ -15,9 +15,9 @@ namespace NanoQL.Experimental;
 /// variables are standard normal too, by the Gaussian's stability under convolution.
 /// </summary>
 /// <remarks>
-/// A <c>readonly struct</c> (D12) built by <see cref="Create"/>. Its zero value isn't usable: QuantLib's default
-/// construction reads the first row of an empty weight matrix (<c>gaussiancopulapolicy.hpp:40-43</c>), so every member
-/// of <c>default(GaussianCopulaPolicy)</c> throws <see cref="InvalidOperationException"/> (S2R9).
+/// A <c>readonly struct</c> built by <see cref="Create"/>. Its zero value isn't usable: QuantLib's default construction
+/// reads the first row of an empty weight matrix (<c>gaussiancopulapolicy.hpp:40-43</c>), so every member of
+/// <c>default(GaussianCopulaPolicy)</c> throws <see cref="InvalidOperationException"/>.
 /// </remarks>
 [Experimental("NQL0001")]
 public readonly struct GaussianCopulaPolicy : ICopulaPolicy<GaussianCopulaPolicy, GaussianCopulaPolicyInitTraits>

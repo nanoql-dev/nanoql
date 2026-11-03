@@ -26,8 +26,8 @@ namespace NanoQL.Experimental;
 /// <see cref="Seniority.NoSeniority"/>, as a settlement from a map settles the seniorities it holds. QuantLib's fills
 /// every other seniority with ISDA's conventional recovery (<c>defaultevent.cpp:63-75</c>), so an event settled for
 /// <see cref="Seniority.SubLT2"/> at 0.3 reads 0.65 for <see cref="Seniority.SecDom"/>, where each seniority settles at
-/// its own auction (ISDA's 2008 Icelandic protocols). A documented divergence (the S-xcr plan's XR8 (iii);
-/// <c>Divergences/SingleSenioritySettlementTests.cs</c>); a seniority not settled reads <see langword="null"/>.
+/// its own auction (ISDA's 2008 Icelandic protocols). A documented divergence
+/// (<c>Divergences/SingleSenioritySettlementTests.cs</c>); a seniority not settled reads <see langword="null"/>.
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]

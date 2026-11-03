@@ -36,7 +36,7 @@ public interface ICalibratedModel
     /// <remarks>
     /// QuantLib's models that override <c>calibrate</c> to fix parameters by default implement it: the
     /// Markov-functional model fixes its first volatility, since its prices don't depend on the volatilities' level.
-    /// Every other model keeps the empty default, QuantLib's (the S-g1d plan's G1R2 (ii)).
+    /// Every other model keeps the empty default, QuantLib's.
     /// </remarks>
     ImmutableArray<bool> DefaultFixParameters => [];
 

@@ -7,9 +7,8 @@ namespace NanoQL.Tests.Conventions;
 
 /// <summary>
 /// QuantLib's stream operator on <c>DoubleBarrier::Type</c> writes "KI lo+KO up" and the rest, not the members' names,
-/// so it is <see cref="DoubleBarrierTypeFunctions.ToString(DoubleBarrierType)"/> (the S-bar plan's PR6.5b precedent;
-/// <c>doublebarriertype.cpp:27-41</c>), its refusal of a value outside the type QuantLib's text. The members' integers
-/// are QuantLib's.
+/// so it is <see cref="DoubleBarrierTypeFunctions.ToString(DoubleBarrierType)"/> (<c>doublebarriertype.cpp:27-41</c>),
+/// its refusal of a value outside the type QuantLib's text. The members' integers are QuantLib's.
 /// </summary>
 public class DoubleBarrierTypeTextTests
 {

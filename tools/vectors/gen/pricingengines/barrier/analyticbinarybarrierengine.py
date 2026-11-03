@@ -12,10 +12,10 @@ its barrier (0) and a knock-in with it (the European digital, by QuantLib's anal
 gamma, vega, theta, rho and dividend rho. Then a plain-vanilla payoff, which QuantLib's formulas price at 0, an expired
 option and the refusals: a European exercise, an American one paying at the hit, and a negative barrier.
 
-The outputs nanoql fixes are left out (the S-bar plan's §2.10): every process here has positive volatilities over
-expiries of six months or more and one day counter and reference date, so none is below machine-epsilon variance
-(BR5 (xv), tests/NanoQL.Tests/Divergences/BinaryBarrierZeroVolatilityTests.cs) or on structures dated or day-counted
-apart (BR5 (i), BarrierClosedFormMismatchedTimesTests.cs); and every rebate is 0, which QuantLib's engine never reads
+The outputs nanoql fixes are left out: every process here has positive volatilities over expiries of six months or more
+and one day counter and reference date, so none is below machine-epsilon variance
+(tests/NanoQL.Tests/Divergences/BinaryBarrierZeroVolatilityTests.cs) or on structures dated or day-counted apart
+(BarrierClosedFormMismatchedTimesTests.cs); and every rebate is 0, which QuantLib's engine never reads
 (BinaryBarrierRebateTests.cs).
 
 A case holds one process, exercise and barrier, its outputs one per payoff, the specs

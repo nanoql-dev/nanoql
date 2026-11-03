@@ -18,16 +18,16 @@ is {"throws": true}. Amounts are compared at the leg's largest notional.
 
 Each implied volatility is an instrument's at a price: the wheel engine's NPV at a chosen volatility (Black, with or
 without a displacement, or Bachelier for the normal type), or a chosen price where none brackets; the outputs are the
-price (nanoql's own engine's NPV at the case's "priceFrom" volatility) and the implied volatility, or {"throws":
-true}; a solve's "instrument" names the instrument's case, whose
-"capFloor" and "discountCurve" it reads, its own settings being that case's. They cover guesses below, at and above the volatility,
-accuracies from QuantLib's default to 1e-12, both volatility types, displacements (the normal type ignoring its own),
-the bracket's ends, a price no volatility reaches, a guess outside the bracket, an empty bracket, too few evaluations,
-an expired instrument and a volatility type outside the enum ("unknown VolatilityType"). QuantLib's helper solves
-with NewtonSafe on its own engine, whatever engine the instrument holds. The stability filter of the plan's S7R6 runs on
-each solve: the solve is redone with the price moved one ulp up and one down (the case's only moved input, so alone
-and together), and the implied volatility is written only where every move leaves it within 1e-12 x max(|a|, |b|,
-1), or throwing where it throws; the generator prints "dropped n of m outputs" per solve and for the file.
+price (nanoql's own engine's NPV at the case's "priceFrom" volatility) and the implied volatility, or {"throws": true};
+a solve's "instrument" names the instrument's case, whose "capFloor" and "discountCurve" it reads, its own settings
+being that case's. They cover guesses below, at and above the volatility, accuracies from QuantLib's default to 1e-12,
+both volatility types, displacements (the normal type ignoring its own), the bracket's ends, a price no volatility
+reaches, a guess outside the bracket, an empty bracket, too few evaluations, an expired instrument and a volatility type
+outside the enum ("unknown VolatilityType"). QuantLib's helper solves with NewtonSafe on its own engine, whatever engine
+the instrument holds. The stability filter runs on each solve: the solve is redone with the price moved one ulp up and
+one down (the case's only moved input, so alone and together), and the implied volatility is written only where every
+move leaves it within 1e-12 x max(|a|, |b|, 1), or throwing where it throws; the generator prints "dropped n of m
+outputs" per solve and for the file.
 
 An instrument spec is {"type", "leg", "legType", "capRates", "floorRates"}: the type QuantLib's integer, the leg an
 IborLeg spec of cashflows/iborcoupon.py ("legType" "IborLeg"), a FixedRateLeg spec of cashflows/fixedratecoupon.py
@@ -267,7 +267,7 @@ def instrument_outputs(spec, curve_spec):
     }
 
 
-# The S7R6 filter: a calibrated output is kept only where every move of its inputs leaves it within this.
+# The stability filter: a calibrated output is kept only where every move of its inputs leaves it within this.
 STABLE = 1e-12
 
 
@@ -278,8 +278,8 @@ def stable(base, moved):
 
 
 def moves(inputs):
-    """S7R6's moves of a case's inputs: every input together one ulp up, then down, and each alone up and down, as
-    lists of input values; a case with one input has two moves."""
+    """The moves of a case's inputs: every input together one ulp up, then down, and each alone up and down, as lists of
+    input values; a case with one input has two moves."""
     out = [[math.nextafter(x, math.inf) for x in inputs], [math.nextafter(x, -math.inf) for x in inputs]]
     for i in range(len(inputs)):
         for direction in (math.inf, -math.inf):

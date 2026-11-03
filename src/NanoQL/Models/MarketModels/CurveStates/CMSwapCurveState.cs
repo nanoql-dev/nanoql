@@ -15,10 +15,10 @@ namespace NanoQL.Models;
 /// from a first valid index on.
 /// </summary>
 /// <remarks>
-/// A working type (the S-mm plan's MR1 (ii)). Its own spanning's swap rates and annuities are set with it; the forwards,
-/// the coterminal swaps and another spanning's swaps are computed at each read into the state's own buffers, as
-/// QuantLib's are. A rate read at the number of rates, which QuantLib's index check admits and reads past its vectors,
-/// is refused with QuantLib's text (MR3 (xx)).
+/// A working type. Its own spanning's swap rates and annuities are set with it; the forwards, the coterminal swaps and
+/// another spanning's swaps are computed at each read into the state's own buffers, as QuantLib's are. A rate read at
+/// the number of rates, which QuantLib's index check admits and reads past its vectors, is refused with QuantLib's
+/// text.
 /// </remarks>
 [WorkingType]
 public sealed class CMSwapCurveState : CurveState

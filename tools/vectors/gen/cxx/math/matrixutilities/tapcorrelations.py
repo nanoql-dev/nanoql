@@ -5,8 +5,8 @@
 harness: the general parametrization at sizes 2 to 5 and ranks 1 to the size + 1 (whose count and loops are rank
 size's), the LMM form, both on unconstrained parameters, the rank-three spiral and its vectorial form, and the Frobenius
 cost of each parametrization against a correlation matrix. Ranks outside 1 to the size + 1, size 0 and short LMM angles,
-where QuantLib reads or writes outside its arrays and nanoql refuses (the S-core plan's CR7 (xxix)), are left out. Read
-back by tests/NanoQL.Tests/Vectors/Cxx/Numerics/MatrixUtilities/TapCorrelationsCxxVectorTests.cs."""
+where QuantLib reads or writes outside its arrays and nanoql refuses, are left out. Read back by
+tests/NanoQL.Tests/Vectors/Cxx/Numerics/MatrixUtilities/TapCorrelationsCxxVectorTests.cs."""
 import os
 import random
 import sys

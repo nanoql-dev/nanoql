@@ -9,11 +9,11 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The n-dimensional solver's and spline's dimension at run time (the S-exo plan's ER3): the solver takes the mesher
-/// layout's, one to four in the n-dimensional engine's use and any the spline carries, where QuantLib's is a template
-/// parameter; the spline takes one to fifteen, QuantLib's list (six here: fifteen dimensions of four points hold 4¹⁵
-/// values), and refuses none or sixteen and the other inputs its recursion can't read (a dimension of no point, values
-/// or flags or a point of another count).
+/// The n-dimensional solver's and spline's dimension at run time: the solver takes the mesher layout's, one to four in
+/// the n-dimensional engine's use and any the spline carries, where QuantLib's is a template parameter; the spline
+/// takes one to fifteen, QuantLib's list (six here: fifteen dimensions of four points hold 4¹⁵ values), and refuses
+/// none or sixteen and the other inputs its recursion can't read (a dimension of no point, values or flags or a point
+/// of another count).
 /// </summary>
 public class FdmNdimSolverDimensionTests
 {

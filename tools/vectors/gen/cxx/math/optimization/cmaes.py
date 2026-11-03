@@ -12,10 +12,10 @@ box-bounded quadratic; weights over twelve decades; a weight of 0; and the rotat
 quadratic: the bounds given in the configuration, an initial mean given, a population of 2, three seeds, and a limit of
 3 generations. Each case records the Problem after minimize (current value, function value, gradient norm, the
 evaluation counts) and the end criterion. Rastrigin's cost cancels near its optimum (10 n against terms near -10 each),
-so samples there tie, and a population above 32 ranks ties by MSVC's introsort, where nanoql sorts stably (the S-core
-plan's CD5; tests/NanoQL.Tests/Divergences/CmaesTests.cs): at 150 the point returned differs, its cost equal, so the
-case keeps to 30, where MSVC's insertion sort is stable. The optimizer's seed is nanoql's constructor argument and
-QuantLib's configuration's. The harness unit is tools/cxx/src/math/optimization/cmaes.cpp. Read back by
+so samples there tie, and a population above 32 ranks ties by MSVC's introsort, where nanoql sorts stably
+(tests/NanoQL.Tests/Divergences/CmaesTests.cs): at 150 the point returned differs, its cost equal, so the case keeps to
+30, where MSVC's insertion sort is stable. The optimizer's seed is nanoql's constructor argument and QuantLib's
+configuration's. The harness unit is tools/cxx/src/math/optimization/cmaes.cpp. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Numerics/Optimization/CmaesCxxVectorTests.cs."""
 import math
 import os

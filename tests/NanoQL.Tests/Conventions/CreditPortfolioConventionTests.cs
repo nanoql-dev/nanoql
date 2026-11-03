@@ -11,10 +11,9 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The credit portfolio's own rules (the S-xcr plan's XR1, XR2, XR8): the basket's binding of its loss model, an
-/// engine's evaluation date, the loss model contract's refusals, the realized defaults' refusals, the n-th-to-default's
-/// order, the event counts' widths and the default correlation's undefined points, each refusal's type, message and
-/// parameter.
+/// The credit portfolio's own rules: the basket's binding of its loss model, an engine's evaluation date, the loss
+/// model contract's refusals, the realized defaults' refusals, the n-th-to-default's order, the event counts' widths
+/// and the default correlation's undefined points, each refusal's type, message and parameter.
 /// </summary>
 public class CreditPortfolioConventionTests
 {
@@ -135,8 +134,8 @@ public class CreditPortfolioConventionTests
     public void ThePoolsDefaultKeyHasNoGracePeriod()
     {
         // QuantLib's Pool::add key is NorthAmericaCorpDefaultKey(Currency(), SeniorSec, Period(), 1.): a failure to pay
-        // ten days before the evaluation date, settled at 0.4, is a default on it, remaining size 1 and settled loss 6
-        // (the S-xcr C1 review's rv_c1_pool.cpp); on a 30-day key QuantLib's reads 2 and 0
+        // ten days before the evaluation date, settled at 0.4, is a default on it, remaining size 1 and settled loss 6;
+        // on a 30-day key QuantLib's reads 2 and 0
         var key = new NorthAmericaCorpDefaultKey(null, Seniority.SeniorSec, new Period(0, TimeUnit.Days), 1.0);
         var failure = new FailureToPayEvent(Today - 10, null, Seniority.SeniorSec, 1.0e6, Today - 5, 0.4);
         Pool pool = new Pool()
@@ -152,8 +151,8 @@ public class CreditPortfolioConventionTests
     [Fact]
     public void AnEatenUpTrancheIsCertainToLose()
     {
-        // a basket of zero notionals binds its model; QuantLib answers 1 before asking it (the S-xcr C1 review's
-        // rv_c1_zero.cpp: remaining notional 0, probOverLoss(5y, 0.5) 1)
+        // a basket of zero notionals binds its model; QuantLib answers 1 before asking it (remaining notional 0,
+        // probOverLoss(5y, 0.5) 1)
         DefaultProbabilityTermStructure[] curves = [Flat(Today, 0.02), Flat(Today, 0.02), Flat(Today, 0.02)];
         Basket basket = new Basket(Today, ["A", "B", "C"], [0.0, 0.0, 0.0], PoolOf(["A", "B", "C"], curves), Context)
             .SetLossModel(Constant(3, 0.3));

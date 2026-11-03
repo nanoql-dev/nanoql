@@ -16,11 +16,11 @@ namespace NanoQL.Methods;
 /// <remarks>
 /// <para>
 /// Both stages run on the operator set once over the whole step, [t − dt, t], the interval QuantLib's other schemes set
-/// for their own steps: the sub-scheme steps without setting its operator's time (the S-eq plan's SEQR9). QuantLib's
-/// sub-step sets the operator over [t − α·dt, t] and its BDF2 stage solves with that operator, so with time-dependent
-/// coefficients QuantLib's scheme is first order or stalls; its own cases are all flat, where both stages' last bits
-/// move with the fix (<c>Divergences/TrBdf2TimeDependentTests.cs</c>). The boundary conditions keep QuantLib's times:
-/// the sub-step sets them to t − α·dt, and the stage to t − dt.
+/// for their own steps: the sub-scheme steps without setting its operator's time. QuantLib's sub-step sets the operator
+/// over [t − α·dt, t] and its BDF2 stage solves with that operator, so with time-dependent coefficients QuantLib's
+/// scheme is first order or stalls; its own cases are all flat, where both stages' last bits move with the fix
+/// (<c>Divergences/TrBdf2TimeDependentTests.cs</c>). The boundary conditions keep QuantLib's times: the sub-step sets
+/// them to t − α·dt, and the stage to t − dt.
 /// </para>
 /// <para>
 /// The fix holds over nanoql's seven one-step schemes, which can step on the set operator. A trapezoidal scheme of
@@ -28,8 +28,8 @@ namespace NanoQL.Methods;
 /// as QuantLib's does.
 /// </para>
 /// <para>
-/// A working type (the S-eq plan's SEQR1): <see cref="Step"/> steps the caller's values in place through buffers the
-/// scheme holds, so a one-directional step allocates nothing after the first.
+/// A working type: <see cref="Step"/> steps the caller's values in place through buffers the scheme holds, so a
+/// one-directional step allocates nothing after the first.
 /// </para>
 /// </remarks>
 [WorkingType]
@@ -99,7 +99,7 @@ public sealed class TrBDF2Scheme<TTrapezoidalScheme> : IFdmScheme
             throw new ArgumentException("a step towards negative time given", nameof(t));
         }
 
-        // SEQR9: the operator set once over the whole step, for both stages
+        // The operator set once over the whole step, for both stages
         map.SetTime(Max0(t - dt), t);
 
         double intermediateTimeStep = dt * alpha;

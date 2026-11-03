@@ -11,14 +11,13 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The partial-time barrier engine with the cover event on the evaluation date (the S-bar plan's BR5 (xiii), fixed under
-/// R8). QuantLib's formulas take t₁ = 0 into Drezner's bivariate normal with infinite arguments and fail ("case not
-/// handled", the planner's P2). nanoql takes the formulas' limit: the start window monitors only the spot, so a
-/// knock-out is the vanilla and a knock-in 0; the end windows monitor the barrier from today to expiry, so B1 is the
-/// standard knock-out on the spot's side of the barrier and B2 the standard knock-out on its own side, out at once with
-/// the spot beyond it, the knock-ins by in-out parity. A cover event before the evaluation date stays refused as QuantLib
-/// refuses it ("negative time"). Checks: QuantLib's analytic European and barrier engines, and the engine's own values
-/// at a cover event a day out.
+/// The partial-time barrier engine with the cover event on the evaluation date (fixed). QuantLib's formulas take t₁ = 0
+/// into Drezner's bivariate normal with infinite arguments and fail ("case not handled"). nanoql takes the formulas'
+/// limit: the start window monitors only the spot, so a knock-out is the vanilla and a knock-in 0; the end windows
+/// monitor the barrier from today to expiry, so B1 is the standard knock-out on the spot's side of the barrier and B2
+/// the standard knock-out on its own side, out at once with the spot beyond it, the knock-ins by in-out parity. A cover
+/// event before the evaluation date stays refused as QuantLib refuses it ("negative time"). Checks: QuantLib's analytic
+/// European and barrier engines, and the engine's own values at a cover event a day out.
 /// </summary>
 public class PartialTimeCoverTodayTests
 {

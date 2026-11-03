@@ -20,15 +20,14 @@ namespace NanoQL.Experimental;
 /// A target swaption's smile is the base smile at a strike mapped through the tenor basis spread, under an affine
 /// terminal swap rate model fitted to the base swaption's deterministic flows, scaled by the target swap's annuity
 /// against the final swap's. A smile section is built per query, as QuantLib's, from the swaps' fair rates on the
-/// discount curve; the swaps are built in the context the structure was built with, which it keeps (S7R2's form,
-/// master Revision 43). The target floating schedule is on the base index's calendar, as QuantLib's.
+/// discount curve; the swaps are built in the context the structure was built with, which it keeps. The target
+/// floating schedule is on the base index's calendar, as QuantLib's.
 /// </para>
 /// <para>
-/// The swaps run the swap length rounded to whole months (the S-xrt plan's XRR5 (xv);
-/// <c>Divergences/TenorSwaptionLengthTests.cs</c>): QuantLib casts the length to whole years before it multiplies by
-/// twelve, so an 18-month tenor builds 12-month swaps; on whole years both are QuantLib's. A swap with no coupon on or
-/// after the discount curve's reference date leaves its flows empty, which QuantLib then reads the last of, undefined;
-/// here it is refused (XRR5 (xvi)).
+/// The swaps run the swap length rounded to whole months (<c>Divergences/TenorSwaptionLengthTests.cs</c>): QuantLib
+/// casts the length to whole years before it multiplies by twelve, so an 18-month tenor builds 12-month swaps; on
+/// whole years both are QuantLib's. A swap with no coupon on or after the discount curve's reference date leaves its
+/// flows empty, which QuantLib then reads the last of, undefined; here it is refused.
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]

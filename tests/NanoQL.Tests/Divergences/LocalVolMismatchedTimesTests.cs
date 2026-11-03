@@ -11,21 +11,21 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The mismatched-dates class (Revision 58) through the S-van plan's C5 readers (its VR4 (xxiii)). QuantLib's
-/// Andreasen-Huge interpolation reads the dividend curve at the risk-free curve's times
-/// (<c>andreasenhugevolatilityinterpl.cpp:299</c>, <c>:414</c>, <c>:462</c>, <c>:547</c>, <c>:623</c>); its
-/// Black-Scholes, generalized Black-Scholes and local-volatility density calculators read their curves and volatility
-/// at one time; and its forward operators read like <c>FdmBlackScholesOp</c>. So a dividend curve on Actual/360 under
-/// a market on Actual/365 (Fixed) is read at other instants: from 15 October 2026, curves at 3% and 1%, the
-/// Andreasen-Huge forward at half a year is 101.0050167084168 where the dividend curve restated on Actual/365 (Fixed),
-/// its rate times 365/360 and so the same discount at every date, gives 100.99800271468963; the density calculators'
-/// cumulative probabilities at 105 are 0.6208898362432407, where the restated market gives 0.6210392949047169
-/// [executed: the wheel, <c>scratchpad\c5\probe_lv_mismatch.py</c>]. nanoql reads each structure at the instant a
-/// time denotes, on its own clock: the risk-free curve's for the interpolation and the Black-Scholes calculators, the
-/// local volatility's for its calculator, and <c>FdmBlackScholesOp</c>'s for the forward operators. QuantLib's check,
-/// its readers on the restated market, gives nanoql's values. Where every structure shares the clock, QuantLib's bits
-/// stand (the vectors). On its default grid the local-volatility calculator solves to its local volatility's last
-/// date, the last representable one for a structure without a maximum date, which a curve dated later reads too.
+/// Structures dated or counted apart through the local-volatility readers. QuantLib's Andreasen-Huge interpolation
+/// reads the dividend curve at the risk-free curve's times (<c>andreasenhugevolatilityinterpl.cpp:299</c>, <c>:414</c>,
+/// <c>:462</c>, <c>:547</c>, <c>:623</c>); its Black-Scholes, generalized Black-Scholes and local-volatility density
+/// calculators read their curves and volatility at one time; and its forward operators read like
+/// <c>FdmBlackScholesOp</c>. So a dividend curve on Actual/360 under a market on Actual/365 (Fixed) is read at other
+/// instants: from 15 October 2026, curves at 3% and 1%, the Andreasen-Huge forward at half a year is 101.0050167084168
+/// where the dividend curve restated on Actual/365 (Fixed), its rate times 365/360 and so the same discount at every
+/// date, gives 100.99800271468963; the density calculators' cumulative probabilities at 105 are 0.6208898362432407,
+/// where the restated market gives 0.6210392949047169 (QuantLib-Python 1.44). nanoql reads each structure at the
+/// instant a time denotes, on its own clock: the risk-free curve's for the interpolation and the Black-Scholes
+/// calculators, the local volatility's for its calculator, and <c>FdmBlackScholesOp</c>'s for the forward operators.
+/// QuantLib's check, its readers on the restated market, gives nanoql's values. Where every structure shares the clock,
+/// QuantLib's bits stand (the vectors). On its default grid the local-volatility calculator solves to its local
+/// volatility's last date, the last representable one for a structure without a maximum date, which a curve dated later
+/// reads too.
 /// </summary>
 public class LocalVolMismatchedTimesTests
 {

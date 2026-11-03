@@ -22,31 +22,31 @@ namespace NanoQL.PricingEngines;
 /// </summary>
 /// <remarks>
 /// <para>
-/// QuantLib's template on the tree (D12): <see cref="Calculate{TTree}"/> takes the tree as its type argument; the seven
-/// named engines, as QuantLib-Python names them, fix it. The credit spread is a number, where QuantLib observes a quote.
+/// QuantLib's template on the tree: <see cref="Calculate{TTree}"/> takes the tree as its type argument; the seven named
+/// engines, as QuantLib-Python names them, fix it. The credit spread is a number, where QuantLib observes a quote.
 /// </para>
 /// <para>
-/// <b>Its clock</b> (the S-sr plan's SSR8, ruled by the user on 2026-10-22, (a)): the tree runs from the bond's
-/// settlement date over the risk-free curve's year fraction to the last exercise date, and the NPV is the bond's value
-/// there, the settlement value equal to it, as QuantLib's are: a named departure from the playbook's lattice clock, since
-/// the engine prices the bond at its settlement date and QuantLib's convertible cases assert that definition. The
-/// structures are flattened at the last exercise date, dated at the risk-free curve's reference date, as QuantLib's are;
-/// where the dividend curve or the volatility has another day counter or reference date than the risk-free curve, its
-/// rate or volatility is the one that gives its discount or variance from the risk-free curve's reference date to that
-/// date, counted on the risk-free day counter, each structure accruing nothing before its own date, where QuantLib reads
-/// it on its own day counter and the tree reads it as the risk-free curve's (<c>Divergences/ConvertibleClockTests.cs</c>).
-/// Where every structure shares the risk-free curve's day counter and reference date, the tree is QuantLib's.
+/// <b>Its clock</b>: the tree runs from the bond's settlement date over the risk-free curve's year fraction to the last
+/// exercise date, and the NPV is the bond's value there, the settlement value equal to it, as QuantLib's are: a named
+/// departure from the playbook's lattice clock, since the engine prices the bond at its settlement date and QuantLib's
+/// convertible cases assert that definition. The structures are flattened at the last exercise date, dated at the
+/// risk-free curve's reference date, as QuantLib's are; where the dividend curve or the volatility has another day
+/// counter or reference date than the risk-free curve, its rate or volatility is the one that gives its discount or
+/// variance from the risk-free curve's reference date to that date, counted on the risk-free day counter, each
+/// structure accruing nothing before its own date, where QuantLib reads it on its own day counter and the tree reads it
+/// as the risk-free curve's (<c>Divergences/ConvertibleClockTests.cs</c>). Where every structure shares the risk-free
+/// curve's day counter and reference date, the tree is QuantLib's.
 /// </para>
 /// <para>
-/// The tree's stock starts at the settlement date's forward, the spot less the dividends' present values divided by
-/// the risk-free discount to the settlement date, as QuantLib's master starts it after 1.44 (#2752, issue #2701; the
-/// upstream sweep's SWR1 (a)), where QuantLib 1.44 starts it at the evaluation date's spot, so a bond with a settlement
-/// lag converts on a spot short of the carry over the lag (<c>Divergences/ConvertibleUpstreamFixesTests.cs</c>).
+/// The tree's stock starts at the settlement date's forward, the spot less the dividends' present values divided by the
+/// risk-free discount to the settlement date, as QuantLib's master starts it after 1.44 (#2752, issue #2701), where
+/// QuantLib 1.44 starts it at the evaluation date's spot, so a bond with a settlement lag converts on a spot short of
+/// the carry over the lag (<c>Divergences/ConvertibleUpstreamFixesTests.cs</c>).
 /// </para>
 /// <para>
 /// The time grid and the lattice take their step count from the tree, its columns less one, where QuantLib's take the
-/// count given: the Leisen-Reimer and Joshi trees build an even count on the next odd one, as S-eq's binomial engine
-/// handles them (the S-eq plan's SEQR7 (x)). Every odd count and every other tree is QuantLib's.
+/// count given: the Leisen-Reimer and Joshi trees build an even count on the next odd one, as the binomial vanilla
+/// engine handles them. Every odd count and every other tree is QuantLib's.
 /// </para>
 /// </remarks>
 public static class BinomialConvertibleEngine
@@ -115,9 +115,9 @@ public static class BinomialConvertibleEngine
         Date maturityDate = arguments.Exercise.LastDate();
         Date referenceDate = process.RiskFreeRate.ReferenceDate;
 
-        // SSR8: a structure on another day counter or reference date is flattened on the risk-free curve's clock, from its
-        // discount or variance between the risk-free curve's reference date and the last exercise date; QuantLib's reads
-        // where it shares that clock
+        // A structure on another day counter or reference date is flattened on the risk-free curve's clock, from its
+        // discount or variance between the risk-free curve's reference date and the last exercise date; QuantLib's
+        // reads where it shares that clock
         bool dividendsFlattened = divdc != rfdc || process.DividendYield.ReferenceDate != referenceDate;
         bool volatilityFlattened = voldc != rfdc || process.BlackVolatility.ReferenceDate != referenceDate;
         double tau = rfdc.YearFraction(referenceDate, maturityDate);
@@ -180,7 +180,7 @@ public static class BinomialConvertibleEngine
         var bs = new GeneralizedBlackScholesProcess(s0, flatDividends, flatRiskFree, flatVol);
         TTree tree = TTree.Create(bs, maturity, timeSteps, strike);
 
-        // SEQR7 (x): the grid and the lattice on the steps the tree was built on
+        // The grid and the lattice on the steps the tree was built on
         int steps = tree.Columns - 1;
         var lattice = new TsiveriotisFernandesLattice<TTree>(tree, riskFreeRate, maturity, steps, creditSpread, v, q);
 

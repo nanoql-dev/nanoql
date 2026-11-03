@@ -5,10 +5,10 @@
 priced on the evaluation date 15 January 2025 under the engine's arguments: either currency domestic; the settlement
 date's flows counted or not, by the engine's flag or by the evaluation context's, on a swap with a coupon paid on the
 evaluation date; a later settlement date; a later NPV date; an explicit FX settlement date, two days on, and one on the
-curves' reference date, which QuantLib reads as unset; and the engine's refusals: curves with different reference
-dates, and a settlement, NPV or FX settlement date before the reference date. Left out (the S-rx plan's SRXR3 (vi)):
-an explicit FX settlement date, the reference date's included, with an NPV date away from the reference date, where
-nanoql converts the spot to the NPV date (tests/NanoQL.Tests/Divergences/CrossCurrencySwapNpvDateFxTests.cs).
+curves' reference date, which QuantLib reads as unset; and the engine's refusals: curves with different reference dates,
+and a settlement, NPV or FX settlement date before the reference date. Left out: an explicit FX settlement date, the
+reference date's included, with an NPV date away from the reference date, where nanoql converts the spot to the NPV date
+(tests/NanoQL.Tests/Divergences/CrossCurrencySwapNpvDateFxTests.cs).
 
 Each case's outputs are the engine's results, those of instruments/constnotionalcrosscurrencyswap.py, or the refused
 pricing, the one output "calculate". NPVs are compared at the largest notional, BPS at it times 1e-4.

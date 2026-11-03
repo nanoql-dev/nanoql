@@ -6,12 +6,11 @@ which the wheel doesn't expose, each output computed by the C++ harness: whole e
 lognormalfwdratepc.py's FlatVol models, here of coterminal swap rates: six semi-annual and five irregular rates, an
 exponential correlation, the default evolution times and every other rate time, full and reduced factors, undisplaced
 and displaced 1% (full factors, terminal measure); the Mersenne-twister generator (seed 42) and Sobol's (diagonal
-ordering, seed 1234); the terminal and money-market measures; from step 0, with the model's initial state and a set
-one, and from step 1 (Mersenne twister, the model's state). The set state is a CoterminalSwapCurveState on the
-coterminal swap rates of an LMMCurveState on the given forwards, the only state type QuantLib's setInitialState reads
-(the S-mm plan's MR3 (v)); nanoql reads the same rates from the LMM state itself. Each of two paths: its weight and
-each step's weight, current step, the curve state's forwards, discount ratios to the last bond and coterminal swap
-rates. Throws: incompatible numeraires.
+ordering, seed 1234); the terminal and money-market measures; from step 0, with the model's initial state and a set one,
+and from step 1 (Mersenne twister, the model's state). The set state is a CoterminalSwapCurveState on the coterminal
+swap rates of an LMMCurveState on the given forwards, the only state type QuantLib's setInitialState reads; nanoql reads
+the same rates from the LMM state itself. Each of two paths: its weight and each step's weight, current step, the curve
+state's forwards, discount ratios to the last bond and coterminal swap rates. Throws: incompatible numeraires.
 
 The loop is lognormalfwdrateipc.py's; the harness unit tools/cxx/src/models/marketmodels/evolvers/evolvers.cpp. Read
 back by tests/NanoQL.Tests/Vectors/Cxx/Models/MarketModels/LogNormalCotSwapRatePcCxxVectorTests.cs."""

@@ -17,10 +17,10 @@ namespace NanoQL.Methods;
 /// <remarks>
 /// <para>
 /// Immutable. Its times are the risk-free curve's, the dividend curve read at the instant a time denotes on its own
-/// clock, as <see cref="BSMRNDCalculator"/> reads it, where QuantLib reads it at the risk-free curve's time (the S-hes
-/// plan's HR7 (xi)); a dividend curve on the risk-free curve's day counter and reference date is read as QuantLib reads
-/// it. Where κt is below 1e-12 the density's κ is raised to 1e-12/t, the density moving by about κt relative there,
-/// below R7, where QuantLib's integration throws "Interval contains no more machine number" from κ = 1e-16 (HR7 (xxv)).
+/// clock, as <see cref="BSMRNDCalculator"/> reads it, where QuantLib reads it at the risk-free curve's time; a dividend
+/// curve on the risk-free curve's day counter and reference date is read as QuantLib reads it. Where κt is below 1e-12
+/// the density's κ is raised to 1e-12/t, the density moving by about κt relative there, below the tolerance, where
+/// QuantLib's integration throws "Interval contains no more machine number" from κ = 1e-16.
 /// </para>
 /// <para>
 /// Reference: A. Dragulescu, V. Yakovenko, Probability distribution of returns in the Heston model with stochastic
@@ -29,7 +29,7 @@ namespace NanoQL.Methods;
 /// </remarks>
 public sealed class HestonRNDCalculator : RiskNeutralDensityCalculator
 {
-    // the kappa t below which the density's kappa is raised to it over t (HR7 (xxv))
+    // the kappa t below which the density's kappa is raised to it over t
     private const double SmallKappaT = 1e-12;
 
     private readonly HestonProcess hestonProcess;
@@ -72,10 +72,10 @@ public sealed class HestonRNDCalculator : RiskNeutralDensityCalculator
         return (new GaussLobattoIntegral(maxIntegrationIterations, 0.1 * integrationEps).Integrate(helper.P0, 0.0, 1.0) / (2.0 * Math.PI)) + 0.5;
     }
 
-    // The distribution of the log spot under the share measure, the spot the numeraire (the code review's C2-B1-2):
-    // there -ln S is a Heston log spot again, its mean reversion kappa - rho sigma, its level kappa theta/(kappa - rho
-    // sigma), its correlation -rho and its forward 1/F, so the risk-neutral distribution's integral at the reflected
-    // point. E[S; S <= e^x] = F times it.
+    // The distribution of the log spot under the share measure, the spot the numeraire: there -ln S is a Heston log
+    // spot again, its mean reversion kappa - rho sigma, its level kappa theta/(kappa - rho sigma), its correlation -rho
+    // and its forward 1/F, so the risk-neutral distribution's integral at the reflected point. E[S; S <= e^x] = F times
+    // it.
     internal double ShareCdf(double x, double t)
     {
         HestonParams p = Params(t);
@@ -95,7 +95,7 @@ public sealed class HestonRNDCalculator : RiskNeutralDensityCalculator
     {
         double v0 = hestonProcess.V0;
 
-        // the density's kappa, floored as Params floors it (the code review's C2-F1-1)
+        // the density's kappa, floored as Params floors it
         double kappa = Params(t).Kappa;
         double theta = hestonProcess.Theta;
         double expVol = Math.Sqrt(theta + ((v0 - theta) * (1 - Math.Exp(-kappa * t)) / (t * kappa)));
@@ -118,7 +118,7 @@ public sealed class HestonRNDCalculator : RiskNeutralDensityCalculator
         return x - x0 + Math.Log(dr / dq);
     }
 
-    // the model's parameters, kappa raised to 1e-12/t where kappa t is below 1e-12 (HR7 (xxv))
+    // the model's parameters, kappa raised to 1e-12/t where kappa t is below 1e-12
     private HestonParams Params(double t)
     {
         double kappa = hestonProcess.Kappa;
@@ -151,14 +151,13 @@ public sealed class HestonRNDCalculator : RiskNeutralDensityCalculator
             // QuantLib's c_inf, capped where its cut x = -ln(QL_EPSILON)/c_inf comes before the characteristic
             // function's decay, about e^{-V x^2/2} with V the expected integrated variance, reaches QL_EPSILON: at a
             // small vol of variance over long terms, and at short terms, QuantLib's cut comes early and the PDF engine
-            // is off by up to 600%; QuantLib's constant, and so its bits, where it already cuts below QL_EPSILON (the
-            // code review's C2-B1-1)
+            // is off by up to 600%; QuantLib's constant, and so its bits, where it already cuts below QL_EPSILON
             double quantLib = Min(10.0, Max(0.0001, Math.Sqrt(1.0 - (p.Rho * p.Rho)) / p.Sigma)) * (p.V0 + (p.Kappa * p.Theta * t));
             cInf = Min(quantLib, Math.Sqrt(CutExponent * ExpectedVariance(p, t) / 2.0));
         }
 
         // theta t + (v0 - theta)(1 - e^{-kappa t})/kappa, the PDF engine's window variance, 1 - e^{-kappa t} by
-        // -expm1(-kappa t) below kappa t = 1e-2 (HR7 (xxv))
+        // -expm1(-kappa t) below kappa t = 1e-2
         private static double ExpectedVariance(HestonParams p, double t)
         {
             double kt = p.Kappa * t;

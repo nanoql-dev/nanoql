@@ -6,10 +6,10 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The bisection's exit on a midpoint whose value is close to 0 (the S-core plan's CR7 (xv)): QuantLib returns its
-/// running root, the bracket's low side, where the midpoint's value is above 0, so x − 1.5 + 1e-30 on [0, 3] returns
-/// 0; nanoql returns the midpoint, 1.5. Where the midpoint's value is at or below 0 the two are QuantLib's own exit.
-/// QuantLib's value is its own (this run's <c>probes\c4_facts.cpp</c>, <c>c4_facts.out</c>).
+/// The bisection's exit on a midpoint whose value is close to 0: QuantLib returns its running root, the bracket's
+/// low side, where the midpoint's value is above 0, so x − 1.5 + 1e-30 on [0, 3] returns 0; nanoql returns the
+/// midpoint, 1.5. Where the midpoint's value is at or below 0 the two are QuantLib's own exit. QuantLib's value is
+/// its own.
 /// </summary>
 public class BisectionTests
 {

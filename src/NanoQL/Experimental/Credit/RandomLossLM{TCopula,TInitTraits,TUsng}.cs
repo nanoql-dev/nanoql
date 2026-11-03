@@ -20,9 +20,9 @@ namespace NanoQL.Experimental;
 /// <typeparam name="TUsng">The uniform sequence generator, which the copula inverts.</typeparam>
 /// <remarks>
 /// A default's recovery is kept in 256ths, QuantLib's rounding, as a value: QuantLib's stores the count in 8 bits, so a
-/// recovery of 1, 256/256, reads 0, a full loss for no loss, and its 12-bit name and day fields wrap past 4,095 (the
-/// S-xcr plan's XR8 (xxv)). Bound to a basket, the model simulates the live names (XR8 (ii)). The simulation's rules
-/// are <see cref="RandomLM{TCopula, TInitTraits, TUsng}"/>'s.
+/// recovery of 1, 256/256, reads 0, a full loss for no loss, and its 12-bit name and day fields wrap past 4,095. Bound
+/// to a basket, the model simulates the live names. The simulation's rules are
+/// <see cref="RandomLM{TCopula, TInitTraits, TUsng}"/>'s.
 /// </remarks>
 [Experimental("NQL0001")]
 public class RandomLossLM<TCopula, TInitTraits, TUsng> : RandomLM<TCopula, TInitTraits, TUsng>

@@ -22,21 +22,21 @@ namespace NanoQL.PricingEngines;
 /// </summary>
 /// <remarks>
 /// <para>
-/// QuantLib's template on the tree and the discretized asset (D12; the S-bar plan's BR2 (iv)): <see cref="Calculate"/>
-/// takes both as type arguments, the tree built through <see cref="IBinomialTree{TSelf}.Create"/> and the asset through
+/// QuantLib's template on the tree and the discretized asset: <see cref="Calculate"/> takes both as type arguments, the
+/// tree built through <see cref="IBinomialTree{TSelf}.Create"/> and the asset through
 /// <see cref="IDiscretizedBarrierAsset{TSelf}.Create"/>, <see cref="DiscretizedBarrierOption"/> or
 /// <see cref="DiscretizedDermanKaniBarrierOption"/> or a user's own. The delta and gamma come from the lattice's first
-/// two steps, the gamma and delta <see langword="null"/> where the nodes don't separate (S-eq's form), and the theta
-/// from the second step's middle node, as QuantLib's.
+/// two steps, the gamma and delta <see langword="null"/> where the nodes don't separate, and the theta from the second
+/// step's middle node, as QuantLib's.
 /// </para>
 /// <para>
 /// Documented divergences. The tree runs on the risk-free curve's day counter from the earliest reference date of the
 /// structures, each structure on another day counter or reference date flattened on it from its discount or variance
 /// at the maturity date, as <see cref="BinomialVanillaEngine"/>'s tree, where QuantLib flattens each curve from the
-/// risk-free curve's date on its own day counter (BR5 (ii), <c>Divergences/BinomialBarrierMismatchedTimesTests.cs</c>);
-/// where every structure shares the risk-free curve's day counter and reference date, the tree is QuantLib's. The time
-/// grid and the lattice take their step count from the tree, its columns less one, where QuantLib's take the count
-/// given (SEQR7 (x)); Boyle and Lau's optimum reads the flattened volatility.
+/// risk-free curve's date on its own day counter (<c>Divergences/BinomialBarrierMismatchedTimesTests.cs</c>); where
+/// every structure shares the risk-free curve's day counter and reference date, the tree is QuantLib's. The time grid
+/// and the lattice take their step count from the tree, its columns less one, where QuantLib's take the count given;
+/// Boyle and Lau's optimum reads the flattened volatility.
 /// </para>
 /// </remarks>
 public static class BinomialBarrierEngine
@@ -136,8 +136,8 @@ public static class BinomialBarrierEngine
 
         // the tree runs on the risk-free curve's day counter from the earliest reference date of the structures it
         // reads, a structure on another day counter or reference date flattened on it, from its discount or variance at
-        // the maturity date, none accrued before its own date, as BinomialVanillaEngine's tree (the S-bar plan's BR5
-        // (ii)); QuantLib's reads where the structure shares the tree's times
+        // the maturity date, none accrued before its own date, as BinomialVanillaEngine's tree; QuantLib's reads where
+        // the structure shares the tree's times
         Date maturityDate = option.Exercise.LastDate();
         Date referenceDate = process.RiskFreeRate.ReferenceDate;
         Date origin = process.EarliestReferenceDate();
@@ -205,7 +205,7 @@ public static class BinomialBarrierEngine
 
         TTree tree = TTree.Create(bs, maturity, optimumSteps, payoff.Strike);
 
-        // SEQR7 (x): the grid and the lattice on the steps the tree was built on
+        // The grid and the lattice on the steps the tree was built on
         int steps = tree.Columns - 1;
         var grid = new NanoQL.TimeGrid(maturity, steps);
         var lattice = new BlackScholesLattice<TTree>(tree, r, maturity, steps);

@@ -22,7 +22,7 @@ namespace NanoQL.Instruments;
 /// <see cref="ZeroCouponSwapResults"/>, whose fair payment <see cref="PricingEngines.DiscountingSwapEngine"/>'s
 /// overload gives at the fixed flow's payment date, where QuantLib's reads the discount at the fixed leg's maturity
 /// date, the accrual end for the fixed-rate constructor's coupon, so with a payment delay its fair payment fed back
-/// leaves a non-zero NPV (the S-cms plan's CMR5 (xxiv)).
+/// leaves a non-zero NPV.
 /// </remarks>
 public sealed class ZeroCouponSwap : Swap
 {

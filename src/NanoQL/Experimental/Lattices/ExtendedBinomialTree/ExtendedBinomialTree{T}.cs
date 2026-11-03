@@ -23,10 +23,10 @@ namespace NanoQL.Experimental;
 /// Immutable once built, on its process, which it keeps. A node at step i is built from the process's drift and
 /// volatility at tᵢ, read as if they held for the whole history to that step, so the tree's spread at step i is that of
 /// a constant volatility σ(tᵢ), not the integrated one. On constant parameters the tree is exact, and every QuantLib
-/// engine flattens its process to constant parameters before it builds a tree (<see cref="PricingEngines.BinomialVanillaEngine"/>),
-/// so through an engine the extended trees equal the standard ones; on a tree built directly on a time-dependent
-/// process the per-step reads are an approximation that doesn't converge to the time-dependent price. QuantLib's
-/// design, kept (the S-xrt plan's XRR6, ruled 2026-10-28; <c>Conventions/ExtendedTreeTimeDependenceTests.cs</c>).
+/// engine flattens its process to constant parameters before it builds a tree (<see
+/// cref="PricingEngines.BinomialVanillaEngine"/>), so through an engine the extended trees equal the standard ones; on
+/// a tree built directly on a time-dependent process the per-step reads are an approximation that doesn't converge to
+/// the time-dependent price. QuantLib's design, kept (<c>Conventions/ExtendedTreeTimeDependenceTests.cs</c>).
 /// </para>
 /// <para>
 /// An extension point, as in QuantLib: the equal-probabilities and equal-jumps bases and the Tian, Leisen-Reimer and

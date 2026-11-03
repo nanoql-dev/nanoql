@@ -16,8 +16,8 @@ namespace NanoQL.Methods;
 /// <remarks>
 /// A working type: <see cref="SetTime"/> rewrites the part's operator in place. The coefficient is ρσ_Sσ√r, the
 /// covariance of the log spot's diffusion σ_S·dW₁ with the CIR rate's σ√r·dW₂, where QuantLib's is 2ρσ_Sσ
-/// (<c>fdmcirop.cpp:74-82</c>) (the S-van plan's VR4 (xv)). The volatility is read on the engine's clock
-/// (<see cref="FdmBlackScholesOp.Clock"/>), QuantLib's read where it shares its times.
+/// (<c>fdmcirop.cpp:74-82</c>). The volatility is read on the engine's clock (<see cref="FdmBlackScholesOp.Clock"/>),
+/// QuantLib's read where it shares its times.
 /// </remarks>
 [WorkingType]
 internal sealed class FdmCIRMixedPart
@@ -36,7 +36,7 @@ internal sealed class FdmCIRMixedPart
         double strike,
         TermStructure clock)
     {
-        // rho*sigma*sqrt(r), where QuantLib's is 2*rho*sigma (VR4 (xv))
+        // rho*sigma*sqrt(r), where QuantLib's is 2*rho*sigma
         dyMap = new SecondOrderMixedDerivativeOp(0, 1, mesher)
             .Mult(rho * cirProcess.Volatility * Numerics.ArrayFunctions.Sqrt(mesher.Locations(1)));
         mapT = new NinePointLinearOp(0, 1, mesher);

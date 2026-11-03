@@ -15,7 +15,7 @@ namespace NanoQL.Experimental;
 /// The path pricer of a double barrier option: either barrier is checked at the path's points, a knock-out paying its
 /// rebate at the first hit's node and a knock-in its rebate at expiry where neither is hit.
 /// </summary>
-/// <remarks>Immutable and public, as QuantLib's (the S-xeq plan's XED8).</remarks>
+/// <remarks>Immutable and public, as QuantLib's.</remarks>
 [Experimental("NQL0001")]
 public sealed class DoubleBarrierPathPricer : PathPricer<MonteCarloPath>
 {

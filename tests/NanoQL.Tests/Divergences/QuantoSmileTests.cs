@@ -12,15 +12,15 @@ using static NanoQL.Tests.Divergences.ExoticTermStructureMarkets;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The quanto engine on a skew. QuantLib reads the underlying's volatility for the drift at the payoff's strike, but for
-/// <c>qvega</c> and <c>qlambda</c> at the spot (<c>quantoengine.hpp:155-166</c>), so on a skew of 0.30 at strike 60 to
-/// 0.10 at 140 (FX volatility 10%, correlation 0.3, a year) they miss its own price bumped in the FX volatility and the
-/// correlation by −27.6% at strike 70 and +56.9% at 130, calls and puts alike, exact at 100; and for a quanto
+/// The quanto engine on a skew. QuantLib reads the underlying's volatility for the drift at the payoff's strike, but
+/// for <c>qvega</c> and <c>qlambda</c> at the spot (<c>quantoengine.hpp:155-166</c>), so on a skew of 0.30 at strike 60
+/// to 0.10 at 140 (FX volatility 10%, correlation 0.3, a year) they miss its own price bumped in the FX volatility and
+/// the correlation by −27.6% at strike 70 and +56.9% at 130, calls and puts alike, exact at 100; and for a quanto
 /// forward-start option it reads the drift at the payoff's strike, which the forward engine never uses, where it
 /// strikes at the moneyness times the spot (3.1098 at payoff strike 0, 3.2384 at 100, 3.2452 at 105, the moneyness
-/// times the spot). nanoql reads both at the drift's strike, the forward's at the moneyness times the spot (the S-exo
-/// plan's ER5 (xxxvi), ED30). The checks: the price bumped in each quote, the prices QuantLib's bits; QuantLib's quanto
-/// forward with its payoff struck at the moneyness times the spot, bit for bit, from any payoff strike.
+/// times the spot). nanoql reads both at the drift's strike, the forward's at the moneyness times the spot. The checks:
+/// the price bumped in each quote, the prices QuantLib's bits; QuantLib's quanto forward with its payoff struck at the
+/// moneyness times the spot, bit for bit, from any payoff strike.
 /// </summary>
 public class QuantoSmileTests
 {

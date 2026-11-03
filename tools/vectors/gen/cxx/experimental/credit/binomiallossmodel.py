@@ -2,13 +2,13 @@
 # SPDX-License-Identifier: Apache-2.0
 """Vectors for QuantLib's BinomialLossModel (ql/experimental/credit/binomiallossmodel.hpp), which the wheel
 doesn't expose, each output computed by the C++ harness (tools/cxx/src/experimental/credit/basket.cpp) on
-tools/vectors/gen/cxx/experimental/credit/defaultevent.py's specs: the Gaussian and Student t models on
-homogeneous pools, by correlation and by weights, equity, mezzanine and senior tranches; the expected tranche
-loss at dates to ten years, and the statistics the model refuses. Left out (Divergences/BinomialLossModelTests.cs):
-inhomogeneous pools, whose adjusted binomial's weight is QuantLib's defect, fixed (the S-xcr plan's XR8 (xviii));
-and the loss distribution, the percentile and the shortfall, which integrate a vector over the factor, where
-QuantLib's quadrature leaves its last node unweighted (XR8 (v), C1's fix). Read back by
-tests/NanoQL.Tests/Vectors/Cxx/Experimental/Credit/BinomialLossModelCxxVectorTests.cs through tests/NanoQL.Tests/Vectors/LossModelStatistics.cs."""
+tools/vectors/gen/cxx/experimental/credit/defaultevent.py's specs: the Gaussian and Student t models on homogeneous
+pools, by correlation and by weights, equity, mezzanine and senior tranches; the expected tranche loss at dates to ten
+years, and the statistics the model refuses. Left out (Divergences/BinomialLossModelTests.cs): inhomogeneous pools,
+whose adjusted binomial's weight is QuantLib's defect, fixed; and the loss distribution, the percentile and the
+shortfall, which integrate a vector over the factor, where QuantLib's quadrature leaves its last node unweighted
+(fixed). Read back by tests/NanoQL.Tests/Vectors/Cxx/Experimental/Credit/BinomialLossModelCxxVectorTests.cs through
+tests/NanoQL.Tests/Vectors/LossModelStatistics.cs."""
 import importlib.util
 import os
 import sys

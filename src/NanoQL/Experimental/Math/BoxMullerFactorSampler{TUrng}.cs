@@ -18,7 +18,7 @@ namespace NanoQL.Experimental;
 /// <remarks>
 /// A mutable working type (§2.7), not for a multithreaded simulation: QuantLib's Box-Muller is the rejection variant.
 /// Its seed constructor is <see cref="BoxMullerFactorSampler.Create{TUrng}"/>, a seed in [1, 4294967295] with no
-/// default, where QuantLib's defaults to 0, the clock (the S-xcr plan's XR4 (a)); a generator given instead is copied.
+/// default, where QuantLib's defaults to 0, the clock; a generator given instead is copied.
 /// </remarks>
 /// <typeparam name="TUrng">The uniform generator.</typeparam>
 [Experimental("NQL0001")]

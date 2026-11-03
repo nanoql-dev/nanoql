@@ -7,13 +7,13 @@ using Microsoft.Office.Interop.Excel;
 namespace NanoQL.Excel.XlTests;
 
 /// <summary>
-/// The shipped builds load (XLR5, XLP37, XLP85), each in an instance of its own: the rows Excel lists for the
-/// <c>.xll</c> are its surface's functions, its own and Excel-DNA's two; a function off the list and one the completeness
-/// check withholds are #NAME?; the desk's swap prices to S-bind's bits.
+/// The shipped builds load, each in an instance of its own: the rows Excel lists for the <c>.xll</c> are its surface's
+/// functions, its own and Excel-DNA's two; a function off the list and one the completeness check withholds are #NAME?;
+/// the desk's swap prices to the C ABI's bits.
 /// </summary>
 public class LoadTests
 {
-    /// <summary>The experimental build: its surface the checked-in one, byte for byte (X1), and loaded whole.</summary>
+    /// <summary>The experimental build: its surface the checked-in one, byte for byte, and loaded whole.</summary>
     [Fact]
     public void TheExperimentalBuildLoads()
     {
@@ -38,7 +38,7 @@ public class LoadTests
             Assert.Equal(Xl.Name, Xl.Get(ws, "B1"));
         });
 
-    /// <summary>The test build the runner's instance loads holds the shipped experimental build's functions, each as it ships, and nqlxlStats (XLD25).</summary>
+    /// <summary>The test build the runner's instance loads holds the shipped experimental build's functions, each as it ships, and nqlxlStats.</summary>
     [Fact]
     public void TheTestBuildHoldsTheShippedFunctions()
     {

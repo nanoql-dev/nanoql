@@ -9,17 +9,17 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// Andreasen-Huge's call-put calibration error by strike (the S-van plan's VR4 (xvii)). QuantLib takes each option's
-/// put or call error by comparing the forward with the j-th grid point, <c>fwd &gt; gridInFwd_[j]</c>
-/// (<c>andreasenhugevolatilityinterpl.cpp:418</c>), about an eighth of the smallest strike, so it always takes the puts':
-/// on calls struck 101.5 to 130 from 15 October 2026, all above the forward, it gives (1.6410985795898742e-08,
-/// 1.148950832474151e-06, 2.1308681968043031e-07), where each option's vega-scaled error on its out-of-the-money side,
-/// from the calibrated prices, gives (1.6414905070833644e-08, 1.1491274031493572e-06, 2.1310003360549513e-07)
-/// [executed: the wheel, <c>scratchpad\c5\probe_ah_callput.py</c>]. nanoql compares the forward with the strike, the
-/// out-of-the-money side; QuantLib's check, the per-option errors from the calibrated prices, gives nanoql's values.
-/// Where every strike is below the forward the two choices agree, and QuantLib's values stand within 1e-6 relative:
-/// the calibration's errors are ill-conditioned, and the C runtime and processor it runs on move them, by 1.8e-8 relative
-/// on GitHub's windows-2022 runner, 5.6e-8 on macOS and 1.7e-8 on Linux (CI run 41146085965).
+/// Andreasen-Huge's call-put calibration error by strike. QuantLib takes each option's put or call error by comparing
+/// the forward with the j-th grid point, <c>fwd &gt; gridInFwd_[j]</c> (<c>andreasenhugevolatilityinterpl.cpp:418</c>),
+/// about an eighth of the smallest strike, so it always takes the puts': on calls struck 101.5 to 130 from 15 October
+/// 2026, all above the forward, it gives (1.6410985795898742e-08, 1.148950832474151e-06, 2.1308681968043031e-07), where
+/// each option's vega-scaled error on its out-of-the-money side, from the calibrated prices, gives
+/// (1.6414905070833644e-08, 1.1491274031493572e-06, 2.1310003360549513e-07) (QuantLib-Python 1.44). nanoql compares the
+/// forward with the strike, the out-of-the-money side; QuantLib's check, the per-option errors from the calibrated
+/// prices, gives nanoql's values. Where every strike is below the forward the two choices agree, and QuantLib's values
+/// stand within 1e-6 relative: the calibration's errors are ill-conditioned, and the C runtime and processor it runs on
+/// move them, by 1.8e-8 relative on GitHub's windows-2022 runner, 5.6e-8 on macOS and 1.7e-8 on Linux (CI run
+/// 41146085965).
 /// </summary>
 public class AndreasenHugeCallPutErrorTests
 {
@@ -39,8 +39,8 @@ public class AndreasenHugeCallPutErrorTests
         AssertClose(avg, e.Avg, 1e-9);
         Assert.True(Math.Abs(e.Min - 1.6410985795898742e-08) > 1e-4 * e.Min);
 
-        // the plan's five strikes about the forward: the smallest error, an out-of-the-money call's, by its call price;
-        // the largest, a put's, QuantLib's
+        // five strikes about the forward: the smallest error, an out-of-the-money call's, by its call price; the
+        // largest, a put's, QuantLib's
         double[] straddling = [80.0, 90.0, 100.0, 110.0, 120.0];
         (ah, e) = Calibrated(straddling);
         (min, _, _) = ByStrike(ah, straddling);

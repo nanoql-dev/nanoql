@@ -123,8 +123,8 @@ public class GeneralizedBlackScholesProcess : StochasticProcess1D
     public BlackVolTermStructure BlackVolatility => blackVolatility;
 
     // The earliest reference date of the risk-free curve, the dividend curve and the Black volatility: the date the
-    // engines' times run from, each structure accruing nothing before its own (the user's rulings of 2026-10-21 on the
-    // S-eq plan, C4R2-O2 (i) and C4R3-O2 (a)); the risk-free curve's where none is dated before it.
+    // engines' times run from, each structure accruing nothing before its own; the risk-free curve's where none is
+    // dated before it.
     internal Date EarliestReferenceDate()
     {
         Date origin = riskFreeRate.ReferenceDate;
@@ -291,18 +291,17 @@ public class GeneralizedBlackScholesProcess : StochasticProcess1D
         return riskFreeRate.DayCounter.YearFraction(riskFreeRate.ReferenceDate, date);
     }
 
-    // The process on an engine's clock (the S-van plan's VR1 (v)): its times, its Time(date)'s among them, on the
-    // clock's day counter from the clock's reference date, and each structure, the risk-free curve among them, read at
-    // the instants those times denote, accruing nothing before its own reference date (TermStructure.AccrualTime); the
-    // process itself where the clock shares the risk-free curve's times, so a market on that clock keeps QuantLib's
-    // bits. The Monte Carlo engines' paths run on FdmBlackScholesOp.Clock, whose origin is the earliest structure's
-    // reference date.
+    // The process on an engine's clock: its times, its Time(date)'s among them, on the clock's day counter from the
+    // clock's reference date, and each structure, the risk-free curve among them, read at the instants those times
+    // denote, accruing nothing before its own reference date (TermStructure.AccrualTime); the process itself where the
+    // clock shares the risk-free curve's times, so a market on that clock keeps QuantLib's bits. The Monte Carlo
+    // engines' paths run on FdmBlackScholesOp.Clock, whose origin is the earliest structure's reference date.
     internal StochasticProcess1D OnClock(TermStructure clock) =>
         clock.SharesTimes(riskFreeRate) ? this : new ClockedView(this, clock);
 
     // q over [t1, t2] on the risk-free curve's clock: QuantLib's read where the dividend curve shares its times;
-    // otherwise at the instants they denote, nothing accruing before the curve's reference date (the user's rulings of
-    // 2026-10-21 on the S-eq plan, C4-O2 and C4R2-O2; TermStructure.AccrualTime)
+    // otherwise at the instants they denote, nothing accruing before the curve's reference date
+    // (TermStructure.AccrualTime)
     private double DividendRate(double t1, double t2) =>
         dividendYield.SharesTimes(riskFreeRate)
             ? dividendYield.ContinuousForwardRate(t1, t2, true)

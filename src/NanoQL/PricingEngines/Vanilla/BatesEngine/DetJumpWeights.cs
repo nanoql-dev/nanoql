@@ -17,7 +17,7 @@ namespace NanoQL.PricingEngines;
 /// </summary>
 /// <remarks>
 /// QuantLib's expression (<c>batesengine.cpp:80-82</c>, <c>:140-142</c>) at and above x = 1e-2; below it the two
-/// weights are x·φ₂(−x) and −expm1(−x)/x, which don't cancel (the S-hes plan's HR7 (iv)).
+/// weights are x·φ₂(−x) and −expm1(−x)/x, which don't cancel.
 /// </remarks>
 internal static class DetJumpWeights
 {

@@ -15,30 +15,31 @@ namespace NanoQL.Bind;
 /// <summary>
 /// <c>nanoql-bind excel</c>: the Excel add-in's generator (docs/excel.md).
 /// <list type="bullet">
-/// <item><c>update</c>: write <c>bindings/excel/functions.json</c>, nanoql's experimental build's surface (XLD22).</item>
-/// <item><c>check</c>: regenerate it into memory and compare its bytes with the checked-in file (X1), and check its names.</item>
+/// <item><c>update</c>: write <c>bindings/excel/functions.json</c>, nanoql's experimental build's surface.</item>
+/// <item><c>check</c>: regenerate it into memory and compare its bytes with the checked-in file, and check its
+/// names.</item>
 /// <item><c>generate --out &lt;folder&gt;</c>: write a build's generated C#, its surface and its templates alone (the
 /// Excel tests compile them).</item>
 /// <item><c>build --out &lt;folder&gt;</c>: generate a build into an Excel-DNA project, build it and pack its <c>.xll</c>.</item>
-/// <item><c>package --out &lt;folder&gt;</c>: build nanoql's two add-ins and write the release's zip and its symbols zip
-/// (XLR12); it takes <c>--runtime-source</c> alone.</item>
+/// <item><c>package --out &lt;folder&gt;</c>: build nanoql's two add-ins and write the release's zip and its symbols
+/// zip; it takes <c>--runtime-source</c> alone.</item>
 /// </list>
 /// The others take <c>--assembly &lt;prefix&gt;=&lt;path&gt;</c> (nanoql's two by default), <c>--experimental</c> (the
-/// experimental API beside the stable), <c>--list &lt;prefix&gt;=&lt;file&gt;|none</c> (nanoql's prefix takes nanoql's list
-/// unless told otherwise, any other none, XLD35), <c>--test-exports</c> (S-bind's test types, prefix nqlt, and
+/// experimental API beside the stable), <c>--list &lt;prefix&gt;=&lt;file&gt;|none</c> (nanoql's prefix takes nanoql's
+/// list unless told otherwise, any other none), <c>--test-exports</c> (the bindings' test types, prefix nqlt, and
 /// <c>nqlxlStats</c>), <c>--roles</c> and <c>--shipped</c> as the tool's other commands do; <c>build</c> also takes
 /// <c>--runtime-source &lt;feed&gt;</c>, <c>--no-pack</c> (compile, no <c>.xll</c>) and the test-only
-/// <c>--xl-budget &lt;n&gt;</c>, which only lowers the 10,000 functions Excel-DNA's loader registers (XLR5).
+/// <c>--xl-budget &lt;n&gt;</c>, which only lowers the 10,000 functions Excel-DNA's loader registers.
 /// </summary>
 internal static class ExcelCommand
 {
-    /// <summary>Excel-DNA's loader's function slots: a function past them is silently missing (XLP2).</summary>
+    /// <summary>Excel-DNA's loader's function slots: a function past them is silently missing.</summary>
     public const int Budget = 10000;
 
     /// <summary>Runs an <c>excel</c> command.</summary>
     /// <param name="args">The arguments after <c>excel</c>.</param>
     /// <param name="repo">The repository.</param>
-    /// <param name="testTypes">Builds S-bind's test types and gives their assembly's path.</param>
+    /// <param name="testTypes">Builds the bindings' test types and gives their assembly's path.</param>
     /// <returns>The exit code.</returns>
     public static int Run(string[] args, string repo, Func<string, string> testTypes)
     {
@@ -156,9 +157,9 @@ internal static class ExcelCommand
         }
     }
 
-    // XLR12: nanoql's two add-ins built and packed; the release's zip (the two .xll, LICENSE, NOTICE, the notices with
-    // Excel-DNA's and .NET's added, README.md) and its symbols zip (nanoql's PDBs, their sources embedded), each in the C
-    // archive's form: one folder, its entries sorted and dated 2026-01-01.
+    // The release: nanoql's two add-ins built and packed; the release's zip (the two .xll, LICENSE, NOTICE, the notices
+    // with Excel-DNA's and .NET's added, README.md) and its symbols zip (nanoql's PDBs, their sources embedded), each
+    // in the C archive's form: one folder, its entries sorted and dated 2026-01-01.
     private static int Package(string bindings, string dir, string? runtimeSource)
     {
         var sw = Stopwatch.StartNew();
@@ -192,7 +193,7 @@ internal static class ExcelCommand
         content["LICENSE"] = ExcelProject.Notice("LICENSE");
         content["NOTICE"] = ExcelProject.Notice("NOTICE");
 
-        // nanoql's notices, then Excel-DNA's, whose runtime each .xll packs, and .NET's, whose host it links (XLP50).
+        // nanoql's notices, then Excel-DNA's, whose runtime each .xll packs, and .NET's, whose host it links.
         string notices = Path.Combine(bindings, "excel", "notices");
         content["THIRD_PARTY_NOTICES.md"] = [.. ExcelProject.Notice("THIRD_PARTY_NOTICES.md"),
             .. File.ReadAllBytes(Path.Combine(notices, "Excel-DNA.txt")), .. File.ReadAllBytes(Path.Combine(notices, "dotnet.txt"))];
@@ -228,7 +229,7 @@ internal static class ExcelCommand
         return 0;
     }
 
-    // Each prefix's list: nanoql's takes nanoql's unless told otherwise; any other none unless given one (XLD35).
+    // Each prefix's list: nanoql's takes nanoql's unless told otherwise; any other none unless given one.
     private static Dictionary<string, ExcelList?> Lists(Dictionary<string, string> given, List<AssemblyInput> assemblies)
     {
         var lists = new Dictionary<string, ExcelList?>(StringComparer.Ordinal);
@@ -316,7 +317,7 @@ internal static class ExcelCommand
             return 0;
         }
 
-        // Excel-DNA names its output after the project's .dna; the add-in takes its own name (XLD1), which its settings file follows.
+        // Excel-DNA names its output after the project's .dna; the add-in takes its own name, which its settings file follows.
         string packed = Path.Combine(dir, "bin", "Release", "net10.0-windows", "publish", ExcelProject.Name + "-AddIn64-packed.xll");
         string xll = Path.Combine(dir, addIn + ".xll");
         File.Copy(packed, xll, true);
@@ -325,8 +326,8 @@ internal static class ExcelCommand
     }
 
     /// <summary>
-    /// The budget, which applies to packing: a build past it would register silently missing functions (XLR5, XLD16),
-    /// so it is refused, naming its count and its largest namespaces.
+    /// The budget, which applies to packing: a build past it would register silently missing functions, so it is
+    /// refused, naming its count and its largest namespaces.
     /// </summary>
     /// <param name="x">The build.</param>
     /// <param name="budget">The ceiling: Excel-DNA's 10,000, or the test-only --xl-budget's lower one.</param>
@@ -340,7 +341,7 @@ internal static class ExcelCommand
         }
     }
 
-    // A user prefix's functions the check withholds, each with the types it lacks and the remedy (XLD35, F11-3).
+    // A user prefix's functions the check withholds, each with the types it lacks and the remedy.
     private static void PrintUserWithheld(ExcelOutput x)
     {
         foreach (string line in UserWithheld(x))

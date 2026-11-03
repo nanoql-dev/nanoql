@@ -9,14 +9,14 @@ using static NanoQL.Bind.Tests.ExcelSurfaces;
 namespace NanoQL.Bind.Tests;
 
 /// <summary>
-/// The completeness check and the entries' checks (XLD34): a listed function whose required input, an object or an
-/// engine, nothing kept makes is withheld to a fixpoint and listed in functions.json's "withheld"; an entry the surface
-/// lacks, an entry keeping no function and a deprecated function the list would keep, each refused; every listed
-/// instrument priced.
+/// The completeness check and the entries' checks: a listed function whose required input, an object or an engine,
+/// nothing kept makes is withheld to a fixpoint and listed in functions.json's "withheld"; an entry the surface lacks,
+/// an entry keeping no function and a deprecated function the list would keep, each refused; every listed instrument
+/// priced.
 /// </summary>
 public class ExcelCheckTests
 {
-    /// <summary>The seed's 19 withheld, each with what it lacks (XLP83).</summary>
+    /// <summary>The seed's 19 withheld, each with what it lacks.</summary>
     [Fact]
     public void TheSeedWithholdsNineteen()
     {
@@ -37,7 +37,7 @@ public class ExcelCheckTests
         Assert.Contains("fx_Selfish_get_Value", withheld.Keys);
     }
 
-    /// <summary>A preset's type a kept lookup makes counts as made: the BMA index through the set's lookup (F10-2).</summary>
+    /// <summary>A preset's type a kept lookup makes counts as made: the BMA index through the set's lookup.</summary>
     [Fact]
     public void ALookupsPresetCountsAsMade()
     {
@@ -65,7 +65,8 @@ public class ExcelCheckTests
         Assert.Contains("an engine no listed engine binds", Withheld(x)["nql_QuantoEngine_Calculate__QuantoForwardVanillaOption"]);
     }
 
-    /// <summary>A user prefix's function on a nanoql type off nanoql's list is withheld as nanoql's are, the tool printing it with the type it lacks and the remedy (F11-3).</summary>
+    /// <summary>A user prefix's function on a nanoql type off nanoql's list is withheld as nanoql's are, the tool
+    /// printing it with the type it lacks and the remedy.</summary>
     [Fact]
     public void AUserFunctionOnAnUnlistedNanoqlTypeIsWithheld()
     {

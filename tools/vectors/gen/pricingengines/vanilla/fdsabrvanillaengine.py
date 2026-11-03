@@ -3,13 +3,12 @@
 """Vectors for QuantLib's FdSabrVanillaEngine (ql/pricingengines/vanilla/fdsabrvanillaengine.hpp, .cpp), on the
 evaluation date 15 October 2026: the NPV it reports, and its delta, gamma and theta, which it doesn't provide.
 
-European, American and Bermudan calls and puts on SABR forwards (testFdmSabrCevPricing's f0 1.2, alpha 0.35, at beta
-0.1 and 0.9; testFdmSabrVsVolApproximation's f0 100, alpha 0.35, beta 0.85, nu 0.75, rho 0.85; and BenchOp's f0 0.5,
-alpha 0.5, beta 0.5, nu 0.4, rho 0) at strikes below, at and above the forward, on flat curves at 5% and 0, on small
-grids (25 x 60 x 15, Hundsdorfer) and one at the default (50 x 400 x 50); then other damping steps, scaling, eps and
-schemes; and the parameter refusals of beta 1 and nu below 0. At nu = 0, where QuantLib's engine throws and nanoql's
-prices on the CEV engine (the S-van plan's VR4 (xxxi), tests/NanoQL.Tests/Divergences/FdSabrZeroNuTests.cs), no case
-is; nor in the band |beta - 1| < 1e-3 (VR10).
+European, American and Bermudan calls and puts on SABR forwards (testFdmSabrCevPricing's f0 1.2, alpha 0.35, at beta 0.1
+and 0.9; testFdmSabrVsVolApproximation's f0 100, alpha 0.35, beta 0.85, nu 0.75, rho 0.85; and BenchOp's f0 0.5, alpha
+0.5, beta 0.5, nu 0.4, rho 0) at strikes below, at and above the forward, on flat curves at 5% and 0, on small grids (25
+x 60 x 15, Hundsdorfer) and one at the default (50 x 400 x 50); then other damping steps, scaling, eps and schemes; and
+the parameter refusals of beta 1 and nu below 0. At nu = 0, where QuantLib's engine throws and nanoql's prices on the
+CEV engine (tests/NanoQL.Tests/Divergences/FdSabrZeroNuTests.cs), no case is; nor in the band |beta - 1| < 1e-3.
 
 The specs are a pricing {"f0", "alpha", "beta", "nu", "rho", "rTS", "payoff", "exercise", "tGrid", "fGrid", "xGrid",
 "dampingSteps", "scalingFactor", "eps", "scheme"}, the exercise and the scheme tools/vectors/gen/pricingengines/vanilla/

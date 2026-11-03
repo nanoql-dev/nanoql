@@ -35,20 +35,20 @@ public class CallableBondErrorTests
     [Fact]
     public void TheCallableBondsRefusals()
     {
-        // MD7: the schedule's own refusal of an empty schedule
+        // The schedule's own refusal of an empty schedule
         NanoQLException empty = Assert.Throws<NanoQLException>(() => new CallableFixedRateBond(
             2, 100.0, new Schedule([], Calendar), [0.05], new Thirty360(Thirty360Convention.BondBasis)));
         Assert.Equal(typeof(NanoQLException), empty.GetType());
         Assert.Equal("empty Schedule: no end date", empty.Message);
 
-        // MD8: a null callability, an argument
+        // A null callability, an argument
         ArgumentException nullCall = Assert.Throws<ArgumentException>(() => new CallableZeroCouponBond(
             2, 100.0, Calendar, new Date(15, Month.June, 2030), new Actual365Fixed(), putCallSchedule: [null!]));
         Assert.Equal(typeof(ArgumentException), nullCall.GetType());
         Assert.Equal("putCallSchedule", nullCall.ParamName);
         Assert.StartsWith("null callability in schedule", nullCall.Message, StringComparison.Ordinal);
 
-        // MD10: the Black engine's one callability occurred, a value already stored
+        // The Black engine's one callability occurred, a value already stored
         Date settlement = Calendar.Advance(Today, 3, TimeUnit.Days);
         NanoQLException occurred = Assert.Throws<NanoQLException>(
             () => BlackCallableFixedRateBondEngine.Calculate(Bond(settlement), Context, 0.2, Curve));
@@ -85,8 +85,8 @@ public class CallableBondErrorTests
         Assert.Equal(typeof(NanoQLException), spread.GetType());
         Assert.Equal("Spread is not supported for trees other than OneFactorModel", spread.Message);
 
-        // an expired bond's implied volatility: QuantLib's own check, ahead of the Black engine's MD10 refusal, which
-        // the bond's occurred call would meet
+        // an expired bond's implied volatility: QuantLib's own check, ahead of the Black engine's refusal of an
+        // occurred callability, which the bond's occurred call would meet
         var expired = new EvaluationContext { EvaluationDate = new Date(16, Month.September, 2030) };
         NanoQLException implied = Assert.Throws<NanoQLException>(() => bond.ImpliedVolatility(
             new BondPrice(100.0, BondPriceType.Clean), Curve, expired, 1e-8, 200, 0.0, 1.0));

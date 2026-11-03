@@ -91,7 +91,7 @@ internal static class Xl
     /// <param name="app">The Excel instance.</param>
     public static void Calc(Application app) => Retry(app.Calculate);
 
-    /// <summary>A number's bits, as the plan's readings give them, or the value's text.</summary>
+    /// <summary>A number's bits, as the reference constants give them, or the value's text.</summary>
     /// <param name="v">The value.</param>
     /// <returns>Sixteen hexadecimal digits for a number.</returns>
     public static string Bits(object? v) => v is double d ? BitConverter.DoubleToInt64Bits(d).ToString("X16", CultureInfo.InvariantCulture) : $"{v}";

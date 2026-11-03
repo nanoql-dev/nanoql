@@ -202,7 +202,7 @@ T rp::el(const jv* v)
     } else if constexpr (is_pair<T>::value) {
         return T(el<typename T::first_type>(at(v, 0)), el<typename T::second_type>(at(v, 1)));
     } else if constexpr (is_tuple<T>::value) {
-        // A tuple argument, or a collection's tuple: its JSON array, each element in its own form (B2R3).
+        // A tuple argument, or a collection's tuple: its JSON array, each element in its own form.
         return el_tuple<T>(v, std::make_index_sequence<std::tuple_size_v<T>>{});
     } else if constexpr (is_vector<T>::value) {
         T out;

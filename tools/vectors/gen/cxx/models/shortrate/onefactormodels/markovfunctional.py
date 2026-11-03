@@ -11,14 +11,14 @@ And the first model with its arbitrage indices forced, each point's left index m
 parity (forceArbitrageIndices): its arbitrage indices, and its numeraire and zero bonds at a few states.
 The grids are smaller than the defaults, for speed; QuantLib's own cases run the defaults.
 
-**The stability filter** (the S7 plan's S7R6) runs on every output: each model is built again with the volatility
-structure's volatility moved one ulp up and down by math.nextafter, then the curve's forward; an output, a whole
-array or matrix, is written only where every rebuild leaves each of its numbers within 1e-12 x max(|base|, |moved|, 1)
-(the dates, indices and messages where every rebuild gives the same), and the generator prints the outputs dropped.
+**The stability filter** runs on every output: each model is built again with the volatility structure's volatility
+moved one ulp up and down by math.nextafter, then the curve's forward; an output, a whole array or matrix, is written
+only where every rebuild leaves each of its numbers within 1e-12 x max(|base|, |moved|, 1) (the dates, indices and
+messages where every rebuild gives the same), and the generator prints the outputs dropped.
 
-Left out, where nanoql's model differs (the S-g1d plan's G1R6 (xxi), (vi), G1R4 (ii)): flat payoff extrapolation; a
-model without volatility step dates at a volatility other than 1, whose state variance QuantLib's computes without the
-volatility's square; and reversions between QuantLib's epsilon and 1e-2. Each case's input "model" is the spec
+Left out, where nanoql's model differs: flat payoff extrapolation; a model without volatility step dates at a
+volatility other than 1, whose state variance QuantLib's computes without the volatility's square; and reversions
+between QuantLib's epsilon and 1e-2. Each case's input "model" is the spec
 tools/cxx/src/models/shortrate/onefactormodels/markovfunctional.cpp reads; tests/NanoQL.Tests/Vectors/Cxx/Models/
 MarkovFunctionalCxxVectorTests.cs reads it back."""
 import importlib.util

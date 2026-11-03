@@ -13,16 +13,15 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The Asian engines on structures that measure time differently (the S-bar plan's BR5 (xxvi), batch 4's dates class,
-/// fixed under R8). QuantLib's engines read each structure on its own day counter's time as though they shared one
-/// clock, so on an Actual/360 risk-free curve (r 5%) beside Actual/365 Fixed dividends (2%) and volatility (25%) they
-/// are off their own values on the market restated onto one clock with the discounts and variances by date unchanged:
-/// a call at 100 on twelve fixings every 30 days by the FD engine +0.478%, by the arithmetic Monte Carlo +0.469%, Levy's
-/// continuous call over a year +0.482%, and the Heston geometric call (v₀ = θ 0.04, κ 2, vol of vol 0.5, ρ −0.5)
-/// −0.174% (the S-bar run's <c>c3_mismatch_ql.py</c>). nanoql runs the FD and Monte Carlo engines on
+/// The Asian engines on structures that measure time differently (fixed). QuantLib's engines read each structure on its
+/// own day counter's time as though they shared one clock, so on an Actual/360 risk-free curve (r 5%) beside Actual/365
+/// Fixed dividends (2%) and volatility (25%) they are off their own values on the market restated onto one clock with
+/// the discounts and variances by date unchanged: a call at 100 on twelve fixings every 30 days by the FD engine
+/// +0.478%, by the arithmetic Monte Carlo +0.469%, Levy's continuous call over a year +0.482%, and the Heston geometric
+/// call (v₀ = θ 0.04, κ 2, vol of vol 0.5, ρ −0.5) −0.174%. nanoql runs the FD and Monte Carlo engines on
 /// <c>FdmBlackScholesOp.Clock</c>, Levy on the volatility's clock, and the Heston engine on <c>FdmHestonOp.Clock</c>,
 /// each structure read at the instants its times denote. Check: each engine on the restated market, to rounding for the
-/// grids and paths (the same numbers drawn) and within R7 for the integrals.
+/// grids and paths (the same numbers drawn) and within the tolerance for the integrals.
 /// </summary>
 public class AsianMismatchedTimesTests
 {

@@ -19,14 +19,14 @@ namespace NanoQL.Experimental;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Immutable (the S-xcr plan's XR5): QuantLib's lazy copula observes its correlation quote; here a correlation is a
-/// <see langword="double"/> and a derived model tabulates F_Y at construction, in QuantLib's loop order. The
-/// correlation lies in [0, 1]: QuantLib's accepts [−1, 1] and takes its square root, a negative one reading NaN
-/// (<c>onefactorcopula.hpp:110-112</c>, <c>onefactorcopula.cpp:35</c>; XR8 (xxxiii)). At 1 the conditional
-/// probability divides by √(1 − c) = 0 and reads the comonotonic step, QuantLib's continuous limit, kept (XR8
-/// (xlviii)): the Gaussian's integral at p = 0.05 reads 0.0545030778829 at 1 and 0.0545030775379 at 0.9999, the Euler
-/// grid's 0.0545 for 0.05 at such correlations QuantLib's own <c>\todo</c> (<c>onefactorcopula.hpp:100</c>), and
-/// <see cref="CheckMoments"/> refuses both, as QuantLib's does (<c>Conventions/AnalyticLossModelConventionTests.cs</c>).
+/// Immutable: QuantLib's lazy copula observes its correlation quote; here a correlation is a <see langword="double"/>
+/// and a derived model tabulates F_Y at construction, in QuantLib's loop order. The correlation lies in [0, 1]:
+/// QuantLib's accepts [−1, 1] and takes its square root, a negative one reading NaN
+/// (<c>onefactorcopula.hpp:110-112</c>, <c>onefactorcopula.cpp:35</c>). At 1 the conditional probability divides by √(1
+/// − c) = 0 and reads the comonotonic step, QuantLib's continuous limit, kept: the Gaussian's integral at p = 0.05
+/// reads 0.0545030778829 at 1 and 0.0545030775379 at 0.9999, the Euler grid's 0.0545 for 0.05 at such correlations
+/// QuantLib's own <c>\todo</c> (<c>onefactorcopula.hpp:100</c>), and <see cref="CheckMoments"/> refuses both, as
+/// QuantLib's does (<c>Conventions/AnalyticLossModelConventionTests.cs</c>).
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]

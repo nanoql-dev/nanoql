@@ -6,12 +6,11 @@ and puts under the normal model, on the evaluation date 15 October 2026.
 Forwards of 100 and of 0.02 (a rate), the second with strikes below zero, at moneyness from deep out of the money to
 deep in it, at deviations from 0.4% to 30% of the level, discounted by 1 and by 0.95: the value, the forward Greeks
 (delta, gamma, elasticity), the spot Greeks at a spot apart from the forward (delta, gamma, elasticity), vega, rho and
-the dividend rho at a maturity, the in-the-money probabilities, the strike sensitivity and gamma, alpha and beta.
-Every case keeps |F - K| / deviation below 7, since where N(d) rounds to 1 QuantLib prices a put as the call (the S-exo
-plan's ER5 (xxvi), tests/NanoQL.Tests/Divergences/BachelierPutBranchTests.cs); theta, vanna and volga are left out,
-nanoql's formulas fixing each (ER5 (xxviii), BachelierGreeksTests.cs), and so are the non-vanilla payoffs (ER5
-(xxvii), BachelierPayoffTests.cs). Then QuantLib's checks: a negative deviation, a discount of zero, and a negative
-maturity in vega, rho and the dividend rho.
+the dividend rho at a maturity, the in-the-money probabilities, the strike sensitivity and gamma, alpha and beta. Every
+case keeps |F - K| / deviation below 7, since where N(d) rounds to 1 QuantLib prices a put as the call
+(tests/NanoQL.Tests/Divergences/BachelierPutBranchTests.cs); theta, vanna and volga are left out, nanoql's formulas
+fixing each (BachelierGreeksTests.cs), and so are the non-vanilla payoffs (BachelierPayoffTests.cs). Then QuantLib's
+checks: a negative deviation, a discount of zero, and a negative maturity in vega, rho and the dividend rho.
 
 A case holds one calculator {"type" (QuantLib's Call 1, Put -1), "strike", "forward", "stdDev", "discount"}, the spot
 and the maturity the Greeks take. The wheel's calls, by QuantLib-SWIG 1.44's bacheliercalculator.i:

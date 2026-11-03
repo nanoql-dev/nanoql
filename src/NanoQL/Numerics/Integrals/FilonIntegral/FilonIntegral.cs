@@ -16,11 +16,11 @@ namespace NanoQL.Numerics;
 /// and everything near 1e-4, and are NaN at θ 0 (t 0). Below |θ| 1.7 nanoql takes their Taylor series to 14 terms
 /// (α = 2θ³/45 − 2θ⁵/315 + …, β = 2/3 + 2θ²/15 − …, γ = 4/3 − 2θ²/15 + …), within 3.3e-16 of a 50-digit evaluation
 /// there, and Simpson's rule at θ 0; from 1.7, where they are within 1e-15 of it, QuantLib's closed forms, bit for bit.
-/// A documented divergence (the S-core plan's CR7 (x)).
+/// A documented divergence.
 /// </para>
 /// <para>
-/// Zero intervals are refused (CR7 (xxviii)): QuantLib accepts them and divides by 0. QuantLib's integrator counts
-/// none of its evaluations and sets no error estimate, so a result's number of evaluations is 0 and its error
+/// Zero intervals are refused: QuantLib accepts them and divides by 0. QuantLib's integrator counts none of its
+/// evaluations and sets no error estimate, so a result's number of evaluations is 0 and its error
 /// <see langword="null"/>.
 /// </para>
 /// </remarks>

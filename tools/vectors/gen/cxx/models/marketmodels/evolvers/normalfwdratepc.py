@@ -6,11 +6,10 @@ doesn't expose, each output computed by the C++ harness: whole evolutions, step 
 lognormalfwdratepc.py's grids and loop on FlatVol models of normal volatilities (0.8% less 0.03% a rate), undisplaced,
 since the normal evolver reads no displacement: six semi-annual and five irregular rates, an exponential correlation,
 the default evolution times and every other rate time, full and reduced factors; the Mersenne-twister generator (seed
-42) and Sobol's (diagonal ordering, seed 1234); the terminal and money-market measures; from step 0 and step 1
-(Mersenne twister), with the model's initial state only: QuantLib's setInitialState keeps the model's forwards (the
-S-mm plan's MR3 (iv)), so a set state is left to the Divergences record. Each of two paths: its weight and each step's
-weight, current step, the curve state's forwards, discount ratios to the last bond and coterminal swap rates. Throws:
-incompatible numeraires.
+42) and Sobol's (diagonal ordering, seed 1234); the terminal and money-market measures; from step 0 and step 1 (Mersenne
+twister), with the model's initial state only: QuantLib's setInitialState keeps the model's forwards, so a set state is
+left to the Divergences record. Each of two paths: its weight and each step's weight, current step, the curve state's
+forwards, discount ratios to the last bond and coterminal swap rates. Throws: incompatible numeraires.
 
 The loop is lognormalfwdrateipc.py's; the harness unit tools/cxx/src/models/marketmodels/evolvers/evolvers.cpp. Read
 back by tests/NanoQL.Tests/Vectors/Cxx/Models/MarketModels/NormalFwdRatePcCxxVectorTests.cs."""

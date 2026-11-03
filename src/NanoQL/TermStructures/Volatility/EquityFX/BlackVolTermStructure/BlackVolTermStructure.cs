@@ -273,9 +273,9 @@ public abstract class BlackVolTermStructure : VolatilityTermStructure
     }
 
     // The variance at a date and its time, which BlackVariance(Date), BlackForwardVariance(Date, Date) and
-    // BlackForwardVol(Date, Date) read, the range checked: the variance at the date's time, QuantLib's read. A structure
-    // whose times can't carry its dates reads them by date (the implied structure on a day counter whose year fractions
-    // don't add, the S-van plan's VR4 (xxii)); every other structure keeps this read and its bits.
+    // BlackForwardVol(Date, Date) read, the range checked: the variance at the date's time, QuantLib's read. A
+    // structure whose times can't carry its dates reads them by date (the implied structure on a day counter whose year
+    // fractions don't add); every other structure keeps this read and its bits.
     internal virtual double BlackVarianceOn(Date d, double t, double strike) => BlackVarianceImpl(t, strike);
 
     // The volatility at a date and its time, which BlackVol(Date) reads, the range checked: QuantLib's read at the

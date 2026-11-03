@@ -13,9 +13,9 @@ namespace NanoQL.Tests.Divergences;
 /// <c>setSeasonality</c> marks the curve for recalculation, and its bootstrap restarts from the nodes it last found, so
 /// the curve it gives differs from one built with the seasonality from the start: on the wheel, a curve on nine UK RPI
 /// zero-coupon swaps from 2.9% to 3.25%, bootstrapped to 1e-14, differs from the fresh one by up to 7.9e-15 at its
-/// nodes, and its five-year zero rate is 0.030262300008121912 against the fresh curve's 0.0302623000081228 (the
-/// planner's <c>seasonality_rebuild.py</c>). nanoql's copy is bootstrapped from a cold start, as S5R1's curves are, so
-/// it is the curve built with the seasonality, bit for bit.
+/// nodes, and its five-year zero rate is 0.030262300008121912 against the fresh curve's 0.0302623000081228. nanoql's
+/// copy is bootstrapped from a cold start, as every bootstrapped curve is, so it is the curve built with the
+/// seasonality, bit for bit.
 /// </summary>
 public class SetSeasonalityColdStartTests
 {

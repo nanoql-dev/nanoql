@@ -28,21 +28,20 @@ namespace NanoQL.PricingEngines;
 /// The drift is 2·(z_r − z_q) and the forward S·D_q/D_r, with z_q and D_q the dividend curve's zero rate and discount
 /// read by the maturity date. QuantLib's drift is 2·z_r and its forward S/D_r, as if the dividend yield were zero,
 /// which misprices the fair variance at any other yield; its value is that of a zero-dividend process whose risk-free
-/// discount is D_r/D_q, which is the check (the S-eq plan's SEQR7 (ix),
-/// <c>Divergences/ReplicatingVarianceSwapDividendTests.cs</c>). At a zero dividend yield the value is QuantLib's.
+/// discount is D_r/D_q, which is the check (<c>Divergences/ReplicatingVarianceSwapDividendTests.cs</c>). At a zero
+/// dividend yield the value is QuantLib's.
 /// </para>
 /// <para>
 /// A put strike at or below the strike step refuses: the portfolio's added end strike is then 0, whose log payoff
-/// QuantLib divides into a NaN or an infinite variance (SEQR7 (iv),
-/// <c>Divergences/ReplicatingVarianceSwapRefusalTests.cs</c>).
+/// QuantLib divides into a NaN or an infinite variance (<c>Divergences/ReplicatingVarianceSwapRefusalTests.cs</c>).
 /// </para>
 /// <para>
-/// The variance is per year of the swap's time on the risk-free curve's day counter from the earliest reference date
-/// of the process's structures, each accruing nothing before its own. QuantLib's time is the risk-free curve's own, so
+/// The variance is per year of the swap's time on the risk-free curve's day counter from the earliest reference date of
+/// the process's structures, each accruing nothing before its own. QuantLib's time is the risk-free curve's own, so
 /// where a later risk-free curve beside an earlier volatility shortens it, QuantLib divides the volatility's variance
 /// by the shorter time: 1.1% high at a year on a curve dated four days after the volatility, 2.3 times at a week. Where
-/// no structure is dated before the risk-free curve, the time is QuantLib's (the S-eq plan's ruling of 2026-10-21,
-/// <c>Divergences/VarianceSwapMismatchedTimesTests.cs</c>).
+/// no structure is dated before the risk-free curve, the time is QuantLib's
+/// (<c>Divergences/VarianceSwapMismatchedTimesTests.cs</c>).
 /// </para>
 /// </remarks>
 public static class ReplicatingVarianceSwapEngine
@@ -95,7 +94,7 @@ public static class ReplicatingVarianceSwapEngine
             throw new ArgumentException("min call and max put strikes differ", nameof(callStrikes));
         }
 
-        // SEQR7 (iv): the end strike max(k - dk, 0) below the lowest put would be 0, whose log payoff is infinite
+        // The end strike max(k - dk, 0) below the lowest put would be 0, whose log payoff is infinite
         if (!(minPut > dk))
         {
             throw new ArgumentException("put strikes must be greater than dk", nameof(putStrikes));
@@ -122,7 +121,6 @@ public static class ReplicatingVarianceSwapEngine
         // the variance per year of the swap's time on the risk-free curve's day counter from the earliest reference
         // date of the structures, none accruing before its own: QuantLib's, the risk-free curve's own time, where none
         // is dated before it; QuantLib divides an earlier volatility's variance by the risk-free curve's shorter time
-        // (the S-eq plan's ruling of 2026-10-21, under R8)
         Date origin = process.EarliestReferenceDate();
         bool fromRiskFreeDate = origin == process.RiskFreeRate.ReferenceDate;
         double residualTime = fromRiskFreeDate
@@ -246,7 +244,7 @@ public static class ReplicatingVarianceSwapEngine
             ? process.RiskFreeRate.ZeroRate(residualTime, Compounding.Continuous, Frequency.NoFrequency, true).Rate
             : Math.Log(1.0 / riskFreeDiscount) / residualTime;
 
-        // SEQR7 (ix): the dividend curve, read by the maturity date, in the drift and the forward
+        // The dividend curve, read by the maturity date, in the drift and the forward
         double dividendDiscount = process.DividendYield.AccruedDiscount(swap.MaturityDate);
         double dividendRate = Math.Log(1.0 / dividendDiscount) / residualTime;
 

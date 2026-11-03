@@ -3,12 +3,12 @@
 
 // ql/experimental/commodities/commodityindex.hpp, .cpp: an index's fixings and forward prices.
 // "CommodityIndex::values" takes (index, dates): an index spec of commodityspec.hpp, its curve in the index's unit
-// (the S-xrt plan's XRR5 (i) leaves other units out), and the dates read; the case's fixings are the Settings call's.
-// It returns {"name", "text", "lastQuoteDate", "empty", "forwardCurveEmpty", "lotQuantity", "validFixingDate",
-// "fixing", "forwardPrice"}, the text as QuantLib's operator<< writes the index, its curve's with it; each date's
+// (the generator leaves other units out), and the dates read; the case's fixings are the Settings call's. It returns
+// {"name", "text", "lastQuoteDate", "empty", "forwardCurveEmpty", "lotQuantity", "validFixingDate", "fixing",
+// "forwardPrice"}, the text as QuantLib's operator<< writes the index, its curve's with it; each date's
 // isValidFixingDate, fixing (its stored fixing, or {"throws": true} where none is stored or the date is no fixing
 // date: QuantLib returns Null<Real>() for none, which the harness writes as a refusal) and forwardPrice; lastQuoteDate
-// is null for an index with no fixings, where QuantLib throws (XRR5 (vi)).
+// is null for an index with no fixings, where QuantLib throws.
 
 #include "experimental/commodities/commodityspec.hpp"
 

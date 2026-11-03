@@ -11,11 +11,11 @@ namespace NanoQL.Tests.Divergences;
 /// falls below the normal range (<c>chisquaredistribution.cpp:54-55</c>), the series runs on subnormal numbers, then
 /// zeros; when the Poisson weight's start, exp(−ncp/2) (<c>:39-41</c>), falls below it, from ncp 1,416.8, every term
 /// carries fewer bits, and from ncp 1,490.3 every term is 0, which the stop (<c>:82</c>) passes as converged; and when
-/// its loop ends at <c>itrmax</c> with its bound still negative, the bound passes as converged (<c>:79-88</c>), so above
-/// df + 20,000 a partial sum returns. nanoql takes QuantLib's master's series, upstream's #2908 (the S-van plan's VR11):
-/// it skips the underflowing weights and terms by their logarithms, so the first two return the distribution's values,
-/// Boost's within upstream's 1e-10; and it refuses a loop that ends before its bound can be computed, "didn't converge",
-/// as the S-eq port refused it.
+/// its loop ends at <c>itrmax</c> with its bound still negative, the bound passes as converged (<c>:79-88</c>), so
+/// above df + 20,000 a partial sum returns. nanoql takes QuantLib's master's series, upstream's #2908: it skips the
+/// underflowing weights and terms by their logarithms, so the first two return the distribution's values, Boost's
+/// within upstream's 1e-10; and it refuses a loop that ends before its bound can be computed, "didn't converge", as
+/// nanoql refused it before.
 /// </summary>
 public class ChiSquaredSeriesRefusalTests
 {

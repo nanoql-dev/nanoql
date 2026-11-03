@@ -13,9 +13,9 @@ paths, at 512 calibration samples and at QuantLib's default; the NPV and the err
 average call deferred a quarter on the curve at the last fixing through the basket engine, and the maximum put through
 the American engine, each equal to its plain payoff's value but for the deferral.
 
-No output is left out (the S-xeq plan's §2.8): the processes' structures share the evaluation date and Act/365, so the
-engines' clock is the risk-free curve's; every option's fixings are sorted (the S-xeq run's R2-3) and none is expired.
-The payoffs, processes and options are tools/cxx/src/experimental/mcbasket/mcpathbasketengine.cpp's. Read back by
+No output is left out: the processes' structures share the evaluation date and Act/365, so the engines' clock is the
+risk-free curve's; every option's fixings are sorted and none is expired. The payoffs, processes and options are
+tools/cxx/src/experimental/mcbasket/mcpathbasketengine.cpp's. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Experimental/McBasket/MCPathBasketEngineCxxVectorTests.cs."""
 import os
 import sys

@@ -10,8 +10,8 @@ of the money, nominals of 1 to 10 million, fixed legs of 1Y and 6M, a spread on 
 engine takes from the swap's leg BPS on the model's curve), an overnight-indexed swap, and an expired swaption (worth
 0). Every fixed leg is on Actual/365 (Fixed), the curve's day counter: on another, QuantLib's pricing function takes
 each coupon as the rate times the difference of its payment times on the curve's day counter, where nanoql's takes the
-fixed coupons' accrual periods (the S-sr plan's SSR6 (xiii)); those swaptions, on Thirty/360 and Actual/360 fixed
-legs, are generated and left out (tests/NanoQL.Tests/Divergences/G2AnalyticSwaptionCouponTests.cs).
+fixed coupons' accrual periods; those swaptions, on Thirty/360 and Actual/360 fixed legs, are generated and left out
+(tests/NanoQL.Tests/Divergences/G2AnalyticSwaptionCouponTests.cs).
 
 Each swaption's output is its NPV ("NPV", an amount at the nominal) on each engine: G2 (a = 0.07, sigma = 0.011,
 b = 0.3, eta = 0.008, rho = -0.6) and G2 (a = 0.1, sigma = 0.01, b = 0.1, eta = 0.01, rho = -0.75), each on the discount
@@ -85,7 +85,7 @@ def swaptions():
         swp.vanilla(swp.PAYER, 1e6, 0.03, swp.TARGET_CAL.advance(past, 2, ql.Days),
                     swp.TARGET_CAL.advance(past, 2, ql.Days) + ql.Period(5, Y), fixed_dc=swp.A365),
         swp.european(past)), True))
-    # the fixed legs off the curve's day counter (SSR6 (xiii)), generated and left out
+    # the fixed legs off the curve's day counter, generated and left out
     for name, dc in (("Thirty/360", swp.THIRTY360_BB), ("Actual/360", swp.A360)):
         for swap_type in (swp.PAYER, swp.RECEIVER):
             out.append((f"left out: {name} fixed leg / {swap_type}", swp.swaption_spec(

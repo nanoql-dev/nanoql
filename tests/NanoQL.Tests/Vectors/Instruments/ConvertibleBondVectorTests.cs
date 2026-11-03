@@ -12,8 +12,8 @@ namespace NanoQL.Tests.Vectors;
 /// The convertible bond vectors, <c>tests/vectors/instruments/bonds/convertiblebonds.json</c>: zero-coupon,
 /// fixed-coupon and floating-rate convertibles with calls, soft calls and puts, their inspectors without a date, their
 /// settlement dates and their prices on the Cox-Ross-Rubinstein convertible engine, which read the arguments the bond
-/// sets up, each priced at a settlement lag of 0 (the case's <c>pricedBond</c>, the upstream sweep's SWR1 (a)); and the
-/// refusal of a last callability after maturity.
+/// sets up, each priced at a settlement lag of 0 (the case's <c>pricedBond</c>); and the refusal of a last callability
+/// after maturity.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class ConvertibleBondVectorTests

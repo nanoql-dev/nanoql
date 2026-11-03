@@ -11,8 +11,8 @@ namespace NanoQL.Instruments;
 /// into a storage of the given capacity, starting from the given load.
 /// </summary>
 /// <remarks>
-/// Immutable; its payoff a <see cref="NullPayoff"/>, as QuantLib's. Its engines are experimental and wait for their
-/// slots; the instrument carries QuantLib's terms and checks.
+/// Immutable; its payoff a <see cref="NullPayoff"/>, as QuantLib's. Its engines are experimental and not yet ported;
+/// the instrument carries QuantLib's terms and checks.
 /// </remarks>
 public sealed class VanillaStorageOption : OneAssetOption
 {

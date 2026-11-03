@@ -15,14 +15,13 @@ namespace NanoQL.PricingEngines;
 /// <typeparam name="TStats">The statistics accumulator.</typeparam>
 /// <remarks>
 /// <para>
-/// An immutable builder (SEQR2): each method returns a modified copy. <see cref="ToEngine"/> returns the engine as a
-/// function of the option and the context, its settings bound, in place of QuantLib's conversion to a pricing engine.
-/// QuantLib's checks stand: the steps given one way at most, the samples beside no tolerance, a tolerance only where
-/// the traits estimate an error, and the steps given before the conversion. A builder has no value equality.
+/// An immutable builder: each method returns a modified copy. <see cref="ToEngine"/> returns the engine as a function
+/// of the option and the context, its settings bound, in place of QuantLib's conversion to a pricing engine. QuantLib's
+/// checks stand: the steps given one way at most, the samples beside no tolerance, a tolerance only where the traits
+/// estimate an error, and the steps given before the conversion. A builder has no value equality.
 /// </para>
 /// <para>
-/// The seed is a constructor argument (S2R4; the S-hes plan's HR2 (v)): QuantLib's default, 0, a seed from the clock,
-/// is refused.
+/// The seed is a constructor argument: QuantLib's default, 0, a seed from the clock, is refused.
 /// </para>
 /// </remarks>
 public sealed record MakeMCEuropeanGJRGARCHEngine<TRng, TStats>

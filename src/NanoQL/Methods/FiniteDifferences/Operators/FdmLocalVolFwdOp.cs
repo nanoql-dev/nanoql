@@ -19,16 +19,15 @@ namespace NanoQL.Methods;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A working type (the S-van plan's VD11): <see cref="SetTime"/> rewrites the operator's bands in place, through
-/// buffers it holds, by QuantLib's arithmetic in QuantLib's order, so a time step allocates nothing. The spot is
-/// QuantLib's constructor's argument, which QuantLib's operator doesn't read.
+/// A working type: <see cref="SetTime"/> rewrites the operator's bands in place, through buffers it holds, by
+/// QuantLib's arithmetic in QuantLib's order, so a time step allocates nothing. The spot is QuantLib's constructor's
+/// argument, which QuantLib's operator doesn't read.
 /// </para>
 /// <para>
 /// Its times run on the risk-free curve's day counter from the earliest reference date of its three structures, as
 /// <see cref="FdmBlackScholesOp.Clock"/>'s, and each structure is read at the instants the step's times denote, on its
-/// own clock, where QuantLib reads them at the risk-free curve's times (the S-van plan's VR4 (xxiii), the
-/// mismatched-dates class); structures that share the risk-free curve's times keep QuantLib's bits. A documented
-/// divergence.
+/// own clock, where QuantLib reads them at the risk-free curve's times (the mismatched-dates class); structures that
+/// share the risk-free curve's times keep QuantLib's bits. A documented divergence.
 /// </para>
 /// </remarks>
 [WorkingType]

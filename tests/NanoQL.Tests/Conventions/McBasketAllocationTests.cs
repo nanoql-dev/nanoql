@@ -12,11 +12,11 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The zero-allocation pin of the European basket's draw-price-add loop (the S-exo plan's ER1 (iv); master §2.2's
-/// Monte Carlo row): on a <see cref="StochasticProcessArray"/> of two and three Black-Scholes processes, pseudo-random
-/// and Sobol, the paths step through the array's in-place pair over the generator's held buffers and
-/// <see cref="EuropeanMultiPathPricer"/> passes its own buffer, so a batch allocates nothing per sample after the
-/// first; each measured on fresh values after a warm-up (<see cref="AllocationAssert"/>).
+/// The zero-allocation pin of the European basket's draw-price-add loop (the playbook's Monte Carlo row): on a
+/// <see cref="StochasticProcessArray"/> of two and three Black-Scholes processes, pseudo-random and Sobol, the paths
+/// step through the array's in-place pair over the generator's held buffers and <see cref="EuropeanMultiPathPricer"/>
+/// passes its own buffer, so a batch allocates nothing per sample after the first; each measured on fresh values after
+/// a warm-up (<see cref="AllocationAssert"/>).
 /// </summary>
 public class McBasketAllocationTests
 {

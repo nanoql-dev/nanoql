@@ -12,14 +12,13 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// A float-float swap's fair spread on a capped or floored leg (the S-rx review's B1-1, fixed under R8). QuantLib
-/// derives every fair spread from the leg's BPS, <c>spread[0] − NPV / (BPS / 1bp)</c>
-/// (<c>floatfloatswap.cpp:545-571</c>), which is exact only while each coupon's amount moves one for one with its
-/// spread: once a cap or floor binds, the swap rebuilt at QuantLib's fair spread is worth thousands. nanoql's engine
-/// solves a capped or floored leg's fair spread on the swap's own pricing, and gives none where no spread zeroes the
-/// NPV; an uncapped leg keeps QuantLib's BPS route and its bits. QuantLib's check: its own NPV of the swap rebuilt at
-/// the solved spread, −2.9e-11 on 1,000,000 for each of the three solved cases [executed on the wheel: Brent on the
-/// swap's NPV, accuracy 1e-12].
+/// A float-float swap's fair spread on a capped or floored leg (fixed). QuantLib derives every fair spread from the
+/// leg's BPS, <c>spread[0] − NPV / (BPS / 1bp)</c> (<c>floatfloatswap.cpp:545-571</c>), which is exact only while each
+/// coupon's amount moves one for one with its spread: once a cap or floor binds, the swap rebuilt at QuantLib's fair
+/// spread is worth thousands. nanoql's engine solves a capped or floored leg's fair spread on the swap's own pricing,
+/// and gives none where no spread zeroes the NPV; an uncapped leg keeps QuantLib's BPS route and its bits. QuantLib's
+/// check: its own NPV of the swap rebuilt at the solved spread, −2.9e-11 on 1,000,000 for each of the three solved
+/// cases (QuantLib-Python 1.44: Brent on the swap's NPV, accuracy 1e-12).
 /// </summary>
 public class FloatFloatSwapOptionalLegFairSpreadTests
 {

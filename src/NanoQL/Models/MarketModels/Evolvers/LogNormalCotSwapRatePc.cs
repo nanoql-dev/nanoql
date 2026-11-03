@@ -19,14 +19,12 @@ namespace NanoQL.Models;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A working type (the S-mm plan's MR1 (ii)), copying each step's pseudo-root at construction (MR1 (iv)); one step
-/// allocates nothing after a path's warm-up (MR1 (v)).
+/// A working type, copying each step's pseudo-root at construction; one step allocates nothing after a path's warm-up.
 /// </para>
 /// <para>
-/// <see cref="SetInitialState"/> reads any curve state's coterminal swap rates, through the base's virtual read,
-/// where QuantLib's casts the state to its own type and dereferences a null pointer for any other (an access
-/// violation; the S-mm plan's MR3 (v), <c>lognormalcotswapratepc.cpp:92-93</c>;
-/// <c>Divergences/SwapRatePcInitialStateTests.cs</c>).
+/// <see cref="SetInitialState"/> reads any curve state's coterminal swap rates, through the base's virtual read, where
+/// QuantLib's casts the state to its own type and dereferences a null pointer for any other (an access violation;
+/// <c>lognormalcotswapratepc.cpp:92-93</c>; <c>Divergences/SwapRatePcInitialStateTests.cs</c>).
 /// </para>
 /// </remarks>
 [WorkingType]
@@ -123,8 +121,7 @@ public sealed class LogNormalCotSwapRatePc : MarketModelEvolver
 
     /// <inheritdoc/>
     /// <exception cref="ArgumentException">The state's swap rates aren't one per rate.</exception>
-    /// <remarks>Any curve state's coterminal swap rates, where QuantLib's reads only its own type's (MR3
-    /// (v)).</remarks>
+    /// <remarks>Any curve state's coterminal swap rates, where QuantLib's reads only its own type's.</remarks>
     public override void SetInitialState(CurveState cs)
     {
         ArgumentNullException.ThrowIfNull(cs);

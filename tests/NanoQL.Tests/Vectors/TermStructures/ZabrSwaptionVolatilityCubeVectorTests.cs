@@ -13,10 +13,10 @@ namespace NanoQL.Tests.Vectors;
 /// <c>tests/vectors/termstructures/volatility/swaption/zabrswaptionvolatilitycube.json</c>: cubes calibrated on the
 /// test fixture with QuantLib's ZABR guesses, beta and gamma fixed, at-the-money calibrated and not, gamma fixed at 0.75
 /// and free, backward flat, by maximum errors and by Simplex; their four matrices, whose errors the generator recomputes
-/// from each row's parameters (S7R5 (ii)), their volatilities on and off the grid and their ZABR sections, each output
-/// kept only where the stability filter found it stable. Its last two cases replace QuantLib's
-/// <c>testZabrObservability</c>: the cube built under two evaluation dates, where QuantLib's cube built before the date
-/// moves follows it, and the generator checks QuantLib's agreement.
+/// from each row's parameters, their volatilities on and off the grid and their ZABR sections, each output kept only
+/// where the stability filter found it stable. Its last two cases replace QuantLib's <c>testZabrObservability</c>: the
+/// cube built under two evaluation dates, where QuantLib's cube built before the date moves follows it, and the
+/// generator checks QuantLib's agreement.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class ZabrSwaptionVolatilityCubeVectorTests

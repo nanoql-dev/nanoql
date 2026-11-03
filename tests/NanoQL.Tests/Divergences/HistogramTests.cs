@@ -7,14 +7,13 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The histogram's quantiles and given breaks (the S-core plan's CR7 (v) to (vii)): QuantLib's Freedman-Diaconis rule
-/// takes Hyndman and Fan's type 8 quantile, as its comment says, but its interpolation weight drops the method's p/3
-/// term, so ten squares bin into 3 where type 8 gives 2; given breaks that repeat count their bins before QuantLib
-/// removes the repeats, so breaks 20, 20 and 50 give 4 bins over 2 breaks (counts 4, 3, 0, 3); and at the upper
-/// boundary's probability QuantLib's quantile reads a 0 past its sorted samples, where type 8 clamps to the largest. No
-/// public input reaches that last one: QuantLib's two probabilities, ¼ and ¾, meet the boundary at no whole number of
-/// samples, so its fact reads the private quantile. QuantLib's values are its own (the plan's <c>misc1.cpp</c>, rerun
-/// in this run's <c>probes\misc1.cpp</c>).
+/// The histogram's quantiles and given breaks: QuantLib's Freedman-Diaconis rule takes Hyndman and Fan's type 8
+/// quantile, as its comment says, but its interpolation weight drops the method's p/3 term, so ten squares bin into 3
+/// where type 8 gives 2; given breaks that repeat count their bins before QuantLib removes the repeats, so breaks 20,
+/// 20 and 50 give 4 bins over 2 breaks (counts 4, 3, 0, 3); and at the upper boundary's probability QuantLib's quantile
+/// reads a 0 past its sorted samples, where type 8 clamps to the largest. No public input reaches that last one:
+/// QuantLib's two probabilities, ¼ and ¾, meet the boundary at no whole number of samples, so its fact reads the
+/// private quantile. QuantLib's values are its own.
 /// </summary>
 public class HistogramTests
 {

@@ -3,12 +3,12 @@
 """Vectors for QuantLib's MCDiscreteGeometricAPEngine (ql/pricingengines/asian/mc_discr_geom_av_price.hpp,
 .cpp), on the evaluation date 15 October 2026: discrete geometric average-price Asian options by Monte Carlo.
 
-Geometric calls and puts at 90%, 100% and 110% of the spot, over a year, with 4 and 12 fixings,
-unseasoned and with two past fixings, on the ten processes of tools/vectors/gen/processes/blackscholesprocess.py, 511
-pseudo-random samples at seeds 42 and 1234, with and without the Brownian bridge and antithetic variates: the NPV and
-the error estimate. Then the refusals of a payoff that isn't plain vanilla, an exercise that isn't European, every
-fixing in the past and one fixing left today, and an expired option. The outputs nanoql fixes are left out (the S-bar
-plan's §2.10): fixing dates given twice (BR5 (xxviii)) and a geometric product out of range (BR5 (xli)).
+Geometric calls and puts at 90%, 100% and 110% of the spot, over a year, with 4 and 12 fixings, unseasoned and with two
+past fixings, on the ten processes of tools/vectors/gen/processes/blackscholesprocess.py, 511 pseudo-random samples at
+seeds 42 and 1234, with and without the Brownian bridge and antithetic variates: the NPV and the error estimate. Then
+the refusals of a payoff that isn't plain vanilla, an exercise that isn't European, every fixing in the past and one
+fixing left today, and an expired option. The outputs nanoql fixes are left out: fixing dates given twice and a
+geometric product out of range.
 
 The engine's settings go in as "engine". The wheel's calls, by QuantLib-SWIG 1.44's options.i:
 MCPRDiscreteGeometricAPEngine(process, brownianBridge, antitheticVariate, requiredSamples, requiredTolerance,

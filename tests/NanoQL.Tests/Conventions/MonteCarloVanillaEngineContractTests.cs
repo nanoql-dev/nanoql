@@ -14,11 +14,11 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The Monte Carlo vanilla engines' contract (the S-van plan's VR1): an engine, the builder's delegate, is a pure
-/// function of its inputs and the seed. QuantLib's <c>MCLongstaffSchwartzEngine</c> keeps its path pricer and
-/// calibration model in <c>mutable</c> members between calls (<c>mclongstaffschwartzengine.hpp:110-113</c>); here each
-/// call builds its own simulation, Longstaff-Schwartz pricer and exercise statistics, so prices on one engine don't
-/// depend on the order of the calls or on the threads that make them, and the exercise probability is the call's.
+/// The Monte Carlo vanilla engines' contract: an engine, the builder's delegate, is a pure function of its inputs and
+/// the seed. QuantLib's <c>MCLongstaffSchwartzEngine</c> keeps its path pricer and calibration model in <c>mutable</c>
+/// members between calls (<c>mclongstaffschwartzengine.hpp:110-113</c>); here each call builds its own simulation,
+/// Longstaff-Schwartz pricer and exercise statistics, so prices on one engine don't depend on the order of the calls or
+/// on the threads that make them, and the exercise probability is the call's.
 /// </summary>
 public class MonteCarloVanillaEngineContractTests
 {
@@ -74,10 +74,10 @@ public class MonteCarloVanillaEngineContractTests
     [Fact]
     public void ALongstaffSchwartzEngineObjectPricesACallMadeInsideAnother()
     {
-        // a deriving engine (S-exo's basket engine's form) running a second call on the same object while the first
-        // draws its calibration paths: each call prices on its own calibrated pricer, so both calls give a lone call's
-        // value and exercise probability, where a pricer kept in a member between calls hands the outer call the
-        // inner one's and leaves its own exercise statistics empty
+        // a deriving engine (the basket engine's form) running a second call on the same object while the first draws
+        // its calibration paths: each call prices on its own calibrated pricer, so both calls give a lone call's value
+        // and exercise probability, where a pricer kept in a member between calls hands the outer call the inner one's
+        // and leaves its own exercise statistics empty
         (double, double) lone = new ReentrantEngine(Atm, reenter: false).Price();
         var engine = new ReentrantEngine(Atm, reenter: true);
         (double, double) outer = engine.Price();

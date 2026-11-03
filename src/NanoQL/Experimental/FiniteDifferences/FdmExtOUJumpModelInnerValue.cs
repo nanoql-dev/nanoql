@@ -19,8 +19,8 @@ namespace NanoQL.Experimental;
 /// The shape is held as given, its times increasing, as QuantLib's lower bound reads it.
 /// </para>
 /// <para>
-/// A time past the shape's last, where QuantLib's lookup reads one past the shape's end, is refused (the S-xeq plan's
-/// XER5 (xxxi); <c>Conventions/ExperimentalEnergyConventionTests.cs</c>).
+/// A time past the shape's last, where QuantLib's lookup reads one past the shape's end, is refused
+/// (<c>Conventions/ExperimentalEnergyConventionTests.cs</c>).
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]
@@ -46,7 +46,7 @@ public sealed class FdmExtOUJumpModelInnerValue : FdmInnerValueCalculator
     }
 
     /// <inheritdoc/>
-    /// <exception cref="NanoQLException">The time is past the shape's last ((xxxi)).</exception>
+    /// <exception cref="NanoQLException">The time is past the shape's last.</exception>
     public override double InnerValue(FdmLinearOpIterator iter, double t)
     {
         double x = mesher.Location(iter, 0);
@@ -56,6 +56,6 @@ public sealed class FdmExtOUJumpModelInnerValue : FdmInnerValueCalculator
     }
 
     /// <inheritdoc/>
-    /// <exception cref="NanoQLException">The time is past the shape's last ((xxxi)).</exception>
+    /// <exception cref="NanoQLException">The time is past the shape's last.</exception>
     public override double AvgInnerValue(FdmLinearOpIterator iter, double t) => InnerValue(iter, t);
 }

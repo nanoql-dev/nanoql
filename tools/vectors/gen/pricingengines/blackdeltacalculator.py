@@ -9,13 +9,13 @@ of 80, 100 and 125% of the forward; the strike at deltas of 0.1, 0.25, 0.5 and 0
 QuantLib's refusals of an incoherent or out-of-range delta recorded; and the strike at each ATM convention (QuantLib
 refusing AtmNull, and AtmPutCall50 but under forward deltas).
 
-The outputs nanoql fixes are left out (the S-rx plan's SRXR3 (xi)): no premium-adjusted put's delta exceeds the
-non-adjusted range, the foreign discount factor (spot) or 1 (forward), where QuantLib refuses and nanoql solves
+The outputs nanoql fixes are left out: no premium-adjusted put's delta exceeds the non-adjusted range, the foreign
+discount factor (spot) or 1 (forward), where QuantLib refuses and nanoql solves
 (tests/NanoQL.Tests/Divergences/PremiumAdjustedPutStrikeTests.cs).
 
-**The stability filter** (the S7R6 filter of the S7 plan) on the premium-adjusted strikes, which QuantLib solves with
-Brent: each is solved again with its delta moved one ulp up and one down (math.nextafter), and a delta is written only
-where both solves give its strike within 1e-12 × max(1, |base|, |moved|). The generator prints the dropped deltas.
+**The stability filter** on the premium-adjusted strikes, which QuantLib solves with Brent: each is solved again with
+its delta moved one ulp up and one down (math.nextafter), and a delta is written only where both solves give its strike
+within 1e-12 × max(1, |base|, |moved|). The generator prints the dropped deltas.
 
 A case's inputs are the calculator's "optionType", "deltaType" (QuantLib's DeltaVolQuote::DeltaType: Spot 0, Fwd 1,
 PaSpot 2, PaFwd 3), "spot", "dDiscount", "fDiscount" and "stdDev", and the "strikes" and "deltas" it reads; its outputs
@@ -69,7 +69,7 @@ def cases():
                     deltas, strike_out = [], []
                     for size in (0.1, 0.25, 0.5, 0.75):
                         delta = size * ot
-                        # SRXR3 (xi): a premium-adjusted put beyond the non-adjusted range is left out
+                        # A premium-adjusted put beyond the non-adjusted range is left out
                         bound = f_df if dt == int(ql.DeltaVolQuote.PaSpot) else 1.0
                         if dt in PREMIUM_ADJUSTED and ot < 0 and abs(delta) > bound:
                             continue

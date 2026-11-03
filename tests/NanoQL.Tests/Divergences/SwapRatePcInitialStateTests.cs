@@ -6,14 +6,13 @@ using NanoQL.Models;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The swap-rate evolvers' initial state from another curve state (the S-mm plan's MR3 (v), fixed under R8).
-/// QuantLib's <c>LogNormalCotSwapRatePc</c> and <c>LogNormalCmSwapRatePc::setInitialState</c> cast the state to their
-/// own type and dereference the result (<c>lognormalcotswapratepc.cpp:92-93</c>,
-/// <c>lognormalcmswapratepc.cpp:93-94</c>), null for any other: given an <c>LMMCurveState</c> the process stops
-/// (0xC0000005, 3 runs of 3; the planner's MP5). nanoql reads the base's coterminal and constant-maturity swap rates,
-/// which every curve state answers. Checks: on the evolver's own state type QuantLib's call, the same rates, so the
-/// same evolution bit for bit (the vectors set the state there); and from an LMM or another state on the same curve,
-/// that evolution again.
+/// The swap-rate evolvers' initial state from another curve state (fixed). QuantLib's <c>LogNormalCotSwapRatePc</c> and
+/// <c>LogNormalCmSwapRatePc::setInitialState</c> cast the state to their own type and dereference the result
+/// (<c>lognormalcotswapratepc.cpp:92-93</c>, <c>lognormalcmswapratepc.cpp:93-94</c>), null for any other: given an
+/// <c>LMMCurveState</c> the process stops (0xC0000005, 3 runs of 3). nanoql reads the base's coterminal and
+/// constant-maturity swap rates, which every curve state answers. Checks: on the evolver's own state type QuantLib's
+/// call, the same rates, so the same evolution bit for bit (the vectors set the state there); and from an LMM or
+/// another state on the same curve, that evolution again.
 /// </summary>
 public class SwapRatePcInitialStateTests
 {

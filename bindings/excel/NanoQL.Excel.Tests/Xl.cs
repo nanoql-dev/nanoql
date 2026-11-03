@@ -8,9 +8,9 @@ using ExcelDna.Integration;
 namespace NanoQL.Excel.Tests;
 
 /// <summary>
-/// The two tests' builds compiled into this assembly (XLD36): their worksheet functions by Excel name, or by C name, a
-/// family's construction with its type arguments first; each call with Excel's values (null a missing argument, a whole
-/// number a double), as a cell makes it. Every call runs on the runtime with <see cref="Host"/> standing in for Excel.
+/// The two tests' builds compiled into this assembly: their worksheet functions by Excel name, or by C name, a family's
+/// construction with its type arguments first; each call with Excel's values (null a missing argument, a whole number a
+/// double), as a cell makes it. Every call runs on the runtime with <see cref="Host"/> standing in for Excel.
 /// </summary>
 internal static class Xl
 {
@@ -22,7 +22,7 @@ internal static class Xl
     /// <summary>Gets the test host every call reads.</summary>
     public static TestHost Host { get; } = new();
 
-    /// <summary>Gets the experimental tests' build, with S-bind's test types (prefix nqlt).</summary>
+    /// <summary>Gets the experimental tests' build, with the bindings' test types (prefix nqlt).</summary>
     public static Build Experimental => ExperimentalBuild.Value;
 
     /// <summary>Gets the stable tests' build.</summary>

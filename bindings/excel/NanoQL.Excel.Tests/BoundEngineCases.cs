@@ -7,10 +7,10 @@ using static NanoQL.Excel.Tests.Xl;
 namespace NanoQL.Excel.Tests;
 
 /// <summary>
-/// S-bind's C suite's bound-engine and calibration cases (bindings/c/tests/conformance.c's test_engines and
-/// test_calibrations, XLP39) through the generated worksheet functions of the experimental tests' build, on S-bind's
-/// test types (prefix nqlt), each with Excel's values: handles as text, enums by name, a NULL argument a missing one;
-/// each result against the test types' C# references, bit for bit, a refusal #VALUE! (XLR10).
+/// The C suite's bound-engine and calibration cases (bindings/c/tests/conformance.c's test_engines and
+/// test_calibrations) through the generated worksheet functions of the experimental tests' build, on the bindings' test
+/// types (prefix nqlt), each with Excel's values: handles as text, enums by name, a NULL argument a missing one; each
+/// result against the test types' C# references, bit for bit, a refusal #VALUE!.
 /// </summary>
 [Collection(TestSettings.Name)]
 public sealed class BoundEngineCases
@@ -47,8 +47,8 @@ public sealed class BoundEngineCases
         string quanto = Fx("Quanto"), bsm = Fx("BlackScholes"), foreign = Fx("Foreign"), fxvol = Fx("ExchangeVolatility");
         Same(C("nql_InstrumentResults_get_NPV", H(C("nql_QuantoEngine_Calculate__QuantoVanillaOption", quanto, ctx, bsm, foreign, fxvol, 0.3, european))), C("nqlt_References_QuantoNpv"));
 
-        // S-bind2's Monte Carlo-shaped engine: its nullable inputs neither bound nor supplied null (B2R4), its shape an
-        // array of pairs, a range a row per element (XLR17), its required seed left open refused.
+        // The Monte Carlo-shaped test engine: its nullable inputs neither bound nor supplied null, its shape an array
+        // of pairs, a range a row per element, its required seed left open refused.
         string mc = H(C("nqlt_McShapedEngine_Bind", null, 4, null, 2000, null, 42, null));
         Same(C("nql_InstrumentResults_get_NPV", H(C("nql_QuantoEngine_Calculate__QuantoVanillaOption", quanto, ctx, bsm, foreign, fxvol, 0.3, mc))), C("nqlt_References_McShapedQuantoNpv", false));
         string shaped = H(C("nqlt_McShapedEngine_Bind", null, 4, null, 2000, null, 42, new object[,] { { 0.5, 1.5 }, { 1.0, 0.5 } }));

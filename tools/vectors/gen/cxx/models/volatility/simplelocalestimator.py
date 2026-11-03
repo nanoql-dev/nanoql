@@ -2,9 +2,9 @@
 # SPDX-License-Identifier: Apache-2.0
 """Vectors for QuantLib's SimpleLocalEstimator (ql/models/volatility/simplelocalestimator.hpp) and
 GarmanKlassSimpleSigma (garmanklass.hpp), which the wheel doesn't expose, each output computed by the C++ harness: the
-volatility series of quote series of 1 to 40 dates, consecutive and with gaps, at year fractions 1/252 and 1/360, and
-of interval-price series likewise. An empty quote series, whose begin QuantLib increments past its end, is left out (the
-S-bar plan's §2.10: BR5 (xxxv)); the refusal is a divergence fact.
+volatility series of quote series of 1 to 40 dates, consecutive and with gaps, at year fractions 1/252 and 1/360, and of
+interval-price series likewise. An empty quote series, whose begin QuantLib increments past its end, is left out; the
+refusal is a divergence fact.
 
 The harness unit is tools/cxx/src/models/volatility/simplelocalestimator.cpp. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Models/Volatility/SimpleLocalEstimatorCxxVectorTests.cs."""

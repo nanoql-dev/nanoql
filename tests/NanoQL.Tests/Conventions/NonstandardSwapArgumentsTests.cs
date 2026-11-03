@@ -12,15 +12,15 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The nonstandard swap's arguments (the S-g1d plan's G1D6): a redemption flow takes the reset date of its leg's coupon
-/// paid on the same date (<c>nonstandardswap.cpp:303-317</c>, <c>:354-369</c>), so it belongs to the exercise right
-/// exactly when that coupon does, as the nonstandard engine's header states. On the wheel, a 5-year amortizing payer at
-/// 3.5% from 19 January 2026 (fixed nominals 1,000,000 to 200,000, annual; Euribor 6M on the same nominals) with
-/// capital exchanges, on a GSR model (a = 0.03, σ = 0.008) on a flat 3% curve with a 2.8% discount curve: exercised on
-/// 19 April 2027, inside the second fixed period, the right holds the floating redemption on 19 January 2028, whose
-/// coupon starts on 19 July 2027, but not the fixed one, whose coupon starts on 19 January 2027: 190272.45330183694,
-/// where the swap without the exchanges gives 10258.068968747979; exercised on 19 January 2027, the period's start, the
-/// two redemptions cancel: 4383.961741083354 with the exchanges, 4383.961741083289 without.
+/// The nonstandard swap's arguments: a redemption flow takes the reset date of its leg's coupon paid on the same date
+/// (<c>nonstandardswap.cpp:303-317</c>, <c>:354-369</c>), so it belongs to the exercise right exactly when that coupon
+/// does, as the nonstandard engine's header states. On the wheel, a 5-year amortizing payer at 3.5% from 19 January
+/// 2026 (fixed nominals 1,000,000 to 200,000, annual; Euribor 6M on the same nominals) with capital exchanges, on a GSR
+/// model (a = 0.03, σ = 0.008) on a flat 3% curve with a 2.8% discount curve: exercised on 19 April 2027, inside the
+/// second fixed period, the right holds the floating redemption on 19 January 2028, whose coupon starts on 19 July
+/// 2027, but not the fixed one, whose coupon starts on 19 January 2027: 190272.45330183694, where the swap without the
+/// exchanges gives 10258.068968747979; exercised on 19 January 2027, the period's start, the two redemptions cancel:
+/// 4383.961741083354 with the exchanges, 4383.961741083289 without.
 /// </summary>
 public class NonstandardSwapArgumentsTests
 {

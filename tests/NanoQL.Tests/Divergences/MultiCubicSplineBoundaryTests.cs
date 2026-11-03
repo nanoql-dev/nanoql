@@ -13,8 +13,8 @@ namespace NanoQL.Tests.Divergences;
 /// its flat value there and beyond takes the last interval's index past it and reads one value past the data
 /// (<c>:553-554</c> with <c>:295</c>), undefined; and a NaN coordinate fails both of its range comparisons, so its
 /// search returns the grid's end and reads past it (<c>:557-558</c>). nanoql interpolates the last point on its last
-/// interval, its value the node's, reads the last value beyond it with no read past the data (the S-exo plan's ER5
-/// (vii)), and refuses a NaN coordinate: the node's value and QuantLib's just inside are the checks.
+/// interval, its value the node's, reads the last value beyond it with no read past the data, and refuses a NaN
+/// coordinate: the node's value and QuantLib's just inside are the checks.
 /// </summary>
 public class MultiCubicSplineBoundaryTests
 {

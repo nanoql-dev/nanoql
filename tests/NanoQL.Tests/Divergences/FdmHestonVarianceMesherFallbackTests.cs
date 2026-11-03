@@ -13,16 +13,15 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The Heston variance mesher's fallbacks, QuantLib's master since 1.44 (#2908's mesher part and #2940, taken under R8;
-/// the S-hes plan's HR7 (iii), HR8 (ii), (iii)). Where the variance falls fast (v₀ 0.25, θ 0.0025, κ 10, σ 0.1), 1.44's
-/// time-averaged quantiles don't reach v₀ and every finite-difference Heston engine throws "interpolation range is
-/// [4.01809, 5.16225] x [0, 0.0483231]: extrapolation at (4.60517, 0.25) not allowed" [executed on the wheel:
-/// <c>scratchpad\c1\oracle_c1.py</c>]; master falls back to the default mesh, evenly spaced over θ and v₀ ± 4σ√(θ/2κ),
-/// whose locations are those 1.44 builds on its own default branch, and the engine prices within its grid's accuracy of
-/// QuantLib's analytic engine. A distribution too narrow for the grid's minimum steps falls back to the same default
-/// mesh before any quantile is computed, the mesh 1.44 reaches only after its quantiles fail; at σ 1e-4 master's later
-/// checks would reach it too, and at 5.6e-4 and 6.8e-4 (v₀ = θ 0.04, κ 1) that test alone does, the later checks passing
-/// the quantile grid.
+/// The Heston variance mesher's fallbacks, QuantLib's master since 1.44 (#2908's mesher part and #2940, taken as
+/// fixes). Where the variance falls fast (v₀ 0.25, θ 0.0025, κ 10, σ 0.1), 1.44's time-averaged quantiles don't reach
+/// v₀ and every finite-difference Heston engine throws "interpolation range is [4.01809, 5.16225] x [0, 0.0483231]:
+/// extrapolation at (4.60517, 0.25) not allowed" (QuantLib-Python 1.44); master falls back to the default mesh, evenly
+/// spaced over θ and v₀ ± 4σ√(θ/2κ), whose locations are those 1.44 builds on its own default branch, and the engine
+/// prices within its grid's accuracy of QuantLib's analytic engine. A distribution too narrow for the grid's minimum
+/// steps falls back to the same default mesh before any quantile is computed, the mesh 1.44 reaches only after its
+/// quantiles fail; at σ 1e-4 master's later checks would reach it too, and at 5.6e-4 and 6.8e-4 (v₀ = θ 0.04, κ 1) that
+/// test alone does, the later checks passing the quantile grid.
 /// </summary>
 public class FdmHestonVarianceMesherFallbackTests
 {
@@ -80,9 +79,9 @@ public class FdmHestonVarianceMesherFallbackTests
     public void ADistributionTooNarrowForTheGridFallsBackBeforeItsQuantiles()
     {
         // sigma 1e-4 at v0 = theta 0.04, kappa 1: QuantLib 1.44's mesher, which reaches the default mesh after its
-        // quantiles fail [executed on the wheel]; master's normal approximation finds the distribution too narrow for
-        // the grid's minimum steps at every averaging time and goes there first, its later checks reaching the same mesh
-        // here
+        // quantiles fail (QuantLib-Python 1.44); master's normal approximation finds the distribution too narrow for
+        // the grid's minimum steps at every averaging time and goes there first, its later checks reaching the same
+        // mesh here
         var mesher = new FdmHestonVarianceMesher(9, Process(0.04, 1.0, 0.04, 1e-4), 1.0);
         double[] quantLib =
         [
@@ -105,7 +104,7 @@ public class FdmHestonVarianceMesherFallbackTests
     })]
     public void ADistributionTooNarrowForTheGridStaysOnTheDefaultMesh(double sigma, double[] quantLib)
     {
-        // QuantLib 1.44's mesher, the default mesh [executed on the wheel]; master's quantile grid passes its two later
+        // QuantLib 1.44's mesher, the default mesh (QuantLib-Python 1.44); master's quantile grid passes its two later
         // checks here, so its normal approximation's test alone keeps the default mesh
         var mesher = new FdmHestonVarianceMesher(9, Process(0.04, 1.0, 0.04, sigma), 1.0);
         Assert.Equal(quantLib, mesher.Locations());

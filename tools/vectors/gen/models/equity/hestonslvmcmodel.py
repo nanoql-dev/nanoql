@@ -11,11 +11,11 @@ volatility of 25% with the Mersenne-Twister factory (seed 1234) and with the Sob
 function at strikes 80, 90, 100, 110 and 125: between the time grid's nodes (1/24, 7/24, 13/24 and 19/24 of a year),
 where QuantLib 1.44's surface holds a strike beyond a time's strikes at the nearest, and at the nodes 0.5 and 1.
 
-Left out (the S-hes plan's §2.10): a time-dependent local volatility, which nanoql reads at a step's end where 1.44
-reads its start (#2860, the plan's HR8 (i); tests/NanoQL.Tests/TestSuite/HestonSlvModelTests.cs's upstream case);
-structures dated or day-counted apart (tests/NanoQL.Tests/Divergences/HestonSlvMismatchedTimesTests.cs).
+Left out: a time-dependent local volatility, which nanoql reads at a step's end where 1.44 reads its start (#2860;
+tests/NanoQL.Tests/TestSuite/HestonSlvModelTests.cs's upstream case); structures dated or day-counted apart
+(tests/NanoQL.Tests/Divergences/HestonSlvMismatchedTimesTests.cs).
 
-Filtered (S7R6, the master plan's §3.2): each case is refit with every input moved one ulp up, then down (the Heston
+Filtered by the stability filter: each case is refit with every input moved one ulp up, then down (the Heston
 parameters and spot, the local volatility's values, the flat curves' rates), and each Heston parameter and the spot
 alone; an output is written only where every refit leaves it within 1e-12 x max(|a|, |b|, 1). The kept points are the
 case's "points"; the dropped count is printed per case.
@@ -120,7 +120,7 @@ def stable(a, b):
 
 
 def filtered(name, spec, points, leverage_values):
-    """The case's points and values kept under S7R6, and the dropped count printed."""
+    """The case's points and values kept under the stability filter, and the dropped count printed."""
     base = leverage_values(spec, points)
     refits = [leverage_values(s, points) for s in refit_specs(spec)]
     kept = [i for i in range(len(points)) if all(stable(base[i], r[i]) for r in refits)]

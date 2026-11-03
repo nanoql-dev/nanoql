@@ -8,7 +8,7 @@ using static NanoQL.Excel.Tests.Xl;
 
 namespace NanoQL.Excel.Tests;
 
-/// <summary>The help text (XLD11): a function's description its member's XML summary, an argument's its parameter's with its form.</summary>
+/// <summary>The help text: a function's description its member's XML summary, an argument's its parameter's with its form.</summary>
 [Collection(TestSettings.Name)]
 public sealed class DocsTests
 {

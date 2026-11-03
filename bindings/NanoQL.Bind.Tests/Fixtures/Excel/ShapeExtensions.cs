@@ -3,7 +3,7 @@
 
 namespace NanoQL.Bind.Tests.Fixtures.Excel;
 
-/// <summary>An extension method on the base, kept with a listed derived type (XLD33).</summary>
+/// <summary>An extension method on the base, kept with a listed derived type.</summary>
 public static class ShapeExtensions
 {
     /// <summary>Twice the area.</summary>

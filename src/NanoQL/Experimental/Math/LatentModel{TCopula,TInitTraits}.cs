@@ -18,9 +18,9 @@ namespace NanoQL.Experimental;
 /// </summary>
 /// <remarks>
 /// <para>
-/// An unsealed, immutable class (the S-xcr plan's XR2 (c)): its derived models give the latent variables a meaning (a
-/// default time, a recovery), and an integrable one its integration. The correlation of Yᵢ and Yⱼ is Σₖ aᵢₖaⱼₖ. Its
-/// factor samplers are working types of their own (<see cref="LatentModelFactorSampler{TCopula, TInitTraits, TUsng}"/>,
+/// An unsealed, immutable class: its derived models give the latent variables a meaning (a default time, a recovery),
+/// and an integrable one its integration. The correlation of Yᵢ and Yⱼ is Σₖ aᵢₖaⱼₖ. Its factor samplers are working
+/// types of their own (<see cref="LatentModelFactorSampler{TCopula, TInitTraits, TUsng}"/>,
 /// <see cref="BoxMullerFactorSampler{TUrng}"/>, <see cref="PolarStudentTFactorSampler{TUrng}"/>).
 /// </para>
 /// <para>
@@ -29,9 +29,9 @@ namespace NanoQL.Experimental;
 /// factor itself, so the two can't merge once a quote is a <see cref="double"/>; the correlation form is
 /// <see cref="FromCorrelation"/>, and a new correlation is a new model, where QuantLib's observes its quote. A model of
 /// no variables or no factors is refused, where QuantLib's reads the first row of an empty matrix
-/// (<c>latentmodel.hpp:653</c>; the S-xcr plan's XR8 (xxx)). The constructor on one factor's weights builds the policy
-/// from the weights, where QuantLib's default-constructs it first, which the Gaussian policy can't do: QuantLib crashes
-/// (<c>latentmodel.hpp:667-680</c>; XR8 (vi), <c>Divergences/LatentModelVectorConstructorTests.cs</c>).
+/// (<c>latentmodel.hpp:653</c>). The constructor on one factor's weights builds the policy from the weights, where
+/// QuantLib's default-constructs it first, which the Gaussian policy can't do: QuantLib crashes
+/// (<c>latentmodel.hpp:667-680</c>; <c>Divergences/LatentModelVectorConstructorTests.cs</c>).
 /// </para>
 /// </remarks>
 /// <typeparam name="TCopula">The copula policy.</typeparam>

@@ -16,17 +16,16 @@ namespace NanoQL.Experimental;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A <c>readonly struct</c> (D12) built by <see cref="Create"/>, over immutable state; its zero value holds no
-/// distribution, and every member of <c>default(TCopulaPolicy)</c> throws <see cref="InvalidOperationException"/>
-/// (S2R9). The orders must exceed 2 (finite variance) and, for a model with variables, be odd, as the convolution
-/// requires.
+/// A <c>readonly struct</c> built by <see cref="Create"/>, over immutable state; its zero value holds no distribution,
+/// and every member of <c>default(TCopulaPolicy)</c> throws <see cref="InvalidOperationException"/>. The orders must
+/// exceed 2 (finite variance) and, for a model with variables, be odd, as the convolution requires.
 /// </para>
 /// <para>
-/// The distributions are Boost.Math's <c>students_t</c>, ported (the S-xcr plan's XR6): its <c>cdf</c>, <c>pdf</c>
-/// and <c>quantile</c>. At 4 and 6 degrees of freedom Boost's quantile takes Shaw's forms, which cancel near ½
-/// (<see cref="InverseCumulativeStudent"/>'s remarks); there, within 0.05 of ½, the policy takes one Newton step on
-/// Boost's cumulative function, as <see cref="InverseCumulativeStudent"/> does (S-core's C3-O4). Those orders are even,
-/// which the convolution refuses, so only a policy built without variables reads them.
+/// The distributions are Boost.Math's <c>students_t</c>, ported: its <c>cdf</c>, <c>pdf</c> and <c>quantile</c>. At 4
+/// and 6 degrees of freedom Boost's quantile takes Shaw's forms, which cancel near ½ (<see
+/// cref="InverseCumulativeStudent"/>'s remarks); there, within 0.05 of ½, the policy takes one Newton step on Boost's
+/// cumulative function, as <see cref="InverseCumulativeStudent"/> does. Those orders are even, which the convolution
+/// refuses, so only a policy built without variables reads them.
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]

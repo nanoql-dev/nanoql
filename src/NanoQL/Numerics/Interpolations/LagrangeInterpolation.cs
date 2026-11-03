@@ -16,13 +16,13 @@ namespace NanoQL.Numerics;
 /// alone. The x values must not repeat, which QuantLib checks only under its extra safety checks.
 /// </para>
 /// <para>
-/// At a node the value is the node's y. QuantLib finds the node by a binary search for the first x not below
-/// x − 10ε|x| and returns its y when that x is less than 10ε|x| above (<c>lagrangeinterpolation.hpp:114-120</c>): at
-/// x = 0 the band is empty, so a node at zero falls through to the barycentric sum, which divides by zero, and on
+/// At a node the value is the node's y. QuantLib finds the node by a binary search for the first x not below x −
+/// 10ε|x| and returns its y when that x is less than 10ε|x| above (<c>lagrangeinterpolation.hpp:114-120</c>): at x =
+/// 0 the band is empty, so a node at zero falls through to the barycentric sum, which divides by zero, and on
 /// descending x values (QuantLib's own Chebyshev-points test gives them) the search never lands on a node, so every
 /// node's value is NaN. Here the band is closed and the nodes are scanned in order: on ascending x values the node is
-/// QuantLib's, and the value off the nodes is QuantLib's on any order. Documented divergences (the S-van plan's VR4
-/// (xxviii) and the run's own find, <c>Divergences/LagrangeZeroNodeTests.cs</c>).
+/// QuantLib's, and the value off the nodes is QuantLib's on any order. Documented divergences
+/// (<c>Divergences/LagrangeZeroNodeTests.cs</c>).
 /// </para>
 /// </remarks>
 public sealed class LagrangeInterpolation : Interpolation
@@ -139,7 +139,7 @@ public sealed class LagrangeInterpolation : Interpolation
         int n = lambda.Length;
         double eps = 10 * NumericLimits.QL_EPSILON * Math.Abs(x);
 
-        // QuantLib's lower_bound of x − eps and its check below x + eps, closed and in storage order (VR4 (xxviii))
+        // QuantLib's lower_bound of x − eps and its check below x + eps, closed and in storage order
         for (int i = 0; i < n; ++i)
         {
             if (!(xs[i] < x - eps) && xs[i] - x <= eps)

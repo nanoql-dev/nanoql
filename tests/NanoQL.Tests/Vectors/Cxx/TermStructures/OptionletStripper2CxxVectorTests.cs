@@ -9,8 +9,9 @@ namespace NanoQL.Tests.Vectors;
 /// <summary>
 /// <see cref="OptionletStripper2"/>'s harness vectors,
 /// <c>tests/vectors/cxx/termstructures/volatility/optionlet/optionletstripper2.json</c>: strips of QuantLib's stripper
-/// tests' cases, their at-the-money strikes, prices and spreads (S7R6's filter's dropped ones null), the strikes and
-/// volatilities with the at-the-money ones inserted, the dates, times and rates; and the 6M Ibor cap QuantLib refuses.
+/// tests' cases, their at-the-money strikes, prices and spreads (the ones the stability filter drops null), the strikes
+/// and volatilities with the at-the-money ones inserted, the dates, times and rates; and the 6M Ibor cap QuantLib
+/// refuses.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class OptionletStripper2CxxVectorTests

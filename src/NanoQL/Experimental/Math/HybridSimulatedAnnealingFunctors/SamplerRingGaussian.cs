@@ -17,26 +17,25 @@ namespace NanoQL.Experimental;
 /// <para>
 /// Each pass of QuantLib's fold moves the point by the box's width w, so a draw takes about |step|/w passes and never
 /// returns on a zero width, nor once w is below the point's last bit. nanoql's holds a zero-width dimension at its
-/// bound, its draw still taken, so the other dimensions draw as QuantLib's (the S-xrt plan's XRR12); and on a narrow
-/// one runs QuantLib's passes up to 10,000, its bits wherever they end, then folds in one step from the drawn point x,
-/// to lower + ((x − lower) mod w) from below and upper − ((upper − x) mod w) from above, the passes' own end (XRR13;
-/// <c>Conventions/AnnealingSamplerFoldTests.cs</c>).
+/// bound, its draw still taken, so the other dimensions draw as QuantLib's; and on a narrow one runs QuantLib's passes
+/// up to 10,000, its bits wherever they end, then folds in one step from the drawn point x, to lower + ((x − lower) mod
+/// w) from below and upper − ((upper − x) mod w) from above, the passes' own end
+/// (<c>Conventions/AnnealingSamplerFoldTests.cs</c>).
 /// </para>
 /// <para>
-/// Its draws are <c>std::normal_distribution&lt;Real&gt;(0.0, 1.0)</c> on a <c>std::mt19937</c>, as MSVC draws them (the
-/// S-xrt plan's XRD4), on the seed, which is required: QuantLib's default seeds from the clock (XRD3). A working type.
+/// Its draws are <c>std::normal_distribution&lt;Real&gt;(0.0, 1.0)</c> on a <c>std::mt19937</c>, as MSVC draws them, on
+/// the seed, which is required: QuantLib's default seeds from the clock. A working type.
 /// </para>
 /// <para>
-/// A lower bound above its upper is refused, where QuantLib's fold never ends, and so are bounds of different sizes
-/// and a point whose size isn't theirs, which QuantLib's reads past (the S-xrt code review's B4-2;
-/// <c>Conventions/ExperimentalMathRefusalTests.cs</c>).
+/// A lower bound above its upper is refused, where QuantLib's fold never ends, and so are bounds of different sizes and
+/// a point whose size isn't theirs, which QuantLib's reads past (<c>Conventions/ExperimentalMathRefusalTests.cs</c>).
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]
 [WorkingType]
 public sealed class SamplerRingGaussian : IAnnealingSampler<SamplerRingGaussian>
 {
-    // QuantLib's passes before the fold in one step (XRR13)
+    // QuantLib's passes before the fold in one step
     private const int MaxPasses = 10000;
 
     private readonly MersenneTwisterUniformRng generator;
@@ -48,7 +47,7 @@ public sealed class SamplerRingGaussian : IAnnealingSampler<SamplerRingGaussian>
     /// <param name="upper">The upper bounds.</param>
     /// <param name="seed">The seed, in [1, 4294967295].</param>
     /// <exception cref="ArgumentException">
-    /// The bounds' sizes differ, with QuantLib's very fast sampler's text, or a lower bound is above its upper (B4-2).
+    /// The bounds' sizes differ, with QuantLib's very fast sampler's text, or a lower bound is above its upper.
     /// </exception>
     /// <exception cref="ArgumentOutOfRangeException"><paramref name="seed"/> is outside [1, 4294967295].</exception>
     public SamplerRingGaussian(Vector lower, Vector upper, long seed)
@@ -101,7 +100,7 @@ public sealed class SamplerRingGaussian : IAnnealingSampler<SamplerRingGaussian>
             double lo = lower[i], up = upper[i];
             if (up == lo)
             {
-                // a zero-width dimension holds its bound (XRR12)
+                // a zero-width dimension holds its bound
                 newPoint[i] = lo;
                 continue;
             }
@@ -124,7 +123,7 @@ public sealed class SamplerRingGaussian : IAnnealingSampler<SamplerRingGaussian>
 
             if (y < lo || y > up)
             {
-                // the passes' end in one step, from the drawn point (XRR13)
+                // the passes' end in one step, from the drawn point
                 double w = up - lo;
                 y = x < lo ? lo + PositiveModulo(x - lo, w) : up - PositiveModulo(up - x, w);
             }

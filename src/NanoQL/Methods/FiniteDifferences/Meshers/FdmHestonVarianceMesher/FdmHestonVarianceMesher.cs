@@ -21,20 +21,19 @@ namespace NanoQL.Methods;
 /// Immutable. Where the quantile grid fails, its default mesh: evenly spaced over θ and v₀ ± 4σ√(θ/2κ).
 /// </para>
 /// <para>
-/// QuantLib's master since 1.44 (#2908's mesher part and #2940, taken under R8, the S-hes plan's HR8 (ii), (iii)) falls
-/// back to the default mesh also where a normal approximation of the quantiles shows the distribution too narrow for
-/// the grid's minimum steps, where the quantiles can't hold v₀ (checked before and after building the grid), and where
-/// the grid is degenerate, its probabilities repeating; and it skips the quantiles beyond 1 − ε, which give the same
-/// grid. 1.44's grid holds no v₀ where the variance falls fast (v₀ 0.25, θ 0.0025, κ 10), so its engines throw, and
-/// at small σ it builds degenerate grids; elsewhere the two are the same, bit for bit
-/// (<c>Divergences/FdmHestonVarianceMesherFallbackTests.cs</c>).
+/// QuantLib's master since 1.44 (#2908's mesher part and #2940, taken as fixes) falls back to the default mesh also
+/// where a normal approximation of the quantiles shows the distribution too narrow for the grid's minimum steps, where
+/// the quantiles can't hold v₀ (checked before and after building the grid), and where the grid is degenerate, its
+/// probabilities repeating; and it skips the quantiles beyond 1 − ε, which give the same grid. 1.44's grid holds no v₀
+/// where the variance falls fast (v₀ 0.25, θ 0.0025, κ 10), so its engines throw, and at small σ it builds degenerate
+/// grids; elsewhere the two are the same, bit for bit (<c>Divergences/FdmHestonVarianceMesherFallbackTests.cs</c>).
 /// </para>
 /// <para>
-/// The volatility estimate scales by a skew factor, max(1, σ_m/κ)^1.5 in QuantLib, σ_m the mixing factor times σ,
-/// which at small κ widens the equity's mesher until its prices leave the analytic engine's: +30% at σ 1.0 and κ 0.1,
-/// +638% at κ 0.02, refining the grid not bringing them back. Here the factor is bounded at σ_m/κ = 2,
-/// min(2, max(1, σ_m/κ))^1.5, so QuantLib's bits stand wherever σ_m/κ ≤ 2, every QuantLib case among them (the S-hes
-/// plan's HR9, by the user's ruling; <c>Divergences/FdHestonSkewFactorTests.cs</c>).
+/// The volatility estimate scales by a skew factor, max(1, σ_m/κ)^1.5 in QuantLib, σ_m the mixing factor times σ, which
+/// at small κ widens the equity's mesher until its prices leave the analytic engine's: +30% at σ 1.0 and κ 0.1, +638%
+/// at κ 0.02, refining the grid not bringing them back. Here the factor is bounded at σ_m/κ = 2, min(2, max(1,
+/// σ_m/κ))^1.5, so QuantLib's bits stand wherever σ_m/κ ≤ 2, every QuantLib case among them
+/// (<c>Divergences/FdHestonSkewFactorTests.cs</c>).
 /// </para>
 /// </remarks>
 public sealed class FdmHestonVarianceMesher : Fdm1dMesher
@@ -78,7 +77,7 @@ public sealed class FdmHestonVarianceMesher : Fdm1dMesher
             }
         }
 
-        // the skew factor bounded at sigma_m/kappa = 2 (HR9), QuantLib's below
+        // the skew factor bounded at sigma_m/kappa = 2, QuantLib's below
         double skewHint = (process.Kappa != 0.0) ? Min(2.0, Max(1.0, mixedSigma / process.Kappa)) : 1.0;
 
         Array.Sort(pGrid);

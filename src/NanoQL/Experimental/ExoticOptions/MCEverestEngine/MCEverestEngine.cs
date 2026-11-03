@@ -17,10 +17,10 @@ namespace NanoQL.Experimental;
 /// <summary>The Monte Carlo engine for Everest options on correlated processes.</summary>
 /// <remarks>
 /// The paths run on the clock spanning every Black-Scholes process's structures, as
-/// <see cref="MCEuropeanBasketEngine"/>'s do (the S-exo plan's ER5 (i); the S-xeq plan's XER5 (xxxiii)), and the
-/// payoff and the yield are discounted on the first process's risk-free curve to the exercise date, nothing accrued
-/// before its reference date; a market on one clock keeps QuantLib's draws and arithmetic. The draw-price-add loop
-/// allocates nothing per sample after its first batch. The seed is explicit and required (the S-xeq plan's XED3).
+/// <see cref="MCEuropeanBasketEngine"/>'s do, and the payoff and the yield are discounted on the first process's
+/// risk-free curve to the exercise date, nothing accrued before its reference date; a market on one clock keeps
+/// QuantLib's draws and arithmetic. The draw-price-add loop allocates nothing per sample after its first batch. The
+/// seed is explicit and required.
 /// </remarks>
 [Experimental("NQL0001")]
 public static class MCEverestEngine

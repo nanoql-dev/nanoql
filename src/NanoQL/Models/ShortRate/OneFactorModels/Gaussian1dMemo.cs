@@ -17,10 +17,10 @@ namespace NanoQL.Models;
 /// <c>swapCache_</c>, and the integrals of GSR's process core.
 /// </summary>
 /// <remarks>
-/// A working type (the S-g1d plan's G1R1 (iii); master plan §2.2's Gaussian1d row): each engine call builds one and
-/// passes it through the model's internal members, and each public member builds its own, so a price computes each term
-/// once, as QuantLib's first price does, and nothing outlives the call. QuantLib keeps both in the model for its life,
-/// flushing the integrals at every parameter change.
+/// A working type (the playbook's Gaussian1d row): each engine call builds one and passes it through the model's
+/// internal members, and each public member builds its own, so a price computes each term once, as QuantLib's first
+/// price does, and nothing outlives the call. QuantLib keeps both in the model for its life, flushing the integrals at
+/// every parameter change.
 /// </remarks>
 [WorkingType]
 internal sealed class Gaussian1dMemo

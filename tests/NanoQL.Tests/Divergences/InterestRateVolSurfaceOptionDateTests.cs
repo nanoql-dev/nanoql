@@ -8,13 +8,13 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The interest-rate volatility surface's option dates (the S-xeq plan's XER5 (xxv)). QuantLib's
-/// <c>InterestRateVolSurface::optionDateFromTenor</c>, the index's fixing date, hides its base's non-virtual member, so
-/// <c>atmVol(Period)</c> and <c>smileSection(Period)</c>, defined on the bases, date the option on the calendar while the
-/// surface's own option dates and volatility spreads use the index's (<c>interestratevolsurface.hpp:69</c>,
+/// The interest-rate volatility surface's option dates. QuantLib's <c>InterestRateVolSurface::optionDateFromTenor</c>,
+/// the index's fixing date, hides its base's non-virtual member, so <c>atmVol(Period)</c> and
+/// <c>smileSection(Period)</c>, defined on the bases, date the option on the calendar while the surface's own option
+/// dates and volatility spreads use the index's (<c>interestratevolsurface.hpp:69</c>,
 /// <c>blackatmvolcurve.cpp:40-44</c>); nanoql dates every tenor on the surface by the index. Checks: a tenor's
-/// at-the-money volatility and smile section are those at the index's date; at one month, where the calendar's date
-/// (15 June 2026) and the index's (17 June) differ, the calendar date's volatility differs.
+/// at-the-money volatility and smile section are those at the index's date; at one month, where the calendar's date (15
+/// June 2026) and the index's (17 June) differ, the calendar date's volatility differs.
 /// </summary>
 public class InterestRateVolSurfaceOptionDateTests
 {

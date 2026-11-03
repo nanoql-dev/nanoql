@@ -79,11 +79,11 @@ public sealed class GaussKronrodAdaptive : Integrator
         }
     }
 
-    // The rule on a first estimate (the S-bar plan's SD24): for a non-negative, smooth integrand, the integral of the
-    // integrand divided by a first 15-point estimate of it, at an absolute tolerance on that scaled integrand, times the
-    // estimate; 0 where the estimate is 0, a 0 estimate being a 0 value for such an integrand, where 0/0 would split to
-    // the cap. The rule's absolute tolerance is refused at or below machine epsilon, so an unscaled one can't ask a
-    // small integral for its relative digits.
+    // The rule on a first estimate: for a non-negative, smooth integrand, the integral of the integrand divided by a
+    // first 15-point estimate of it, at an absolute tolerance on that scaled integrand, times the estimate; 0 where the
+    // estimate is 0, a 0 estimate being a 0 value for such an integrand, where 0/0 would split to the cap. The rule's
+    // absolute tolerance is refused at or below machine epsilon, so an unscaled one can't ask a small integral for its
+    // relative digits.
     internal static double IntegrateOnFirstEstimate(
         Func<double, double> f, double a, double b, double relativeTolerance, int maxEvaluations)
     {

@@ -10,13 +10,12 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// <see cref="JointStochasticProcess"/> builds each step's correlation for that step (the S-hes plan's HR4 (iii)):
-/// QuantLib's process caches the matrix by (t0, dt) when its derived class says the correlation doesn't depend on the
-/// state, and serves it to a later step at the same (t0, dt) from another state; no class derives it, so nothing can show
-/// the cache pays, and nanoql keeps none: a step is a fresh process's step bit for bit, after any other. And a derived
-/// process's members: the size, factors and initial values its constituents give, each constituent's slice, the
-/// correlated increments its pre-evolve hook receives, its post-evolve hook's result as the step's, and the first
-/// constituent's time.
+/// <see cref="JointStochasticProcess"/> builds each step's correlation for that step: QuantLib's process caches the
+/// matrix by (t0, dt) when its derived class says the correlation doesn't depend on the state, and serves it to a later
+/// step at the same (t0, dt) from another state; no class derives it, so nothing can show the cache pays, and nanoql
+/// keeps none: a step is a fresh process's step bit for bit, after any other. And a derived process's members: the
+/// size, factors and initial values its constituents give, each constituent's slice, the correlated increments its
+/// pre-evolve hook receives, its post-evolve hook's result as the step's, and the first constituent's time.
 /// </summary>
 public class JointStochasticProcessTests
 {

@@ -60,8 +60,8 @@ public partial class ConventionPresetTests
     [InlineData("BusinessDayConventionEnum", "NEAREST")]
     public void ACodeWithNoExactMappingHasNoAlias(string scheme, string code)
     {
-        // CVR15 as ruled: 30E/360.ISDA keeps the last day of February at the termination date, which no day counter
-        // preset knows, and FpML's NEAREST isn't QuantLib's Nearest; each is in its scheme's list and isn't shipped
+        // 30E/360.ISDA keeps the last day of February at the termination date, which no day counter preset knows, and
+        // FpML's NEAREST isn't QuantLib's Nearest; each is in its scheme's list and isn't shipped
         Assert.Contains(code, FpmlTable.Value.Schemes[scheme]);
         Assert.DoesNotContain(FpmlTable.Value.Aliases, a => a.Code == code);
         Assert.DoesNotContain(Shipped.Records, r => r.Name == code);
@@ -146,7 +146,7 @@ public partial class ConventionPresetTests
         }
         else
         {
-            // a business-day convention's member, which C4's records read
+            // a business-day convention's member, which the instrument conventions' records read
             Assert.True(Enum.TryParse(target, false, out BusinessDayConvention c) && c.ToString() == target, $"{name}: {target}");
         }
 

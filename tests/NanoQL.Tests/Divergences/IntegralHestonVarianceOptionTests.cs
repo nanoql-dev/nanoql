@@ -11,22 +11,21 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The integral Heston variance-option engine's put, other payoffs, start date and dividend curve (the user's ruling at
-/// the S-xeq run's stop 8; the S-xeq plan's XER5 (xx), XER2). QuantLib sums any payoff but a call against the integrated
-/// variance's density on 4,096 points of spacing √(2π)/64, about one standard deviation of it, so its put case prices
-/// 0.0466796 [executed: QuantLib's <c>testIntegralHeston</c>]; nanoql prices a put by parity on the call's integral,
-/// 0.0465915, and refuses other payoffs, which QuantLib's grid prices 13% to 24% off. Checks: an independent price, the
-/// integrated CIR variance's characteristic function (the CIR bond formula at λ = −iu, averaged over the start
-/// variance's non-central χ² law) inverted by Gil-Pelaez's distribution function integrated over [0, K], which gives
-/// QuantLib's call case to 1e-10 [executed: the run's <c>varopt_cf.py</c>]. QuantLib's engine measures the variance from the evaluation date whatever the option's start, so a start 180 days
-/// ahead prices as one starting today, 0.9104618670 [executed: the planner's <c>xp_c2.cpp</c>]; nanoql prices a forward
-/// start on the variance integrated from its start, each integrand's expectation over the start variance's
-/// non-central χ² law the CIR transform, and refuses a seasoned option. QuantLib refuses a process whose dividend
-/// handle isn't empty; nanoql ignores the dividend curve, which the integrated variance's law doesn't read. Checks: a
-/// Monte Carlo of the integrated variance (the exact mean-reverting step with a truncated diffusion and trapezoid
-/// integration, four steps a day, 100,000 antithetic pairs on
-/// QuantLib's Mersenne twister) within three standard errors, for a call (the one-dimensional integral) and a put (the
-/// two-dimensional one); the start tending to the evaluation date.
+/// The integral Heston variance-option engine's put, other payoffs, start date and dividend curve. QuantLib sums any
+/// payoff but a call against the integrated variance's density on 4,096 points of spacing √(2π)/64, about one standard
+/// deviation of it, so its put case prices 0.0466796 (QuantLib's <c>testIntegralHeston</c>); nanoql prices a put by
+/// parity on the call's integral, 0.0465915, and refuses other payoffs, which QuantLib's grid prices 13% to 24% off.
+/// Checks: an independent price, the integrated CIR variance's characteristic function (the CIR bond formula at λ =
+/// −iu, averaged over the start variance's non-central χ² law) inverted by Gil-Pelaez's distribution function
+/// integrated over [0, K], which gives QuantLib's call case to 1e-10. QuantLib's engine measures the variance from the
+/// evaluation date whatever the option's start, so a start 180 days ahead prices as one starting today, 0.9104618670
+/// (QuantLib 1.44); nanoql prices a forward start on the variance integrated from its start, each integrand's
+/// expectation over the start variance's non-central χ² law the CIR transform, and refuses a seasoned option. QuantLib
+/// refuses a process whose dividend handle isn't empty; nanoql ignores the dividend curve, which the integrated
+/// variance's law doesn't read. Checks: a Monte Carlo of the integrated variance (the exact mean-reverting step with a
+/// truncated diffusion and trapezoid integration, four steps a day, 100,000 antithetic pairs on QuantLib's Mersenne
+/// twister) within three standard errors, for a call (the one-dimensional integral) and a put (the two-dimensional
+/// one); the start tending to the evaluation date.
 /// </summary>
 public class IntegralHestonVarianceOptionTests
 {

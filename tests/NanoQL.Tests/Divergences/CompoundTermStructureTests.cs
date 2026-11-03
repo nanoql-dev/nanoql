@@ -17,12 +17,12 @@ namespace NanoQL.Tests.Divergences;
 /// call is +1,090% off and its Greeks miss its own bumped values by −45% (delta) to +2,908% (vega); nanoql reads
 /// Geske's formula with the variances to each maturity at the daughter's strike, the correlation √(V_M/V_D) and the
 /// discounts by date, its critical spot solving the daughter's forward Black value over the mother's period, on West's
-/// bivariate normal, and takes the form's own Greeks (the S-exo plan's ER4, ER7). The checks: the option's exact value
-/// at the mother's maturity, the mother's payoff on the daughter's Black value over the lognormal spot, within Brent's
-/// accuracy, 1e-6; on a flat market, QuantLib's value, delta and theta within Drezner's accuracy, the value nearer the
-/// exact one, and its gamma and vega, which read no bivariate normal, within its last bits; and on rising and falling
-/// markets, the delta and gamma against bumps of the spot, the vega against a parallel shift of the volatilities and
-/// the theta against the evaluation date moved with each date's zero rate and volatility held.
+/// bivariate normal, and takes the form's own Greeks. The checks: the option's exact value at the mother's maturity,
+/// the mother's payoff on the daughter's Black value over the lognormal spot, within Brent's accuracy, 1e-6; on a flat
+/// market, QuantLib's value, delta and theta within Drezner's accuracy, the value nearer the exact one, and its gamma
+/// and vega, which read no bivariate normal, within its last bits; and on rising and falling markets, the delta and
+/// gamma against bumps of the spot, the vega against a parallel shift of the volatilities and the theta against the
+/// evaluation date moved with each date's zero rate and volatility held.
 /// </summary>
 public class CompoundTermStructureTests
 {

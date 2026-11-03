@@ -20,26 +20,25 @@ namespace NanoQL.PricingEngines;
 /// <para>
 /// A static class with one <c>Calculate</c> overload per lookback instrument, QuantLib's template parameter <c>I</c>
 /// and its four pricer overloads, over one private simulation deriving <see cref="McSimulation{TPath, TStats}"/>
-/// directly (the S-bar plan's BR1 (ii)); QuantLib's four <c>.cpp</c>-local path pricers are two private classes here, a
-/// partial pricer the full one over its window's nodes. The full-period overloads refuse a partial-time option held as
-/// the full-period type with QuantLib's "wrong argument type" (SD8). The seed is explicit (S2R4).
+/// directly; QuantLib's four <c>.cpp</c>-local path pricers are two private classes here, a partial pricer the full one
+/// over its window's nodes. The full-period overloads refuse a partial-time option held as the full-period type with
+/// QuantLib's "wrong argument type". The seed is explicit.
 /// </para>
 /// <para>
 /// Documented divergences. The paths and the discount run on the engine's clock, <see cref="FdmBlackScholesOp.Clock"/>,
-/// from the earliest reference date of the structures, where QuantLib's run on the risk-free curve's (BR5 (xix),
-/// <c>Divergences/McLookbackMismatchedTimesTests.cs</c>). The extremum observed so far is folded into the path's, where
-/// QuantLib's pricers take the extremum from the path's second node alone and price a seasoned option as a new one (BR5
-/// (xx), <c>Divergences/McLookbackSeasonedTests.cs</c>), and it is read as the spot where it lies beyond it, the spot
-/// being observed (BR5 (xxii)). A partial option's window date is a time of the grid, its start node included, where
-/// QuantLib's pricers snap it to the closest time of a regular grid and the partial fixed pricer drops the window's
-/// first node (BR5 (xx), <c>Divergences/McLookbackWindowTests.cs</c>). A partial fixed window opened before the
-/// evaluation date is refused, as the analytic engine refuses it, where QuantLib's pricer starts it today, and a
-/// partial floating window closed before the evaluation date takes the extremum as given, neither the spot nor a path's
-/// node folded in, where QuantLib's folds today's spot into it; a window dated from the evaluation date to the clock's
-/// origin opens or closes at the path's start (the S-bar code review's B2-2 and B2-3,
-/// <c>Divergences/LookbackPartialWindowTodayTests.cs</c>). And the partial floating option pays the terminal spot less
-/// λ times the minimum, or λ times the maximum less the terminal spot, as the instrument and the analytic engine have
-/// it, where QuantLib's pricer drops λ (BR5 (xxi), <c>Divergences/McLookbackLambdaTests.cs</c>).
+/// from the earliest reference date of the structures, where QuantLib's run on the risk-free curve's
+/// (<c>Divergences/McLookbackMismatchedTimesTests.cs</c>). The extremum observed so far is folded into the path's,
+/// where QuantLib's pricers take the extremum from the path's second node alone and price a seasoned option as a new
+/// one (<c>Divergences/McLookbackSeasonedTests.cs</c>), and it is read as the spot where it lies beyond it, the spot
+/// being observed. A partial option's window date is a time of the grid, its start node included, where QuantLib's
+/// pricers snap it to the closest time of a regular grid and the partial fixed pricer drops the window's first node
+/// (<c>Divergences/McLookbackWindowTests.cs</c>). A partial fixed window opened before the evaluation date is refused,
+/// as the analytic engine refuses it, where QuantLib's pricer starts it today, and a partial floating window closed
+/// before the evaluation date takes the extremum as given, neither the spot nor a path's node folded in, where
+/// QuantLib's folds today's spot into it; a window dated from the evaluation date to the clock's origin opens or closes
+/// at the path's start (<c>Divergences/LookbackPartialWindowTodayTests.cs</c>). And the partial floating option pays
+/// the terminal spot less λ times the minimum, or λ times the maximum less the terminal spot, as the instrument and the
+/// analytic engine have it, where QuantLib's pricer drops λ (<c>Divergences/McLookbackLambdaTests.cs</c>).
 /// </para>
 /// </remarks>
 public static class MCLookbackEngine
@@ -166,10 +165,9 @@ public static class MCLookbackEngine
             option.LookbackPeriodStart,
             (grid, discount) =>
             {
-                // the window from its start node on, the start a time of the grid (BR5 (xx)), from the first node where
-                // it opens from the evaluation date to the clock's origin; a window opened before the evaluation date
-                // refused, the option holding no extremum observed since (the S-bar code review's B2-2 and B2-3), where
-                // QuantLib's prices it as opening today
+                // the window from its start node on, the start a time of the grid, from the first node where it opens
+                // from the evaluation date to the clock's origin; a window opened before the evaluation date refused,
+                // the option holding no extremum observed since, where QuantLib's prices it as opening today
                 PlainVanillaPayoff payoff = PlainPayoff(option);
                 if (option.LookbackPeriodStart < context.EvaluationDate)
                 {
@@ -311,9 +309,9 @@ public static class MCLookbackEngine
             option.LookbackPeriodEnd,
             (grid, discount) =>
             {
-                // the window to its end node, the end a time of the grid (BR5 (xx)), λ in the payoff (BR5 (xxi)); a
-                // window closed before the evaluation date its extremum as given, neither the spot nor a path's node in
-                // it (the S-bar code review's B2-2 and B2-3), where QuantLib's folds the spot in
+                // the window to its end node, the end a time of the grid, λ in the payoff; a window closed before the
+                // evaluation date its extremum as given, neither the spot nor a path's node in it, where QuantLib's
+                // folds the spot in
                 FloatingTypePayoff payoff = FloatingPayoff(option);
                 double spot = process.X0;
                 bool closed = option.LookbackPeriodEnd < context.EvaluationDate;
@@ -472,7 +470,7 @@ public static class MCLookbackEngine
             return pricer(grid, discount);
         }
 
-        // QuantLib's grid to the exercise on the clock, a partial option's window date a time of it (BR5 (xx))
+        // QuantLib's grid to the exercise on the clock, a partial option's window date a time of it
         private Grid WindowedGrid()
         {
             double residualTime = clockedProcess.Time(option.Exercise.LastDate());

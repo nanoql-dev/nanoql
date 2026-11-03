@@ -9,13 +9,13 @@ using static NanoQL.Tests.Conventions.CommodityMarkets;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// An energy basis swap's basis converted from its own currency into the base (the S-xrt plan's XRR5 (ix), fixed under
-/// R8). QuantLib converts it from the base currency into the basis currency (<c>energybasisswap.cpp:126-129</c>), the
-/// reverse of every other conversion in the swap: on QuantLib 1.44 (the run's <c>probes\xi_c1.cpp</c>: 1,000 barrels in
-/// March 2025, the pay index at 70 and the receive index at 73 dollars a barrel, a basis of 2 euros a barrel at 1.25
-/// dollars a euro, flat zero curves) the swap with the basis on the receive leg prices 4,600 and on the pay leg 1,400,
-/// the basis read as 1.6 dollars. nanoql reads it as 2.5 dollars: 5,500 and 500, the hand values (73 + 2.5 − 70) × 1,000
-/// and (73 − 70 − 2.5) × 1,000. A basis in the base currency is QuantLib's either way.
+/// An energy basis swap's basis converted from its own currency into the base (fixed). QuantLib converts it from the
+/// base currency into the basis currency (<c>energybasisswap.cpp:126-129</c>), the reverse of every other conversion in
+/// the swap: on QuantLib 1.44 (1,000 barrels in March 2025, the pay index at 70 and the receive index at 73 dollars a
+/// barrel, a basis of 2 euros a barrel at 1.25 dollars a euro, flat zero curves) the swap with the basis on the receive
+/// leg prices 4,600 and on the pay leg 1,400, the basis read as 1.6 dollars. nanoql reads it as 2.5 dollars: 5,500 and
+/// 500, the hand values (73 + 2.5 − 70) × 1,000 and (73 − 70 − 2.5) × 1,000. A basis in the base currency is QuantLib's
+/// either way.
 /// </summary>
 public class EnergyBasisSwapTests
 {

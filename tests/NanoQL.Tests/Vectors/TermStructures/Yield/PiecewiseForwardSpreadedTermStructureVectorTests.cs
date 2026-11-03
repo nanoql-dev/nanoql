@@ -12,8 +12,8 @@ namespace NanoQL.Tests.Vectors;
 /// The piecewise forward-spreaded curve vectors,
 /// <c>tests/vectors/termstructures/yield/piecewiseforwardspreadedtermstructure.json</c>: the zero-spreaded file's six
 /// originals under linear and backward-flat interpolation and three spread schedules, one from a later date against
-/// QuantLib's curve with its first spread prepended at the reference date (the S-sr plan's SSR6 (vii)); the curve's
-/// inspectors, and its discounts, zero rates and forward rates from the first spread's date.
+/// QuantLib's curve with its first spread prepended at the reference date; the curve's inspectors, and its discounts,
+/// zero rates and forward rates from the first spread's date.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class PiecewiseForwardSpreadedTermStructureVectorTests

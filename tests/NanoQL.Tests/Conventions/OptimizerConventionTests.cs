@@ -6,12 +6,11 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The optimizers' conventions (the S-core plan's C2): the line-search base's refusing direction (CR5 (a)); BFGS's
-/// update, QuantLib's (CR7's kept designs); the seeds' refusals (CR2 (c)); the configurations' checks, QuantLib's, and
-/// their records (CD12); CMA-ES on a NaN cost (CR7 (xxvi)) and differential evolution on an empty initial population
-/// (CR7 (xxxvi)), refused; QuantLib's checks of L-BFGS-B, CMA-ES, differential evolution and simulated annealing;
-/// differential evolution's catch of a cost's refusal, QuantLib's; and BFGS, L-BFGS-B and the simplex on one problem,
-/// one minimum (§2.6).
+/// The optimizers' conventions: the line-search base's refusing direction; BFGS's update, QuantLib's, kept; the seeds'
+/// refusals; the configurations' checks, QuantLib's, and their records; CMA-ES on a NaN cost and differential evolution
+/// on an empty initial population, refused; QuantLib's checks of L-BFGS-B, CMA-ES, differential evolution and simulated
+/// annealing; differential evolution's catch of a cost's refusal, QuantLib's; and BFGS, L-BFGS-B and the simplex on one
+/// problem, one minimum.
 /// </summary>
 public class OptimizerConventionTests
 {
@@ -30,9 +29,8 @@ public class OptimizerConventionTests
     public void BFGSsUpdateIsQuantLibs()
     {
         // the update on the search direction before its step scaling, which QuantLib's Armijo search compensates:
-        // QuantLib's evaluation counts on the extended Rosenbrock with Armijo, 47 in 2 variables from (-1, -1) and 76 in
-        // 10 from -1 (probes\c2_facts.out); the textbook update on the step fails to converge in about 10,000 (the
-        // reviewer's r8b.cpp, the plan's CR7)
+        // QuantLib's evaluation counts on the extended Rosenbrock with Armijo, 47 in 2 variables from (-1, -1) and 76
+        // in 10 from -1; the textbook update on the step fails to converge in about 10,000
         ProblemResults two = new BFGS().Minimize(new Problem(new Rosenbrock(), new NoConstraint(), [-1.0, -1.0]), Criteria);
         Assert.Equal(47, two.FunctionEvaluation);
         Assert.Equal(0.0, two.FunctionValue);
@@ -96,8 +94,8 @@ public class OptimizerConventionTests
         AssertRefused<ArgumentOutOfRangeException>(
             () => defaults.WithCrossoverType((DifferentialEvolutionCrossoverType)3), "t", "Unknown crossover type (3)");
 
-        // an empty initial population (CR7 (xxxvi)): QuantLib's sets 0 members and its minimization reads the front of
-        // an empty population (differentialevolution.cpp:85-88); refused with QuantLib's own text for 0 members
+        // an empty initial population: QuantLib's sets 0 members and its minimization reads the front of an empty
+        // population (differentialevolution.cpp:85-88); refused with QuantLib's own text for 0 members
         AssertRefused<ArgumentException>(() => defaults.WithInitialPopulation([]), "c", "Positive number of population members required");
 
         // QuantLib's minimization checks, on the stored configuration against the problem
@@ -140,8 +138,8 @@ public class OptimizerConventionTests
             "bound size does not match problem dimension",
             Assert.Throws<NanoQLException>(() => new Cmaes(defaults.WithBounds([0.0], [1.0]), 1).Minimize(Two(), criteria)).Message);
 
-        // a NaN cost (CR7 (xxvi)): QuantLib's std::sort reads it, breaking the strict weak ordering it needs
-        // (cmaes.cpp:190-191), MSVC's insertion sort finishing on an order that depends on where the NaN falls
+        // a NaN cost: QuantLib's std::sort reads it, breaking the strict weak ordering it needs (cmaes.cpp:190-191),
+        // MSVC's insertion sort finishing on an order that depends on where the NaN falls
         Assert.Equal(
             "CMA-ES cost function returned NaN",
             Assert.Throws<NanoQLException>(
@@ -174,10 +172,10 @@ public class OptimizerConventionTests
     [Fact]
     public void ACostThatRefusesATrialPointScoresTheLargestDouble()
     {
-        // differential evolution's crossover catches a refusal and scores the point QL_MAX_REAL: the cost
-        // (x0 - 0.5)^2 + x1^2 refusing x0 < 0 (an ArgumentException here, QL_FAIL in QuantLib), the bounds [0, 1] for
-        // the initial population only, 20 members, F 0.8, CR 0.9, seed 1. QuantLib's run (the code review's probe,
-        // rerun in this run's probes\r8k.cpp) catches 1,776 refusals and ends on the maximum iterations, as here
+        // differential evolution's crossover catches a refusal and scores the point QL_MAX_REAL: the cost (x0 - 0.5)^2
+        // + x1^2 refusing x0 < 0 (an ArgumentException here, QL_FAIL in QuantLib), the bounds [0, 1] for the initial
+        // population only, 20 members, F 0.8, CR 0.9, seed 1. QuantLib 1.44's run catches 1,776 refusals and ends on
+        // the maximum iterations, as here
         var cost = new Refusing();
         DifferentialEvolutionConfiguration configuration = new DifferentialEvolutionConfiguration()
             .WithBounds(false).WithPopulationMembers(20).WithStepsizeWeight(0.8).WithCrossoverProbability(0.9);

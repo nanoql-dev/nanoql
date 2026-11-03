@@ -6,8 +6,8 @@ using Microsoft.Office.Interop.Excel;
 namespace NanoQL.Excel.XlTests;
 
 /// <summary>
-/// Excel closes by itself after nqlxlError has read a spill (XLD18, XLP79): the read releases every object it takes
-/// from Excel, so an instance quit ends without a kill, which <see cref="OwnExcel"/> checks.
+/// Excel closes by itself after nqlxlError has read a spill: the read releases every object it takes from Excel, so
+/// an instance quit ends without a kill, which <see cref="OwnExcel"/> checks.
 /// </summary>
 public class CloseTests
 {

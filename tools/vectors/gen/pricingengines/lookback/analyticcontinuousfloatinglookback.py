@@ -9,12 +9,11 @@ of it, over six months, a year and two years, on the ten processes of tools/vect
 blackscholesprocess.py: the NPV, the engine's one result. Then an expired option and the refusal of a plain-vanilla
 payoff ("Non-floating payoff given").
 
-The outputs nanoql fixes are left out (the S-bar plan's §2.10): every process here has one day counter and reference
-date (BR5 (xix), tests/NanoQL.Tests/Divergences/LookbackMismatchedTimesTests.cs); no running extremum lies beyond the
-spot (BR5 (xxii), LookbackExtremeBeyondSpotTests.cs); no output's carry is within the small-carry cuts, u =
-|2b sqrt(T)/sigma| below 2.5e-3 with the carry b and volatility sigma read as the engine reads them at expiry, which
-leaves out the Black processes' zero carry (BR5 (xxiii), LookbackSmallCarryTests.cs); and no volatility is zero (BR5
-(xxiv), LookbackZeroVolatilityTests.cs).
+The outputs nanoql fixes are left out: every process here has one day counter and reference date
+(tests/NanoQL.Tests/Divergences/LookbackMismatchedTimesTests.cs); no running extremum lies beyond the spot
+(LookbackExtremeBeyondSpotTests.cs); no output's carry is within the small-carry cuts, u = |2b sqrt(T)/sigma| below
+2.5e-3 with the carry b and volatility sigma read as the engine reads them at expiry, which leaves out the Black
+processes' zero carry (LookbackSmallCarryTests.cs); and no volatility is zero (LookbackZeroVolatilityTests.cs).
 
 A case holds one process, exercise and option type, its outputs one per running extremum; the specs
 tools/vectors/gen/pricingengines/barrier/analyticbarrierengine.py's. The wheel's calls, by QuantLib-SWIG 1.44's
@@ -48,7 +47,7 @@ bsp, bc = abe.bsp, abe.bc
 R = abe.R
 CALL, PUT = abe.CALL, abe.PUT
 
-# the small-carry cuts' bound: the full engines' 1e-3 and the partial engines' 6e-4 to 2e-3 (BR5 (xxiii)), with a margin
+# the small-carry cuts' bound: the full engines' 1e-3 and the partial engines' 6e-4 to 2e-3, with a margin
 U_CUT = 2.5e-3
 
 

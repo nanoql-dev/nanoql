@@ -16,8 +16,8 @@ namespace NanoQL.Methods;
 /// <remarks>
 /// Immutable: the weights are computed at construction. Fornberg's algorithm divides by the offsets' differences, which
 /// QuantLib doesn't check: repeated offsets give NaN weights, which its evaluation then skips, so x³'s first derivative
-/// at 1 on offsets (−0.1, 0, 0, 0.1) comes out 0 for 3. Repeated offsets are refused here (the S-core plan's CR7
-/// (xxxviii), the user's ruling). Terms whose weight is at most ε² in magnitude are skipped, as QuantLib's.
+/// at 1 on offsets (−0.1, 0, 0, 0.1) comes out 0 for 3. Repeated offsets are refused here. Terms whose weight is at
+/// most ε² in magnitude are skipped, as QuantLib's.
 /// </remarks>
 public sealed class NumericalDifferentiation
 {
@@ -138,7 +138,7 @@ public sealed class NumericalDifferentiation
         return retVal;
     }
 
-    // CR7 (xxxviii): Fornberg's algorithm divides by the offsets' differences
+    // Fornberg's algorithm divides by the offsets' differences
     private static void CheckDistinct(ReadOnlySpan<double> offsets)
     {
         for (int i = 1; i < offsets.Length; ++i)

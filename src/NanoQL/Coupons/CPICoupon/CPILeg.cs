@@ -263,9 +263,9 @@ public sealed record CPILeg
 
         Date? baseDate = BaseDate;
 
-        // The observation whose lagged fixing is every flow's base when no base CPI is given (SIR5 (xi)): with a base
-        // date, the coupons' baseDate + lag at the lag; with neither, the schedule's start at the lag, which QuantLib's
-        // start - lag base date loses at a month end.
+        // The observation whose lagged fixing is every flow's base when no base CPI is given: with a base date, the
+        // coupons' baseDate + lag at the lag; with neither, the schedule's start at the lag, which QuantLib's start -
+        // lag base date loses at a month end.
         (Date Date, Period Lag)? baseObservation = baseDate is Date bd ? (bd + ObservationLag, ObservationLag) : null;
 
         // BaseDate and baseCPI are not given, use the first date as startDate and the baseFixingg

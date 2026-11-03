@@ -7,8 +7,8 @@ namespace NanoQL.Tests.Conventions;
 
 /// <summary>
 /// <see cref="IMM"/>'s and <see cref="ASX"/>'s functions whose date QuantLib defaults to the evaluation date take the
-/// context and the date as a nullable after it (PR1's form): the context's evaluation date is read only when the date
-/// is <see langword="null"/>, so a date given gives the same answer under any context.
+/// context and the date as a nullable after it: the context's evaluation date is read only when the date is
+/// <see langword="null"/>, so a date given gives the same answer under any context.
 /// </summary>
 public class DateFunctionContextTests
 {

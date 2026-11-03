@@ -12,7 +12,7 @@ namespace NanoQL.Methods;
 /// The second-order mixed derivative ∂²/∂x∂y in two directions of a multi-dimensional layout, on a non-uniform grid:
 /// the product of the two directions' central first-derivative stencils, one-sided at the grid's edges and corners.
 /// </summary>
-/// <remarks>A working type (the S-eq plan's SEQR1), its coefficients filled at construction.</remarks>
+/// <remarks>A working type, its coefficients filled at construction.</remarks>
 [WorkingType]
 public sealed class SecondOrderMixedDerivativeOp : NinePointLinearOp
 {

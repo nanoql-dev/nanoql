@@ -5,8 +5,8 @@ money, and its inspectors.
 
 Quotes at deltas of ±0.1, ±0.25 and 0.5 under each delta convention, and at the money under each ATM convention, at
 volatilities of 8 and 15% and maturities of a month and two years: each quote's value, maturity, delta type and ATM
-type, and a delta quote's delta. An ATM quote's delta, which QuantLib leaves uninitialized, is left out (the S-rx plan's
-SRXR3 (viii); tests/NanoQL.Tests/Divergences/DeltaVolQuoteAtmDeltaTests.cs).
+type, and a delta quote's delta. An ATM quote's delta, which QuantLib leaves uninitialized, is left out
+(tests/NanoQL.Tests/Divergences/DeltaVolQuoteAtmDeltaTests.cs).
 
 A case's inputs are the "quote": {"kind": "delta", "delta", "vol", "maturity", "deltaType"} or {"kind": "atm", "vol",
 "deltaType", "maturity", "atmType"}, the types QuantLib's integers (DeltaType Spot 0, Fwd 1, PaSpot 2, PaFwd 3;

@@ -16,7 +16,7 @@ namespace NanoQL.Methods;
 /// <remarks>
 /// <para>
 /// Immutable and safe to share across threads: the rollback and the spline run in the constructor, where QuantLib's
-/// lazy object runs them at the first query (master §2.2's finite-difference row). Its dimension is the mesher
+/// lazy object runs them at the first query (the playbook's finite-difference row). Its dimension is the mesher
 /// layout's, read at construction, where QuantLib's is a template parameter checked against the layout ("solver dim N
 /// does not fit to layout dim"), a check that can't fail here; the spline's limit of 15 dimensions is its.
 /// </para>

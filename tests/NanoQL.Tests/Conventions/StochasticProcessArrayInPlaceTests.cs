@@ -9,10 +9,10 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// <see cref="StochasticProcessArray"/>'s in-place pair (the S-exo plan's ER1 (i)): <c>InitialValues(Span)</c> and
-/// <c>Evolve(t0, x0, dt, dw, Span)</c> give the allocating forms' bits, QuantLib's arithmetic (the correlated
-/// increments row by row in the matrix product's order, then each process's own step), on two and three Black-Scholes
-/// processes, and refuse increments of another size than the correlation's as the matrix product does.
+/// <see cref="StochasticProcessArray"/>'s in-place pair: <c>InitialValues(Span)</c> and <c>Evolve(t0, x0, dt, dw,
+/// Span)</c> give the allocating forms' bits, QuantLib's arithmetic (the correlated increments row by row in the matrix
+/// product's order, then each process's own step), on two and three Black-Scholes processes, and refuse increments of
+/// another size than the correlation's as the matrix product does.
 /// </summary>
 public class StochasticProcessArrayInPlaceTests
 {

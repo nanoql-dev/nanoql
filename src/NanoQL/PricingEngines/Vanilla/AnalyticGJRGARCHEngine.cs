@@ -19,42 +19,41 @@ namespace NanoQL.PricingEngines;
 /// </summary>
 /// <remarks>
 /// <para>
-/// An immutable object over its <see cref="GJRGARCHModel"/> (the S-hes plan's HD7). It keeps the moments of each
-/// maturity it prices in a memo keyed by the day count and the rate they read, each entry QuantLib's arithmetic on the
-/// engine's model, whose parameters and curves are fixed with it, so a price is a fresh engine's bit for bit whatever
-/// the engine priced before and on whichever thread (HR4 (iv)); QuantLib's engine keeps one maturity's moments and its
-/// key leaves out the rate, so a model relinked to another curve can price on the old rate.
+/// An immutable object over its <see cref="GJRGARCHModel"/>. It keeps the moments of each maturity it prices in a memo
+/// keyed by the day count and the rate they read, each entry QuantLib's arithmetic on the engine's model, whose
+/// parameters and curves are fixed with it, so a price is a fresh engine's bit for bit whatever the engine priced
+/// before and on whichever thread; QuantLib's engine keeps one maturity's moments and its key leaves out the rate, so a
+/// model relinked to another curve can price on the old rate.
 /// </para>
 /// <para>
-/// QuantLib's prices are corrected where they're wrong (R8): the model's time runs from the earliest curve date, as
-/// <see cref="GJRGARCHProcess"/>'s (HR7 (xviii)); a maturity of no day prices the forward's discounted intrinsic value,
-/// where QuantLib's moments are 0/0 (HR7 (xvii)); with a dividend yield the call is D_q times QuantLib's
-/// approximation and the put D_q·C + K·D_r − S·D_q, where QuantLib returns the price over D_q (HR7 (xxix)); and a
-/// payoff that isn't a plain vanilla is refused, where QuantLib returns the call's or put's value by its option type
-/// (HR12).
+/// QuantLib's prices are corrected where they're wrong: the model's time runs from the earliest curve date, as
+/// <see cref="GJRGARCHProcess"/>'s; a maturity of no day prices the forward's discounted intrinsic value, where
+/// QuantLib's moments are 0/0; with a dividend yield the call is D_q times QuantLib's approximation and the put D_q·C +
+/// K·D_r − S·D_q, where QuantLib returns the price over D_q; and a payoff that isn't a plain vanilla is refused, where
+/// QuantLib returns the call's or put's value by its option type.
 /// </para>
 /// <para>
-/// Two of QuantLib's defects are kept, its prices returned (C3-B1-1 and C3-B1-2 of the S-hes run record, the user's
-/// rulings). Its fourth moment is wrong in the variance's own terms: where the variance is deterministic (α = γ = 0)
-/// the log return is normal, but the engine's kurtosis is about 3 − Σh, Σh the total variance, so at a daily variance
-/// of 2e-4 a year's calls at 0.9, 1 and 1.1 of the spot price 0.12%, 0.23% and 0.29% above Black-Scholes at the same
-/// variance. And its Edgeworth expansion is a density only for moderate skewness and kurtosis: against a Monte Carlo of
-/// the discrete model it approximates, the day's shock moving the log return and then the next day's variance
-/// (QuantLib's gjrgarchmodel test model from its stationary variance, spot 50, a flat 4% curve, calls at 45, 50 and 55,
-/// 180 days and a year; 2,560,000 paths on QuantLib's Mersenne twister), it errs from −3.2% to +0.3% at λ 0, down to
-/// −8.8% at λ 0.1 and from −8.3% to −32% at λ 0.2 and 180 days, and at λ 0.2 and a year its calls are negative, −0.63
-/// to −6.60 where the model's are 10.67 to 5.55 (QuantLib's own Monte Carlo engine, daily steps of its continuous-time
-/// process, gives the model's prices within 1.3%). Where the variance's second or third moment grows without bound its
-/// prices run off: −41,067 at two years on that model at λ 0.2 (m₂ 1.0022, m₃ 1.0257), and −3.4e19 at two years at 252
-/// days a year with α 0.05, β 0.85, γ 0.1 and λ 0.3 (m₂ 1.0135, m₃ 1.1208).
+/// Two of QuantLib's defects are kept, its prices returned. Its fourth moment is wrong in the variance's own terms:
+/// where the variance is deterministic (α = γ = 0) the log return is normal, but the engine's kurtosis is about 3 − Σh,
+/// Σh the total variance, so at a daily variance of 2e-4 a year's calls at 0.9, 1 and 1.1 of the spot price 0.12%,
+/// 0.23% and 0.29% above Black-Scholes at the same variance. And its Edgeworth expansion is a density only for moderate
+/// skewness and kurtosis: against a Monte Carlo of the discrete model it approximates, the day's shock moving the log
+/// return and then the next day's variance (QuantLib's gjrgarchmodel test model from its stationary variance, spot 50,
+/// a flat 4% curve, calls at 45, 50 and 55, 180 days and a year; 2,560,000 paths on QuantLib's Mersenne twister), it
+/// errs from −3.2% to +0.3% at λ 0, down to −8.8% at λ 0.1 and from −8.3% to −32% at λ 0.2 and 180 days, and at λ 0.2
+/// and a year its calls are negative, −0.63 to −6.60 where the model's are 10.67 to 5.55 (QuantLib's own Monte Carlo
+/// engine, daily steps of its continuous-time process, gives the model's prices within 1.3%). Where the variance's
+/// second or third moment grows without bound its prices run off: −41,067 at two years on that model at λ 0.2 (m₂
+/// 1.0022, m₃ 1.0257), and −3.4e19 at two years at 252 days a year with α 0.05, β 0.85, γ 0.1 and λ 0.3 (m₂ 1.0135, m₃
+/// 1.1208).
 /// </para>
 /// <para>
 /// Where two of the variance's growth factors m₁, m₂ and m₃, or one of them and 1, are equal (α = β = γ = 0; an
 /// integrated GARCH), QuantLib's divided differences of their powers are 0/0 and its price NaN; here each is taken at
-/// its limit, the same polynomial in the factors, the limit of QuantLib's prices as the factors meet (C3-B1-1's
-/// ruling). QuantLib's own prices, kept bit for bit off the meeting point, lose their accuracy within about 1e-7 of all
-/// three factors meeting at 1 (α = γ = 0, β near 1), where its nested difference quotients cancel: a year's call there
-/// moves by as much as 12%.
+/// its limit, the same polynomial in the factors, the limit of QuantLib's prices as the factors meet. QuantLib's own
+/// prices, kept bit for bit off the meeting point, lose their accuracy within about 1e-7 of all three factors meeting
+/// at 1 (α = γ = 0, β near 1), where its nested difference quotients cancel: a year's call there moves by as much as
+/// 12%.
 /// </para>
 /// <para>
 /// Reference: Jin-Chuan Duan, Genevieve Gauthier, Jean-Guy Simonato, Caroline Sasseville, 2006. Approximating the
@@ -124,7 +123,7 @@ public sealed class AnalyticGJRGARCHEngine
             throw new NanoQLException("not an European option");
         }
 
-        // plain vanilla, as the Monte Carlo engine requires (HR12)
+        // plain vanilla, as the Monte Carlo engine requires
         if (option.Payoff is not PlainVanillaPayoff payoff)
         {
             throw new ArgumentException("non-plain payoff given", nameof(option));
@@ -145,7 +144,7 @@ public sealed class AnalyticGJRGARCHEngine
         long days = (long)Math.Round(process.DaysPerYear * term, MidpointRounding.AwayFromZero);
         if (days == 0)
         {
-            // no day's variance: the forward's discounted intrinsic value (HR7 (xvii))
+            // no day's variance: the forward's discounted intrinsic value
             return riskFreeDiscount * payoff.Evaluate(spotPrice * dividendDiscount / riskFreeDiscount);
         }
 
@@ -174,7 +173,7 @@ public sealed class AnalyticGJRGARCHEngine
             - (sigma * stdev * CumNormal.Evaluate(d_))) / 24;
         double capp = c + (k3 * a3) + ((k4 - 3) * a4);
 
-        // QuantLib's price is the price over the dividend discount (HR7 (xxix))
+        // QuantLib's price is the price over the dividend discount
         return payoff.OptionType == OptionType.Call
             ? dividendDiscount * capp
             : (dividendDiscount * capp) + (strikePrice * riskFreeDiscount) - (spotPrice * dividendDiscount);
@@ -289,9 +288,9 @@ public sealed class AnalyticGJRGARCHEngine
             new Sums(sEh, sEh2, sEhh, sEh1_2eh, sEhhh, sEh2h, sEhh2, sEh3, sEh1_2eh2, sEh3_2eh, sEh1_2ehh, sEhh1_2eh, sEhe2h, sEh1_2eh1_2eh, sEh3_2e3h));
     }
 
-    // QuantLib's moments where its divided differences of the growth factors' powers are 0/0, two of m1, m2 and m3,
-    // or one of them and 1, equal (C3-B1-1 of the S-hes run record): each divided difference written as one and taken
-    // at its limit, the same polynomial in the factors, so the moments are continuous with QuantLib's on either side
+    // QuantLib's moments where its divided differences of the growth factors' powers are 0/0, two of m1, m2 and m3, or
+    // one of them and 1, equal: each divided difference written as one and taken at its limit, the same polynomial in
+    // the factors, so the moments are continuous with QuantLib's on either side
     private Moments ConfluentMoments(long days, double r)
     {
         GJRGARCHProcess process = model.Process;

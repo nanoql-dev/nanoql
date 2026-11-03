@@ -11,13 +11,12 @@ using static NanoQL.Tests.Divergences.TwoAssetMarket;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// Pearson's spread engine where the conditional strike, the second forward at a node plus the strike, is zero or
-/// less. QuantLib's integrand takes the call's intrinsic value there whatever the type
-/// (<c>pearsonspreadengine.cpp:73-75</c>), so a put prices that intrinsic (136.84 on the plan's market where Choi's
-/// engine gives 0.00304, Deng-Li-Zhou's 0.00303 and a quadrature 0.00313). nanoql's put takes its conditional value,
-/// 0 there (the S-exo plan's ER5 (ix)): Choi's engine and the put-call parity, which QuantLib's put breaks, are the
-/// checks. QuantLib's master makes the same fix after the pin (#2955, <c>8d98cbd3c</c>), its cases below as a check of
-/// nanoql's.
+/// Pearson's spread engine where the conditional strike, the second forward at a node plus the strike, is zero or less.
+/// QuantLib's integrand takes the call's intrinsic value there whatever the type
+/// (<c>pearsonspreadengine.cpp:73-75</c>), so a put prices that intrinsic (136.84 on the test's market where Choi's
+/// engine gives 0.00304, Deng-Li-Zhou's 0.00303 and a quadrature 0.00313). nanoql's put takes its conditional value, 0
+/// there: Choi's engine and the put-call parity, which QuantLib's put breaks, are the checks. QuantLib's master makes
+/// the same fix after the pin (#2955, <c>8d98cbd3c</c>), its cases below as a check of nanoql's.
 /// </summary>
 public class PearsonNegativeStrikePutTests
 {

@@ -16,8 +16,8 @@ namespace NanoQL.Tests.Vectors;
 /// The McSimulation vectors, <c>tests/vectors/pricingengines/mcsimulation.json</c>: QuantLib's MCEuropeanEngine NPV and
 /// error estimate, reproduced by <see cref="McEuropeanTestEngine{TMc}"/>, a test-only engine on
 /// <see cref="McSimulation{TPath, TStats}"/> with QuantLib's European path pricer and MCVanillaEngine's grid and path
-/// generator (the S-sr plan's SSD7), over pseudo-random and Sobol traits, steps, samples, seeds, antithetic variates, a
-/// Brownian bridge and tolerances; and the sample limit's refusal.
+/// generator, over pseudo-random and Sobol traits, steps, samples, seeds, antithetic variates, a Brownian bridge and
+/// tolerances; and the sample limit's refusal.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class McSimulationVectorTests

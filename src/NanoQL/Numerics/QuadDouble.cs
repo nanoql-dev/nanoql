@@ -5,10 +5,10 @@ namespace NanoQL.Numerics;
 
 /// <summary>
 /// A quad-double: an unevaluated sum X0 + X1 + X2 + X3 of four non-overlapping doubles, about 62 digits, for QuantLib's
-/// Heston expressions below double-double's own floor (the S-hes plan's HR6, as the user ruled R2-1). Its arithmetic is
-/// QD's, Hida, Li and Bailey's quad-double library, the one HR6's <see cref="DoubleDouble"/> follows: the accurate
-/// addition, multiplication and long division, Newton's square root and logarithm, and the exponential by argument
-/// reduction, a Taylor series and repeated squaring. A non-finite input gives a non-finite leading part.
+/// Heston expressions below double-double's own floor. Its arithmetic is QD's, Hida, Li and Bailey's quad-double
+/// library, the one <see cref="DoubleDouble"/> follows: the accurate addition, multiplication and long division,
+/// Newton's square root and logarithm, and the exponential by argument reduction, a Taylor series and repeated
+/// squaring. A non-finite input gives a non-finite leading part.
 /// </summary>
 internal readonly record struct QuadDouble(double X0, double X1, double X2, double X3) : IRealArithmetic<QuadDouble>
 {

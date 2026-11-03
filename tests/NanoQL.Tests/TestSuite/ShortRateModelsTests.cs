@@ -374,7 +374,7 @@ public class ShortRateModelsTests
             + $"\n  difference: {diff:E}\n  tolerance : {tol:E}");
     }
 
-    // Upstream: QuantLib's master's case for #2908 (the S-van plan's VR11).
+    // Upstream: QuantLib's master's case for #2908.
     [Fact]
     public void TestCoxIngersollRossShortExpiryBondOptions()
     {

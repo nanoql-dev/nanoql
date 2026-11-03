@@ -17,11 +17,11 @@ last bits, are left to that file.
   them (allowExtrapolation set); and SABR::global.
 - "refusal" cases: the factory on no strike, and on an expiry of 0.
 
-**The stability filter** (the plan's S7R6) runs on the outputs a fit computes, endCriteria, rmsError, maxError and the
-factory's values: each case is refitted in the harness with every input volatility moved one ulp up, then down, by
-math.nextafter, together; then each alone, up and down; an output is written only where every refit leaves it within
-1e-12 x max(|base|, |moved|, 1) (an end criterion where every refit gives the same), and the generator prints "dropped
-n of m outputs" per case and for the file. Expiry, forward and the weights, which no fit computes, aren't filtered.
+**The stability filter** runs on the outputs a fit computes, endCriteria, rmsError, maxError and the factory's values:
+each case is refitted in the harness with every input volatility moved one ulp up, then down, by math.nextafter,
+together; then each alone, up and down; an output is written only where every refit leaves it within 1e-12 x
+max(|base|, |moved|, 1) (an end criterion where every refit gives the same), and the generator prints "dropped n of m
+outputs" per case and for the file. Expiry, forward and the weights, which no fit computes, aren't filtered.
 
 A refused value is {"throws": true}. Each fit's input "interpolation" is the spec
 tools/cxx/src/math/interpolations/sabrinterpolation.cpp reads, the wheel file's inputs; a factory's input "factory"

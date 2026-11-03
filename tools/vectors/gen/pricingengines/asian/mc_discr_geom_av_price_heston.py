@@ -8,8 +8,8 @@ Geometric calls and puts at 90% and 110% of the spot, over six months and a year
 with two past fixings, on the three parameter sets of tools/vectors/gen/processes/hestonprocess.py on flat curves (the
 quadratic-exponential martingale scheme), 511 pseudo-random samples at seeds 42 and 1234, on the fixing times alone, 24
 steps and 20 steps a year: the NPV and the error estimate. Then the refusals of a payoff that isn't plain vanilla, an
-exercise that isn't European and every fixing in the past, and an expired option. The outputs nanoql fixes are left
-out (the S-bar plan's §2.10): fixing dates given twice (BR5 (xxviii)) and a geometric product out of range (BR5 (xli)).
+exercise that isn't European and every fixing in the past, and an expired option. The outputs nanoql fixes are left out:
+fixing dates given twice and a geometric product out of range.
 
 The engine's settings go in as "engine". The wheel's calls, by QuantLib-SWIG 1.44's options.i:
 MCPRDiscreteGeometricAPHestonEngine(process, antitheticVariate, requiredSamples, requiredTolerance, maxSamples, seed,

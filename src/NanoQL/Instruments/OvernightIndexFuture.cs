@@ -20,15 +20,13 @@ namespace NanoQL.Instruments;
 /// <para>
 /// The rate's known part reads the stored fixings, each compounded through the index's
 /// <see cref="OvernightIndex.GrowthFactor"/> or accrued through its <see cref="OvernightIndex.SimpleAccrual"/>,
-/// QuantLib's 1 + r·τ and r·τ on a simple index (the S-cms plan's CMD13); the rest is forecast on the index's
-/// forwarding curve, which must reach the dates it forecasts from, with QuantLib master's texts (#2897, the plan's
-/// CMR6).
+/// QuantLib's 1 + r·τ and r·τ on a simple index; the rest is forecast on the index's forwarding curve, which must reach
+/// the dates it forecasts from, with QuantLib master's texts (#2897).
 /// </para>
 /// <para>
 /// A compounded future on its value date uses today's fixing once it is published, as the averaged one does and as the
-/// compounded one does on later dates; QuantLib's skips it there (<c>overnightindexfuture.cpp:89-114</c>, its
-/// <c>today &gt; valueDate_</c>), so the same future's price moves when its first fixing becomes a past one (the S-cms
-/// plan's CMR5 (xxi)).
+/// compounded one does on later dates; QuantLib's skips it there (<c>overnightindexfuture.cpp:89-114</c>, its <c>today
+/// &gt; valueDate_</c>), so the same future's price moves when its first fixing becomes a past one.
 /// </para>
 /// </remarks>
 public sealed class OvernightIndexFuture : Instrument
@@ -163,7 +161,7 @@ public sealed class OvernightIndexFuture : Instrument
             // d2 might be beyond the maturity date if the latter is a holiday.
             double span = dayCounter.YearFraction(d1, d2 < MaturityDate ? d2 : MaturityDate);
 
-            // a fixing accrues in the index's convention (SCR5); the curve's forecast is a simple rate
+            // a fixing accrues in the index's convention; the curve's forecast is a simple rate
             if (fixingDate < today)
             {
                 avg += OvernightIndex.SimpleAccrual(PastRate(fixingDate, context), span);
@@ -218,7 +216,7 @@ public sealed class OvernightIndexFuture : Instrument
         }
 
         // here today is on or after the value date, and we might have today's fixing already: on the value date too,
-        // where QuantLib's skips it (CMR5 (xxi))
+        // where QuantLib's skips it
         if (today >= ValueDate && today < MaturityDate && OvernightIndex.PastFixing(today, context) is double todays)
         {
             Date tomorrow = calendar.Advance(today, 1, TimeUnit.Days);

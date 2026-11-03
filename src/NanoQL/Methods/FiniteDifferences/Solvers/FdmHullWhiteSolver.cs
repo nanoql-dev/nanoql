@@ -10,8 +10,9 @@ namespace NanoQL.Methods;
 
 /// <summary>The Hull-White model's finite-difference solver: a <see cref="Fdm1DimSolver"/> on a <see cref="FdmHullWhiteOp"/> in direction 0.</summary>
 /// <remarks>
-/// Computed at construction, where QuantLib's lazy object computes at the first read (S-eq's solvers' form), and
-/// immutable after. The model is an argument, where QuantLib's solver holds a handle and recalculates when it changes.
+/// Computed at construction, where QuantLib's lazy object computes at the first read (the one-dimensional solver's
+/// form), and immutable after. The model is an argument, where QuantLib's solver holds a handle and recalculates when
+/// it changes.
 /// </remarks>
 public sealed class FdmHullWhiteSolver
 {

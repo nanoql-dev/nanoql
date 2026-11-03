@@ -17,7 +17,7 @@ namespace NanoQL.Experimental;
 /// squared drift at the step's time: QuantLib's <c>ExtendedTrigeorgis</c>.
 /// </summary>
 /// <remarks>
-/// Immutable; exact on constant parameters (<see cref="ExtendedBinomialTree{T}"/>, XRR6). The constructor checks the up
+/// Immutable; exact on constant parameters (<see cref="ExtendedBinomialTree{T}"/>). The constructor checks the up
 /// probability at time 0 only, as QuantLib's.
 /// </remarks>
 [Experimental("NQL0001")]

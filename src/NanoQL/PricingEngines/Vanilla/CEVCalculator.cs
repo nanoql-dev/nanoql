@@ -21,13 +21,13 @@ namespace NanoQL.PricingEngines;
 /// chi-squared refuses or runs for seconds. For |β − 1| &lt; 1e-3 the value is Black's formula at Hagan's
 /// CEV-equivalent volatility, the SABR volatility at ν = 0 (<see cref="SabrFunctions.UnsafeSabrLogNormalVolatility"/>),
 /// which is α at β = 1 and within 4.6e-7 of the CEV formula at the band's edge, where QuantLib throws or hangs. A
-/// documented divergence (the S-van plan's VR10, <c>Divergences/CevNearOneTests.cs</c>).
+/// documented divergence (<c>Divergences/CevNearOneTests.cs</c>).
 /// </para>
 /// <para>
 /// Where a tail QuantLib takes as 1 − cdf (or Γ-ratio − cdf, <c>analyticcevengine.cpp:50-80</c>) is below 1e-3, the
 /// difference loses most of its digits: a 36-day call at a strike of 150 comes out about 20% low. There the tail is
 /// Boost's complement <c>cdf</c> (and <c>gamma_q</c>); QuantLib's arithmetic and bits elsewhere. A documented divergence
-/// (the S-van plan's VR4 (xxxiv), <c>Divergences/CevTailTests.cs</c>).
+/// (<c>Divergences/CevTailTests.cs</c>).
 /// </para>
 /// <para>
 /// At a time of 0 the formula's non-centrality x₀/t is infinite, which Boost refuses; the value there is the payoff at
@@ -37,10 +37,10 @@ namespace NanoQL.PricingEngines;
 /// </remarks>
 public sealed class CEVCalculator
 {
-    // the band around β = 1 where Black's formula at Hagan's volatility replaces the CEV formula (VR10)
+    // the band around β = 1 where Black's formula at Hagan's volatility replaces the CEV formula
     private const double NearOne = 1e-3;
 
-    // the tail below which the complement replaces QuantLib's 1 − cdf (VR4 (xxxiv))
+    // the tail below which the complement replaces QuantLib's 1 − cdf
     private const double SmallTail = 1e-3;
 
     private readonly double delta;
@@ -82,7 +82,7 @@ public sealed class CEVCalculator
 
         if (Math.Abs(Beta - 1.0) < NearOne)
         {
-            // Black's formula at Hagan's CEV-equivalent volatility (VR10)
+            // Black's formula at Hagan's CEV-equivalent volatility
             double vol = SabrFunctions.UnsafeSabrLogNormalVolatility(strike, F0, t, Alpha, Beta, 0.0, 0.0);
             return BlackFormulaFunctions.BlackFormula(optionType, strike, F0, vol * Math.Sqrt(t));
         }

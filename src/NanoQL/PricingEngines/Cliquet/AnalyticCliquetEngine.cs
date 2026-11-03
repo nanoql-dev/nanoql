@@ -20,17 +20,16 @@ namespace NanoQL.PricingEngines;
 /// <remarks>
 /// <para>
 /// Stateless. Each period's theta is its value times the dividend rate to its start, over which its weight decays,
-/// where QuantLib's reads the rate over the period itself, after the start (the S-exo plan's ER5 (xxii),
-/// <c>Divergences/CliquetThetaTests.cs</c>): QuantLib's forward engine's theta, period by period. Each period's vega
-/// is under a parallel shift of the input volatilities, its vega in the forward volatility times dσ_f/dε, exactly
-/// QuantLib's where the volatilities at the period's ends are equal (ER5 (xxxvii),
-/// <c>Divergences/ForwardVegaTermStructureTests.cs</c>).
+/// where QuantLib's reads the rate over the period itself, after the start (<c>Divergences/CliquetThetaTests.cs</c>):
+/// QuantLib's forward engine's theta, period by period. Each period's vega is under a parallel shift of the input
+/// volatilities, its vega in the forward volatility times dσ_f/dε, exactly QuantLib's where the volatilities at the
+/// period's ends are equal (<c>Divergences/ForwardVegaTermStructureTests.cs</c>).
 /// </para>
 /// <para>
 /// Every structure is read by date, accruing nothing before its own date, the rates on the process's clock
 /// (<see cref="FdmBlackScholesOp.Clock"/>), where QuantLib's reads throw for a reset before a later-dated structure's
-/// date (ER5 (xxiv), <c>Divergences/ExoticMismatchedTimesTests.cs</c>); a reset before the clock's own date keeps
-/// QuantLib's "negative time" refusal; on structures dated alike, QuantLib's reads.
+/// date (<c>Divergences/ExoticMismatchedTimesTests.cs</c>); a reset before the clock's own date keeps QuantLib's
+/// "negative time" refusal; on structures dated alike, QuantLib's reads.
 /// </para>
 /// </remarks>
 public static class AnalyticCliquetEngine

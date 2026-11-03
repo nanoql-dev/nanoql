@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 """Vectors for QuantLib's TrBDF2Scheme (ql/methods/finitedifferences/schemes/trbdf2scheme.hpp, .cpp), on the evaluation
 date 15 October 2026: the TR-BDF2 scheme, through the TrBDF2 description (its trapezoidal stage a Craig-Sneyd scheme, as
-the solver builds it), on the flat set-ups alone: nanoql runs both stages over the whole step (SEQR9), which moves the
-last bits of the flat set-ups' values, within R7, and the values of time-dependent ones beyond it
+the solver builds it), on the flat set-ups alone: nanoql runs both stages over the whole step, which moves the last bits
+of the flat set-ups' values, within the tolerance, and the values of time-dependent ones beyond it
 (tests/NanoQL.Tests/Divergences/TrBdf2TimeDependentTests.cs). Each rollback runs through QuantLib's FdmBackwardSolver,
 as QuantLib's engines run the schemes, on the Black-Scholes operator: a put on a flat Merton process, with and without
 an American condition; and a rollback towards negative time, refused ("a step towards negative time given").

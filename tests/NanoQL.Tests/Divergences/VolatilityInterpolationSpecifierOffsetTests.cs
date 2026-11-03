@@ -6,14 +6,13 @@ using NanoQL.Models;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The abcd specifier's in-between short rates at an offset (the S-mm plan's MR3 (iii), fixed under R8). QuantLib
-/// builds the variance of the short rate in slot <c>i + j·period + offset</c> on reset index <c>i + j·period</c>, an
-/// earlier rate's (<c>volatilityinterpolationspecifierabcd.cpp:169-170</c>): in periods of 2 at offset 1 over twelve
-/// semi-annual short rates, slots 1 to 4 reset at indexes 0 to 3, each slot's variance ending a step early (the C++
-/// harness's <c>VolatilityInterpolationSpecifierabcd</c>, this run's probe; the planner's MP3). nanoql resets each slot
-/// at its own index. Checks: each in-between slot's variance is QuantLib's own
-/// <see cref="PiecewiseConstantAbcdVariance"/> on the two long rates' mean abcd at that index, bit for bit; at offset
-/// 0, QuantLib's tested case, the vectors' bits.
+/// The abcd specifier's in-between short rates at an offset (fixed). QuantLib builds the variance of the short rate in
+/// slot <c>i + j·period + offset</c> on reset index <c>i + j·period</c>, an earlier rate's
+/// (<c>volatilityinterpolationspecifierabcd.cpp:169-170</c>): in periods of 2 at offset 1 over twelve semi-annual short
+/// rates, slots 1 to 4 reset at indexes 0 to 3, each slot's variance ending a step early (the C++ harness's
+/// <c>VolatilityInterpolationSpecifierabcd</c>). nanoql resets each slot at its own index. Checks: each in-between
+/// slot's variance is QuantLib's own <see cref="PiecewiseConstantAbcdVariance"/> on the two long rates' mean abcd at
+/// that index, bit for bit; at offset 0, QuantLib's tested case, the vectors' bits.
 /// </summary>
 public class VolatilityInterpolationSpecifierOffsetTests
 {

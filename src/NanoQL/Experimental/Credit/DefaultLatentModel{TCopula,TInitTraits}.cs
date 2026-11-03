@@ -19,16 +19,15 @@ namespace NanoQL.Experimental;
 /// <remarks>
 /// <para>
 /// Unsealed and immutable. <see cref="ResetBasket"/> returns a copy bound to a basket, where QuantLib's model holds a
-/// mutable pointer to one; bound to a basket with realized defaults, the copy keeps the live names' rows (the S-xcr
-/// plan's XR2 (f)). A curve read before its reference date is a default probability of 0, where QuantLib's refuses it
-/// ("negative time"; XR8 (x)).
+/// mutable pointer to one; bound to a basket with realized defaults, the copy keeps the live names' rows. A curve read
+/// before its reference date is a default probability of 0, where QuantLib's refuses it ("negative time").
 /// </para>
 /// <para>
 /// <see cref="ProbAtLeastNEvents"/> sums over every default configuration, 2ⁿ per integration node, counting them in
 /// QuantLib's <c>BigNatural</c>, 32 bits under MSVC: from 32 names its count is 0 and its probability of one or more
 /// defaults 0, and an order above 30 shifts a 32-bit 1 past its sign (<c>defaultprobabilitylatentmodel.hpp:295-309</c>),
-/// both refused (XR8 (xxxi)). <see cref="DefaultCorrelation"/> divides by the product of the probabilities and their
-/// complements, 0/0 at a probability of 0 or 1, refused (XR8 (xlvi)).
+/// both refused. <see cref="DefaultCorrelation"/> divides by the product of the probabilities and their complements,
+/// 0/0 at a probability of 0 or 1, refused.
 /// </para>
 /// </remarks>
 /// <typeparam name="TCopula">The copula policy.</typeparam>

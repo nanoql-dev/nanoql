@@ -19,9 +19,9 @@ namespace NanoQL.Models;
 /// times the coterminal model's, the expired rates' rows zero.
 /// </summary>
 /// <remarks>
-/// Immutable (the S-mm plan's MR1 (i)): its pseudo-roots are computed at construction, and a read returns a copy. Its
-/// displacements, evolution and counts are the coterminal model's. A pseudo-root read past the steps, which QuantLib
-/// reads unchecked, is refused (MR3 (xx)).
+/// Immutable: its pseudo-roots are computed at construction, and a read returns a copy. Its displacements, evolution
+/// and counts are the coterminal model's. A pseudo-root read past the steps, which QuantLib reads unchecked, is
+/// refused.
 /// </remarks>
 public sealed class CotSwapToFwdAdapter : MarketModel
 {
@@ -106,7 +106,7 @@ public sealed class CotSwapToFwdAdapter : MarketModel
     /// <exception cref="ArgumentOutOfRangeException"><paramref name="i"/> isn't a step.</exception>
     public override Matrix PseudoRoot(int i)
     {
-        // QuantLib reads the pseudo-roots unchecked (MR3 (xx)).
+        // QuantLib reads the pseudo-roots unchecked.
         if (!(i >= 0 && i < pseudoRoots.Length))
         {
             throw new ArgumentOutOfRangeException(

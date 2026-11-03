@@ -20,15 +20,15 @@ and swap length at 4, each as its ATM level, exercise time, shift, volatility ty
 1% on either side, past the cube's range only where the point extrapolates; the 35Y and 40Y points are past the model's
 30 years, refused.
 
-The outputs nanoql fixes are left out (the S-xeq plan's §2.8): every option is 5 years or more, so every fit's trial
-points and every section have sigmaI sqrt(T) above 0.1 (the transformation keeps sigmaI in [0.05, 1]), where nanoql's
-integrals are QuantLib's single intervals (the S-xeq run's XER5 (xxvi)); the fixture's 1Y option, its 1M and 6M
-at-the-money options and its 30Y ones (past the model's 30 years) are left out.
+The outputs nanoql fixes are left out: every option is 5 years or more, so every fit's trial points and every section
+have sigmaI sqrt(T) above 0.1 (the transformation keeps sigmaI in [0.05, 1]), where nanoql's integrals are QuantLib's
+single intervals; the fixture's 1Y option, its 1M and 6M at-the-money options and its 30Y ones (past the model's 30
+years) are left out.
 
-The stability filter (the S7 plan's S7R6) runs as on the SABR cube's file: each case is refitted with every input
-volatility (the at-the-money matrix's and every spread) moved one ulp up, then down, and an output is written only where
-both refits leave it within 1e-12 x max(|a|, |b|, 1); the indexes of each output's dropped elements are in the case's
-inputs "dropped", and the generator prints the counts.
+The stability filter runs as on the SABR cube's file: each case is refitted with every input volatility (the
+at-the-money matrix's and every spread) moved one ulp up, then down, and an output is written only where both refits
+leave it within 1e-12 x max(|a|, |b|, 1); the indexes of each output's dropped elements are in the case's inputs
+"dropped", and the generator prints the counts.
 
 A refused value is {"throws": true}. A case's inputs hold its settings, its "cube" spec (swaptionvolcube.py's, of type
 "NoArbSabrSwaptionVolatilityCube") and "dropped". The cube is tools/cxx/src/termstructures/volatility/swaption/

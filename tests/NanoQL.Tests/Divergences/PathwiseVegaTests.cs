@@ -9,22 +9,21 @@ using NanoQL.Tests.Conventions;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The pathwise vega engines (the S-mmp plan's MMPR4 (i), (ii), (iv), (v), ruled by the user): the delta engine's
-/// recursion, the pseudo-root Jacobian's drift sum and displacement, and the Jacobian's one-step discount factors, which
-/// QuantLib's engines take at the step's end (<c>pathwiseaccountingengine.cpp:494</c>, <c>:910</c>) where its own test
-/// takes them at the start (<c>marketmodel.cpp:2899-2900</c>). On caplets at the forwards, FlatVol 20%, 3 factors, the
-/// money-market measure, the Mersenne twister (seed 42), 1,023 paths, one bump a step (factor 0 of every alive rate):
-/// six semi-annual rates at displacements 0 and 2%, six unequal periods at 2%, and the semi-annual rates paid 0.2 before
-/// their periods' ends (this run's <c>probes\c4_facts.cpp</c>, <c>c4_facts2.cpp</c>; the planner's MPP8): nanoql's
-/// vegas, from both engines, are the same-path differences of the price in the pseudo-roots; QuantLib's are off. Checks:
-/// same-path central differences of the price, the pseudo-roots bumped along the bump; the two engines against each
-/// other.
+/// The pathwise vega engines: the delta engine's recursion, the pseudo-root Jacobian's drift sum and displacement, and
+/// the Jacobian's one-step discount factors, which QuantLib's engines take at the step's end
+/// (<c>pathwiseaccountingengine.cpp:494</c>, <c>:910</c>) where its own test takes them at the start
+/// (<c>marketmodel.cpp:2899-2900</c>). On caplets at the forwards, FlatVol 20%, 3 factors, the money-market measure,
+/// the Mersenne twister (seed 42), 1,023 paths, one bump a step (factor 0 of every alive rate): six semi-annual rates
+/// at displacements 0 and 2%, six unequal periods at 2%, and the semi-annual rates paid 0.2 before their periods' ends:
+/// nanoql's vegas, from both engines, are the same-path differences of the price in the pseudo-roots; QuantLib's are
+/// off. Checks: same-path central differences of the price, the pseudo-roots bumped along the bump; the two engines
+/// against each other.
 /// </summary>
 public class PathwiseVegaTests
 {
     private const int Paths = 1023;
 
-    // QuantLib's vegas from its inner engine (this run's c4_facts.out, c4_facts2.out)
+    // QuantLib's vegas from its inner engine
     private static readonly double[] QuantLibVegas =
         [0.0053763768279585225, 0.0079641373482339829, 0.009588273437900913, 0.010371034010451278, 0.011112985154909499, 0.012938568215462127];
 

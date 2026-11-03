@@ -8,8 +8,8 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// <c>ConstantEstimator</c> is immutable (the S-bar plan's BR3): its calibration, empty in QuantLib, returns the
-/// estimator itself, unchanged, so its series after a calibration is the one before.
+/// <c>ConstantEstimator</c> is immutable: its calibration, empty in QuantLib, returns the estimator itself, unchanged,
+/// so its series after a calibration is the one before.
 /// </summary>
 public class ConstantEstimatorImmutableTests
 {

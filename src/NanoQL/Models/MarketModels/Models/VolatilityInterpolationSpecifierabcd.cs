@@ -15,16 +15,16 @@ namespace NanoQL.Models;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Immutable (the S-mm plan's MR2 (c)): <see cref="WithScalingFactors"/> and <see cref="WithLastCapletVol"/> return a
-/// new specifier, where QuantLib's setters change it in place.
+/// Immutable: <see cref="WithScalingFactors"/> and <see cref="WithLastCapletVol"/> return a new specifier, where
+/// QuantLib's setters change it in place.
 /// </para>
 /// <para>
 /// One departure from QuantLib (<c>Divergences/VolatilityInterpolationSpecifierOffsetTests.cs</c>): a short rate
-/// between two long rates resets at its own index, <c>i + j·period + offset</c>, where QuantLib's resets at
-/// <c>i + j·period</c>, an earlier rate's, at an offset other than 0 (MR3 (iii);
-/// <c>volatilityinterpolationspecifierabcd.cpp:169-170</c>). A period of 0, which QuantLib divides by, no long rates,
+/// between two long rates resets at its own index, <c>i + j·period + offset</c>, where QuantLib's resets at <c>i +
+/// j·period</c>, an earlier rate's, at an offset other than 0
+/// (<c>volatilityinterpolationspecifierabcd.cpp:169-170</c>). A period of 0, which QuantLib divides by, no long rates,
 /// whose last QuantLib reads, no short rate times, and long rates' times past the short ones, which QuantLib reads
-/// past, are refused (MR3 (xx)).
+/// past, are refused.
 /// </para>
 /// </remarks>
 public sealed class VolatilityInterpolationSpecifierabcd : VolatilityInterpolationSpecifier
@@ -61,8 +61,7 @@ public sealed class VolatilityInterpolationSpecifierabcd : VolatilityInterpolati
     {
         ArgumentOutOfRangeException.ThrowIfNegative(offset);
 
-        // QuantLib divides by the period, reads the last long rate and sizes its short rates from their times less one
-        // (MR3 (xx)).
+        // QuantLib divides by the period, reads the last long rate and sizes its short rates from their times less one.
         ArgumentOutOfRangeException.ThrowIfLessThan(period, 1);
         if (!(originalVariances.Length > 0))
         {
@@ -97,7 +96,7 @@ public sealed class VolatilityInterpolationSpecifierabcd : VolatilityInterpolati
             ImmutableArray<double> rateTimes = originalVariances[i].RateTimes;
             for (int j = 0; j < rateTimes.Length; ++j)
             {
-                // QuantLib reads past the short rate times where a long rate has more times (MR3 (xx))
+                // QuantLib reads past the short rate times where a long rate has more times
                 int k = offset + (j * period);
                 if (!(k < timesForSmallRates.Length && rateTimes[j] == timesForSmallRates[k]))
                 {
@@ -208,7 +207,7 @@ public sealed class VolatilityInterpolationSpecifierabcd : VolatilityInterpolati
 
             for (int i = 0; i < period; ++i)
             {
-                // the slot's own reset index, where QuantLib's is i + j·period (MR3 (iii))
+                // the slot's own reset index, where QuantLib's is i + j·period
                 int slot = i + (j * period) + offset;
                 interpolated[slot] = new PiecewiseConstantAbcdVariance(a, b, c, d, slot, timesForSmallRates.AsSpan());
             }

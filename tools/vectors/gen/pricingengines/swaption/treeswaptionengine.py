@@ -26,13 +26,13 @@ build. The refusals: a cash swaption settled at the par yield curve, time steps 
 that ends before the swap's last payment, and the started swap without its fixing ("current floating coupon not
 given"). An expired swaption is worth 0. Amounts are compared at the nominal.
 
-A swaption whose discretized swaption nanoql's fix moves (the S-cms plan's CMR4; snapping_moves) is left out: QuantLib
-snaps a swap date in the week after an exercise date back to it, so a swap starting on its usual two-day lag is valued
-from the exercise date, where nanoql values it from its own start; those swaptions are checked against Jamshidian's
-and the finite-difference engines (tests/NanoQL.Tests/Divergences/TreeSwaptionSnappingTests.cs). In each one's place
-is its unlagged twin, the same swaption on a swap starting on its exercise date, which nothing moves (" / unlagged");
-the Bermudans exercised 3 and 7 days before the coupons, whose twin, exercised on them, is already priced, get none:
-29 of the 64 swaptions are left out.
+A swaption whose discretized swaption nanoql's fix moves (snapping_moves) is left out: QuantLib snaps a swap date in the
+week after an exercise date back to it, so a swap starting on its usual two-day lag is valued from the exercise date,
+where nanoql values it from its own start; those swaptions are checked against Jamshidian's and the finite-difference
+engines (tests/NanoQL.Tests/Divergences/TreeSwaptionSnappingTests.cs). In each one's place is its unlagged twin, the
+same swaption on a swap starting on its exercise date, which nothing moves (" / unlagged"); the Bermudans exercised 3
+and 7 days before the coupons, whose twin, exercised on them, is already priced, get none: 29 of the 64 swaptions are
+left out.
 
 Each case's inputs hold the swaption (instruments/swaption.py's spec), the discount curve and the grid. The wheel's
 TreeSwaptionEngine is the proxy of the C++ constructors, on a model and time steps or a TimeGrid. Read back by
@@ -114,7 +114,7 @@ def grid_times(swaption):
 def snapped(dates, exercise_dates, both_ways):
     """A schedule's dates, the last apart, snapped to the exercise dates, each in turn against the dates earlier ones
     snapped: within a week either way, QuantLib's (discretizedswaption.cpp:93-111), or, both_ways false, within the week
-    before only, nanoql's (the S-cms plan's CMR4)."""
+    before only, nanoql's."""
     out = list(dates)
     for e in exercise_dates:
         for j in range(len(out) - 1):
@@ -125,10 +125,10 @@ def snapped(dates, exercise_dates, both_ways):
 
 
 def snapping_moves(swaption):
-    """Whether nanoql's discretized swaption differs from QuantLib's on a swaption (the S-cms plan's CMR4): QuantLib
-    snaps a schedule date in the week after an exercise date, where nanoql doesn't, or its snapped swap pays a coupon
-    on its schedule's date (discretizedswaption.cpp:113-119) where nanoql pays it on the swap's own payment date, a
-    snapped one on the swap's payment rule. Its expiry isn't read: an expired swaption's value is 0 either way."""
+    """Whether nanoql's discretized swaption differs from QuantLib's on a swaption: QuantLib snaps a schedule date in
+    the week after an exercise date, where nanoql doesn't, or its snapped swap pays a coupon on its schedule's date
+    (discretizedswaption.cpp:113-119) where nanoql pays it on the swap's own payment date, a snapped one on the swap's
+    payment rule. Its expiry isn't read: an expired swaption's value is 0 either way."""
     swap = swaption.underlying()
     exercise_dates = list(swaption.exercise().dates())
     lag, convention, payment_calendar = swap.paymentLag(), swap.paymentConvention(), swap.paymentCalendar()

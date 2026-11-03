@@ -18,8 +18,8 @@ namespace NanoQL.Experimental;
 /// <remarks>
 /// A mutable working type (§2.7): each draw changes it, and it isn't thread-safe. A rejection method: not for a
 /// low-discrepancy generator. Its draws are raw Student t, of variance ν/(ν − 2). Its seed constructor is
-/// <see cref="PolarStudentTRng.Create{TUrng}"/>, a seed in [1, 4294967295] with no default (S2R4), where QuantLib's
-/// defaults to 0, the clock (the S-xcr plan's XR4 (a)).
+/// <see cref="PolarStudentTRng.Create{TUrng}"/>, a seed in [1, 4294967295] with no default, where QuantLib's
+/// defaults to 0, the clock.
 /// </remarks>
 /// <typeparam name="TUrng">The uniform generator, of deviates in (0, 1).</typeparam>
 [Experimental("NQL0001")]

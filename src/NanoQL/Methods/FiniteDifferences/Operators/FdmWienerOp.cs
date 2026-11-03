@@ -16,7 +16,7 @@ namespace NanoQL.Methods;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A working type (master §2.2's finite-difference row): mutable, owned by one rollback and not thread-safe. Its time
+/// A working type (the playbook's finite-difference row): mutable, owned by one rollback and not thread-safe. Its time
 /// step rewrites only its rate, so a step on Douglas's scheme, the engine's default, allocates nothing.
 /// </para>
 /// <para>
@@ -44,8 +44,8 @@ public sealed class FdmWienerOp : FdmLinearOpComposite
     {
     }
 
-    // The operator on an engine's clock (the S-exo plan's ER5 (i)): the curve's rate read over the instants the
-    // clock's times denote; QuantLib's read where the clock is the curve itself.
+    // The operator on an engine's clock: the curve's rate read over the instants the clock's times denote; QuantLib's
+    // read where the clock is the curve itself.
     internal FdmWienerOp(FdmMesher mesher, YieldTermStructure? rTS, ReadOnlySpan<double> lambdas, TermStructure? clock)
     {
         ArgumentNullException.ThrowIfNull(mesher);

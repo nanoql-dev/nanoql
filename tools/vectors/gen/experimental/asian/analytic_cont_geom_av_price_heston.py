@@ -9,9 +9,9 @@ Kim and Wee's Feller and non-Feller parameters and a positive correlation; expir
 puts at 90, 100 and 110: the NPV, at QuantLib's default cutoff and integral limit and at a cutoff of 30. Then an expired
 option and an arithmetic average ("not a geometric average option").
 
-No output is left out (the S-xeq plan's §2.8): the prices read <c>Phi</c> at w = 0 only, where nanoql's coefficient of w
-(XER5 (xv)) doesn't enter; no option carries a start date, which nanoql refuses; and the curves share the evaluation
-date and day counter, so the model's clock is the risk-free curve's.
+No output is left out: the prices read <c>Phi</c> at w = 0 only, where nanoql's coefficient of w doesn't enter; no
+option carries a start date, which nanoql refuses; and the curves share the evaluation date and day counter, so the
+model's clock is the risk-free curve's.
 
 A case holds one process (tools/vectors/gen/processes/hestonprocess.py's spec), the exercise date, the average type, the
 cutoff and the limit, and the payoffs (bc's specs). The wheel's calls, by QuantLib-SWIG 1.44's asianoptions.i:

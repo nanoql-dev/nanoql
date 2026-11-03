@@ -29,40 +29,38 @@ namespace NanoQL.PricingEngines;
 /// <remarks>
 /// <para>
 /// The engine reports the value, delta, gamma and theta, the theta <see langword="null"/> when the problem's first
-/// stopping time is time 0. Its finite-difference working types are built inside each calculation and dropped after it
-/// (the S-eq plan's SEQR1). Its times run on <see cref="FdmHestonOp.Clock"/>, from the earliest reference date of the
-/// structures it reads, each accruing nothing before its own date, where QuantLib's run from the risk-free curve's;
-/// where none is dated before the risk-free curve, they are QuantLib's (the S-hes plan's HR7 (ii),
-/// <c>Divergences/FdHestonMismatchedTimesTests.cs</c>). The variance mesher's skew factor is bounded (HR9) and its
-/// fallbacks are master's (HR8).
+/// stopping time is time 0. Its finite-difference working types are built inside each calculation and dropped after it.
+/// Its times run on <see cref="FdmHestonOp.Clock"/>, from the earliest reference date of the structures it reads, each
+/// accruing nothing before its own date, where QuantLib's run from the risk-free curve's; where none is dated before
+/// the risk-free curve, they are QuantLib's (<c>Divergences/FdHestonMismatchedTimesTests.cs</c>). The variance mesher's
+/// skew factor is bounded and its fallbacks are master's.
 /// </para>
 /// <para>
 /// QuantLib sizes the equity mesher on a helper process whose curves its call binds in each other's places, so the
 /// mesher walks the forward's mirror about the spot; where the carry is large against the volatility the grid's far
-/// edge falls inside the distribution and the price stops converging (a five-year call at 1.25 times the forward,
-/// carry 0.30 and volatility 0.1, priced 0 where the analytic engine gives 1.5732), and where cash dividends take the
+/// edge falls inside the distribution and the price stops converging (a five-year call at 1.25 times the forward, carry
+/// 0.30 and volatility 0.1, priced 0 where the analytic engine gives 1.5732), and where cash dividends take the
 /// mirrored walk below zero its bound isn't a number and the engine refuses. Here the mesher is QuantLib's wherever its
 /// range holds the true forwards' band, the walk's ends on the helper's curves in place widened by the volatility's
-/// quantile, half the mesher's own margin, and the strike widened by the same half margin, and QuantLib's mesher widened
-/// to the band through its own constraints where it doesn't, a bound that isn't a number falling short. The
+/// quantile, half the mesher's own margin, and the strike widened by the same half margin, and QuantLib's mesher
+/// widened to the band through its own constraints where it doesn't, a bound that isn't a number falling short. The
 /// multi-strike solve, whose mesher takes no constraints, solves each strike alone where its grid doesn't hold the band
 /// at the points the solve is read at, S·K/Kᵢ, their forwards quanto-adjusted where a quanto helper is given; the two
 /// paths run on different grids, so a strike's value steps where the switch moves, by up to about 0.4% at carry 0.06
-/// (B1-1, B2-1, B2-2 and B3-1 of the S-hes plan's C1 review, the strike's band D3-1 of its run record;
-/// <c>Divergences/FdHestonHighCarryTests.cs</c>).
+/// (<c>Divergences/FdHestonHighCarryTests.cs</c>).
 /// </para>
 /// <para>
 /// QuantLib's <c>enableMultipleStrikesCaching</c> solves once on a mesher spanning several strikes and serves later
 /// options at those strikes from the solve, each V(S·d)/d with d = K/Kᵢ; the strike a later call is served depends on
-/// which option solved first, which a cache under the rule on caches may not do (the master plan's Revision 79). Here
-/// <see cref="CalculateStrikes(VanillaOption, IEnumerable{double}, EvaluationContext, HestonModel, int, int, int, int,
-/// FdmSchemeDesc?, LocalVolTermStructure?, double)"/> returns every strike's results from one solve on the given option,
-/// each QuantLib's cached value bit for bit (the S-hes plan's HR4 (ii)). Where the scaling doesn't hold, QuantLib's
-/// cache serves values far from the strike's own price: with a leverage function, which a spot-dependent leverage
-/// breaks (at 125, 0.830 cached where the direct price is 0.433), and after a reference whose payoff isn't a plain
-/// vanilla (6.819 served for a plain call at 80 after a cash-or-nothing reference, its direct price 22.945); there
-/// each strike's plain vanilla is solved alone, QuantLib's engine priced for that strike (HR7 (i), (xxiv);
-/// <c>Divergences/FdHestonMultipleStrikesLeverageTests.cs</c>, <c>Divergences/FdHestonStrikesReferenceTests.cs</c>).
+/// which option solved first, which a cache may not do here: a value doesn't depend on what was computed before it.
+/// Here
+/// <see cref="CalculateStrikes(VanillaOption, IEnumerable{double}, EvaluationContext, HestonModel, int, int, int, int, FdmSchemeDesc?, LocalVolTermStructure?, double)"/>
+/// returns every strike's results from one solve on the given option, each QuantLib's cached value bit for bit. Where
+/// the scaling doesn't hold, QuantLib's cache serves values far from the strike's own price: with a leverage function,
+/// which a spot-dependent leverage breaks (at 125, 0.830 cached where the direct price is 0.433), and after a reference
+/// whose payoff isn't a plain vanilla (6.819 served for a plain call at 80 after a cash-or-nothing reference, its
+/// direct price 22.945); there each strike's plain vanilla is solved alone, QuantLib's engine priced for that strike
+/// (<c>Divergences/FdHestonMultipleStrikesLeverageTests.cs</c>, <c>Divergences/FdHestonStrikesReferenceTests.cs</c>).
 /// </para>
 /// </remarks>
 public static class FdHestonVanillaEngine
@@ -223,7 +221,7 @@ public static class FdHestonVanillaEngine
     /// <param name="dampingSteps">The number of implicit damping steps.</param>
     /// <param name="schemeDesc">The scheme; <see langword="null"/> for Hundsdorfer's, QuantLib's default.</param>
     /// <param name="leverageFct">The leverage function, or <see langword="null"/> for none; with one, each strike is
-    /// solved alone (HR7 (i)).</param>
+    /// solved alone.</param>
     /// <param name="mixingFactor">The factor scaling the variance's volatility σ.</param>
     /// <returns>The plain vanilla's results at each strike, in the strikes' order; the expired results for each when
     /// the option has expired.</returns>
@@ -264,7 +262,7 @@ public static class FdHestonVanillaEngine
     /// <param name="dampingSteps">The number of implicit damping steps.</param>
     /// <param name="schemeDesc">The scheme; <see langword="null"/> for Hundsdorfer's, QuantLib's default.</param>
     /// <param name="leverageFct">The leverage function, or <see langword="null"/> for none; with one, each strike is
-    /// solved alone (HR7 (i)).</param>
+    /// solved alone.</param>
     /// <param name="mixingFactor">The factor scaling the variance's volatility σ.</param>
     /// <returns>The plain vanilla's results at each strike, in the strikes' order; the expired results for each when
     /// the option has expired.</returns>
@@ -320,8 +318,8 @@ public static class FdHestonVanillaEngine
             || option.Payoff is not PlainVanillaPayoff
             || !MultiStrikeGridHolds(option, model, k, quantoHelper, tGrid, vGrid, mixingFactor, FdmHestonOp.Clock(model.Process, quantoHelper)))
         {
-            // HR7 (i), (xxiv), and a multi-strike grid short of the true forwards' band (B1-1 of the S-hes plan's C1
-            // review): each strike's plain vanilla solved alone, QuantLib's engine priced for that strike
+            // A leverage function, a reference that isn't a plain vanilla, or a multi-strike grid short of the true
+            // forwards' band: each strike's plain vanilla solved alone, QuantLib's engine priced for that strike
             foreach (double strike in k)
             {
                 var single = new VanillaOption(new PlainVanillaPayoff(payoff.OptionType, strike), option.Exercise);
@@ -469,12 +467,11 @@ public static class FdHestonVanillaEngine
     }
 
     // Whether QuantLib's multi-strike mesher holds the true forwards' band at the points the solve is read at, S·K/Kᵢ
-    // for the option's strike K (B1-1 and B2-1 of the S-hes plan's C1 review): from each read point to its forward on
-    // the curves in place, the dividend curve quanto-adjusted as the operator's drift is (B3-1), widened there by half
-    // the mesher's margin, with its -σ²T/2, and without QuantLib's floor terms, which don't scale with the spot; where
-    // it doesn't, each strike is solved alone. The strike K takes no band of its own here: the grid is centred on the
-    // strikes' mirrored forwards, and a band around K, measured, fired only where the grid already held it (D3-1 of
-    // the S-hes run record)
+    // for the option's strike K: from each read point to its forward on the curves in place, the dividend curve
+    // quanto-adjusted as the operator's drift is, widened there by half the mesher's margin, with its -σ²T/2, and
+    // without QuantLib's floor terms, which don't scale with the spot; where it doesn't, each strike is solved alone.
+    // The strike K takes no band of its own here: the grid is centred on the strikes' mirrored forwards, and a band
+    // around K, measured, fired only where the grid already held it
     internal static bool MultiStrikeGridHolds(
         VanillaOption option,
         HestonModel model,
@@ -514,13 +511,12 @@ public static class FdHestonVanillaEngine
         return !(bandMin < xMin || bandMax > xMax);
     }
 
-    // QuantLib's mesher on its helper, which walks the forward's mirror about the spot; where its range doesn't hold the
-    // true forwards' band, the walk's ends on the helper's curves in place widened by the volatility's quantile, half
-    // the mesher's own margin, QuantLib's mesher widened to the band through its own constraints (B1-1 of the S-hes
-    // plan's C1 review): QuantLib's grid wherever it holds the distribution. The band holds the strike widened by the
-    // same half margin too, where an option far from the forwards takes its value: without it a put at 0.7 of the
-    // forward priced 0 at a year, carry -0.2 and volatility 0.1 (D3-1 of the S-hes run record). The Heston-Hull-White
-    // engine's mesher too, at its scale factor (D3-1).
+    // QuantLib's mesher on its helper, which walks the forward's mirror about the spot; where its range doesn't hold
+    // the true forwards' band, the walk's ends on the helper's curves in place widened by the volatility's quantile,
+    // half the mesher's own margin, QuantLib's mesher widened to the band through its own constraints: QuantLib's grid
+    // wherever it holds the distribution. The band holds the strike widened by the same half margin too, where an
+    // option far from the forwards takes its value: without it a put at 0.7 of the forward priced 0 at a year, carry
+    // -0.2 and volatility 0.1. The Heston-Hull-White engine's mesher too, at its scale factor.
     internal static FdmBlackScholesMesher EquityMesher(
         int xGrid,
         GeneralizedBlackScholesProcess helperProcess,
@@ -545,8 +541,7 @@ public static class FdHestonVanillaEngine
         bandMin = Min(bandMin, Math.Log(strike) - halfMargin);
         bandMax = Max(bandMax, Math.Log(strike) + halfMargin);
 
-        // a bound of QuantLib's that isn't a number, its swapped walk below zero, is short of a band that is (B2-2 of
-        // the review)
+        // a bound of QuantLib's that isn't a number, its swapped walk below zero, is short of a band that is
         bool lowShort = double.IsNaN(xMin) ? !double.IsNaN(bandMin) : bandMin < xMin;
         bool highShort = double.IsNaN(xMax) ? !double.IsNaN(bandMax) : bandMax > xMax;
         bool widened = lowShort || highShort;

@@ -21,22 +21,20 @@ namespace NanoQL.PricingEngines;
 /// <para>
 /// The value alone, as QuantLib's. The bivariate normal is QuantLib's default,
 /// <see cref="BivariateCumulativeNormalDistributionWe04DP"/>, where QuantLib's engine reads Drezner's 1978 algorithm,
-/// to six decimal places (the S-bar plan's BR4 (e), the S-exo plan's ER7); on QuantLib's cases the values move by at
-/// most 6.7e-6, within QuantLib's tolerance.
+/// to six decimal places; on QuantLib's cases the values move by at most 6.7e-6, within QuantLib's tolerance.
 /// </para>
 /// <para>
-/// Five documented divergences (BR5). Each asset's carry reads its own process's curves and the payoff is discounted on
-/// the first process's risk-free curve, where QuantLib takes the second asset's carry from the first process's rate
-/// (BR5 (vii), the S-exo plan's ED27; <c>Divergences/TwoAssetBarrierTwoCurvesTests.cs</c>). The knock-in's vanilla
-/// carries the first asset's dividends, S₁e^((b₁−r)T)N(d₁), where QuantLib's drops them, so in-out parity holds
-/// (BR5 (viii), <c>Divergences/TwoAssetBarrierDividendTests.cs</c>). The second asset's volatility is read at the
-/// barrier, its own price level, where QuantLib reads it at the first asset's strike (BR5 (ix),
-/// <c>Divergences/TwoAssetBarrierSmileTests.cs</c>). And every rate and volatility is read over the time to expiry on
-/// the clock across both processes (<see cref="FdmBlackScholesOp.ClockAcross"/>), each structure at the instants that
-/// time denotes, accruing nothing before its date, where QuantLib reads everything at the first process's time; a
-/// structure sharing the clock's times is read as QuantLib reads it (BR5 (i), the S-exo plan's ED10;
-/// <c>Divergences/BarrierClosedFormMismatchedTimesTests.cs</c>). And a non-European exercise is refused, as the
-/// family's European engines refuse it, where QuantLib prices it to its last date
+/// Five documented divergences. Each asset's carry reads its own process's curves and the payoff is discounted on the
+/// first process's risk-free curve, where QuantLib takes the second asset's carry from the first process's rate
+/// (<c>Divergences/TwoAssetBarrierTwoCurvesTests.cs</c>). The knock-in's vanilla carries the first asset's dividends,
+/// S₁e^((b₁−r)T)N(d₁), where QuantLib's drops them, so in-out parity holds
+/// (<c>Divergences/TwoAssetBarrierDividendTests.cs</c>). The second asset's volatility is read at the barrier, its own
+/// price level, where QuantLib reads it at the first asset's strike (<c>Divergences/TwoAssetBarrierSmileTests.cs</c>).
+/// And every rate and volatility is read over the time to expiry on the clock across both processes (<see
+/// cref="FdmBlackScholesOp.ClockAcross"/>), each structure at the instants that time denotes, accruing nothing before
+/// its date, where QuantLib reads everything at the first process's time; a structure sharing the clock's times is read
+/// as QuantLib reads it (<c>Divergences/BarrierClosedFormMismatchedTimesTests.cs</c>). And a non-European exercise is
+/// refused, as the family's European engines refuse it, where QuantLib prices it to its last date
 /// (<c>Divergences/TwoAssetBarrierExerciseTests.cs</c>).
 /// </para>
 /// <para>
@@ -45,8 +43,7 @@ namespace NanoQL.PricingEngines;
 /// and its single correlation term, ρσ₁σ₂, can't carry a first volatility that moves over the option's life. On shaped
 /// markets (1.5 years; forward rates 1%, 3%, 6%, dividends 0%, 1%, 3% and volatilities 15%, 25%, 35%, rising or
 /// falling; ρ 0.5) it misses an independent Monte Carlo by −24% to +21%, and by 3% to 7% with the first volatility
-/// flat, where on a flat market it agrees (the S-bar plan's BR4 (d), the user's ruling of 2026-10-26). A Monte Carlo on
-/// the two processes is the term-structure-exact route.
+/// flat, where on a flat market it agrees. A Monte Carlo on the two processes is the term-structure-exact route.
 /// </para>
 /// </remarks>
 public static class AnalyticTwoAssetBarrierEngine
@@ -93,7 +90,7 @@ public static class AnalyticTwoAssetBarrierEngine
         double rho)
     {
         // QuantLib never reads the exercise's type and prices any exercise to its last date: the formula prices a
-        // European exercise only (the S-bar code review's B1-3)
+        // European exercise only
         if (option.Exercise.Type != ExerciseType.European)
         {
             throw new NanoQLException("only european style option are supported");
@@ -173,21 +170,21 @@ public static class AnalyticTwoAssetBarrierEngine
             x = payoff.Strike;
             h = option.Barrier;
 
-            // the time to expiry on the clock across both processes, every structure read at it (BR5 (i))
+            // the time to expiry on the clock across both processes, every structure read at it
             TermStructure clock = FdmBlackScholesOp.ClockAcross([process1, process2]);
             bigT = clock.TimeFromReference(option.Exercise.LastDate());
 
-            // the first asset's volatility at the strike, the second's at the barrier, its own level (BR5 (ix))
+            // the first asset's volatility at the strike, the second's at the barrier, its own level
             sigma1 = Volatility(process1.BlackVolatility, clock, bigT, x);
             sigma2 = Volatility(process2.BlackVolatility, clock, bigT, h);
 
-            // each asset's carry on its own process's curves, the discount on the first's (BR5 (vii))
+            // each asset's carry on its own process's curves, the discount on the first's
             r = ZeroRate(process1.RiskFreeRate, clock, bigT);
             b1 = r - ZeroRate(process1.DividendYield, clock, bigT);
             b2 = ZeroRate(process2.RiskFreeRate, clock, bigT) - ZeroRate(process2.DividendYield, clock, bigT);
         }
 
-        // the first asset's vanilla call, its dividends carried (BR5 (viii)), where QuantLib's S₁N(d₁) drops them
+        // the first asset's vanilla call, its dividends carried, where QuantLib's S₁N(d₁) drops them
         internal double Call() => (s1 * Math.Exp((b1 - r) * bigT) * N.Evaluate(D1()))
             - (x * Math.Exp(-r * bigT) * N.Evaluate(D2()));
 
@@ -228,7 +225,7 @@ public static class AnalyticTwoAssetBarrierEngine
 
         private double D2() => D1() - (sigma1 * Math.Sqrt(bigT));
 
-        // QuantLib's M, on We04DP where QuantLib's reads Dr78 (BR4 (e))
+        // QuantLib's M, on We04DP where QuantLib's reads Dr78
         private static double M(double a, double b, double correlation) =>
             new BivariateCumulativeNormalDistributionWe04DP(correlation).Evaluate(a, b);
 

@@ -18,7 +18,7 @@ namespace NanoQL.Models;
 /// A time-homogeneous forward correlation: in the k-th period, between rate times k and k + 1, the alive rates i and j
 /// correlate as rates i − k and j − k do at time zero.
 /// </summary>
-/// <remarks>Immutable (the S-mm plan's MR1 (i)): a matrix read returns a copy.</remarks>
+/// <remarks>Immutable: a matrix read returns a copy.</remarks>
 public sealed class TimeHomogeneousForwardCorrelation : PiecewiseConstantCorrelation
 {
     private readonly Matrix[] correlations;

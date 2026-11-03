@@ -6,11 +6,11 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The histogram's and the discrepancy statistics' conventions (the S-core plan's C3): data giving a bin width of 0
-/// under the Freedman-Diaconis or Scott rule refused (CR7 (xxxi)), where QuantLib's bin count is undefined and it throws
-/// <c>std::length_error</c>, "vector too long" (<c>histogram.cpp:116</c>, the plan's <c>misc1.cpp</c>); QuantLib's
-/// empty histogram (CD15) and checks; a first sample of dimension 1 refused with QuantLib's text, the statistics left
-/// as they were (CR7 (xxxvii)); and QuantLib's checks of the Student t distributions.
+/// The histogram's and the discrepancy statistics' conventions: data giving a bin width of 0 under the
+/// Freedman-Diaconis or Scott rule refused, where QuantLib's bin count is undefined and it throws
+/// <c>std::length_error</c>, "vector too long" (<c>histogram.cpp:116</c>); QuantLib's empty histogram and checks; a
+/// first sample of dimension 1 refused with QuantLib's text, the statistics left as they were; and QuantLib's checks of
+/// the Student t distributions.
 /// </summary>
 public class StatisticsConventionTests
 {

@@ -22,8 +22,8 @@ namespace NanoQL.Experimental;
 /// <para>
 /// An extension point: <see cref="InterpolatedYoYCapFloorTermPriceSurface{TInterpolator2D, TInterpolator1D}"/> derives
 /// from it. QuantLib's surface follows the evaluation date (<c>TermStructure(0, …)</c>), so a derived class's factory
-/// computes the reference date and passes it in (D15). An option date is the reference date plus its tenor, unadjusted,
-/// as QuantLib's. The protected range checks, which QuantLib never calls, are kept; a price past the last maturity or
+/// computes the reference date and passes it in. An option date is the reference date plus its tenor, unadjusted, as
+/// QuantLib's. The protected range checks, which QuantLib never calls, are kept; a price past the last maturity or
 /// strike extrapolates.
 /// </para>
 /// </remarks>

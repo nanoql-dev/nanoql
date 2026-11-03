@@ -14,12 +14,12 @@ namespace NanoQL.Numerics;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Immutable, with QuantLib's settings (the S-bar plan's BR3 (v)): <see cref="Perform"/> takes the initial value and
-/// returns the results, where QuantLib's object holds both. QuantLib's <c>iterationsNumber()</c> isn't ported: it
-/// returns a member QuantLib never sets (<c>leastsquare.cpp:109</c>, its assignment commented out), its value undefined
-/// (BR5 (xxxvii)). The results are the point the method returns: on the conjugate gradient, the last one its line
-/// search accepted (the S-sr plan's SSR6 (xvii), <c>Divergences/LineSearchReturnTests.cs</c>), where QuantLib's is the
-/// point before; the residual norm, the function value there, is QuantLib's.
+/// Immutable, with QuantLib's settings: <see cref="Perform"/> takes the initial value and returns the results, where
+/// QuantLib's object holds both. QuantLib's <c>iterationsNumber()</c> isn't ported: it returns a member QuantLib never
+/// sets (<c>leastsquare.cpp:109</c>, its assignment commented out), its value undefined. The results are the point the
+/// method returns: on the conjugate gradient, the last one its line search accepted
+/// (<c>Divergences/LineSearchReturnTests.cs</c>), where QuantLib's is the point before; the residual norm, the function
+/// value there, is QuantLib's.
 /// </para>
 /// </remarks>
 public sealed class NonLinearLeastSquare

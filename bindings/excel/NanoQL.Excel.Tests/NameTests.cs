@@ -8,9 +8,9 @@ using static NanoQL.Excel.Tests.Xl;
 namespace NanoQL.Excel.Tests;
 
 /// <summary>
-/// A calendar's or a day counter's name where its handle goes (XLR16): text names it in the current convention set, an
-/// alias too; a misspelt name #VALUE!; a handle's text never a name; a name where another type goes #REF!; each built
-/// once per provider.
+/// A calendar's or a day counter's name where its handle goes: text names it in the current convention set, an alias
+/// too; a misspelt name #VALUE!; a handle's text never a name; a name where another type goes #REF!; each built once
+/// per provider.
 /// </summary>
 [Collection(TestSettings.Name)]
 public sealed class NameTests

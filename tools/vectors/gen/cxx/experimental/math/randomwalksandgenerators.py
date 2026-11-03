@@ -6,13 +6,12 @@ claytoncopularng.hpp, farliegumbelmorgensterncopularng.hpp, frankcopularng.hpp),
 output computed by the C++ harness (tools/cxx/src/experimental/math/randomwalksandgenerators.cpp).
 
 - "walk" cases: the walk in one and two dimensions, its radius std::normal_distribution(0, 0.1) or the Levy flight
-  distribution (x_m 0.5, alpha 1.5) on a std::mt19937 at seed 42, as MSVC 14.44 draws them (the S-xrt plan's XRD4),
-  with and without an ellipsoid from bounds; 20 steps. From three dimensions nanoql's direction is Muller's (XRR11),
-  left out here.
+  distribution (x_m 0.5, alpha 1.5) on a std::mt19937 at seed 42, as MSVC 14.44 draws them, with and without an
+  ellipsoid from bounds; 20 steps. From three dimensions nanoql's direction is Muller's, left out here.
 - "levy" cases: the distribution's density at five points, 20 draws and its minimum.
 - "ziggurat" case: 2,000 draws at seed 42 and five sequences of three from its traits' generator.
 - "copula" cases: 50 pairs from each generator over a Mersenne Twister at seed 42, Clayton's and Frank's theta at or
-  above 1e-2 in magnitude, where nanoql's forms are QuantLib's (XRR5 (xxxiv)).
+  above 1e-2 in magnitude, where nanoql's forms are QuantLib's.
 
 Read back by tests/NanoQL.Tests/Vectors/Cxx/Experimental/Math/RandomWalksAndGeneratorsCxxVectorTests.cs."""
 import os

@@ -11,7 +11,7 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The Dupire operator's mixed term (the S-g1d plan's G1R6 (xi)): a one-direction operator has none, but QuantLib's
+/// The Dupire operator's mixed term: a one-direction operator has none, but QuantLib's
 /// <c>FdmDupire1dOp::apply_mixed</c> returns its input (on the wheel, [1, 2, 3, 4, 5] for [1, 2, 3, 4, 5]), which a
 /// scheme adding the mixed term would count twice. nanoql's gives zeros, as every other one-direction operator's
 /// does, QuantLib's <c>FdmBlackScholesOp</c>'s the check. ZABR's own price never reads it: Douglas runs on

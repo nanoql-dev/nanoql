@@ -13,16 +13,16 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The calibration basket's nominal (the S-g1d plan's G1R6 (xxiv)): QuantLib's match reads a negative nominal as the
-/// flipped swap type (<c>basketgeneratingengine.hpp:156-157</c>), but floors the solution's nominal at 1e-6 before
-/// dropping its sign (<c>basketgeneratingengine.cpp:213-214</c>, <c>:230</c>), so a flipped solution's helper gets
-/// 1e-6. On the wheel, a Bermudan payer exercised in one, two and three years into a 5-year inverse floater (fixed 3%;
-/// floating 4% − 0.5 × Euribor 6M) on 1,000,000, on a GSR model (a = σ = 0.01) on a flat 3% curve, gets helpers of
-/// nominal 1e-6 at strikes 0.0215898859149053, 0.02160167978480207 and 0.02162134419969126. The receiver at −3% fixed
-/// with gearing 0.5 and spread −4%, worth the same in every state, solves unflipped: nominals 490917.1124356477,
-/// 491116.4435245846 and 491433.33826786536, from another guess (a strike of −3%), at the same strikes within 4e-9.
-/// nanoql keeps the solution's size: QuantLib's strikes, and nominals within 3.1e-6 of the unflipped solution's, the
-/// two starts' spread. QuantLib's check: its match on the unflipped equivalent.
+/// The calibration basket's nominal: QuantLib's match reads a negative nominal as the flipped swap type
+/// (<c>basketgeneratingengine.hpp:156-157</c>), but floors the solution's nominal at 1e-6 before dropping its sign
+/// (<c>basketgeneratingengine.cpp:213-214</c>, <c>:230</c>), so a flipped solution's helper gets 1e-6. On the wheel, a
+/// Bermudan payer exercised in one, two and three years into a 5-year inverse floater (fixed 3%; floating 4% − 0.5 ×
+/// Euribor 6M) on 1,000,000, on a GSR model (a = σ = 0.01) on a flat 3% curve, gets helpers of nominal 1e-6 at strikes
+/// 0.0215898859149053, 0.02160167978480207 and 0.02162134419969126. The receiver at −3% fixed with gearing 0.5 and
+/// spread −4%, worth the same in every state, solves unflipped: nominals 490917.1124356477, 491116.4435245846 and
+/// 491433.33826786536, from another guess (a strike of −3%), at the same strikes within 4e-9. nanoql keeps the
+/// solution's size: QuantLib's strikes, and nominals within 3.1e-6 of the unflipped solution's, the two starts' spread.
+/// QuantLib's check: its match on the unflipped equivalent.
 /// </summary>
 public class CalibrationBasketNominalTests
 {

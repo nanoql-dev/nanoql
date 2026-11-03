@@ -11,9 +11,8 @@ namespace NanoQL.Numerics;
 /// <summary>The Marshall-Olkin copula, C(x, y) = min(y·x^(1 − a₁), x·y^(1 − a₂)).</summary>
 /// <remarks>
 /// Immutable. On the unit square's edges it returns the boundary values, C(u, 0) = C(0, v) = 0, C(u, 1) = u and C(1, v)
-/// = v, before its formula, as every copula here does (the S-core plan's CR7 (xxxiii)). Its parameters are refused
-/// above 1, where QuantLib's accepts them and returns values above min(x, y), the Fréchet-Hoeffding bound every copula
-/// meets: at a₁ 2, C(0.2, 0.9) 0.222 (the plan's CR7 (xxxii)).
+/// = v, before its formula, as every copula here does. Its parameters are refused above 1, where QuantLib's accepts
+/// them and returns values above min(x, y), the Fréchet-Hoeffding bound every copula meets: at a₁ 2, C(0.2, 0.9) 0.222.
 /// </remarks>
 public sealed class MarshallOlkinCopula
 {

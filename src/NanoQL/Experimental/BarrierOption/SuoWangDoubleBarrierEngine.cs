@@ -26,25 +26,24 @@ namespace NanoQL.Experimental;
 /// value, as in QuantLib.
 /// </para>
 /// <para>
-/// Documented divergences (the S-xeq plan's XER5 (iii)–(vii), each leaving QuantLib's value and bits where it doesn't
-/// apply). The strike limits are clipped to the corridor on both sides, K↑ = max(min(H, K), L) and K↓ = min(max(L, K),
-/// H), where QuantLib clips one side and prices a knock-out call struck above H or a put struck below L negative
-/// (#2881's class, S-bar's BR6 (ii)); the image series runs from −<c>series</c> to <c>series</c> and on while the next
-/// pair of terms exceeds machine epsilon of the sum, where QuantLib sums from −<c>series</c> to <c>series</c> − 1, ten
-/// terms, unconverged on narrow corridors (S-bar's BR5 (xliii)); QuantLib's sum stands wherever it agrees with that
-/// converged series within 1e-12 on the value's scale, max(|value|, 1), QuantLib's cases among them; where that sum
-/// isn't finite or disagrees with the analytic engine's knock-out within 1e-12 on the value's scale, as at low
-/// volatility, where QuantLib returns NaN once a term's power overflows and, at volatilities of 1% to 3%, sums that
-/// cancel, the knock-out is the analytic engine's, its terms taken in logs and its deterministic limit below
-/// machine-epsilon variance (BR5 (xvi)), the two one image series; and the rebate is priced, a
+/// Documented divergences (each leaving QuantLib's value and bits where it doesn't apply). The strike limits are
+/// clipped to the corridor on both sides, K↑ = max(min(H, K), L) and K↓ = min(max(L, K), H), where QuantLib clips one
+/// side and prices a knock-out call struck above H or a put struck below L negative (#2881's class); the image series
+/// runs from −<c>series</c> to <c>series</c> and on while the next pair of terms exceeds machine epsilon of the sum,
+/// where QuantLib sums from −<c>series</c> to <c>series</c> − 1, ten terms, unconverged on narrow corridors; QuantLib's
+/// sum stands wherever it agrees with that converged series within 1e-12 on the value's scale, max(|value|, 1),
+/// QuantLib's cases among them; where that sum isn't finite or disagrees with the analytic engine's knock-out within
+/// 1e-12 on the value's scale, as at low volatility, where QuantLib returns NaN once a term's power overflows and, at
+/// volatilities of 1% to 3%, sums that cancel, the knock-out is the analytic engine's, its terms taken in logs and its
+/// deterministic limit below machine-epsilon variance, the two one image series; and the rebate is priced, a
 /// knock-out's at the first touch of either barrier and a knock-in's at expiry where neither is touched, the analytic
-/// engine's value (BR5 (xlvi)), where QuantLib's engine reads none (<c>Divergences/SuoWangDoubleBarrierTests.cs</c>).
+/// engine's value, where QuantLib's engine reads none (<c>Divergences/SuoWangDoubleBarrierTests.cs</c>).
 /// </para>
 /// <para>
-/// Each rate and discount is read to the residual time on the volatility's clock, the volatility at the strike, as
-/// the analytic engine reads them (BR5 (i)), where QuantLib reads every structure at the risk-free curve's time:
-/// equivalent-constant reads, as S-bar's BR4 (d) keeps for the analytic engine, no exact closed form existing for a
-/// first passage under general deterministic term structures (XER5 (vii)).
+/// Each rate and discount is read to the residual time on the volatility's clock, the volatility at the strike, as the
+/// analytic engine reads them, where QuantLib reads every structure at the risk-free curve's time: equivalent-constant
+/// reads, as the analytic engine keeps them, no exact closed form existing for a first passage under general
+/// deterministic term structures.
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]
@@ -120,7 +119,7 @@ public static class SuoWangDoubleBarrierEngine
         double l = option.BarrierLo;
         double h = option.BarrierHi;
 
-        // the reads on the volatility's clock (XER5 (vii), BR5 (i)), as the analytic engine's
+        // the reads on the volatility's clock, as the analytic engine's
         Date lastDate = option.Exercise.LastDate();
         BlackVolTermStructure volatility = process.BlackVolatility;
         double t = volatility.TimeFromReference(lastDate);
@@ -161,10 +160,9 @@ public static class SuoWangDoubleBarrierEngine
                     - (Math.Pow(h / l, 2.0 * n * mu / (vol * vol)) * F.Evaluate(sgn * v4))));
         }
 
-        // the limits clipped to the corridor on both sides (XER5 (iii)), the series converged (XER5 (iv)); the analytic
-        // engine's knock-out, its terms in logs, wherever this sum isn't finite or disagrees with it within 1e-12 on the
-        // value's scale, as at low volatility where the powers overflow or the sums cancel (XER5 (vi); the code
-        // review's O1-3)
+        // the limits clipped to the corridor on both sides, the series converged; the analytic engine's knock-out, its
+        // terms in logs, wherever this sum isn't finite or disagrees with it within 1e-12 on the value's scale, as at
+        // low volatility where the powers overflow or the sums cancel
         double converged = terms.Converged(series, Math.Max(Math.Min(h, k), l), Math.Min(Math.Max(l, k), h));
         double analyticOut = AnalyticDoubleBarrierEngine.KnockOutValue(option, payoff, process, series);
         double ownOut = double.IsFinite(converged) ? Agreed(quantLibOut, converged) : double.NaN;
@@ -172,8 +170,8 @@ public static class SuoWangDoubleBarrierEngine
             ? ownOut
             : analyticOut;
 
-        // the rebate as the analytic engine prices it (XER5 (v)): a knock-out's at the first touch, a knock-in's at
-        // expiry where neither barrier is touched
+        // the rebate as the analytic engine prices it: a knock-out's at the first touch, a knock-in's at expiry where
+        // neither barrier is touched
         double rebate = option.Rebate != 0.0
             ? AnalyticDoubleBarrierEngine.RebateValue(option, payoff, process, series)
             : 0.0;
@@ -243,8 +241,8 @@ public static class SuoWangDoubleBarrierEngine
             };
         }
 
-        // the series from −series to series, then pairs while the next exceeds machine epsilon of the sum (S-bar's BR5
-        // (xliii)); NaN where a term isn't finite
+        // the series from −series to series, then pairs while the next exceeds machine epsilon of the sum; NaN where a
+        // term isn't finite
         internal double Converged(int series, double kUp, double kDown)
         {
             double sum = 0.0;

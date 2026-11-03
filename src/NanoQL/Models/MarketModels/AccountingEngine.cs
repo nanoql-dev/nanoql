@@ -16,14 +16,13 @@ namespace NanoQL.Models;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A working type (the S-mmp plan's MMPR1 (i)): it holds the caller's evolver, as QuantLib's <c>shared_ptr</c>, and
-/// steps it, so an evolver serves one engine at a time; it holds its own clone of the product. Its buffers are sized
-/// at construction, so a path allocates nothing after a warm-up path (MMPR1 (v);
-/// <c>Conventions/MarketModelProductAllocationTests.cs</c>).
+/// A working type: it holds the caller's evolver, as QuantLib's <c>shared_ptr</c>, and steps it, so an evolver serves
+/// one engine at a time; it holds its own clone of the product. Its buffers are sized at construction, so a path
+/// allocates nothing after a warm-up path (<c>Conventions/MarketModelProductAllocationTests.cs</c>).
 /// </para>
 /// <para>
 /// A product that isn't finished at the evolver's last step is refused, where QuantLib reads the numeraire past the
-/// evolver's steps (MMPR4's refusals).
+/// evolver's steps.
 /// </para>
 /// </remarks>
 [WorkingType]

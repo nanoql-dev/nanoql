@@ -7,9 +7,9 @@ using static NanoQL.Excel.Tests.Xl;
 namespace NanoQL.Excel.Tests;
 
 /// <summary>
-/// The file readers (XLR3): a call reading files keys their content beside their paths, so an edited file is a new
-/// object; the single-path read parses the bytes its key hashed, the multi-path read refuses a file changed between its
-/// read and its second hash; one content from two paths two objects, each reporting its own path (B5-1).
+/// The file readers: a call reading files keys their content beside their paths, so an edited file is a new object; the
+/// single-path read parses the bytes its key hashed, the multi-path read refuses a file changed between its read and
+/// its second hash; one content from two paths two objects, each reporting its own path.
 /// </summary>
 [Collection(TestSettings.Name)]
 public sealed class ReaderTests : IDisposable
@@ -58,7 +58,7 @@ public sealed class ReaderTests : IDisposable
         Assert.Contains("changed while it was read", Message(), StringComparison.Ordinal);
     }
 
-    /// <summary>One content from two paths: two handles, each snapshot reporting its own path (B5-1).</summary>
+    /// <summary>One content from two paths: two handles, each snapshot reporting its own path.</summary>
     [Fact]
     public void OneContentFromTwoPathsIsTwoHandles()
     {
@@ -69,7 +69,7 @@ public sealed class ReaderTests : IDisposable
         Assert.Contains(p2, Show(Call("nqlConventionSnapshotSources", b)), StringComparison.Ordinal);
     }
 
-    /// <summary>A malformed file is #VALUE! (BIR4's 13), its message by the cell (XLP56).</summary>
+    /// <summary>A malformed file is #VALUE! (error code 13), its message by the cell.</summary>
     [Fact]
     public void AMalformedFileIsValue()
     {

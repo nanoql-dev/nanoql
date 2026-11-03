@@ -30,15 +30,14 @@ namespace NanoQL.Experimental;
 /// </para>
 /// <para>
 /// The loss distribution labels each point by its attainable loss, and the percentile at 0 and 1 is the tranche's loss
-/// at the first and last, as its interior's are tranche losses (the S-xcr code review's C3 O1-1): QuantLib's labels
-/// the i-th attainable loss i times the loss unit, wrong where the weights aren't 0, 1, 2, …, and its percentile
-/// returns the distribution's probability at both ends (1.0000000003 and 0.717; the S-xcr plan's XR8 (vii);
-/// <c>Divergences/RecursiveLossModelTests.cs</c>). Bound to a basket, a copy
-/// computes the weights afresh, where QuantLib's appends them to the previous basket's (XR8 (viii)), and prices the
-/// live names over the restated tranche (XR8 (ii)). Refused, where QuantLib's reads before or past its vectors (XR8
-/// (xxix)): a basket whose losses given default are all 0, and a percentile or shortfall whose search leaves the
-/// distribution. A shortfall the distribution never reaches is refused, as the binomial model's is, where QuantLib's
-/// reads 0 with its comment "well, we are in error.... fix: FAIL" (<c>recursivelossmodel.hpp:298</c>).
+/// at the first and last, as its interior's are tranche losses: QuantLib's labels the i-th attainable loss i times the
+/// loss unit, wrong where the weights aren't 0, 1, 2, …, and its percentile returns the distribution's probability at
+/// both ends (1.0000000003 and 0.717; <c>Divergences/RecursiveLossModelTests.cs</c>). Bound to a basket, a copy
+/// computes the weights afresh, where QuantLib's appends them to the previous basket's, and prices the live names over
+/// the restated tranche. Refused, where QuantLib's reads before or past its vectors: a basket whose losses given
+/// default are all 0, and a percentile or shortfall whose search leaves the distribution. A shortfall the distribution
+/// never reaches is refused, as the binomial model's is, where QuantLib's reads 0 with its comment "well, we are in
+/// error.... fix: FAIL" (<c>recursivelossmodel.hpp:298</c>).
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]

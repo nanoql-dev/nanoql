@@ -115,7 +115,7 @@ public class ConventionSetTests
     [Fact]
     public void TheSetsSnapshotsProvenanceAndForeignContentCompareByValueAsObjects()
     {
-        // the members the slot's coverage report found no test reaching: the object overloads and the provenance's
+        // the members the coverage report found no test reaching: the object overloads and the provenance's
         const string A = "<Calendar name=\"Desk\" base=\"TARGET\" />";
         ConventionSet x = ConventionsText.OnQuantLib(A), y = ConventionsText.OnQuantLib(A);
         ConventionSnapshot s = ConventionsText.Records(A);
@@ -273,7 +273,7 @@ public class ConventionSetTests
     [Fact]
     public void ACurrencysIdentityCheckBuildsNoPresetThroughTheSet()
     {
-        // F5-1: EUR through DEM and DEM through USD is no cycle, though QuantLib's DEM triangulates through EUR
+        // EUR through DEM and DEM through USD is no cycle, though QuantLib's DEM triangulates through EUR
         ConventionSet set = ConventionsText.OnQuantLib(
             "<CurrencyPreset name=\"EUR\" base=\"EUR\"><TriangulationCurrency>DEM</TriangulationCurrency></CurrencyPreset>"
             + "<CurrencyPreset name=\"DEM\" base=\"DEM\"><TriangulationCurrency>USD</TriangulationCurrency></CurrencyPreset>");

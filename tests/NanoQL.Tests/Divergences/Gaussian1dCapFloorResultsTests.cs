@@ -14,10 +14,10 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The Gaussian1d cap/floor engine's at-the-money forwards (the S-g1d plan's G1R6 (iii)): QuantLib's engine declares
-/// <c>optionletsAtmForward</c> and leaves it 0 (<c>gaussian1dcapfloorengine.cpp:33</c>, <c>:219</c>): on the wheel,
-/// a 3-year cap at 3% on Euribor 6M from a year out, on a GSR model on a flat 3% curve, reports six zeros. nanoql
-/// reports each coupon's forward, as Black's engine does. QuantLib's check: Black's engine's results.
+/// The Gaussian1d cap/floor engine's at-the-money forwards: QuantLib's engine declares <c>optionletsAtmForward</c> and
+/// leaves it 0 (<c>gaussian1dcapfloorengine.cpp:33</c>, <c>:219</c>): on the wheel, a 3-year cap at 3% on Euribor 6M
+/// from a year out, on a GSR model on a flat 3% curve, reports six zeros. nanoql reports each coupon's forward, as
+/// Black's engine does. QuantLib's check: Black's engine's results.
 /// </summary>
 public class Gaussian1dCapFloorResultsTests
 {

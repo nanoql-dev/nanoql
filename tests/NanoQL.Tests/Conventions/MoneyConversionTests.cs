@@ -7,7 +7,7 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// <see cref="Money"/>'s conversion modes are methods that take the context (U7, the S-rx plan's SRXR1): each reads
+/// <see cref="Money"/>'s conversion modes are methods that take the context: each reads
 /// <see cref="EvaluationContext.MoneySettings"/> and converts through <see cref="EvaluationContext.ExchangeRates"/> at
 /// the context's evaluation date, as QuantLib's operators read its globals; <see cref="Money.GreaterThan"/> converts
 /// the operand QuantLib's <c>&gt;</c> converts; under no conversion each method answers as its operator does.

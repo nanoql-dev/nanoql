@@ -15,7 +15,7 @@ namespace NanoQL.PricingEngines;
 
 /// <summary>
 /// The binomial engine on the Cox-Ross-Rubinstein tree: QuantLib-Python's <c>BinomialCRRVanillaEngine</c>, QuantLib's
-/// <c>BinomialVanillaEngine&lt;CoxRossRubinstein&gt;</c> (D12).
+/// <c>BinomialVanillaEngine&lt;CoxRossRubinstein&gt;</c>.
 /// </summary>
 public static class BinomialCRRVanillaEngine
 {

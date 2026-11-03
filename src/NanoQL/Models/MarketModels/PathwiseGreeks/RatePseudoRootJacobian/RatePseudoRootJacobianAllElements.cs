@@ -14,13 +14,13 @@ namespace NanoQL.Models;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A working type (the S-mmp plan's MMPR1 (i)): its scratch is QuantLib's members, so an instance serves one caller
-/// at a time. It copies the pseudo-root.
+/// A working type: its scratch is QuantLib's members, so an instance serves one caller at a time. It copies the
+/// pseudo-root.
 /// </para>
 /// <para>
-/// <b>The derivative</b> (MMPR4 (iv), a documented divergence): <see cref="RatePseudoRootJacobian"/>'s, where QuantLib's
-/// sums the drift's terms without their accrual periods and carries f_j, not f_j + d_j
-/// (<c>ratepseudorootjacobian.cpp:280</c>, <c>:294</c>, <c>:298</c>).
+/// <b>The derivative</b> (a documented divergence): <see cref="RatePseudoRootJacobian"/>'s, where QuantLib's sums the
+/// drift's terms without their accrual periods and carries f_j, not f_j + d_j (<c>ratepseudorootjacobian.cpp:280</c>,
+/// <c>:294</c>, <c>:298</c>).
 /// </para>
 /// </remarks>
 [WorkingType]

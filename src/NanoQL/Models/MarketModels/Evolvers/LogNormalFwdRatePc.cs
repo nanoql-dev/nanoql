@@ -15,10 +15,9 @@ namespace NanoQL.Models;
 /// with the drifts at its start, then corrected with the average of those and the drifts at the predicted forwards.
 /// </summary>
 /// <remarks>
-/// A working type (the S-mm plan's MR1 (ii)). It builds its Brownian generator from the factory it is given (HR3) and
-/// copies each step's pseudo-root from the model at construction (MR1 (iv)), so a step reads nothing shared and one
-/// model serves many evolvers on many threads. One step allocates nothing after a path's warm-up (MR1 (v);
-/// <c>Conventions/MarketModelAllocationTests.cs</c>).
+/// A working type. It builds its Brownian generator from the factory it is given and copies each step's pseudo-root
+/// from the model at construction, so a step reads nothing shared and one model serves many evolvers on many threads.
+/// One step allocates nothing after a path's warm-up (<c>Conventions/MarketModelAllocationTests.cs</c>).
 /// </remarks>
 [WorkingType]
 public sealed class LogNormalFwdRatePc : MarketModelEvolver

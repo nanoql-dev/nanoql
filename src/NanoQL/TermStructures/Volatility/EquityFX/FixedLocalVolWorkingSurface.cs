@@ -24,8 +24,8 @@ namespace NanoQL.TermStructures;
 /// <para>
 /// Its reads are QuantLib 1.44's: at a node time a strike beyond the time's strikes extrapolates by the time's line,
 /// between nodes it is held at the nearest strike (<c>fixedlocalvolsurface.cpp:118-165</c>), so the calibrations are
-/// QuantLib's bit for bit (the S-hes plan's HR5); the surface a model returns is <see cref="FixedLocalVolSurface"/>,
-/// <see cref="ToSurface"/>, held at the nearest strike at a node too (the S-van plan's VR4 (xviii)).
+/// QuantLib's bit for bit; the surface a model returns is <see cref="FixedLocalVolSurface"/>, <see cref="ToSurface"/>,
+/// held at the nearest strike at a node too.
 /// </para>
 /// </remarks>
 [WorkingType]
@@ -91,7 +91,8 @@ internal sealed class FixedLocalVolWorkingSurface : LocalVolTermStructure
         localVolInterpol[j] = new LinearInterpolation(strikes[j], column);
     }
 
-    // The calibrated leverage as the public surface: S-van's, on these times, strikes and values, copied.
+    // The calibrated leverage as the public surface, the fixed local-volatility surface, on these times, strikes and
+    // values, copied.
     internal FixedLocalVolSurface ToSurface() =>
         new(ReferenceDate, times, strikes.Select(k => (IEnumerable<double>)k), localVolMatrix, DayCounter);
 

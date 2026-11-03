@@ -14,21 +14,20 @@ on the HullWhite with their legs' fixing days 0 (", fixed on its start"), each c
 QuantLib's option and nanoql's are the same.
 
 Each case's output is the NPV on each model, an amount compared at the leg's largest notional: a HullWhite (a = 0.05,
-sigma = 0.01) on the case's discount curve, its own; a Vasicek (r0 = 0.03, a = 0.08, b = 0.035, sigma = 0.009) with
-the discount curve given to the engine, whose reference date and day counter the times read; a CoxIngersollRoss
-(r0 = 0.03, theta = 0.035, k = 0.3, sigma = 0.05) likewise; and an ExtendedCoxIngersollRoss (theta = 0.035, k = 0.3,
-sigma = 0.05, x0 = 0.03) on the discount curve. A refused pricing is {"throws": true}. A Cox-Ingersoll-Ross engine
-whose bond option on one of the instrument's caplets reaches a non-central chi-squared series outside the range of
-doubles, where QuantLib's series runs on subnormals and zeros and nanoql's distribution refuses
+sigma = 0.01) on the case's discount curve, its own; a Vasicek (r0 = 0.03, a = 0.08, b = 0.035, sigma = 0.009) with the
+discount curve given to the engine, whose reference date and day counter the times read; a CoxIngersollRoss (r0 = 0.03,
+theta = 0.035, k = 0.3, sigma = 0.05) likewise; and an ExtendedCoxIngersollRoss (theta = 0.035, k = 0.3, sigma = 0.05,
+x0 = 0.03) on the discount curve. A refused pricing is {"throws": true}. A Cox-Ingersoll-Ross engine whose bond option
+on one of the instrument's caplets reaches a non-central chi-squared series outside the range of doubles, where
+QuantLib's series runs on subnormals and zeros and nanoql's distribution refuses
 (tests/NanoQL.Tests/Divergences/ChiSquaredSeriesRefusalTests.cs), is generated and left out of the case's engines, by
-models/shortrate/onefactormodels/coxingersollross.py's and extendedcoxingersollross.py's tests on the caplet's option
-(a caplet just after its fixing, of short maturity, on the seasoned instruments). The HullWhite's price of an instrument
+models/shortrate/onefactormodels/coxingersollross.py's and extendedcoxingersollross.py's tests on the caplet's option (a
+caplet just after its fixing, of short maturity, on the seasoned instruments). The HullWhite's price of an instrument
 with a caplet still to be fixed before its start, which QuantLib's option expires at its start and nanoql's at its
-fixing (the S-sr plan's B1-1, ruled by the user on 2026-10-22; tests/NanoQL.Tests/Divergences/CapletFixingExpiryTests.cs),
-is generated and left out of the case's engines likewise. Each case's inputs hold the
-instrument, the discount curve and the engines ({"model", and the model's parameters}). The wheel's
-AnalyticCapFloorEngine is the proxy of the C++ constructor on a one-factor affine model and an optional term
-structure (QuantLib-SWIG 1.44, SWIG/capfloor.i). Read back by
+fixing (tests/NanoQL.Tests/Divergences/CapletFixingExpiryTests.cs), is generated and left out of the case's engines
+likewise. Each case's inputs hold the instrument, the discount curve and the engines ({"model", and the model's
+parameters}). The wheel's AnalyticCapFloorEngine is the proxy of the C++ constructor on a one-factor affine model and an
+optional term structure (QuantLib-SWIG 1.44, SWIG/capfloor.i). Read back by
 tests/NanoQL.Tests/Vectors/PricingEngines/AnalyticCapFloorEngineVectorTests.cs."""
 import importlib.util
 import os
@@ -115,7 +114,7 @@ def caplet_options(c, curve_spec):
 
 def fixed_before_start(c, curve_spec):
     """Whether a caplet still to be fixed, not yet paid, is fixed before its start, on the curve's reference date and day
-    counter: the HullWhite's option then expires at its fixing in nanoql (B1-1)."""
+    counter: the HullWhite's option then expires at its fixing in nanoql."""
     curve = irx.handle(curve_spec)
     reference, dc = curve.referenceDate(), curve.dayCounter()
     for cf in c.floatingLeg():

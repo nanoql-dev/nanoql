@@ -20,7 +20,7 @@ namespace NanoQL.PricingEngines;
 /// <remarks>
 /// <para>
 /// A static class: <see cref="Calculate"/> takes the engine's inputs and returns the results, in place of QuantLib's
-/// engine object (D14). An expired swap's results are <see cref="CreditDefaultSwap.SetupExpired"/>'s, as QuantLib's
+/// engine object. An expired swap's results are <see cref="CreditDefaultSwap.SetupExpired"/>'s, as QuantLib's
 /// instrument gives them before it calls the engine; otherwise the swap is validated and priced.
 /// </para>
 /// <para>
@@ -30,11 +30,10 @@ namespace NanoQL.PricingEngines;
 /// settles after the evaluation date, as for QuantLib's own CDS on a T+2 curve, and on curves dated the evaluation date
 /// for a live coupon whose period ended before it (one paid after the weekend that ended it). No default before the
 /// reference date is QuantLib's own premise for its two-date default probability (<c>defaulttermstructure.cpp:112-120</c>).
-/// A documented divergence (the S-core plan's CR7 (xxxiv)); wherever QuantLib's reads succeed, its values, bit for bit.
+/// A documented divergence; wherever QuantLib's reads succeed, its values, bit for bit.
 /// </para>
 /// <para>
-/// A negative step is refused, where QuantLib's loop walks back from the period's start until a curve refuses its date
-/// (the plan's CR7 (xxv)).
+/// A negative step is refused, where QuantLib's loop walks back from the period's start until a curve refuses its date.
 /// </para>
 /// </remarks>
 public static class IntegralCdsEngine

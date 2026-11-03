@@ -18,11 +18,11 @@ namespace NanoQL.Tests.Divergences;
 /// (σ₂t₂ − σ₁t₁)/(σ_f·Δt)·ε. On a variance curve with its nodes at the dates, rising (0.10, 0.30, 0.30 at one, two and
 /// three years), QuantLib's forward vega misses its own price under that shift by −17.5%, the cliquet's by −9.6%, the
 /// performance engine's by −9.8% and the quanto forward's by −18.4%; falling (0.30, 0.25, 0.25), by −6.5%, −3.3%,
-/// −3.4% and −6.8%. nanoql scales each period's vega by that factor (the S-exo plan's ER5 (xxxvii)): exactly 1 where
-/// the period's two volatilities are equal, zero among them, so QuantLib's bits stand there; at a zero forward variance
-/// between unequal volatilities the one-sided limit, infinite at the forward and 0 off it. The checks: QuantLib's
-/// prices under a parallel shift of 1e-6 each way (its tests' bump), the forward-performance engine, which the wheel
-/// lacks, against its own; on a flat zero volatility, QuantLib's bits; at equal total variances, the one-sided bumps.
+/// −3.4% and −6.8%. nanoql scales each period's vega by that factor: exactly 1 where the period's two volatilities are
+/// equal, zero among them, so QuantLib's bits stand there; at a zero forward variance between unequal volatilities the
+/// one-sided limit, infinite at the forward and 0 off it. The checks: QuantLib's prices under a parallel shift of 1e-6
+/// each way (its tests' bump), the forward-performance engine, which the wheel lacks, against its own; on a flat zero
+/// volatility, QuantLib's bits; at equal total variances, the one-sided bumps.
 /// </summary>
 public class ForwardVegaTermStructureTests
 {

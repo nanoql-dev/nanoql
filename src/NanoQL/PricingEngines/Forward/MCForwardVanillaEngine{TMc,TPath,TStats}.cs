@@ -15,10 +15,10 @@ namespace NanoQL.PricingEngines;
 /// <typeparam name="TPath">The path type the traits generate.</typeparam>
 /// <typeparam name="TStats">The statistics accumulator.</typeparam>
 /// <remarks>
-/// An extension point, as QuantLib's template (the S-exo plan's ER2 (v), S-van's VR1 form): an immutable base over
-/// <see cref="McSimulation{TPath, TStats}"/> holding one call's option and settings; a derived engine gives the path
-/// pricer and, for a control variate, its path pricer and engine. The grid runs to the reset and to expiry on the
-/// process's times, as the derived engine clocks it; the seed is explicit (S2R4).
+/// An extension point, as QuantLib's template: an immutable base over <see cref="McSimulation{TPath, TStats}"/> holding
+/// one call's option and settings; a derived engine gives the path pricer and, for a control variate, its path pricer
+/// and engine. The grid runs to the reset and to expiry on the process's times, as the derived engine clocks it; the
+/// seed is explicit.
 /// </remarks>
 public abstract class MCForwardVanillaEngine<TMc, TPath, TStats> : McSimulation<TPath, TStats>
     where TMc : IMcTraits<TPath>

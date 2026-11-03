@@ -15,10 +15,10 @@ branch). Then the constructor's refusals, a then sigma checked: a or sigma zero,
 value"), both bad.
 
 The four models at a = 1e-9 to 1.5e-8 are generated and left out: there QuantLib 1.44's forms cut to the a = 0 limit,
-dropping terms of order a*tau, or cancel just above sqrt(QL_EPSILON), and nanoql's are QuantLib's master's (#2882, the
-S-sr plan's SSR3), which move their outputs beyond the tolerance; upstream's 60-digit values check them
-(tests/NanoQL.Tests/Divergences/VasicekCancellationTests.cs). At a = 2e-12 the dropped terms stay within the
-tolerance, and that model stays. Elsewhere the forms move the last bits only.
+dropping terms of order a*tau, or cancel just above sqrt(QL_EPSILON), and nanoql's are QuantLib's master's (#2882),
+which move their outputs beyond the tolerance; upstream's 60-digit values check them
+(tests/NanoQL.Tests/Divergences/VasicekCancellationTests.cs). At a = 2e-12 the dropped terms stay within the tolerance,
+and that model stays. Elsewhere the forms move the last bits only.
 
 The wheel's calls, by QuantLib-SWIG's shortratemodels.i: ql.Vasicek(r0, a, b, sigma, lambda_parameter), positional;
 params(); discount(t); discountBond(now, maturity, rate) and discountBond(now, maturity, Array); and
@@ -90,7 +90,7 @@ def spec(m):
     return {"type": "Vasicek", "r0": r0, "a": a, "b": b, "sigma": sigma, "lambda": lam, "params": None}
 
 
-# The models SSR3's forms move beyond the tolerance, generated and left out.
+# The models the cancellation-free forms move beyond the tolerance, generated and left out.
 LEFT_OUT = {1, 2, 3, 18}
 
 

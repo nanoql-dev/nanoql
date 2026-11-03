@@ -154,9 +154,9 @@ jobs:
           path: TestResults/bitid
           if-no-files-found: ignore
 
-  # Java's jextract layer (BIR16): jextract 22, checked against its published SHA-256, run once over nanoql.h and over the
-  # test build's nqlt.h, which nanoql-bind headers writes without a native build. The headers hold fixed-width types
-  # only, so every bindings job compiles this one layer.
+  # Java's jextract layer: jextract 22, checked against its published SHA-256, run once over nanoql.h and over the test
+  # build's nqlt.h, which nanoql-bind headers writes without a native build. The headers hold fixed-width types only, so
+  # every bindings job compiles this one layer.
   java-ffi:
     name: Java's jextract layer
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || !github.event.repository.private
@@ -199,7 +199,7 @@ jobs:
   # run and a dispatch's core build Windows x64 and Linux x64; a dispatch's macos builds macOS Arm64 alone, and its all
   # the five, as a PyPI publish does. Linux builds in a manylinux_2_28 container, so the library runs on glibc 2.28 and
   # later; the container has no libicu, which the library doesn't load. A check's red doesn't stop the checks after
-  # it, so a run shows every language's results, and the job's last step reds the job (R27).
+  # it, so a run shows every language's results, and the job's last step reds the job.
   bindings:
     name: Bindings (${{ matrix.rid }})
     needs: java-ffi
@@ -220,8 +220,8 @@ jobs:
       # The SDK runs without ICU in the Linux container, as the library does.
       DOTNET_SYSTEM_GLOBALIZATION_INVARIANT: ${{ matrix.container != '' && '1' || '' }}
       # Off Windows x64, the reference platform, a replayed double within this relative difference of C#'s, or else
-      # within this absolute one, is a match, tallied (R19, R26): macOS on Arm64 and Linux x64 differ in some results'
-      # last bits, which near zero are a larger part of the value.
+      # within this absolute one, is a match, tallied: macOS on Arm64 and Linux x64 differ in some results' last bits,
+      # which near zero are a larger part of the value.
       NANOQL_REPLAY_TOLERANCE: ${{ matrix.rid != 'win-x64' && '1e-12' || '0' }}
       NANOQL_REPLAY_ABS_TOLERANCE: ${{ matrix.rid != 'win-x64' && '1e-13' || '0' }}
     steps:
@@ -263,8 +263,9 @@ jobs:
         id: surface
         continue-on-error: true
         run: dotnet run --project src/NanoQL.Bind -c Release --no-build -- check
-      # On the reference leg: every class QuantLib-Python constructs crosses, has a route or a ruled exclusion, the wheel
-      # installed as the vector jobs install it, so an API change that loses a route, or a pin that adds a class, reds.
+      # On the reference leg: every class QuantLib-Python constructs crosses, has a route or an exclusion with its
+      # reason, the wheel installed as the vector jobs install it, so an API change that loses a route, or a pin that
+      # adds a class, reds.
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         if: matrix.rid == 'win-x64'
         with:
@@ -330,12 +331,12 @@ jobs:
           cmake --build "$RUNNER_TEMP/c-replay" --config Release
           replay=$(find "$RUNNER_TEMP/c-replay" -name 'replay' -type f -o -name 'replay.exe' -type f | head -1)
           "$replay" "$RUNNER_TEMP/recording/trace.jsonl" "$RUNNER_TEMP/recording/facts.tsv" bindings/replay-floor.json
-      # Excel (XLR11, XLD14), on the reference leg alone: the Windows-only solution built and tested after the native
-      # build, whose managed NanoQL.Native.dll the error table's test reads; the checked-in surface; the shipped builds,
-      # packed against the runtime package; the tests' builds, compiled with no .xll; the vector suite's trace replayed
-      # through the experimental tests' build's worksheet functions, and the repro vectors replayed through them in each
-      # order (XLR14); and the release's package (XLR12), kept a day, its symbols zip only at a release. The suite inside
-      # Excel needs Excel, which the runners don't have: it runs on a contributor's machine (CONTRIBUTING.md).
+      # Excel, on the reference leg alone: the Windows-only solution built and tested after the native build, whose
+      # managed NanoQL.Native.dll the error table's test reads; the checked-in surface; the shipped builds, packed
+      # against the runtime package; the tests' builds, compiled with no .xll; the vector suite's trace replayed through
+      # the experimental tests' build's worksheet functions, and the repro vectors replayed through them in each order;
+      # and the release's package, kept a day, its symbols zip only at a release. The suite inside Excel needs Excel,
+      # which the runners don't have: it runs on a contributor's machine (CONTRIBUTING.md).
       - name: The Excel add-in
         id: excel
         if: matrix.rid == 'win-x64'
@@ -365,7 +366,7 @@ jobs:
           name: nanoql-excel-win-x64
           path: ${{ runner.temp }}/excel-package/nanoql-excel-*-win-x64.zip
           retention-days: 1
-      # C++ (BIR14): nanoql.hpp, C++17, through its conformance suite on the test build and the vector suite's trace, which
+      # C++: nanoql.hpp, C++17, through its conformance suite on the test build and the vector suite's trace, which
       # replays to C's facts line for line.
       - name: The C++ conformance suite
         id: cpp-conformance
@@ -386,7 +387,7 @@ jobs:
           replay=$(find "$RUNNER_TEMP/cpp-replay" -name 'replay' -type f -o -name 'replay.exe' -type f | head -1)
           "$replay" "$RUNNER_TEMP/recording/trace.jsonl" "$RUNNER_TEMP/recording/cpp-facts.tsv"
           diff <(sort "$RUNNER_TEMP/recording/facts.tsv") <(sort "$RUNNER_TEMP/recording/cpp-facts.tsv")
-      # Python: CPython's oldest supported version with NumPy's floor, and the newest with the newest NumPy (BIR12). The
+      # Python: CPython's oldest supported version with NumPy's floor, and the newest with the newest NumPy. The
       # manylinux container brings its own CPythons; NumPy 1.26 has no Windows Arm64 wheel, so that job tests the newest.
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         id: python-floor
@@ -430,7 +431,7 @@ jobs:
           name: nanoql-python-${{ matrix.rid }}
           path: ${{ runner.temp }}/wheels/*.whl
           retention-days: 1
-      # The C and C++ archive (BIR14, BIR17): the headers, the library and the notices, zipped on Windows, .tar.xz elsewhere.
+      # The C and C++ archive: the headers, the library and the notices, zipped on Windows, .tar.xz elsewhere.
       - name: The C and C++ archive
         id: archive
         continue-on-error: true
@@ -445,8 +446,8 @@ jobs:
           name: nanoql-c-api-${{ matrix.rid }}
           path: ${{ runner.temp }}/archive/nanoql-*-c-api.*
           retention-days: 1
-      # Java (BIR16): the java-ffi job's layers, the idiomatic layer over nanoql's compiled for Java 22 on the newest LTS
-      # JDK, under -Xcheck:jni on Linux and macOS, which fails the step where it reports a signal handler Native AOT's
+      # Java: the java-ffi job's layers, the idiomatic layer over nanoql's compiled for Java 22 on the newest LTS JDK,
+      # under -Xcheck:jni on Linux and macOS, which fails the step where it reports a signal handler Native AOT's
       # runtime replaced; the conformance suite on the test build, the test types a user's package beside nanoql's; the
       # vector suite replayed at or above B4's floor (Java's enums hold no undefined value and a double[][] no 0-by-n
       # matrix, so a few refusals' facts stop short of C's); and the jars with their notices.
@@ -455,7 +456,7 @@ jobs:
         with:
           name: nanoql-java-ffi
           path: ${{ runner.temp }}/java-ffi
-      # Temurin 25, but Microsoft's build on Windows Arm64, which Temurin 25 has none for (R20).
+      # Temurin 25, but Microsoft's build on Windows Arm64, which Temurin 25 has none for.
       - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
         if: needs.java-ffi.result == 'success'
         with:
@@ -484,9 +485,9 @@ jobs:
           case "$RUNNER_OS" in Windows) lib=nanoql.dll; sep=';' ;; macOS) lib=libnanoql.dylib; sep=':' ;; *) lib=libnanoql.so; sep=':' ;; esac
           jvm=""; [ "$RUNNER_OS" = Windows ] || jvm="-Xcheck:jni"
           # The JDK's libjsig preloaded on Linux and macOS, so the library's SIGSEGV and SIGFPE handlers chain behind
-          # the JVM's (BIR16, R17). Each JVM runs through a java that sets the variable itself: Surefire starts its JVM
-          # through /bin/sh, which strips DYLD_* on macOS (SIP). Surefire takes a java in a bin folder, the JDK's
-          # release file in the folder above.
+          # the JVM's. Each JVM runs through a java that sets the variable itself: Surefire starts its JVM through
+          # /bin/sh, which strips DYLD_* on macOS (SIP). Surefire takes a java in a bin folder, the JDK's release file
+          # in the folder above.
           java=java; surefire=""
           if [ "$RUNNER_OS" != Windows ]; then
             jsig="$JAVA_HOME/lib/libjsig.so"; [ "$RUNNER_OS" = macOS ] && jsig="$JAVA_HOME/lib/libjsig.dylib"
@@ -506,7 +507,7 @@ jobs:
           shopt -s nullglob
           logs=("$RUNNER_TEMP/java.log" bindings/java/target/surefire-reports/*.dumpstream)
           if grep -i "handler modified" "${logs[@]}"; then
-            echo "::error::-Xcheck:jni reports a replaced signal handler with libjsig preloaded (BIR16, R17)"; exit 1
+            echo "::error::-Xcheck:jni reports a replaced signal handler with libjsig preloaded"; exit 1
           fi
       - name: The Java jars
         id: java-jars
@@ -525,7 +526,7 @@ jobs:
           name: nanoql-java-${{ matrix.rid }}
           path: bindings/java/target/nanoql-*.jar
           retention-days: 1
-      # The checks above go on past a red (R27); the job reds here, after them all.
+      # The checks above go on past a red; the job reds here, after them all.
       - name: Every check green
         if: ${{ !cancelled() }}
         env:
@@ -550,8 +551,8 @@ jobs:
           done
           [ -z "$reds" ] || { echo "::error::red:$reds"; exit 1; }
 
-  # PyPI's nanoql (BIR20): dispatched by hand, the pypi environment's approval, trusted publishing (no stored token),
-  # the wheels the same run's five bindings jobs built.
+  # PyPI's nanoql: dispatched by hand, the pypi environment's approval, trusted publishing (no stored token), the wheels
+  # the same run's five bindings jobs built.
   publish-pypi:
     name: Publish to PyPI
     if: github.event_name == 'workflow_dispatch' && inputs.publish-pypi
@@ -674,16 +675,16 @@ jobs:
         run: >
           dotnet test --solution NanoQL.slnx -c Release --no-build --filter-trait "Oracle=QuantLib" --coverage
           --coverage-output-format cobertura --coverage-output coverage.cobertura.xml
-          --coverage-settings tests/NanoQL.Tests/CodeCoverage.xml --results-directory TestResults/G7
+          --coverage-settings tests/NanoQL.Tests/CodeCoverage.xml --results-directory TestResults/coverage
       - name: The QLNet-tagged tests under coverage
         if: steps.changes.outputs.src == 'true'
         run: >
           dotnet test --solution NanoQL.slnx -c Release --no-build --filter-trait "Oracle=QLNet" --coverage
           --coverage-output-format cobertura --coverage-output coverage.cobertura.xml
-          --coverage-settings tests/NanoQL.Tests/CodeCoverage.xml --results-directory TestResults/G7qlnet
+          --coverage-settings tests/NanoQL.Tests/CodeCoverage.xml --results-directory TestResults/coverage-qlnet
       - name: The ported types' coverage
         if: steps.changes.outputs.src == 'true'
-        run: python -I tools/check-coverage.py TestResults/G7 --qlnet TestResults/G7qlnet
+        run: python -I tools/check-coverage.py TestResults/coverage --qlnet TestResults/coverage-qlnet
 
   reproducibility:
     name: Vector reproducibility

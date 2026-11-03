@@ -10,15 +10,14 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The CEV engine and density near β = 1 (the S-van plan's VR10, the user's ruling of 2026-10-23). At β = 1
-/// <c>CEVCalculator</c>'s δ = (1 − 2β)/(1 − β) divides by zero (<c>analyticcevengine.cpp:36</c>) and Boost refuses the
-/// infinite degrees of freedom; near it Boost's non-central chi-squared refuses or runs for seconds, from |β − 1| ≤ 1e-4
-/// at σ 5% and 0.1 years to 1e-6 at σ 80% and 10 years; <c>CEVRNDCalculator</c> refuses β = 1
-/// (<c>cevrndcalculator.cpp:39</c>). nanoql prices Black's formula at Hagan's CEV-equivalent volatility (the SABR
-/// volatility at ν = 0) for |β − 1| &lt; 1e-3, exactly Black's at β = 1; its density refuses the band but β = 1, where it
-/// is the lognormal density. QuantLib's check: its CEV formula where it still prices inside the band, and at the band's
-/// edge [executed on the wheel: <c>scratchpad\c3\oracle_c3.py</c>, <c>oracle_c3.out</c>; f0 100, σ 20%, r 3% on
-/// Actual/365 (Fixed), from 15 October 2026].
+/// The CEV engine and density near β = 1. At β = 1 <c>CEVCalculator</c>'s δ = (1 − 2β)/(1 − β) divides by zero
+/// (<c>analyticcevengine.cpp:36</c>) and Boost refuses the infinite degrees of freedom; near it Boost's non-central
+/// chi-squared refuses or runs for seconds, from |β − 1| ≤ 1e-4 at σ 5% and 0.1 years to 1e-6 at σ 80% and 10 years;
+/// <c>CEVRNDCalculator</c> refuses β = 1 (<c>cevrndcalculator.cpp:39</c>). nanoql prices Black's formula at Hagan's
+/// CEV-equivalent volatility (the SABR volatility at ν = 0) for |β − 1| &lt; 1e-3, exactly Black's at β = 1; its
+/// density refuses the band but β = 1, where it is the lognormal density. QuantLib's check: its CEV formula where it
+/// still prices inside the band, and at the band's edge (QuantLib-Python 1.44; f0 100, σ 20%, r 3% on Actual/365
+/// (Fixed), from 15 October 2026).
 /// </summary>
 public class CevNearOneTests
 {

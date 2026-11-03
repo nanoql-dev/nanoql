@@ -10,12 +10,12 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The Monte Carlo SLV calibration reads its working leverage as QuantLib 1.44 reads its surface, and returns S-van's
-/// surface (the S-hes plan's HR5): while it calibrates, a read at a node time beyond that time's strikes extrapolates
-/// by the time's line, so the calibrated leverage is QuantLib's on the wheel's case
+/// The Monte Carlo SLV calibration reads its working leverage as QuantLib 1.44 reads its surface, and returns the fixed
+/// local-volatility surface: while it calibrates, a read at a node time beyond that time's strikes extrapolates by the
+/// time's line, so the calibrated leverage is QuantLib's on the wheel's case
 /// (<c>tests/vectors/models/equity/hestonslvmcmodel.json</c>'s first, recorded from QuantLib-SWIG 1.44); the
 /// <see cref="HestonSLVMCModel.LeverageFunction"/> it returns is <see cref="FixedLocalVolSurface"/>, which holds such a
-/// strike at the time's nearest (the S-van plan's VR4 (xviii)), where QuantLib's returned surface extrapolates.
+/// strike at the time's nearest, where QuantLib's returned surface extrapolates.
 /// </summary>
 public class HestonSlvMcCalibrationSurfaceTests
 {

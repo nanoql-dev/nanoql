@@ -9,9 +9,8 @@ budget (the initial temperature times (1 - k/K)^alpha after k moves, 0 past K), 
 variables, Griewangk's function in 3, and a weighted quadratic in 3, the last also in a box; two seeds each; under end
 criteria the simplex's size meets and under a limit of 50 iterations. Each case records the Problem after minimize (the
 best point and value, the gradient norm, the evaluation counts) and the end criterion. No vertex here is NaN, where
-nanoql guards the initial vertices' values (the S-core plan's CR7 (xix)). The harness unit is
-tools/cxx/src/math/optimization/simulatedannealing.cpp. Read back by
-tests/NanoQL.Tests/Vectors/Cxx/Numerics/Optimization/SimulatedAnnealingCxxVectorTests.cs."""
+nanoql guards the initial vertices' values. The harness unit is tools/cxx/src/math/optimization/simulatedannealing.cpp.
+Read back by tests/NanoQL.Tests/Vectors/Cxx/Numerics/Optimization/SimulatedAnnealingCxxVectorTests.cs."""
 import os
 import sys
 

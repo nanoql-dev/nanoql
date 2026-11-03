@@ -13,14 +13,13 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The GJR-GARCH engines on a risk-free curve dated after the evaluation date (the S-hes plan's HR7 (xviii), the
-/// mismatched-dates class of master Revision 58). QuantLib's engines run from the risk-free curve's reference date
-/// (<c>process-&gt;time</c>): their days to the maturity are short by the curve's settlement, and an option expiring
-/// before the curve's date is refused ("negative time given"). nanoql's run on the process's model clock, from the
-/// earliest reference date of its curves, each curve accruing nothing before its own date. QuantLib's check: its engines
-/// on the market restated on one clock, the risk-free discount 1 to its date and 5% after (a log-linear discount curve),
-/// which nanoql's engines on the original market reproduce to rounding [executed on the wheel:
-/// <c>scratchpad\c3\oracle_c3.py</c>, <c>scratchpad\cxxprobe\src\c3oracle.cpp</c>].
+/// The GJR-GARCH engines on a risk-free curve dated after the evaluation date. QuantLib's engines run from the
+/// risk-free curve's reference date (<c>process-&gt;time</c>): their days to the maturity are short by the curve's
+/// settlement, and an option expiring before the curve's date is refused ("negative time given"). nanoql's run on the
+/// process's model clock, from the earliest reference date of its curves, each curve accruing nothing before its own
+/// date. QuantLib's check: its engines on the market restated on one clock, the risk-free discount 1 to its date and 5%
+/// after (a log-linear discount curve), which nanoql's engines on the original market reproduce to rounding
+/// (QuantLib-Python 1.44 and QuantLib 1.44).
 /// </summary>
 public class GjrGarchMismatchedTimesTests
 {

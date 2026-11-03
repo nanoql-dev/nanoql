@@ -16,8 +16,8 @@ namespace NanoQL.PricingEngines;
 /// the spot and discounted on the risk-free curve to the reset date.
 /// </summary>
 /// <remarks>
-/// Immutable, as its base, whose plain-payoff refusal, shifted vega and clock it shares (the S-exo plan's ER5 (xxiii),
-/// (xxxvii) and (xxiv)); the rho's reset term is on the risk-free curve's own time.
+/// Immutable, as its base, whose plain-payoff refusal, shifted vega and clock it shares; the rho's reset term is on the
+/// risk-free curve's own time.
 /// </remarks>
 public sealed class ForwardPerformanceVanillaEngine : ForwardVanillaEngine
 {

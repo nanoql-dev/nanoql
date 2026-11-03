@@ -15,7 +15,7 @@ namespace NanoQL.PricingEngines;
 
 /// <summary>
 /// The binomial convertible engine on the additive equal-probabilities tree: QuantLib-Python's <c>BinomialEQPConvertibleEngine</c>, QuantLib's
-/// <c>BinomialConvertibleEngine&lt;AdditiveEQPBinomialTree&gt;</c> (D12).
+/// <c>BinomialConvertibleEngine&lt;AdditiveEQPBinomialTree&gt;</c>.
 /// </summary>
 public static class BinomialEQPConvertibleEngine
 {

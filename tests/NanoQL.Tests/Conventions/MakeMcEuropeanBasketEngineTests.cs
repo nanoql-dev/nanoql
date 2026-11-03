@@ -11,9 +11,9 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The Monte Carlo European basket engine's builder and checks (S2R4; SEQR2): the seed is required and 0, QuantLib's
-/// seed from the clock, refused, naming the parameter; QuantLib's checks and texts on the steps, samples and tolerance;
-/// a builder kept and reused is never changed; and the engine refuses a first process that isn't a Black-Scholes one.
+/// The Monte Carlo European basket engine's builder and checks: the seed is required and 0, QuantLib's seed from the
+/// clock, refused, naming the parameter; QuantLib's checks and texts on the steps, samples and tolerance; a builder
+/// kept and reused is never changed; and the engine refuses a first process that isn't a Black-Scholes one.
 /// </summary>
 public class MakeMcEuropeanBasketEngineTests
 {

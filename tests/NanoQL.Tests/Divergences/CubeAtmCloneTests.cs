@@ -10,12 +10,12 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The cube's at-the-money strike (the S-g1d plan's G1R5 (v), #2849): QuantLib 1.44 builds a plain SwapIndex from the
-/// base index's conventions (<c>swaptionvolcube.cpp:89-145</c>), where its master, after the pin, clones the base to the
-/// tenor (<c>base->clone(swapTenor)</c>, merged as 87065c808), so a base index that overrides <c>clone</c> gives its own
+/// The cube's at-the-money strike (#2849): QuantLib 1.44 builds a plain SwapIndex from the base index's conventions
+/// (<c>swaptionvolcube.cpp:89-145</c>), where its master, after the pin, clones the base to the tenor
+/// (<c>base->clone(swapTenor)</c>, merged as 87065c808), so a base index that overrides <c>clone</c> gives its own
 /// clone's fixing. For every swap index QuantLib defines the two agree, the overnight-indexed one included, since none
-/// overrides <c>clone(tenor)</c>; nanoql's cube clones the base, as the master. QuantLib's check: the master's code, and
-/// for QuantLib's indices 1.44's bits.
+/// overrides <c>clone(tenor)</c>; nanoql's cube clones the base, as the master. QuantLib's check: the master's code,
+/// and for QuantLib's indices 1.44's bits.
 /// </summary>
 public class CubeAtmCloneTests
 {

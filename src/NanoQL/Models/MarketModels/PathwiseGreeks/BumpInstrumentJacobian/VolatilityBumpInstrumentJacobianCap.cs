@@ -8,8 +8,7 @@ namespace NanoQL.Models;
 
 /// <summary>
 /// A cap whose implied volatility <see cref="VolatilityBumpInstrumentJacobian"/> bumps: the caplets from the start
-/// index to the end index at a strike. QuantLib's nested <c>VolatilityBumpInstrumentJacobian::Cap</c> (R2's top-level
-/// name).
+/// index to the end index at a strike. QuantLib's nested <c>VolatilityBumpInstrumentJacobian::Cap</c>, made top-level.
 /// </summary>
 /// <param name="StartIndex">The first caplet's rate.</param>
 /// <param name="EndIndex">The end of the caplets, after the last caplet's rate.</param>

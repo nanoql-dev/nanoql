@@ -13,13 +13,12 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// QuantLib's master's coverage of the Gaussian1d float-float swaption (#2845, after the pin; the S-g1d plan's G1R5
-/// (iv)): <c>testGaussian1dFloatFloatSwaptionAndCalibrationBasket</c> and
-/// <c>testGaussian1dFloatFloatSwaptionCoverage</c> (master's <c>test-suite/floatfloatswap.cpp</c>), their checks that
-/// hold on 1.44, on its fixture: Euribor 3M against 6M, 100 on each leg, a flat 5% from the settlement date, GSR (σ =
-/// 0.01, a = 0.03), exercises in two and three years. The evaluation date is fixed at 15 January 2025, where master's
-/// test runs on the day's; its values at 1e-10 (4.1503974670013793e-06 and the rest) are that day's, so they are left
-/// out.
+/// QuantLib's master's coverage of the Gaussian1d float-float swaption (#2845, after the pin):
+/// <c>testGaussian1dFloatFloatSwaptionAndCalibrationBasket</c> and <c>testGaussian1dFloatFloatSwaptionCoverage</c>
+/// (master's <c>test-suite/floatfloatswap.cpp</c>), their checks that hold on 1.44, on its fixture: Euribor 3M against
+/// 6M, 100 on each leg, a flat 5% from the settlement date, GSR (σ = 0.01, a = 0.03), exercises in two and three years.
+/// The evaluation date is fixed at 15 January 2025, where master's test runs on the day's; its values at 1e-10
+/// (4.1503974670013793e-06 and the rest) are that day's, so they are left out.
 /// </summary>
 public class FloatFloatCoverageTests
 {

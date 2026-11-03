@@ -8,8 +8,8 @@ namespace NanoQL.Tests.Vectors;
 /// <summary>
 /// The BaroneAdesiWhaleyApproximationEngine vectors,
 /// <c>tests/vectors/pricingengines/vanilla/baroneadesiwhaleyengine.json</c>: American calls and puts priced by the
-/// Barone-Adesi-Whaley approximation over S-van's grid, their NPVs and Greeks, and the refusals; the outputs nanoql
-/// fixes are left out of the file.
+/// Barone-Adesi-Whaley approximation over the vanilla engines' grid, their NPVs and Greeks, and the refusals; the
+/// outputs nanoql fixes are left out of the file.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class BaroneAdesiWhaleyApproximationEngineVectorTests

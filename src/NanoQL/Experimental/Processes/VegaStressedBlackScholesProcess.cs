@@ -23,9 +23,9 @@ namespace NanoQL.Experimental;
 /// With a nonzero stress the standard deviation, the variance and the step go through the discretization, QuantLib's own
 /// route for a strike-dependent volatility, so the stressed diffusion reaches them; QuantLib's take the exact forms from
 /// the term structures on a strike-independent volatility, which read no diffusion, so the stress never reaches a step
-/// there (the S-xrt plan's XRR5 (xxvii); <c>Divergences/VegaStressedProcessTests.cs</c>). The expectation keeps
-/// QuantLib's exact value from the curves, the mean of the asset reading no volatility, where the discretized route
-/// refuses ("not implemented"). With no stress the process is QuantLib's.
+/// there (<c>Divergences/VegaStressedProcessTests.cs</c>). The expectation keeps QuantLib's exact value from the
+/// curves, the mean of the asset reading no volatility, where the discretized route refuses ("not implemented"). With
+/// no stress the process is QuantLib's.
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]
@@ -128,17 +128,17 @@ public sealed class VegaStressedBlackScholesProcess : GeneralizedBlackScholesPro
     }
 
     /// <inheritdoc/>
-    /// <remarks>Through the discretization with a nonzero stress (XRR5 (xxvii)); QuantLib's otherwise.</remarks>
+    /// <remarks>Through the discretization with a nonzero stress; QuantLib's otherwise.</remarks>
     public override double StdDeviation(double t0, double x0, double dt) =>
         StressLevel != 0.0 ? Discretization1D().Diffusion(this, t0, x0, dt) : base.StdDeviation(t0, x0, dt);
 
     /// <inheritdoc/>
-    /// <remarks>Through the discretization with a nonzero stress (XRR5 (xxvii)); QuantLib's otherwise.</remarks>
+    /// <remarks>Through the discretization with a nonzero stress; QuantLib's otherwise.</remarks>
     public override double Variance(double t0, double x0, double dt) =>
         StressLevel != 0.0 ? Discretization1D().Variance(this, t0, x0, dt) : base.Variance(t0, x0, dt);
 
     /// <inheritdoc/>
-    /// <remarks>The discretization's step with a nonzero stress (XRR5 (xxvii)); QuantLib's otherwise.</remarks>
+    /// <remarks>The discretization's step with a nonzero stress; QuantLib's otherwise.</remarks>
     public override double Evolve(double t0, double x0, double dt, double dw) =>
         StressLevel != 0.0
             ? Apply(x0, Discretization1D().Drift(this, t0, x0, dt) + (StdDeviation(t0, x0, dt) * dw))

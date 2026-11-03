@@ -13,11 +13,11 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The zero-allocation pins of C3's Monte Carlo loops (the S-exo plan's ER1 (iii) and (iv)): the forward Black-Scholes
-/// and performance path pricers on Black-Scholes paths join S-sr's one-dimensional pin
-/// (<see cref="McVanillaAllocationTests"/>), and the forward Heston path pricer's draw-price-add on
-/// <see cref="HestonProcess"/> paths S-hes's (<see cref="HestonAllocationTests"/>). Each pricer evaluates the plain
-/// vanilla payoff inline, where QuantLib builds one per path, so a batch allocates nothing per sample after the first.
+/// The zero-allocation pins of the forward engines' Monte Carlo loops: the forward Black-Scholes and performance path
+/// pricers on Black-Scholes paths join the one-dimensional pin (<see cref="McVanillaAllocationTests"/>), and the
+/// forward Heston path pricer's draw-price-add on <see cref="HestonProcess"/> paths the Heston pin (<see
+/// cref="HestonAllocationTests"/>). Each pricer evaluates the plain vanilla payoff inline, where QuantLib builds one
+/// per path, so a batch allocates nothing per sample after the first.
 /// </summary>
 public class McForwardAllocationTests
 {

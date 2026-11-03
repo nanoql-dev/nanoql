@@ -16,27 +16,26 @@ namespace NanoQL.Experimental;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A mutable working type (§2.7, the S-xcr plan's XR5), QuantLib's API: values or densities are added, then
-/// <see cref="Normalize"/>, which the reads call, computes the cumulative and excess probabilities. The density is
-/// uniform within a bucket, as <see cref="CumulativeDensity"/>'s interpolation reads it. QuantLib's default
-/// constructor leaves the size uninitialized; a distribution here is built of its buckets.
+/// A mutable working type (§2.7), QuantLib's API: values or densities are added, then <see cref="Normalize"/>, which
+/// the reads call, computes the cumulative and excess probabilities. The density is uniform within a bucket, as
+/// <see cref="CumulativeDensity"/>'s interpolation reads it. QuantLib's default constructor leaves the size
+/// uninitialized; a distribution here is built of its buckets.
 /// </para>
 /// <para>
-/// Three members depart from QuantLib's, each fixed on that density (the S-xcr plan's XR8 (xx);
-/// <c>Divergences/DistributionMembersTests.cs</c>): <see cref="CumulativeDensity"/> in the first bucket interpolates
-/// from 0, where QuantLib's reads the cumulative at index −1 (<c>distribution.cpp:220-230</c>);
-/// <see cref="ExpectedShortfall"/> integrates the density above the quantile, where QuantLib's sums the left edges
-/// from the bucket after the quantile's over a denominator leaving its first term out (5.625 and 9 for a uniform's
-/// 5.25 and 9.5, <c>:328-341</c>); and <see cref="Tranche"/> keeps the mass above the detachment in the last bucket,
-/// where QuantLib's sets the last cumulative to 1 before computing the last density from it, 0 (a total probability
-/// of 0.7, <c>:236-284</c>).
+/// Three members depart from QuantLib's, each fixed on that density (<c>Divergences/DistributionMembersTests.cs</c>):
+/// <see cref="CumulativeDensity"/> in the first bucket interpolates from 0, where QuantLib's reads the cumulative at
+/// index −1 (<c>distribution.cpp:220-230</c>); <see cref="ExpectedShortfall"/> integrates the density above the
+/// quantile, where QuantLib's sums the left edges from the bucket after the quantile's over a denominator leaving its
+/// first term out (5.625 and 9 for a uniform's 5.25 and 9.5, <c>:328-341</c>); and <see cref="Tranche"/> keeps the mass
+/// above the detachment in the last bucket, where QuantLib's sets the last cumulative to 1 before computing the last
+/// density from it, 0 (a total probability of 0.7, <c>:236-284</c>).
 /// </para>
 /// <para>
 /// A tranched distribution's buckets end at the tranche's width D − A: the bucket spanning it is uniform up to it, and
 /// the buckets <see cref="Tranche"/> truncates to it, the mass above the detachment among them, are an atom there, as
 /// <see cref="CumulativeDensity"/> and <see cref="ExpectedShortfall"/> read them. QuantLib's keeps their widths, which
 /// its left-edge shortfall never reads; the uniform shortfall read past the tranche (3.5 for 3 at 0.5 on a uniform's
-/// [2, 5] tranche; the S-xcr code review's C2 O1-1).
+/// [2, 5] tranche).
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]

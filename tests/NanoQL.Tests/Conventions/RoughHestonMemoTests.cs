@@ -12,10 +12,10 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The rough Heston engine keeps QuantLib's caches inside itself (the S-hes plan's HR4 (i), HD17): the characteristic
-/// function by (z, t), the lifted grid by t and the Riemann-Liouville weights, each computed from the engine's immutable
-/// model and settings, so a warm engine's answers are a fresh engine's bit for bit, in any order, and eight threads
-/// sharing one engine get one thread's bits.
+/// The rough Heston engine keeps QuantLib's caches inside itself: the characteristic function by (z, t), the lifted
+/// grid by t and the Riemann-Liouville weights, each computed from the engine's immutable model and settings, so a warm
+/// engine's answers are a fresh engine's bit for bit, in any order, and eight threads sharing one engine get one
+/// thread's bits.
 /// </summary>
 public class RoughHestonMemoTests
 {

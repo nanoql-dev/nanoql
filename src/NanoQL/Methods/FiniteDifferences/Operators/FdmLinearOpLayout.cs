@@ -14,7 +14,7 @@ namespace NanoQL.Methods;
 /// The memory layout of a finite-difference operator's points: the number of points in each direction, the first
 /// direction contiguous, each later one spaced by the product of the earlier dimensions.
 /// </summary>
-/// <remarks>Immutable once built (the S-eq plan's SEQR1).</remarks>
+/// <remarks>Immutable once built.</remarks>
 public sealed class FdmLinearOpLayout
 {
     private readonly ImmutableArray<int> dim;

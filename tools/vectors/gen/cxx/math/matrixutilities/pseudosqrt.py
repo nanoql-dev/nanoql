@@ -9,10 +9,10 @@ and of one that isn't square.
 
 Left out, generated: the three roots whose retained eigenvalues include a negative one (Higham's adjusted matrices of
 the "negative eigenvalue" matrix at ranks 3 and 100 and of Higham's M5 at rank 100, all at 1.0), where QuantLib takes
-its square root, a NaN column, and nanoql floors it at 0 (the S-sr plan's C1 review, B1-1;
-tests/NanoQL.Tests/Divergences/RankReducedSqrtNegativeEigenvalueTests.cs). Added for that check: the "negative
-eigenvalue" matrix under Higham at rank 2 and 1.0, the rank that keeps its non-negative eigenvalues. tests/NanoQL.Tests/Vectors/Cxx/Numerics/MatrixUtilities/PseudoSqrtCxxVectorTests.cs
-reads it back."""
+its square root, a NaN column, and nanoql floors it at 0
+(tests/NanoQL.Tests/Divergences/RankReducedSqrtNegativeEigenvalueTests.cs). Added for that check: the "negative
+eigenvalue" matrix under Higham at rank 2 and 1.0, the rank that keeps its non-negative eigenvalues.
+tests/NanoQL.Tests/Vectors/Cxx/Numerics/MatrixUtilities/PseudoSqrtCxxVectorTests.cs reads it back."""
 import os
 import random
 import sys
@@ -31,7 +31,7 @@ import vectors as v  # noqa: E402
 NONE, SPECTRAL, HYPERSPHERE, LOWERDIAGONAL, HIGHAM, PRINCIPAL = range(6)
 RANKS = [1, 3, 100]
 PERCENTAGES = [0.5, 0.9, 1.0]
-# The roots with a negative retained eigenvalue (B1-1), generated and left out.
+# The roots with a negative retained eigenvalue, generated and left out.
 LEFT_OUT = {"negative eigenvalue, Higham, rank 3, 1.0", "negative eigenvalue, Higham, rank 100, 1.0",
             "Higham's M5, Higham, rank 100, 1.0"}
 

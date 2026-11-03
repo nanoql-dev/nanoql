@@ -11,8 +11,8 @@ that strips with it.
   volatilities at each strike at dates from the base date to eight years after it (Dslice, each stripped curve read
   through its own lag), and the surface's strikes and last date.
 
-Left out: the k-interpolated surface's own volatility, which reads the stripped curves a lag early in QuantLib's (the
-S-xrt plan's XRR5 (xiii), tests/NanoQL.Tests/Divergences/KInterpolatedYoYVolatilityTests.cs). Read back by
+Left out: the k-interpolated surface's own volatility, which reads the stripped curves a lag early in QuantLib's
+(tests/NanoQL.Tests/Divergences/KInterpolatedYoYVolatilityTests.cs). Read back by
 tests/NanoQL.Tests/Vectors/Experimental/Inflation/InterpolatedYoYOptionletStripperVectorTests.cs."""
 import importlib.util
 import os

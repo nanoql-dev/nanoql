@@ -33,12 +33,11 @@ namespace NanoQL.Experimental;
 /// priced in the context given, as QuantLib computes at construction and again on a change.
 /// </para>
 /// <para>
-/// Two fixes (the S-xrt plan's XRR5 (xii) and (xiv); <c>Divergences/YoYCapFloorPriceSurfaceTests.cs</c>): each swap
-/// rate's date is its own maturity's option date, where QuantLib's takes the date of the maturity counted among the valid
-/// ones, another maturity's once one fails the intersection (<c>yoycapfloortermpricesurface.hpp:506-508</c>); and the
-/// repricing check reads each helper's own maturity, where QuantLib's reads the surface's reference date plus whole
-/// years while the helpers sit on the nominal curve's. With every maturity valid and the two reference dates equal,
-/// both are QuantLib's.
+/// Two fixes (<c>Divergences/YoYCapFloorPriceSurfaceTests.cs</c>): each swap rate's date is its own maturity's option
+/// date, where QuantLib's takes the date of the maturity counted among the valid ones, another maturity's once one
+/// fails the intersection (<c>yoycapfloortermpricesurface.hpp:506-508</c>); and the repricing check reads each helper's
+/// own maturity, where QuantLib's reads the surface's reference date plus whole years while the helpers sit on the
+/// nominal curve's. With every maturity valid and the two reference dates equal, both are QuantLib's.
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]
@@ -372,7 +371,7 @@ public class InterpolatedYoYCapFloorTermPriceSurface<TInterpolator2D, TInterpola
             }
             else
             {
-                // the maturity's own date (XRR5 (xii)), where QuantLib's takes the valid count's
+                // the maturity's own date, where QuantLib's takes the valid count's
                 times.Add(tmpSwapMaturities[valid]);
                 rates.Add(tmpSwapRates[valid]);
                 dates.Add(YoYOptionDateFromTenor(maturities[i]));
@@ -421,7 +420,7 @@ public class InterpolatedYoYCapFloorTermPriceSurface<TInterpolator2D, TInterpola
         var pYITS = new PiecewiseYoYInflation(
             NominalTermStructure.ReferenceDate, baseDate, baseYoYRate, YoYIndex.Frequency, DayCounter, yyHelpers, context);
 
-        // check that helpers are repriced, each at its own maturity (XRR5 (xiv))
+        // check that helpers are repriced, each at its own maturity
         const double Eps = 1e-5;
         for (int i = 0; i < yyHelpers.Count; i++)
         {

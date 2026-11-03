@@ -20,11 +20,10 @@ namespace NanoQL.Models;
 /// rank-reduced square root of its covariance.
 /// </summary>
 /// <remarks>
-/// <para>Immutable (the S-mm plan's MR1 (i)): its pseudo-roots are computed at construction, and a read returns a
-/// copy.</para>
+/// <para>Immutable: its pseudo-roots are computed at construction, and a read returns a copy.</para>
 /// <para>
-/// As <see cref="FlatVol"/>, two inputs whose reads QuantLib leaves undefined are refused (MR3 (xx);
-/// <c>Divergences/MarketModelUndefinedReadsTests.cs</c>): correlation times ending before the last evolution time,
+/// As <see cref="FlatVol"/>, two inputs whose reads QuantLib leaves undefined are refused
+/// (<c>Divergences/MarketModelUndefinedReadsTests.cs</c>): correlation times ending before the last evolution time,
 /// which QuantLib reads past, and a correlation with fewer rates than the model, whose matrices QuantLib reads past.
 /// QuantLib's check of the rates against the factors times the steps is commented out, and so it is here.
 /// </para>
@@ -115,7 +114,7 @@ public sealed class AbcdVol : MarketModel
         ImmutableArray<double> corrTimes = corr.Times;
         ImmutableArray<double> evolTimes = evolution.EvolutionTimes;
 
-        // QuantLib reads past the correlation times where they end before the last evolution time: refused (MR3 (xx)).
+        // QuantLib reads past the correlation times where they end before the last evolution time: refused.
         if (!(!corrTimes.IsEmpty && corrTimes[^1] >= evolTimes[^1]))
         {
             throw new ArgumentException(

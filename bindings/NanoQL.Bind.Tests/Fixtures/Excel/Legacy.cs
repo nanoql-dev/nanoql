@@ -3,7 +3,7 @@
 
 namespace NanoQL.Bind.Tests.Fixtures.Excel;
 
-/// <summary>A deprecated member: a list keeping it is refused (XLD34).</summary>
+/// <summary>A deprecated member: a list keeping it is refused.</summary>
 public static class Legacy
 {
     /// <summary>The old way.</summary>

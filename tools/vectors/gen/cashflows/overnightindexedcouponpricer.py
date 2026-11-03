@@ -3,17 +3,18 @@
 """Vectors for QuantLib's compounding and arithmetic-averaging overnight coupon pricers
 (ql/cashflows/overnightindexedcouponpricer.hpp), on the wheel, through 60 coupons and a dozen legs.
 
-Each coupon is priced with a pricer set on it: compounded coupons with CompoundingOvernightIndexedCouponPricer (with
-and without an optionlet volatility and the effective-volatility flag, which it doesn't read), averaged ones with
+Each coupon is priced with a pricer set on it: compounded coupons with CompoundingOvernightIndexedCouponPricer (with and
+without an optionlet volatility and the effective-volatility flag, which it doesn't read), averaged ones with
 ArithmeticAveragedOvernightIndexedCouponPricer over the approximation both ways, mean reversion 0.03 and 0, and
 volatility 0 and 0.01: a mean reversion of 0 gives NaN wherever a fixing is forecast, as QuantLib's formulas divide by
-its cube (D14). The coupons are past, spanning and future, on overnight indexes fixing 0 and 2 days back, with
-lookbacks, lockouts and the shift on the compounded ones. Each case's outputs are the coupon's rate, amount and
-accrued amounts at three dates, its effective spread and index fixing (compounded coupons), and the pricer's
-accessors: the effective-volatility flag, whether it holds a volatility, and its five throwing members (swapletPrice,
-capletPrice, capletRate, floorletPrice, floorletRate). The effective volatilities, which QuantLib keeps after a caplet
-or floorlet, are the harness's (tools/vectors/gen/cxx/cashflows/overnightindexedcouponpricer.py) and the Black file's. A pricer's setCapletVolatility and setEffectiveVolatilityInput are read back
-on every fifth case, the coupon priced again after them.
+its cube. The coupons are past, spanning and future, on overnight indexes fixing 0 and 2 days back, with lookbacks,
+lockouts and the shift on the compounded ones. Each case's outputs are the coupon's rate, amount and accrued amounts at
+three dates, its effective spread and index fixing (compounded coupons), and the pricer's accessors: the
+effective-volatility flag, whether it holds a volatility, and its five throwing members (swapletPrice, capletPrice,
+capletRate, floorletPrice, floorletRate). The effective volatilities, which QuantLib keeps after a caplet or floorlet,
+are the harness's (tools/vectors/gen/cxx/cashflows/overnightindexedcouponpricer.py) and the Black file's. A pricer's
+setCapletVolatility and setEffectiveVolatilityInput are read back on every fifth case, the coupon priced again after
+them.
 
 The legs set a pricer with setCouponPricer, QuantLib's visitor: a compounding pricer on compounded coupons, an
 averaging pricer on averaged ones, the Black pricers on each, and the refusals of a compounding pricer on averaged
@@ -21,8 +22,8 @@ coupons, an averaging pricer on compounded ones, and a mixed leg. Each leg's out
 call, or the call's throw.
 
 A compounded coupon whose spread QuantLib's compounding pricer drops over the telescopic forecast range, which nanoql
-compounds (the S-rx plan's C3 review, B1-1; overnightindexedcoupon.py's spread_dropped), is generated and left out, so
-the random sequence of the cases after it is kept.
+compounds (overnightindexedcoupon.py's spread_dropped), is generated and left out, so the random sequence of the cases
+after it is kept.
 
 The wheel's ArithmeticAveragedOvernightIndexedCouponPricer is built with keyword arguments only. Each case's inputs
 hold its settings, its "coupon" (or "coupons") and its "pricer", as tools/vectors/gen/cashflows/overnightindexedcoupon.py
@@ -105,7 +106,7 @@ def coupon_and_pricer(k, rng):
 
 
 def coupon_case(k, rng):
-    """The case, or None where QuantLib drops the coupon's spread (B1-1), after the fixings are drawn."""
+    """The case, or None where QuantLib drops the coupon's spread, after the fixings are drawn."""
     spec, pspec, dates = coupon_and_pricer(k, rng)
     index = oic.make_index(spec["index"])
     pairs = oic.fixings_for(index, ql.Date(spec["startDate"]) - 20, TODAY - 1, rng)

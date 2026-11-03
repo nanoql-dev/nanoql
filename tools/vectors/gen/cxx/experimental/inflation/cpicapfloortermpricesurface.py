@@ -12,8 +12,8 @@
 - "refused" cases: the constructor's checks (too few strikes, a non-increasing maturity, a non-positive price, a cap
   price rising with the strike, no zero-inflation curve), each with QuantLib's text in nanoql's convention facts.
 
-Left out: maturities in months, which QuantLib compounds over their month count (the S-xrt run's R2-1,
-tests/NanoQL.Tests/Divergences/CPICapFloorPriceSurfaceTests.cs). The functions here are shared by
+Left out: maturities in months, which QuantLib compounds over their month count
+(tests/NanoQL.Tests/Divergences/CPICapFloorPriceSurfaceTests.cs). The functions here are shared by
 tools/vectors/gen/cxx/experimental/inflation/cpicapfloorengines.py, which imports this file. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Experimental/Inflation/CPICapFloorTermPriceSurfaceCxxVectorTests.cs."""
 import copy

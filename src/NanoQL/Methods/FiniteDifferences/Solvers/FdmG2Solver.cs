@@ -10,8 +10,9 @@ namespace NanoQL.Methods;
 
 /// <summary>The G2 model's finite-difference solver: a <see cref="Fdm2DimSolver"/> on a <see cref="FdmG2Op"/> in directions 0 and 1.</summary>
 /// <remarks>
-/// Computed at construction, where QuantLib's lazy object computes at the first read (S-eq's solvers' form), and
-/// immutable after. The model is an argument, where QuantLib's solver holds a handle and recalculates when it changes.
+/// Computed at construction, where QuantLib's lazy object computes at the first read (the one-dimensional solver's
+/// form), and immutable after. The model is an argument, where QuantLib's solver holds a handle and recalculates when
+/// it changes.
 /// </remarks>
 public sealed class FdmG2Solver
 {

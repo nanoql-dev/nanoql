@@ -15,8 +15,8 @@ namespace NanoQL.Methods;
 /// </summary>
 /// <typeparam name="TScheme">The scheme that steps the values (QuantLib's template parameter, D12).</typeparam>
 /// <remarks>
-/// A working type (the S-eq plan's SEQR1): the rollback steps the caller's values in place through the scheme, so the
-/// model's inner loop allocates nothing.
+/// A working type: the rollback steps the caller's values in place through the scheme, so the model's inner loop
+/// allocates nothing.
 /// </remarks>
 [WorkingType]
 public sealed class FiniteDifferenceModel<TScheme>

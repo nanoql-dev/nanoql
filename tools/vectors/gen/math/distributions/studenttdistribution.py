@@ -1,12 +1,11 @@
 # SPDX-FileCopyrightText: 2026 The nanoql Authors
 # SPDX-License-Identifier: Apache-2.0
 """Vectors for StudentDistribution, CumulativeStudentDistribution and InverseCumulativeStudent
-(ql/math/distributions/studenttdistribution.hpp, .cpp) through the wheel: the density for degrees of freedom from
-1 to 300 at points where QuantLib's factors stay finite; the cumulative function above the centre where n/(n + x^2)
-is at most 1/2, QuantLib's formula (nearer the centre and below it CR7 (xxiii)'s fixes, left out); and the
-inverse, Boost's quantile, for degrees of freedom from 1 to 10^6 at probabilities from 1e-12 to 1 - 1e-12, with
-QuantLib's own answers at 0 and 1. Read back by
-tests/NanoQL.Tests/Vectors/Numerics/Distributions/StudentTDistributionVectorTests.cs."""
+(ql/math/distributions/studenttdistribution.hpp, .cpp) through the wheel: the density for degrees of freedom from 1 to
+300 at points where QuantLib's factors stay finite; the cumulative function above the centre where n/(n + x^2) is at
+most 1/2, QuantLib's formula (nearer the centre and below it nanoql's fixes, left out); and the inverse, Boost's
+quantile, for degrees of freedom from 1 to 10^6 at probabilities from 1e-12 to 1 - 1e-12, with QuantLib's own answers
+at 0 and 1. Read back by tests/NanoQL.Tests/Vectors/Numerics/Distributions/StudentTDistributionVectorTests.cs."""
 import os
 import sys
 

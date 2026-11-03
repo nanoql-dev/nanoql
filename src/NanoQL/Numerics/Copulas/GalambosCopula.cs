@@ -12,12 +12,11 @@ namespace NanoQL.Numerics;
 /// <summary>The Galambos copula, C(x, y) = xy·exp(((−ln x)^−θ + (−ln y)^−θ)^(−1/θ)).</summary>
 /// <remarks>
 /// Immutable. On the unit square's edges it returns the boundary values, C(u, 0) = C(0, v) = 0, C(u, 1) = u and C(1, v)
-/// = v, before its formula, as every copula here does (the S-core plan's CR7 (xxxiii)): QuantLib's is NaN at (0, 0).
-/// Above θ 19, where (−ln x)^−θ can overflow (from θ 19.3 at the largest x below 1, so QuantLib's is ∞ from θ about 50
-/// on points 1e-8 from the edge), the smaller logarithm m is factored out, xy·exp(m(1 + r^θ)^(−1/θ)) with r the ratio
-/// of the two (the plan's CR7 (xxi)); QuantLib's formula to θ 19, where no power leaves the doubles' normal range.
-/// Where xy is below the normal range the product is formed last, and where e^(…) overflows (x and y both subnormal)
-/// as e^(… + ln x + ln y), where QuantLib's is NaN.
+/// = v, before its formula, as every copula here does: QuantLib's is NaN at (0, 0). Above θ 19, where (−ln x)^−θ can
+/// overflow (from θ 19.3 at the largest x below 1, so QuantLib's is ∞ from θ about 50 on points 1e-8 from the edge),
+/// the smaller logarithm m is factored out, xy·exp(m(1 + r^θ)^(−1/θ)) with r the ratio of the two; QuantLib's formula
+/// to θ 19, where no power leaves the doubles' normal range. Where xy is below the normal range the product is formed
+/// last, and where e^(…) overflows (x and y both subnormal) as e^(… + ln x + ln y), where QuantLib's is NaN.
 /// </remarks>
 public sealed class GalambosCopula
 {

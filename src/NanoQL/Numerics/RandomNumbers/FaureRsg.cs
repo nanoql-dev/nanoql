@@ -20,11 +20,11 @@ namespace NanoQL.Numerics;
 /// until its next draw. The correctness of the returned values is tested by reproducing known good values.
 /// </para>
 /// <para>
-/// Its integers are QuantLib's <c>long</c> under MSVC, 32 bits wide (the S-core plan's CD6), which also sets the number
-/// of base-b digits the sequence carries, ⌊ln(2^31 − 1)/ln b⌋: 30 in two dimensions (base 2), 4 in a hundred
-/// (base 101). Once its counter carries past them the generator refuses ("Error processing Faure sequence."), after
-/// 2^30 − 1 draws in base 2 and 101^4 − 1 in base 101, where QuantLib built with a 64-bit <c>long</c> (Linux) draws
-/// other numbers and refuses after about 10^18. These are the Python wheel's numbers.
+/// Its integers are QuantLib's <c>long</c> under MSVC, 32 bits wide, which also sets the number of base-b digits the
+/// sequence carries, ⌊ln(2^31 − 1)/ln b⌋: 30 in two dimensions (base 2), 4 in a hundred (base 101). Once its counter
+/// carries past them the generator refuses ("Error processing Faure sequence."), after 2^30 − 1 draws in base 2 and
+/// 101^4 − 1 in base 101, where QuantLib built with a 64-bit <c>long</c> (Linux) draws other numbers and refuses after
+/// about 10^18. These are the Python wheel's numbers.
 /// </para>
 /// </remarks>
 [WorkingType]

@@ -9,14 +9,14 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The Rendistato calculator computes in its constructor (the S-cms plan's CMD9; the playbook's <c>LazyObject</c> row),
-/// each yield solve from QuantLib's first-call guess, 5%. QuantLib's calculator, recalculated after a change, starts
-/// each solve from the last calculation's yields (<c>btp.cpp</c>, <c>yields_[i]</c> and <c>swapBondYields_[i]</c> as
-/// the guesses), so its recomputed yields can differ from a first calculation's within the solver's accuracy, 1e-10: a
-/// documented divergence on a recomputation, nanoql's every calculator being QuantLib's first. On the harness, on three
-/// BTPs (3% 2029, 3.35% 2030, 3.1% 2031; outstandings 12, 18 and 6; clean prices 99.1, 101.4 and 99.8) on Euribor 6M on
-/// a flat 3.1% curve discounted on a flat 2.9% one on 15 January 2025, QuantLib's first calculation gives the yields
-/// 0.03240038273671944, 0.03108728722912678 and 0.03157660374568899.
+/// The Rendistato calculator computes in its constructor (the playbook's <c>LazyObject</c> row), each yield solve from
+/// QuantLib's first-call guess, 5%. QuantLib's calculator, recalculated after a change, starts each solve from the last
+/// calculation's yields (<c>btp.cpp</c>, <c>yields_[i]</c> and <c>swapBondYields_[i]</c> as the guesses), so its
+/// recomputed yields can differ from a first calculation's within the solver's accuracy, 1e-10: a documented divergence
+/// on a recomputation, nanoql's every calculator being QuantLib's first. On the harness, on three BTPs (3% 2029, 3.35%
+/// 2030, 3.1% 2031; outstandings 12, 18 and 6; clean prices 99.1, 101.4 and 99.8) on Euribor 6M on a flat 3.1% curve
+/// discounted on a flat 2.9% one on 15 January 2025, QuantLib's first calculation gives the yields 0.03240038273671944,
+/// 0.03108728722912678 and 0.03157660374568899.
 /// </summary>
 public class RendistatoTests
 {

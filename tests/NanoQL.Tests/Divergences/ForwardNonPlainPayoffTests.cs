@@ -13,7 +13,7 @@ namespace NanoQL.Tests.Divergences;
 /// The forward and forward-performance engines on a payoff that isn't plain vanilla. QuantLib builds the inner option's
 /// plain vanilla payoff from the payoff's type alone (<c>forwardengine.hpp:84-86</c>), so a cash-or-nothing forward
 /// start prices 10.456, the plain vanilla's, where its value is 5.003. nanoql refuses it, with the text of QuantLib's
-/// Monte Carlo forward engines (the S-exo plan's ER5 (xxiii)): the refusal's type and text are the facts.
+/// Monte Carlo forward engines: the refusal's type and text are the facts.
 /// </summary>
 public class ForwardNonPlainPayoffTests
 {

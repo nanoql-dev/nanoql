@@ -10,18 +10,17 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The markets and the tolerance of the S-bar plan's Heston geometric Asian facts: flat curves on Actual/365 Fixed
-/// (r 5%, q 0 unless given), the fixing and exercise dates as days from the evaluation date, the strike given; and R7 at
-/// the engine's own scale (BR12), 1e-10 × max(the price, the lower bound D·max(±(F_G − K), 0), D·F_G/100). The
-/// references come from the S-bar run's <c>c3_heston_div_refs.py</c> on the planner's route machinery: QuantLib's
-/// <c>AnalyticHestonEngine</c> at 1e-15 at one fixing, QUADPACK on the route's contour and on a second, and QuantLib's
-/// formula in 40 digits. A market whose fixings fall within a day is restated on days by the model's time change: over
-/// c times the time, r, q, v₀, κ, θ and the vol of vol each over c and ρ kept, which leaves the average's law and the
-/// discount unchanged.
+/// The markets and the tolerance of the Heston geometric Asian facts: flat curves on Actual/365 Fixed (r 5%, q 0 unless
+/// given), the fixing and exercise dates as days from the evaluation date, the strike given; and the tolerance at the
+/// engine's own scale, 1e-10 × max(the price, the lower bound D·max(±(F_G − K), 0), D·F_G/100). The references:
+/// QuantLib's <c>AnalyticHestonEngine</c> at 1e-15 at one fixing, QUADPACK on the route's contour and on a second, and
+/// QuantLib's formula in 40 digits. A market whose fixings fall within a day is restated on days by the model's time
+/// change: over c times the time, r, q, v₀, κ, θ and the vol of vol each over c and ρ kept, which leaves the average's
+/// law and the discount unchanged.
 /// </summary>
 internal static class HestonGeometricAsianMarkets
 {
-    // the references' evaluation date, and P9's (the planner's cut probe)
+    // the references' evaluation date, and the short-dated market's
     internal static readonly Date Today = new(16, Month.September, 2015);
     internal static readonly Date P9Today = new(1, Month.January, 2026);
     internal static readonly DayCounter A365 = new Actual365Fixed();
@@ -38,7 +37,7 @@ internal static class HestonGeometricAsianMarkets
         AnalyticDiscreteGeometricAveragePriceAsianHestonEngine.Calculate(
             Option(today, type, strike, fixingDays, exerciseDays), new EvaluationContext { EvaluationDate = today }, process, xiRightLimit).NPV!.Value;
 
-    // R7 at BR12's scale: the discount D and the average's forward F_G of the contract
+    // The tolerance at the engine's scale: the discount D and the average's forward F_G of the contract
     internal static void AssertR7(double expected, double actual, OptionType type, double strike, double discount, double forward, double r7s = 1.0)
     {
         double lower = discount * Math.Max((double)type * (forward - strike), 0.0);

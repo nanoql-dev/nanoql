@@ -9,10 +9,10 @@ and a lambda at zero (QuantLib's ConstantParameter, ": invalid value"). Then cal
 helpers (maturities of three months, a year and two years, strikes 90, 100 and 110, quoted at QuantLib's DAX case's
 volatilities), each helper priced by a BatesEngine (Gauss-Laguerre 64) on the model, by Levenberg-Marquardt at
 QuantLib's defaults and the DAX case's end criteria: the calibrated params, the helpers' calibration errors, the end
-criteria and the function evaluations, through the S7R6 filter of the master plan: each calibration is refit with every
-nonzero real input (the vols, the spot, the curves' rates and the starting parameters) moved one ulp, up and down
-together, and an output is written only where both refits keep it within 1e-12 x max(|a|, |b|, 1) (an integer, where
-they give the same); the generator prints "dropped n of m outputs".
+criteria and the function evaluations, through the stability filter: each calibration is refit with every nonzero real
+input (the vols, the spot, the curves' rates and the starting parameters) moved one ulp, up and down together, and an
+output is written only where both refits keep it within 1e-12 x max(|a|, |b|, 1) (an integer, where they give the same);
+the generator prints "dropped n of m outputs".
 
 A case holds one process {"riskFree", "dividend", "s0", "v0", "kappa", "theta", "sigma", "rho", "lambda", "nu",
 "delta"}, the curves tools/vectors/gen/processes/blackscholesprocess.py's specs, and for a calibration its helpers

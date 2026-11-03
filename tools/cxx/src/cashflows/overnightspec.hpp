@@ -10,7 +10,7 @@
 // "refPeriodEnd", "dayCounter", "telescopicValueDates", "averagingMethod", "lookbackDays", "lockoutDays",
 // "applyObservationShift", "compoundSpreadDaily", "rateComputationStartDate", "rateComputationEndDate",
 // "exCouponDate", "roundingPrecision"}, its index an OvernightIndex spec of indexes/indexspec.hpp; the harness builds
-// no telescopic coupon, whose expected values the plan's telescopic rule takes from the wheel. A capped coupon is
+// no telescopic coupon, whose expected values the telescopic rule takes from the wheel. A capped coupon is
 // {"underlying", "cap", "floor", "nakedOption", "dailyCapFloor"}. A pricer is {"type", "vol",
 // "effectiveVolatilityInput"} with the types Compounding, ArithmeticAveraged (adding "meanReversion", "volatility" and
 // "byApprox"), BlackCompounding and BlackAveraging. A volatility is null or a ConstantOptionletVolatility,

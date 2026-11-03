@@ -8,9 +8,9 @@ expectation(t, x, dt), stdDeviation(t, x, dt) and variance(t, x, dt). Then the c
 of a NaN volatility.
 
 Left out: the standard deviation and the variance of the two processes at the square root of machine epsilon and just
-below it, where QuantLib's variance cuts to sigma^2*dt or cancels, and nanoql's is the cancellation-free
-sigma^2*dt*(1 - exp(-x))/x, x = 2a*dt, by the user's ruling of 2026-10-22 (the S-sr plan's SSR3 class;
-tests/NanoQL.Tests/Divergences/OrnsteinUhlenbeckVarianceTests.cs). Elsewhere the form moves the last bits only.
+below it, where QuantLib's variance cuts to sigma^2*dt or cancels, and nanoql's is the cancellation-free sigma^2*dt*(1
+- exp(-x))/x, x = 2a*dt (tests/NanoQL.Tests/Divergences/OrnsteinUhlenbeckVarianceTests.cs). Elsewhere the form moves
+the last bits only.
 
 The wheel's calls, by QuantLib-SWIG's stochasticprocess.i: ql.OrnsteinUhlenbeckProcess(speed, vol, x0, level) is the
 constructor, with QuantLib's defaults for x0 and level where the case leaves them out; speed, volatility and level

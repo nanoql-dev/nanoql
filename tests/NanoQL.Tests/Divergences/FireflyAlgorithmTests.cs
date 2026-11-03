@@ -8,17 +8,17 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The firefly algorithm (the S-xrt plan's XRR5 (xxxii) and the run's R4-1, fixed under R8). QuantLib's attraction loop
-/// stops at k &lt; i − 1, so each firefly misses the next brighter one and the second brightest is attracted by none;
-/// its moved fireflies' new values go to the sorted population's place their index names, another firefly's, so values
-/// and positions part after the first move; and pure differential evolution assigns its random base through a
-/// reference, overwriting the best firefly. nanoql attracts each firefly to every brighter one, which a recording
-/// intensity counts, i(i − 1)/2 of M brightest a round; keeps each value with its firefly, which the intensity checks
-/// against the cost at every round; and copies the base, so pure differential evolution converges on the shifted sphere,
-/// where QuantLib's population of six collapses onto copies of its members and stalls at 1.2e-3 (6.0e-16 for the copy).
-/// The decreasing walk's δ squares at each round's first walk from the second round (the S-xrt code review's F4-2):
-/// each walk's scale, read against a walk at δ 1 on the same seed, is δ₀^(2^(r − 1)) in round r, where QuantLib's
-/// count squares once every Mfa + 1 walks, so with one firefly δ₀² still in the third round.
+/// The firefly algorithm (fixed). QuantLib's attraction loop stops at k &lt; i − 1, so each firefly misses the next
+/// brighter one and the second brightest is attracted by none; its moved fireflies' new values go to the sorted
+/// population's place their index names, another firefly's, so values and positions part after the first move; and pure
+/// differential evolution assigns its random base through a reference, overwriting the best firefly. nanoql attracts
+/// each firefly to every brighter one, which a recording intensity counts, i(i − 1)/2 of M brightest a round; keeps
+/// each value with its firefly, which the intensity checks against the cost at every round; and copies the base, so
+/// pure differential evolution converges on the shifted sphere, where QuantLib's population of six collapses onto
+/// copies of its members and stalls at 1.2e-3 (6.0e-16 for the copy). The decreasing walk's δ squares at each round's
+/// first walk from the second round: each walk's scale, read against a walk at δ 1 on the same seed, is δ₀^(2^(r − 1))
+/// in round r, where QuantLib's count squares once every Mfa + 1 walks, so with one firefly δ₀² still in the third
+/// round.
 /// </summary>
 public class FireflyAlgorithmTests
 {

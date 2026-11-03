@@ -15,13 +15,13 @@ swapletPrice, and capletRate, capletPrice, floorletRate and floorletPrice at eac
 coupon's rate initialized the pricer), and the rate of a collared coupon on the same terms (cap 6%, floor 3.5%), each as
 a flat list over the coupons and strikes. The strikes are 3%, 5% and 7%, and on the normal matrix also -0.5%.
 
-Left out, the S-cms plan's CMR5 fixes: the analytic pricer on the shift models, whose convexity term is high by
-P(T0)/P(Tp) ((xxii)); a lognormal cap at or below 0 ((xxiii)); an index with an exogenous discounting curve ((xxii)); a
-non-whole-year Standard index ((i)); and reversions below 1e-4 but 0 ((v)).
+Left out, nanoql's fixes: the analytic pricer on the shift models, whose convexity term is high by P(T0)/P(Tp); a
+lognormal cap at or below 0; an index with an exogenous discounting curve; a non-whole-year Standard index; and
+reversions below 1e-4 but 0.
 
-The SABR cube's cases take the stability filter (the S7 plan's S7R6): each is priced again on the cube refitted with
-every input volatility moved one ulp up, then down (swaptionvolcube.py's moved()), and an output is written only where
-both leave it within 1e-12 x max(|a|, |b|, 1); the dropped indexes per output are in the case's inputs "dropped".
+The SABR cube's cases take the stability filter: each is priced again on the cube refitted with every input volatility
+moved one ulp up, then down (swaptionvolcube.py's moved()), and an output is written only where both leave it within
+1e-12 x max(|a|, |b|, 1); the dropped indexes per output are in the case's inputs "dropped".
 
 A refused value is {"throws": true}. Each case's inputs hold its settings, the pricer ("pricer": {"type", "model",
 "meanReversion"}), the volatility ("volatility": a matrix or cube spec of swaptionvolcube.py's), the coupons ("coupons":

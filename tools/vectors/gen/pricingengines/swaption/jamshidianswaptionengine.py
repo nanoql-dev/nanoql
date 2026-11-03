@@ -13,8 +13,8 @@ engine, which fixes the reference date and day counter of the times. A Hull-Whit
 it: the model's own gives the times.
 
 A Hull-White and a Vasicek model at a = 1e-9, below the formulas' sqrt(QL_EPSILON), where QuantLib 1.44's forms take
-their a = 0 limits and drop terms of order a*tau, are left out: nanoql's forms are QuantLib's master's (#2882, the S-sr
-plan's SSR3), which move those prices beyond the tolerance (tests/NanoQL.Tests/Divergences/SmallReversionTests.cs).
+their a = 0 limits and drop terms of order a*tau, are left out: nanoql's forms are QuantLib's master's (#2882), which
+move those prices beyond the tolerance (tests/NanoQL.Tests/Divergences/SmallReversionTests.cs).
 
 The refusals: a cash swaption settled at the par yield curve; a Bermudan exercise ("exotic swaptions"); a floating
 spread; nominals that aren't constant; a Vasicek model with no curve; and each one checked first when several fail.

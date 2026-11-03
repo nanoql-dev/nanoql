@@ -14,24 +14,22 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The perturbative barrier engine's distribution helpers and second-order derivatives (the S-xeq plan's XER5 (i), (ii)
-/// and XER3 (a), fixed under R8; the helpers internal, read through reflection). QuantLib's port of Genz's TVPACK has
-/// three lines that aren't Genz's: Plackett's integrand takes √(BA − R·BB) where Genz squares it
-/// (<c>perturbativebarrieroptionengine.cpp:1260</c>; upstream's own fix after v1.44, #2935, which re-caches QuantLib's
-/// two order-2 cases at 0.8943754 where v1.44 cached its defective code's 0.8943769); the Student branch belongs to the
-/// degrees-of-freedom test, where QuantLib's attaches it to the normal integrand's cut (<c>:1261-1268</c>), so a normal
-/// integrand past the cut returns 0.5 or NaN, not 0; and the bivariate normal's |ρ| ≥ 0.925 branch takes (1 − x²)²
-/// where Genz's <c>BVND</c> takes √(1 − x²) (<c>:1398</c>). QuantLib's trivariate normal misses an independent one by
-/// up to 0.0129 at six points (0.247037493575 against 0.253775665773, 0.051555378193 against 0.049633455514, 0 against
-/// 0.012895124168, 0 against 0.006207519614, 0.144908828458 against 0.144207845916, 0.001686899450 against
-/// 0.001348181042) and by up to 0.92 at 1,500 random ones; QuantLib's bivariate normal misses QuantLib's own We04DP by
-/// up to 5.1e-3 [executed: the planner's <c>xp_pert.cpp</c>, <c>xp_pert2935.cpp</c>, <c>xp_pert_nd2.cpp</c>,
-/// <c>xp_tvtl_time.cpp</c>]. The second-order term's derivative helpers aren't their functions' derivatives in a: the F
-/// helper's factor reads τ − p where its function reads τ − s, and the E helper's two normal limits carry a stray inner
-/// square root and its x-derivative of Φ₂(x, y) − Φ(x) the wrong sign. nanoql takes Genz's three lines and derives the
-/// helpers term by term from ∂Φ₂(h, k; ρ)/∂h = φ(h) Φ((k − ρh)/√(1 − ρ²)). Checks: We04DP; a trivariate normal
-/// integrated on 50 panels of 64-point Gauss-Legendre; five-point differences; the finite-difference barrier engine;
-/// S-rx's analytic barrier engine on a flat market.
+/// The perturbative barrier engine's distribution helpers and second-order derivatives (fixed; the helpers internal,
+/// read through reflection). QuantLib's port of Genz's TVPACK has three lines that aren't Genz's: Plackett's integrand
+/// takes √(BA − R·BB) where Genz squares it (<c>perturbativebarrieroptionengine.cpp:1260</c>; upstream's own fix after
+/// v1.44, #2935, which re-caches QuantLib's two order-2 cases at 0.8943754 where v1.44 cached its defective code's
+/// 0.8943769); the Student branch belongs to the degrees-of-freedom test, where QuantLib's attaches it to the normal
+/// integrand's cut (<c>:1261-1268</c>), so a normal integrand past the cut returns 0.5 or NaN, not 0; and the bivariate
+/// normal's |ρ| ≥ 0.925 branch takes (1 − x²)² where Genz's <c>BVND</c> takes √(1 − x²) (<c>:1398</c>). QuantLib's
+/// trivariate normal misses an independent one by up to 0.0129 at six points (0.247037493575 against 0.253775665773,
+/// 0.051555378193 against 0.049633455514, 0 against 0.012895124168, 0 against 0.006207519614, 0.144908828458 against
+/// 0.144207845916, 0.001686899450 against 0.001348181042) and by up to 0.92 at 1,500 random ones; QuantLib's bivariate
+/// normal misses QuantLib's own We04DP by up to 5.1e-3 (QuantLib 1.44). The second-order term's derivative helpers
+/// aren't their functions' derivatives in a: the F helper's factor reads τ − p where its function reads τ − s, and the
+/// E helper's two normal limits carry a stray inner square root and its x-derivative of Φ₂(x, y) − Φ(x) the wrong sign.
+/// nanoql takes Genz's three lines and derives the helpers term by term from ∂Φ₂(h, k; ρ)/∂h = φ(h) Φ((k − ρh)/√(1 −
+/// ρ²)). Checks: We04DP; a trivariate normal integrated on 50 panels of 64-point Gauss-Legendre; five-point
+/// differences; the finite-difference barrier engine; the analytic barrier engine on a flat market.
 /// </summary>
 public class PerturbativeBarrierEngineTests
 {
@@ -42,7 +40,7 @@ public class PerturbativeBarrierEngineTests
     private delegate double TvtlFunction(int nu, ReadOnlySpan<double> limit, ReadOnlySpan<double> sigmarho, double epsi);
 
     [Theory]
-    [InlineData(1000, 100)] // full resolution: 0.8943757367 (this run's record)
+    [InlineData(1000, 100)] // full resolution: 0.8943757367
     [InlineData(100, 10)] // fast: 0.8943756216
     public void OrderTwoIsQuantLibMastersCacheNotItsV144Cache(int npoint, int npoint2)
     {
@@ -93,7 +91,7 @@ public class PerturbativeBarrierEngineTests
     public void TheTrivariateNormalIsGenzsAtThePlannersPoints(
         double h1, double h2, double h3, double r21, double r31, double r32, double planner)
     {
-        // the planner's independent values to twelve digits beside this file's own reference
+        // independent values to twelve digits beside this file's own reference
         double tvtl = Tvtl(0, [0.0, h1, h2, h3], [0.0, r21, r31, r32], 1e-12);
         double reference = TrivariateNormal(h1, h2, h3, r21, r31, r32);
         Assert.Equal(reference, tvtl, 1e-12);
@@ -106,7 +104,7 @@ public class PerturbativeBarrierEngineTests
         // limits in [−4, 4] and correlations in [−0.95, 0.95] from a Mersenne twister seeded 20261028, a correlation
         // matrix kept where its determinant is at least 1e-3; at the engine's requested accuracy, 1e-12. #2935's line
         // alone leaves 100 of the points past it, up to 6.8e-2, and QuantLib's bivariate normal line alone 20, up to
-        // 2.2e-4 [executed: the planner's xp_tvtl_time.cpp]
+        // 2.2e-4 (QuantLib 1.44)
         var rng = new MersenneTwisterUniformRng(20261028);
         double Uniform(double lo, double hi) => lo + ((hi - lo) * rng.NextReal());
         int points = 0, over = 0;
@@ -140,7 +138,6 @@ public class PerturbativeBarrierEngineTests
         // five-point differences in a, their step 1e-2 × min(max(1, |a|), √(2(τ − p))), the width on which the
         // functions vary; within 1e-7 relative wherever the derivative exceeds 1e-3, where the stencil carries digits.
         // QuantLib's F helper misses by up to 1.4e-3 relative for b² ≠ (1 − γ)², its E helper by orders of magnitude
-        // (the planner's xp_pert.cpp)
         var dvv = Helper<Func<double, double, double, double, double, double, double>>("Dvv");
         var ddvv = Helper<Func<double, double, double, double, double, double, double>>("Ddvv");
         var dff = Helper<Func<double, double, double, double, double, double, double>>("Dff");
@@ -189,7 +186,7 @@ public class PerturbativeBarrierEngineTests
     {
         // vols 0.10 then 0.30, K 95, H 110: QuantLib's finite-difference barrier engine at 800², 1600² and 3200²,
         // 4.4111575994, 4.4111651161 and 4.4111669887, second order, its limit 4.4111676129; QuantLib's order 2 errs
-        // 7.6e-5 (4.4112434138) [executed: the planner's xp_pert.cpp]; fast order 2 here within 5e-6
+        // 7.6e-5 (4.4112434138) (QuantLib 1.44); fast order 2 here within 5e-6
         Date today = new(15, May, 2026);
         var context = new EvaluationContext { EvaluationDate = today };
         DayCounter dc = new Actual360();
@@ -210,7 +207,7 @@ public class PerturbativeBarrierEngineTests
     [Fact]
     public void OnAFlatMarketEachOrderIsTheAnalyticBarrierPrice()
     {
-        // the perturbations vanish where the carry and variance are constant: order 0 is S-rx's analytic up-and-out put
+        // the perturbations vanish where the carry and variance are constant: order 0 is the analytic up-and-out put
         Date today = new(15, May, 2026);
         var context = new EvaluationContext { EvaluationDate = today };
         DayCounter dc = new Actual360();
@@ -231,9 +228,8 @@ public class PerturbativeBarrierEngineTests
         }
     }
 
-    // P(X1 < h1, X2 < h2, X3 < h3), correlations r21, r31, r32: X1's density times the bivariate normal of the other two
-    // given it (We04DP), on 50 panels of 64-point Gauss-Legendre over [−12, h1], within 1.4e-15 of 400 panels (the
-    // planner's xp_tvtl_time.cpp)
+    // P(X1 < h1, X2 < h2, X3 < h3), correlations r21, r31, r32: X1's density times the bivariate normal of the other
+    // two given it (We04DP), on 50 panels of 64-point Gauss-Legendre over [−12, h1], within 1.4e-15 of 400 panels
     private static double TrivariateNormal(double h1, double h2, double h3, double r21, double r31, double r32)
     {
         double s2 = Math.Sqrt(1 - (r21 * r21)), s3 = Math.Sqrt(1 - (r31 * r31));

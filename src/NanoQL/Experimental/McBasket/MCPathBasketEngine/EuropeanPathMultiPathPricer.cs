@@ -18,7 +18,7 @@ namespace NanoQL.Experimental;
 /// </summary>
 /// <remarks>
 /// A working type: it holds the path's fixings and payments buffers, which QuantLib builds per path, so a path prices
-/// without allocating after the first (the S-xeq plan's §2.0).
+/// without allocating after the first.
 /// </remarks>
 [Experimental("NQL0001")]
 [WorkingType]

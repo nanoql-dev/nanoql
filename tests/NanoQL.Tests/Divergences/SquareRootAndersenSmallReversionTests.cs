@@ -7,12 +7,11 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The square-root volatility process at small reversion (the S-mm plan's MR3 (xviii), fixed with an independent check,
-/// Revision 69). QuantLib's conditional variance divides (1 − e^{−κΔt}) by κ (<c>squarerootandersen.cpp:96-97</c>),
-/// which cancels about ε/(κΔt) relative: 9e-5 at κ 1e-12, the variance 0 at 1e-16, so its path is NaN at the next step,
-/// and NaN at κ 0, where the limit is v ε² Δt (the planner's MP10; at κ 1e-16 and 0 from v₀ = θ 0.04, ε 0.5 on times
-/// 0.5 and 1, QuantLib's state is NaN after the second step and the first, this run's <c>probes\c2_facts.cpp</c>).
-/// nanoql takes −expm1(−κΔt)/κ below κΔt = 1e-2 (S-g1d's cut, G1R4), Δt at κ 0, and QuantLib's form at and above it.
+/// The square-root volatility process at small reversion (fixed with an independent check). QuantLib's conditional
+/// variance divides (1 − e^{−κΔt}) by κ (<c>squarerootandersen.cpp:96-97</c>), which cancels about ε/(κΔt) relative:
+/// 9e-5 at κ 1e-12, the variance 0 at 1e-16, so its path is NaN at the next step, and NaN at κ 0, where the limit is v
+/// ε² Δt (at κ 1e-16 and 0 from v₀ = θ 0.04, ε 0.5 on times 0.5 and 1, QuantLib's state is NaN after the second step
+/// and the first). nanoql takes −expm1(−κΔt)/κ below κΔt = 1e-2, Δt at κ 0, and QuantLib's form at and above it.
 /// Checks: the κ → 0 limit, CIR without reversion, at κ 0, 1e-16 and 1e-12; and the two forms' agreement across the
 /// cut.
 /// </summary>

@@ -14,9 +14,9 @@ namespace NanoQL.Numerics;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A working type (the S-mmp plan's MMPR2): <see cref="Add"/> and <see cref="Reset"/> change it, and it isn't
-/// thread-safe. Its dimension is set by the constructor, by <see cref="Reset"/>, or by the first sample added to a
-/// statistics of dimension 0, QuantLib's lazy dimension.
+/// A working type: <see cref="Add"/> and <see cref="Reset"/> change it, and it isn't thread-safe. Its dimension is set
+/// by the constructor, by <see cref="Reset"/>, or by the first sample added to a statistics of dimension 0, QuantLib's
+/// lazy dimension.
 /// </para>
 /// <para>
 /// Each member of <see cref="IStatistics"/> and of the Gaussian layer (<see cref="GaussianStatisticsExtensions"/>) is
@@ -26,7 +26,7 @@ namespace NanoQL.Numerics;
 /// type parameter has it.
 /// </para>
 /// <para>
-/// An extension point (U13): QuantLib's protected members are protected here, <see cref="Dimension"/>,
+/// An extension point: QuantLib's protected members are protected here, <see cref="Dimension"/>,
 /// <see cref="ComponentStatistics"/> and <see cref="QuadraticSum"/>, and <see cref="Add"/> and <see cref="Reset"/> are
 /// virtual. The constructor, and <see cref="Add"/> where the first sample sets the dimension, reset this class's own
 /// state, not a derived class's, as QuantLib's call its own <c>reset</c>: a derived override isn't run before its

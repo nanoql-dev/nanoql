@@ -12,8 +12,8 @@ namespace NanoQL.Tests.Divergences;
 /// directly, without the expiry check (<c>creditdefaultswap.cpp:317-336</c>), and the engine finds every coupon
 /// occurred, so the objective is the target less a constant: for <see cref="CreditFixture"/>'s expired swap, under
 /// either model, a zero target returns the solver's guess, 0.016898148148148148, and a target of 1 fails to bracket
-/// ("unable to bracket root in 100 function evaluations …") (QuantLib's defect, R8). nanoql refuses an expired swap
-/// with a <see cref="NanoQLException"/>, "instrument expired", QuantLib's text in <c>Swaption::impliedVolatility</c>.
+/// ("unable to bracket root in 100 function evaluations …") (QuantLib's defect). nanoql refuses an expired swap with
+/// a <see cref="NanoQLException"/>, "instrument expired", QuantLib's text in <c>Swaption::impliedVolatility</c>.
 /// </summary>
 public class CdsImpliedHazardRateExpiredTests
 {

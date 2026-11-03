@@ -11,7 +11,7 @@ namespace NanoQL.Experimental;
 /// <summary>The results an engine returns for an <see cref="NthToDefault"/>: the instrument's, with its legs' values
 /// and its fair premium.</summary>
 /// <remarks>A result QuantLib leaves at <c>Null&lt;Real&gt;()</c>, whose accessor refuses it ("… not available"), is
-/// <see langword="null"/> (PR4), as the error estimate of the integral engine.</remarks>
+/// <see langword="null"/>, as the error estimate of the integral engine.</remarks>
 [Experimental("NQL0001")]
 public sealed record NthToDefaultResults : InstrumentResults
 {

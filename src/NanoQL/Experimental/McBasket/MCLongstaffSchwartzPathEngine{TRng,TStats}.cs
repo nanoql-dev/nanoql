@@ -20,16 +20,15 @@ namespace NanoQL.Experimental;
 /// <typeparam name="TStats">The statistics.</typeparam>
 /// <remarks>
 /// <para>
-/// An extension point and an immutable object (the S-xeq plan's §2.0, S-van's VR1 form): a concrete engine's static
-/// <c>Calculate</c> builds one per call and implements <see cref="LsmPathPricer"/>. <see cref="Run"/> builds the
-/// pricer, adds the calibration samples, calibrates and prices on the same pricer, QuantLib's mutable pricer the call's
-/// working state.
+/// An extension point and an immutable object: a concrete engine's static <c>Calculate</c> builds one per call and
+/// implements <see cref="LsmPathPricer"/>. <see cref="Run"/> builds the pricer, adds the calibration samples,
+/// calibrates and prices on the same pricer, QuantLib's mutable pricer the call's working state.
 /// </para>
 /// <para>
 /// One seed draws the calibration and the pricing paths, so the pricing run's first paths are the calibration's
 /// (Longstaff and Schwartz's in-sample estimator, QuantLib's code); there is no calibration seed, as QuantLib's path
-/// engine has none (the S-xeq plan's XED3). The calibration samples default to 2,048; none is refused, where QuantLib's
-/// calibration reads the first of no path (XER5 (xxiii)).
+/// engine has none. The calibration samples default to 2,048; none is refused, where QuantLib's calibration reads the
+/// first of no path.
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]
@@ -54,7 +53,7 @@ public abstract class MCLongstaffSchwartzPathEngine<TRng, TStats> : McSimulation
     /// <exception cref="ArgumentNullException">An argument is <see langword="null"/>.</exception>
     /// <exception cref="ArgumentException">The time steps are neither or both given, or not positive.</exception>
     /// <exception cref="ArgumentOutOfRangeException">The seed or a sample count is out of range, or
-    /// <paramref name="nCalibrationSamples"/> isn't positive (XER5 (xxiii)).</exception>
+    /// <paramref name="nCalibrationSamples"/> isn't positive.</exception>
     protected MCLongstaffSchwartzPathEngine(
         PathMultiAssetOption option,
         EvaluationContext context,

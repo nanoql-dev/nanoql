@@ -10,13 +10,12 @@ using NanoQL.Tests.Conventions;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The cap pseudo-derivative's implied volatility (the S-mmp plan's MMPR4 (xviii), ruled by the user). QuantLib solves
-/// for the flat undisplaced Black volatility in [0.99, 1.01] times its least displaced and greatest scaled caplet
-/// volatility (<c>swaptionpseudojacobian.cpp:331</c>), which away from the money on a displaced model misses the root: on
-/// six semi-annual rates, FlatVol 20%, 3 factors, displacement 2%, the cap from rate 1 to 5, its bracket [0.198,
-/// 0.332323] refuses strikes 0.5%, 1% and 2% "root not bracketed" (this run's <c>probes\c4_facts.cpp</c>; the planner's
-/// MPP22). nanoql solves by Brent's bracketing from QuantLib's guess there. Checks: the volatility reprices the model's
-/// cap through the class's undisplaced Black sum; QuantLib's bits where its bracket holds the root (3.2%).
+/// The cap pseudo-derivative's implied volatility. QuantLib solves for the flat undisplaced Black volatility in [0.99,
+/// 1.01] times its least displaced and greatest scaled caplet volatility (<c>swaptionpseudojacobian.cpp:331</c>), which
+/// away from the money on a displaced model misses the root: on six semi-annual rates, FlatVol 20%, 3 factors,
+/// displacement 2%, the cap from rate 1 to 5, its bracket [0.198, 0.332323] refuses strikes 0.5%, 1% and 2% "root not
+/// bracketed". nanoql solves by Brent's bracketing from QuantLib's guess there. Checks: the volatility reprices the
+/// model's cap through the class's undisplaced Black sum; QuantLib's bits where its bracket holds the root (3.2%).
 /// </summary>
 public class CapPseudoDerivativeBracketTests
 {

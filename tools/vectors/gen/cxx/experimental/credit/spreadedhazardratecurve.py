@@ -3,9 +3,9 @@
 """Vectors for QuantLib's spreaded hazard-rate curves (ql/experimental/credit/spreadedhazardratecurve.hpp,
 factorspreadedhazardratecurve.hpp), which the wheel doesn't expose, each output computed by the C++ harness
 (tools/cxx/src/experimental/credit/spreadedhazardratecurve.cpp): the additive and multiplicative curves on flat and
-interpolated originals, their reference date, maximum date and time, and their hazard rate at times inside and past
-the original's range. Their survival probabilities and densities, which QuantLib integrates numerically and nanoql
-computes exactly (the S-xcr plan's XR3 (b)), are left out. Read back by
+interpolated originals, their reference date, maximum date and time, and their hazard rate at times inside and past the
+original's range. Their survival probabilities and densities, which QuantLib integrates numerically and nanoql computes
+exactly, are left out. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Experimental/Credit/SpreadedHazardRateCurveCxxVectorTests.cs."""
 import importlib.util
 import os

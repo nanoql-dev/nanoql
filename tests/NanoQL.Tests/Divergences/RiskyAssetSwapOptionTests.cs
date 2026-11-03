@@ -9,12 +9,11 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The risky asset swap option at a zero standard deviation (the S-xcr plan's XR8 (xxii)): the formula's limit, the
-/// intrinsic value, where QuantLib's reads 0·∞, NaN. On 31 August 2006, the payer swap of nominal 100 at spread 0.01
-/// (an annual fixed and a quarterly float schedule on TARGET to 31 August 2011, Actual/360, recovery 0.4, the discount
-/// curve 5% flat, the hazard rate 0.02 flat), the option expiring a year out at a market spread of 0.012 reads
-/// 35.967035007653337 at a volatility of 0.2, 0.890356389102676 at 1e-9 and NaN at 0 in QuantLib (the S-xcr run's
-/// <c>c4_facts.cpp</c>).
+/// The risky asset swap option at a zero standard deviation: the formula's limit, the intrinsic value, where QuantLib's
+/// reads 0·∞, NaN. On 31 August 2006, the payer swap of nominal 100 at spread 0.01 (an annual fixed and a quarterly
+/// float schedule on TARGET to 31 August 2011, Actual/360, recovery 0.4, the discount curve 5% flat, the hazard rate
+/// 0.02 flat), the option expiring a year out at a market spread of 0.012 reads 35.967035007653337 at a volatility of
+/// 0.2, 0.890356389102676 at 1e-9 and NaN at 0 in QuantLib.
 /// </summary>
 public class RiskyAssetSwapOptionTests
 {

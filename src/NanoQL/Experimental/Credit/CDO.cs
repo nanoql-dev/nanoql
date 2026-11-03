@@ -27,11 +27,10 @@ namespace NanoQL.Experimental;
 /// Eᵢ₊₁ &lt; Eᵢ, which <see cref="CDOResults.Error"/> counts.
 /// </para>
 /// <para>
-/// QuantLib's older CDO, computed by the instrument itself: <see cref="Calculate"/>, nothing cached (the S-xcr plan's
-/// XR5). Its "today" is the yield curve's reference date, as QuantLib's. The maximum loss given default
-/// <see cref="Lgd"/> is the sum of the names' losses given default, which QuantLib's sums onto an uninitialized value
-/// (<c>cdo.cpp:73-77</c>; XR8 (xxvii)). A default probability before its curve's reference date is 0, where QuantLib's
-/// refuses it (XR8 (x)).
+/// QuantLib's older CDO, computed by the instrument itself: <see cref="Calculate"/>, nothing cached. Its "today" is the
+/// yield curve's reference date, as QuantLib's. The maximum loss given default <see cref="Lgd"/> is the sum of the
+/// names' losses given default, which QuantLib's sums onto an uninitialized value (<c>cdo.cpp:73-77</c>). A default
+/// probability before its curve's reference date is 0, where QuantLib's refuses it.
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]

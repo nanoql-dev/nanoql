@@ -3,7 +3,7 @@
   SPDX-License-Identifier: Apache-2.0
 -->
 <Project Sdk="Microsoft.NET.Sdk">
-  <!-- The Excel replayer (docs/excel.md, XLR11): the vector suite's recorded trace through a build's generated worksheet
+  <!-- The Excel replayer (docs/excel.md): the vector suite's recorded trace through a build's generated worksheet
        functions, outside Excel, each result against C#'s. The build's assembly is loaded by path from an
        `nanoql-bind excel build` folder; the runtime is this solution's. -->
   <PropertyGroup>

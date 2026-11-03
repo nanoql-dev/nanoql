@@ -14,10 +14,10 @@ namespace NanoQL.Processes;
 /// <summary>The Ornstein-Uhlenbeck process, governed by dx = a (r − x_t) dt + σ dW_t.</summary>
 /// <remarks>
 /// Its expectation, standard deviation and variance are exact. The variance, σ² (1 − e^(−2aΔt))/2a, is written as
-/// σ²Δt·(1 − e^(−x))/x, x = 2aΔt, in the cancellation-free form of QuantLib's master's mean-reversion kernels (the S-sr
-/// plan's SSR3 class, by the user's ruling of 2026-10-22), exact in the limit a → 0: a divergence, QuantLib cutting to
-/// σ²Δt below |a| = √ε and cancelling just above it, off by up to 8.3e-8 relative at a = 1.5e-8, so the last bits
-/// differ from QuantLib's at every speed (<c>Divergences/OrnsteinUhlenbeckVarianceTests.cs</c>).
+/// σ²Δt·(1 − e^(−x))/x, x = 2aΔt, in the cancellation-free form of QuantLib's master's mean-reversion kernels, exact in
+/// the limit a → 0: a divergence, QuantLib cutting to σ²Δt below |a| = √ε and cancelling just above it, off by up to
+/// 8.3e-8 relative at a = 1.5e-8, so the last bits differ from QuantLib's at every speed
+/// (<c>Divergences/OrnsteinUhlenbeckVarianceTests.cs</c>).
 /// </remarks>
 public sealed class OrnsteinUhlenbeckProcess : StochasticProcess1D
 {

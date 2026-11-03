@@ -18,18 +18,17 @@ namespace NanoQL.Methods;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A working type (the S-hes plan's HD8): the Heston part steps in place; the jump integral, in the apply and the
-/// mixed apply, reads each row into held buffers and interpolates it in place, by QuantLib's
-/// <c>LinearInterpolation</c> arithmetic (the slopes from the row, the value by its located interval), so a step
-/// allocates nothing. Its boundary conditions must be Dirichlet's, as QuantLib's. Beyond the grid the integral
-/// extrapolates each row linearly, QuantLib's approximation.
+/// A working type: the Heston part steps in place; the jump integral, in the apply and the mixed apply, reads each row
+/// into held buffers and interpolates it in place, by QuantLib's <c>LinearInterpolation</c> arithmetic (the slopes from
+/// the row, the value by its located interval), so a step allocates nothing. Its boundary conditions must be
+/// Dirichlet's, as QuantLib's. Beyond the grid the integral extrapolates each row linearly, QuantLib's approximation.
 /// </para>
 /// <para>
-/// The operator's times are <see cref="FdmHestonOp.Clock"/>'s (HR7 (ii)). QuantLib adds the compensator λm to the
-/// dividend curve's zero rate in the dividend curve's own day count (<c>fdmbatesop.cpp:45-58</c>), so on a dividend curve
-/// on another day counter than the risk-free curve's the jumps' compensator, an intensity per unit of the model's time,
-/// is read off its clock. Here, where the dividend curve shares the engine's clock, QuantLib's spreaded curve and its
-/// bits; otherwise the dividend curve read on its own clock and λm added per unit of the engine's time, as QuantLib's
+/// The operator's times are <see cref="FdmHestonOp.Clock"/>'s. QuantLib adds the compensator λm to the dividend curve's
+/// zero rate in the dividend curve's own day count (<c>fdmbatesop.cpp:45-58</c>), so on a dividend curve on another day
+/// counter than the risk-free curve's the jumps' compensator, an intensity per unit of the model's time, is read off
+/// its clock. Here, where the dividend curve shares the engine's clock, QuantLib's spreaded curve and its bits;
+/// otherwise the dividend curve read on its own clock and λm added per unit of the engine's time, as QuantLib's
 /// operator on the market restated on one clock (<c>Divergences/FdHestonMismatchedTimesTests.cs</c>).
 /// </para>
 /// </remarks>

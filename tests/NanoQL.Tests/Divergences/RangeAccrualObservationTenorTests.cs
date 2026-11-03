@@ -11,12 +11,12 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// A range accrual with no observation dates (the S-cms plan's CMR5 (xiii)): QuantLib's <c>RangeAccrualLeg</c> defaults
-/// its observation tenor to <c>Period()</c>, so each coupon's observation schedule holds its start and end alone, and
-/// the BGM pricer divides a sum over no observations by their number, 0/0: on the wheel, the vectors' semiannual leg
-/// built without a tenor pays a rate of NaN, and a coupon whose observation schedule holds its start and end alone pays
-/// NaN on each of the pricer's three routes. nanoql's leg refuses a floating coupon with no observation tenor, and its
-/// pricer a coupon with no observation dates, each with a text naming what is missing.
+/// A range accrual with no observation dates: QuantLib's <c>RangeAccrualLeg</c> defaults its observation tenor to
+/// <c>Period()</c>, so each coupon's observation schedule holds its start and end alone, and the BGM pricer divides a
+/// sum over no observations by their number, 0/0: on the wheel, the vectors' semiannual leg built without a tenor pays
+/// a rate of NaN, and a coupon whose observation schedule holds its start and end alone pays NaN on each of the
+/// pricer's three routes. nanoql's leg refuses a floating coupon with no observation tenor, and its pricer a coupon
+/// with no observation dates, each with a text naming what is missing.
 /// </summary>
 public class RangeAccrualObservationTenorTests
 {

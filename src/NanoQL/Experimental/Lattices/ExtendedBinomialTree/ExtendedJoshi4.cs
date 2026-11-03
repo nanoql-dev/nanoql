@@ -18,10 +18,10 @@ namespace NanoQL.Experimental;
 /// at the step's time, on an odd number of steps: QuantLib's <c>ExtendedJoshi4</c>.
 /// </summary>
 /// <remarks>
-/// Immutable; exact on constant parameters (<see cref="ExtendedBinomialTree{T}"/>, XRR6). An even number of steps is
-/// raised by one. The constructor checks the strike and the up probability at time 0 only, with the standard tree's
-/// texts (<see cref="Joshi4"/>); its <c>up_</c>, <c>down_</c>, <c>pu_</c> and <c>pd_</c> members, which nothing reads
-/// after that check, aren't ported.
+/// Immutable; exact on constant parameters (<see cref="ExtendedBinomialTree{T}"/>). An even number of steps is raised
+/// by one. The constructor checks the strike and the up probability at time 0 only, with the standard tree's texts
+/// (<see cref="Joshi4"/>); its <c>up_</c>, <c>down_</c>, <c>pu_</c> and <c>pd_</c> members, which nothing reads after
+/// that check, aren't ported.
 /// </remarks>
 [Experimental("NQL0001")]
 public sealed class ExtendedJoshi4 : ExtendedBinomialTree<ExtendedJoshi4>, IBinomialTree<ExtendedJoshi4>

@@ -14,14 +14,13 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// QuantLib's multiple-strikes caching of the finite-difference Heston-Hull-White engine as a call (the S-hes plan's HR4
-/// (ii)): <see cref="FdHestonHullWhiteVanillaEngine.CalculateStrikes(VanillaOption, IEnumerable{double},
-/// EvaluationContext, HestonModel, HullWhiteProcess, double, int, int, int, int, int, bool, FdmSchemeDesc?)"/> solves once
-/// on QuantLib's multi-strike mesher and returns each strike's results in the strikes' order: the value V(S·d)/d, delta,
-/// gamma·d and theta/d at d = K/Kᵢ, bit for bit the solver's on the problem QuantLib's engine builds with the strikes, the
-/// delta and gamma at a shift of 1% of S·d; with the control variate each value corrected by the analytic Heston
-/// engine's price at Kᵢ less the finite-difference Heston engine's multiple-strikes value; and QuantLib's refusals, of
-/// discrete dividends and of no strikes.
+/// QuantLib's multiple-strikes caching of the finite-difference Heston-Hull-White engine as a call:
+/// <see cref="FdHestonHullWhiteVanillaEngine.CalculateStrikes(VanillaOption, IEnumerable{double}, EvaluationContext, HestonModel, HullWhiteProcess, double, int, int, int, int, int, bool, FdmSchemeDesc?)"/>
+/// solves once on QuantLib's multi-strike mesher and returns each strike's results in the strikes' order: the value
+/// V(S·d)/d, delta, gamma·d and theta/d at d = K/Kᵢ, bit for bit the solver's on the problem QuantLib's engine builds
+/// with the strikes, the delta and gamma at a shift of 1% of S·d; with the control variate each value corrected by the
+/// analytic Heston engine's price at Kᵢ less the finite-difference Heston engine's multiple-strikes value; and
+/// QuantLib's refusals, of discrete dividends and of no strikes.
 /// </summary>
 public class FdHestonHullWhiteStrikesTests
 {

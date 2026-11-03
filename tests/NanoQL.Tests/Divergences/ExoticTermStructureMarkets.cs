@@ -11,11 +11,11 @@ using static NanoQL.PricingEngines.BlackFormulaFunctions;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The markets and the independent check of the S-exo plan's ER4 facts: a flat market, a rising one (zero rates 1% to
-/// 6% and dividends 0 to 3% from three months to a year, volatilities 0.15, 0.30, 0.30 at three months, a year and two)
-/// and a falling one (the rates reversed, volatilities 0.30, 0.25, 0.25), the planner's P4b and EP31 markets; and the
-/// exact value of an option at its first date under deterministic rates, dividends and volatility, its payoff there
-/// integrated over the lognormal spot by Gauss-Lobatto at an absolute accuracy of 1e-13, split at the payoff's kinks.
+/// The markets and the independent check of the term-structure facts: a flat market, a rising one (zero rates 1% to 6%
+/// and dividends 0 to 3% from three months to a year, volatilities 0.15, 0.30, 0.30 at three months, a year and two)
+/// and a falling one (the rates reversed, volatilities 0.30, 0.25, 0.25); and the exact value of an option at its first
+/// date under deterministic rates, dividends and volatility, its payoff there integrated over the lognormal spot by
+/// Gauss-Lobatto at an absolute accuracy of 1e-13, split at the payoff's kinks.
 /// </summary>
 internal static class ExoticTermStructureMarkets
 {

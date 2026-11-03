@@ -11,17 +11,16 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The soft barrier with coincident or nearly coincident barriers (the S-bar plan's BR5 (xi), fixed under R8).
-/// Where U − L &lt; 1e-4 QuantLib prices its analytic barrier engine on flat Actual/360 curves rebuilt from TARGET's
-/// adjusted evaluation date (<c>analyticsoftbarrierengine.cpp:250-282</c>), so a process on Actual/365 Fixed prices
-/// 10.187731 where the analytic engine on it gives 10.159379; and the switch is absolute in price units, so the same
-/// contract changes value with the underlying's scale: a down-in call struck at the spot on the band [0.990, 0.995] ×
-/// spot prices 0.1027057 × spot at spots 100 and 1 and 0.1063173 × spot at 0.02 and 0.01, a 0.5% band taken as a hard
-/// barrier (the reviewer's r2a). Haug's own difference quotient cancels as the band narrows, beyond 1e-12 below a
-/// relative width of about 1e-3 (the planner's P15). nanoql prices the single barrier at U = L only, through the
-/// analytic barrier engine on the process itself, Haug's form where (U − L)/U ≥ 3e-3, and the band average below it.
-/// Checks: QuantLib's analytic barrier engine on the same process at U = L, and homogeneity, the contract scaled to
-/// spot 100.
+/// The soft barrier with coincident or nearly coincident barriers (fixed). Where U − L &lt; 1e-4 QuantLib prices its
+/// analytic barrier engine on flat Actual/360 curves rebuilt from TARGET's adjusted evaluation date
+/// (<c>analyticsoftbarrierengine.cpp:250-282</c>), so a process on Actual/365 Fixed prices 10.187731 where the
+/// analytic engine on it gives 10.159379; and the switch is absolute in price units, so the same contract changes
+/// value with the underlying's scale: a down-in call struck at the spot on the band [0.990, 0.995] × spot prices
+/// 0.1027057 × spot at spots 100 and 1 and 0.1063173 × spot at 0.02 and 0.01, a 0.5% band taken as a hard barrier.
+/// Haug's own difference quotient cancels as the band narrows, beyond 1e-12 below a relative width of about 1e-3.
+/// nanoql prices the single barrier at U = L only, through the analytic barrier engine on the process itself, Haug's
+/// form where (U − L)/U ≥ 3e-3, and the band average below it. Checks: QuantLib's analytic barrier engine on the same
+/// process at U = L, and homogeneity, the contract scaled to spot 100.
 /// </summary>
 public class SoftBarrierCoincidentBarriersTests
 {

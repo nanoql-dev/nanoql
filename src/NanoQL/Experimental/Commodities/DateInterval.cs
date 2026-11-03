@@ -17,9 +17,9 @@ namespace NanoQL.Experimental;
 /// </para>
 /// <para>
 /// <see cref="IsDateBetween"/> includes or excludes each end as its flags say. QuantLib's excludes both ends whatever
-/// they say: its <c>else if</c> follows the <c>includeFirst</c> test, so a start date that passes
-/// <c>date &gt;= startDate</c> then fails <c>date &gt; startDate</c>, and the end likewise
-/// (<c>dateinterval.hpp:51-63</c>; the S-xrt plan's XRR5 (iii), <c>Divergences/DateIntervalTests.cs</c>).
+/// they say: its <c>else if</c> follows the <c>includeFirst</c> test, so a start date that passes <c>date &gt;=
+/// startDate</c> then fails <c>date &gt; startDate</c>, and the end likewise (<c>dateinterval.hpp:51-63</c>;
+/// <c>Divergences/DateIntervalTests.cs</c>).
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]

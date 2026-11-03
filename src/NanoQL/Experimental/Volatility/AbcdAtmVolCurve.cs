@@ -19,11 +19,11 @@ namespace NanoQL.Experimental;
 /// </summary>
 /// <remarks>
 /// <para>
-/// QuantLib's <c>LazyObject</c> computes at construction (the S-xeq plan's §2.0): QuantLib fits the abcd function when
-/// its constructor builds the interpolation and again at the first calculation, from the first fit's coefficients
-/// (<c>update()</c>, which checks no guess), so the curve fits twice, the second through <see cref="AbcdInterpolation"/>'s
-/// internal refit. Quotes are values. QuantLib's moving reference date is the factory's, dated by the context. QuantLib's
-/// acyclic visitor isn't ported.
+/// QuantLib's <c>LazyObject</c> computes at construction: QuantLib fits the abcd function when its constructor builds
+/// the interpolation and again at the first calculation, from the first fit's coefficients (<c>update()</c>, which
+/// checks no guess), so the curve fits twice, the second through <see cref="AbcdInterpolation"/>'s internal refit.
+/// Quotes are values. QuantLib's moving reference date is the factory's, dated by the context. QuantLib's acyclic
+/// visitor isn't ported.
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]

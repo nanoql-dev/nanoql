@@ -7,8 +7,8 @@ using NanoQL.Methods;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// A step of the ZABR operator allocates nothing (the S-g1d plan's G1D11, S-sr's two-dimensional pin): its parts are
-/// built once, and its apply and splitting solves write into the caller's spans through buffers it holds. A rollback of
+/// A step of the ZABR operator allocates nothing (the two-dimensional pin): its parts are built once, and its apply and
+/// splitting solves write into the caller's spans through buffers it holds. A rollback of
 /// <see cref="FdmBackwardSolver"/> on <see cref="FdmZabrOp"/> under Hundsdorfer's scheme, <c>fullFdPrice</c>'s
 /// (<c>zabr.cpp:300</c>), on a glued forward mesher by a volatility mesher as <c>fullFdPrice</c> builds them, is
 /// measured on fresh values after a warm-up (<see cref="AllocationAssert"/>), and gives the warm-up's values.

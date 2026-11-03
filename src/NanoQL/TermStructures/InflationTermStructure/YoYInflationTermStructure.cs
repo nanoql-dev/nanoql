@@ -10,7 +10,7 @@ namespace NanoQL.TermStructures;
 
 /// <summary>The base class of year-on-year inflation term structures.</summary>
 /// <remarks>
-/// An extension point. QuantLib's deprecated lagged <c>yoyRate</c> isn't ported (D5); <see cref="YoyRate(Date, bool)"/>
+/// An extension point. QuantLib's deprecated lagged <c>yoyRate</c> isn't ported; <see cref="YoyRate(Date, bool)"/>
 /// computes what QuantLib's non-lagged form computes through it with a zero lag.
 /// </remarks>
 public abstract class YoYInflationTermStructure : InflationTermStructure

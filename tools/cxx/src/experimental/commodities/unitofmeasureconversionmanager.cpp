@@ -3,10 +3,10 @@
 
 // ql/experimental/commodities/unitofmeasureconversionmanager.hpp, .cpp: the registry's lookups.
 // "UnitOfMeasureConversionManager::lookups" takes (adds, queries): the conversions added after clear(), in order (specs
-// of commodityspec.hpp), and the lookups [commodityType, source, target, type], type 0 for Direct and 1 for Derived;
-// it returns {"lookups"}: for each, [factor, source, target, type, unit, amount] (the factor, the found conversion's
-// units' codes and type, and its convert of one unit of the query's source), or {"throws": true}. The generator
-// queries no chained search QuantLib's recursion can't end (the S-xrt run's R1-1).
+// of commodityspec.hpp), and the lookups [commodityType, source, target, type], type 0 for Direct and 1 for Derived; it
+// returns {"lookups"}: for each, [factor, source, target, type, unit, amount] (the factor, the found conversion's
+// units' codes and type, and its convert of one unit of the query's source), or {"throws": true}. The generator queries
+// no chained search QuantLib's recursion can't end.
 
 #include "experimental/commodities/commodityspec.hpp"
 

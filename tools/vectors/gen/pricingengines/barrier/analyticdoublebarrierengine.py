@@ -10,17 +10,17 @@ three strikes (90, 100 and 110% of the spot): the NPV, the engine's one result, 
 an expired option and the refusals: an American exercise, a cash-or-nothing payoff, a spot on a barrier and outside
 the corridor ("barrier(s) already touched"), and the KIKO and KOKI types.
 
-The outputs nanoql fixes are left out (the S-bar plan's §2.10): every process here has positive volatilities and one
-day counter and reference date, so none is on structures dated or day-counted apart (BR5 (i),
-tests/NanoQL.Tests/Divergences/BarrierClosedFormMismatchedTimesTests.cs) or at a vanishing variance (BR5 (xvi),
-DoubleBarrierLowVolatilityTests.cs); every rebate is 0, which QuantLib's engine never reads (BR5 (xlvi),
-DoubleBarrierRebateTests.cs); every strike is inside the corridor, a put's above L and a call's below U, where #2881's
-bounds are QuantLib 1.44's (it prices 0 a put at or below L and a call at or above U, where 1.44 leaves a rounding of
-up to 4e-15; BarrierUpstreamFixesTests.cs); and an output whose knock-out at five terms isn't within 5e-13 of its value at 50
-terms, on max(|value|, 1), is left out of its case: the port keeps QuantLib's five terms only where they agree with the
-converged series within 1e-12 on that scale and sums on elsewhere (BR5 (xliii), DoubleBarrierSeriesTests.cs), the
-knock-in being the vanilla less the knock-out, and the margin keeps a case clear of that switch. A case holds the
-payoffs left, and none is empty.
+The outputs nanoql fixes are left out: every process here has positive volatilities and one day counter and reference
+date, so none is on structures dated or day-counted apart
+(tests/NanoQL.Tests/Divergences/BarrierClosedFormMismatchedTimesTests.cs) or at a vanishing variance
+(DoubleBarrierLowVolatilityTests.cs); every rebate is 0, which QuantLib's engine never reads
+(DoubleBarrierRebateTests.cs); every strike is inside the corridor, a put's above L and a call's below U, where #2881's
+bounds are QuantLib 1.44's (it prices 0 a put at or below L and a call at or above U, where 1.44 leaves a rounding of up
+to 4e-15; BarrierUpstreamFixesTests.cs); and an output whose knock-out at five terms isn't within 5e-13 of its value at
+50 terms, on max(|value|, 1), is left out of its case: the port keeps QuantLib's five terms only where they agree with
+the converged series within 1e-12 on that scale and sums on elsewhere (DoubleBarrierSeriesTests.cs), the knock-in being
+the vanilla less the knock-out, and the margin keeps a case clear of that switch. A case holds the payoffs left, and
+none is empty.
 
 A case holds one process, exercise and double barrier, its outputs one per payoff: a double barrier is
 {"barrierType" (QuantLib's DoubleBarrier::Type, KnockIn 0, KnockOut 1, KIKO 2, KOKI 3), "barrierLo", "barrierHi",

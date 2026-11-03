@@ -8,8 +8,8 @@ digital call and put prices, its density and its volatility at strikes from half
 level and its strike range; two sections dated by an exercise date, on Actual/365 (Fixed) and Actual/360, with their
 exercise times; then a beta past the domain and a nonzero shift, which the model and the section refuse.
 
-The outputs nanoql fixes are left out (the S-xeq plan's §2.8): every set has sigma_I sqrt(T) at least 0.1, where
-QuantLib's single integration interval stands (XER5 (xxvi)).
+The outputs nanoql fixes are left out: every set has sigma_I sqrt(T) at least 0.1, where QuantLib's single integration
+interval stands.
 
 The specs: a section {"expiry", "forward", "params" [alpha, beta, nu, rho], "shift"}, or for a dated one
 {"exerciseDays", "dayCounter", "forward", "params", "shift"}, the exercise date that many days after the evaluation

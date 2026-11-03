@@ -17,8 +17,8 @@ namespace NanoQL.Numerics;
 /// <typeparam name="T">The solution's type: <see cref="double"/>, or <see cref="Complex"/> for a complex equation.</typeparam>
 /// <remarks>
 /// <para>
-/// QuantLib's real weights multiply the values componentwise, as C++ multiplies a <c>std::complex</c> by a real (the
-/// S-hes plan's HD16). The kernel's memory makes the cost O(N²) in the number of steps.
+/// QuantLib's real weights multiply the values componentwise, as C++ multiplies a <c>std::complex</c> by a real. The
+/// kernel's memory makes the cost O(N²) in the number of steps.
 /// </para>
 /// <para>
 /// Immutable and thread-safe: it holds only its order, and each solve works on its own arrays.
@@ -122,7 +122,7 @@ public sealed class FractionalAdams<T>
         return y;
     }
 
-    // A real times a value, componentwise for a complex one, as std::complex's real-scalar product (HD16)
+    // A real times a value, componentwise for a complex one, as std::complex's real-scalar product
     internal static T Scale(double w, T value)
     {
         if (typeof(T) == typeof(Complex))

@@ -23,15 +23,15 @@ namespace NanoQL.Experimental;
 /// says, the forward adjustment can fail at extreme parameters, which <see cref="Forward"/> against
 /// <see cref="NumericalForward"/> shows: at an expiry of 30, ρ 0.9, ν 0.8 the adjustment is 0.0157 off and the call flat
 /// in strike; at β 0.9, ν 0.8, |ρ| 0.7 the density beyond QuantLib's integration domain carries a strike-independent call
-/// value, 4.0e-6 at an expiry of 1 (σ_I 0.3) and 3.5e-4 at 4 (σ_I 0.05) (the S-xeq plan's XER5 (xxvii)). Out-of-the-money
-/// prices below the integrator's 1e-7 carry no relative accuracy, so implied volatilities read there are unreliable.
+/// value, 4.0e-6 at an expiry of 1 (σ_I 0.3) and 3.5e-4 at 4 (σ_I 0.05). Out-of-the-money prices below the integrator's
+/// 1e-7 carry no relative accuracy, so implied volatilities read there are unreliable.
 /// </para>
 /// <para>
 /// Documented divergence (<c>Divergences/NoArbSabrShortExpiryTests.cs</c>): where σ_I√T is below 0.1, each of the
 /// model's integrals (the normalization and the price inside the forward solve, the price, the digital) is split at
 /// the density's peak, the current forward ± 8w with w = Fσ_I√T, where QuantLib's single interval misses the spike: out
-/// of the money from T 0.005, at the money from 0.003, the forward adjustment failing at 0.001 (XER5 (xxvi)); at and
-/// above 0.1 QuantLib's single interval and bits stand.
+/// of the money from T 0.005, at the money from 0.003, the forward adjustment failing at 0.001; at and above 0.1
+/// QuantLib's single interval and bits stand.
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]
@@ -58,7 +58,7 @@ public sealed class NoArbSabrModel
     internal const double DensityLowerBound = 1E-50;
     internal const double DensityThreshold = 1E-100;
 
-    // the split at the density's peak below this σ_I√T, at this many widths Fσ_I√T either side (XER5 (xxvi))
+    // the split at the density's peak below this σ_I√T, at this many widths Fσ_I√T either side
     private const double SplitBelow = 0.1;
     private const double SplitWidths = 8.0;
 
@@ -243,7 +243,7 @@ public sealed class NoArbSabrModel
             * (Integrate(u => Math.Max(u - strike, 0.0) * P(u, f), strike, Math.Max(fmax, 2.0 * strike), f) / integralOverP);
     }
 
-    // QuantLib's integral over [a, b]; below σ_I√T of 0.1 split at the forward ± 8 widths (XER5 (xxvi))
+    // QuantLib's integral over [a, b]; below σ_I√T of 0.1 split at the forward ± 8 widths
     private double Integrate(Func<double, double> g, double a, double b, double f)
     {
         if (!(sigmaIRootT < SplitBelow))

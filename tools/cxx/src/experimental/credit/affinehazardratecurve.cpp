@@ -13,8 +13,8 @@
 //     PiecewiseAffineHazardRateCurve::build (model, interpolator, helpers, quotes, reference date, times): the piecewise
 //         curve on the affine traits, its dates and data, its survival probability at each time
 //
-// The curve's survival squares the process's x0 where nanoql takes the model's own initial intensity (the S-xcr
-// plan's XR8 (xiii)), so its generator reads it on models where the two coincide.
+// The curve's survival squares the process's x0 where nanoql takes the model's own initial intensity, so its generator
+// reads it on models where the two coincide.
 
 #include "termstructures/credit/creditspec.hpp"
 

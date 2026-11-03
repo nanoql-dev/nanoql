@@ -7,7 +7,7 @@ curves and constant volatilities, a Merton process on zero curves and a variance
 with no dividends. Then an expired option, the refusal of an American exercise, and a percentage-strike call at a
 moneyness of 0.9, a striked payoff whose variance the engine reads at the moneyness.
 
-The outputs nanoql fixes are left out (the S-van plan's VR4 (x)): at a zero variance, where QuantLib divides by it
+The outputs nanoql fixes are left out: at a zero variance, where QuantLib divides by it
 (tests/NanoQL.Tests/Divergences/IntegralEngineZeroVarianceTests.cs); the processes here have none.
 
 The process specs are tools/vectors/gen/processes/blackscholesprocess.py's and the payoff specs

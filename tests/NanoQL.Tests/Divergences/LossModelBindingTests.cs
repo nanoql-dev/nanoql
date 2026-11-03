@@ -8,11 +8,10 @@ using static NanoQL.Tests.Conventions.CreditPortfolioBuilders;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// A loss model bound to a basket by copy, its precomputation run there, once (the S-xcr plan's XR1 (b), XR8 (viii)):
-/// QuantLib's model holds a relinkable handle to its basket, so a model set on two baskets in turn can keep the first's
-/// precomputation (the recursive model's weights and the random models' simulations, the planner's
-/// <c>xp_basket.cpp</c> D23, D32: 26.31 and 28.72 against a fresh model's 49.47 and 94.475). Each binding here is a
-/// fresh model's; the check is QuantLib's fresh model, bit for bit.
+/// A loss model bound to a basket by copy, its precomputation run there, once: QuantLib's model holds a relinkable
+/// handle to its basket, so a model set on two baskets in turn can keep the first's precomputation (the recursive
+/// model's weights and the random models' simulations: 26.31 and 28.72 against a fresh model's 49.47 and 94.475). Each
+/// binding here is a fresh model's; the check is QuantLib's fresh model, bit for bit.
 /// </summary>
 public class LossModelBindingTests
 {

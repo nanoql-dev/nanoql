@@ -8,10 +8,9 @@ using static NanoQL.Tests.Conventions.CreditPortfolioBuilders;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The n-th-to-default upfront on the swap's own nominal (the S-xcr plan's XR8 (xi)): QuantLib's is the basket's
-/// remaining notional times the rate (<c>integralntdengine.cpp:157-163</c>), 5 for a 1,000 nominal on a 100 basket (the
-/// planner's <c>xp_engines.cpp</c>, D42: the swap at its fair premium reads an NPV of 5, its upfront). The check is
-/// QuantLib where the nominal is the basket's notional.
+/// The n-th-to-default upfront on the swap's own nominal: QuantLib's is the basket's remaining notional times the rate
+/// (<c>integralntdengine.cpp:157-163</c>), 5 for a 1,000 nominal on a 100 basket (the swap at its fair premium reads an
+/// NPV of 5, its upfront). The check is QuantLib where the nominal is the basket's notional.
 /// </summary>
 public class NthToDefaultUpfrontTests
 {

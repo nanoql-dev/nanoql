@@ -9,15 +9,15 @@ strikes (within the grid, between its points and in both wings) the call and put
 call price and the density; and on the arbitrage-free smile and the SABR smile, the core forced to start and end at
 given indices at the least and the most, the indices QuantLib's Markov-functional model forces.
 
-**The stability filter** (the S7 plan's S7R6) runs on every output: each section is fitted again with every nonzero
-real of the source's spec moved one ulp up, then down (models/model.py's moved); an output is written only where both
-fits leave it within models/model.py's measure, and the generator prints the outputs dropped per case.
+**The stability filter** runs on every output: each section is fitted again with every nonzero real of the source's
+spec moved one ulp up, then down (models/model.py's moved); an output is written only where both fits leave it within
+models/model.py's measure, and the generator prints the outputs dropped per case.
 
-Left out, where nanoql's section differs (the S-g1d plan's G1R6 (viii), (xv), (xvii), and the run's at-the-money
-level): shifted sources, and interpolated fits on which QuantLib's erase runs past its functions' end. The sources'
-specs are tools/vectors/gen/termstructures/volatility/interpolatedsmilesection.py's and sabrsmilesection.py's; each
-case's input "kahale" is {"source", "atm", "interpolate", "exponentialExtrapolation", "deleteArbitragePoints",
-"moneynessGrid", "gap", "forcedLeftIndex", "forcedRightIndex"}. tests/NanoQL.Tests/Vectors/TermStructures/
+Left out, where nanoql's section differs (and in its at-the-money level): shifted sources, and interpolated fits on
+which QuantLib's erase runs past its functions' end. The sources' specs are
+tools/vectors/gen/termstructures/volatility/interpolatedsmilesection.py's and sabrsmilesection.py's; each case's input
+"kahale" is {"source", "atm", "interpolate", "exponentialExtrapolation", "deleteArbitragePoints", "moneynessGrid",
+"gap", "forcedLeftIndex", "forcedRightIndex"}. tests/NanoQL.Tests/Vectors/TermStructures/
 KahaleSmileSectionVectorTests.cs reads it back."""
 import copy
 import importlib.util

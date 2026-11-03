@@ -12,7 +12,7 @@ namespace NanoQL.Models;
 /// Caplets for the pathwise engines, one product a rate: caplet i pays (fᵢ − Kᵢ) aᵢ at its payment time where positive,
 /// with its derivative aᵢ with respect to fᵢ; mainly a test product.
 /// </summary>
-/// <remarks>A working type (the S-mmp plan's MMPR1 (i)).</remarks>
+/// <remarks>A working type.</remarks>
 [WorkingType]
 public sealed class MarketModelPathwiseMultiCaplet : MarketModelPathwiseMultiProduct
 {

@@ -4,12 +4,11 @@
 the evaluation date 15 October 2026: discrete arithmetic average-price Asian options by Turnbull and Wakeman's moment
 match.
 
-Arithmetic calls and puts at 90, 100 and 110, over six months, a year and two years, with 12 fixings, unseasoned
-on the ten processes of tools/vectors/gen/processes/blackscholesprocess.py, and with two past fixings at 95 and 105,
-and at 40 and 45, on the processes without a smile: the NPV, delta and gamma.
-Then the refusals of a geometric average, a payoff that isn't plain vanilla and an exercise that isn't European, and an
-expired option. The outputs nanoql fixes are left out (the S-bar plan's §2.10): every fixing past (QuantLib crashes,
-BR5 (xxix)) and seasoned options on a smile (BR5 (xxx)).
+Arithmetic calls and puts at 90, 100 and 110, over six months, a year and two years, with 12 fixings, unseasoned on the
+ten processes of tools/vectors/gen/processes/blackscholesprocess.py, and with two past fixings at 95 and 105, and at 40
+and 45, on the processes without a smile: the NPV, delta and gamma. Then the refusals of a geometric average, a payoff
+that isn't plain vanilla and an exercise that isn't European, and an expired option. The outputs nanoql fixes are left
+out: every fixing past (QuantLib crashes) and seasoned options on a smile.
 
 The wheel's calls, by QuantLib-SWIG 1.44's options.i: TurnbullWakemanAsianEngine(process) and the option's NPV, delta
 and gamma. Read back by tests/NanoQL.Tests/Vectors/PricingEngines/Asian/TurnbullWakemanAsianEngineVectorTests.cs."""

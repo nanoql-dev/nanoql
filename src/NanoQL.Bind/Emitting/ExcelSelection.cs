@@ -10,10 +10,10 @@ using NanoQL.Bind.Selecting;
 namespace NanoQL.Bind.Emitting;
 
 /// <summary>
-/// What an Excel build holds (XLR5, XLR6): the tool's surface under Excel's filter, a generic type's constructions folded
-/// into families, every function named over that whole filtered surface; then each prefix's list with what a listed type
-/// inherits and the extension methods on it (XLD33), the completeness check to a fixpoint (XLD34), the list's entries
-/// checked, and the stable build's cut with its own fixpoint.
+/// What an Excel build holds: the tool's surface under Excel's filter, a generic type's constructions folded into
+/// families, every function named over that whole filtered surface; then each prefix's list with what a listed type
+/// inherits and the extension methods on it, the completeness check to a fixpoint, the list's entries checked, and the
+/// stable build's cut with its own fixpoint.
 /// </summary>
 internal sealed class ExcelSelection
 {
@@ -25,7 +25,8 @@ internal sealed class ExcelSelection
 
     private ExcelSelection(Surface surface) => this.surface = surface;
 
-    /// <summary>The file readers XLR3 lists by member, whose path-like parameters are taken; any other is refused.</summary>
+    /// <summary>The file readers, listed by member, whose path-like parameters are taken; any other is
+    /// refused.</summary>
     public static IReadOnlyList<string> Readers { get; } = ["nql_ConventionsXml_Read__string", "nql_ConventionsXml_Read__stringArray"];
 
     /// <summary>Gets the build's worksheet functions, in the surface's order.</summary>
@@ -35,9 +36,9 @@ internal sealed class ExcelSelection
     public Dictionary<CFunction, string> Names { get; private set; } = [];
 
     /// <summary>
-    /// Gets the Excel names of the members reporting a read file's path (XLR14, round 6's F6-1), over the whole surface
-    /// so every build carries the same list: the generated assembly hands them to the runtime, whose export refuses a tree
-    /// calling one, since a replay reads the embedded file from another path.
+    /// Gets the Excel names of the members reporting a read file's path, over the whole surface so every build carries
+    /// the same list: the generated assembly hands them to the runtime, whose export refuses a tree calling one, since
+    /// a replay reads the embedded file from another path.
     /// </summary>
     public List<string> PathReporters { get; } = [];
 
@@ -71,7 +72,7 @@ internal sealed class ExcelSelection
         return s;
     }
 
-    /// <summary>A family's key (XLD29): the generic type's definition, the member's kind, name and parameter kinds.</summary>
+    /// <summary>A family's key: the generic type's definition, the member's kind, name and parameter kinds.</summary>
     /// <param name="f">A construction's function.</param>
     /// <returns>The key.</returns>
     public static string FamilyKey(CFunction f) =>
@@ -119,9 +120,9 @@ internal sealed class ExcelSelection
     }
 
     /// <summary>
-    /// Excel's filter (XLR6): what Excel doesn't need or can't call safely: equality and increment operators, results
-    /// records' constructors and <c>with</c>, writable spans and in-out parameters (R15), setters, the file writer and
-    /// the clock (XLD20), members returning nothing but a validation, and the engine hooks (F11-1).
+    /// Excel's filter: what Excel doesn't need or can't call safely: equality and increment operators, results records'
+    /// constructors and <c>with</c>, writable spans and in-out parameters, setters, the file writer and the clock,
+    /// members returning nothing but a validation, and the engine hooks.
     /// </summary>
     /// <param name="f">The function.</param>
     /// <returns>Why it is withheld, or null.</returns>
@@ -150,29 +151,29 @@ internal sealed class ExcelSelection
 
         if (f.Params.Any(p => p.Kind.Name.EndsWith('&')))
         {
-            return "in-out (R15)";
+            return "in-out";
         }
 
-        // XLD20 extended (round 7): a member returning nothing other than a validation can only change an object's state.
+        // A member returning nothing other than a validation can only change an object's state.
         if (f.Kind is "method" or "static" && f.Return == null && !Regex.IsMatch(m, "^(Validate|Check)", RegexOptions.CultureInvariant))
         {
-            return "state-changing (XLD20)";
+            return "state-changing";
         }
 
-        // Round 11's F11-1: an instrument's engine hooks and a provider's resolution hook, which no worksheet calls.
+        // An instrument's engine hooks and a provider's resolution hook, which no worksheet calls.
         if (m is "FetchResults" or "SetupExpired" or "ResolveCalendarEdits")
         {
-            return "engine hook (XLD20)";
+            return "engine hook";
         }
 
         if (f.Kind == "set")
         {
-            return "setter (XLD20)";
+            return "setter";
         }
 
         if (f.CName is "nql_ConventionsXml_WriteDefaults" or "nql_Date_TodaysDate")
         {
-            return "writes files or reads the clock (XLD20)";
+            return "writes files or reads the clock";
         }
 
         return null;
@@ -198,7 +199,7 @@ internal sealed class ExcelSelection
 
     private static IEnumerable<Type> Required(CFunction f) => f.Params.Where(p => p.IsSelf || !p.Optional).SelectMany(p => KindTypes(p.Kind));
 
-    // XLR14's path reporters, by member: a call through one gives the path of the file a snapshot was read from. Each is
+    // The path reporters, by member: a call through one gives the path of the file a snapshot was read from. Each is
     // nanoql's extensions' own, so a surface binding that assembly has them.
     private static readonly (string Type, string Member)[] Reporters =
     [
@@ -210,14 +211,14 @@ internal sealed class ExcelSelection
 
     private void Run(ExcelOptions options, ExcelShipped shipped)
     {
-        // XLD31: a struct's implicit default constructor (no member) is withheld where its type declares a constructor or
-        // a static factory making it; where it is its type's only maker it is kept.
+        // A struct's implicit default constructor (no member) is withheld where its type declares a constructor or a
+        // static factory making it; where it is its type's only maker it is kept.
         var declared = surface.Functions.Where(g => g.Kind == "new" && g.Member != null).Select(g => g.Type).ToHashSet();
         var factories = surface.Functions.Where(g => g.Kind == "static" && g.Return?.Type == g.Type).Select(g => g.Type).ToHashSet();
         var filtered = new List<CFunction>();
         foreach (CFunction f in surface.Functions)
         {
-            string? why = f.Kind == "new" && f.Member == null && (declared.Contains(f.Type) || factories.Contains(f.Type)) ? "default constructor beside a declared maker (XLD31)" : Skip(f);
+            string? why = f.Kind == "new" && f.Member == null && (declared.Contains(f.Type) || factories.Contains(f.Type)) ? "default constructor beside a declared maker" : Skip(f);
             if (why != null)
             {
                 Skips[why] = Skips.GetValueOrDefault(why) + 1;
@@ -228,7 +229,7 @@ internal sealed class ExcelSelection
             }
         }
 
-        // XLD29: a generic type's constructions fold into one function per family, over the whole filtered surface.
+        // A generic type's constructions fold into one function per family, over the whole filtered surface.
         var folded = new HashSet<CFunction>();
         foreach (var g in filtered.Where(IsClosed).GroupBy(FamilyKey))
         {
@@ -239,19 +240,20 @@ internal sealed class ExcelSelection
 
         Names = ExcelNames.Number([.. filtered.Where(f => !folded.Contains(f))], Families, shipped);
 
-        // The reporters listed by member, as XLR3 lists the readers; a listed member the surface binding nanoql's extensions
-        // doesn't have refuses the build before a file is written, so the export's refusal can't silently lose one.
+        // The reporters listed by member, as the readers are listed; a listed member the surface binding nanoql's
+        // extensions doesn't have refuses the build before a file is written, so the export's refusal can't silently
+        // lose one.
         var named = Names.Keys.Where(f => f.Member != null).ToList();
         bool extensions = named.Any(f => f.Member!.DeclaringType!.Assembly.GetName().Name == "NanoQL.Extensions");
         var missing = extensions ? Reporters.Where(r => !named.Any(f => Reports(f, r))).ToList() : [];
         if (missing.Count > 0)
         {
-            throw new BindException($"the path reporters' list names {string.Join(", ", missing.Select(r => r.Type + "." + r.Member))}, which the surface doesn't have: the export's refusal (XLR14) needs each");
+            throw new BindException($"the path reporters' list names {string.Join(", ", missing.Select(r => r.Type + "." + r.Member))}, which the surface doesn't have: the export's refusal needs each");
         }
 
         PathReporters.AddRange(named.Where(f => Reporters.Any(r => Reports(f, r))).Select(f => Names[f]).Order(StringComparer.Ordinal));
 
-        // XLD33: each prefix's list, a listed type bringing the instance members it inherits and the extension methods on it.
+        // Each prefix's list, a listed type bringing the instance members it inherits and the extension methods on it.
         Inherit(options);
         var kept = new List<CFunction>();
         foreach (CFunction f in filtered)
@@ -263,12 +265,12 @@ internal sealed class ExcelSelection
             }
             else
             {
-                Skips["not on the list (XLR5)"] = Skips.GetValueOrDefault("not on the list (XLR5)") + 1;
+                Skips["not on the list"] = Skips.GetValueOrDefault("not on the list") + 1;
             }
         }
 
-        // The check runs where a list applies, over every kept function, a user's included (XLD35); a build with no
-        // list is the whole filtered surface, as the tool's surface keeps what no binding can make (its coverage.md).
+        // The check runs where a list applies, over every kept function, a user's included; a build with no list is the
+        // whole filtered surface, as the tool's surface keeps what no binding can make (its coverage.md).
         bool listed = options.Lists.Values.Any(l => l != null);
         if (listed)
         {
@@ -312,7 +314,7 @@ internal sealed class ExcelSelection
         if (!options.Experimental)
         {
             // The stable build: a family holds its stable constructions, an experimental one refused naming the
-            // experimental build (round 3's B3-2); then its own fixpoint.
+            // experimental build; then its own fixpoint.
             units = [.. units.Where(u => !u.Experimental).Select(u => u.Family == null ? u : u with
             {
                 Family = [.. u.Family.Where(m => !m.Experimental)],
@@ -334,16 +336,16 @@ internal sealed class ExcelSelection
         {
             if (f.Params.Any(p => PathLike.IsMatch(p.Name) && p.Kind.Text is "string" or "array:string") && !Readers.Contains(f.CName))
             {
-                throw new BindException($"{f.CName}: a path-like parameter outside the file readers' list (XLR3)");
+                throw new BindException($"{f.CName}: a path-like parameter outside the file readers' list");
             }
         }
 
         Units.AddRange(units.OrderBy(u => u.Functions.Select(f => f.CName).Min(StringComparer.Ordinal), StringComparer.Ordinal));
     }
 
-    // The members a listed type inherits: for each member (its kind, name and parameters) the nearest declaration in its
-    // chain, its own first, then its base classes', an interface's only where no class declares it (round 11's F11-1);
-    // constructors and statics of every kind stay with their own type.
+    // The members a listed type inherits: for each member (its kind, name and parameters) the nearest declaration in
+    // its chain, its own first, then its base classes', an interface's only where no class declares it; constructors
+    // and statics of every kind stay with their own type.
     private void Inherit(ExcelOptions options)
     {
         var listed = options.Lists.Values.Where(l => l != null).SelectMany(l => l!.Types).ToHashSet(StringComparer.Ordinal);
@@ -389,8 +391,8 @@ internal sealed class ExcelSelection
             && f.Params.Count > 0
             && KindTypes(f.Params[0].Kind).Any(t => t.FullName != null && (list.Types.Contains(ListedName(t)) || inheritedTypes.Contains(ListedName(t))));
 
-    // XLD34: a kept function whose required input (self included) no kept function makes, by its type or a type derived
-    // from it, nor a kept lookup by name constructs, or whose required engine no kept bind can fill, is withheld, to a
+    // A kept function whose required input (self included) no kept function makes, by its type or a type derived from
+    // it, nor a kept lookup by name constructs, or whose required engine no kept bind can fill, is withheld, to a
     // fixpoint, each with what it lacks.
     private List<CFunction> Reachable(List<CFunction> kept)
     {
@@ -451,7 +453,7 @@ internal sealed class ExcelSelection
         return [.. kept.Where(live.Contains)];
     }
 
-    // XLD34's entries' checks: an entry the surface lacks, an entry keeping no function, and a deprecated function the
+    // The list entries' checks: an entry the surface lacks, an entry keeping no function, and a deprecated function the
     // list would keep, each refused.
     private void CheckEntries(ExcelOptions options, List<CFunction> kept)
     {

@@ -3,8 +3,8 @@
 """Vectors for Histogram (ql/math/statistics/histogram.hpp, .cpp), which the wheel doesn't bind, each output computed by
 the C++ harness: data sets from a fixed random sample (normal, uniform, and integers with ties), each binned by a number
 of breaks (0, 1, 5 and 20), by Sturges' and Scott's rules, and by given breaks, sorted and unsorted, the bins, breaks,
-algorithm, counts and frequencies. The Freedman-Diaconis rule's quantiles and given breaks that repeat are CR7 (v) to
-(vii)'s, left out. Read back by tests/NanoQL.Tests/Vectors/Cxx/Numerics/Statistics/HistogramCxxVectorTests.cs."""
+algorithm, counts and frequencies. The Freedman-Diaconis rule's quantiles and given breaks that repeat are nanoql's
+fixes, left out. Read back by tests/NanoQL.Tests/Vectors/Cxx/Numerics/Statistics/HistogramCxxVectorTests.cs."""
 import os
 import random
 import sys

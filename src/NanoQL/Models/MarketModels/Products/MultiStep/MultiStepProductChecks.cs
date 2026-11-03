@@ -4,8 +4,8 @@
 namespace NanoQL.Models;
 
 /// <summary>
-/// The size checks of the multi-step products' inputs where QuantLib reads past them unchecked (the S-mmp plan's
-/// MMPR4's refusals), in the form of QuantLib's inverse floater's ("Incorrect number of … given").
+/// The size checks of the multi-step products' inputs where QuantLib reads past them unchecked, in the form of
+/// QuantLib's inverse floater's ("Incorrect number of … given").
 /// </summary>
 internal static class MultiStepProductChecks
 {

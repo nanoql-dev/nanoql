@@ -28,8 +28,8 @@ namespace NanoQL.Experimental;
 /// </para>
 /// <para>
 /// QuantLib compounds over the maturity's length in its own unit, so an 18-month maturity compounds over 18 years; here
-/// over 1.5, QuantLib's own <c>years</c> of the period, its bits on maturities in years, and a maturity in weeks or days,
-/// which has no length in years, is refused (the S-xrt run's R2-1; <c>Divergences/CPICapFloorPriceSurfaceTests.cs</c>).
+/// over 1.5, QuantLib's own <c>years</c> of the period, its bits on maturities in years, and a maturity in weeks or
+/// days, which has no length in years, is refused (<c>Divergences/CPICapFloorPriceSurfaceTests.cs</c>).
 /// </para>
 /// <para>
 /// The at-the-money rates read the index's fixings, so the surface is built from a context (<see cref="Create"/>), as

@@ -18,10 +18,9 @@ namespace NanoQL.Experimental;
 /// calibration paths, regresses the continuation value on each fixing's state, then prices on the fitted decisions.
 /// </summary>
 /// <remarks>
-/// A working type (the S-xeq plan's §2.0): QuantLib's mutable calibration phase, stored paths and coefficients, owned by
-/// one engine call. At each fixing the regression's decision gives way to always or never exercising where either beats
-/// it on the calibration paths, as QuantLib's. A calibration on no path is refused, where QuantLib reads the first of
-/// none (XER5 (xxiii)).
+/// A working type: QuantLib's mutable calibration phase, stored paths and coefficients, owned by one engine call. At
+/// each fixing the regression's decision gives way to always or never exercising where either beats it on the
+/// calibration paths, as QuantLib's. A calibration on no path is refused, where QuantLib reads the first of none.
 /// </remarks>
 [Experimental("NQL0001")]
 [WorkingType]
@@ -152,7 +151,7 @@ public sealed class LongstaffSchwartzMultiPathPricer : PathPricer<MultiPath>
 
     /// <summary>Fits the exercise decisions on the stored paths, then leaves the calibration phase.</summary>
     /// <exception cref="NanoQLException">
-    /// No path was stored (XER5 (xxiii)), or a state's size isn't the basis dimension ("Invalid size of basis system").
+    /// No path was stored, or a state's size isn't the basis dimension ("Invalid size of basis system").
     /// </exception>
     public void Calibrate()
     {

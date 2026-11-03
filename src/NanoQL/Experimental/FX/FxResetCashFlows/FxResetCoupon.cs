@@ -19,7 +19,7 @@ namespace NanoQL.Experimental;
 /// compounding of an overnight-indexed coupon. <see cref="Coupon.ContractNominal"/> is the underlying's.
 /// </para>
 /// <para>
-/// Immutable, as S3R1 shapes coupons: <see cref="SetFxResetPricer"/> returns a copy holding the pricer, and a coupon
+/// Immutable, as every coupon is: <see cref="SetFxResetPricer"/> returns a copy holding the pricer, and a coupon
 /// pricer set through <see cref="FloatingRateCouponExtensions.SetPricer"/> is forwarded to a copy of the underlying,
 /// whose pricer drives the paid rate.
 /// </para>

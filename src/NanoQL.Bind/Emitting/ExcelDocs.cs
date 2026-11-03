@@ -10,10 +10,10 @@ using NanoQL.Bind.Reading;
 namespace NanoQL.Bind.Emitting;
 
 /// <summary>
-/// The worksheet functions' help text (XLD11): each function's description and each argument's, read from the XML
-/// documentation the build writes beside an assembly, by the compiler's documentation id; an <c>&lt;inheritdoc/&gt;</c>
-/// resolved to its nearest base's, as C# resolves it. Read in the Excel back end alone: nothing enters the shared model
-/// or <c>surface.json</c>.
+/// The worksheet functions' help text: each function's description and each argument's, read from the XML documentation
+/// the build writes beside an assembly, by the compiler's documentation id; an <c>&lt;inheritdoc/&gt;</c> resolved to
+/// its nearest base's, as C# resolves it. Read in the Excel back end alone: nothing enters the shared model or
+/// <c>surface.json</c>.
 /// </summary>
 internal sealed class ExcelDocs
 {
@@ -44,8 +44,8 @@ internal sealed class ExcelDocs
 
         XElement? e = Find(m);
 
-        // An <inheritdoc/> is its base's: the cref it names, an override's base method, an interface's member of the same
-        // signature, a constructor's base constructor of the same parameters; the nearest first (round 7's F7-5).
+        // An <inheritdoc/> is its base's: the cref it names, an override's base method, an interface's member of the
+        // same signature, a constructor's base constructor of the same parameters; the nearest first.
         for (int depth = 0; e != null && e.Element("summary") == null && e.Element("inheritdoc") is XElement inh && depth < 8; depth++)
         {
             Inherited++;
@@ -184,7 +184,7 @@ internal sealed class ExcelDocs
 
         static string Sig(MethodBase x) => string.Join(",", x.GetParameters().Select(p => p.ParameterType.FullName ?? p.ParameterType.Name));
 
-        // C#'s <inheritdoc/> takes the nearest base's text: the base classes nearest first, then the interfaces (F7-5).
+        // C#'s <inheritdoc/> takes the nearest base's text: the base classes nearest first, then the interfaces.
         var bases = new List<Type>();
         for (Type? b = t.BaseType; b != null; b = b.BaseType)
         {

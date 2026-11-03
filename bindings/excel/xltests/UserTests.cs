@@ -6,8 +6,8 @@ using Microsoft.Office.Interop.Excel;
 namespace NanoQL.Excel.XlTests;
 
 /// <summary>
-/// A user's assembly built by the tool (XLR8, XLP27): its curve made by its own function in the user's prefix, read by
-/// its own getter, and priced by nanoql's, exactly as its code computes the discount.
+/// A user's assembly built by the tool: its curve made by its own function in the user's prefix, read by its own
+/// getter, and priced by nanoql's, exactly as its code computes the discount.
 /// </summary>
 public class UserTests
 {

@@ -4,13 +4,13 @@
 October 2026: the rough Heston model, the Heston parameters and the variance's Hurst exponent.
 
 Three models (Hurst exponents 0, 0.12 and 0.5) on flat and linear zero curves: θ, κ, σ, ρ, v₀, the Hurst exponent and
-the parameter vector, and the parameters after setParams. And a calibration of a model to twenty Heston
-helpers (five strikes at four maturities, implied volatilities from the Padé engine on QuantLib's own calibration
-case's parameters) by Levenberg-Marquardt through AnalyticRoughHestonEngine's Padé route at Gauss-Laguerre order 64 and
-256 time steps, from QuantLib's case's start: the calibrated parameters and the helpers' errors, under the S7 plan's
-S7R6 filter: the calibration rerun with each market volatility moved one ulp, up and down, each output written only
-where every rerun leaves it within 1e-10 x max(|a|, |b|, 1), a dropped one null and its index in the case's input
-"dropped"; the generator prints "dropped n of m outputs".
+the parameter vector, and the parameters after setParams. And a calibration of a model to twenty Heston helpers (five
+strikes at four maturities, implied volatilities from the Padé engine on QuantLib's own calibration case's parameters)
+by Levenberg-Marquardt through AnalyticRoughHestonEngine's Padé route at Gauss-Laguerre order 64 and 256 time steps,
+from QuantLib's case's start: the calibrated parameters and the helpers' errors, under the stability filter: the
+calibration rerun with each market volatility moved one ulp, up and down, each output written only where every rerun
+leaves it within 1e-10 x max(|a|, |b|, 1), a dropped one null and its index in the case's input "dropped"; the
+generator prints "dropped n of m outputs".
 
 A case holds one model {"process" (tools/vectors/gen/processes/hestonprocess.py's spec), "hurst"}, for the members
 the parameters setParams gives, and for the calibration its helpers {"maturities" (days), "strikes", "vols"} and its
@@ -100,7 +100,7 @@ def calibrate(rf, q, vols):
 
 
 def reruns(rf, q, vols):
-    """The calibration with each market volatility moved one ulp, up and down (S7R6); None where a rerun fails."""
+    """The calibration with each market volatility moved one ulp, up and down; None where a rerun fails."""
     for i in range(len(vols)):
         for d in (math.inf, -math.inf):
             moved = list(vols)

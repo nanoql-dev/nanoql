@@ -17,11 +17,10 @@ namespace NanoQL.Experimental;
 /// </summary>
 /// <remarks>
 /// The factor is integrated over [−maximum, maximum]: QuantLib's Student classes pass no minimum, so its base's −5
-/// stands and the integrals lose the factor's left tail, where defaults are nearly certain (the copula's integral of
-/// p = 0.001 reads 0.000898 on Student 5/5 at correlation 0.3 and 0.000102 on Student-Gaussian ν 3 at 0.6; the S-xcr
-/// code review's C3 O1-4; <c>Divergences/OneFactorStudentCopulaRangeTests.cs</c>).
-/// The Student densities and distributions are S-core's (its CR7 (xxii), (xxiii)), so a tabulated value reads the last
-/// bits of their fixes where QuantLib's formula loses its digits (the kickoff's Student cdf class).
+/// stands and the integrals lose the factor's left tail, where defaults are nearly certain (the copula's integral of p
+/// = 0.001 reads 0.000898 on Student 5/5 at correlation 0.3 and 0.000102 on Student-Gaussian ν 3 at 0.6;
+/// <c>Divergences/OneFactorStudentCopulaRangeTests.cs</c>). The Student densities and distributions are nanoql's fixed
+/// ones, so a tabulated value reads the last bits of their fixes where QuantLib's formula loses its digits.
 /// </remarks>
 [Experimental("NQL0001")]
 public sealed class OneFactorStudentCopula : OneFactorCopula

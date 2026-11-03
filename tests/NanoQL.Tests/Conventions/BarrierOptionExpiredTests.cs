@@ -13,9 +13,8 @@ namespace NanoQL.Tests.Conventions;
 
 /// <summary>
 /// An expired barrier option (its exercise date before the evaluation date) prices, under every barrier engine, as
-/// <see cref="OneAssetOption"/>'s expired results, D14's first step, before the engine checks its arguments; its
-/// implied volatility is refused with QuantLib's "option expired" (<c>barrieroption.cpp:62</c>; the S-rx plan's
-/// SRXD11 and SRXD12).
+/// <see cref="OneAssetOption"/>'s expired results, the engines' first step, before the engine checks its
+/// arguments; its implied volatility is refused with QuantLib's "option expired" (<c>barrieroption.cpp:62</c>).
 /// </summary>
 public class BarrierOptionExpiredTests
 {

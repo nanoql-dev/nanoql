@@ -13,15 +13,14 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The multiple-strikes calculation on a reference that isn't a plain vanilla (the S-hes plan's HR7 (xxiv)). QuantLib's
-/// cache stores the reference payoff's values scaled, V(S·d)/d, under plain-vanilla keys at each strike
-/// (<c>fdhestonvanillaengine.cpp:209-224</c>) and serves them to a later plain vanilla (<c>:174-191</c>); V(S·d)/d is a
-/// vanilla at Kᵢ only for a plain-vanilla reference. After a cash-or-nothing reference (100, cash 10) it serves plain
-/// calls at 80, 100 and 120 6.8209430073262878, 5.8085085805369312 and 1.6286553941678532, after an asset-or-nothing one
-/// 91.147695950275022, 66.230378622429299 and 17.487133347226365, where its engine priced for each strike alone gives
-/// 22.93727546246711, 8.144976787928341 and 1.2010639430197885 [executed: <c>scratchpad\cxxprobe\src\c1oracle.cpp</c>].
-/// nanoql's <c>CalculateStrikes</c> solves each strike's plain vanilla alone there. Check: QuantLib's engine priced for
-/// each strike alone.
+/// The multiple-strikes calculation on a reference that isn't a plain vanilla. QuantLib's cache stores the reference
+/// payoff's values scaled, V(S·d)/d, under plain-vanilla keys at each strike (<c>fdhestonvanillaengine.cpp:209-224</c>)
+/// and serves them to a later plain vanilla (<c>:174-191</c>); V(S·d)/d is a vanilla at Kᵢ only for a plain-vanilla
+/// reference. After a cash-or-nothing reference (100, cash 10) it serves plain calls at 80, 100 and 120
+/// 6.8209430073262878, 5.8085085805369312 and 1.6286553941678532, after an asset-or-nothing one 91.147695950275022,
+/// 66.230378622429299 and 17.487133347226365, where its engine priced for each strike alone gives 22.93727546246711,
+/// 8.144976787928341 and 1.2010639430197885 (QuantLib 1.44). nanoql's <c>CalculateStrikes</c> solves each strike's
+/// plain vanilla alone there. Check: QuantLib's engine priced for each strike alone.
 /// </summary>
 public class FdHestonStrikesReferenceTests
 {

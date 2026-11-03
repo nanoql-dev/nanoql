@@ -9,12 +9,12 @@ wheel's PiecewiseZeroInflation (Linear, IterativeBootstrap) and ZeroCouponInflat
   maxDate, zeroRate at 24 dates; each helper's pillar, earliest and latest dates and its implied quote on the curve;
   and, after setSeasonality, which bootstraps the curve again, its data and zeroRate at the same dates.
 
-The stability filter of the S-infl plan's SID20 (the S7 plan's S7R6) runs on each case: the curve is rebuilt with its
-helpers' quotes moved one ulp up, then down, together and each alone, and a solved output (a datum, a rate, an
-implied quote) is written only where every move leaves it within 1e-12 x max(|a|, |b|, 1); a dropped one is written
-null and its index listed in the case's inputs "dropped". The generator prints "dropped n of m outputs" per case and
-for the file. QuantLib re-bootstraps a curve given a seasonality from its own nodes; nanoql builds it afresh, which
-differs by up to 7.9e-15 (tests/NanoQL.Tests/Divergences/SetSeasonalityColdStartTests.cs), within R7.
+The stability filter runs on each case: the curve is rebuilt with its helpers' quotes moved one ulp up, then down,
+together and each alone, and a solved output (a datum, a rate, an implied quote) is written only where every move
+leaves it within 1e-12 x max(|a|, |b|, 1); a dropped one is written null and its index listed in the case's inputs
+"dropped". The generator prints "dropped n of m outputs" per case and for the file. QuantLib re-bootstraps a curve
+given a seasonality from its own nodes; nanoql builds it afresh, which differs by up to 7.9e-15
+(tests/NanoQL.Tests/Divergences/SetSeasonalityColdStartTests.cs), within the tolerance.
 
 A case's inputs hold its settings, the index spec and fixings (tools/vectors/gen/cashflows/indexedcashflow.py's,
 the index with no curve), the helpers' {"quote", "maturity", "pillar", "customPillarDate"} with their shared lag,

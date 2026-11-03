@@ -8,18 +8,17 @@ using static NanoQL.Tests.Conventions.CommodityMarkets;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The energy instruments' unit conversions (the S-xrt plan's XRR5 (i), fixed under R8 with Revision 69). QuantLib's
-/// <c>calculateUomConversionFactor</c> returns the looked-up conversion's stored factor whatever its orientation, so it
-/// is one unit's value in the other for 25 of the 30 ordered pairs of its six petroleum units and the reciprocal for
-/// five (BBL→MB, BBL→kl, BBL→KL_tk, GAL→BBL, l→BBL), and its call sites multiply a quantity by the factor from the base
-/// to its unit and a price by the factor from its unit to the base, so one is inverted: a payer vanilla swap on 1,000
-/// units a month at a 0.5 spread prices 500 in barrels, 882,000 in gallons and 500,000,000 in thousand-barrels, and a
-/// fee of 0.1 a unit reads 100, 176,400 and 10⁸ (the S-xrt planner's <c>xp_c1.cpp</c> and <c>xr_c1.cpp</c>, flat
-/// zero curves). nanoql's factor is one unit's value in the other, the conversion's own convert of a unit quantity; a
-/// quantity converts to the base by the factor from its unit, and a price, an index's forward price, a curve's basis
-/// and a unit cost by the factor from the base (or the index's unit) to theirs. The check is the hand value, the
-/// spread and the fee converted through barrels by QuantLib's known factors, on every unit; QuantLib's bits stand on the
-/// base unit, where every factor is 1.
+/// The energy instruments' unit conversions (fixed). QuantLib's <c>calculateUomConversionFactor</c> returns the
+/// looked-up conversion's stored factor whatever its orientation, so it is one unit's value in the other for 25 of the
+/// 30 ordered pairs of its six petroleum units and the reciprocal for five (BBL→MB, BBL→kl, BBL→KL_tk, GAL→BBL, l→BBL),
+/// and its call sites multiply a quantity by the factor from the base to its unit and a price by the factor from its
+/// unit to the base, so one is inverted: a payer vanilla swap on 1,000 units a month at a 0.5 spread prices 500 in
+/// barrels, 882,000 in gallons and 500,000,000 in thousand-barrels, and a fee of 0.1 a unit reads 100, 176,400 and 10⁸
+/// (flat zero curves). nanoql's factor is one unit's value in the other, the conversion's own convert of a unit
+/// quantity; a quantity converts to the base by the factor from its unit, and a price, an index's forward price, a
+/// curve's basis and a unit cost by the factor from the base (or the index's unit) to theirs. The check is the hand
+/// value, the spread and the fee converted through barrels by QuantLib's known factors, on every unit; QuantLib's bits
+/// stand on the base unit, where every factor is 1.
 /// </summary>
 public class EnergyUnitConversionTests
 {
@@ -75,7 +74,7 @@ public class EnergyUnitConversionTests
     [InlineData("MB", 500_000_000.0)]
     public void APayerSwapInAnyUnitIsWorthItsSpreadTimesItsQuantity(string unit, double quantLib)
     {
-        // xp_c1.cpp's swap: 1,000 units in March 2025, the index at 2 a unit, the fixed price 1.5 a unit
+        // the swap: 1,000 units in March 2025, the index at 2 a unit, the fixed price 1.5 a unit
         UnitOfMeasure u = Unit(unit);
         CommodityIndex index = Index(u, 2.0);
         EvaluationContext context = WithFixing(Context(), index, 2.0);
@@ -94,7 +93,7 @@ public class EnergyUnitConversionTests
     [InlineData("MB", 100_000_000.0)]
     public void AUnitCostIsChargedPerUnitDelivered(string unit, double quantLib)
     {
-        // xr_c1.cpp's swap fee: 0.1 a unit on 1,000 units
+        // the swap fee: 0.1 a unit on 1,000 units
         UnitOfMeasure u = Unit(unit);
         CommodityIndex index = Index(u, 2.0);
         EvaluationContext context = WithFixing(Context(), index, 2.0);

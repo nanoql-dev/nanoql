@@ -13,7 +13,7 @@ namespace NanoQL.PricingEngines;
 /// <summary>
 /// <see cref="MCPerformanceEngine"/> on pseudo-random draws with QuantLib's default statistics: QuantLib-Python's
 /// <c>MCPRPerformanceEngine</c>, QuantLib's <c>MCPerformanceEngine&lt;PseudoRandom&gt;</c>, its calculations closed at
-/// <see cref="PseudoRandom"/> and <see cref="GeneralStatistics"/> (D12).
+/// <see cref="PseudoRandom"/> and <see cref="GeneralStatistics"/>.
 /// </summary>
 public static class MCPRPerformanceEngine
 {

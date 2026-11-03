@@ -7,10 +7,9 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Extensions;
 
 /// <summary>
-/// A coded preset's name keeps its class (CVD28): a record under it must be one the class can take, since a coded
-/// construction can't become another kind. Each kind a calendar, day counter and currency preset's name may take is
-/// taken and reaches the coded construction; every other is refused at <see cref="ConventionSet.With"/>, naming the
-/// record.
+/// A coded preset's name keeps its class: a record under it must be one the class can take, since a coded construction
+/// can't become another kind. Each kind a calendar, day counter and currency preset's name may take is taken and
+/// reaches the coded construction; every other is refused at <see cref="ConventionSet.With"/>, naming the record.
 /// </summary>
 public class ConventionPairingTests
 {

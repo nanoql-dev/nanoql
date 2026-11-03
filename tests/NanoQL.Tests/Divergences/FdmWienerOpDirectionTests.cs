@@ -8,7 +8,7 @@ namespace NanoQL.Tests.Divergences;
 /// <summary>
 /// The Wiener operator in a direction past its count. QuantLib's <c>apply_direction</c> and <c>solve_splitting</c>
 /// read <c>ops_[direction]</c> unchecked (<c>fdmwienerop.cpp:71-79</c>), past its operators' vector, undefined. nanoql
-/// refuses such a direction (master §2.2's undefined-path row).
+/// refuses such a direction (the playbook's undefined-behaviour row).
 /// </summary>
 public class FdmWienerOpDirectionTests
 {

@@ -6,13 +6,13 @@ using NanoQL.Models;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The periodic calibration's failures and passes (the S-mm plan's MR3 (xi), fixed under R8). QuantLib returns the
-/// inner calibration's <c>calibrate</c> value, a <c>bool</c>, as its failure count
-/// (<c>capletcoterminalperiodic.cpp:125-126</c>), and its <c>++iterationsDone</c> runs only when the loop goes on
-/// (<c>:171</c>), one short of the passes when the errors end it: on QuantLib's case it returns 1, its inner
-/// calibration's <c>failures()</c> 0, and at caplets × 0.7 it returns 0 with 3 failures, each counting 5 passes with 6
-/// rows of its volatility matrix filled (the planner's MP24). nanoql returns the inner failures and the passes run.
-/// Checks: the inner calibration's own failures on the last pass's variances, and the matrix's filled rows.
+/// The periodic calibration's failures and passes (fixed). QuantLib returns the inner calibration's <c>calibrate</c>
+/// value, a <c>bool</c>, as its failure count (<c>capletcoterminalperiodic.cpp:125-126</c>), and its
+/// <c>++iterationsDone</c> runs only when the loop goes on (<c>:171</c>), one short of the passes when the errors end
+/// it: on QuantLib's case it returns 1, its inner calibration's <c>failures()</c> 0, and at caplets × 0.7 it returns 0
+/// with 3 failures, each counting 5 passes with 6 rows of its volatility matrix filled. nanoql returns the inner
+/// failures and the passes run. Checks: the inner calibration's own failures on the last pass's variances, and the
+/// matrix's filled rows.
 /// </summary>
 public class CapletCoterminalPeriodicTests
 {

@@ -16,7 +16,7 @@ internal static class RatePseudoRootJacobianFunctions
 {
     /// <summary>
     /// Writes, for each rate j, the matrix of its derivatives with respect to the pseudo-root's elements (k, f): zero
-    /// for a rate already reset, for a root of a dead rate and for a root of a later rate (MMPR4 (iv)'s form).
+    /// for a rate already reset, for a root of a dead rate and for a root of a later rate.
     /// </summary>
     public static void Derivatives(
         Matrix pseudoRoot,
@@ -39,7 +39,7 @@ internal static class RatePseudoRootJacobianFunctions
             ratios[j] = (oldRates[j] + displacements[j]) * discountRatios[j + 1];
         }
 
-        // the drift's sum, each term with its own accrual period (MMPR4 (iv))
+        // the drift's sum, each term with its own accrual period
         for (int f = 0; f < factors; ++f)
         {
             e[aliveIndex, f] = 0;
@@ -62,7 +62,7 @@ internal static class RatePseudoRootJacobianFunctions
             {
                 Matrix d = derivatives[j];
 
-                // the displaced end rate (MMPR4 (iv))
+                // the displaced end rate
                 double displacedRate = newRates[j] + displacements[j];
                 for (int k = aliveIndex; k < j; ++k)
                 {

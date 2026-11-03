@@ -15,10 +15,10 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// C2's refusals and list conventions (the S-xeq plan's XER5 (xvii), (xxiii), XER1, the seasoned variance option; the
-/// run's R2-1 and R2-3): variance gamma past its first moment; a Longstaff-Schwartz calibration with no paths; the
-/// seasoned variance option; a list of options priced in its order with its expired options; Vecer's engine refusing an
-/// option whose own start differs from the engine's; the path engines refusing unsorted or missing fixing dates.
+/// The experimental exotics' refusals and list conventions: variance gamma past its first moment; a Longstaff-Schwartz
+/// calibration with no paths; the seasoned variance option; a list of options priced in its order with its expired
+/// options; Vecer's engine refusing an option whose own start differs from the engine's; the path engines refusing
+/// unsorted or missing fixing dates.
 /// </summary>
 public class ExperimentalExoticConventionTests
 {

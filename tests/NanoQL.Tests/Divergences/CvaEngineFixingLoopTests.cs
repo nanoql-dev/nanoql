@@ -14,15 +14,14 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The CVA engine's loop over the fixed payment dates (the S-cms plan's CMR5 (xvi)): QuantLib's
-/// <c>CounterpartyAdjSwapEngine</c> skips the dates before the counterparty curve's reference date with <c>while
-/// (*nextFD &lt; priceDate) ++nextFD;</c> (<c>cvaswapengine.cpp:128</c>), with no end check, so when every fixed
-/// payment is before that date it reads past the dates, undefined behaviour. nanoql's loop stops at the end, and the
-/// swap is then worth its NPV, its fair rate the swap's. QuantLib's checks: its values where its loop stays in range
-/// (the C++ harness's vectors, a seasoned swap among them); and a seasoned swap against a fresh one with the same
-/// remaining flows, which QuantLib's loop prices alike, the seasoned swap skipping its past payments: the vectors'
-/// seasoned 5-year payer from 16 April 2022 at its fair rate, -1,880.3521932368576 and 0.025867936451198614,
-/// restarted on 16 April 2024.
+/// The CVA engine's loop over the fixed payment dates: QuantLib's <c>CounterpartyAdjSwapEngine</c> skips the dates
+/// before the counterparty curve's reference date with <c>while (*nextFD &lt; priceDate) ++nextFD;</c>
+/// (<c>cvaswapengine.cpp:128</c>), with no end check, so when every fixed payment is before that date it reads past
+/// the dates, undefined behaviour. nanoql's loop stops at the end, and the swap is then worth its NPV, its fair rate
+/// the swap's. QuantLib's checks: its values where its loop stays in range (the C++ harness's vectors, a seasoned
+/// swap among them); and a seasoned swap against a fresh one with the same remaining flows, which QuantLib's loop
+/// prices alike, the seasoned swap skipping its past payments: the vectors' seasoned 5-year payer from 16 April 2022
+/// at its fair rate, -1,880.3521932368576 and 0.025867936451198614, restarted on 16 April 2024.
 /// </summary>
 public class CvaEngineFixingLoopTests
 {

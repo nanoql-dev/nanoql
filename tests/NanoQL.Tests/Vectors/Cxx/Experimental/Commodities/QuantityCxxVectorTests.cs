@@ -12,8 +12,8 @@ namespace NanoQL.Tests.Vectors;
 /// The C++ harness's quantity vectors, <c>tests/vectors/cxx/experimental/commodities/quantity.json</c>:
 /// <see cref="Quantity"/>'s conversion-mode methods under each of QuantLib's conversion types, through the context's
 /// <see cref="QuantitySettings"/>, and its scalings. QuantLib's <c>==</c> throws on a unit mismatch without
-/// conversion, where <see cref="Quantity.Equals(Quantity, EvaluationContext)"/> returns false (the S-xrt plan's
-/// XRR1, <see cref="Money"/>'s form).
+/// conversion, where <see cref="Quantity.Equals(Quantity, EvaluationContext)"/> returns false (<see cref="Money"/>'s
+/// form).
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class QuantityCxxVectorTests
@@ -60,7 +60,7 @@ public class QuantityCxxVectorTests
             check.Output(c, "pairs", pairs);
             if (context.QuantitySettings.ConversionType == QuantityConversionType.NoConversion)
             {
-                check.Mapped(c, "equal", equal, false, "a unit mismatch without conversion is unequal (XRR1)");
+                check.Mapped(c, "equal", equal, false, "a unit mismatch without conversion is unequal");
             }
             else
             {

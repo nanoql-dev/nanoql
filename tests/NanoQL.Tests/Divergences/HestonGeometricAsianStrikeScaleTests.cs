@@ -11,20 +11,19 @@ using static NanoQL.Tests.Divergences.HestonGeometricAsianMarkets;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The Heston geometric Asian engine across strikes and spots (the S-bar plan's BR5 (xxxiv) (e)–(l), Revisions 18 to
-/// 22, BR12, fixed under R8). On the damped contour, a strip chosen by width alone sends a deep out-of-the-money option
-/// on the other side through parity from a large in-the-money integral (no end under the cap: puts at K/F 0.01 and
-/// 0.001, calls at K/F 30 to 1,000); R7 at scale 1 asks a small price at spot 1e4 for 5e-14 of the forward (no end
-/// at spot 1e4 and 1e6); the halfway α leaves the integrand on the forward's scale at large spots; a single breakpoint
-/// set accepts a panel whose two rules alias the oscillation and agree by chance (1.88 R7 off at spot 1e4); and
-/// distinct dates on one 30/360 time put Phi(1, 0) at its one-date 0/0 (the planner's BP54 to BP59). nanoql runs the
-/// out-of-the-money option on its own strip where that strip is at least 0.5 wide and on the middle strip where it
-/// isn't, the other by parity; Lord and Kahl's α; R7 at max(the price, the lower bound, D·F_G/100), every spot
-/// computing spot 100's contract scaled; two breakpoint sets that must agree, a third on disagreement; F_G exact where
-/// every fixing time is one. Checks, at R7 on BR12's scale: QuantLib's <c>AnalyticHestonEngine</c> at 1e-15 at one
-/// fixing, itself checked against QUADPACK on the route's contour at two α, QUADPACK the reference where they part by
-/// more than 0.5 R7 (the K/F 1e5 call, 11.8 R7 off QuantLib); spot 100's price scaled; QUADPACK elsewhere. Markets: r
-/// 5%, q 0, v₀ = θ 0.04 unless given.
+/// The Heston geometric Asian engine across strikes and spots (fixed). On the damped contour, a strip chosen by width
+/// alone sends a deep out-of-the-money option on the other side through parity from a large in-the-money integral (no
+/// end under the cap: puts at K/F 0.01 and 0.001, calls at K/F 30 to 1,000); the tolerance at scale 1 asks a small
+/// price at spot 1e4 for 5e-14 of the forward (no end at spot 1e4 and 1e6); the halfway α leaves the integrand on the
+/// forward's scale at large spots; a single breakpoint set accepts a panel whose two rules alias the oscillation and
+/// agree by chance (1.88 tolerances off at spot 1e4); and distinct dates on one 30/360 time put Phi(1, 0) at its
+/// one-date 0/0. nanoql runs the out-of-the-money option on its own strip where that strip is at least 0.5 wide and on
+/// the middle strip where it isn't, the other by parity; Lord and Kahl's α; the tolerance at max(the price, the lower
+/// bound, D·F_G/100), every spot computing spot 100's contract scaled; two breakpoint sets that must agree, a third on
+/// disagreement; F_G exact where every fixing time is one. Checks, at the tolerance on the engine's scale: QuantLib's
+/// <c>AnalyticHestonEngine</c> at 1e-15 at one fixing, itself checked against QUADPACK on the route's contour at two α,
+/// QUADPACK the reference where they part by more than half the tolerance (the K/F 1e5 call, 11.8 tolerances off
+/// QuantLib); spot 100's price scaled; QUADPACK elsewhere. Markets: r 5%, q 0, v₀ = θ 0.04 unless given.
 /// </summary>
 public class HestonGeometricAsianStrikeScaleTests
 {
@@ -105,7 +104,7 @@ public class HestonGeometricAsianStrikeScaleTests
     public void TheAliasedCallAtSpotTenThousandIsQuantLibs() =>
         Check(1e4, 1e-3, 0.5, 1.0, 0.9, 3650, OptionType.Call, 24730.819060501926, F10 * 100.0, 48.20371977272231);
 
-    // the same at variance 1e-4: at R7's scale 1 the contour reached its cap
+    // the same at variance 1e-4: at the tolerance's scale 1 the contour reached its cap
     [Fact]
     public void TheSmallVarianceCallAtSpotTenThousandIsQuantLibs() =>
         Check(1e4, 1e-4, 0.5, 1.0, 0.9, 3650, OptionType.Call, 24730.819060501926, F10 * 100.0, 4.837422034235834);
@@ -126,8 +125,8 @@ public class HestonGeometricAsianStrikeScaleTests
     [Fact]
     public void TheHundredThousandTimesForwardCallIsQuadpacks()
     {
-        // thirty years, vol of vol 3, ρ 0, κ 0.01: QuantLib's engine 11.8 R7 off the route's two contours, which agree
-        // within 0.1 R7
+        // thirty years, vol of vol 3, ρ 0, κ 0.01: QuantLib's engine 11.8 times the tolerance off the route's two
+        // contours, which agree within 0.1 times it
         HestonProcess process = Market(Today, 100.0, 0.04, 0.01, 0.04, 3.0, 0.0);
         double price = Price(Today, process, OptionType.Call, 44816890.703380644, [10950], 10950);
         AssertR7(0.27072958889490906, price, OptionType.Call, 44816890.703380644, D(10950), F30);

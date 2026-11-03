@@ -12,17 +12,17 @@ namespace NanoQL.Tests.Divergences;
 
 /// <summary>
 /// The American window's bounds on the tree (upstream's fix after v1.44, #2878: <c>51c6263b7</c>, merged as
-/// <c>eaeac5651</c>; the S-sr plan's SSR5): <c>TimeGrid(T, N)</c> builds its last time as (T/N)·N, an ulp off T, the
-/// discretized assets snap their exercise times to the grid but start at the unsnapped maturity, and QuantLib 1.44's
-/// American branch compares the two with plain <c>&lt;=</c> and <c>&gt;=</c>; so where the last time rounds below T the
-/// exercise is never applied at expiry, and where it rounds above, a window ending at maturity is rejected. Upstream
-/// compares both bounds with <c>isOnTime</c>, as the European branch does, in <c>DiscretizedVanillaOption</c> and
+/// <c>eaeac5651</c>): <c>TimeGrid(T, N)</c> builds its last time as (T/N)·N, an ulp off T, the discretized assets snap
+/// their exercise times to the grid but start at the unsnapped maturity, and QuantLib 1.44's American branch compares
+/// the two with plain <c>&lt;=</c> and <c>&gt;=</c>; so where the last time rounds below T the exercise is never
+/// applied at expiry, and where it rounds above, a window ending at maturity is rejected. Upstream compares both bounds
+/// with <c>isOnTime</c>, as the European branch does, in <c>DiscretizedVanillaOption</c> and
 /// <c>DiscretizedConvertible</c>. On the wheel, at the upstream cases' market (21 September 2026, 91 days to expiry on
-/// Actual/365 (Fixed), spot 100, r = 5%, q = 0, σ = 15%), where the last time rounds below T at 51 steps and above it at
-/// 101: the CRR call struck at 85 at 51 steps, American 16.05280871761558 against European 16.074532566935556; exercisable
-/// only at maturity at 101 steps, American 0.0 against European 16.075288548193498; and the zero-coupon convertible
-/// (conversion ratio 2, redemption 100, no credit spread) at 51 steps, American at maturity 98.76131265936051 against
-/// European 200.00004055297964. nanoql takes upstream's fix; its cases are upstream's
+/// Actual/365 (Fixed), spot 100, r = 5%, q = 0, σ = 15%), where the last time rounds below T at 51 steps and above it
+/// at 101: the CRR call struck at 85 at 51 steps, American 16.05280871761558 against European 16.074532566935556;
+/// exercisable only at maturity at 101 steps, American 0.0 against European 16.075288548193498; and the zero-coupon
+/// convertible (conversion ratio 2, redemption 100, no credit spread) at 51 steps, American at maturity
+/// 98.76131265936051 against European 200.00004055297964. nanoql takes upstream's fix; its cases are upstream's
 /// (<c>europeanoption.cpp</c>'s <c>testBinomialAmericanExerciseAtMaturity</c> and
 /// <c>testBinomialAmericanExerciseOnlyAtMaturity</c>, <c>convertiblebonds.cpp</c>'s
 /// <c>testBinomialConversionAtMaturity</c>), until the pin moves to a release that carries the fix.

@@ -10,11 +10,11 @@ American over it, on the Cox-Ross-Rubinstein, Jarrow-Rudd, additive EQP, Trigeor
 trees at 51 and 101 steps: the NPV, delta, gamma and theta. Then an expired option and a KIKO, which the asset refuses
 ("unsupported barrier type").
 
-The outputs nanoql fixes are left out (the S-xeq plan's §2.8): every process shares one day counter and reference date,
-where nanoql flattens a structure timed apart onto the tree's clock (XER5 (xi)); every count is odd, where nanoql's grid
-and lattice take an even count's tree its own odd steps on the Leisen-Reimer and Joshi trees (XER5 (x), SEQR7 (x));
-and an American is kept only where the grid's last time, maturity/steps × steps, isn't below the maturity, where
-QuantLib 1.44 skips the exercise at expiry and nanoql takes #2878 (XER5 (xii)).
+The outputs nanoql fixes are left out: every process shares one day counter and reference date, where nanoql flattens a
+structure timed apart onto the tree's clock; every count is odd, where nanoql's grid and lattice take an even count's
+tree its own odd steps on the Leisen-Reimer and Joshi trees; and an American is kept only where the grid's last time,
+maturity/steps × steps, isn't below the maturity, where QuantLib 1.44 skips the exercise at expiry and nanoql takes
+#2878.
 
 A case holds one process, exercise, double barrier and tree, its outputs one per payoff; the specs are the analytic
 double-barrier generator's, and the tree is "crr", "jr", "eqp", "trigeorgis", "tian", "lr" or "j4" with its steps. The

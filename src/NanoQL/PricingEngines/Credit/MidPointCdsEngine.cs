@@ -21,7 +21,7 @@ namespace NanoQL.PricingEngines;
 /// <remarks>
 /// <para>
 /// A static class: <see cref="Calculate"/> takes the engine's inputs and returns the results, in place of QuantLib's
-/// engine object (D14). An expired swap's results are <see cref="CreditDefaultSwap.SetupExpired"/>'s, as QuantLib's
+/// engine object. An expired swap's results are <see cref="CreditDefaultSwap.SetupExpired"/>'s, as QuantLib's
 /// instrument gives them before it calls the engine; otherwise the swap is validated and priced.
 /// </para>
 /// <para>
@@ -31,8 +31,8 @@ namespace NanoQL.PricingEngines;
 /// curve that settles after the evaluation date, and on curves dated the evaluation date for a live coupon whose period
 /// ended before it (one paid after the weekend that ended it). No default before the reference date is QuantLib's own
 /// premise for its two-date default probability, which excuses the period's start and not its end
-/// (<c>defaulttermstructure.cpp:112-120</c>). A documented divergence (the S-core plan's CR7 (xxxiv)); wherever
-/// QuantLib's reads succeed, its values, bit for bit.
+/// (<c>defaulttermstructure.cpp:112-120</c>). A documented divergence; wherever QuantLib's reads succeed, its values,
+/// bit for bit.
 /// </para>
 /// </remarks>
 public static class MidPointCdsEngine

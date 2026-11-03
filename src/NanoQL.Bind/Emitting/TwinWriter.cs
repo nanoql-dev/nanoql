@@ -67,7 +67,7 @@ internal sealed class TwinWriter(Surface surface)
         Records(cs, map, ref index);
         Generators(cs, map, ref index);
 
-        // A struct made by default or new T(), which has no call site, is written as its implicit constructor's call (R16).
+        // A struct made by default or new T(), which has no call site, is written as its implicit constructor's call.
         cs.AppendLine("    public static string DefaultNew(global::System.Type t) => t.FullName switch").AppendLine("    {");
         foreach (CFunction f in surface.Functions.Where(f => f.Kind == "new" && f.Member == null).OrderBy(f => f.Type.FullName, StringComparer.Ordinal))
         {
@@ -157,7 +157,7 @@ internal sealed class TwinWriter(Surface surface)
         bool returns = retCs != "void";
         cs.AppendLine(returns ? $"        if (!{Rec}.On) return {call};" : $"        if (!{Rec}.On) {{ {call}; return; }}");
 
-        // An argument the C function leaves at its default (B2R5) that isn't: the C call can't make this one.
+        // An argument the C function leaves at its default that isn't: the C call can't make this one.
         foreach (int d in f.Dropped)
         {
             cs.AppendLine(returns ? $"        if (a{d} is not null) return {call};" : $"        if (a{d} is not null) {{ {call}; return; }}");
@@ -191,7 +191,7 @@ internal sealed class TwinWriter(Surface surface)
         cs.AppendLine("        catch (global::System.Exception) { w_.Spoil(); }");
 
         // A Matrix or Vector argument crosses in only: its contents before the call, to check after it that the member
-        // didn't write into it, which the C call wouldn't give back (B1-1).
+        // didn't write into it, which the C call wouldn't give back.
         CParam[] arrays = [.. f.Params.Where(p => !p.IsSelf && p.Kind.Name is "matrix" or "vector")];
         foreach (CParam a in arrays)
         {
@@ -215,7 +215,7 @@ internal sealed class TwinWriter(Surface surface)
             cs.AppendLine("            w_.Void();");
         }
 
-        // A writable span's values after the call, and an in-out Matrix's or Vector's (R15), each in order.
+        // A writable span's values after the call, and an in-out Matrix's or Vector's, each in order.
         CParam[] spans = [.. f.Params.Where(p => p.Kind.Name is "span" or "vector&" or "matrix&")];
         if (spans.Length > 0)
         {
@@ -355,8 +355,8 @@ internal sealed class TwinWriter(Surface surface)
         _ => Capture(k, r),
     };
 
-    // One tuple of a returned collection (B2R10): its elements as results write them, an object by its new id, and a
-    // null tuple as null.
+    // One tuple of a returned collection: its elements as results write them, an object by its new id, and a null tuple
+    // as null.
     private static string TupleResult(CKind t, string v, string w)
     {
         string Body(string x) => $"{w}.Open(); " + string.Join(" ", t.Items.Select((item, i) => (item.Name == "handle" ? $"{w}.New({x}.Item{i + 1})" : Element(item, $"{x}.Item{i + 1}", w)) + ";")) + $" {w}.Close();";

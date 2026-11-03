@@ -16,16 +16,16 @@ namespace NanoQL.Methods;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A working type (the S-eq plan's SEQR1): <see cref="SetTime"/> rewrites the step's operator in place through a
-/// buffer it holds, and the apply and splitting solves write into the caller's spans, so a step allocates nothing (the
-/// S-van plan's VD12). The forward rate is the curve's over its own times, read through
-/// <see cref="YieldTermStructure"/>'s internal <c>ContinuousForwardRate</c>, its bits <c>ForwardRate</c>'s.
+/// A working type: <see cref="SetTime"/> rewrites the step's operator in place through a buffer it holds, and the apply
+/// and splitting solves write into the caller's spans, so a step allocates nothing. The forward rate is the curve's
+/// over its own times, read through <see cref="YieldTermStructure"/>'s internal <c>ContinuousForwardRate</c>, its bits
+/// <c>ForwardRate</c>'s.
 /// </para>
 /// <para>
 /// The second derivative is taken in the direction given, where QuantLib's is built on direction 0 whatever the
 /// direction (<c>fdmcevop.cpp:39-40</c>), so that in another direction of a mesher of more than one it differentiates
 /// along the wrong axis: QuantLib's operator in direction 1 of a two-dimensional mesher differs from its operator in
-/// direction 0 of the transposed mesher (the S-van plan's VR4 (xiv)). In direction 0, QuantLib's bits.
+/// direction 0 of the transposed mesher. In direction 0, QuantLib's bits.
 /// </para>
 /// </remarks>
 [WorkingType]
@@ -56,7 +56,7 @@ public sealed class FdmCEVOp : FdmLinearOpComposite
         this.rTS = rTS;
         this.direction = direction;
 
-        // the direction given, where QuantLib's is 0 (VR4 (xiv))
+        // the direction given, where QuantLib's is 0
         dxxMap = new SecondDerivativeOp(direction, mesher)
             .Mult(0.5 * alpha * alpha * ArrayFunctions.Pow(mesher.Locations(direction), 2.0 * beta));
         mapT = new TripleBandLinearOp(direction, mesher);

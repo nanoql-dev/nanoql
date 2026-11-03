@@ -4,11 +4,10 @@
 C++ harness, since the wheel doesn't bind it.
 
 At a1, a2 of 0.3, 0.6, 0.5, 0.5, 1.0, 0.2, 0.0, 0.8, on the points 0.05 to 0.95 in each argument; the unit square's
-edges and corners are left out, where nanoql returns the boundary values before the formula (the S-core plan's CR7
-(xxxiii); tests/NanoQL.Tests/Divergences/CopulaEdgeTests.cs). Parameters above 1, which nanoql refuses (the S-core
-plan's CR7 (xxxii)), are left out. Each case's "values" are the rows of C(x, y), one per x. The harness unit is
-tools/cxx/src/math/copulas/copulas.cpp. Read back by
-tests/NanoQL.Tests/Vectors/Cxx/Numerics/Copulas/CopulaCxxVectorTests.cs."""
+edges and corners are left out, where nanoql returns the boundary values before the formula
+(tests/NanoQL.Tests/Divergences/CopulaEdgeTests.cs). Parameters above 1, which nanoql refuses, are left out. Each
+case's "values" are the rows of C(x, y), one per x. The harness unit is tools/cxx/src/math/copulas/copulas.cpp. Read
+back by tests/NanoQL.Tests/Vectors/Cxx/Numerics/Copulas/CopulaCxxVectorTests.cs."""
 import os
 import sys
 

@@ -14,11 +14,11 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The Monte Carlo Hull-White cap engine's seed is explicit (the S-sr plan's SSR1 (iv)): QuantLib's 0, a seed from the
-/// clock and its builder's default, is refused by the engine, the builder's constructor and its <c>WithSeed</c>. And
-/// its loop allocates nothing per sample (SSR1 (v)): the path's step, its bonds and its payoff read the curve's forward
-/// rates without building an <see cref="InterestRate"/>, so a calculation into an <see cref="IncrementalStatistics"/>,
-/// which keeps no sample, allocates as much at 3,000 samples as at 1,000, plain and antithetic.
+/// The Monte Carlo Hull-White cap engine's seed is explicit: QuantLib's 0, a seed from the clock and its builder's
+/// default, is refused by the engine, the builder's constructor and its <c>WithSeed</c>. And its loop allocates nothing
+/// per sample: the path's step, its bonds and its payoff read the curve's forward rates without building an
+/// <see cref="InterestRate"/>, so a calculation into an <see cref="IncrementalStatistics"/>, which keeps no sample,
+/// allocates as much at 3,000 samples as at 1,000, plain and antithetic.
 /// </summary>
 public class McHullWhiteCapFloorTests
 {

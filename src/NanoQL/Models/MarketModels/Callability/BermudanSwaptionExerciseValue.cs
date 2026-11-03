@@ -13,7 +13,7 @@ namespace NanoQL.Models;
 /// The exercise value of a Bermudan swaption into the coterminal swaps: at rate time i, the coterminal swap's annuity
 /// times its payoff on the coterminal swap rate, floored at 0, paid at rate time i.
 /// </summary>
-/// <remarks>A working type (the S-mmp plan's MMPR1 (i)).</remarks>
+/// <remarks>A working type.</remarks>
 [WorkingType]
 public sealed class BermudanSwaptionExerciseValue : MarketModelExerciseValue
 {

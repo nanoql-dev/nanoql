@@ -21,14 +21,13 @@ namespace NanoQL.Experimental;
 /// <remarks>
 /// <para>
 /// For purchased protection the value is the protection leg's V₁ = Σ (Eᵢ − Eᵢ₋₁)·dᵢ less the premium leg's V₂ = m·Σ (D₂
-/// − D₁ − Eᵢ)·Δᵢ₋₁,ᵢ·dᵢ, Eᵢ the expected tranche loss at tᵢ. The CDO holds its basket, bound to a loss model (the S-xcr
-/// plan's XR1 (c)), and is priced by <see cref="MidPointCDOEngine"/> or <see cref="IntegralCDOEngine"/>. A notional
-/// above the basket's tranche notional levers the CDO by their ratio.
+/// − D₁ − Eᵢ)·Δᵢ₋₁,ᵢ·dᵢ, Eᵢ the expected tranche loss at tᵢ. The CDO holds its basket, bound to a loss model, and is
+/// priced by <see cref="MidPointCDOEngine"/> or <see cref="IntegralCDOEngine"/>. A notional above the basket's tranche
+/// notional levers the CDO by their ratio.
 /// </para>
 /// <para>
 /// <see cref="ImplicitCorrelation"/> binds a Gaussian LHP model to a copy of the basket at each trial correlation and
-/// leaves the CDO's basket untouched, where QuantLib's sets the model on the user's basket and leaves it there (XR1
-/// (d)).
+/// leaves the CDO's basket untouched, where QuantLib's sets the model on the user's basket and leaves it there.
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]

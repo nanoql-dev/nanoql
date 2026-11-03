@@ -10,7 +10,7 @@ namespace NanoQL.TermStructures;
 
 /// <summary>The base class of zero-inflation term structures, which give zero-coupon inflation rates.</summary>
 /// <remarks>
-/// An extension point. QuantLib's deprecated lagged <c>zeroRate</c> isn't ported (D5); <see cref="ZeroRate(Date, bool)"/>
+/// An extension point. QuantLib's deprecated lagged <c>zeroRate</c> isn't ported; <see cref="ZeroRate(Date, bool)"/>
 /// computes what QuantLib's non-lagged form computes through it with a zero lag.
 /// </remarks>
 public abstract class ZeroInflationTermStructure : InflationTermStructure

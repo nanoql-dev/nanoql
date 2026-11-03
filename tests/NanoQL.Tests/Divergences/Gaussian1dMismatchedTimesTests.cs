@@ -14,36 +14,35 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The Gaussian1d model and engines on curves on another clock (the S-g1d plan's G1R6 (xvi); master plan §2.2's
-/// mismatched-dates row): QuantLib reads a discount or forwarding curve at the model curve's times, so a curve on
-/// another day counter with the same discount factors by date moves a price. On the wheel, on a GSR model (a = σ =
-/// 0.01) on a flat 3% Actual/365 (Fixed) curve, a 5Y into 10Y payer at 3% is worth 0.07095344971961592 with a 2%
-/// discount curve on Actual/360, where the same curve restated on Actual/365 (Fixed) gives 0.07076745548830388; with
-/// the index forecast on a 3.1% Actual/360 curve, 0.06649840575430056 against 0.06817679085140739 restated. On a model
-/// curve on 30/360 dated the 30th, a time doesn't tell the 30th of a 31-day month from the 31st: from 30 June 2025, a
-/// Bermudan exercised on 30 January 2026, 30 July 2026 and 30 March 2027 into a 5-year payer at 3%, with a 2.5%
-/// Actual/365 (Fixed) discount curve, is worth 0.029341545499651206, against 0.02934088072814103 on the curve restated
-/// on 30/360 at every date the engine reads; its Digital probability of the exercise on the 30th (the C++ harness)
-/// 0.00013119665716211765 against 0.00013119666147197958, and a zero-bond option expiring on 30 January 2026
-/// 0.014136151799917162 against 0.014102533018978234. nanoql reads each curve at the instant QuantLib's argument
-/// denotes: by the date QuantLib derives a time from (an exercise, a fixing, an option's expiry), where a read by the
-/// time would take the 31st; and the numeraire time, which has no date and whose factor cancels, at the instant it
-/// denotes on the model's clock. The nonstandard engine reads alike: on the same swaptions as nonstandard swaptions,
-/// QuantLib's same numbers. So does the cap/floor engine at a caplet's fixing: a caplet at 3% on 1,000,000 of Euribor
-/// 6M fixing in two years, forecast on the 3.1% Actual/360 curve, is worth 2693.625283396357 against 2793.958767701246
-/// restated; on the 30/360 market, one fixing on 30 January 2026 with the discount curve 1528.9285427087634, where
-/// QuantLib's swaption engine gives the one-period swaption into the same coupon 1509.9042444210352 and, on the market
-/// restated, 1509.8482273231564, the strike's leg read on the discount curve too (G1R6 (ii)). So does the float-float
-/// engine, at its exercises and its fixing events: on the same swaptions as float-float swaptions, their first legs
-/// fixed at 3% in all but name (a zero gearing on Euribor 1Y, 30/360), QuantLib's engine gives 0.0709550276548306 on
-/// the Actual/360 discount curve against 0.07076902784741748 restated; on the 30/360 market, where Euribor 6M fixes on
-/// 30 July 2026, 0.029342639252770517 against 0.029341974297365136, and the Digital probability of the exercise on the
-/// 30th 0.00013119665716211765 against 0.00013119666147197958, the swaption engine's; with rebates of 0.005, 0.002 and
-/// 0.001 paid on the exercise dates, whose bond to their payment is 1 on any curve and in any state (so G1R6 (v)'s
-/// reading at y = 0 moves none), 0.030447425948888763 against 0.030446802464572535. QuantLib's check: its engine on
-/// the market restated on the model curve's clock (on the 30/360 market, a discount curve with a node at each date to
-/// 2031 whose 30/360 time is new, and at the numeraire's 60 years); for a caplet with a discount curve, its swaption
-/// engine on the one-period swaption.
+/// The Gaussian1d model and engines on curves on another clock (the playbook's row for structures on another clock):
+/// QuantLib reads a discount or forwarding curve at the model curve's times, so a curve on another day counter with the
+/// same discount factors by date moves a price. On the wheel, on a GSR model (a = σ = 0.01) on a flat 3% Actual/365
+/// (Fixed) curve, a 5Y into 10Y payer at 3% is worth 0.07095344971961592 with a 2% discount curve on Actual/360, where
+/// the same curve restated on Actual/365 (Fixed) gives 0.07076745548830388; with the index forecast on a 3.1%
+/// Actual/360 curve, 0.06649840575430056 against 0.06817679085140739 restated. On a model curve on 30/360 dated the
+/// 30th, a time doesn't tell the 30th of a 31-day month from the 31st: from 30 June 2025, a Bermudan exercised on 30
+/// January 2026, 30 July 2026 and 30 March 2027 into a 5-year payer at 3%, with a 2.5% Actual/365 (Fixed) discount
+/// curve, is worth 0.029341545499651206, against 0.02934088072814103 on the curve restated on 30/360 at every date the
+/// engine reads; its Digital probability of the exercise on the 30th (the C++ harness) 0.00013119665716211765 against
+/// 0.00013119666147197958, and a zero-bond option expiring on 30 January 2026 0.014136151799917162 against
+/// 0.014102533018978234. nanoql reads each curve at the instant QuantLib's argument denotes: by the date QuantLib
+/// derives a time from (an exercise, a fixing, an option's expiry), where a read by the time would take the 31st; and
+/// the numeraire time, which has no date and whose factor cancels, at the instant it denotes on the model's clock. The
+/// nonstandard engine reads alike: on the same swaptions as nonstandard swaptions, QuantLib's same numbers. So does the
+/// cap/floor engine at a caplet's fixing: a caplet at 3% on 1,000,000 of Euribor 6M fixing in two years, forecast on
+/// the 3.1% Actual/360 curve, is worth 2693.625283396357 against 2793.958767701246 restated; on the 30/360 market, one
+/// fixing on 30 January 2026 with the discount curve 1528.9285427087634, where QuantLib's swaption engine gives the
+/// one-period swaption into the same coupon 1509.9042444210352 and, on the market restated, 1509.8482273231564, the
+/// strike's leg read on the discount curve too. So does the float-float engine, at its exercises and its fixing events:
+/// on the same swaptions as float-float swaptions, their first legs fixed at 3% in all but name (a zero gearing on
+/// Euribor 1Y, 30/360), QuantLib's engine gives 0.0709550276548306 on the Actual/360 discount curve against
+/// 0.07076902784741748 restated; on the 30/360 market, where Euribor 6M fixes on 30 July 2026, 0.029342639252770517
+/// against 0.029341974297365136, and the Digital probability of the exercise on the 30th 0.00013119665716211765 against
+/// 0.00013119666147197958, the swaption engine's; with rebates of 0.005, 0.002 and 0.001 paid on the exercise dates,
+/// whose bond to their payment is 1 on any curve and in any state (so a reading at y = 0 moves none),
+/// 0.030447425948888763 against 0.030446802464572535. QuantLib's check: its engine on the market restated on the model
+/// curve's clock (on the 30/360 market, a discount curve with a node at each date to 2031 whose 30/360 time is new, and
+/// at the numeraire's 60 years); for a caplet with a discount curve, its swaption engine on the one-period swaption.
 /// </summary>
 public class Gaussian1dMismatchedTimesTests
 {

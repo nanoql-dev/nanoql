@@ -4,10 +4,10 @@
 (ql/experimental/credit/interpolatedaffinehazardratecurve.hpp), which the wheel doesn't expose, each output computed
 by the C++ harness (tools/cxx/src/experimental/credit/affinehazardratecurve.cpp).
 
-QuantLib's curve squares the process's x0 where nanoql takes the model's own initial intensity, its dynamics' short
-rate at x0 (the S-xcr plan's XR8 (xiii)); the two agree on a Vasicek model whose x0 = r0 - b squares exactly to r0,
-so every case is on such a model, their floating-point values exact: x0 0.125, r0 0.015625, b -0.109375, and x0 0.25,
-r0 0.0625, b -0.1875 (tests/NanoQL.Tests/Divergences/AffineHazardRateTests.cs holds the cases where they differ).
+QuantLib's curve squares the process's x0 where nanoql takes the model's own initial intensity, its dynamics' short rate
+at x0; the two agree on a Vasicek model whose x0 = r0 - b squares exactly to r0, so every case is on such a model, their
+floating-point values exact: x0 0.125, r0 0.015625, b -0.109375, and x0 0.25, r0 0.0625, b -0.1875
+(tests/NanoQL.Tests/Divergences/AffineHazardRateTests.cs holds the cases where they differ).
 
 - "curve" cases: hazard rates on nodes today and one, three and five years out, linear and backward flat: the
   curve's maximum date, and at times to seven years (past its range, extrapolated) its survival probability, default

@@ -75,7 +75,7 @@ class Kinds(unittest.TestCase):
         self.assertEqual(Echo.opt_date(datetime.date(2023, 3, 15)), datetime.date(2023, 3, 15))
 
     def test_period_operators(self):
-        # Period's operators and equality are nanoql's, not the named tuple's (round 6's B6-1).
+        # Period's operators and equality are nanoql's, not the named tuple's.
         y, m, w = Period(1, TimeUnit.Years), Period(6, TimeUnit.Months), Period(2, TimeUnit.Weeks)
         self.assertTrue(y > m)
         self.assertFalse(y < m)
@@ -180,7 +180,7 @@ class Arrays(unittest.TestCase):
             Echo.fill([0.0, 0.0], 1.0)
 
     def test_in_and_out(self):
-        # A vector the member writes into (R15): a line search's step moves the caller's point, as C# moves it.
+        # A vector the member writes into: a line search's step moves the caller's point, as C# moves it.
         point = np.array([0.5, 0.2])
         step = nanoql.BoundaryConstraint(-1.0, 1.0).update(point, [0.1, -0.3], 1.0)
         self.assertEqual(step, 1.0)
@@ -218,7 +218,7 @@ class Dispatch(unittest.TestCase):
 
 
 class Defaults(unittest.TestCase):
-    """An optional struct left out takes C#'s default(T) (R16); its implicit constructor crosses too."""
+    """An optional struct left out takes C#'s default(T); its implicit constructor crosses too."""
 
     def test_piecewise_curve(self):
         qs = ConventionSet.quant_lib()
@@ -445,7 +445,7 @@ class UsersPackage(unittest.TestCase):
         self.assertEqual(ConventionSet.day_counter(None, "Actual365Fixed").name, "Actual/365 (Fixed)")
 
     def test_a_class_named_like_nanoqls(self):
-        # B2-1: the user's Calendar beside nanoql's, each keeping its own class.
+        # The user's Calendar beside nanoql's, each keeping its own class.
         mine = nqlt.Calendar("TARGET")
         self.assertIsInstance(mine, nqlt.Calendar)
         self.assertNotIsInstance(mine, nanoql.Calendar)
@@ -513,7 +513,7 @@ class Engines(unittest.TestCase):
 
 
 class Contract(unittest.TestCase):
-    """S-bind2's contract: the tuple forms both ways, a bound engine's open nullable inputs, optional parameters of a type
+    """The contract's later forms: the tuple forms both ways, a bound engine's open nullable inputs, optional parameters of a type
     that doesn't cross, generator bases, each class's own constructor, and statics under their declaring type."""
 
     def test_tuples_in(self):
@@ -629,13 +629,13 @@ class Experimental(unittest.TestCase):
 
         import nqlt.experimental  # noqa: F401 - the test types' experimental members, a user's opt-in
 
-        # A user's class over nanoql's experimental interface (F3-1): experimental, not in nqlt's stable module.
+        # A user's class over nanoql's experimental interface: experimental, not in nqlt's stable module.
         self.assertNotIn("Walk", nqlt.__all__)
         self.assertIsInstance(nqlt.experimental.Walk(), x.IRandomWalkDistribution)
-        # A stable class's experimental member attached on the opt-in, then a nanoql enum default read (F5-1).
+        # A stable class's experimental member attached on the opt-in, then a nanoql enum default read.
         self.assertIsInstance(nqlt.Calendar.make_walk(), nqlt.experimental.Walk)
         self.assertEqual(nqlt.experimental.Walk.per_year(), 1)
-        # A stable class's experimental constructor added on the opt-in beside its stable one (F6-1).
+        # A stable class's experimental constructor added on the opt-in beside its stable one.
         self.assertEqual(nqlt.Calendar(nqlt.experimental.Walk()).name, "walk")
         self.assertEqual(nqlt.Calendar("TARGET").name, "TARGET")
         self.assertTrue(hasattr(x, "__all__") and len(x.__all__) > 100)
@@ -647,7 +647,7 @@ class Experimental(unittest.TestCase):
         import nanoql.experimental  # noqa: F401
         import nqlt.experimental
 
-        # Every annotated function of a user's two modules resolves its hints (F3-2, F5-1).
+        # Every annotated function of a user's two modules resolves its hints.
         resolved = 0
         for module in (nqlt._generated, nqlt.experimental):
             for cls in [v for v in vars(module).values() if isinstance(v, type) and v.__module__ == module.__name__]:

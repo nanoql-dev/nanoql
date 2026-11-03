@@ -9,14 +9,13 @@ curves flat or interpolated, and no investor curve (QuantLib's default-free one)
 
 Each case gives the adjusted NPV and fair rate. Each swap is at its fair rate on the wheel (the stored fixings set),
 where QuantLib's swaptionlets, struck at the swap's risk-free fair rate, are nanoql's for the NPV, struck at its fixed
-rate, within a few ulps (C3's review, C3-O2, ruled (a); off par the two depart,
-tests/NanoQL.Tests/Divergences/CvaSwaptionStrikeTests.cs); both price the fair rate on QuantLib's. A swap whose fixed
-payments all fall before the counterparty curve's reference date is the S-cms plan's CMR5 (xvi)
-(tests/NanoQL.Tests/Divergences/CvaEngineFixingLoopTests.cs) and isn't sampled. A case's inputs hold its settings with
-the stored fixings, the swap (instruments/fixedvsfloatingswap.py's vanilla spec on a Euribor 6M preset, its payment
-convention and coupon choice null), the discounting curve, the exposure ({"kind": "blackVol" | "blackQuote" |
-"bachelier", "volatility"}) and the credit curves and recoveries (termstructures/defaulttermstructure.py's specs, a null
-investor curve none). Read back by tests/NanoQL.Tests/Vectors/Cxx/PricingEngines/CvaSwapEngineCxxVectorTests.cs."""
+rate, within a few ulps (off par the two depart, tests/NanoQL.Tests/Divergences/CvaSwaptionStrikeTests.cs); both price
+the fair rate on QuantLib's. A swap whose fixed payments all fall before the counterparty curve's reference date
+diverges (tests/NanoQL.Tests/Divergences/CvaEngineFixingLoopTests.cs) and isn't sampled. A case's inputs hold its
+settings with the stored fixings, the swap (instruments/fixedvsfloatingswap.py's vanilla spec on a Euribor 6M preset,
+its payment convention and coupon choice null), the discounting curve, the exposure ({"kind": "blackVol" | "blackQuote"
+| "bachelier", "volatility"}) and the credit curves and recoveries (termstructures/defaulttermstructure.py's specs, a
+null investor curve none). Read back by tests/NanoQL.Tests/Vectors/Cxx/PricingEngines/CvaSwapEngineCxxVectorTests.cs."""
 import importlib.util
 import os
 import sys

@@ -13,9 +13,9 @@ namespace NanoQL.Tests.Divergences;
 /// The writer-extensible engine on term structures. QuantLib evaluates Longstaff's formula on one zero rate, dividend
 /// yield and volatility, read at the first exercise, for both periods (<c>analyticwriterextensibleoptionengine.cpp:61-87</c>),
 /// so on a rising market the call is −2.4% off; nanoql reads the variances to each date, the correlation from their
-/// ratio and the discounts by date (the S-exo plan's ER4). The check is the option's exact value at the first exercise,
-/// the vanilla's payoff in the money and the extended option's Black value out of it, over the lognormal spot, within
-/// 1e-9; on a flat market, QuantLib's values within its last bits.
+/// ratio and the discounts by date. The check is the option's exact value at the first exercise, the vanilla's payoff
+/// in the money and the extended option's Black value out of it, over the lognormal spot, within 1e-9; on a flat
+/// market, QuantLib's values within its last bits.
 /// </summary>
 public class WriterExtensibleTermStructureTests
 {

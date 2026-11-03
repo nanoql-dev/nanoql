@@ -15,8 +15,8 @@ namespace NanoQL.Methods;
 /// weighted by μ and a second round of implicit corrections.
 /// </summary>
 /// <remarks>
-/// A working type (the S-eq plan's SEQR1): <see cref="Step"/> steps the caller's values in place through buffers the
-/// scheme holds, so a step allocates nothing after the first.
+/// A working type: <see cref="Step"/> steps the caller's values in place through buffers the scheme holds, so a step
+/// allocates nothing after the first.
 /// </remarks>
 [WorkingType]
 public sealed class HundsdorferScheme : IFdmScheme, IFdmSetOperatorScheme

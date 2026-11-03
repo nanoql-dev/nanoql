@@ -16,8 +16,7 @@ namespace NanoQL.Instruments;
 /// <para>
 /// Immutable: <see cref="Add"/> and <see cref="Subtract"/> return a new composite with the component added, where
 /// QuantLib's change the composite. Each component carries the engine that prices it, a delegate from the evaluation
-/// context (the S-core plan's CR5 (c)), as nanoql's instruments carry none; QuantLib's composite reads the engines its
-/// components carry.
+/// context, as nanoql's instruments carry none; QuantLib's composite reads the engines its components carry.
 /// </para>
 /// <para>
 /// It is priced without an engine: <see cref="Calculate"/> runs QuantLib's steps, its value the components' values

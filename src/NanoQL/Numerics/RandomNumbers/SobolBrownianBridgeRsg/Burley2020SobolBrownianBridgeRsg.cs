@@ -15,10 +15,10 @@ namespace NanoQL.Numerics;
 /// each step together.
 /// </summary>
 /// <remarks>
-/// A working type, as every <see cref="IRsg"/>: each draw changes it. Both seeds are explicit, in [1, 4294967295]
-/// (the S-mm plan's SD6); QuantLib's defaults are 42 and 43. Every sequence's weight is 1. <see cref="Clone"/> builds
-/// the generator again from its arguments and draws the paths this one has drawn, the scrambled sequence being
-/// deterministic, so the copy's next draw is this one's.
+/// A working type, as every <see cref="IRsg"/>: each draw changes it. Both seeds are explicit, in [1, 4294967295];
+/// QuantLib's defaults are 42 and 43. Every sequence's weight is 1. <see cref="Clone"/> builds the generator again from
+/// its arguments and draws the paths this one has drawn, the scrambled sequence being deterministic, so the copy's next
+/// draw is this one's.
 /// </remarks>
 [WorkingType]
 public sealed class Burley2020SobolBrownianBridgeRsg : IRsg

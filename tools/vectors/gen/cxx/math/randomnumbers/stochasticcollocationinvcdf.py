@@ -5,8 +5,7 @@ wheel doesn't bind, each output computed by the C++ harness: QuantLib's test's c
 chi-squared inverse (k 3, lambda 1; 10 points, and 30 with pMax 0.9999999), and the exponential's (lambda 2; 5 points
 with pMin 2e-6, 12 with neither), each value(x) on deviates from -4 to 4 and operator()(u) on probabilities from 1e-6
 to 1 - 1e-6. pMax and pMin lie off the probabilities' grid: there the deviate lands on the outer node, where QuantLib's
-Lagrange interpolation is NaN for descending nodes (the S-van plan's VR4 (xxviii), a documented divergence). Read back
-by
+Lagrange interpolation is NaN for descending nodes (a documented divergence). Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Numerics/RandomNumbers/StochasticCollocationInvCDFCxxVectorTests.cs."""
 import os
 import sys

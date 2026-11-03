@@ -21,20 +21,20 @@ namespace NanoQL.PricingEngines;
 /// <remarks>
 /// <para>
 /// An extension point, as QuantLib's template: <see cref="ForwardPerformanceVanillaEngine"/> derives it and overrides
-/// <see cref="OriginalResults"/>. Immutable; it holds the process and the inner engine, a delegate in D14's form taking
-/// the forward process (the S-exo plan's ER2 (iii)); the forward process is built per call.
+/// <see cref="OriginalResults"/>. Immutable; it holds the process and the inner engine, a delegate in the engines' form
+/// taking the forward process; the forward process is built per call.
 /// </para>
 /// <para>
 /// The payoff must be a plain vanilla one: QuantLib builds the inner option's plain vanilla payoff from the payoff's
-/// type alone, so a cash-or-nothing forward start prices as the vanilla (the plan's ER5 (xxiii),
-/// <c>Divergences/ForwardNonPlainPayoffTests.cs</c>); it is refused with the text of QuantLib's Monte Carlo forward
-/// engines. The vega is the derivative under a parallel shift of the input volatilities, the inner vega in the
-/// period's forward volatility times dσ_f/dε, where QuantLib's is the inner vega alone (ER5 (xxxvii),
-/// <c>Divergences/ForwardVegaTermStructureTests.cs</c>): exactly QuantLib's where the volatilities at the reset and at
-/// expiry are equal. The dividend rate read for the theta is on the process's clock
-/// (<see cref="FdmBlackScholesOp.Clock"/>), each curve read by date, and the dividend rho's reset term on the dividend
-/// curve's own time, the derivative of its zero rates (ER5 (xxiv), <c>Divergences/ExoticMismatchedTimesTests.cs</c>);
-/// on structures dated alike, QuantLib's reads.
+/// type alone, so a cash-or-nothing forward start prices as the vanilla
+/// (<c>Divergences/ForwardNonPlainPayoffTests.cs</c>); it is refused with the text of QuantLib's Monte Carlo forward
+/// engines. The vega is the derivative under a parallel shift of the input volatilities, the inner vega in the period's
+/// forward volatility times dσ_f/dε, where QuantLib's is the inner vega alone
+/// (<c>Divergences/ForwardVegaTermStructureTests.cs</c>): exactly QuantLib's where the volatilities at the reset and at
+/// expiry are equal. The dividend rate read for the theta is on the process's clock (<see
+/// cref="FdmBlackScholesOp.Clock"/>), each curve read by date, and the dividend rho's reset term on the dividend
+/// curve's own time, the derivative of its zero rates (<c>Divergences/ExoticMismatchedTimesTests.cs</c>); on structures
+/// dated alike, QuantLib's reads.
 /// </para>
 /// </remarks>
 public class ForwardVanillaEngine
@@ -192,7 +192,7 @@ public class ForwardVanillaEngine
     /// <summary>
     /// The time to the reset on a curve's own clock, none before its date: the time over which a parallel shift of the
     /// curve's zero rates discounts the value to the reset, where QuantLib reads the risk-free curve's year fraction for
-    /// every curve (the S-exo plan's ER5 (xxiv)).
+    /// every curve.
     /// </summary>
     /// <param name="option">The forward-start option.</param>
     /// <param name="curve">The curve.</param>
@@ -251,13 +251,12 @@ public class ForwardVanillaEngine
     }
 
     // The vega of a forward-start period under a parallel shift ε of the input volatilities, from its vega in the
-    // period's forward volatility σ_f (the S-exo plan's ER5 (xxxvii)): times dσ_f/dε = (σ₂t₂ − σ₁t₁)/(σ_f·Δt), the
-    // volatilities at the period's start and end read at the strike on the volatility's own times. Exactly the given
-    // vega where the two volatilities are equal, zero among them, or the period starts on or before the volatility's
-    // reference date; at a zero forward variance between unequal volatilities the one-sided limit, infinite where the
-    // period is at its forward (atTheForward: Black's at-the-money condition, close(forward, strike), where the price
-    // rises with the square root of the shift) and 0 elsewhere. The given vega can't tell them apart: Black's vega is 0
-    // at a zero deviation.
+    // period's forward volatility σ_f: times dσ_f/dε = (σ₂t₂ − σ₁t₁)/(σ_f·Δt), the volatilities at the period's start
+    // and end read at the strike on the volatility's own times. Exactly the given vega where the two volatilities are
+    // equal, zero among them, or the period starts on or before the volatility's reference date; at a zero forward
+    // variance between unequal volatilities the one-sided limit, infinite where the period is at its forward
+    // (atTheForward: Black's at-the-money condition, close(forward, strike), where the price rises with the square root
+    // of the shift) and 0 elsewhere. The given vega can't tell them apart: Black's vega is 0 at a zero deviation.
     internal static double ShiftedVega(
         BlackVolTermStructure vol, Date start, Date end, double strike, bool atTheForward, double periodVega)
     {

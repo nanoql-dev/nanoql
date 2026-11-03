@@ -13,11 +13,11 @@ strike sensitivity and the in-the-money cash probability). An expired option's r
 zero. Then the refusals: an American exercise ("not an European option") and a spot at zero ("negative or null
 underlying given").
 
-The outputs nanoql fixes are left out (the S-eq plan's SEQR7): at zero volatility (and at a zero time to expiry,
-which gives a zero standard deviation) the delta, forward delta, strike sensitivity, elasticity, theta, theta per day,
-rho and dividend rho of every payoff but a plain vanilla call, and the in-the-money probability of puts
-(tests/NanoQL.Tests/Divergences/BlackCalculatorZeroVolatilityTests.cs and BlackCalculatorItmProbabilityTests.cs).
-The wheel doesn't expose the additional results; they are vectored through the C++ harness
+The outputs nanoql fixes are left out: at zero volatility (and at a zero time to expiry, which gives a zero standard
+deviation) the delta, forward delta, strike sensitivity, elasticity, theta, theta per day, rho and dividend rho of every
+payoff but a plain vanilla call, and the in-the-money probability of puts
+(tests/NanoQL.Tests/Divergences/BlackCalculatorZeroVolatilityTests.cs and BlackCalculatorItmProbabilityTests.cs). The
+wheel doesn't expose the additional results; they are vectored through the C++ harness
 (tools/vectors/gen/cxx/pricingengines/vanilla/analyticeuropeanengine.py).
 
 A case holds one process, exercise, payoff kind and type, its outputs one per strike. The process specs are

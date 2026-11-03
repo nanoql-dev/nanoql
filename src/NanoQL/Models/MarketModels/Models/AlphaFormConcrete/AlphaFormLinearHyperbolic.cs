@@ -12,8 +12,7 @@ namespace NanoQL.Models;
 /// The alpha form √(1 + α t_i (atan(α t_i) − π/2)).
 /// </summary>
 /// <remarks>
-/// A working type (the S-mm plan's MR2 (b)). A rate past the times, which QuantLib reads unchecked, is refused (MR3
-/// (xx)).
+/// A working type. A rate past the times, which QuantLib reads unchecked, is refused.
 /// </remarks>
 [WorkingType]
 public sealed class AlphaFormLinearHyperbolic : AlphaForm

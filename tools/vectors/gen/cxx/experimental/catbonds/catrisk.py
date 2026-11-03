@@ -5,13 +5,13 @@ each output computed by the C++ harness (tools/cxx/src/experimental/catbonds/cat
 
 - "event set" cases: every path of an event set's simulation, on QuantLib's test's events and on denser ones, for
   whole years, irregular periods and periods longer than the set allows; and on no events.
-- "beta risk" cases: BetaRisk's first paths on MSVC's streams, the harness's toolchain, as nanoql draws them (the
-  S-xcr plan's XR4 (c)): QuantLib's events arrive by fresh draws where nanoql cumulates them (XR8 (xlii);
-  tests/NanoQL.Tests/Divergences/BetaRiskTests.cs), so each case stops before the first path where the two can part,
-  a path whose cumulated time differs from QuantLib's next draw: on QuantLib's testBetaRisk risk 40 paths (its path 42
-  is its first of two events), and on long return periods where the paths hold one event or none.
+- "beta risk" cases: BetaRisk's first paths on MSVC's streams, the harness's toolchain, as nanoql draws them:
+  QuantLib's events arrive by fresh draws where nanoql cumulates them
+  (tests/NanoQL.Tests/Divergences/BetaRiskTests.cs), so each case stops before the first path where the two can part, a
+  path whose cumulated time differs from QuantLib's next draw: on QuantLib's testBetaRisk risk 40 paths (its path 42 is
+  its first of two events), and on long return periods where the paths hold one event or none.
 - "beta" cases: losses drawn by the simulation's generateBeta alone, no events, at shapes reaching each of the gamma's
-  branches: below 1, at 1, integers below 20 and the tangent method above (the S-xcr code review's C4 O1-4 (b)).
+  branches: below 1, at 1, integers below 20 and the tangent method above.
 
 Read back by tests/NanoQL.Tests/Vectors/Cxx/Experimental/CatBonds/CatRiskCxxVectorTests.cs."""
 import os

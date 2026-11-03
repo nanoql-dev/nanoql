@@ -16,23 +16,22 @@ namespace NanoQL.Experimental;
 /// <remarks>
 /// <para>
 /// Each coordinate is x + y(upper − lower), y = sign(u − ½)·T·((1 + 1/T)^|2u − 1| − 1), redrawn until inside its
-/// bounds. Its draws are <c>std::uniform_real_distribution&lt;Real&gt;</c> on a <c>std::mt19937</c>, as MSVC draws them
-/// (the S-xrt plan's XRD4), on the seed, which is required: QuantLib's default seeds from the clock (XRD3). A working
-/// type.
+/// bounds. Its draws are <c>std::uniform_real_distribution&lt;Real&gt;</c> on a <c>std::mt19937</c>, as MSVC draws
+/// them, on the seed, which is required: QuantLib's default seeds from the clock. A working type.
 /// </para>
 /// <para>
-/// A step is at most the box's width w: below it for every draw that moves a point up, and w itself only at u = 0, which
-/// moves it down. So no draw brings in a point outside the box by w or more, nor one off a zero-width box's bound; and
-/// at T = 0 no draw but u = 0 moves a point at all. QuantLib's loop never ends there: such a point is refused, and so
-/// is a lower bound above its upper (the S-xrt code review's B4-2 and F4-6;
-/// <c>Conventions/ExperimentalMathRefusalTests.cs</c>). Fixed under R8
+/// A step is at most the box's width w: below it for every draw that moves a point up, and w itself only at u = 0,
+/// which moves it down. So no draw brings in a point outside the box by w or more, nor one off a zero-width box's
+/// bound; and at T = 0 no draw but u = 0 moves a point at all. QuantLib's loop never ends there: such a point is
+/// refused, and so is a lower bound above its upper (<c>Conventions/ExperimentalMathRefusalTests.cs</c>). Fixed
 /// (<c>Divergences/VeryFastAnnealingSamplerTests.cs</c>): each coordinate is drawn at least once, where QuantLib's
 /// starts the loop from lower − 1, which rounds to the lower bound itself at every magnitude from 2⁵⁴ and at some from
-/// 2⁵³, and then returns that bound undrawn; and a temperature whose reciprocal overflows, below about 5.6e-309, takes y
-/// as sign·(T^(1 − |2u − 1|) − T), the same value rewritten, where QuantLib's y is infinite and never lands in the box,
-/// and its 0·∞ at T = 0 is NaN, which its loop returns. A temperature of 0 so holds the point, the distribution's limit.
-/// Above T 100, where 1 + 1/T loses the digits of 1/T (QuantLib's step is 2.3e-2 off at 1e14 and 0 from about 1e16, so
-/// the point is held), y is sign·T·expm1(|2u − 1|·log1p(1/T)), the same value (F4-7). Elsewhere QuantLib's arithmetic.
+/// 2⁵³, and then returns that bound undrawn; and a temperature whose reciprocal overflows, below about 5.6e-309, takes
+/// y as sign·(T^(1 − |2u − 1|) − T), the same value rewritten, where QuantLib's y is infinite and never lands in the
+/// box, and its 0·∞ at T = 0 is NaN, which its loop returns. A temperature of 0 so holds the point, the distribution's
+/// limit. Above T 100, where 1 + 1/T loses the digits of 1/T (QuantLib's step is 2.3e-2 off at 1e14 and 0 from about
+/// 1e16, so the point is held), y is sign·T·expm1(|2u − 1|·log1p(1/T)), the same value. Elsewhere QuantLib's
+/// arithmetic.
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]
@@ -47,7 +46,7 @@ public sealed class SamplerVeryFastAnnealing : IAnnealingSampler<SamplerVeryFast
     /// <param name="upper">The upper bounds.</param>
     /// <param name="seed">The seed, in [1, 4294967295].</param>
     /// <exception cref="ArgumentException">
-    /// The bounds' sizes differ, with QuantLib's text, or a lower bound is above its upper (B4-2).
+    /// The bounds' sizes differ, with QuantLib's text, or a lower bound is above its upper.
     /// </exception>
     /// <exception cref="ArgumentOutOfRangeException"><paramref name="seed"/> is outside [1, 4294967295].</exception>
     public SamplerVeryFastAnnealing(Vector lower, Vector upper, long seed)
@@ -80,7 +79,7 @@ public sealed class SamplerVeryFastAnnealing : IAnnealingSampler<SamplerVeryFast
 
     /// <inheritdoc/>
     /// <exception cref="ArgumentException">
-    /// The vectors' sizes differ, with QuantLib's text, or no draw brings the current point into the box (B4-2, F4-6).
+    /// The vectors' sizes differ, with QuantLib's text, or no draw brings the current point into the box.
     /// </exception>
     public void Sample(Vector newPoint, Vector currentPoint, Vector temp)
     {
@@ -95,7 +94,7 @@ public sealed class SamplerVeryFastAnnealing : IAnnealingSampler<SamplerVeryFast
         for (int i = 0; i < currentPoint.Size; i++)
         {
             // a point outside the box: |y| reaches its most only at |2u − 1| = 1, u = 0, which moves the point down,
-            // and at T = 0 no other draw moves it (B4-2, F4-6)
+            // and at T = 0 no other draw moves it
             double t = temp[i];
             if (currentPoint[i] < lower[i] || currentPoint[i] > upper[i])
             {
@@ -122,8 +121,8 @@ public sealed class SamplerVeryFastAnnealing : IAnnealingSampler<SamplerVeryFast
     /// <inheritdoc/>
     public SamplerVeryFastAnnealing Clone() => new(this);
 
-    // T·((1 + 1/T)^e − 1), QuantLib's; where 1/T overflows, the same value as T^(1 − e)·(1 + T)^e − T, (1 + T)^e then 1
-    // (R4-10); above T 100, as T·expm1(e·log1p(1/T)), keeping the digits 1 + 1/T loses (F4-7)
+    // T·((1 + 1/T)^e − 1), QuantLib's; where 1/T overflows, the same value as T^(1 − e)·(1 + T)^e − T, (1 + T)^e then
+    // 1; above T 100, as T·expm1(e·log1p(1/T)), keeping the digits 1 + 1/T loses
     private static double Step(double t, double e)
     {
         double inverse = 1.0 / t;

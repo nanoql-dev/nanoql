@@ -17,7 +17,7 @@ namespace NanoQL.Numerics;
 /// <remarks>
 /// Immutable: its vectors are computed at construction, and its reads are immutable. As in QuantLib, an invalid
 /// vector's projection is the last valid one's before it, zeros before any. A vector read past the vectors, which
-/// QuantLib reads unchecked, is refused (the S-mm plan's MR3 (xx)).
+/// QuantLib reads unchecked, is refused.
 /// </remarks>
 public sealed class OrthogonalProjections
 {
@@ -133,7 +133,7 @@ public sealed class OrthogonalProjections
     /// <exception cref="ArgumentOutOfRangeException"><paramref name="index"/> isn't a vector.</exception>
     public ImmutableArray<double> GetVector(int index)
     {
-        // QuantLib reads its vectors unchecked (MR3 (xx)).
+        // QuantLib reads its vectors unchecked.
         if (!(index >= 0 && index < projectedVectors.Length))
         {
             throw new ArgumentOutOfRangeException(

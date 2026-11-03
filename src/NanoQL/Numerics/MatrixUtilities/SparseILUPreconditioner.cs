@@ -13,16 +13,16 @@ namespace NanoQL.Numerics;
 /// <remarks>
 /// <para>
 /// Immutable: the factors are computed at construction; <see cref="L"/> and <see cref="U"/> return copies, and
-/// <see cref="Apply"/> returns a new vector, the form of the Krylov solvers' preconditioner (the S-core plan's CD14).
+/// <see cref="Apply"/> returns a new vector, the form of the Krylov solvers' preconditioner.
 /// </para>
 /// <para>
 /// QuantLib records each new entry's fill level from the levels' nonzero entries by the entries' rank among the row's
 /// nonzero values, which a value that cancels to 0 shifts, so a later row reads another entry's level; here each
-/// entry's level is its own (the S-core plan's CR7 (xxiv), a documented divergence; QuantLib's factors wherever no
-/// entry cancels). QuantLib's reads of U also insert zero elements where none is stored, past its last column too,
-/// which changes U's structure but not its values; here they insert nothing. A row that keeps no entry on or right of
-/// its diagonal, where QuantLib's elimination loop never ends, is refused, and <see cref="Apply"/> refuses a vector not
-/// of the matrix's size, which QuantLib reads unchecked.
+/// entry's level is its own (a documented divergence; QuantLib's factors wherever no entry cancels). QuantLib's reads
+/// of U also insert zero elements where none is stored, past its last column too, which changes U's structure but not
+/// its values; here they insert nothing. A row that keeps no entry on or right of its diagonal, where QuantLib's
+/// elimination loop never ends, is refused, and <see cref="Apply"/> refuses a vector not of the matrix's size, which
+/// QuantLib reads unchecked.
 /// </para>
 /// </remarks>
 public sealed class SparseILUPreconditioner
@@ -178,7 +178,7 @@ public sealed class SparseILUPreconditioner
                         u[ii, j] = entry;
 
                         // the entry's own level, where QuantLib reads the levels' nonzero entries by the values'
-                        // rank (CR7 (xxiv))
+                        // rank
                         levs[ii][j] = levii[j];
                         if (j - ii > 0)
                         {

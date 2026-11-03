@@ -12,9 +12,9 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The Monte Carlo variance-swap engine's loop joins S-sr's one-dimensional pin (the S-exo plan's ER1 (iii) and (iv);
-/// <see cref="McVanillaAllocationTests"/>): <see cref="VariancePathPricer"/> integrates over the path it is given, where
-/// QuantLib's integrand copies the path per sample, so a batch allocates nothing per sample after the first.
+/// The Monte Carlo variance-swap engine's loop joins the one-dimensional pin (<see cref="McVanillaAllocationTests"/>):
+/// <see cref="VariancePathPricer"/> integrates over the path it is given, where QuantLib's integrand copies the path
+/// per sample, so a batch allocates nothing per sample after the first.
 /// </summary>
 public class McVarianceSwapAllocationTests
 {

@@ -8,8 +8,8 @@ namespace NanoQL.Tests.Vectors;
 
 /// <summary>
 /// The QdPlusAmericanEngine vectors, <c>tests/vectors/pricingengines/vanilla/qdplusamericanengine.json</c>: the NPVs of
-/// American calls and puts over S-van's grid, priced by the engine's defaults and six other settings of its nodes,
-/// solver, accuracy and evaluation cap, and the refusals.
+/// American calls and puts over the vanilla engines' grid, priced by the engine's defaults and six other settings of
+/// its nodes, solver, accuracy and evaluation cap, and the refusals.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class QdPlusAmericanEngineVectorTests

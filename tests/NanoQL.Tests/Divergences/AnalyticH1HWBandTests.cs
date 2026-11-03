@@ -12,12 +12,12 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// H1HW where its fit has no decaying exponential (the S-hes plan's HR7 (xxviii)). The engine fits E[√v_t] ≈ a + b·e^(−ct),
-/// b = √v₀ − a, c = −log((Λ(1) − a)/b) (<c>analytich1hwengine.cpp:103-134</c>): where the ratio isn't positive c is NaN
-/// and so is the price, at ρ_Sr = 0 too, where H1HW is the analytic Heston-Hull-White engine; where it exceeds 1, c &lt; 0
-/// and the fit grows exponentially, on QuantLib's own ten-year parameters at v₀/θ 0.15 a call 1.70 below its FD
-/// Heston-Hull-White engine [executed: <c>scratchpad\c3\oracle_c3.py</c>]. nanoql takes the fit's limits there: at or below
-/// 0, and where b = 0, c = +∞, the b terms dropped; at or above 1, c = 0; QuantLib's fit and bits in between.
+/// H1HW where its fit has no decaying exponential. The engine fits E[√v_t] ≈ a + b·e^(−ct), b = √v₀ − a, c = −log((Λ(1)
+/// − a)/b) (<c>analytich1hwengine.cpp:103-134</c>): where the ratio isn't positive c is NaN and so is the price, at
+/// ρ_Sr = 0 too, where H1HW is the analytic Heston-Hull-White engine; where it exceeds 1, c &lt; 0 and the fit grows
+/// exponentially, on QuantLib's own ten-year parameters at v₀/θ 0.15 a call 1.70 below its FD Heston-Hull-White engine
+/// (QuantLib 1.44). nanoql takes the fit's limits there: at or below 0, and where b = 0, c = +∞, the b terms dropped;
+/// at or above 1, c = 0; QuantLib's fit and bits in between.
 /// </summary>
 public class AnalyticH1HWBandTests
 {
@@ -71,9 +71,9 @@ public class AnalyticH1HWBandTests
     [Fact]
     public void OnQuantLibsTenYearParametersH1HWHoldsTheFiniteDifferenceEngine()
     {
-        // QuantLib's hybridhestonhullwhiteprocess test's H1-HW case at v₀/θ 0.15, its vol of variance 0.3: QuantLib's FD
-        // Heston-Hull-White engine 32.471049627116756, its H1HW 30.774986404609777, 1.70 below; inside the decaying band
-        // H1HW is 0.118 below the FD engine at v₀ 0.02 and 0.107 at 0.025, 0.040 at 0.04 (scratchpad\c3\oracle_c3c.py)
+        // QuantLib's hybridhestonhullwhiteprocess test's H1-HW case at v₀/θ 0.15, its vol of variance 0.3: QuantLib's
+        // FD Heston-Hull-White engine 32.471049627116756, its H1HW 30.774986404609777, 1.70 below; inside the decaying
+        // band H1HW is 0.118 below the FD engine at v₀ 0.02 and 0.107 at 0.025, 0.040 at 0.04
         var today = new Date(15, July, 2012);
         var context = new EvaluationContext { EvaluationDate = today };
         YieldTermStructure r = new FlatForward(today, 0.02, A365);

@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 """Vectors for DiscrepancyStatistics (ql/math/statistics/discrepancystatistics.hpp, .cpp), which the wheel doesn't bind,
 each output computed by the C++ harness: statistics of a dimension given, 2, 3, 5 and 10 (QuantLib's lazy dimension 0
-and its percentile reads are CR7 (viii) and (ix)'s, left out), and the discrepancy after each of 200 samples, uniform
-in the unit cube from a fixed random sample, with a few exact repeats and coordinates at 0. Read back by
+and its percentile reads are nanoql's fixes, left out), and the discrepancy after each of 200 samples, uniform in the
+unit cube from a fixed random sample, with a few exact repeats and coordinates at 0. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Numerics/Statistics/DiscrepancyStatisticsCxxVectorTests.cs."""
 import os
 import random

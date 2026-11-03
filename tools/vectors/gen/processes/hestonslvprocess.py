@@ -10,10 +10,10 @@ factors 1 and 0.5 (the first set on flat curves only). For each: size, factors a
 at times 0 and 0.5 on three states; and evolve from those times over steps of 0.05, 0.25 and 1 on the states with two
 draws each (the quadratic-exponential variance's two branches among them).
 
-Left out (the S-hes plan's §2.10): every structure is on the risk-free curve's day counter and reference date (on
-others QuantLib reads the leverage at the risk-free curve's times, tests/NanoQL.Tests/Divergences/
-HestonSlvMismatchedTimesTests.cs); expectation, stdDeviation and covariance, which dereference QuantLib's null
-discretization (the process has none; nanoql refuses them, StochasticProcess's remarks).
+Left out: every structure is on the risk-free curve's day counter and reference date (on others QuantLib reads the
+leverage at the risk-free curve's times, tests/NanoQL.Tests/Divergences/HestonSlvMismatchedTimesTests.cs); expectation,
+stdDeviation and covariance, which dereference QuantLib's null discretization (the process has none; nanoql refuses
+them, StochasticProcess's remarks).
 
 The specs are a "heston" hestonprocess.py's spec, a "leverage" fdhestonvanillaengine.py's and a "mixingFactor". The
 wheel's calls, by QuantLib-SWIG 1.44: HestonSLVProcess(hestonProcess, leverageFct, mixingFactor) and the

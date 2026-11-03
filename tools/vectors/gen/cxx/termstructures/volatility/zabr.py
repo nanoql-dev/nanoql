@@ -16,7 +16,7 @@ refuses some for β = 1); its outputs are the inspectors (nu the model's transfo
 "localVolatilityAt" at the points, and the call prices by finite differences on the Dupire equation, "fdPrice" over the
 strikes' positive ones ("fdStrikes": QuantLib's grid starts at half the first) and "fdPriceAt" at the points, each
 {"throws": true} where QuantLib refuses it. Left out: fullFdPrice, the two-dimensional equation's price, whose solve
-stops at a relative 1e-8 and so fails the stability filter (the S7 plan's S7R6) at every strike
+stops at a relative 1e-8 and so fails the stability filter at every strike
 tools/vectors/gen/termstructures/volatility/zabrsmilesection.py tries. A "refusal" case holds the refused call. The
 vector forms aren't given an empty vector, whose first element QuantLib reads (nanoql refuses it, a documented
 divergence). tests/NanoQL.Tests/Vectors/Cxx/TermStructures/ZabrCxxVectorTests.cs reads the file back."""

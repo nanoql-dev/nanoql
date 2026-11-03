@@ -12,8 +12,8 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The fix QuantLib's master made to the YoY inflation cap/floor engines after the pin, which nanoql takes (R8, the
-/// upstream sweep): #2877 (<c>5c93960e2</c>), the optionlet's time from the volatility's base date read with no lag,
+/// The fix QuantLib's master made to the YoY inflation cap/floor engines after the pin, which nanoql takes: #2877
+/// (<c>5c93960e2</c>), the optionlet's time from the volatility's base date read with no lag,
 /// <c>timeFromBase(fixingDate, Period(0, Days))</c>, as the engine's own variance is. QuantLib 1.44 reads it with the
 /// structure's default lag (<c>inflationcapfloorengines.cpp:85-89</c>), so a fixing within one lag of the base date has
 /// a negative time, its square root NaN, and the engine's <c>sqrtTime &gt; 0</c> test leaves the optionlet at its

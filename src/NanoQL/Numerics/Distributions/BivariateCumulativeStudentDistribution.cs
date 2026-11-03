@@ -16,9 +16,9 @@ namespace NanoQL.Numerics;
 /// <remarks>
 /// Immutable. QuantLib's x(m, h, k) returns 0 wherever its denominator is below 1e-8, the limit case for ρ = ±1, which
 /// flips x from 1 to 0 within about 1e-4 of the line h = ρk at and near |ρ| = 1: errors to 1.9e-5 and negative
-/// probabilities (−1.75e-5 at n 2, ρ −1, (0, −9.9e-5)). nanoql takes the limit only at an exact 0/0, where the sign
-/// of h − ρk, 0, multiplies x (a documented divergence, found under R8; <c>Divergences/BivariateStudentTests.cs</c>);
-/// QuantLib's values, bit for bit, wherever its denominator is at least 1e-8.
+/// probabilities (−1.75e-5 at n 2, ρ −1, (0, −9.9e-5)). nanoql takes the limit only at an exact 0/0, where the sign of
+/// h − ρk, 0, multiplies x (a documented divergence; <c>Divergences/BivariateStudentTests.cs</c>); QuantLib's values,
+/// bit for bit, wherever its denominator is at least 1e-8.
 /// </remarks>
 public sealed class BivariateCumulativeStudentDistribution
 {

@@ -35,11 +35,11 @@ construction-time fit. A calibration's outputs, they pass the stability filter b
   which blackFormulaStdDevDerivative refuses; and a strike at minus the shift, whose value shiftedSabrVolatility
   refuses at the fit's first evaluation.
 
-**The stability filter** (the plan's S7R6, master §3.2): each fit is refitted in the wheel with every input volatility
-moved one ulp up, then down, by math.nextafter, together; then each alone, up and down. An output is written only
-where every refit leaves it within 1e-12 x max(|base|, |moved|, 1); the others are dropped, and the case's input
-"evalAt" lists the points whose values are kept. The generator prints "dropped n of m outputs" per case and for the
-file; the outputs just outside the range, which no fit computes, aren't filtered.
+**The stability filter**: each fit is refitted in the wheel with every input volatility moved one ulp up, then down, by
+math.nextafter, together; then each alone, up and down. An output is written only where every refit leaves it within
+1e-12 x max(|base|, |moved|, 1); the others are dropped, and the case's input "evalAt" lists the points whose values
+are kept. The generator prints "dropped n of m outputs" per case and for the file; the outputs just outside the range,
+which no fit computes, aren't filtered.
 
 A refused value is {"throws": true}. Each case's inputs are the interpolation's arguments: "x", "y", "t", "forward",
 "alpha" ... "rho" (null for Null<Real>()), "alphaIsFixed" ... "rhoIsFixed", "vegaWeighted", "endCriteria" (null for

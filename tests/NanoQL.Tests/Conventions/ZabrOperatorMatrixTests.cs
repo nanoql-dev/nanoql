@@ -12,7 +12,7 @@ namespace NanoQL.Tests.Conventions;
 /// The ZABR and Dupire operators' matrix decompositions apply as the operators, QuantLib's
 /// <c>FdmLinearOpComposite::toMatrix</c> being their sum: the ZABR operator's three parts (its forward and volatility
 /// directions and its mixed term, <c>fdmzabrop.cpp</c>'s <c>toMatrixDecomp</c>) and the Dupire operator's one
-/// (<c>fdmdupire1dop.cpp</c>'s), each sum times a vector the operator's <c>apply</c> of it, as S-sr's short-rate
+/// (<c>fdmdupire1dop.cpp</c>'s), each sum times a vector the operator's <c>apply</c> of it, as the short-rate
 /// operators' (<c>FdmMemberTests</c>).
 /// </summary>
 public class ZabrOperatorMatrixTests

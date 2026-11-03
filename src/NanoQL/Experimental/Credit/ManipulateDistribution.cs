@@ -13,7 +13,7 @@ namespace NanoQL.Experimental;
 /// <see cref="Convolve"/> is the distribution of the sum: its bucket k holds the products of the buckets i and k − i,
 /// in buckets of the inputs' width. QuantLib's assigns each product where it should add it
 /// (<c>distribution.cpp:309</c>) and spreads its n₁ + n₂ − 1 buckets over [0, xmax₁ + xmax₂], one bucket wider, so its
-/// result's mass isn't 1 (the S-xcr plan's XR8 (xxvii), an unused class; <c>Divergences/DistributionMembersTests.cs</c>).
+/// result's mass isn't 1 (an unused class; <c>Divergences/DistributionMembersTests.cs</c>).
 /// </remarks>
 [Experimental("NQL0001")]
 public static class ManipulateDistribution

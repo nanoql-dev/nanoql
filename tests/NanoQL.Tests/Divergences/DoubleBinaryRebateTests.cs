@@ -11,16 +11,15 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The double-barrier binary engine's rebate (the S-bar plan's BR5 (xlvi), its reach found by the S-bar code review's
-/// B1-2). QuantLib's engine never reads <c>DoubleBarrierOption</c>'s rebate: a cash-or-nothing call, cash 10, strike
-/// 100, knocked out on [80, 120], prices 1.574843057685 at rebates 0 and 5 at r 5%, q 1%, σ 20% over a year, and 0
-/// already knocked out. The facts run on <c>DoubleBarrierRebateTests</c>' market (q 2%). nanoql prices it as the double
-/// barrier engine does (<c>DoubleBarrierRebateTests</c>): a knock-out's paid at the first touch of either barrier, now
-/// where one is already touched, R × (KIKO + KOKI) at unit cash; a knock-in's at expiry where neither is touched, R ×
-/// the unit-cash knock-out at strike 0, and none once knocked in. A KIKO's or KOKI's, which no convention fixes (at the
-/// knock-out's touch, or at expiry if the knock-in never comes), is refused. Checks: the survival route on QuantLib's
-/// image series (the reviewer's r3a, 0.60784983008 per unit rebate on [80, 120] at 20% over a year), and the double
-/// barrier engine's own rebate on the same option.
+/// The double-barrier binary engine's rebate. QuantLib's engine never reads <c>DoubleBarrierOption</c>'s rebate: a
+/// cash-or-nothing call, cash 10, strike 100, knocked out on [80, 120], prices 1.574843057685 at rebates 0 and 5 at r
+/// 5%, q 1%, σ 20% over a year, and 0 already knocked out. The facts run on <c>DoubleBarrierRebateTests</c>' market (q
+/// 2%). nanoql prices it as the double barrier engine does (<c>DoubleBarrierRebateTests</c>): a knock-out's paid at the
+/// first touch of either barrier, now where one is already touched, R × (KIKO + KOKI) at unit cash; a knock-in's at
+/// expiry where neither is touched, R × the unit-cash knock-out at strike 0, and none once knocked in. A KIKO's or
+/// KOKI's, which no convention fixes (at the knock-out's touch, or at expiry if the knock-in never comes), is refused.
+/// Checks: the survival route on QuantLib's image series (0.60784983008 per unit rebate on [80, 120] at 20% over a
+/// year), and the double barrier engine's own rebate on the same option.
 /// </summary>
 public class DoubleBinaryRebateTests
 {

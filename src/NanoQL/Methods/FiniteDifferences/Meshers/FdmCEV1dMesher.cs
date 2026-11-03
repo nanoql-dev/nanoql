@@ -15,13 +15,13 @@ namespace NanoQL.Methods;
 /// lower end is 0, or <see cref="NumericLimits.QL_EPSILON"/> for β &lt; 0.
 /// </summary>
 /// <remarks>
-/// Immutable. Within |β − 1| &lt; 1e-3 the bounds are the lognormal limit's quantiles, the CEV density at β = 1
-/// (<see cref="CEVRNDCalculator"/>), where QuantLib's density throws or hangs in Boost's non-central chi-squared
-/// (the S-van plan's VR10); elsewhere QuantLib's bounds and bits.
+/// Immutable. Within |β − 1| &lt; 1e-3 the bounds are the lognormal limit's quantiles, the CEV density at β = 1 (<see
+/// cref="CEVRNDCalculator"/>), where QuantLib's density throws or hangs in Boost's non-central chi-squared; elsewhere
+/// QuantLib's bounds and bits.
 /// </remarks>
 public sealed class FdmCEV1dMesher : Fdm1dMesher
 {
-    // the band around β = 1 the non-central chi-squared can't reach (VR10), CEVCalculator's
+    // the band around β = 1 the non-central chi-squared can't reach, CEVCalculator's
     private const double NearOne = 1e-3;
 
     /// <summary>Initializes a new instance of the <see cref="FdmCEV1dMesher"/> class.</summary>
@@ -52,7 +52,7 @@ public sealed class FdmCEV1dMesher : Fdm1dMesher
         (double? Point, double? Density) cPoint = default)
         : base(size)
     {
-        // the lognormal limit in VR10's band
+        // the lognormal limit where beta is within NearOne of 1
         var rndCalculator = new CEVRNDCalculator(f0, alpha, Math.Abs(beta - 1.0) < NearOne ? 1.0 : beta);
         double upperBound = scaleFactor * rndCalculator.InvCdf(1 - eps, maturity);
 

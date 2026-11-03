@@ -7,10 +7,11 @@ using System.Text.Json;
 namespace NanoQL.Excel;
 
 /// <summary>
-/// XLR14's <c>"python"</c>: a vector's calls in S-bind's Python layer, each call its Python member (the template's, from
-/// the tool's Python back end): handles as objects, a bound engine as its <c>bind</c>, draws as the snapshot's batch, a
-/// matrix as a 2-D NumPy array, a map as a dict, a jagged range as a list of lists, a complex number as Python's
-/// <c>complex</c>, the date system applied, the conventions and read files set up as the C# sets them.
+/// The repro's <c>"python"</c> format: a vector's calls in the Python layer, each call its Python member (the
+/// template's, from the tool's Python back end): handles as objects, a bound engine as its <c>bind</c>, draws as the
+/// snapshot's batch, a matrix as a 2-D NumPy array, a map as a dict, a jagged range as a list of lists, a complex
+/// number as Python's <c>complex</c>, the date system applied, the conventions and read files set up as the C# sets
+/// them.
 /// </summary>
 internal sealed class XlPython
 {
@@ -140,7 +141,7 @@ internal sealed class XlPython
         return (module + "." + p[1].GetString(), p[2].GetString()!, p[3].GetString()!, [.. p[4].EnumerateArray().Select(n => n.GetString()!)]);
     }
 
-    // A calendar's or a day counter's name, looked up in the current convention set (XLR16).
+    // A calendar's or a day counter's name, looked up in the current convention set.
     private string Lookup(string cs, string name)
     {
         (string owner, string member, _, _) = Member(cs.EndsWith("Calendar", StringComparison.Ordinal) ? "nql_ConventionSet_Calendar" : "nql_ConventionSet_DayCounter");
@@ -226,7 +227,7 @@ internal sealed class XlPython
         }
 
         // A matrix's and a vector's cells as the add-in reads them: numbers alone, a vector's trailing empty cells trimmed and
-        // an inner one refused (XLR2).
+        // an inner one refused.
         if (kind == "matrix")
         {
             Numerics.Matrix mx = X.Converted(x ?? default, p.GetProperty("name").GetString()!, X.Mat);
@@ -332,7 +333,7 @@ internal sealed class XlPython
                 return vars[v!.Value.GetProperty("ref").GetString()!];
             }
 
-            // A name inside an array of calendars or day counters, as the runtime's Objs<T> takes it (round 7's B7-1).
+            // A name inside an array of calendars or day counters, as the runtime's Objs<T> takes it.
             if (v is { ValueKind: JsonValueKind.String } name && Named.Contains(cs))
             {
                 return Lookup(cs, name.GetString()!);
@@ -424,7 +425,7 @@ internal sealed class XlPython
         }
 
         // Loop exactly where the add-in's mask loops; a range where one value goes and the mask doesn't loop is the
-        // add-in's refusal (round 7's B7-1).
+        // add-in's refusal.
         string mask = S(f, "loops") ?? string.Empty;
         var lifted = Enumerable.Range(0, args.Count).Where(i => i < mask.Length && mask[i] == '1' && Multi(args[i])).ToList();
         var unlooped = Enumerable.Range(0, ps.Count).Where(i => ScalarKind(ps[i].GetProperty("kind").GetString()!) && Multi(args[i]) && !lifted.Contains(i)).ToList();

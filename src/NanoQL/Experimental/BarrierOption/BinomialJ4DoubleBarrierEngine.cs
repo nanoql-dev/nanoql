@@ -14,7 +14,7 @@ namespace NanoQL.Experimental;
 /// <summary>
 /// The binomial double-barrier engine on the Joshi tree and Derman and Kani's discretized double-barrier option:
 /// QuantLib-Python's <c>BinomialJ4DoubleBarrierEngine</c>, QuantLib's <c>BinomialDoubleBarrierEngine&lt;Joshi4,
-/// DiscretizedDermanKaniDoubleBarrierOption&gt;</c>, the wheel's closing (D12).
+/// DiscretizedDermanKaniDoubleBarrierOption&gt;</c>, the wheel's closing.
 /// </summary>
 [Experimental("NQL0001")]
 public static class BinomialJ4DoubleBarrierEngine

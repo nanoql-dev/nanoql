@@ -19,10 +19,9 @@ namespace NanoQL.Models;
 /// methods.
 /// </para>
 /// <para>
-/// A(t, T), B(t, T) and the bond option's variance are QuantLib's master's forms after the pin (#2882, the S-sr plan's
-/// SSR3), free of cancellation at small a and exact in the limit a → 0, where QuantLib 1.44 cuts to the a = 0 forms
-/// below a = √ε and cancels above it. They read <c>std::expm1</c> (nanoql's own), so their last bits differ from 1.44's
-/// at every a.
+/// A(t, T), B(t, T) and the bond option's variance are QuantLib's master's forms after the pin (#2882), free of
+/// cancellation at small a and exact in the limit a → 0, where QuantLib 1.44 cuts to the a = 0 forms below a = √ε and
+/// cancels above it. They read <c>std::expm1</c> (nanoql's own), so their last bits differ from 1.44's at every a.
 /// </para>
 /// <para>An extension point, as in QuantLib: Hull-White derives from it.</para>
 /// </remarks>

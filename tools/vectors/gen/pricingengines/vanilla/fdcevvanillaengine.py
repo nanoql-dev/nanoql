@@ -4,14 +4,13 @@
 evaluation date 15 October 2026: the NPV, delta, gamma and theta it reports.
 
 European, American and Bermudan calls and puts on CEV forwards of 100 and 2.1 at strikes below, at and above them, for
-elasticities -0.5, 0.45, 0.9 and 1.45 (delta below and above 2), volatility parameters at 30%, on flat curves at 3%
-and -1%, on the default grid (50 x 400, Douglas); then testFdmCevOp's grid (100 x 1000, one damping step, eps 1e-6),
-other scaling factors, schemes and a cash-or-nothing payoff; and an expired option. The band |beta - 1| < 1e-3, where
-nanoql's mesher and upper boundary take the lognormal limit (the S-van plan's VR10,
-tests/NanoQL.Tests/Divergences/FdCevNearOneTests.cs), is none of the grid's; an exercise on or before the curve's
-date, which nanoql refuses and QuantLib throws on, isn't in it either; and the cases where QuantLib's density inverse
-steps below zero, which nanoql fixes (tests/NanoQL.Tests/Divergences/CevDensityBelowZeroTests.cs), are left out by
-Boost's message.
+elasticities -0.5, 0.45, 0.9 and 1.45 (delta below and above 2), volatility parameters at 30%, on flat curves at 3% and
+-1%, on the default grid (50 x 400, Douglas); then testFdmCevOp's grid (100 x 1000, one damping step, eps 1e-6), other
+scaling factors, schemes and a cash-or-nothing payoff; and an expired option. The band |beta - 1| < 1e-3, where nanoql's
+mesher and upper boundary take the lognormal limit (tests/NanoQL.Tests/Divergences/FdCevNearOneTests.cs), is none of the
+grid's; an exercise on or before the curve's date, which nanoql refuses and QuantLib throws on, isn't in it either; and
+the cases where QuantLib's density inverse steps below zero, which nanoql fixes
+(tests/NanoQL.Tests/Divergences/CevDensityBelowZeroTests.cs), are left out by Boost's message.
 
 The specs are a pricing {"f0", "alpha", "beta", "rTS", "payoff", "exercise", "tGrid", "xGrid", "dampingSteps",
 "scalingFactor", "eps", "scheme"}, the exercise and the scheme tools/vectors/gen/pricingengines/vanilla/
@@ -54,9 +53,9 @@ def pricing_spec(f0, alpha, beta, rate, payoff, ex, t_grid=50, x_grid=400, dampi
             "scheme": fbs.scheme_spec(scheme if scheme is not None else ql.FdmSchemeDesc.Douglas())}
 
 
-# The cash-or-nothing put's gamma's recorded tolerance: a second difference of the finite-difference grid's values
-# about its payoff's jump, which the C runtime and the processor a run uses move in their last bits: 1.02e-10 apart,
-# by R7's measure, on GitHub's windows-2022 runner (CI run 41146085965).
+# The cash-or-nothing put's gamma's recorded tolerance: a second difference of the finite-difference grid's values about
+# its payoff's jump, which the C runtime and the processor a run uses move in their last bits: 1.02e-10 apart, by the
+# tolerance's measure, on GitHub's windows-2022 runner (CI run 41146085965).
 GAMMA_TOLERANCE = 1e-8
 
 

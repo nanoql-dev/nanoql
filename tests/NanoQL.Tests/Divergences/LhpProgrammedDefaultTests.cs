@@ -10,12 +10,11 @@ using static NanoQL.Tests.Conventions.CreditPortfolioBuilders;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The LHP model under a default programmed after the evaluation date (the S-xcr plan's XR8 (ii), round 3's O3-1): its
-/// averages read the notionals and recoveries of the names alive at the evaluation date, so its statistics are its
-/// model's without the event. QuantLib's reads the notionals alive at the statistic's date beside the evaluation date's
-/// probabilities and recoveries, past its vectors, undefined (the plan's four runs: 2.24789, 2.24363, 1.77310 and a
-/// throw); without the event it reads 12.282321555009048 at ten years on the basket vector's programmed case (the S-xcr
-/// run's <c>c2_facts.cpp</c>).
+/// The LHP model under a default programmed after the evaluation date: its averages read the notionals and recoveries
+/// of the names alive at the evaluation date, so its statistics are its model's without the event. QuantLib's reads the
+/// notionals alive at the statistic's date beside the evaluation date's probabilities and recoveries, past its vectors,
+/// undefined (four runs: 2.24789, 2.24363, 1.77310 and a throw); without the event it reads 12.282321555009048 at ten
+/// years on the basket vector's programmed case.
 /// </summary>
 public class LhpProgrammedDefaultTests
 {

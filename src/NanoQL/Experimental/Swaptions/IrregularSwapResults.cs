@@ -20,10 +20,9 @@ namespace NanoQL.Experimental;
 /// </summary>
 /// <remarks>
 /// A result QuantLib leaves null is <see langword="null"/>, where QuantLib throws "result not available" on reading it.
-/// The fair rate and the fair spread are null on a swap engine's results and on an expired swap's (the S-xrt plan's
-/// XRR5 (xx)). The leg accessors are QuantLib's instrument accessors, read from the per-leg arrays: the fixed leg is the
-/// first leg and the floating leg the second. Equality compares the per-leg arrays element by element, and the fair
-/// rate and spread by value.
+/// The fair rate and the fair spread are null on a swap engine's results and on an expired swap's. The leg accessors
+/// are QuantLib's instrument accessors, read from the per-leg arrays: the fixed leg is the first leg and the floating
+/// leg the second. Equality compares the per-leg arrays element by element, and the fair rate and spread by value.
 /// </remarks>
 [Experimental("NQL0001")]
 public sealed record IrregularSwapResults : SwapResults

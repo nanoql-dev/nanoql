@@ -19,17 +19,16 @@ namespace NanoQL.Experimental;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A static class: <see cref="Calculate"/> takes the engine's inputs and returns the results (D14). It reads the
-/// statistics through the CDO's basket, which must be of the engine's evaluation date (the S-xcr plan's XR1 (c)).
-/// Premium accrual on default isn't paid, as in QuantLib's.
+/// A static class: <see cref="Calculate"/> takes the engine's inputs and returns the results. It reads the statistics
+/// through the CDO's basket, which must be of the engine's evaluation date. Premium accrual on default isn't paid, as
+/// in QuantLib's.
 /// </para>
 /// <para>
 /// The legs and the upfront are levered by the CDO's leverage factor, which QuantLib's engine ignores, so a tranche at
 /// twice its notional reads an unchanged value; the fair premium and fair upfront are the unlevered rates, the
-/// additional "fairPremium" the instrument's, the fair upfront side-invariant (XR8 (ix);
-/// <c>Divergences/CdoLeverageTests.cs</c>). A basket with realized defaults is priced on the tranche's outstanding
-/// notional, and a discount before the curve's reference date is 1, as <see cref="MidPointCDOEngine"/>'s (XR8 (ii),
-/// (x)).
+/// additional "fairPremium" the instrument's, the fair upfront side-invariant (<c>Divergences/CdoLeverageTests.cs</c>).
+/// A basket with realized defaults is priced on the tranche's outstanding notional, and a discount before the curve's
+/// reference date is 1, as <see cref="MidPointCDOEngine"/>'s.
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]

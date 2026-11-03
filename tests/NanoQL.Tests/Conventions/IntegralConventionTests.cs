@@ -6,14 +6,12 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The integrals' conventions (the S-core plan's C4): exp-sinh's refusals, Boost's domain errors (CD13); Filon's
-/// refusal of 0 intervals (CR7 (xxviii)) and QuantLib's of an odd number; the moment-based polynomial's memo, a
-/// 12-node rule asking 24 moments in 27 calls, QuantLib's count (<c>probes\c4_memo.cpp</c>, <c>c4_memo.out</c>), where
-/// the recursion alone asks 511,659,097 times (the plan's CP20), and one polynomial serving two threads, each reading
-/// QuantLib's nodes (CR5 (d)); and the trigonometric polynomials' moments
-/// by the loop, QuantLib's bits (round 1's O1-8). And §2.6's two routes: exp-sinh against tanh-sinh after a
-/// substitution; Filon against Gauss-Kronrod; the two-dimensional integral against iterated one-dimensional rules.
-/// QuantLib's bits are its own (this run's <c>probes\c4_facts.cpp</c>, <c>c4_facts.out</c>).
+/// The integrals' conventions: exp-sinh's refusals, Boost's domain errors; Filon's refusal of 0 intervals and
+/// QuantLib's of an odd number; the moment-based polynomial's memo, a 12-node rule asking 24 moments in 27 calls,
+/// QuantLib's count, where the recursion alone asks 511,659,097 times, and one polynomial serving two threads, each
+/// reading QuantLib's nodes; and the trigonometric polynomials' moments by the loop, QuantLib's bits. And two routes to
+/// one value: exp-sinh against tanh-sinh after a substitution; Filon against Gauss-Kronrod; the two-dimensional
+/// integral against iterated one-dimensional rules. QuantLib's bits come from QuantLib itself.
 /// </summary>
 public class IntegralConventionTests
 {

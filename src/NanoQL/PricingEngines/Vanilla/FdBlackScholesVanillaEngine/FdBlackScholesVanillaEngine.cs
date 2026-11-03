@@ -25,7 +25,7 @@ namespace NanoQL.PricingEngines;
 /// <para>
 /// The engine reports the value, delta, gamma and theta; the theta is <see langword="null"/> when the problem's first
 /// stopping time is time 0, as QuantLib's is; the other Greeks are <see langword="null"/>. Its finite-difference
-/// working types are built inside each calculation and dropped after it (the S-eq plan's SEQR1).
+/// working types are built inside each calculation and dropped after it.
 /// </para>
 /// <para>
 /// Its times run on <see cref="FdmBlackScholesOp.Clock"/>, from the earliest reference date of the structures it reads,

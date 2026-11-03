@@ -5,12 +5,11 @@ doesn't expose, each output computed by the C++ harness (tools/cxx/src/experimen
 tools/vectors/gen/cxx/experimental/credit/defaultevent.py's specs: Gaussian and Student t models over constant-loss
 latent models, 2,000 paths on QuantLib's Sobol sequence at its default seed, 2863311530, on baskets of unequal
 notionals, hazards and recoveries, curves dated at the evaluation date (QuantLib counts the days from each curve's
-date, the S-xcr plan's XR8 (x)), at dates within the horizon (XR8 (xliv)); the expected tranche loss, the percentile
-and the shortfall at levels whose positions lie within the sorted losses (XR8 (xxix)), the event counts, the loss
-splits and distributions, and each name's recovery, on both constructors; the n-th event's probabilities where no two names default on one
-day (QuantLib's counts them once, held in Divergences/RandomModelStatisticsTests.cs: the whole pool's case has such days).
-The default correlation divides the joint frequency by n - 1 (XR8 (xxiv)), so it is left out (held in
-Divergences/RandomModelStatisticsTests.cs). Read back by
+date), at dates within the horizon; the expected tranche loss, the percentile and the shortfall at levels whose
+positions lie within the sorted losses, the event counts, the loss splits and distributions, and each name's recovery,
+on both constructors; the n-th event's probabilities where no two names default on one day (QuantLib's counts them once,
+held in Divergences/RandomModelStatisticsTests.cs: the whole pool's case has such days). The default correlation divides
+the joint frequency by n - 1, so it is left out (held in Divergences/RandomModelStatisticsTests.cs). Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Experimental/Credit/RandomDefaultLMCxxVectorTests.cs through
 tests/NanoQL.Tests/Vectors/LossModelStatistics.cs."""
 import importlib.util

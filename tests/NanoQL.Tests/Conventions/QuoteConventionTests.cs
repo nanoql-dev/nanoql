@@ -8,9 +8,9 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The derived quotes' construction-time values and refusals (the S-core plan's CR1): each quote computes its value
-/// once, from its inputs and the context it is built under, and refuses at construction what QuantLib's would refuse
-/// when read, with QuantLib's texts.
+/// The derived quotes' construction-time values and refusals: each quote computes its value once, from its inputs and
+/// the context it is built under, and refuses at construction what QuantLib's would refuse when read, with QuantLib's
+/// texts.
 /// </summary>
 public class QuoteConventionTests
 {

@@ -21,9 +21,8 @@ namespace NanoQL.PricingEngines;
 /// <remarks>
 /// The engine reports the value, delta, gamma and theta, the theta <see langword="null"/> when the problem's first
 /// stopping time is time 0. Its grid is <see cref="FdHestonVanillaEngine"/>'s, QuantLib's helper engine, on its clock
-/// (<see cref="FdmHestonOp.Clock"/>, the S-hes plan's HR7 (ii)), with its bounded skew factor (HR9) and its equity
-/// grid widened where QuantLib's falls short of the true forwards' band or isn't a number (B1-1 and B2-2 of the S-hes
-/// plan's C1 review).
+/// (<see cref="FdmHestonOp.Clock"/>), with its bounded skew factor and its equity grid widened where QuantLib's falls
+/// short of the true forwards' band or isn't a number.
 /// </remarks>
 public static class FdBatesVanillaEngine
 {

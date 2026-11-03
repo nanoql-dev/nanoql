@@ -10,17 +10,15 @@ the swap rate and annuity of a 5y swap index, and a zero-bond call and put. Then
 swaption helpers, priced by the Gaussian1d swaption engine on the model, its first volatility fixed by default:
 its end criterion, function evaluations, parameters, problem values and calibration errors.
 
-**The stability filter** (the S7 plan's S7R6) runs on every output: each model is built again with every nonzero real
-of its specs (and of the helpers, for the calibration) moved one ulp up, then down (models/model.py's moved); an output
-is written only where both rebuilds leave it within models/model.py's measure, and the generator prints the outputs
-dropped per case.
+**The stability filter** runs on every output: each model is built again with every nonzero real of its specs (and of
+the helpers, for the calibration) moved one ulp up, then down (models/model.py's moved); an output is written only where
+both rebuilds leave it within models/model.py's measure, and the generator prints the outputs dropped per case.
 
-Left out, where nanoql's model differs (the S-g1d plan's G1R6 (i), (vi), (xvi), (xxi), G1R4 (ii)): flat payoff
-extrapolation; a curve on another clock; a given curve shorter than the numeraire time; a model without step dates at
-a volatility other than 1; and reversions between QuantLib's epsilon and 1e-2. Each case's input "model" is the spec
-tools/cxx/src/models/shortrate/onefactormodels/markovfunctional.cpp reads (the harness file's,
-tools/vectors/gen/cxx/models/shortrate/onefactormodels/markovfunctional.py); tests/NanoQL.Tests/Vectors/Models/
-MarkovFunctionalVectorTests.cs reads it back."""
+Left out, where nanoql's model differs: flat payoff extrapolation; a curve on another clock; a given curve shorter than
+the numeraire time; a model without step dates at a volatility other than 1; and reversions between QuantLib's epsilon
+and 1e-2. Each case's input "model" is the spec tools/cxx/src/models/shortrate/onefactormodels/markovfunctional.cpp
+reads (the harness file's, tools/vectors/gen/cxx/models/shortrate/onefactormodels/markovfunctional.py);
+tests/NanoQL.Tests/Vectors/Models/MarkovFunctionalVectorTests.cs reads it back."""
 import copy
 import importlib.util
 import math

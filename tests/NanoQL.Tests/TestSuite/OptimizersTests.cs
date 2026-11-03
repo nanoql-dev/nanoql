@@ -475,9 +475,9 @@ public class OptimizersTests
         Assert.Empty(errors);
     }
 
-    // Adapted: the optimizers' seed is the constructor's argument (the S-core plan's CR2 (c)), where QuantLib's
-    // configuration holds it (withSeed); QuantLib's vector holds four copies of one unused optimizer, each starting its
-    // generator from the seed, as each nanoql minimization does.
+    // Adapted: the optimizers' seed is the constructor's argument, where QuantLib's configuration holds it (withSeed);
+    // QuantLib's vector holds four copies of one unused optimizer, each starting its generator from the seed, as each
+    // nanoql minimization does.
     [Fact]
     public void TestDifferentialEvolution()
     {
@@ -597,9 +597,9 @@ public class OptimizersTests
         Assert.Empty(errors);
     }
 
-    // Adapted: the optimizers' seed is the constructor's argument (the S-core plan's CR2 (c)), where QuantLib's
-    // configuration holds it (withSeed); withPopulationSize returns a copy, which the 10-dimensional case keeps, where
-    // QuantLib's changes the configuration in place (CD12).
+    // Adapted: the optimizers' seed is the constructor's argument, where QuantLib's configuration holds it (withSeed);
+    // withPopulationSize returns a copy, which the 10-dimensional case keeps, where QuantLib's changes the
+    // configuration in place.
     [Fact]
     public void TestCMAES()
     {

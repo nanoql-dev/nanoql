@@ -24,19 +24,19 @@ namespace NanoQL.Experimental;
 /// </para>
 /// <para>
 /// A smile section is built per query, as QuantLib's, from the indexes' fixings and forecasts at the option date: its
-/// fixings are read in the context the structure was built with, which it keeps (S7R2's form, master Revision 43),
-/// since the smile-section and volatility queries take no context. The structure takes the base structure's reference
-/// date, calendar, convention and day counter.
+/// fixings are read in the context the structure was built with, which it keeps, since the smile-section and volatility
+/// queries take no context. The structure takes the base structure's reference date, calendar, convention and day
+/// counter.
 /// </para>
 /// <para>
 /// A volatility is the smile section's at the strike, the range checked once, by the query with its own extrapolation
-/// flag (the S-xrt run's R2-4; <c>Divergences/TenorOptionletExtrapolationTests.cs</c>). QuantLib's builds the section
-/// through <c>smileSection(optionTime)</c>, which checks the range again without extrapolation, so a query allowed to
+/// flag (<c>Divergences/TenorOptionletExtrapolationTests.cs</c>). QuantLib's builds the section through
+/// <c>smileSection(optionTime)</c>, which checks the range again without extrapolation, so a query allowed to
 /// extrapolate past the base structure's last date refuses: QuantLib's own <c>testTenoroptionletvts</c> asks for its
-/// 30-year caplets from the base structure's reference date, two business days after the evaluation date, and on QuantLib
-/// 1.44 refuses ("time (30.0219) is past max curve time (30.0137)") on every evaluation date of 29 October to 11 November
-/// 2026 but the two Wednesdays. On its test runner's date, 16 September 2015, a Wednesday, the case passes, so
-/// QuantLib's own run doesn't refuse. QuantLib's swaption structure builds its section unchecked, as here; where
+/// 30-year caplets from the base structure's reference date, two business days after the evaluation date, and on
+/// QuantLib 1.44 refuses ("time (30.0219) is past max curve time (30.0137)") on every evaluation date of 29 October to
+/// 11 November 2026 but the two Wednesdays. On its test runner's date, 16 September 2015, a Wednesday, the case passes,
+/// so QuantLib's own run doesn't refuse. QuantLib's swaption structure builds its section unchecked, as here; where
 /// QuantLib's doesn't refuse, the value is its.
 /// </para>
 /// </remarks>
@@ -110,8 +110,7 @@ public sealed class TenorOptionletVTS : OptionletVolatilityStructure
     protected override SmileSection SmileSectionImpl(double optionTime) => new TenorOptionletSmileSection(this, optionTime);
 
     /// <inheritdoc/>
-    /// <remarks>The smile section's volatility, the range checked once, by the caller's query (the S-xrt run's
-    /// R2-4).</remarks>
+    /// <remarks>The smile section's volatility, the range checked once, by the caller's query.</remarks>
     protected override double VolatilityImpl(double optionTime, double strike) =>
         SmileSectionImpl(optionTime).Volatility(strike);
 }

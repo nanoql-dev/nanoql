@@ -12,7 +12,7 @@ namespace NanoQL.Numerics;
 /// <remarks>
 /// Immutable. Its accuracy is QuantLib's <c>Null&lt;Real&gt;()</c>: the rule runs its evaluations and reports no error.
 /// Fewer than two evaluations are refused, where QuantLib's count of intervals wraps below zero and its loop runs about
-/// 2⁶⁴ times (<c>discreteintegrals.cpp:74-79</c>; the S-van plan's VR4 (xix)).
+/// 2⁶⁴ times (<c>discreteintegrals.cpp:74-79</c>).
 /// </remarks>
 public sealed class DiscreteTrapezoidIntegrator : Integrator
 {
@@ -47,7 +47,7 @@ public sealed class DiscreteTrapezoidIntegrator : Integrator
         return new IntegrationResult(d * sum, MaxEvaluations);
     }
 
-    // at least two, where QuantLib's Size wraps below zero (VR4 (xix))
+    // at least two, where QuantLib's Size wraps below zero
     internal static int Evaluations(int evaluations)
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(evaluations, 2);

@@ -20,7 +20,7 @@ public static class PiecewiseFunctionFunctions
     /// <remarks>
     /// Normally Y has one value more than X. Further values are ignored; with fewer, the last value holds on the
     /// remaining intervals; with X empty, the function is the constant Y[0]. An empty Y is refused, where QuantLib's
-    /// macro reads past it ("an invalid access occurs", its warning; the S-xrt plan's XRR5 (xxxvii);
+    /// macro reads past it ("an invalid access occurs", its warning;
     /// <c>Conventions/ExperimentalMathRefusalTests.cs</c>).
     /// </remarks>
     /// <param name="X">The breaks, sorted ascending.</param>

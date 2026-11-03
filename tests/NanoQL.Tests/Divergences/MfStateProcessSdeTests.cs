@@ -6,12 +6,12 @@ using NanoQL.Processes;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The Markov-functional state process, dx = σ(t) e^{at} dW (the S-g1d plan's G1R6 (vi)): QuantLib's diffusion omits
-/// the factor e^{at} (<c>mfstateprocess.cpp:62-66</c>), and its variance without step times omits the volatility's
-/// square (<c>:80-84</c>). On the harness, at a = 0.05 and σ = 0.8 without steps, its diffusion at t = 2 is 0.8 and
-/// its variance over [0, 1] 1.0517091807564771, where the same process stepped once past the horizon gives
-/// 0.6730938756841454. nanoql's are its equation's. QuantLib's checks: its own stepped variance, of which the diffusion's
-/// square is the derivative and which the variance without steps equals with one step past the horizon. The
+/// The Markov-functional state process, dx = σ(t) e^{at} dW: QuantLib's diffusion omits the factor e^{at}
+/// (<c>mfstateprocess.cpp:62-66</c>), and its variance without step times omits the volatility's square
+/// (<c>:80-84</c>). On the harness, at a = 0.05 and σ = 0.8 without steps, its diffusion at t = 2 is 0.8 and its
+/// variance over [0, 1] 1.0517091807564771, where the same process stepped once past the horizon gives
+/// 0.6730938756841454. nanoql's are its equation's. QuantLib's checks: its own stepped variance, of which the
+/// diffusion's square is the derivative and which the variance without steps equals with one step past the horizon. The
 /// Markov-functional model's prices don't move: they read the variance's ratios, which its level leaves.
 /// </summary>
 public class MfStateProcessSdeTests

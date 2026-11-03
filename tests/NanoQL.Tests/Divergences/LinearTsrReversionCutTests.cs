@@ -8,12 +8,12 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The linear TSR pricer's reversion cut (the S-cms plan's CMR5 (iv)): QuantLib's <c>GsrG</c> reads every reversion
-/// with |a| below 1e-4 as 0 (<c>lineartsrpricer.cpp:71-79</c>), so the model's slope jumps there: on the wheel, on a
-/// flat 3% curve and a 20% volatility, a 1-year coupon fixing in 10 years prices 0.03235538786871865 for every a below
-/// 1e-4 and 0.03235551192457936 at 1e-4, a jump of 1.2e-7 in its convexity adjustment of 1.9e-3. nanoql takes
-/// −expm1(−a·τ)/a below the cut (§3.3's expm1 class) and τ at a = 0, with QuantLib's form at and above it, which loses
-/// at most 1e-12 there. QuantLib's checks: its own values at 0 and at the cut.
+/// The linear TSR pricer's reversion cut: QuantLib's <c>GsrG</c> reads every reversion with |a| below 1e-4 as 0
+/// (<c>lineartsrpricer.cpp:71-79</c>), so the model's slope jumps there: on the wheel, on a flat 3% curve and a 20%
+/// volatility, a 1-year coupon fixing in 10 years prices 0.03235538786871865 for every a below 1e-4 and
+/// 0.03235551192457936 at 1e-4, a jump of 1.2e-7 in its convexity adjustment of 1.9e-3. nanoql takes −expm1(−a·τ)/a
+/// below the cut (§3.3's expm1 class) and τ at a = 0, with QuantLib's form at and above it, which loses at most 1e-12
+/// there. QuantLib's checks: its own values at 0 and at the cut.
 /// </summary>
 public class LinearTsrReversionCutTests
 {

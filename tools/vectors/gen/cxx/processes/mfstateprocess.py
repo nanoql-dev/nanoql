@@ -8,11 +8,10 @@ evolution at nine (t0, x0, dt) steps (an interval below QuantLib's epsilon, and 
 past the last), and the diffusion at nine times on the processes at a zero reversion. Then the constructor's
 refusals: one volatility too many or too few, times not increasing, a negative volatility.
 
-Left out, where nanoql's process is its equation's (the S-g1d plan's G1R6 (vi), G1R4 (ii)): the diffusion at a
-reversion other than 0, which QuantLib's computes without the factor e^{at}; a process without step times at a
-volatility other than 1, whose variance QuantLib's computes without the volatility's square; and reversions between
-QuantLib's epsilon and 1e-2, where nanoql's variance takes the expm1 form. tests/NanoQL.Tests/Vectors/Cxx/Processes/
-MfStateProcessCxxVectorTests.cs reads it back."""
+Left out, where nanoql's process is its equation's: the diffusion at a reversion other than 0, which QuantLib's computes
+without the factor e^{at}; a process without step times at a volatility other than 1, whose variance QuantLib's computes
+without the volatility's square; and reversions between QuantLib's epsilon and 1e-2, where nanoql's variance takes the
+expm1 form. tests/NanoQL.Tests/Vectors/Cxx/Processes/MfStateProcessCxxVectorTests.cs reads it back."""
 import os
 import sys
 

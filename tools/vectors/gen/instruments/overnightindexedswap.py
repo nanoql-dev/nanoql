@@ -5,11 +5,11 @@ January 2025: QuantLib's four constructors (one nominal or a list of nominals, w
 for each) × 20 variants of the conventions the swap passes to its overnight leg: the payment lag, adjustment and
 calendar, compounded and averaged rates, lookbacks with and without the observation shift, lockouts, telescopic value
 dates (refused with a lookback and no shift), the rounding of the compounded rate (17 places refused), spreads,
-receivers and a seasoned swap reading stored fixings; on overnight indexes with SOFR's, ESTR's and SONIA's
-conventions, each on a flat curve. Also a swap whose overnight schedule has one date, which builds an empty overnight
-leg (D13); a swap whose payments are all past, with its expired results; and one swap of QuantLib's
-testNotifications (a 2-year annual swap on ESTR, discounted on a flat 2% curve), priced on a flat 2% forecasting curve
-and rebuilt on a flat 3% one, the rebuild that replaces QuantLib's relink.
+receivers and a seasoned swap reading stored fixings; on overnight indexes with SOFR's, ESTR's and SONIA's conventions,
+each on a flat curve. Also a swap whose overnight schedule has one date, which builds an empty overnight leg; a swap
+whose payments are all past, with its expired results; and one swap of QuantLib's testNotifications (a 2-year annual
+swap on ESTR, discounted on a flat 2% curve), priced on a flat 2% forecasting curve and rebuilt on a flat 3% one, the
+rebuild that replaces QuantLib's relink.
 
 Each swap's outputs are whether it builds, QuantLib's refusals recorded as its one throw; its inspectors (the payment
 frequency, the overnight index's name, the averaging method, the lookback days, null for QuantLib's Null<Natural>(),
@@ -19,14 +19,13 @@ DiscountingSwapEngine on a flat discount curve, with and without the settlement 
 BPS, the fair rate and spread, the fixed-leg accessors and the overnight-leg ones). NPVs are compared at the largest
 nominal and BPS at it times 1e-4.
 
-Telescopic swaps follow the plan's telescopic rule (instruments/fixedvsfloatingswap.py's make_ois): QuantLib builds
-the swap with the flag first, so a refusal is its own; the expected values are then the same swap's built without
-it, with the averaging approximation set on an averaged swap's overnight leg. The swaps are built with
-ql.OvernightIndexedSwap, the wheel's proxy of three of QuantLib's four constructors; QuantLib's third (one nominal and
-two schedules) delegates to its fourth with one-element nominal lists, which the wheel builds. Each case's inputs hold
-its settings (with the stored fixings), its "swap" spec (instruments/fixedvsfloatingswap.py's), the discount curve and
-the engine's includeSettlementDateFlows. Read back by
-tests/NanoQL.Tests/Vectors/Instruments/OvernightIndexedSwapVectorTests.cs."""
+Telescopic swaps follow the telescopic rule (instruments/fixedvsfloatingswap.py's make_ois): QuantLib builds the swap
+with the flag first, so a refusal is its own; the expected values are then the same swap's built without it, with the
+averaging approximation set on an averaged swap's overnight leg. The swaps are built with ql.OvernightIndexedSwap, the
+wheel's proxy of three of QuantLib's four constructors; QuantLib's third (one nominal and two schedules) delegates to
+its fourth with one-element nominal lists, which the wheel builds. Each case's inputs hold its settings (with the
+stored fixings), its "swap" spec (instruments/fixedvsfloatingswap.py's), the discount curve and the engine's
+includeSettlementDateFlows. Read back by tests/NanoQL.Tests/Vectors/Instruments/OvernightIndexedSwapVectorTests.cs."""
 import importlib.util
 import os
 import sys
@@ -123,7 +122,7 @@ def swaps():
 
 
 def one_date():
-    """A swap whose overnight schedule has one date: an empty overnight leg (D13)."""
+    """A swap whose overnight schedule has one date: an empty overnight leg."""
     fixed = fvf.sched(SPOT, D(17, 1, 2027), fvf.ONE_Y, fvf.TARGET)
     overnight = fvf.dates_schedule([SPOT], fvf.TARGET)
     return ("one-date overnight schedule", fvf.ois("nominals, two schedules", fvf.PAYER, [1e6], fixed, 0.03,

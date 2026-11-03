@@ -14,7 +14,7 @@ namespace NanoQL.Tests.Vectors;
 /// <summary>
 /// The C++ harness's HestonSLVFDMModel log vectors, <c>tests/vectors/cxx/models/equity/hestonslvfdmmodel.json</c>: the
 /// finite-difference SLV calibration's log with logging on, its number of entries and its first, second, eleventh and
-/// last entries' times and meshers, the outputs stable under the master plan's S7R6 (the densities aren't).
+/// last entries' times and meshers, the outputs stable under one-ulp moves of the inputs (the densities aren't).
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class HestonSLVFDMModelCxxVectorTests

@@ -13,13 +13,12 @@ the error estimate. The second-kind Chebyshev basis prices puts alone: a call's 
 scaled spot of 1, where QuantLib's decomposition never ends and nanoql's refuses (tests/NanoQL.Tests/Divergences/
 SvdNonFiniteRefusalTests.cs). Then the refusals of a European exercise, of a payoff at expiry and of the Legendre basis.
 
-The outputs nanoql fixes are left out (the S-van plan's VR4): every case passes its calibration seed, since QuantLib's
-default is its narrowed null where nanoql's is the documented seed plus 1768237423 (LongstaffSchwartzCalibrationSeed
-Tests.cs); a Bermudan option prices on one step per date and every American exercise opens on the evaluation date,
-where nanoql's pricer, exercising only at the exercise times, is QuantLib's (LongstaffSchwartzExerciseTimesTests.cs);
-and every structure is on the risk-free curve's clock (McMismatchedTimesTests.cs). The exercise probability, an
-additional result the wheel doesn't expose, is the harness's (tools/vectors/gen/cxx/methods/montecarlo/
-longstaffschwartzpathpricer.py).
+The outputs nanoql fixes are left out: every case passes its calibration seed, since QuantLib's default is its narrowed
+null where nanoql's is the documented seed plus 1768237423 (LongstaffSchwartzCalibrationSeed Tests.cs); a Bermudan
+option prices on one step per date and every American exercise opens on the evaluation date, where nanoql's pricer,
+exercising only at the exercise times, is QuantLib's (LongstaffSchwartzExerciseTimesTests.cs); and every structure is on
+the risk-free curve's clock (McMismatchedTimesTests.cs). The exercise probability, an additional result the wheel
+doesn't expose, is the harness's (tools/vectors/gen/cxx/methods/montecarlo/longstaffschwartzpathpricer.py).
 
 An engine spec is {"traits", "timeSteps", "timeStepsPerYear", "antitheticVariate", "controlVariate",
 "requiredSamples", "requiredTolerance", "maxSamples", "seed", "polynomialOrder", "polynomialType" (LsmBasisSystem's

@@ -18,10 +18,9 @@ namespace NanoQL.Methods;
 /// discounting at half the rate.
 /// </summary>
 /// <remarks>
-/// A working type (the S-hes plan's HD8): <see cref="SetTime"/> rewrites the part's operator and its leverage slice in
-/// place through buffers it holds. The curves, the quanto helper's structures and the leverage function are read on
-/// the engine's clock (<see cref="FdmHestonOp.Clock"/>), each on its own, QuantLib's reads where they share its times
-/// (HR7 (ii)).
+/// A working type: <see cref="SetTime"/> rewrites the part's operator and its leverage slice in place through buffers
+/// it holds. The curves, the quanto helper's structures and the leverage function are read on the engine's clock (<see
+/// cref="FdmHestonOp.Clock"/>), each on its own, QuantLib's reads where they share its times.
 /// </remarks>
 [WorkingType]
 internal sealed class FdmHestonEquityPart

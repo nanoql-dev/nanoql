@@ -17,7 +17,7 @@ namespace NanoQL.Instruments;
 /// A swaption has no payoff, and its results are an engine's <see cref="InstrumentResults"/>. The settlement type and
 /// method are checked against each other when the swaption is priced, as QuantLib's arguments check them.
 /// <see cref="CalibrationBasket"/> takes the basket-generating engine, which QuantLib's instrument holds and nanoql's
-/// doesn't (the S-g1d plan's G1D5).
+/// doesn't.
 /// </remarks>
 public sealed class NonstandardSwaption : Option
 {

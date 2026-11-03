@@ -13,7 +13,7 @@ namespace NanoQL.Experimental;
 /// <summary>A pool of issuers by name, each with the default key it enters with and a time.</summary>
 /// <remarks>
 /// <para>
-/// Immutable: QuantLib's <c>add</c>, <c>clear</c> and <c>setTime</c> return new pools (PR6.4b).
+/// Immutable: QuantLib's <c>add</c>, <c>clear</c> and <c>setTime</c> return new pools.
 /// </para>
 /// <para>
 /// <see cref="DefaultKeys"/> lists each name's key in the pool's order, the order of <see cref="Names"/>, which every
@@ -21,8 +21,8 @@ namespace NanoQL.Experimental;
 /// (<c>pool.cpp:77-82</c>), so a pool not added in name order reads each name's probability on another name's key: names
 /// C and A entering with keys KA and KB read C's probability on KB's curve. And QuantLib's <c>clear</c> keeps the
 /// cleared names' keys (<c>pool.cpp:34-38</c>), which a name added later then reads; <see cref="Clear"/> returns an
-/// empty pool. A documented divergence (the S-xcr plan's XR8 (i); <c>Divergences/PoolKeyOrderTests.cs</c>); on a pool
-/// added in name order, QuantLib's.
+/// empty pool. A documented divergence (<c>Divergences/PoolKeyOrderTests.cs</c>); on a pool added in name order,
+/// QuantLib's.
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]

@@ -6,7 +6,7 @@ using Microsoft.Office.Interop.Excel;
 
 namespace NanoQL.Excel.XlTests;
 
-/// <summary>Multi-threaded recalculation (XLP9, XLP55): 2,000 curves built at once on Excel's threads, all distinct, all priced.</summary>
+/// <summary>Multi-threaded recalculation: 2,000 curves built at once on Excel's threads, all distinct, all priced.</summary>
 [ExcelTestSettings(OutOfProcess = true)]
 public class ThreadTests : RunnerTest
 {

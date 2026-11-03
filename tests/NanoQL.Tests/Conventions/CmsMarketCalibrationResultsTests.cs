@@ -11,8 +11,8 @@ using NanoQL.Tests.Vectors;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// <see cref="CmsMarketCalibration"/>'s results (the S-cms plan's CMR3 (iii)): QuantLib's <c>compute</c> recalibrates
-/// the cube it was given and reprices its market in place, leaving its outputs in public members; nanoql's returns a
+/// <see cref="CmsMarketCalibration"/>'s results: QuantLib's <c>compute</c> recalibrates the cube it was given and
+/// reprices its market in place, leaving its outputs in public members; nanoql's returns a
 /// <see cref="CmsMarketCalibrationResults{TResult}"/> holding the recalibrated cube, its dense parameters where it has
 /// them, and the market repriced on it, and the calibration's cube and market stand.
 /// </summary>

@@ -5,10 +5,9 @@
 rules (at QuantLib's integration accuracy of 1e-4 and at 1e-6), constant and linear levels, speeds from 0.5 to 7; each
 process's expectation and standard deviation over steps, and its evolution on draws.
 
-The outputs nanoql fixes are left out (the S-xeq plan's §2.8): every trapezoidal step has a·dt of 1e-2 or more, where
-nanoql's rule is QuantLib's quotient (below it a series, XER5 (xxix)); every Gauss-Lobatto step ends at a(t0 + dt) of
-30 or less, where nanoql integrates QuantLib's integrand (past it the bounded one, (xxx)). Nothing is fitted, so no
-output is filtered.
+The outputs nanoql fixes are left out: every trapezoidal step has a·dt of 1e-2 or more, where nanoql's rule is
+QuantLib's quotient (below it a series); every Gauss-Lobatto step ends at a(t0 + dt) of 30 or less, where nanoql
+integrates QuantLib's integrand (past it the bounded one). Nothing is fitted, so no output is filtered.
 
 The processes are tools/cxx/src/experimental/processes/extouspec.hpp's specs; the harness's method is
 tools/cxx/src/experimental/processes/extendedornsteinuhlenbeckprocess.cpp's. Read back by

@@ -9,7 +9,7 @@ namespace NanoQL.Bind.Tests;
 /// <summary>
 /// The C++ back end: QuantLib's camelCase, the overload rule (no two forms of a class share a C++ signature, and none
 /// takes a call another takes exactly, §2.2), no implicit conversion through a constructor, a user's header of its own,
-/// and the dispatch reaching what C's does (BIR14).
+/// and the dispatch reaching what C's does.
 /// </summary>
 public class CppTests
 {
@@ -97,7 +97,7 @@ public class CppTests
         Assert.Contains("namespace fx {", fx, StringComparison.Ordinal);
         Assert.Contains("class UserCalibratedCurve : public virtual ::nanoql::YieldTermStructure, public virtual ::nanoql::ICalibratedModel {", fx, StringComparison.Ordinal);
 
-        // A user's class named like one of nanoql's (B2-1): nanoql's named with its namespace in the user's header.
+        // A user's class named like one of nanoql's: nanoql's named with its namespace in the user's header.
         Assert.Contains("class Calendar : public virtual Object {", fx, StringComparison.Ordinal);
         Assert.Contains("    static bool holds(const ::nanoql::Calendar& calendar, Date d);", fx, StringComparison.Ordinal);
         Assert.Contains("    std::string name() const;", fx, StringComparison.Ordinal);

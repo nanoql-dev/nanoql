@@ -18,7 +18,7 @@ namespace NanoQL.Coupons;
 /// having a maximum at the strike.
 /// </para>
 /// <para>
-/// Stateless (PR6.9): each member takes the coupon and the context, and computes inside the call what QuantLib's
+/// Stateless: each member takes the coupon and the context, and computes inside the call what QuantLib's
 /// <c>initialize</c> stores. An extension point.
 /// </para>
 /// </remarks>

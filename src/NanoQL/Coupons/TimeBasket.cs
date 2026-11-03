@@ -13,9 +13,9 @@ namespace NanoQL.Coupons;
 
 /// <summary>A distribution of values over dates: a map from each date to its value, in date order.</summary>
 /// <remarks>
-/// Immutable (the S-cms plan's CMD10): QuantLib's map is changed in place by its <c>operator[]</c>, <c>+=</c> and
-/// <c>-=</c>; here the indexer reads, a date the basket doesn't hold reading 0 as QuantLib's inserted entry does, and
-/// <see cref="op_Addition"/>, <see cref="op_Subtraction"/> and <see cref="Rebin"/> return new baskets.
+/// Immutable: QuantLib's map is changed in place by its <c>operator[]</c>, <c>+=</c> and <c>-=</c>; here the indexer
+/// reads, a date the basket doesn't hold reading 0 as QuantLib's inserted entry does, and <see cref="op_Addition"/>,
+/// <see cref="op_Subtraction"/> and <see cref="Rebin"/> return new baskets.
 /// </remarks>
 public sealed class TimeBasket : IReadOnlyCollection<KeyValuePair<Date, double>>
 {

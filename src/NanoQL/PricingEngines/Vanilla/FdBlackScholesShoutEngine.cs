@@ -23,13 +23,13 @@ namespace NanoQL.PricingEngines;
 /// <para>
 /// The engine reports the value, delta, gamma and theta; the theta is <see langword="null"/> when the problem's first
 /// stopping time is time 0, as QuantLib's is. Its finite-difference working types are built inside each calculation and
-/// dropped after it (the S-eq plan's SEQR1).
+/// dropped after it.
 /// </para>
 /// <para>
 /// Its times run on <see cref="FdmBlackScholesOp.Clock"/>, from the earliest reference date of the structures it reads,
 /// each accruing nothing before its own date; where no structure is dated before the risk-free curve, they are
 /// QuantLib's. The residual option after a shout is struck at the spot, where QuantLib strikes it at the escrowed level
-/// (<see cref="FdmShoutLogInnerValueCalculator"/>'s remarks; the S-van plan's VR4 (xxx)).
+/// (<see cref="FdmShoutLogInnerValueCalculator"/>'s remarks).
 /// </para>
 /// <para>
 /// QuantLib's two constructors are one method here: the dividends are an optional argument.

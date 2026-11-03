@@ -15,9 +15,8 @@ namespace NanoQL.Methods;
 /// worth more, or wherever the rights still to use need every remaining exercise.
 /// </summary>
 /// <remarks>
-/// A working type (the S-van plan's VD11): applied in place through a scratch buffer it holds, QuantLib's copy of the
-/// values, so an application allocates nothing (VD12). The exercise times are found by equality, as QuantLib's
-/// <c>std::find</c>.
+/// A working type: applied in place through a scratch buffer it holds, QuantLib's copy of the values, so an application
+/// allocates nothing. The exercise times are found by equality, as QuantLib's <c>std::find</c>.
 /// </remarks>
 [WorkingType]
 public sealed class FdmSimpleSwingCondition : StepCondition

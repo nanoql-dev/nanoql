@@ -15,19 +15,18 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The CVA engine's swaptionlets (C3's review, C3-O2, ruled by the user on 2026-10-24, (a)): QuantLib strikes every
-/// swaptionlet and its reverse at the swap's risk-free fair rate, <c>-baseSwapRate * legNPV[1] / legNPV[0]</c>
-/// (<c>cvaswapengine.cpp:147</c>, <c>:170</c>, <c>:179</c>), which the fixed rate cancels out of, so its adjustment is
-/// the same whatever the swap's rate. On the harness, on the vectors' 5-year payer from 17 January 2025 on 1e7 (Black
-/// 15%, a flat 2% hazard rate, 40% recovery, no investor curve), QuantLib's adjustment is -2,625.223121590 at 1%, at
-/// the fair rate 0.03147227737464738 and at 5%, where the swap is worth 990,581.19 and -854,739.96, and the
-/// receiver's -2,617.287664647 at each. nanoql strikes them at the swap's fixed rate, the contract's own exposure: its
-/// adjustment is QuantLib's at the fair rate (the harness's vectors, each swap at its fair rate), and follows the
-/// exposure off par: -21,968.948298009 at 1% and -75.016505939 at 5%. The independent check off par is the swaptions'
-/// parity: each period's payer and receiver swaptions differ by the forward swap at their strike, so a payer swap's
-/// adjustment less the receiver's at one rate is minus the forward swaps at that rate weighted by the parties' losses
-/// given default over the periods, at every volatility. The fair rate keeps QuantLib's (C3's review, C3R2-O1), its
-/// first-order root of the adjusted NPV on swaptionlets struck at the risk-free fair rate: QuantLib's
+/// The CVA engine's swaptionlets: QuantLib strikes every swaptionlet and its reverse at the swap's risk-free fair rate,
+/// <c>-baseSwapRate * legNPV[1] / legNPV[0]</c> (<c>cvaswapengine.cpp:147</c>, <c>:170</c>, <c>:179</c>), which the
+/// fixed rate cancels out of, so its adjustment is the same whatever the swap's rate. On the harness, on the vectors'
+/// 5-year payer from 17 January 2025 on 1e7 (Black 15%, a flat 2% hazard rate, 40% recovery, no investor curve),
+/// QuantLib's adjustment is -2,625.223121590 at 1%, at the fair rate 0.03147227737464738 and at 5%, where the swap is
+/// worth 990,581.19 and -854,739.96, and the receiver's -2,617.287664647 at each. nanoql strikes them at the swap's
+/// fixed rate, the contract's own exposure: its adjustment is QuantLib's at the fair rate (the harness's vectors, each
+/// swap at its fair rate), and follows the exposure off par: -21,968.948298009 at 1% and -75.016505939 at 5%. The
+/// independent check off par is the swaptions' parity: each period's payer and receiver swaptions differ by the forward
+/// swap at their strike, so a payer swap's adjustment less the receiver's at one rate is minus the forward swaps at
+/// that rate weighted by the parties' losses given default over the periods, at every volatility. The fair rate keeps
+/// QuantLib's, its first-order root of the adjusted NPV on swaptionlets struck at the risk-free fair rate: QuantLib's
 /// 0.031415371873538545 at 1%, 0.03141537187353853 at the fair rate and 0.03141537187353854 at 5%, nanoql's to the bit,
 /// the adjusted NPV at it -26.87; on the contract's strikes it would be 0.030996068704439883 at 1%, the adjusted NPV at
 /// it 19,112.14, and 0.03147065128358219 at 5%.

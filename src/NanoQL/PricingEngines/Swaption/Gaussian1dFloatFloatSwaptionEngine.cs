@@ -29,14 +29,14 @@ namespace NanoQL.PricingEngines;
 /// <c>includeTodaysExercise</c>; the probabilities, another, are QuantLib's.
 /// </para>
 /// <para>
-/// Immutable, a <see cref="BasketGeneratingEngine"/> (the S-g1d plan's G1D5): <see cref="Calculate(FloatFloatSwaption,
-/// EvaluationContext)"/> prices with the engine's model and parameters, and the static <c>Calculate</c> builds the
-/// engine for one call. Four of QuantLib's defects are fixed. A rebate is valued in the state, on the discount curve,
-/// as the nonstandard engine values it, where QuantLib's reads the model curve's bond at the mean state (G1R6 (v)); the
-/// model reads a discount curve on another clock by date at every instant QuantLib derives from a date (an event's
-/// numeraire, the Digital probabilities' discount; (xvi)); flat payoff extrapolation's right tail reads the last node
-/// ((xxi)); and the calibration basket's initial guess refuses an expiry with no leg 1 coupon left or with leg 1's
-/// remaining nominals summing to zero, as QuantLib's master does (#2845, G1R5 (iv)).
+/// Immutable, a <see cref="BasketGeneratingEngine"/>: <see cref="Calculate(FloatFloatSwaption, EvaluationContext)"/>
+/// prices with the engine's model and parameters, and the static <c>Calculate</c> builds the engine for one call. Four
+/// of QuantLib's defects are fixed. A rebate is valued in the state, on the discount curve, as the nonstandard engine
+/// values it, where QuantLib's reads the model curve's bond at the mean state; the model reads a discount curve on
+/// another clock by date at every instant QuantLib derives from a date (an event's numeraire, the Digital
+/// probabilities' discount); flat payoff extrapolation's right tail reads the last node; and the calibration basket's
+/// initial guess refuses an expiry with no leg 1 coupon left or with leg 1's remaining nominals summing to zero, as
+/// QuantLib's master does (#2845).
 /// </para>
 /// </remarks>
 public sealed class Gaussian1dFloatFloatSwaptionEngine : BasketGeneratingEngine
@@ -309,7 +309,7 @@ public sealed class Gaussian1dFloatFloatSwaptionEngine : BasketGeneratingEngine
                     CubicInterpolation payoff1 = Gaussian1dSwaptionEngine.Spline(z, p);
                     CubicInterpolation payoff1a = Gaussian1dSwaptionEngine.Spline(z, pa);
 
-                    // the right tail at the last node's value (G1R6 (xxi))
+                    // the right tail at the last node's value
                     price = Gaussian1dSwaptionEngine.Rollback(z, p, payoff1, ExtrapolatePayoff, FlatPayoffExtrapolation, type, zSpreadDf);
                     pricea = Gaussian1dSwaptionEngine.Rollback(z, pa, payoff1a, ExtrapolatePayoff, FlatPayoffExtrapolation, type, zSpreadDf);
                 }
@@ -348,7 +348,7 @@ public sealed class Gaussian1dFloatFloatSwaptionEngine : BasketGeneratingEngine
                 {
                     double zk = event0 > expiry ? z[k] : y;
 
-                    // the numeraire read at the event's date (G1R6 (xvi))
+                    // the numeraire read at the event's date
                     if (isLeg1Fixing)
                     {
                         // if event is a fixing date and exercise date,
@@ -376,7 +376,7 @@ public sealed class Gaussian1dFloatFloatSwaptionEngine : BasketGeneratingEngine
                         }
 
                         // the rebate in the state, on the discount curve, where QuantLib's reads the model curve's
-                        // bond at y = 0 (G1R6 (v))
+                        // bond at y = 0
                         double exerciseValue = ((type == OptionType.Call ? 1.0 : -1.0) * npv0a[k])
                             + (rebate * model.Zerobond(rebateDate, event0, zk, discountCurve, memo) * zSpreadDf
                                 / model.NumeraireCore(event0Time, event0, zk, discountCurve, memo));

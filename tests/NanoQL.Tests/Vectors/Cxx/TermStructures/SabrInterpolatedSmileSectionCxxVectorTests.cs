@@ -10,9 +10,10 @@ namespace NanoQL.Tests.Vectors;
 /// <summary>
 /// The C++ harness's SABR-interpolated smile section vectors,
 /// <c>tests/vectors/cxx/termstructures/volatility/sabrinterpolatedsmilesection.json</c>: seven fits of
-/// <see cref="SabrInterpolatedSmileSection"/> by both of QuantLib's constructors, free and fixed parameters, unweighted,
-/// floating strikes, a missing quote and a shift, their fitted parameters, errors and end criteria where stable (the S7
-/// plan's S7R6), the strike range, level and exercise time, and the volatility and variance at stable strikes.
+/// <see cref="SabrInterpolatedSmileSection"/> by both of QuantLib's constructors, free and fixed parameters,
+/// unweighted, floating strikes, a missing quote and a shift, their fitted parameters, errors and end criteria where
+/// stable under one-ulp moves of the inputs, the strike range, level and exercise time, and the volatility and variance
+/// at stable strikes.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class SabrInterpolatedSmileSectionCxxVectorTests

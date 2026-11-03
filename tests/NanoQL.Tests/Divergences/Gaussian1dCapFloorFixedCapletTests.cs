@@ -14,12 +14,12 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// A caplet fixed before today on the Gaussian1d cap/floor engine (the S-g1d plan's G1R6 (iv)): QuantLib's engine
-/// values its known payoff undiscounted (<c>gaussian1dcapfloorengine.cpp:63-66</c>, <c>:138-141</c>). On the wheel, a
-/// caplet at 2.5% on 1,000,000 of Euribor 6M fixed at 3.15% on 16 December 2024, paid on 18 June 2025 (accrual
-/// 182/360), seen from 15 January 2025, is worth 3286.1111111111104 on a GSR model on a flat 3% curve, where Black's
-/// engine gives 3244.7791791813, the payoff discounted to the payment. nanoql discounts it. QuantLib's check: Black's
-/// engine's value of the known payoff.
+/// A caplet fixed before today on the Gaussian1d cap/floor engine: QuantLib's engine values its known payoff
+/// undiscounted (<c>gaussian1dcapfloorengine.cpp:63-66</c>, <c>:138-141</c>). On the wheel, a caplet at 2.5% on
+/// 1,000,000 of Euribor 6M fixed at 3.15% on 16 December 2024, paid on 18 June 2025 (accrual 182/360), seen from 15
+/// January 2025, is worth 3286.1111111111104 on a GSR model on a flat 3% curve, where Black's engine gives
+/// 3244.7791791813, the payoff discounted to the payment. nanoql discounts it. QuantLib's check: Black's engine's value
+/// of the known payoff.
 /// </summary>
 public class Gaussian1dCapFloorFixedCapletTests
 {

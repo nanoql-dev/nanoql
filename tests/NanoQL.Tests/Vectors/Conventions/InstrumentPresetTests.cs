@@ -18,7 +18,7 @@ namespace NanoQL.Tests.Vectors;
 /// swap builder's by currency at tenors and dates either side of GBP's and AUD's thresholds, the OIS builder's on every
 /// overnight preset with its settlement days; a bond convention's bonds what QuantLib's constructor builds with its
 /// defaults; and <see cref="BTP"/> built in the set its coded class. Each default record gives every option its builder
-/// fixes, the ones it derives listed apart (CVD40).
+/// fixes, the ones it derives listed apart.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class InstrumentPresetTests
@@ -28,7 +28,7 @@ public class InstrumentPresetTests
     private static readonly FlatForward Curve = new(new Date(15, Month.October, 2026), 0.03, new Actual365Fixed());
 
     // Each default record's kind, and the options of its kind its builder derives or doesn't fix, with the builder line
-    // each comes from (CVD40).
+    // each comes from.
     private static readonly Dictionary<string, (Type Kind, string[] Derived)> Defaults = new(StringComparer.Ordinal)
     {
         // makevanillaswap.cpp:51-70, the index's calendar, tenor, conventions and day counter; :85, the index's value

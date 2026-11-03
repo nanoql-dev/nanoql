@@ -16,16 +16,15 @@ namespace NanoQL.Processes;
 /// <remarks>
 /// <para>
 /// <see cref="Variance"/> is the conditional variance the scheme's own step reads, x₀σ²e^(−kΔt)(1 − e^(−kΔt))/k
-/// + θσ²(1 − e^(−kΔt))²/(2k), at the state given, and <see cref="Diffusion"/> is σ√x, the header's SDE (the S-sr plan's
-/// SSR7, K2): a divergence, QuantLib's variance reading the process's initial value for the state and θσ²/k for its
-/// level term, and its diffusion σ (<c>coxingersollrossprocess.cpp:32-38</c>, <c>.hpp:90-92</c>;
+/// + θσ²(1 − e^(−kΔt))²/(2k), at the state given, and <see cref="Diffusion"/> is σ√x, the header's SDE (K2): a
+/// divergence, QuantLib's variance reading the process's initial value for the state and θσ²/k for its level term, and
+/// its diffusion σ (<c>coxingersollrossprocess.cpp:32-38</c>, <c>.hpp:90-92</c>;
 /// <c>Divergences/CirProcessMomentsTests.cs</c>).
 /// </para>
 /// <para>
 /// The step's (1 − e^(−kΔt))/k is written as Δt·(1 − e^(−x))/x, x = kΔt, the cancellation-free form of QuantLib's
 /// master's mean-reversion kernels, exact in the limit k → 0, so the step's last bits differ from QuantLib's at every
-/// speed (R8's fix of QuantLib's cancellation at small speed, the user's ruling of 2026-10-22 on the
-/// Ornstein-Uhlenbeck variance's form).
+/// speed (a fix of QuantLib's cancellation at small speed).
 /// </para>
 /// </remarks>
 public sealed class CoxIngersollRossProcess : StochasticProcess1D

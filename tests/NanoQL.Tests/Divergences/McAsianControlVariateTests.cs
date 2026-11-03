@@ -11,17 +11,16 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The arithmetic Monte Carlo engine's geometric control variate (the S-bar plan's BR5 (xxvii), (xli), fixed under R8).
-/// QuantLib's control path pricer discounts at the last fixing's time (<c>mc_discr_arith_av_price.hpp:175-178</c>)
-/// where its analytic control engine discounts at the exercise date, so the controlled price is biased when the exercise
-/// follows the last fixing: on spot 100, r 8%, q 0, σ 25% (Act/365 Fixed), a call at 100 on twelve fixings every 30
-/// days prices 7.70961 controlled for 7.86180 ± 0.024 uncontrolled with the exercise 90 days after the last fixing, and
-/// 6.810 for 7.402 at 365 days (200,000 samples, seed 42, the planner's BP18). And the control's running product
-/// underflows at small spots while its analytic value doesn't: at spot 0.01 with 252 daily fixings the controlled price
-/// is +99% to +103% off the uncontrolled one (BP35). nanoql discounts the control path at the exercise date and
-/// flushes the product into the average where the next factor would underflow it. Checks: the engine without the
-/// control within the two estimates' errors, on QuantLib's own pricers and analytic geometric engine; and the
-/// controlled price at spot 0.01 against the same contract at spot 100, scaled.
+/// The arithmetic Monte Carlo engine's geometric control variate (fixed). QuantLib's control path pricer discounts at
+/// the last fixing's time (<c>mc_discr_arith_av_price.hpp:175-178</c>) where its analytic control engine discounts at
+/// the exercise date, so the controlled price is biased when the exercise follows the last fixing: on spot 100, r 8%, q
+/// 0, σ 25% (Act/365 Fixed), a call at 100 on twelve fixings every 30 days prices 7.70961 controlled for 7.86180 ±
+/// 0.024 uncontrolled with the exercise 90 days after the last fixing, and 6.810 for 7.402 at 365 days (200,000
+/// samples, seed 42). And the control's running product underflows at small spots while its analytic value doesn't: at
+/// spot 0.01 with 252 daily fixings the controlled price is +99% to +103% off the uncontrolled one. nanoql discounts
+/// the control path at the exercise date and flushes the product into the average where the next factor would underflow
+/// it. Checks: the engine without the control within the two estimates' errors, on QuantLib's own pricers and analytic
+/// geometric engine; and the controlled price at spot 0.01 against the same contract at spot 100, scaled.
 /// </summary>
 public class McAsianControlVariateTests
 {

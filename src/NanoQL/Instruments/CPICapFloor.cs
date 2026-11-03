@@ -20,8 +20,7 @@ namespace NanoQL.Instruments;
 /// A CPI cap or floor is an option, not a cap or floor on a coupon: like a zero-coupon inflation swap it has a single
 /// flow, cumulative from the base date to the option's maturity. Inflation is published on every day, holidays and
 /// weekends included, so whether the fixing date is adjusted is the fixing convention's choice. Its engine,
-/// <see cref="Experimental.InterpolatingCPICapFloorEngine"/>, reads QuantLib's arguments through an internal builder
-/// (the S-cms plan's CMD16).
+/// <see cref="Experimental.InterpolatingCPICapFloorEngine"/>, reads QuantLib's arguments through an internal builder.
 /// </para>
 /// <para>
 /// It expires after its unadjusted maturity, an option's expiry, as QuantLib's.

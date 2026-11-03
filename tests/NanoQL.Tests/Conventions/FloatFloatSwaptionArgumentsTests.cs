@@ -11,16 +11,16 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The float-float swap's arguments (the S-g1d plan's G1D6): a redemption flow takes the fixing date of its leg's
-/// coupon paid on the same date (<c>floatfloatswap.cpp:391-525</c>), so it belongs to the exercise right exactly when
-/// that coupon does, the engine's right holding the coupons fixing on or after the exercise
-/// (<c>gaussian1dfloatfloatswaptionengine.cpp:128-133</c>). On the wheel, a 5-year amortizing swap from 19 January 2026
-/// (Euribor 1Y + 0.5%, yearly on 1,000,000 to 200,000, 30/360, against Euribor 6M on the same nominals) with capital
-/// exchanges, on a GSR model (a = 0.03, σ = 0.008) on a flat 3% curve with a 2.8% discount curve: a payer exercised on
-/// 19 April 2027 holds the second leg's redemption on 19 January 2028, whose coupon fixes on 15 July 2027, but not the
-/// first leg's, whose coupon fixed on 15 January 2027: 190231.52904994308, where the swap without the exchanges gives
-/// 6566.591892282355; a receiver exercised on 15 January 2027, both coupons' fixing, holds both, which cancel:
-/// 8184.371881337382 with the exchanges, 8184.368110793747 without.
+/// The float-float swap's arguments: a redemption flow takes the fixing date of its leg's coupon paid on the same date
+/// (<c>floatfloatswap.cpp:391-525</c>), so it belongs to the exercise right exactly when that coupon does, the engine's
+/// right holding the coupons fixing on or after the exercise (<c>gaussian1dfloatfloatswaptionengine.cpp:128-133</c>).
+/// On the wheel, a 5-year amortizing swap from 19 January 2026 (Euribor 1Y + 0.5%, yearly on 1,000,000 to 200,000,
+/// 30/360, against Euribor 6M on the same nominals) with capital exchanges, on a GSR model (a = 0.03, σ = 0.008) on a
+/// flat 3% curve with a 2.8% discount curve: a payer exercised on 19 April 2027 holds the second leg's redemption on 19
+/// January 2028, whose coupon fixes on 15 July 2027, but not the first leg's, whose coupon fixed on 15 January 2027:
+/// 190231.52904994308, where the swap without the exchanges gives 6566.591892282355; a receiver exercised on 15 January
+/// 2027, both coupons' fixing, holds both, which cancel: 8184.371881337382 with the exchanges, 8184.368110793747
+/// without.
 /// </summary>
 public class FloatFloatSwaptionArgumentsTests
 {

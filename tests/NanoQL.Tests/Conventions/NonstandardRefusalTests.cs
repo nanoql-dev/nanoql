@@ -15,9 +15,8 @@ namespace NanoQL.Tests.Conventions;
 
 /// <summary>
 /// The refusals of the rebated exercise, the nonstandard swap and swaption, the nonstandard engine, its calibration
-/// basket and the Gaussian1d cap/floor engine, by type, message and parameter (playbook §2; the S-g1d plan's G1D17):
-/// QuantLib's texts, a check of an argument an <see cref="ArgumentException"/> naming it, a check of a value already
-/// stored a
+/// basket and the Gaussian1d cap/floor engine, by type, message and parameter (playbook §2): QuantLib's texts, a check
+/// of an argument an <see cref="ArgumentException"/> naming it, a check of a value already stored a
 /// <see cref="NanoQLException"/>.
 /// </summary>
 public class NonstandardRefusalTests

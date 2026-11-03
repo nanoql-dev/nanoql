@@ -20,18 +20,17 @@ namespace NanoQL.PricingEngines;
 /// <remarks>
 /// <para>
 /// The value and, where the generator allows one, its error estimate, with the grid as the additional result
-/// <c>"TimeGrid"</c>, as QuantLib's (the S-bar plan's BR1 (iii)): a static class over a private simulation deriving
+/// <c>"TimeGrid"</c>, as QuantLib's: a static class over a private simulation deriving
 /// <see cref="MCDiscreteAveragingAsianEngineBase{TMc, TPath, TStats}"/> on multi-variate paths, the grid the fixing
-/// times with the steps or steps per year given, the seed explicit (S2R4). The process is <see cref="HestonProcess"/>
-/// or a process deriving it, QuantLib's template parameter <c>P</c>. The control is the unseasoned geometric average on
-/// the fixings to come, its analytic value the engine's on the same contract, as QuantLib's.
+/// times with the steps or steps per year given, the seed explicit. The process is <see cref="HestonProcess"/> or a
+/// process deriving it, QuantLib's template parameter <c>P</c>. The control is the unseasoned geometric average on the
+/// fixings to come, its analytic value the engine's on the same contract, as QuantLib's.
 /// </para>
 /// <para>
-/// Documented divergences (BR5). The paths and the discount run on the engine's clock, <see cref="FdmHestonOp.Clock"/>,
-/// from the earliest reference date of the structures, where QuantLib's run on the risk-free curve's (BR1 (v),
-/// <c>Divergences/AsianMismatchedTimesTests.cs</c>); a fixing date given twice counts twice in both averages ((xxviii),
-/// <c>Divergences/AsianDuplicateFixingsTests.cs</c>); the control's analytic value is the corrected engine's ((xxxiv),
-/// (xlix), (l)).
+/// Documented divergences. The paths and the discount run on the engine's clock, <see cref="FdmHestonOp.Clock"/>, from
+/// the earliest reference date of the structures, where QuantLib's run on the risk-free curve's
+/// (<c>Divergences/AsianMismatchedTimesTests.cs</c>); a fixing date given twice counts twice in both averages
+/// (<c>Divergences/AsianDuplicateFixingsTests.cs</c>); the control's analytic value is the corrected engine's.
 /// </para>
 /// </remarks>
 public static class MCDiscreteArithmeticAPHestonEngine

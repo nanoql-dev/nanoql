@@ -7,8 +7,8 @@ FlatVol or AbcdVol models on the same initial rates and evolution, at each rate'
 Models on six semi-annual rates and on five irregular ones, evolved on their rate times, at one, three and full factors;
 and two models whose initial rates differ, and two whose evolution times differ (refused).
 
-Left out (nanoql divides by the rate's reset time and checks the index against the rates, the S-mmp plan's MMPR4
-(xiii) and (xiv); tests/NanoQL.Tests/Divergences/MarketModelDifferencesTests.cs): evolution times off the rate times.
+Left out (nanoql divides by the rate's reset time and checks the index against the rates;
+tests/NanoQL.Tests/Divergences/MarketModelDifferencesTests.cs): evolution times off the rate times.
 
 The harness unit is tools/cxx/src/models/marketmodels/marketmodeldifferences.cpp. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Models/MarketModels/MarketModelDifferencesCxxVectorTests.cs."""

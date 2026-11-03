@@ -14,12 +14,11 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The Monte Carlo lookback engine's loop allocates nothing per sample after its first batch (the S-van plan's VD12,
-/// the S-bar plan's BR1 (ii)): its four pricers' draw-price-add, the fixed-strike pricer from the second node with the
-/// observed extremum folded in and from a window's node with none, the floating-strike pricer to the last node and to a
-/// window's at λ 1.2, calls and puts, plain and antithetic. Each batch goes into an
-/// <see cref="IncrementalStatistics"/>, which keeps no sample. The pricers are private to the engine, so they are built
-/// through reflection.
+/// The Monte Carlo lookback engine's loop allocates nothing per sample after its first batch: its four pricers'
+/// draw-price-add, the fixed-strike pricer from the second node with the observed extremum folded in and from a
+/// window's node with none, the floating-strike pricer to the last node and to a window's at λ 1.2, calls and puts,
+/// plain and antithetic. Each batch goes into an <see cref="IncrementalStatistics"/>, which keeps no sample. The
+/// pricers are private to the engine, so they are built through reflection.
 /// </summary>
 public class McLookbackAllocationTests
 {

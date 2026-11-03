@@ -10,11 +10,10 @@ by the C++ harness.
   the ISDA engine accepts as it accepts QuantLib's own cast: the curve's dates, times and data, and its survival
   probability and hazard rate at 20 dates; the ISDA-model helpers on linear densities, refused by the ISDA engine.
 
-The data and the values are solved, so the stability filter of the S-infl plan's SID20 (the S7 plan's S7R6) runs on
-them, as in the wheel's piecewisedefaultcurve file; a dropped output is written null and its index listed in the
-case's inputs "dropped". A case's inputs hold its settings, the traits, the interpolator, the helper specs, the
-curve's reference date and day counter and the sample dates, as tools/cxx/src/termstructures/credit/
-piecewisedefaultcurve.cpp reads them. Read back by
+The data and the values are solved, so the stability filter runs on them, as in the wheel's piecewisedefaultcurve
+file; a dropped output is written null and its index listed in the case's inputs "dropped". A case's inputs hold its
+settings, the traits, the interpolator, the helper specs, the curve's reference date and day counter and the sample
+dates, as tools/cxx/src/termstructures/credit/piecewisedefaultcurve.cpp reads them. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/TermStructures/PiecewiseDefaultCurveCxxVectorTests.cs."""
 import importlib.util
 import os

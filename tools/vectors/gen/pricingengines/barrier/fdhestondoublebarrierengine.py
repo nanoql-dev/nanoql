@@ -10,11 +10,11 @@ strike-0 cash-or-nothing call (cash 10) expiring in a year, on a 40 x 50 x 25 gr
 default grid, damping steps, the Douglas scheme, a constant leverage function, a mixing factor of 0.8 and an expired
 option; and the refusal of the KIKO type.
 
-The outputs nanoql fixes are left out (the S-bar plan's §2.10): every structure is on the risk-free curve's day counter
-and reference date (BR5 (iv), tests/NanoQL.Tests/Divergences/FdHestonBarrierMismatchedTimesTests.cs); the double
-knock-ins QuantLib refuses aren't written (BR8 (b), FdHestonDoubleKnockInTests.cs); no spot is on or beyond a barrier
-(BR5 (xliv), tests/NanoQL.Tests/Conventions/FdHestonBarrierTouchedTests.cs); and the parameter sets are
-tools/vectors/gen/pricingengines/vanilla/fdhestonvanillaengine.py's, clear of the S-hes plan's HR8 and HR9.
+The outputs nanoql fixes are left out: every structure is on the risk-free curve's day counter and reference date
+(tests/NanoQL.Tests/Divergences/FdHestonBarrierMismatchedTimesTests.cs); the double knock-ins QuantLib refuses aren't
+written (FdHestonDoubleKnockInTests.cs); no spot is on or beyond a barrier
+(tests/NanoQL.Tests/Conventions/FdHestonBarrierTouchedTests.cs); and the parameter sets are
+tools/vectors/gen/pricingengines/vanilla/fdhestonvanillaengine.py's, clear of the regions nanoql's Heston fixes reach.
 
 The specs are tools/vectors/gen/pricingengines/barrier/fdhestonbarrierengine.py's pricing, its barrier
 analyticdoublebarrierengine.py's double barrier. The wheel's calls, by QuantLib-SWIG 1.44's options.i:

@@ -7,12 +7,12 @@ using NanoQL.Tests.Harness;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The Ornstein-Uhlenbeck variance at small speed (the S-sr plan's SSR3 class, by the user's ruling of 2026-10-22):
-/// QuantLib's <c>variance</c> (<c>ornsteinuhlenbeckprocess.cpp:34-42</c>) is σ²Δt below |a| = √ε, dropping the terms of
-/// order aΔt, and above it σ²(1 − e^(−2aΔt))/(2a), whose 1 − e^(−2aΔt) cancels: 8.3e-8 relative at a = 1.5e-8 and
-/// Δt = 0.01, 1.4e-8 below the cut at a = 1.4e-8 and Δt = 1. nanoql's is σ²Δt·(1 − e^(−x))/x, x = 2aΔt, the
-/// cancellation-free form of QuantLib's master's kernels. QuantLib's check: its own closed form at ordinary speed and
-/// its own limit at a = 0; at small speed, the series σ²Δt(1 − aΔt + ⅔(aΔt)²), exact there to well below the tolerance.
+/// The Ornstein-Uhlenbeck variance at small speed: QuantLib's <c>variance</c>
+/// (<c>ornsteinuhlenbeckprocess.cpp:34-42</c>) is σ²Δt below |a| = √ε, dropping the terms of order aΔt, and above it
+/// σ²(1 − e^(−2aΔt))/(2a), whose 1 − e^(−2aΔt) cancels: 8.3e-8 relative at a = 1.5e-8 and Δt = 0.01, 1.4e-8 below the
+/// cut at a = 1.4e-8 and Δt = 1. nanoql's is σ²Δt·(1 − e^(−x))/x, x = 2aΔt, the cancellation-free form of QuantLib's
+/// master's kernels. QuantLib's check: its own closed form at ordinary speed and its own limit at a = 0; at small
+/// speed, the series σ²Δt(1 − aΔt + ⅔(aΔt)²), exact there to well below the tolerance.
 /// </summary>
 public class OrnsteinUhlenbeckVarianceTests
 {

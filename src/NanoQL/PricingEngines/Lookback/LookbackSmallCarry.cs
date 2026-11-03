@@ -6,20 +6,18 @@ using NanoQL.Numerics;
 namespace NanoQL.PricingEngines;
 
 /// <summary>
-/// The analytic lookback engines' small-carry class (the S-bar plan's BR5 (xxiii), the user's ruling (b) of
-/// 2026-10-26): as the carry b = r − q vanishes, each formula's terms over x = 2b/σ² cancel, QuantLib's double
-/// departing from the 50-digit value by more than 1e-12 of max(|value|, 1) up to u = |x|σ√T of about 5e-4, and the
-/// partial engines are NaN at b = 0.
+/// The analytic lookback engines' small-carry class: as the carry b = r − q vanishes, each formula's terms over x =
+/// 2b/σ² cancel, QuantLib's double departing from the 50-digit value by more than 1e-12 of max(|value|, 1) up to u =
+/// |x|σ√T of about 5e-4, and the partial engines are NaN at b = 0.
 /// </summary>
 /// <remarks>
 /// <para>
 /// The full engines evaluate QuantLib's expressions in double-double, over <see cref="DoubleDoubleNormal"/>, below
 /// <see cref="FullCut"/>, down to <see cref="FullFloor"/>, where double-double cancels past 1e-12 in its turn; below
-/// that, the cubic through the double-double values at the carries where u is the floor and twice it, either side of
-/// 0; and at b = 0 #2856's limit. The partial engines take, below <see cref="PartialCut"/>, the cubic through
-/// QuantLib's double values at the carries where u is the cut and twice it, either side of 0. Each cut is measured
-/// against 50-digit values of the formula (the run's probes <c>c2_smallcarry_refs.py</c> and
-/// <c>c2_smallcarry_cut.py</c>).
+/// that, the cubic through the double-double values at the carries where u is the floor and twice it, either side of 0;
+/// and at b = 0 #2856's limit. The partial engines take, below <see cref="PartialCut"/>, the cubic through QuantLib's
+/// double values at the carries where u is the cut and twice it, either side of 0. Each cut is measured against
+/// 50-digit values of the formula.
 /// </para>
 /// <para>
 /// A carry moves the dividend side alone: r and its discount as read, q = r − b and its discount the read one times

@@ -12,15 +12,15 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The constant-notional cross-currency swaps' fair spread and fixed rate on a leg whose BPS is zero (the S-rx plan's
-/// SRXR3 (xviii), fixed under R8). Both swaps test the leg's BPS against <c>Null</c> alone before dividing by it
+/// The constant-notional cross-currency swaps' fair spread and fixed rate on a leg whose BPS is zero (fixed). Both
+/// swaps test the leg's BPS against <c>Null</c> alone before dividing by it
 /// (<c>constnotionalcrosscurrencybasisswap.cpp:180-187</c>,
 /// <c>constnotionalcrosscurrencyfixedvsfloatingswap.cpp:157-163</c>), so a zero-notional leg's fair pay spread and fair
 /// rate are an infinity. nanoql gives null, the results' "not available", as QuantLib's sibling swaps do with their
-/// <c>legBPS != 0</c> checks (<c>fixedvsfloatingswap.cpp:201-207</c>,
-/// <c>floatfloatswap.cpp:560</c>, <c>:566</c>; <c>mtmcrosscurrencybasisswap.cpp:238-246</c>, which refuses); the other
-/// leg's keeps QuantLib's value. QuantLib's check: those siblings, and its <c>testZeroBpsFairSpread</c>, which asserts
-/// the float-float swap's "fair spread 1 not available" [executed on the wheel].
+/// <c>legBPS != 0</c> checks (<c>fixedvsfloatingswap.cpp:201-207</c>, <c>floatfloatswap.cpp:560</c>, <c>:566</c>;
+/// <c>mtmcrosscurrencybasisswap.cpp:238-246</c>, which refuses); the other leg's keeps QuantLib's value. QuantLib's
+/// check: those siblings, and its <c>testZeroBpsFairSpread</c>, which asserts the float-float swap's "fair spread 1 not
+/// available" (QuantLib-Python 1.44).
 /// </summary>
 public class CrossCurrencySwapZeroBpsTests
 {

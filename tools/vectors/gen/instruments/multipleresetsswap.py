@@ -10,9 +10,9 @@ starting or seasoned, with a spread, a payment convention, lag and calendar: the
 instruments/fixedvsfloatingswap.py writes them) with the full reset schedule's dates, the resets per coupon and the
 averaging method; each leg's payment dates, nominals, rates and amounts; and the engine's results (NPV, the per-leg NPV
 and BPS, the fair rate and the four leg accessors). The fair spread is recorded on the averaging legs only: on a
-compounding leg QuantLib's is linear in the leg's BPS, where the spread compounds, and misses par, the S-cms plan's CMR5
-(xv) (tests/NanoQL.Tests/Divergences/MultipleResetsFairSpreadTests.cs). NPVs are compared at the nominal and BPS at it
-times 1e-4.
+compounding leg QuantLib's is linear in the leg's BPS, where the spread compounds, and misses par
+(tests/NanoQL.Tests/Divergences/MultipleResetsFairSpreadTests.cs). NPVs are compared at the nominal and BPS at it times
+1e-4.
 
 A case's inputs hold its settings with the stored fixings, the discounting curve and "swap" ({"type", "nominal",
 "fixedSchedule", "fixedRate", "fixedDayCount", "fullResetSchedule", "index", "resetsPerCoupon", "spread", "averaging",

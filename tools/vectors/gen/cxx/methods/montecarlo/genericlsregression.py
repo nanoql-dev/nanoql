@@ -9,8 +9,8 @@ Rate grids: six semi-annual rates and five irregular ones; a receiver swap exerc
 into nothing and into a Bermudan payer, on a swap basis system and a swap-forward basis system; a payer swap exercised at
 every other rate time; Mersenne-twister and Sobol paths.
 
-Left out: node data with an invalid first path, from which QuantLib sizes the regression (the S-mmp plan's MMPR4
-(xix), tests/NanoQL.Tests/Divergences/GenericLSRegressionBasisSizeTests.cs); no product here ends before an exercise.
+Left out: node data with an invalid first path, from which QuantLib sizes the regression
+(tests/NanoQL.Tests/Divergences/GenericLSRegressionBasisSizeTests.cs); no product here ends before an exercise.
 
 The harness unit is tools/cxx/src/models/marketmodels/callability/callability.cpp (the callability generators'
 helpers). Read back by tests/NanoQL.Tests/Vectors/Cxx/Methods/MonteCarlo/GenericLSRegressionCxxVectorTests.cs."""

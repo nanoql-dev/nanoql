@@ -14,7 +14,7 @@ namespace NanoQL.Models;
 /// the instruments' one-percent bumps projected orthogonally to each other, an instrument too correlated with the
 /// others discarded.
 /// </summary>
-/// <remarks>Immutable (the S-mmp plan's MMPR1 (ii)): <see cref="GetVegaBumps"/> returns a new array.</remarks>
+/// <remarks>Immutable: <see cref="GetVegaBumps"/> returns a new array.</remarks>
 public sealed class OrthogonalizedBumpFinder
 {
     private readonly VolatilityBumpInstrumentJacobian derivativesProducer;

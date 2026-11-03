@@ -208,9 +208,9 @@ public class TelescopicValueDatesTests
     }
 
     /// <summary>
-    /// QuantLib's <c>ZeroCurve</c> (<c>InterpolatedZeroCurve&lt;Linear&gt;</c>) on Actual/365 (Fixed) with continuous zero
-    /// rates, as the plan's premises build it: the rates interpolated linearly in time from the first date, and the
-    /// discount factor exp(-r t), 1 at the reference date.
+    /// QuantLib's <c>ZeroCurve</c> (<c>InterpolatedZeroCurve&lt;Linear&gt;</c>) on Actual/365 (Fixed) with continuous
+    /// zero rates: the rates interpolated linearly in time from the first date, and the discount factor exp(-r t), 1 at
+    /// the reference date.
     /// </summary>
     private sealed class LinearZeroCurve : YieldTermStructure
     {

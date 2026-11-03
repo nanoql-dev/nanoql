@@ -7,12 +7,11 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The market models' boundary (the S-mm plan's MR1 (i), (iv); the playbook's §2.5): a matrix read returns a copy, so
-/// changing it changes nothing; a constructor that takes a matrix copies it; an evolver copies each step's pseudo-root,
-/// so one model serves many evolvers on many threads, each path the same as on a model of its own; and the SVD-DD
-/// evolver owns a copy of its volatility process, so the process given is left as it was and serves many evolvers; and
-/// the volatility interpolation specifier's setters return a new specifier, leaving the one they're called on as it
-/// was (the S-mm plan's MR2 (c)).
+/// The market models' boundary (the playbook's §2.5): a matrix read returns a copy, so changing it changes nothing; a
+/// constructor that takes a matrix copies it; an evolver copies each step's pseudo-root, so one model serves many
+/// evolvers on many threads, each path the same as on a model of its own; and the SVD-DD evolver owns a copy of its
+/// volatility process, so the process given is left as it was and serves many evolvers; and the volatility
+/// interpolation specifier's setters return a new specifier, leaving the one they're called on as it was.
 /// </summary>
 public class MarketModelImmutabilityTests
 {
@@ -199,7 +198,7 @@ public class MarketModelImmutabilityTests
         double[] caplets = [0.1640, 0.1740, 0.1840, 0.1940, 0.1840, 0.1740, 0.1640, 0.1540, 0.1440, variances[9].TotalVolatility(9)];
         var evolution = new EvolutionDescription(times);
 
-        // the form given is copied: QuantLib's calibration leaves it at its last alpha (the S-mm plan's MR2 (b))
+        // the form given is copied: QuantLib's calibration leaves it at its last alpha
         var form = new AlphaFormLinearHyperbolic(times, 0.25);
         double before = form.Evaluate(5);
         var calibration = new CTSMMCapletAlphaFormCalibration(
@@ -239,7 +238,7 @@ public class MarketModelImmutabilityTests
         step.SwapCovariancePseudoRoots()[0][0, 0] = 99.0;
         Assert.NotEqual(99.0, step.SwapCovariancePseudoRoots()[0][0, 0]);
 
-        // the periodic calibration leaves the caller's specifier as it was (MR2 (c))
+        // the periodic calibration leaves the caller's specifier as it was
         double[] bigTimes = [.. Enumerable.Range(0, 6).Select(i => times[2 * i])];
         var specifier = new VolatilityInterpolationSpecifierabcd(
             2, 0, [.. Enumerable.Range(0, 5).Select(i => new PiecewiseConstantAbcdVariance(0.0, 0.17, 1.0, 0.1, i, bigTimes))], times);

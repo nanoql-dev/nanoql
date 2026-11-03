@@ -13,10 +13,9 @@ log one. For each, at three (t1, t2): size, then on seeded vectors apply, apply_
 direction, solve_splitting in each direction at s = -0.3 and 0.7, preconditioner at s = 0.4; and at the second
 (t1, t2), to_sparse_matrix (QuantLib's toMatrix, the sum of toMatrixDecomp's three parts).
 
-Left out (the S-hes plan's §2.10): every structure is on the risk-free curve's day counter and reference date (on
-others QuantLib reads them at the risk-free curve's times, tests/NanoQL.Tests/Divergences/
-HestonSlvMismatchedTimesTests.cs). The operator's mixing factor, which the wheel doesn't take, is the FD SLV model's
-(hestonslvfdmmodel.py).
+Left out: every structure is on the risk-free curve's day counter and reference date (on others QuantLib reads them at
+the risk-free curve's times, tests/NanoQL.Tests/Divergences/HestonSlvMismatchedTimesTests.cs). The operator's mixing
+factor, which the wheel doesn't take, is the FD SLV model's (hestonslvfdmmodel.py).
 
 The specs are a "process" hestonprocess.py's, a "mesher" tools/vectors/gen/methods/finitedifferences/meshers/
 fdmmeshercomposite.py's composite, a "type" (QuantLib's TransformationType: 0 plain, 1 power, 2 log) and a "leverage"

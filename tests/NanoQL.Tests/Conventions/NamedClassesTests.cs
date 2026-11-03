@@ -58,8 +58,8 @@ public class NamedClassesTests
     [Fact]
     public void EachNamedCurveIsASubclassOfItsClosedGeneric()
     {
-        // the iterative piecewise curves and the interpolated curves (SD5); each piecewise one hides the generic's
-        // Create with its own, returning its own type
+        // the iterative piecewise curves and the interpolated curves; each piecewise one hides the generic's Create
+        // with its own, returning its own type
         (Type Named, Type Generic)[] piecewise =
         [
             (typeof(PiecewiseLinearSimpleZero), typeof(PiecewiseYieldCurve<SimpleZeroYield, Linear, IterativeBootstrap>)),

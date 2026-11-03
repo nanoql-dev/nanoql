@@ -16,7 +16,7 @@ namespace NanoQL.Tests.Vectors;
 /// The wheel's nonstandard swaption vectors, <c>tests/vectors/instruments/nonstandardswaption.json</c>: on four
 /// Bermudan nonstandard swaptions, the calibration basket of each type their Gaussian1d engine generates on a Euribor
 /// standard swap base against a constant swaption volatility, per helper its swaption's expiry and maturity dates,
-/// nominal and strike, its volatility and market value, each where stable (the S7 plan's S7R6).
+/// nominal and strike, its volatility and market value, each where stable under one-ulp moves of the inputs.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class NonstandardSwaptionVectorTests

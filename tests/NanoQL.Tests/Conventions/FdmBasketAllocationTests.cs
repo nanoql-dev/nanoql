@@ -10,10 +10,10 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The zero-allocation pins of the basket operators' steps (the S-exo plan's ED9; master §2.2's finite-difference
-/// row): a rollback of <see cref="Fdm2dBlackScholesOp"/> on Hundsdorfer's scheme, the two-dimensional engine's default,
-/// with the Black and the local volatility, and of <see cref="FdmWienerOp"/> on Douglas's, the n-dimensional engine's,
-/// in two and three dimensions, allocates nothing after the first, each measured on fresh values after a warm-up.
+/// The zero-allocation pins of the basket operators' steps (the playbook's finite-difference row): a rollback of
+/// <see cref="Fdm2dBlackScholesOp"/> on Hundsdorfer's scheme, the two-dimensional engine's default, with the Black and
+/// the local volatility, and of <see cref="FdmWienerOp"/> on Douglas's, the n-dimensional engine's, in two and three
+/// dimensions, allocates nothing after the first, each measured on fresh values after a warm-up.
 /// </summary>
 public class FdmBasketAllocationTests
 {

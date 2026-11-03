@@ -9,8 +9,8 @@ namespace NanoQL.Tests.Divergences;
 /// Romania's Epiphany and St John the Baptist, January 6th and 7th from 2024, and Orthodox Good Friday from 2018.
 /// QuantLib 1.44 has none of them (<c>romania.cpp:45-78</c>); QuantLib's master adds them to the public calendar
 /// (#2919, <c>657346746</c>), and so to the Bucharest stock exchange's, which derives from it, with nine new test
-/// lines, which nanoql takes ahead of the pin, as R8 directs. The lines below are upstream's; QuantLib 1.44's answers
-/// are recorded beside them.
+/// lines, which nanoql takes ahead of the pin, as a fix. The lines below are upstream's; QuantLib 1.44's answers are
+/// recorded beside them.
 /// </summary>
 public class RomaniaUpstreamHolidaysTests
 {

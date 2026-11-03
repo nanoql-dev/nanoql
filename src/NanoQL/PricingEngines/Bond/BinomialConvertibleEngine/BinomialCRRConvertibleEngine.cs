@@ -15,7 +15,7 @@ namespace NanoQL.PricingEngines;
 
 /// <summary>
 /// The binomial convertible engine on the Cox-Ross-Rubinstein tree: QuantLib-Python's <c>BinomialCRRConvertibleEngine</c>, QuantLib's
-/// <c>BinomialConvertibleEngine&lt;CoxRossRubinstein&gt;</c> (D12).
+/// <c>BinomialConvertibleEngine&lt;CoxRossRubinstein&gt;</c>.
 /// </summary>
 public static class BinomialCRRConvertibleEngine
 {

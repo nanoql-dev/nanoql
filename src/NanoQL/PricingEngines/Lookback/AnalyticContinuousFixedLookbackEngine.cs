@@ -20,25 +20,24 @@ namespace NanoQL.PricingEngines;
 /// <remarks>
 /// <para>
 /// The value alone, as QuantLib's. At zero carry, where the formula's ratio is 0/0, its limit, upstream's fix after
-/// v1.44 (#2856, the S-bar plan's BR6 (v)).
+/// v1.44 (#2856).
 /// </para>
 /// <para>
-/// Documented divergences (BR5). Each rate is read on the volatility's clock and each time is the volatility's, as
+/// Documented divergences. Each rate is read on the volatility's clock and each time is the volatility's, as
 /// <see cref="AnalyticBarrierEngine"/> reads them, where QuantLib reads every structure at the risk-free curve's times
-/// (BR5 (xix), <c>Divergences/LookbackMismatchedTimesTests.cs</c>). The extremum observed so far is read as the spot
-/// where it lies beyond it, the spot being observed, where QuantLib prices the impossible extremum (BR5 (xxii),
-/// <c>Divergences/LookbackExtremeBeyondSpotTests.cs</c>). Near zero carry the formula is evaluated in double-double,
-/// where QuantLib's double cancels and #2856 switches to its limit below |λ| of 1e-7 (BR5 (xxiii),
-/// <see cref="LookbackSmallCarry"/>, <c>Divergences/LookbackSmallCarryTests.cs</c>). At small volatilities, where λ =
-/// 2b/σ² is large and QuantLib's power of s times its normal factor is +∞ times 0, NaN, the product is taken in logs
-/// (BR5 (xxiv)'s class, the S-bar code review's B2-1, <see cref="LookbackTails"/>,
+/// (<c>Divergences/LookbackMismatchedTimesTests.cs</c>). The extremum observed so far is read as the spot where it lies
+/// beyond it, the spot being observed, where QuantLib prices the impossible extremum
+/// (<c>Divergences/LookbackExtremeBeyondSpotTests.cs</c>). Near zero carry the formula is evaluated in double-double,
+/// where QuantLib's double cancels and #2856 switches to its limit below |λ| of 1e-7 (<see cref="LookbackSmallCarry"/>,
+/// <c>Divergences/LookbackSmallCarryTests.cs</c>). At small volatilities, where λ = 2b/σ² is large and QuantLib's power
+/// of s times its normal factor is +∞ times 0, NaN, the product is taken in logs (<see cref="LookbackTails"/>,
 /// <c>Divergences/LookbackSmallVolatilityTests.cs</c>). And below machine-epsilon variance the underlying follows its
-/// forward, where QuantLib divides by the volatility (BR5 (xxiv), <c>Divergences/LookbackZeroVolatilityTests.cs</c>).
+/// forward, where QuantLib divides by the volatility (<c>Divergences/LookbackZeroVolatilityTests.cs</c>).
 /// </para>
 /// <para>
 /// The formula is a first-passage closed form in equivalent-constant rates and a volatility, the variance and discounts
-/// to expiry: no exact closed form exists for a first passage under general deterministic term structures (the S-bar
-/// plan's BR4 (d)); the term-structure-exact route is <see cref="MCLookbackEngine"/>.
+/// to expiry: no exact closed form exists for a first passage under general deterministic term structures; the
+/// term-structure-exact route is <see cref="MCLookbackEngine"/>.
 /// </para>
 /// </remarks>
 public static class AnalyticContinuousFixedLookbackEngine
@@ -118,7 +117,7 @@ public static class AnalyticContinuousFixedLookbackEngine
         return option.FetchResults(new OneAssetOptionResults { NPV = value });
     }
 
-    // QuantLib's members, each read once on the volatility's clock (BR5 (xix))
+    // QuantLib's members, each read once on the volatility's clock
     private sealed class Formulas
     {
         private readonly double eta;
@@ -137,7 +136,7 @@ public static class AnalyticContinuousFixedLookbackEngine
             this.strike = strike;
             underlying = process.X0;
 
-            // a call's maximum and a put's minimum, the spot among the values observed (BR5 (xxii))
+            // a call's maximum and a put's minimum, the spot among the values observed
             Minmax = eta > 0.0 ? Math.Max(option.Minmax, underlying) : Math.Min(option.Minmax, underlying);
             Date lastDate = option.Exercise.LastDate();
             BlackVolTermStructure vol = process.BlackVolatility;
@@ -167,7 +166,7 @@ public static class AnalyticContinuousFixedLookbackEngine
 
         // eta (S Dq N1 - level D N2 - S D ratio), with ss = S/level: QuantLib's in double above the small-carry cut, in
         // double-double below it, the cubic through double-double values below its floor, and #2856's limit at zero
-        // carry (BR5 (xxiii))
+        // carry
         private double Term(double level, double ratioLevel)
         {
             double carry = riskFreeRate - dividendYield;
@@ -231,7 +230,7 @@ public static class AnalyticContinuousFixedLookbackEngine
                 - (underlying * riskFreeDiscount * ratio));
         }
 
-        // the forward path's payoff (BR5 (xxiv)): the path is monotone, so its extremum is at an end
+        // the forward path's payoff: the path is monotone, so its extremum is at an end
         private double DeterministicValue()
         {
             double forward = underlying * dividendDiscount / riskFreeDiscount;

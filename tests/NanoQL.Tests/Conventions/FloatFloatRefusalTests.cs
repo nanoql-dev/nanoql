@@ -14,11 +14,10 @@ namespace NanoQL.Tests.Conventions;
 
 /// <summary>
 /// The refusals of the float-float swaption, its Gaussian1d engine and its calibration basket, and the Gaussian1d
-/// cap/floor engine's of a coupon on another kind of index, by type, message and parameter (playbook §2; the S-g1d
-/// plan's G1D17): QuantLib's texts, a check of an argument an <see cref="ArgumentException"/> naming it, a check of a
-/// value already stored a <see cref="NanoQLException"/>. A basket asked of an engine of the other instrument is
-/// QuantLib's "argument types do not match", its <c>setupArguments</c>' cast failing; in QuantLib the instrument holds
-/// the engine.
+/// cap/floor engine's of a coupon on another kind of index, by type, message and parameter (playbook §2): QuantLib's
+/// texts, a check of an argument an <see cref="ArgumentException"/> naming it, a check of a value already stored a
+/// <see cref="NanoQLException"/>. A basket asked of an engine of the other instrument is QuantLib's "argument types do
+/// not match", its <c>setupArguments</c>' cast failing; in QuantLib the instrument holds the engine.
 /// </summary>
 public class FloatFloatRefusalTests
 {

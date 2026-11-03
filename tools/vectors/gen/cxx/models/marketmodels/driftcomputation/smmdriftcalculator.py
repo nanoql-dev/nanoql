@@ -10,7 +10,7 @@ drifts of a CoterminalSwapCurveState set on the rates from index 0, computed twi
 "again"). Throws: each of the constructor's refusals.
 
 Left out: a state set from the first alive rate, past index 0, which QuantLib refuses ("invalid index") and nanoql
-computes (the S-mm plan's MR3 (xvi); tests/NanoQL.Tests/Divergences/SmmDriftAliveTests.cs).
+computes (tests/NanoQL.Tests/Divergences/SmmDriftAliveTests.cs).
 
 The harness unit is tools/cxx/src/models/marketmodels/driftcomputation/driftcalculators.cpp. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Models/MarketModels/SMMDriftCalculatorCxxVectorTests.cs."""

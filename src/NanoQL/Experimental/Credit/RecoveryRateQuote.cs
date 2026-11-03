@@ -12,14 +12,13 @@ namespace NanoQL.Experimental;
 /// <summary>A recovery-rate market quote and the seniority it is quoted for.</summary>
 /// <remarks>
 /// <para>
-/// Immutable (§2.2's quote row; the S-core plan's CR1): the value is required, so QuantLib's <c>isValid</c>,
-/// <c>setValue</c> and <c>reset</c>, which a mutable quote with a null value needs, aren't ported; a new value is a new
-/// quote.
+/// Immutable (§2.2's quote row): the value is required, so QuantLib's <c>isValid</c>, <c>setValue</c> and <c>reset</c>,
+/// which a mutable quote with a null value needs, aren't ported; a new value is a new quote.
 /// </para>
 /// <para>
 /// ISDA's conventional recoveries cover the five ISDA seniorities. QuantLib's table read for
 /// <see cref="Seniority.NoSeniority"/> reads past its five entries (<c>recoveryratequote.hpp:36-37</c>), which nanoql
-/// refuses (the S-xcr plan's XR8 (xxviii); <c>Divergences/ConventionalRecoveryNoSeniorityTests.cs</c>).
+/// refuses (<c>Divergences/ConventionalRecoveryNoSeniorityTests.cs</c>).
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]

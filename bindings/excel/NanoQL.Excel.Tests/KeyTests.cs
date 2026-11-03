@@ -7,9 +7,9 @@ using static NanoQL.Excel.Tests.Xl;
 namespace NanoQL.Excel.Tests;
 
 /// <summary>
-/// The key (XLR3): a call's function, the provider, the date system and each argument (numbers by their bits, a missing
-/// argument as itself, a handle by its own key); equal calls one object in any cell; the handle's 16 hex digits, 32 on a
-/// collision (XLD23); the RTD topic keyed by the store's key (B1-6).
+/// The key: a call's function, the provider, the date system and each argument (numbers by their bits, a missing
+/// argument as itself, a handle by its own key); equal calls one object in any cell; the handle's 16 hex digits, 32 on
+/// a collision; the RTD topic keyed by the store's key.
 /// </summary>
 [Collection(TestSettings.Name)]
 public sealed class KeyTests
@@ -59,7 +59,7 @@ public sealed class KeyTests
         }
     }
 
-    /// <summary>The same raw call from a 1900 and a 1904 workbook: two objects, two RTD topics (XLP41).</summary>
+    /// <summary>The same raw call from a 1900 and a 1904 workbook: two objects, two RTD topics.</summary>
     [Fact]
     public void TwoDateSystemsGiveTwoHandlesAndTwoTopics()
     {
@@ -83,7 +83,7 @@ public sealed class KeyTests
         Assert.NotEqual(H(Call("nqlFlatForward", Date, 0.03, dc)), H(Call("nqlFlatForward", Date, 0.03, dc, "Continuous", "Annual")));
     }
 
-    /// <summary>A collision of the shown 16 digits, forced: the second object shows 32 (XLD23).</summary>
+    /// <summary>A collision of the shown 16 digits, forced: the second object shows 32.</summary>
     [Fact]
     public void ACollisionShowsThirtyTwoDigits()
     {

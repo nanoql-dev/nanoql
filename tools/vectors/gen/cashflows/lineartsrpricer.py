@@ -11,11 +11,10 @@ swaptionvolcube.py's at-the-money matrix (lognormal), the matrix with a 1% shift
 volatilities, and the interpolated cube on the lognormal matrix, extrapolating. The strikes are 3%, 5% and 7%, on the
 shifted matrix also -0.5%, and on the normal one -0.5% and -3%.
 
-Left out, the S-cms plan's CMR5 fixes: the price-threshold strategy, dead in QuantLib ((ii)); the standard-deviations
-strategy ((iii)); reversions below 1e-4 but 0 ((iv)); a lognormal strike at or below -shift ((xxiii)); the SABR and ZABR
-cubes, whose sections carry an interpolated forward of their own ((xxvii)); and the vega-ratio strategy on a normal
-volatility, which QuantLib's section refuses ((xxviii)). The interpolated cube's sections carry the coupon's own
-forward, so its outputs are QuantLib's.
+Left out, nanoql's fixes: the price-threshold strategy, dead in QuantLib; the standard-deviations strategy; reversions
+below 1e-4 but 0; a lognormal strike at or below -shift; the SABR and ZABR cubes, whose sections carry an interpolated
+forward of their own; and the vega-ratio strategy on a normal volatility, which QuantLib's section refuses. The
+interpolated cube's sections carry the coupon's own forward, so its outputs are QuantLib's.
 
 A refused value is {"throws": true}. Each case's inputs hold its settings, the pricer ("pricer": {"meanReversion",
 "settings": {"strategy", "vegaRatio", "lowerRateBound", "upperRateBound", "defaultBounds"}, "couponDiscountCurve"}), the

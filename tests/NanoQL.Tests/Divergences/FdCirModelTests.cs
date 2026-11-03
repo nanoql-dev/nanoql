@@ -13,20 +13,19 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The finite-difference engine for a Black-Scholes equity under a Cox-Ingersoll-Ross short rate (the S-van plan's VR4
-/// (xv) and VR8). QuantLib's operator's rate diffusion is σ²r where the CIR generator's is ½σ²r, and its covariance
-/// 2ρσ_Sσ where it is ρσ_Sσ√r (<c>fdmcirop.cpp:55-60</c>, <c>:74-82</c>): through its own machinery a cash-like put's
-/// implied bond is the CIR bond at σ√2 (0.8612436 at σ 0.15, where the CIR bond is 0.8609795 and at σ√2 0.8612489),
-/// it blows up (1e32 to 1e226) at ρ ±0.5 on its schemes for every σ, and at σ 0.3 even at ρ = 0; and its rate grid,
-/// the process's time-averaged quantiles, leaves the rate's path where it drifts or σ is small (3.58 to 15.7 where the
-/// deterministic-rate limit is 4.21 and 3.28) [executed by the S-van planner: VP26, VP45]. Its test's 4.275 is its own
-/// operator on its 10-step grid (4.27310 refined). nanoql's operator is the CIR generator's, its rate grid uniform on
-/// [0, max(upper, r₀, θ, E[r_T])], upper the last point of QuantLib's, where at r = 0 the equation is its own boundary
-/// condition, and its default scheme Hundsdorfer's, where QuantLib's modified Hundsdorfer blows up on fine grids when the
-/// rate drifts up fast. The checks: QuantLib's CIR model's closed-form bond (the rates part, every ρ); the
-/// deterministic-rate limit against Black's formula at the mean path's average rate; and a Monte Carlo of QuantLib's
-/// CIR process, the log spot's step exact given the rate's path and draws, for ρ ≠ 0 and the rising rate. Flat
-/// Actual/365 (Fixed) curves from 15 October 2026.
+/// The finite-difference engine for a Black-Scholes equity under a Cox-Ingersoll-Ross short rate. QuantLib's operator's
+/// rate diffusion is σ²r where the CIR generator's is ½σ²r, and its covariance 2ρσ_Sσ where it is ρσ_Sσ√r
+/// (<c>fdmcirop.cpp:55-60</c>, <c>:74-82</c>): through its own machinery a cash-like put's implied bond is the CIR bond
+/// at σ√2 (0.8612436 at σ 0.15, where the CIR bond is 0.8609795 and at σ√2 0.8612489), it blows up (1e32 to 1e226) at ρ
+/// ±0.5 on its schemes for every σ, and at σ 0.3 even at ρ = 0; and its rate grid, the process's time-averaged
+/// quantiles, leaves the rate's path where it drifts or σ is small (3.58 to 15.7 where the deterministic-rate limit is
+/// 4.21 and 3.28). Its test's 4.275 is its own operator on its 10-step grid (4.27310 refined). nanoql's operator is the
+/// CIR generator's, its rate grid uniform on [0, max(upper, r₀, θ, E[r_T])], upper the last point of QuantLib's, where
+/// at r = 0 the equation is its own boundary condition, and its default scheme Hundsdorfer's, where QuantLib's modified
+/// Hundsdorfer blows up on fine grids when the rate drifts up fast. The checks: QuantLib's CIR model's closed-form bond
+/// (the rates part, every ρ); the deterministic-rate limit against Black's formula at the mean path's average rate; and
+/// a Monte Carlo of QuantLib's CIR process, the log spot's step exact given the rate's path and draws, for ρ ≠ 0 and
+/// the rising rate. Flat Actual/365 (Fixed) curves from 15 October 2026.
 /// </summary>
 public class FdCirModelTests
 {
@@ -55,7 +54,7 @@ public class FdCirModelTests
     [Fact]
     public void QuantLibsBondIsTheCirBondAtTwiceTheVariance()
     {
-        // QuantLib's implied bond at σ 0.15, 0.8612436 (VP26), is QuantLib's model's at σ√2, not at σ
+        // QuantLib's implied bond at σ 0.15, 0.8612436, is QuantLib's model's at σ√2, not at σ
         double atSigma = new CoxIngersollRoss(0.05, 0.05, 2.0, 0.15, false).DiscountBond(0.0, 3.0, 0.05);
         double atSigmaRoot2 = new CoxIngersollRoss(0.05, 0.05, 2.0, 0.15 * Math.Sqrt(2.0), false).DiscountBond(0.0, 3.0, 0.05);
         Assert.Equal(0.8609795, atSigma, 1e-7);
@@ -81,8 +80,8 @@ public class FdCirModelTests
     [Fact]
     public void ARisingRateAtThirtyPercentIsTheMonteCarlos()
     {
-        // σ 0.3, the rate from 1% to 12% at κ 3, ρ 0: on a grid from zero where QuantLib's blows up; the reviewer's
-        // conditional estimator read 3.29627 ± 0.00129
+        // σ 0.3, the rate from 1% to 12% at κ 3, ρ 0: on a grid from zero where QuantLib's blows up; a conditional
+        // estimator reads 3.29627 ± 0.00129
         var cir = new CoxIngersollRossProcess(3.0, 0.3, 0.01, 0.12);
         double fd = FdCIRVanillaEngine.Calculate(Put(), Context, cir, Equity(36.0, 0.06), 100, 200, 100, 0, 0.0).NPV!.Value;
         (double mean, double error) = ConditionalMonteCarlo(cir, 36.0, 0.2, 40.0, 0.0, 40000, 250, 4242);
@@ -95,7 +94,7 @@ public class FdCirModelTests
     public void TheDeterministicRateLimitIsBlacksFormula(double kappa, double theta, double r0)
     {
         // σ 1e-6: Black's put at the mean path's average rate, within 1.5e-4 at 200 × 400 × 200; QuantLib's grid
-        // collapses there (3.246071 on fdcir's drift down, 3.579656 drifting up, VP45)
+        // collapses there (3.246071 on fdcir's drift down, 3.579656 drifting up)
         var cir = new CoxIngersollRossProcess(kappa, 1e-6, r0, theta);
         double fd = FdCIRVanillaEngine.Calculate(Put(), Context, cir, Equity(36.0, 0.06), 200, 400, 200, 0, 0.0).NPV!.Value;
         Assert.Equal(Black(kappa, theta, r0), fd, 1.5e-4);
@@ -105,7 +104,7 @@ public class FdCirModelTests
     public void TheDefaultSchemeHoldsTheFastDriftUp()
     {
         // the rate from 1% to 12% at κ 3, σ 1e-6: Hundsdorfer's, the default, within 1.5e-4 of Black's 3.278907 at
-        // 200 × 400 × 200, where QuantLib's default, modified Hundsdorfer, blows up (−1.05e43, VP46)
+        // 200 × 400 × 200, where QuantLib's default, modified Hundsdorfer, blows up (−1.05e43)
         var cir = new CoxIngersollRossProcess(3.0, 1e-6, 0.01, 0.12);
         double fd = FdCIRVanillaEngine.Calculate(Put(), Context, cir, Equity(36.0, 0.06), 200, 400, 200, 0, 0.0).NPV!.Value;
         Assert.Equal(Black(3.0, 0.12, 0.01), fd, 1.5e-4);

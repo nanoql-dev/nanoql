@@ -12,10 +12,10 @@ namespace NanoQL.Tests.Divergences;
 /// (<c>fdm2dblackscholesop.cpp:106-116</c>), so its price discounts at the second's, where every analytic two-asset
 /// engine discounts on the first's curve: a spread call with asset 2 on a curve at 8% and asset 1 at 5% prices 2.96%
 /// below the same market restated onto the first curve (asset 2's dividend yield q₂ + r₁ − r₂, the same forward).
-/// nanoql's mixed term adds back the second's rate (the S-exo plan's ER5 (ii)), so the price discounts on the first
-/// process's curve: QuantLib's engine on the restated market is the check, within the scheme's splitting error, the two
-/// curves' rates sitting in the two directions' operators where the restated market's sit in one (6e-6 relative here).
-/// On one risk-free curve the two read the same rate.
+/// nanoql's mixed term adds back the second's rate, so the price discounts on the first process's curve: QuantLib's
+/// engine on the restated market is the check, within the scheme's splitting error, the two curves' rates sitting in
+/// the two directions' operators where the restated market's sit in one (6e-6 relative here). On one risk-free curve
+/// the two read the same rate.
 /// </summary>
 public class Fd2dTwoRiskFreeCurvesTests
 {

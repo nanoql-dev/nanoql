@@ -158,8 +158,8 @@ public static class Rec
             return id;
         }
 
-        // A struct made by default or new T(): its implicit constructor's call, written before the call taking it (R16),
-        // in each fact that takes it, so no fact's replay rests on another's reaching the call.
+        // A struct made by default or new T(): its implicit constructor's call, written before the call taking it, in
+        // each fact that takes it, so no fact's replay rests on another's reaching the call.
         if (t.IsValueType && Twins.DefaultNew(t) is { } function && new ValueKey().Equals(o, Activator.CreateInstance(t)))
         {
             Forget(o);

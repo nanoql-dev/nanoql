@@ -21,25 +21,23 @@ namespace NanoQL.PricingEngines;
 /// </summary>
 /// <remarks>
 /// <para>
-/// An immutable object over its <see cref="HestonModel"/> and the integrations' accuracy and limit (the S-hes plan's
-/// HD7); the static <c>Calculate</c> builds one. The model's time runs from the earliest curve date, each curve read at
-/// the instant a time denotes (HR7 (xi)); at the model's time 0 the price is the forward's discounted payoff (HR7
-/// (xxxi)), where QuantLib's window is zero-wide. The window is centred on the log forward, x₀ + ln(D_q/D_r), where
-/// QuantLib centres it on x₀ + ln(D_r/D_q), the forward's mirror, and misses the density at high carry and long expiry
-/// (HR7 (vii)); its half-width 8√(θt + (v₀ − θ)(1 − e^{−κt})/κ) takes 1 − e^{−κt} by −expm1(−κt) below κt = 1e-2,
-/// where QuantLib's loses the (v₀ − θ) term (HR7 (xxv)).
+/// An immutable object over its <see cref="HestonModel"/> and the integrations' accuracy and limit; the static
+/// <c>Calculate</c> builds one. The model's time runs from the earliest curve date, each curve read at the instant a
+/// time denotes; at the model's time 0 the price is the forward's discounted payoff, where QuantLib's window is
+/// zero-wide. The window is centred on the log forward, x₀ + ln(D_q/D_r), where QuantLib centres it on x₀ +
+/// ln(D_r/D_q), the forward's mirror, and misses the density at high carry and long expiry; its half-width 8√(θt + (v₀
+/// − θ)(1 − e^{−κt})/κ) takes 1 − e^{−κt} by −expm1(−κt) below κt = 1e-2, where QuantLib's loses the (v₀ − θ) term.
 /// </para>
 /// <para>
-/// The window misses the density's mass beyond it: on QuantLib's own markets, a half-year put at half the forward 3%
-/// to 53% low, and at a vol of variance of 1 and correlation −0.9 puts up to 18% low. nanoql adds the tails' values
-/// where they're worth more than the integrations' accuracy, QuantLib's price where they aren't: the payoff a line
-/// between its strikes, each piece's value is exact from the spot's distribution under the risk-neutral measure and
-/// under the share measure, a Heston distribution again, at the window's edges and the strikes; a payoff not linear on
-/// a tail with mass beyond the accuracy is refused. The value added is the additional result <c>tailsValue</c> (the
-/// code review's C2-B1-2; <c>Divergences/AnalyticPdfHestonTailsTests.cs</c>). A tail is left out where both its
-/// probabilities, under the two measures, are within the accuracy, the distribution's own noise there; such a tail can
-/// be worth up to (K + F) times the accuracy, so the tails' accuracy scales with the payoff, as the window's does
-/// (C2-F3-1).
+/// The window misses the density's mass beyond it: on QuantLib's own markets, a half-year put at half the forward 3% to
+/// 53% low, and at a vol of variance of 1 and correlation −0.9 puts up to 18% low. nanoql adds the tails' values where
+/// they're worth more than the integrations' accuracy, QuantLib's price where they aren't: the payoff a line between
+/// its strikes, each piece's value is exact from the spot's distribution under the risk-neutral measure and under the
+/// share measure, a Heston distribution again, at the window's edges and the strikes; a payoff not linear on a tail
+/// with mass beyond the accuracy is refused. The value added is the additional result <c>tailsValue</c>
+/// (<c>Divergences/AnalyticPdfHestonTailsTests.cs</c>). A tail is left out where both its probabilities, under the two
+/// measures, are within the accuracy, the distribution's own noise there; such a tail can be worth up to (K + F) times
+/// the accuracy, so the tails' accuracy scales with the payoff, as the window's does.
 /// </para>
 /// <para>
 /// Reference: A. Dragulescu, V. Yakovenko, Probability distribution of returns in the Heston model with stochastic
@@ -125,9 +123,9 @@ public sealed class AnalyticPDFHestonEngine
     private HestonRNDCalculator Calculator() =>
         new(model.Process, integrationEps, maxIntegrationIterations, model.Process.ModelClock());
 
-    // QuantLib's calculate, its window centred on the log forward (HR7 (vii)) and its curves read on the model's clock,
-    // and the tails outside the window where they're worth more than the integrations' accuracy (C2-B1-2): the price
-    // and the tails' value, 0 where none is added
+    // QuantLib's calculate, its window centred on the log forward and its curves read on the model's clock, and the
+    // tails outside the window where they're worth more than the integrations' accuracy: the price and the tails'
+    // value, 0 where none is added
     private (double Npv, double Tails) Value(VanillaOption option)
     {
         // this is an European option pricer
@@ -145,11 +143,11 @@ public sealed class AnalyticPDFHestonEngine
         Payoff payoff = option.Payoff!;
         if (t == 0.0)
         {
-            // no variance has accrued: the forward's discounted payoff (HR7 (xxxi))
+            // no variance has accrued: the forward's discounted payoff
             return (rD * payoff.Evaluate(process.S0 * qD / rD), 0.0);
         }
 
-        // below kappa t = 1e-2, (1 - e^{-kappa t}) by -expm1(-kappa t), which keeps the (v0 - theta) term (HR7 (xxv))
+        // below kappa t = 1e-2, (1 - e^{-kappa t}) by -expm1(-kappa t), which keeps the (v0 - theta) term
         double kappa = process.Kappa;
         double decay = kappa * t < 1e-2 ? -Expm1Functions.StdExpm1(-kappa * t) : 1 - Math.Exp(-kappa * t);
         double xMax = 8.0 * Math.Sqrt((process.Theta * t) + ((process.V0 - process.Theta) * decay / kappa));

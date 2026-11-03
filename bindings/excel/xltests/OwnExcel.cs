@@ -13,8 +13,8 @@ namespace NanoQL.Excel.XlTests;
 /// An Excel instance of a test's own, for what the runner's shared instance can't hold: a build of its own (the shipped
 /// builds, a user's), a settings file read at load, a workbook reopened in a new instance. Started through automation
 /// (a new process, never the user's), the add-in loaded for the session alone with <c>RegisterXLL</c>, and quit; the
-/// instance must then end by itself, every object the add-in made released (XLP79), or the test fails, its process
-/// killed by its identifier alone.
+/// instance must then end by itself, every object the add-in made released, or the test fails, its process killed by
+/// its identifier alone.
 /// </summary>
 internal static class OwnExcel
 {

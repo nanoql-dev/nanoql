@@ -15,7 +15,7 @@
     <IsAotCompatible>true</IsAotCompatible>
     <!-- The library loads no ICU, so it runs where libicu is absent and its messages read the same in every locale. -->
     <InvariantGlobalization>true</InvariantGlobalization>
-    <!-- The bindings export the experimental API, each declaration behind its language's opt-in (R3's consent here). -->
+    <!-- The bindings export the experimental API, each declaration behind its language's opt-in. -->
     <NoWarn>$(NoWarn);NQL0001</NoWarn>
     <CopyOutputSymbolsToPublishDirectory>false</CopyOutputSymbolsToPublishDirectory>
     <DefineConstants Condition="'$(NanoQLTestExports)' == 'true'">$(DefineConstants);NANOQL_TEST_EXPORTS</DefineConstants>

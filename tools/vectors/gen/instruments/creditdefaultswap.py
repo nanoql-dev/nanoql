@@ -14,14 +14,13 @@ CreditDefaultSwap, its two constructors, the mid-point engine and cdsMaturity.
 - "maturity" cases: cdsMaturity on trade dates around the rolls, for tenors of 0 to 10 years, under the three CDS
   rules; null where the 2015 rule gives no maturity; and its refusals.
 
-The implied hazard rate and the conventional spread are solved, so the stability filter of the S-infl plan's SID20
-(the S7 plan's S7R6) runs on them: each is solved again with the target NPV, the discount rate and the recovery moved
-one ulp up, then down, together and each alone, and written only where every move leaves it within
-1e-12 x max(|a|, |b|, 1); a dropped one is written null and listed in the case's inputs "dropped". On an expired swap,
-or one with a zero running spread, QuantLib's implied quantities return values it hasn't solved, which nanoql refuses
-(tests/NanoQL.Tests/Divergences/CdsImpliedHazardRateExpiredTests.cs, CdsConventionalSpreadNullTests.cs), so no case
-asks for them there; nor on a weekend, where QuantLib's ISDA model refuses its own curve
-(tests/NanoQL.Tests/Divergences/IsdaImpliedWeekendTests.cs).
+The implied hazard rate and the conventional spread are solved, so the stability filter runs on them: each is solved
+again with the target NPV, the discount rate and the recovery moved one ulp up, then down, together and each alone, and
+written only where every move leaves it within 1e-12 x max(|a|, |b|, 1); a dropped one is written null and listed in the
+case's inputs "dropped". On an expired swap, or one with a zero running spread, QuantLib's implied quantities return
+values it hasn't solved, which nanoql refuses (tests/NanoQL.Tests/Divergences/CdsImpliedHazardRateExpiredTests.cs,
+CdsConventionalSpreadNullTests.cs), so no case asks for them there; nor on a weekend, where QuantLib's ISDA model
+refuses its own curve (tests/NanoQL.Tests/Divergences/IsdaImpliedWeekendTests.cs).
 
 A case's inputs hold its settings and the swap spec {"side", "notional", "upfront" (null for the running-spread
 constructor), "spread", "schedule", "paymentConvention", "dayCounter", "settlesAccrual", "paysAtDefaultTime",

@@ -13,13 +13,13 @@ A case is one method on one parameter set. Its outputs are the method's size, wh
 the curve's discount at 26 times from 0 to 29 years and its Actual/365 (Fixed) continuous zero rate at 12 dates. A
 refused value is {"throws": true}.
 
-Left out: exponential splines with a fixed κ (the S-sr plan's SSR6 (v)), whose last coefficient QuantLib's discount
-function leaves out (tests/NanoQL.Tests/Divergences/ExponentialSplinesFixedKappaTests.cs); the spread method over a
-discounting curve on another clock (SSR6 (xiv)), which QuantLib reads at the fitted curve's time
-(tests/NanoQL.Tests/Divergences/SpreadFittingClockTests.cs); and cubic B-splines on a repeated knot (SSR6 (vi)), which
-QuantLib refuses (tests/NanoQL.Tests/Divergences/BSplineRepeatedKnotTests.cs). NaturalCubicFitting has no wheel class:
-its vectors are the C++ harness's (tools/vectors/gen/cxx/termstructures/yield/nonlinearfittingmethods.py). The
-polynomial's powers are std::pow's, which agree with .NET's within R7, not bit for bit.
+Left out: exponential splines with a fixed κ, whose last coefficient QuantLib's discount function leaves out
+(tests/NanoQL.Tests/Divergences/ExponentialSplinesFixedKappaTests.cs); the spread method over a discounting curve on
+another clock, which QuantLib reads at the fitted curve's time
+(tests/NanoQL.Tests/Divergences/SpreadFittingClockTests.cs); and cubic B-splines on a repeated knot, which QuantLib
+refuses (tests/NanoQL.Tests/Divergences/BSplineRepeatedKnotTests.cs). NaturalCubicFitting has no wheel class: its
+vectors are the C++ harness's (tools/vectors/gen/cxx/termstructures/yield/nonlinearfittingmethods.py). The polynomial's
+powers are std::pow's, which agree with .NET's within the tolerance, not bit for bit.
 
 Each case's inputs hold its settings, the "method" ({"type", its arguments, and "discountCurve" for the spread
 method, tools/vectors/gen/termstructures/yield/zerospreadedtermstructure.py's spec}), the "parameters", the

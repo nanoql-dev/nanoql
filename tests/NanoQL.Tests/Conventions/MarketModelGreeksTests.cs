@@ -8,13 +8,12 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The market-model Greeks' refusals (the S-mmp plan's MMPR5, ruled by the user, and MMPR4's refusals), each beside its
-/// valid twin: the pathwise engines on an evolver not in the money-market measure, which QuantLib requires and doesn't
-/// check (<c>pathwiseaccountingengine.cpp:99</c>), and the money-market evolver; the swaption pseudo-derivative on steps
-/// straddling its expiry or on unequal displacements, refused as <c>swaptionImpliedVolatility</c> refuses
-/// (<c>swaptionpseudojacobian.cpp:44</c>, <c>:53</c>), and on a grid holding the expiry; and the inputs QuantLib reads
-/// past: a product off the model's evolution, the vega bumps, the proxy engine's weights and constraints, the
-/// constrained evolver's reference model.
+/// The market-model Greeks' refusals, each beside its valid twin: the pathwise engines on an evolver not in the
+/// money-market measure, which QuantLib requires and doesn't check (<c>pathwiseaccountingengine.cpp:99</c>), and the
+/// money-market evolver; the swaption pseudo-derivative on steps straddling its expiry or on unequal displacements,
+/// refused as <c>swaptionImpliedVolatility</c> refuses (<c>swaptionpseudojacobian.cpp:44</c>, <c>:53</c>), and on a
+/// grid holding the expiry; and the inputs QuantLib reads past: a product off the model's evolution, the vega bumps,
+/// the proxy engine's weights and constraints, the constrained evolver's reference model.
 /// </summary>
 public class MarketModelGreeksTests
 {

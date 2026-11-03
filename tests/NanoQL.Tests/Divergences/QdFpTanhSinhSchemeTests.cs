@@ -10,12 +10,12 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The QD fixed-point engine's tanh-sinh scheme with no fixed-point step (the S-van run's own find). QuantLib's
-/// Gauss-Legendre scheme refuses m = 0 ("at least one fixed point iteration step is needed",
-/// <c>qdfpamericanengine.cpp:44</c>), but its tanh-sinh scheme checks nothing, and its m − 1 naive steps wrap to
-/// 2⁶⁴ − 1, so the engine never ends [executed on the wheel in a child process, killed after 30 seconds]. nanoql refuses
-/// m = 0 with the Gauss-Legendre scheme's text. With no node QuantLib's engine refuses when it prices ("not enough points
-/// to interpolate: at least 2 required, 1 provided"), and nanoql's likewise.
+/// The QD fixed-point engine's tanh-sinh scheme with no fixed-point step. QuantLib's Gauss-Legendre scheme refuses m =
+/// 0 ("at least one fixed point iteration step is needed", <c>qdfpamericanengine.cpp:44</c>), but its tanh-sinh scheme
+/// checks nothing, and its m − 1 naive steps wrap to 2⁶⁴ − 1, so the engine never ends (QuantLib-Python 1.44 in a child
+/// process, killed after 30 seconds). nanoql refuses m = 0 with the Gauss-Legendre scheme's text. With no node
+/// QuantLib's engine refuses when it prices ("not enough points to interpolate: at least 2 required, 1 provided"), and
+/// nanoql's likewise.
 /// </summary>
 public class QdFpTanhSinhSchemeTests
 {

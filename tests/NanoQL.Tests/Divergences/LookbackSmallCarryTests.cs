@@ -12,19 +12,17 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The analytic lookback engines near zero carry (the S-bar plan's BR5 (xxiii), the user's ruling (b) of 2026-10-26).
-/// As the carry b = r − q vanishes, each formula's terms over 2b/σ² cancel: over a year at σ 20%, QuantLib's floating
-/// call (spot 100, minimum 95) is off its 50-digit value by 2.0e-9 at b = 1e-7 and 1.4e-4 at 1e-12, its partial fixed
-/// call (strike 100, the window from half a year) by 1.4e-9 and 1.9e-4, and every engine is NaN at b = 0 (#2856 takes
-/// the full engines' limit below |λ| of 1e-7; the partial engines stay NaN). nanoql evaluates the full engines'
-/// formulas in double-double below u = |2b√T/σ| of 1e-3, the cubic through double-double values below 1e-18, and
-/// #2856's limit at 0; and the partial engines' as the cubic in b through QuantLib's double values at ±c and ±2c, c the
-/// carry at a cut of 6e-4 to 2e-3 in u. Checks: the formulas at 50 digits, the bivariate normal by quadrature (the
-/// S-bar run's <c>c2_smallcarry_refs.py</c>), within 1e-12 of max(|value|, 1); over the run's fit, corner and holdout
-/// grids the worst is 1.6e-13 for the full engines and 1.1e-12 for the partial ones (<c>c2_smallcarry_cut.py</c>,
-/// <c>c2_smallcarry_rule.py</c>, and the engines on the holdout grid). QuantLib's master fixes the partial engines
-/// after the pin (#2925, <c>2d86c20e3</c>): the limit below |2b/σ²| of 1e-7 and 1.44's form above it; nanoql keeps its
-/// cubic (the user's ruling (b) of 2026-10-26), and the master's three cases below check it.
+/// The analytic lookback engines near zero carry. As the carry b = r − q vanishes, each formula's terms over 2b/σ²
+/// cancel: over a year at σ 20%, QuantLib's floating call (spot 100, minimum 95) is off its 50-digit value by 2.0e-9 at
+/// b = 1e-7 and 1.4e-4 at 1e-12, its partial fixed call (strike 100, the window from half a year) by 1.4e-9 and 1.9e-4,
+/// and every engine is NaN at b = 0 (#2856 takes the full engines' limit below |λ| of 1e-7; the partial engines stay
+/// NaN). nanoql evaluates the full engines' formulas in double-double below u = |2b√T/σ| of 1e-3, the cubic through
+/// double-double values below 1e-18, and #2856's limit at 0; and the partial engines' as the cubic in b through
+/// QuantLib's double values at ±c and ±2c, c the carry at a cut of 6e-4 to 2e-3 in u. Checks: the formulas at 50
+/// digits, the bivariate normal by quadrature, within 1e-12 of max(|value|, 1); over fit, corner and holdout grids the
+/// worst is 1.6e-13 for the full engines and 1.1e-12 for the partial ones (the engines on the holdout grid among them).
+/// QuantLib's master fixes the partial engines after the pin (#2925, <c>2d86c20e3</c>): the limit below |2b/σ²| of 1e-7
+/// and 1.44's form above it; nanoql keeps its cubic, and the master's three cases below check it.
 /// </summary>
 public class LookbackSmallCarryTests
 {

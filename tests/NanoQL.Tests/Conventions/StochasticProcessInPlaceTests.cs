@@ -12,11 +12,11 @@ namespace NanoQL.Tests.Conventions;
 /// <summary>
 /// The in-place <see cref="StochasticProcess.InitialValues(Span{double})"/> and
 /// <see cref="StochasticProcess.Evolve(double, ReadOnlySpan{double}, double, ReadOnlySpan{double}, Span{double})"/>
-/// give the allocating forms' values bit for bit (the S-hes plan's HR2 (i), (ii)): on every discretization of
-/// <see cref="HestonProcess"/>, the overrides for the truncation, reflection and quadratic-exponential schemes and the
-/// fallback for the exact ones; on <see cref="BatesProcess"/>, its jumps added once; on every discretization of
-/// <see cref="GJRGARCHProcess"/>; on both of <see cref="HybridHestonHullWhiteProcess"/>, its step terms below their cut
-/// and above it; and, through the base's defaults, on landed processes that don't override them.
+/// give the allocating forms' values bit for bit: on every discretization of <see cref="HestonProcess"/>, the overrides
+/// for the truncation, reflection and quadratic-exponential schemes and the fallback for the exact ones; on
+/// <see cref="BatesProcess"/>, its jumps added once; on every discretization of <see cref="GJRGARCHProcess"/>; on both
+/// of <see cref="HybridHestonHullWhiteProcess"/>, its step terms below their cut and above it; and, through the base's
+/// defaults, on landed processes that don't override them.
 /// </summary>
 public class StochasticProcessInPlaceTests
 {

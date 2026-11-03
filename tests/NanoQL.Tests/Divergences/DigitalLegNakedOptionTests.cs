@@ -11,14 +11,14 @@ using NanoQL.Tests.Vectors;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The digital legs' naked option flag (the S-cms plan's CMR5 (viii)): QuantLib's <c>DigitalCmsLeg</c>,
-/// <c>DigitalIborLeg</c> and <c>DigitalCmsSpreadLeg</c> leave <c>nakedOption_</c> uninitialized unless
-/// <c>withNakedOption</c> is called (<c>digitalcmscoupon.cpp</c>, <c>digitaliborcoupon.cpp</c>,
-/// <c>digitalcmsspreadcoupon.cpp</c>, their constructors), so a leg built without it reads an indeterminate value,
-/// undefined behaviour. nanoql's legs default to <see langword="false"/>, the covered option, the coupon's own default.
-/// QuantLib's check: its legs built with <c>withNakedOption(false)</c> (the C++ harness's vectors): on the
-/// <c>cash calls at 5%</c> legs, the Ibor leg's first coupon pays 0.030579238011458898 and the CMS leg's
-/// 0.06130050779731958, where the naked legs pay 0 and 0.010000000000000286.
+/// The digital legs' naked option flag: QuantLib's <c>DigitalCmsLeg</c>, <c>DigitalIborLeg</c> and
+/// <c>DigitalCmsSpreadLeg</c> leave <c>nakedOption_</c> uninitialized unless <c>withNakedOption</c> is called
+/// (<c>digitalcmscoupon.cpp</c>, <c>digitaliborcoupon.cpp</c>, <c>digitalcmsspreadcoupon.cpp</c>, their constructors),
+/// so a leg built without it reads an indeterminate value, undefined behaviour. nanoql's legs default to
+/// <see langword="false"/>, the covered option, the coupon's own default. QuantLib's check: its legs built with
+/// <c>withNakedOption(false)</c> (the C++ harness's vectors): on the <c>cash calls at 5%</c> legs, the Ibor leg's first
+/// coupon pays 0.030579238011458898 and the CMS leg's 0.06130050779731958, where the naked legs pay 0 and
+/// 0.010000000000000286.
 /// </summary>
 public class DigitalLegNakedOptionTests
 {

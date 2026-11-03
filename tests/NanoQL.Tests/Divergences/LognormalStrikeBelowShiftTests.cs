@@ -11,17 +11,17 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// A lognormal CMS option struck at or below −shift (the S-cms plan's CMR5 (xxiii), its Hagan and TSR parts):
-/// QuantLib's Hagan caplet on a lognormal volatility prices <c>optionletPrice(Call, max(effectiveCap, 1e-10))</c>
-/// (<c>conundrumpricer.cpp:171-178</c>), E[R] − 1e-10 for a strike below 0, dropping −K; its linear TSR pricer refuses
-/// the strike in its section ("strike + displacement (-0.0045371 + 0) must be non-negative"). On the wheel, on a flat
-/// 3% curve and a 20% volatility, a capped CMS coupon fixing in a year with a spread of 1% and a cap of 0.5% pays
-/// 0.010000000099999993 on the analytic pricer and 0.009996991868222522 on the numeric one, where R > 0 makes the right
-/// rate the cap; and a digital replicated by caplets at ±1e-4 around 0 gives a probability of 0.49999950000000765.
-/// nanoql prices a caplet at or below −shift, on a forward above −shift, as the coupon's expected rate less the strike
-/// and a floorlet there as 0, the limits of each pricer's own formula, in each pricer before it prices an option. A
-/// forward at or below −shift has no lognormal rate distribution, and QuantLib's refusal stands there. QuantLib's
-/// checks: its own swaplets, which give the expected rate, its values above −shift, and its refusals on such a forward.
+/// A lognormal CMS option struck at or below −shift (its Hagan and TSR parts): QuantLib's Hagan caplet on a lognormal
+/// volatility prices <c>optionletPrice(Call, max(effectiveCap, 1e-10))</c> (<c>conundrumpricer.cpp:171-178</c>), E[R] −
+/// 1e-10 for a strike below 0, dropping −K; its linear TSR pricer refuses the strike in its section ("strike +
+/// displacement (-0.0045371 + 0) must be non-negative"). On the wheel, on a flat 3% curve and a 20% volatility, a
+/// capped CMS coupon fixing in a year with a spread of 1% and a cap of 0.5% pays 0.010000000099999993 on the analytic
+/// pricer and 0.009996991868222522 on the numeric one, where R > 0 makes the right rate the cap; and a digital
+/// replicated by caplets at ±1e-4 around 0 gives a probability of 0.49999950000000765. nanoql prices a caplet at or
+/// below −shift, on a forward above −shift, as the coupon's expected rate less the strike and a floorlet there as 0,
+/// the limits of each pricer's own formula, in each pricer before it prices an option. A forward at or below −shift has
+/// no lognormal rate distribution, and QuantLib's refusal stands there. QuantLib's checks: its own swaplets, which give
+/// the expected rate, its values above −shift, and its refusals on such a forward.
 /// </summary>
 public class LognormalStrikeBelowShiftTests
 {

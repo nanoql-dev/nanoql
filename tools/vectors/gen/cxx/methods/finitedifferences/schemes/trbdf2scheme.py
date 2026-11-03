@@ -5,9 +5,9 @@ bind, each output computed by the C++ harness (docs/porting-playbook.md §9.4): 
 TrBDF2Scheme<CrankNicolsonScheme> with a Crank-Nicolson trapezoid at theta 0.5 (FdmBackwardSolver's, over a Craig-Sneyd
 trapezoid, is tools/vectors/gen/methods/finitedifferences/schemes/trbdf2scheme.py's), on the Black-Scholes operator of
 three flat-forward processes on uniform log meshers, at alpha 2 - sqrt(2) (QuantLib's description's) and 0.5, stepped
-back ten steps of 0.05 from 1 from a seeded vector: the values after each step and numberOfIterations after the last
-(0: the operator has one direction, which the splitting solves), on the evaluation date 15 October 2026. The operator
-doesn't depend on time, so nanoql's two stages over the whole step (SEQR9) move only the values' last bits, within R7
+back ten steps of 0.05 from 1 from a seeded vector: the values after each step and numberOfIterations after the last (0:
+the operator has one direction, which the splitting solves), on the evaluation date 15 October 2026. The operator
+doesn't depend on time, so nanoql's two stages over the whole step move only the values' last bits, within the tolerance
 (tests/NanoQL.Tests/Divergences/TrBdf2TimeDependentTests.cs).
 
 The harness's call is tools/cxx/src/methods/finitedifferences/schemes/trbdf2scheme.cpp's. Read back by

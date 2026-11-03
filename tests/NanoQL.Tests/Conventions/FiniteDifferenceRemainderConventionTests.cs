@@ -8,15 +8,14 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The finite-difference remainder's conventions (the S-core plan's C4): numerical differentiation refuses repeated
-/// offsets (CR7 (xxxviii), the user's ruling), where QuantLib's Fornberg weights are NaN, which its evaluation skips, so
-/// x³'s first derivative at 1 on offsets (−0.1, 0, 0, 0.1) is 0 for 3; the n-th order operator's offsets, the mesher's
-/// distinct locations, are accepted; its weights alone need no function, as QuantLib's empty one; the jump mesher's
-/// distribution refuses a time at or below 0, where QuantLib's density divides by 0, and is QuantLib's 0 at a size at
-/// or below 0; the storage condition refuses a mesher not of two dimensions, which QuantLib reads unchecked; the old
-/// TR-BDF2 refuses a step before its step's parts are set, as QuantLib's empty operators do; and the zero condition is
-/// <c>std::max(a, 0.0)</c>. QuantLib's values beside the refusals are its own (this run's <c>probes\c4_facts.cpp</c>,
-/// <c>c4_facts.out</c>).
+/// The finite-difference remainder's conventions: numerical differentiation refuses repeated offsets, where QuantLib's
+/// Fornberg weights are NaN, which its evaluation skips, so x³'s first derivative at 1 on offsets (−0.1, 0, 0, 0.1) is
+/// 0 for 3; the n-th order operator's offsets, the mesher's distinct locations, are accepted; its weights alone need no
+/// function, as QuantLib's empty one; the jump mesher's distribution refuses a time at or below 0, where QuantLib's
+/// density divides by 0, and is QuantLib's 0 at a size at or below 0; the storage condition refuses a mesher not of two
+/// dimensions, which QuantLib reads unchecked; the old TR-BDF2 refuses a step before its step's parts are set, as
+/// QuantLib's empty operators do; and the zero condition is <c>std::max(a, 0.0)</c>. QuantLib's values beside the
+/// refusals are its own.
 /// </summary>
 public class FiniteDifferenceRemainderConventionTests
 {

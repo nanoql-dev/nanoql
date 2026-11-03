@@ -14,7 +14,7 @@ namespace NanoQL.Models;
 /// </summary>
 internal static class PathwiseEngineFunctions
 {
-    // QuantLib: "need to check that we are in money market measure", unchecked (MMPR5 (a)).
+    // QuantLib: "need to check that we are in money market measure", unchecked.
     public static void CheckMoneyMarket(EvolutionDescription evolution, ReadOnlySpan<int> numeraires)
     {
         if (!EvolutionDescriptionFunctions.IsInMoneyMarketMeasure(evolution, numeraires))
@@ -115,7 +115,7 @@ internal static class PathwiseEngineFunctions
     /// <summary>
     /// Carries a product's derivatives with respect to a step's end rates, V's row <paramref name="stepToUse"/>, to its
     /// start rates, row <paramref name="nextStepIndex"/>: the log-Euler step's Jacobian, its drift's derivative at the
-    /// step's start (MMPR4 (i)), the rates displaced (MMPR4 (ii)).
+    /// step's start, the rates displaced.
     /// </summary>
     public static void UpdateV(
         Matrix v,

@@ -13,14 +13,14 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The Monte Carlo lookback engine's grid on structures that measure time differently (the S-bar plan's BR5 (xix),
-/// batch 4's rule, fixed under R8). QuantLib's grid runs on the risk-free curve's time and its process reads the other
-/// structures at it, as though they shared that clock. nanoql's paths and discount run on the engine's clock,
-/// <c>FdmBlackScholesOp.Clock</c>, each structure read at the instants its times denote. Check: the engine on the
-/// market restated onto the clock, the dividend rate and the volatility scaled so their discounts and variances by date
-/// are unchanged, on the same seed: the paths draw the same numbers, so the prices agree to rounding; and a risk-free
-/// curve settling two days after the others, read from its own date on the clock from the earliest, where QuantLib's
-/// grid starts at the risk-free curve's date, against the market restated with every structure today.
+/// The Monte Carlo lookback engine's grid on structures that measure time differently (fixed). QuantLib's grid runs on
+/// the risk-free curve's time and its process reads the other structures at it, as though they shared that clock.
+/// nanoql's paths and discount run on the engine's clock, <c>FdmBlackScholesOp.Clock</c>, each structure read at the
+/// instants its times denote. Check: the engine on the market restated onto the clock, the dividend rate and the
+/// volatility scaled so their discounts and variances by date are unchanged, on the same seed: the paths draw the same
+/// numbers, so the prices agree to rounding; and a risk-free curve settling two days after the others, read from its
+/// own date on the clock from the earliest, where QuantLib's grid starts at the risk-free curve's date, against the
+/// market restated with every structure today.
 /// </summary>
 public class McLookbackMismatchedTimesTests
 {

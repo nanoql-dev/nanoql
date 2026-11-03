@@ -9,20 +9,20 @@ namespace NanoQL.Tests.Divergences;
 
 /// <summary>
 /// The fix QuantLib's master made to the exact Bachelier implied volatility after the pin, which nanoql takes as
-/// written (R8, the upstream sweep): #2924 (<c>e61abd2f5</c>) returns 0 only where the time value isn't positive and
-/// the price is close to its intrinsic value. QuantLib 1.44 returns 0 wherever the price is close to the intrinsic
-/// value (<c>blackformula.cpp:919-920</c>), so a deep in-the-money price just above it, or a tiny real time value out
-/// of the money, inverts to 0 in place of its volatility. Of the vectors' 600 Bachelier implied volatilities, 23 leave
-/// 1.44's 0 (the plan's SWP9, F1-4), which the generator leaves out of the file. In 14 the time value is real and tiny,
-/// and the fix recovers the generating volatility; in 9 a deep in-the-money price sits one ulp above its intrinsic
-/// value after the division by a discount of 0.95, and the fix inverts that rounding into a volatility of about 0.09,
-/// where the generating one is far smaller and 1.44 returns 0. At a discount of 1 those prices are exact, and the fix
-/// returns 0 too. One of each kind is below, from the vectors' inputs. Two of the vectors' argument cases move too: an
-/// infinite price after the division by the discount (a discount of 0, or an infinite price), which 1.44 finds close to
-/// the intrinsic value and returns 0 for, and which the fix's positive time value inverts to NaN, as QuantLib's
-/// master's arithmetic does. And a smile section's normal volatility, whose conversion inverts the section's price at a
-/// discount of 1 (<c>smilesection.cpp:131-155</c>): 16 of the flat, SABR and ZABR sections' vectors leave 1.44's 0 (the
-/// sweep's SWI3), one of them below.
+/// written: #2924 (<c>e61abd2f5</c>) returns 0 only where the time value isn't positive and the price is close to its
+/// intrinsic value. QuantLib 1.44 returns 0 wherever the price is close to the intrinsic value
+/// (<c>blackformula.cpp:919-920</c>), so a deep in-the-money price just above it, or a tiny real time value out of the
+/// money, inverts to 0 in place of its volatility. Of the vectors' 600 Bachelier implied volatilities, 23 leave 1.44's
+/// 0, which the generator leaves out of the file. In 14 the time value is real and tiny, and the fix recovers the
+/// generating volatility; in 9 a deep in-the-money price sits one ulp above its intrinsic value after the division by a
+/// discount of 0.95, and the fix inverts that rounding into a volatility of about 0.09, where the generating one is far
+/// smaller and 1.44 returns 0. At a discount of 1 those prices are exact, and the fix returns 0 too. One of each kind
+/// is below, from the vectors' inputs. Two of the vectors' argument cases move too: an infinite price after the
+/// division by the discount (a discount of 0, or an infinite price), which 1.44 finds close to the intrinsic value and
+/// returns 0 for, and which the fix's positive time value inverts to NaN, as QuantLib's master's arithmetic does. And a
+/// smile section's normal volatility, whose conversion inverts the section's price at a discount of 1
+/// (<c>smilesection.cpp:131-155</c>): 16 of the flat, SABR and ZABR sections' vectors leave 1.44's 0, one of them
+/// below.
 /// </summary>
 public class BlackFormulaUpstreamFixesTests
 {

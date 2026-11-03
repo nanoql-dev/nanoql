@@ -7,8 +7,8 @@ namespace NanoQL.Tests.Divergences;
 
 /// <summary>
 /// An empty matrix's pseudo square root is refused with QuantLib's master's text, "matrix must not be empty", before
-/// the decomposition reads it (#2846, f3f789067, the S-sr plan's SSR5), where QuantLib 1.44 refuses it inside the
-/// symmetric Schur decomposition with "null matrix given" (symmetricschurdecomposition.cpp:29).
+/// the decomposition reads it (#2846, f3f789067), where QuantLib 1.44 refuses it inside the symmetric Schur
+/// decomposition with "null matrix given" (symmetricschurdecomposition.cpp:29).
 /// </summary>
 public class PseudoSqrtEmptyMatrixTests
 {

@@ -12,7 +12,7 @@ namespace NanoQL.Tests.Vectors;
 /// The C++ harness's abcd calibration vectors, <c>tests/vectors/cxx/termstructures/volatility/abcdcalibration.json</c>:
 /// <see cref="AbcdCalibration"/>'s fits of falling, rising and dipping term structures from two guesses, with d fixed,
 /// vega weighted and capped, their parameters, errors, end criteria, adjustment factors and fitted volatilities where
-/// stable (the S7 plan's S7R6); its members at the guesses, before a fit; and the fits QuantLib refuses.
+/// stable under one-ulp moves of the inputs; its members at the guesses, before a fit; and the fits QuantLib refuses.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class AbcdCalibrationCxxVectorTests

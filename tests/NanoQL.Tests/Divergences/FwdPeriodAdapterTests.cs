@@ -7,17 +7,16 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The period adapter's default displacements (the S-mm plan's MR3 (ii), fixed under R8) and its pseudo-roots on the
-/// fixed Y matrix (MR3 (i)'s reach). With no displacements given, QuantLib's k-th long rate's is the running sum of the
-/// first (k + 1)·period short ones over the period, its <c>sum</c> never reset and its index from 0, not the offset
-/// (<c>fwdperiodadapter.cpp:54-64</c>): on twelve semi-annual rates displaced 1%, 0.01, 0.02, … 0.06 in periods of 2,
-/// and on displacements 0.1% to 1.2%, 0.0015, 0.005, 0.0105 … where the periods' means are 0.0015, 0.0035, 0.0055 …
-/// (the C++ harness's <c>FwdPeriodAdapter</c>, this run's probe; the planner's MP3). nanoql takes each period's own
-/// short displacements' mean, from the offset. And the adapter's pseudo-roots are the Y matrix times the short model's,
-/// where QuantLib's Y is MR3 (i)'s, its long forwards' variances 3 times too high on quarterly forwards in periods of 4
-/// (the planner's MP2). Checks: equal short displacements give QuantLib's own model for that one displacement given
-/// (the one-displacement branch), bit for bit; the means; and each step's long covariance the short covariance through
-/// the long forwards' elasticities by central bumps of QuantLib's restricted state.
+/// The period adapter's default displacements (fixed) and its pseudo-roots on the fixed Y matrix. With no displacements
+/// given, QuantLib's k-th long rate's is the running sum of the first (k + 1)·period short ones over the period, its
+/// <c>sum</c> never reset and its index from 0, not the offset (<c>fwdperiodadapter.cpp:54-64</c>): on twelve
+/// semi-annual rates displaced 1%, 0.01, 0.02, … 0.06 in periods of 2, and on displacements 0.1% to 1.2%, 0.0015,
+/// 0.005, 0.0105 … where the periods' means are 0.0015, 0.0035, 0.0055 … (the C++ harness's <c>FwdPeriodAdapter</c>).
+/// nanoql takes each period's own short displacements' mean, from the offset. And the adapter's pseudo-roots are the Y
+/// matrix times the short model's, where QuantLib's Y is its defective one, its long forwards' variances 3 times too
+/// high on quarterly forwards in periods of 4. Checks: equal short displacements give QuantLib's own model for that one
+/// displacement given (the one-displacement branch), bit for bit; the means; and each step's long covariance the short
+/// covariance through the long forwards' elasticities by central bumps of QuantLib's restricted state.
 /// </summary>
 public class FwdPeriodAdapterTests
 {
@@ -36,7 +35,7 @@ public class FwdPeriodAdapterTests
             Assert.Equal(Rows(given.PseudoRoot(k)), Rows(byDefault.PseudoRoot(k)));
         }
 
-        // QuantLib's running sum: 0.01, 0.02, ... (this run's harness probe)
+        // QuantLib's running sum: 0.01, 0.02, ... (the C++ harness)
         Assert.NotEqual(0.02, byDefault.Displacements[1], 1e-3);
     }
 
@@ -59,7 +58,7 @@ public class FwdPeriodAdapterTests
             Assert.Equal(sum / period, adapter.Displacements[k]);
         }
 
-        // QuantLib's: 0.0015, 0.005, 0.0105 at period 2, offset 0 (this run's harness probe)
+        // QuantLib's: 0.0015, 0.005, 0.0105 at period 2, offset 0 (the C++ harness)
         if (period == 2 && offset == 0)
         {
             Assert.Equal(0.0035, adapter.Displacements[1], 1e-15);

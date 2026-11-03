@@ -53,8 +53,7 @@ public class BondForwardVectorTests
 
             check.Output(c, "spotValue", forward.SpotValue(context, BondEngine));
 
-            // bondforward.py leaves the income's outputs out on a face other than 100 delivering after a coupon (the
-            // S-cms plan's CMR5 (xxv)).
+            // bondforward.py leaves the income's outputs out on a face other than 100 delivering after a coupon.
             if (!c.Expected.TryGetProperty("spotIncome", out _))
             {
                 continue;

@@ -9,11 +9,11 @@ piecewiseintegral.hpp, .cpp), which the wheel doesn't bind, each output computed
   column, the non-equidistant grids, the field case at 100 iterations a point) and a 4 × 5 matrix with five missing
   values; and a 3 × 3 × 2 grid through LaplaceInterpolation itself.
 - "moore-penrose" cases: tall, square and rank-deficient tall matrices, QuantLib's 8 × 6 case among them, at the default
-  tolerance and at 1e-10. A wide matrix is nanoql's (A^T)^+^T, where QuantLib's reads past its singular values (XRR5
-  (xxxv)), left out.
+  tolerance and at 1e-10. A wide matrix is nanoql's (A^T)^+^T, where QuantLib's reads past its singular values, left
+  out.
 - "piecewise" cases: QuantLib's piecewise integral case on its step function and the segment rule; the exponential over
-  breaks at 0.5, 1.5 and 3 on Simpson's rule, avoiding and not; every break above 0, where nanoql's nudges are QuantLib's
-  (XRR5 (xxxvi)); and QL_PIECEWISE_FUNCTION at and between its breaks.
+  breaks at 0.5, 1.5 and 3 on Simpson's rule, avoiding and not; every break above 0, where nanoql's nudges are
+  QuantLib's; and QL_PIECEWISE_FUNCTION at and between its breaks.
 
 Read back by tests/NanoQL.Tests/Vectors/Cxx/Experimental/Math/LaplaceAndPiecewiseCxxVectorTests.cs."""
 import os

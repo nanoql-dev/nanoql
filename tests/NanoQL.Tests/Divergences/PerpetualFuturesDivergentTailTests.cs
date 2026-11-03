@@ -16,8 +16,8 @@ namespace NanoQL.Tests.Divergences;
 /// series' analytic continuation: on QuantLib's case market (r_d 4%, r_f 2%, interest-rate difference 0.005) continuous
 /// funding at k 0.01 prices −4,999.998 and quarterly funding at k 0.004 a plausible 9,876.34; and where r_f &gt; r_d it
 /// refuses a non-positive rate whose tail converges. nanoql refuses exactly where the tail diverges, a discrete rate of
-/// −1 or below among them, and prices a convergent tail at any rate (the S-exo plan's ER5 (xl), ER8). The checks: the
-/// refusals' type and text; Ackerer, Hugonnier and Jermann's constant-rate closed forms, QuantLib's own case's.
+/// −1 or below among them, and prices a convergent tail at any rate. The checks: the refusals' type and text; Ackerer,
+/// Hugonnier and Jermann's constant-rate closed forms, QuantLib's own case's.
 /// </summary>
 public class PerpetualFuturesDivergentTailTests
 {

@@ -15,10 +15,10 @@ namespace NanoQL.Models;
 /// half of the products the caplets and the second the swaptions.
 /// </summary>
 /// <remarks>
-/// <para>A working type (the S-mmp plan's MMPR1 (i)); the payoffs are shared, immutable.</para>
+/// <para>A working type; the payoffs are shared, immutable.</para>
 /// <para>
-/// QuantLib's design, kept and documented (MMPR4): each value is paid at its long forward's start, its end's discount
-/// inside the value (the caplet's τ times the period's discount ratio), and a value of 0 pays nothing.
+/// QuantLib's design, kept and documented: each value is paid at its long forward's start, its end's discount inside
+/// the value (the caplet's τ times the period's discount ratio), and a value of 0 pays nothing.
 /// </para>
 /// </remarks>
 [WorkingType]

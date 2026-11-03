@@ -12,9 +12,9 @@ namespace NanoQL.Experimental;
 
 /// <summary>
 /// <see cref="MCPathBasketEngine"/> on low-discrepancy draws with QuantLib's default statistics:
-/// <c>MCLDPathBasketEngine</c>, named as QuantLib-Python names its siblings (B2R2), QuantLib's
+/// <c>MCLDPathBasketEngine</c>, named as QuantLib-Python names its siblings, QuantLib's
 /// <c>MCPathBasketEngine&lt;LowDiscrepancy&gt;</c>, its calculations closed at <see cref="LowDiscrepancy"/> and
-/// <see cref="GeneralStatistics"/> (D12).
+/// <see cref="GeneralStatistics"/>.
 /// </summary>
 [Experimental("NQL0001")]
 public static class MCLDPathBasketEngine

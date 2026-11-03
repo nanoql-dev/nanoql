@@ -14,12 +14,11 @@ namespace NanoQL.Models;
 /// second-to-last rate, 1, x, the last forward y, x², xy, y²; on the last, 1, x, x².
 /// </summary>
 /// <remarks>
-/// <para>A working type (the S-mmp plan's MMPR1 (i)).</para>
+/// <para>A working type.</para>
 /// <para>
-/// Each exercise's number of functions follows its own rate (the S-mmp plan's MMPR4 (xv), a documented divergence):
-/// QuantLib adjusts only the last exercise's count (<c>swapforwardbasissystem.cpp:53</c>, <c>:56</c>), so an earlier
-/// exercise in the last periods reports 10 functions where <see cref="Values"/> gives 6 or 3
-/// (<c>Divergences/BasisSystemFunctionCountTests.cs</c>).
+/// Each exercise's number of functions follows its own rate (a documented divergence): QuantLib adjusts only the last
+/// exercise's count (<c>swapforwardbasissystem.cpp:53</c>, <c>:56</c>), so an earlier exercise in the last periods
+/// reports 10 functions where <see cref="Values"/> gives 6 or 3 (<c>Divergences/BasisSystemFunctionCountTests.cs</c>).
 /// </para>
 /// </remarks>
 [WorkingType]

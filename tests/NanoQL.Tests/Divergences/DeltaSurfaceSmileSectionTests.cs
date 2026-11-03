@@ -11,15 +11,15 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The delta-quoted volatility surface's smile section and its forward (the S-van plan's VR4 (xxxii)). QuantLib's
-/// <c>blackVolSmile</c> passes the at-the-money volatility as the section's at-the-money level, or 1 without an
-/// at-the-money quote (<c>blackvolsurfacedelta.cpp:118</c>, <c>:135</c>), which <c>InterpolatedSmileSection</c> takes as
-/// the forward (<c>interpolatedsmilesection.hpp:52-58</c>) and its option prices, vega, digital prices and density read
-/// as the forward (<c>smilesection.cpp:78</c>, <c>:120</c>, <c>:124</c>, <c>:135</c>): on QuantLib's cases' surface, the
+/// The delta-quoted volatility surface's smile section and its forward. QuantLib's <c>blackVolSmile</c> passes the
+/// at-the-money volatility as the section's at-the-money level, or 1 without an at-the-money quote
+/// (<c>blackvolsurfacedelta.cpp:118</c>, <c>:135</c>), which <c>InterpolatedSmileSection</c> takes as the forward
+/// (<c>interpolatedsmilesection.hpp:52-58</c>) and its option prices, vega, digital prices and density read as the
+/// forward (<c>smilesection.cpp:78</c>, <c>:120</c>, <c>:124</c>, <c>:135</c>): on QuantLib's cases' surface, the
 /// six-month section prices on a forward of 0.11, the at-the-money volatility, where the surface's own forward, its
-/// <c>atmLevel(t)</c>, is S·P_f/P_d, about 1.17 [read]. nanoql's section takes the surface's forward; its volatilities
-/// are QuantLib's. The checks: the forward from QuantLib's curves, and the section's prices against Black's formula at
-/// the section's own volatilities.
+/// <c>atmLevel(t)</c>, is S·P_f/P_d, about 1.17. nanoql's section takes the surface's forward; its volatilities are
+/// QuantLib's. The checks: the forward from QuantLib's curves, and the section's prices against Black's formula at the
+/// section's own volatilities.
 /// </summary>
 public class DeltaSurfaceSmileSectionTests
 {

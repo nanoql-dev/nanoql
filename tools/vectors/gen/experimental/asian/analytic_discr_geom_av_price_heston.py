@@ -4,11 +4,11 @@
 (ql/experimental/asian/analytic_discr_geom_av_price_heston.hpp, .cpp), on the evaluation date 15 October 2026: Kim, Kim,
 Kim and Wee's discrete geometric average-price Asian options under Heston.
 
-Every price the engine makes is left out (the S-bar plan's §2.10: (xlix) and (xxxiv) move each by at least 8.5e-10,
-the Fourier integral's left-out stretch and its cut), so the outputs are the ones nothing moves: the refusals of an
-exercise that isn't European, a payoff that isn't plain vanilla and a running product of 0, and an expired option, on
-the three parameter sets of tools/vectors/gen/processes/hestonprocess.py on flat curves. The prices are checked in
-tests/NanoQL.Tests/Divergences/, against QuantLib's AnalyticHestonEngine at one fixing and against QUADPACK elsewhere.
+Every price the engine makes is left out (nanoql's fixes move each by at least 8.5e-10: the Fourier integral's left-out
+stretch and its cut), so the outputs are the ones nothing moves: the refusals of an exercise that isn't European, a
+payoff that isn't plain vanilla and a running product of 0, and an expired option, on the three parameter sets of
+tools/vectors/gen/processes/hestonprocess.py on flat curves. The prices are checked in tests/NanoQL.Tests/Divergences/,
+against QuantLib's AnalyticHestonEngine at one fixing and against QUADPACK elsewhere.
 
 The wheel's calls, by QuantLib-SWIG 1.44's options.i: AnalyticDiscreteGeometricAveragePriceAsianHestonEngine(process)
 and the option's NPV. Read back by

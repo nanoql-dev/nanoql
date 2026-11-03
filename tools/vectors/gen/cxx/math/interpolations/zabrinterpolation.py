@@ -9,23 +9,22 @@ at once, accepted after some, and run out at a tiny errorAccept; the maximum err
 the end criteria and the optimizer given; every parameter fixed; and no guess given. Then the factory's fits, whose
 values QuantLib reads through its Interpolation, the factory's trait, and QuantLib's refusals.
 
-**The fixed values come from a fresh section** (the plan's S7R5 (ii)). QuantLib's interpolation prices with a
-section built from a copy of the parameters, which its fit doesn't rebuild after writing the best restart's
-parameters back; so where the restarts run out, or Simplex's last trial isn't its best vertex, its values and errors
-are its last trial's, while nanoql's, rebuilt, are its best restart's. Each case's "values" are therefore those of a
-QuantLib ZabrSmileSection built fresh at the reported parameters (the harness's ZabrSmileSection::volatility), at the
-case's "valueStrikes", and its "rmsError" and "maxError" are recomputed by this generator from that section's
-volatilities at the smile's strikes, the smile's volatilities and the fit's weights, with QuantLib's formulas
-(xabrinterpolation.hpp:245-285: sums by loop, the maximum from QL_MIN_REAL, the plan's §2.11). The rest are QuantLib's
-interpolation's: the parameters, γ among them, the weights and the end criterion, which the stale copy doesn't touch.
-A factory's fit reports no parameters, so its cases are fits whose last evaluation is their result: one
-Levenberg-Marquardt minimization, one accepted at once, or every parameter fixed.
+**The fixed values come from a fresh section**. QuantLib's interpolation prices with a section built from a copy of the
+parameters, which its fit doesn't rebuild after writing the best restart's parameters back; so where the restarts run
+out, or Simplex's last trial isn't its best vertex, its values and errors are its last trial's, while nanoql's, rebuilt,
+are its best restart's. Each case's "values" are therefore those of a QuantLib ZabrSmileSection built fresh at the
+reported parameters (the harness's ZabrSmileSection::volatility), at the case's "valueStrikes", and its "rmsError" and
+"maxError" are recomputed by this generator from that section's volatilities at the smile's strikes, the smile's
+volatilities and the fit's weights, with QuantLib's formulas (xabrinterpolation.hpp:245-285: sums by loop, the maximum
+from QL_MIN_REAL). The rest are QuantLib's interpolation's: the parameters, γ among them, the weights and the end
+criterion, which the stale copy doesn't touch. A factory's fit reports no parameters, so its cases are fits whose last
+evaluation is their result: one Levenberg-Marquardt minimization, one accepted at once, or every parameter fixed.
 
-**The stability filter** (the plan's S7R6): every fit is refitted in the harness with its volatilities moved one ulp
-up, then down, by math.nextafter, every one together and each alone; an output is written only where every refit
-leaves it within 1e-12 × max(|base|, |moved|, 1) (equal, for the end criterion), and the others are dropped: a value
-by leaving its strike out of "valueStrikes", a parameter, an error or the end criterion by leaving its key out, the
-weights only all together. The generator prints the dropped outputs per case and for the file.
+**The stability filter**: every fit is refitted in the harness with its volatilities moved one ulp up, then down, by
+math.nextafter, every one together and each alone; an output is written only where every refit leaves it within 1e-12 ×
+max(|base|, |moved|, 1) (equal, for the end criterion), and the others are dropped: a value by leaving its strike out of
+"valueStrikes", a parameter, an error or the end criterion by leaving its key out, the weights only all together. The
+generator prints the dropped outputs per case and for the file.
 
 Each fit case's input "fit" is the harness's fit spec (tools/cxx/src/math/interpolations/zabrinterpolation.cpp),
 which tests/NanoQL.Tests/Vectors/Cxx/Numerics/Interpolations/ZabrInterpolationCxxVectorTests.cs reads back. A refused

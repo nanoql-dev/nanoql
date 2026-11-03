@@ -6,8 +6,8 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The calendar markets QuantLib deprecates by the attribute alone aren't ported (D5): Israel's <c>Settlement</c>, 0,
-/// an alias of the Tel Aviv stock exchange, and Italy's <c>Exchange</c>, 1, the old Milan stock exchange
+/// The calendar markets QuantLib deprecates by the attribute alone aren't ported: Israel's <c>Settlement</c>, 0, an
+/// alias of the Tel Aviv stock exchange, and Italy's <c>Exchange</c>, 1, the old Milan stock exchange
 /// (<c>israel.hpp:105-106</c>, <c>italy.hpp:78</c>). Each enum keeps QuantLib's other values and its constructor
 /// QuantLib's default, and the deprecated value is refused as any value outside the enum,
 /// <see cref="ArgumentOutOfRangeException"/> naming <c>market</c>, "unknown market".

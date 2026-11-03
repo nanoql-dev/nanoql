@@ -10,18 +10,17 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The analytic Hagan pricer's normalisation (the S-cms plan's CMR5 (xxii)): Hagan's analytic forms add
-/// sign·G′(R0)·annuity·(…) to (discount/annuity)·C(K) (<c>conundrumpricer.cpp:520-547</c>, <c>:573-576</c>), which
-/// presumes G(R0) = P(Tp)/A0, where the numeric pricer divides by G(R0) (<c>:472-490</c>). The shift g-functions' Z
-/// omits P(0,Tp)/P(0,T0) (<c>:783-786</c>), so their analytic convexity term is high by exactly P(T0)/P(Tp) against the
-/// numeric twin: on the wheel, on QuantLib's cms.cpp market (flat 5%, its at-the-money matrix), a 1-year-delay coupon
-/// fixing in 5 years prices 0.05235802683487254 on the analytic parallel shifts against 0.052312587540360674 numeric, a
-/// convexity adjustment 1.045 times the numeric one where the standard model's is 0.994. On an index discounting on a
-/// curve of its own (3% against a 5% forwarding curve), every analytic model is 7.9% above its numeric twin. nanoql
-/// scales the shift models' analytic term by P(0,Tp)/P(0,T0) on their own curve, and on an exogenous discounting curve
-/// takes discount·G′(R0)/G(R0) for annuity·G′(R0), as the numeric pricer normalises its integrand; the standard and
-/// exact-yield models on one curve keep QuantLib's values. QuantLib's check: its numeric twins, which neither part
-/// changes.
+/// The analytic Hagan pricer's normalisation: Hagan's analytic forms add sign·G′·annuity·(…) to (discount/annuity)·C(K)
+/// (<c>conundrumpricer.cpp:520-547</c>, <c>:573-576</c>), which presumes G = P(Tp)/A0, where the numeric pricer divides
+/// by G (<c>:472-490</c>). The shift g-functions' Z omits P(0,Tp)/P(0,T0) (<c>:783-786</c>), so their analytic
+/// convexity term is high by exactly P/P(Tp) against the numeric twin: on the wheel, on QuantLib's cms.cpp market (flat
+/// 5%, its at-the-money matrix), a 1-year-delay coupon fixing in 5 years prices 0.05235802683487254 on the analytic
+/// parallel shifts against 0.052312587540360674 numeric, a convexity adjustment 1.045 times the numeric one where the
+/// standard model's is 0.994. On an index discounting on a curve of its own (3% against a 5% forwarding curve), every
+/// analytic model is 7.9% above its numeric twin. nanoql scales the shift models' analytic term by P(0,Tp)/P(0,T0) on
+/// their own curve, and on an exogenous discounting curve takes discount·G′/G for annuity·G′, as the numeric pricer
+/// normalises its integrand; the standard and exact-yield models on one curve keep QuantLib's values. QuantLib's check:
+/// its numeric twins, which neither part changes.
 /// </summary>
 public class HaganAnalyticNormalisationTests
 {

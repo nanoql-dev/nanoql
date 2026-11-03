@@ -20,28 +20,28 @@ namespace NanoQL.PricingEngines;
 /// <remarks>
 /// <para>
 /// Stateless. The maturities are measured from the evaluation date, QuantLib's fix after v1.44 (#2891), where 1.44
-/// measures them from the choosing date and its critical value from twice it (the S-exo plan's ER6 (ii),
-/// <c>Divergences/ComplexChooserEqualTermsTests.cs</c>). QuantLib evaluates the formula on one zero rate, dividend
+/// measures them from the choosing date and its critical value from twice it
+/// (<c>Divergences/ComplexChooserEqualTermsTests.cs</c>). QuantLib evaluates the formula on one zero rate, dividend
 /// yield and volatility per maturity, its critical value on the times between the dates, so it is exact only on flat
 /// markets; here each term reads the variances to each date at the call's strike, the correlations from their ratios
-/// and the discounts by date, and the critical spot solves the forward Black values from the choosing date (ER4,
-/// <c>Divergences/ComplexChooserTermStructureTests.cs</c>, against the exact integral at the choosing date within the
-/// critical value's accuracy). The bivariate normal is West's, QuantLib's default, where its engine reads Drezner's
-/// (ER7). QuantLib's Newton iteration and stopping rule are kept, capped at 1,000 iterations (ED24).
+/// and the discounts by date, and the critical spot solves the forward Black values from the choosing date
+/// (<c>Divergences/ComplexChooserTermStructureTests.cs</c>, against the exact integral at the choosing date within the
+/// critical value's accuracy). The bivariate normal is West's, QuantLib's default, where its engine reads Drezner's.
+/// QuantLib's Newton iteration and stopping rule are kept, capped at 1,000 iterations.
 /// </para>
 /// <para>
-/// Every structure is read by date, accruing nothing before its own date (ER5 (xxiv),
-/// <c>Divergences/ExoticMismatchedTimesTests.cs</c>); a date before the process's clock keeps QuantLib's "negative
+/// Every structure is read by date, accruing nothing before its own date
+/// (<c>Divergences/ExoticMismatchedTimesTests.cs</c>); a date before the process's clock keeps QuantLib's "negative
 /// time" refusal.
 /// </para>
 /// </remarks>
 public static class AnalyticComplexChooserEngine
 {
-    // ED24's cap on QuantLib's Newton loops.
+    // The cap on QuantLib's Newton loops.
     internal const int MaxIterations = 1000;
 
     // QuantLib's Newton-Raphson loops, this engine's and the holder-extensible engine's: from sv, Newton steps on f's
-    // value and derivative while the value exceeds 0.001 in magnitude, refused past MaxIterations steps (ED24).
+    // value and derivative while the value exceeds 0.001 in magnitude, refused past MaxIterations steps.
     internal static double Newton(double sv, Func<double, (double Value, double Derivative)> f)
     {
         (double yi, double di) = f(sv);
@@ -86,7 +86,7 @@ public static class AnalyticComplexChooserEngine
         return option.FetchResults(new OneAssetOptionResults { NPV = new Form(option, process).Value() });
     }
 
-    // QuantLib's engine over one call's option, its time and rate reads made ER4's discounts and variances by date.
+    // QuantLib's engine over one call's option, its time and rate reads made discounts and variances by date.
     private sealed class Form
     {
         private readonly double spot, strikeCall, strikePut;
@@ -172,7 +172,7 @@ public static class AnalyticComplexChooserEngine
             }
         }
 
-        // QuantLib's criticalValue(), capped (ED24): the spot where the call less the put is worth nothing.
+        // QuantLib's criticalValue(), capped: the spot where the call less the put is worth nothing.
         private double CriticalValue() =>
             Newton(spot, sv =>
             {

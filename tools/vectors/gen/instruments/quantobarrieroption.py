@@ -12,11 +12,10 @@ analytic barrier engine leaves unset (null; the wheel's QuantoBarrierOption expo
 ported QuantoOptionTests' testBarrierValues checks). Then an expired option and the refusal of a spot beyond the
 barrier.
 
-The outputs nanoql fixes are left out (the S-bar plan's §2.10, the S-rx plan's §2.5 and the S-exo plan's): every
-process here has positive rates and volatilities and one day counter and reference date, so none is at zero volatility
-or on structures dated or day-counted apart, and no rebate is negative or has no real lambda (the analytic barrier
-engine's divergence facts); and every volatility is flat, where QuantLib reads the quanto sensitivities' volatility at
-the spot (tests/NanoQL.Tests/Divergences/QuantoSmileTests.cs).
+The outputs nanoql fixes are left out: every process here has positive rates and volatilities and one day counter and
+reference date, so none is at zero volatility or on structures dated or day-counted apart, and no rebate is negative
+or has no real lambda (the analytic barrier engine's divergence facts); and every volatility is flat, where QuantLib
+reads the quanto sensitivities' volatility at the spot (tests/NanoQL.Tests/Divergences/QuantoSmileTests.cs).
 
 A case holds one process, exercise and barrier (tools/vectors/gen/pricingengines/barrier/analyticbarrierengine.py's
 specs) and a quanto spec (quantoengine.py's), its outputs one per payoff. The wheel's calls, by QuantLib-SWIG 1.44's

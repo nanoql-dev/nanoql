@@ -18,17 +18,17 @@ namespace NanoQL.PricingEngines;
 /// <remarks>
 /// <para>
 /// The value and, where the generator allows one, its error estimate, with the grid as the additional result
-/// <c>"TimeGrid"</c>, as QuantLib's (the S-bar plan's BR1 (iii)): a static class over a private simulation deriving
+/// <c>"TimeGrid"</c>, as QuantLib's: a static class over a private simulation deriving
 /// <see cref="MCDiscreteAveragingAsianEngineBase{TMc, TPath, TStats}"/> on multi-variate paths, the grid the fixing
-/// times with the steps or steps per year given, the seed explicit (S2R4). The process is <see cref="HestonProcess"/>
-/// or a process deriving it, QuantLib's template parameter <c>P</c>.
+/// times with the steps or steps per year given, the seed explicit. The process is <see cref="HestonProcess"/> or a
+/// process deriving it, QuantLib's template parameter <c>P</c>.
 /// </para>
 /// <para>
-/// Documented divergences (BR5). The paths and the discount run on the engine's clock, <see cref="FdmHestonOp.Clock"/>,
-/// from the earliest reference date of the structures, where QuantLib's run on the risk-free curve's (BR1 (v),
-/// <c>Divergences/AsianMismatchedTimesTests.cs</c>). The geometric product is kept in double's normal range and the past
-/// fixings are read by their log where their product leaves it ((xli), <see cref="GeometricAPOHestonPathPricer"/>); a
-/// fixing date given twice counts twice ((xxviii)).
+/// Documented divergences. The paths and the discount run on the engine's clock, <see cref="FdmHestonOp.Clock"/>, from
+/// the earliest reference date of the structures, where QuantLib's run on the risk-free curve's
+/// (<c>Divergences/AsianMismatchedTimesTests.cs</c>). The geometric product is kept in double's normal range and the
+/// past fixings are read by their log where their product leaves it (<see cref="GeometricAPOHestonPathPricer"/>); a
+/// fixing date given twice counts twice.
 /// </para>
 /// </remarks>
 public static class MCDiscreteGeometricAPHestonEngine
@@ -160,7 +160,7 @@ public static class MCDiscreteGeometricAPHestonEngine
                 throw new NanoQLException("wrong exercise given");
             }
 
-            // the past fixings by their log where their product leaves double's normal range (BR5 (xli))
+            // the past fixings by their log where their product leaves double's normal range
             double product = RunningAccumulator;
             bool inRange = double.IsNormal(product) && product > 0.0;
             return new GeometricAPOHestonPathPricer(

@@ -11,10 +11,10 @@ using Vector = NanoQL.Numerics.Vector;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The time-dependent and rough Heston models are immutable (the S-hes plan's HD9): <c>WithParams</c> returns a new
-/// model of the receiver's type with the parameters, QuantLib's <c>setParams</c>, and leaves the receiver unchanged. The
-/// time-dependent model keeps its curves, spot and grid; the rough model builds its process from the given process's
-/// curves and spot and the new parameters, where its constructor keeps the given process, QuantLib's.
+/// The time-dependent and rough Heston models are immutable: <c>WithParams</c> returns a new model of the receiver's
+/// type with the parameters, QuantLib's <c>setParams</c>, and leaves the receiver unchanged. The time-dependent model
+/// keeps its curves, spot and grid; the rough model builds its process from the given process's curves and spot and the
+/// new parameters, where its constructor keeps the given process, QuantLib's.
 /// </summary>
 public class CalibratedHestonModelCopyTests
 {

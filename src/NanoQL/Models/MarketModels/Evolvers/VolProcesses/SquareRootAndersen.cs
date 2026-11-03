@@ -14,32 +14,31 @@ namespace NanoQL.Models;
 /// step, its step's standard deviation multiplier the weighted average of the variance at the sub-steps' ends.
 /// </summary>
 /// <remarks>
-/// <para>A working type (the S-mm plan's MR1 (ii)), with <see cref="Clone"/>.</para>
+/// <para>A working type, with <see cref="Clone"/>.</para>
 /// <para>
 /// Three departures from QuantLib (<c>Divergences/SquareRootAndersenFirstStepTests.cs</c>, <c>…StepsTests.cs</c>,
 /// <c>…SmallReversionTests.cs</c>): the first evolution step's sub-steps revert by e^{−κΔt}, where QuantLib leaves that
-/// factor 0, reverting the variance to its mean in full over the first step (MR3 (xvii);
-/// <c>squarerootandersen.cpp:51-52</c>); <see cref="NumberSteps"/> is the evolution steps, where QuantLib's multiplies
-/// its sub-steps by the sub-steps again (MR3 (xiii); <c>:80</c>); and below |κΔt| = 1e-2 the conditional variance's
-/// (1 − e^{−κΔt})/κ is −expm1(−κΔt)/κ, Δt at κ = 0, where QuantLib's cancels to 0 or NaN (MR3 (xviii);
-/// <c>:96-97</c>), QuantLib's form and bits at and above the cut. A process with no evolution times or a first one not
-/// positive, a step before a path starts or past the path's steps, and too few variates, which QuantLib reads before or
-/// past its vectors, are refused (MR3 (xx)).
+/// factor 0, reverting the variance to its mean in full over the first step (<c>squarerootandersen.cpp:51-52</c>);
+/// <see cref="NumberSteps"/> is the evolution steps, where QuantLib's multiplies its sub-steps by the sub-steps again
+/// (<c>:80</c>); and below |κΔt| = 1e-2 the conditional variance's (1 − e^{−κΔt})/κ is −expm1(−κΔt)/κ, Δt at κ = 0,
+/// where QuantLib's cancels to 0 or NaN (<c>:96-97</c>), QuantLib's form and bits at and above the cut. A process with
+/// no evolution times or a first one not positive, a step before a path starts or past the path's steps, and too few
+/// variates, which QuantLib reads before or past its vectors, are refused.
 /// </para>
 /// <para>
-/// Two more under R8 (<c>Divergences/SquareRootAndersenDegenerateStepTests.cs</c>): where the conditional variance is
-/// 0 (no vol of variance), the variance and its mean both 0, or ψ so small that QuantLib's quadratic form overflows
+/// Two more fixes (<c>Divergences/SquareRootAndersenDegenerateStepTests.cs</c>): where the conditional variance is 0
+/// (no vol of variance), the variance and its mean both 0, or ψ so small that QuantLib's quadratic form overflows
 /// (below about 1.5e-154), the sub-step's variance is its conditional mean, the form's limit, where QuantLib's is NaN
 /// (<c>:102-103</c>); and the cut point picks each ψ's form inside its domain, clamped to [1, 2], where QuantLib's cut
 /// below 1 sends ψ below 1 to the exponential form, whose p is then no probability, and a cut above 2 sends ψ above 2
-/// to the quadratic form's square root of a negative (<c>:100</c>). QuantLib's bits elsewhere and at every cut in
-/// [1, 2].
+/// to the quadratic form's square root of a negative (<c>:100</c>). QuantLib's bits elsewhere and at every cut in [1,
+/// 2].
 /// </para>
 /// </remarks>
 [WorkingType]
 public sealed class SquareRootAndersen : MarketModelVolProcess
 {
-    // S-g1d's cut for cancellation-free forms (G1R4).
+    // The cut below which the cancellation-free forms apply.
     private const double SmallReversion = 1e-2;
 
     private readonly double theta;
@@ -91,7 +90,7 @@ public sealed class SquareRootAndersen : MarketModelVolProcess
             throw new ArgumentException("at least one evolution time is required", nameof(evolutionTimes));
         }
 
-        // QuantLib checks each later step's size; the first's is checked here (MR3 (xx)).
+        // QuantLib checks each later step's size; the first's is checked here.
         if (!(evolutionTimes[0] > 0.0))
         {
             throw new ArgumentException("Steps must be of positive size.", nameof(evolutionTimes));
@@ -105,7 +104,7 @@ public sealed class SquareRootAndersen : MarketModelVolProcess
         numberOfSteps = evolutionTimes.Length;
         this.w1 = w1;
         this.w2 = w2;
-        // each form inside its domain: the quadratic for ψ ≤ 2, the exponential for ψ ≥ 1 (R8)
+        // each form inside its domain: the quadratic for ψ ≤ 2, the exponential for ψ ≥ 1
         psiC = cutPoint < 1.0 ? 1.0 : cutPoint > 2.0 ? 2.0 : cutPoint;
         int subSteps = checked(evolutionTimes.Length * numberSubSteps);
         dt = new double[subSteps];
@@ -123,7 +122,7 @@ public sealed class SquareRootAndersen : MarketModelVolProcess
             {
                 dt[j] = dt0;
 
-                // QuantLib leaves the first step's factors 0 (MR3 (xvii)).
+                // QuantLib leaves the first step's factors 0.
                 eMinuskDt[j] = ekdt0;
             }
         }
@@ -145,7 +144,7 @@ public sealed class SquareRootAndersen : MarketModelVolProcess
             }
         }
 
-        // below the cut, (1 − e^{−κΔt})/κ without its cancellation (MR3 (xviii))
+        // below the cut, (1 − e^{−κΔt})/κ without its cancellation
         for (int s = 0; s < subSteps; ++s)
         {
             double x = k * dt[s];
@@ -184,7 +183,7 @@ public sealed class SquareRootAndersen : MarketModelVolProcess
     public override int VariatesPerStep => numberSubSteps;
 
     /// <inheritdoc/>
-    /// <remarks>The evolution steps; QuantLib's multiplies its sub-steps by the sub-steps again (MR3 (xiii)).</remarks>
+    /// <remarks>The evolution steps; QuantLib's multiplies its sub-steps by the sub-steps again.</remarks>
     public override int NumberSteps => numberOfSteps;
 
     /// <inheritdoc/>
@@ -205,7 +204,7 @@ public sealed class SquareRootAndersen : MarketModelVolProcess
     public override double Nextstep(ReadOnlySpan<double> variates)
     {
         // QuantLib's variance is uninitialized before a path, and it writes past its path's variances after the last
-        // step (MR3 (xx)).
+        // step.
         if (!started)
         {
             throw new NanoQLException("nextPath must be called before nextstep");
@@ -278,12 +277,12 @@ public sealed class SquareRootAndersen : MarketModelVolProcess
         }
         else
         {
-            // (1 − e)/κ as f and (1 − e)²/(2κ) as (κf) f/2 (MR3 (xviii))
+            // (1 − e)/κ as f and (1 − e)²/(2κ) as (κf) f/2
             s2 = (vt * epsilon * epsilon * eminuskT * f) + (theta * epsilon * epsilon * (k * f) * f / 2.0);
         }
 
-        // no conditional variance, ψ 0 or, with the mean 0 too, 0/0: the limit, as below (R8); a negative or NaN s²,
-        // an invalid process's, stays QuantLib's NaN
+        // no conditional variance, ψ 0 or, with the mean 0 too, 0/0: the limit, as below; a negative or NaN s², an
+        // invalid process's, stays QuantLib's NaN
         if (s2 == 0.0)
         {
             vt = m;

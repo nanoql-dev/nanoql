@@ -5,11 +5,10 @@ process's mesher, from the density's eps-quantile to its (1 - eps)-quantile, on 
 
 Elasticities on both sides of 1 and below 0 (delta below and above 2, and a mass at zero above eps), over volatility
 parameters at 10% to 75%, maturities of a quarter to five years, sizes 2 to 101, eps 1e-4 to 1e-8, scale factors 1 and
-1.5, with no critical point, one inside the bounds and one outside: the locations, dplus and dminus. The band
-|beta - 1| < 1e-3, where nanoql takes the lognormal limit's bounds (the S-van plan's VR10,
-tests/NanoQL.Tests/Divergences/FdCevNearOneTests.cs), is none of the grid's; the cases where QuantLib's density
-inverse steps below zero and Boost refuses it, which nanoql fixes (tests/NanoQL.Tests/Divergences/
-CevDensityBelowZeroTests.cs), are left out by Boost's message.
+1.5, with no critical point, one inside the bounds and one outside: the locations, dplus and dminus. The band |beta -
+1| < 1e-3, where nanoql takes the lognormal limit's bounds (tests/NanoQL.Tests/Divergences/FdCevNearOneTests.cs), is
+none of the grid's; the cases where QuantLib's density inverse steps below zero and Boost refuses it, which nanoql
+fixes (tests/NanoQL.Tests/Divergences/CevDensityBelowZeroTests.cs), are left out by Boost's message.
 
 A spec is {"type": "CEV", "size", "f0", "alpha", "beta", "maturity", "eps", "scaleFactor", "cPoint": [point, density]
 or [null, null]}, which the CEV operator's and engines' generators share. The wheel's calls, by QuantLib-SWIG 1.44's
@@ -39,8 +38,8 @@ def _load(name, rel):
 spm = _load("fdmsimpleprocess1dmesher", "methods/finitedifferences/meshers/fdmsimpleprocess1dmesher.py")
 R = ql.Date(15, ql.October, 2026)
 
-# Boost's refusal where QuantLib's density inverse steps below zero, which nanoql fixes (the S-van plan's C3,
-# tests/NanoQL.Tests/Divergences/CevDensityBelowZeroTests.cs): the cases left out
+# Boost's refusal where QuantLib's density inverse steps below zero, which nanoql fixes
+# (tests/NanoQL.Tests/Divergences/CevDensityBelowZeroTests.cs): the cases left out
 BELOW_ZERO = "Non centrality parameter is"
 
 

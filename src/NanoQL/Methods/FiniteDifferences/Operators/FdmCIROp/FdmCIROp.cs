@@ -18,17 +18,16 @@ namespace NanoQL.Methods;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A working type (the S-eq plan's SEQR1): its three parts are built at construction; <see cref="SetTime"/> rewrites
-/// them in place, and the apply, splitting solves and preconditioner write into the caller's spans through buffers it
-/// holds, so a step allocates nothing (the S-van plan's VD12). Its times are <see cref="FdmBlackScholesOp.Clock"/>'s,
-/// the dividend curve and the volatility read on it, each on its own.
+/// A working type: its three parts are built at construction; <see cref="SetTime"/> rewrites them in place, and the
+/// apply, splitting solves and preconditioner write into the caller's spans through buffers it holds, so a step
+/// allocates nothing. Its times are <see cref="FdmBlackScholesOp.Clock"/>'s, the dividend curve and the volatility read
+/// on it, each on its own.
 /// </para>
 /// <para>
 /// QuantLib's rates part is σ²r ∂ᵣᵣ where the CIR generator's is ½σ²r ∂ᵣᵣ, and its mixed term 2ρσ_Sσ where the
 /// covariance is ρσ_Sσ√r (<c>fdmcirop.cpp:55-60</c>, <c>:74-82</c>): QuantLib's operator prices a rate with twice the
-/// CIR variance, and blows up at ρ ≠ 0. Here the generator's coefficients (the S-van plan's VR4 (xv)). With a quanto
-/// helper the drift is less its adjustment at the grid's rate (<see cref="FdmCIREquityPart"/>'s remarks), where
-/// QuantLib's operator takes no helper.
+/// CIR variance, and blows up at ρ ≠ 0. Here the generator's coefficients. With a quanto helper the drift is less its
+/// adjustment at the grid's rate (<see cref="FdmCIREquityPart"/>'s remarks), where QuantLib's operator takes no helper.
 /// </para>
 /// </remarks>
 [WorkingType]

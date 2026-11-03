@@ -15,16 +15,16 @@ namespace NanoQL.Tests.Conventions;
 
 /// <summary>
 /// The multi-dimensional Monte Carlo loop and the finite-difference Heston, Bates and Heston-Hull-White steps allocate
-/// nothing (the S-hes plan's HR2 (iii) and HD8, S3's closing ruling in S-sr's forms): the draw-price-add of
-/// <see cref="EuropeanHestonPathPricer"/> on paths a <see cref="MultiPathGenerator{TGsg}"/> steps in place through the
-/// process's in-place forms, on a <see cref="HestonProcess"/> under the quadratic-exponential martingale scheme and
-/// full truncation and on a <see cref="BatesProcess"/>, each batch into an <see cref="IncrementalStatistics"/>, which
-/// keeps no sample; the same of <see cref="EuropeanGJRGARCHPathPricer"/> on a <see cref="GJRGARCHProcess"/> and of
+/// nothing: the draw-price-add of <see cref="EuropeanHestonPathPricer"/> on paths a
+/// <see cref="MultiPathGenerator{TGsg}"/> steps in place through the process's in-place forms, on a
+/// <see cref="HestonProcess"/> under the quadratic-exponential martingale scheme and full truncation and on a
+/// <see cref="BatesProcess"/>, each batch into an <see cref="IncrementalStatistics"/>, which keeps no sample; the same
+/// of <see cref="EuropeanGJRGARCHPathPricer"/> on a <see cref="GJRGARCHProcess"/> and of
 /// <see cref="HestonHullWhitePathPricer"/> on a <see cref="HybridHestonHullWhiteProcess"/> under both discretizations,
 /// its step terms in double-double at a·dt 0.005; and a rollback of <see cref="FdmBackwardSolver"/> on
 /// <see cref="FdmHestonOp"/>, plain, with a quanto helper and a leverage function, and with the FD Heston barrier
-/// engines' Dirichlet boundaries at one barrier and at both (the S-bar plan's BR1), on <see cref="FdmBatesOp"/> and
-/// on <see cref="FdmHestonHullWhiteOp"/>, under the engines' default scheme, Hundsdorfer's; and a step of the forward
+/// engines' Dirichlet boundaries at one barrier and at both, on <see cref="FdmBatesOp"/> and on
+/// <see cref="FdmHestonHullWhiteOp"/>, under the engines' default scheme, Hundsdorfer's; and a step of the forward
 /// operators the stochastic-local volatility calibration evolves, <see cref="FdmHestonFwdOp"/> under each
 /// transformation, with and without a leverage function, and <see cref="FdmSquareRootFwdOp"/>, on Hundsdorfer's scheme
 /// and on the modified Craig-Sneyd scheme; and a step of <see cref="HestonSLVProcess"/> in place on each branch of its

@@ -32,41 +32,38 @@ namespace NanoQL.Experimental;
 /// control variate.
 /// </para>
 /// <para>
-/// Documented divergences (the S-bar plan's BR5, SD22). QuantLib cuts its integral at ξ 100 on 128 Gauss-Legendre
-/// points, before the integrand decays at short maturities and small variance (−51% on a ten-day Asian at v₀ 0.0025;
-/// (xxxiv), <c>Divergences/HestonGeometricAsianCutoffTests.cs</c>), and leaves out [0, 1e-8 ξ_max] ((xlix)). Here:
+/// Documented divergences. QuantLib cuts its integral at ξ 100 on 128 Gauss-Legendre points, before the integrand
+/// decays at short maturities and small variance (−51% on a ten-day Asian at v₀ 0.0025;
+/// <c>Divergences/HestonGeometricAsianCutoffTests.cs</c>), and leaves out [0, 1e-8 ξ_max]. Here:
 /// </para>
 /// <list type="bullet">
 /// <item><description><c>Phi</c> in a stable form, ω̃ through tanh and the logs of the Riccati factors through log1p,
 /// where QuantLib's terms of order 1/σ² cancel at small vol of vol and its cosh and sinh overflow at long maturities
-/// ((l), <c>Divergences/HestonGeometricAsianSmallParameterTests.cs</c>); below a vol of vol of 1e-4, a cubic in σ
-/// through the Black-Scholes limit at σ = 0; at a vanishing square root, γ = 0, the forms' limits ((xxxii), κ =
-/// 0).</description></item>
+/// (<c>Divergences/HestonGeometricAsianSmallParameterTests.cs</c>); below a vol of vol of 1e-4, a cubic in σ through
+/// the Black-Scholes limit at σ = 0; at a vanishing square root, γ = 0, the forms' limits (κ = 0).</description></item>
 /// <item><description>Before the integral, a switch: a point mass at v₀ = θ = 0, priced at its intrinsic; and the
 /// discounted intrinsic where a Chernoff bound on the extrinsic value, from <c>Phi</c> at real s up to the moment
-/// explosion, is at or below 1e-12 × max(the discounted intrinsic, D F_G/100) ((xxxiv), BR12,
-/// <c>Divergences/HestonGeometricAsianIntrinsicTests.cs</c>).</description></item>
+/// explosion, is at or below 1e-12 × max(the discounted intrinsic, D F_G/100)
+/// (<c>Divergences/HestonGeometricAsianIntrinsicTests.cs</c>).</description></item>
 /// <item><description>The integral on Carr and Madan's damped contour: the out-of-the-money option on its own strip
 /// where that strip is at least 0.5 wide, else on Lewis's middle strip, the other by parity; Lord and Kahl's α inside
 /// the half of the strip next to its pole; the explosions by the closed-form first-zero test of the Riccati factors
-/// ((xxxiv) (a), <c>Divergences/HestonGeometricAsianExplosionTests.cs</c>); cut where <c>Phi</c>'s modulus falls below
-/// 1e-14 of its value on the contour's axis, or at the engine's ξ_max where that is later; split at the decades of ξ
-/// and at the peak's width below 1; on NanoQL's adaptive Kronrod rule at the price's R7 scale, max(the price, the
-/// lower bound, D F_G/100), in two passes, accepted where two breakpoint sets agree within it, a third on
-/// disagreement, each set capped at 1e6 evaluations ((xxxiv) (e)–(k), BR12,
-/// <c>Divergences/HestonGeometricAsianStrikeScaleTests.cs</c>).</description></item>
+/// (<c>Divergences/HestonGeometricAsianExplosionTests.cs</c>); cut where <c>Phi</c>'s modulus falls below 1e-14 of its
+/// value on the contour's axis, or at the engine's ξ_max where that is later; split at the decades of ξ and at the
+/// peak's width below 1; on NanoQL's adaptive Kronrod rule at the price's tolerance scale, max(the price, the lower
+/// bound, D F_G/100), in two passes, accepted where two breakpoint sets agree within it, a third on disagreement, each
+/// set capped at 1e6 evaluations (<c>Divergences/HestonGeometricAsianStrikeScaleTests.cs</c>).</description></item>
 /// <item><description>Refused, with "variance too small for the Heston geometric engine near the forward", where the
-/// switch doesn't fire and the cut lies past ξ 1e7, which no checkable route reaches (BR10, BR11).</description></item>
+/// switch doesn't fire and the cut lies past ξ 1e7, which no checkable route reaches.</description></item>
 /// <item><description>F_G exact, S₀ D_q(t)/D_r(t), where every fixing time is one t and none is past, where
-/// <c>Phi</c>(1, 0) is 0/0; the call floored at D max(F_G − K, 0), the put at its mirror ((xxxiv) (c),
-/// (d)).</description></item>
+/// <c>Phi</c>(1, 0) is 0/0; the call floored at D max(F_G − K, 0), the put at its mirror.</description></item>
 /// </list>
 /// <para>
 /// Times run on the engine's clock, <see cref="FdmHestonOp.Clock"/>, from the earliest reference date of the process's
-/// curves, each discount read at its instants (BR1 (v)). A fixing before the evaluation date is left out, as the Monte
-/// Carlo engines leave it, where QuantLib reads its negative time into the intervals; one from the evaluation date to
-/// the clock's origin is taken at the origin, as a past fixing at the spot (the S-bar code review's B3-1,
-/// <c>Divergences/AsianLateSettlementTests.cs</c>).
+/// curves, each discount read at its instants. A fixing before the evaluation date is left out, as the Monte Carlo
+/// engines leave it, where QuantLib reads its negative time into the intervals; one from the evaluation date to the
+/// clock's origin is taken at the origin, as a past fixing at the spot
+/// (<c>Divergences/AsianLateSettlementTests.cs</c>).
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]
@@ -127,7 +124,7 @@ public static class AnalyticDiscreteGeometricAveragePriceAsianHestonEngine
         int pastFixings;
         if (arguments.AverageType == AverageType.Geometric)
         {
-            // the product by its log where it leaves double's range (BR5 (xli))
+            // the product by its log where it leaves double's range
             if (!(arguments.RunningAccumulator > 0.0 || arguments.RunningLogSum > double.NegativeInfinity))
             {
                 throw new NanoQLException(
@@ -205,7 +202,7 @@ public static class AnalyticDiscreteGeometricAveragePriceAsianHestonEngine
             process.V0, process.Kappa, process.Theta, process.Sigma, process.Rho, Math.Log(process.S0), [.. fixingTimes], [.. tauK],
             kStar, trT, bigTrT, tkrTk, startTime, expiryTime);
 
-        // F_G exact where every fixing time is one t and none is past, where Phi(1, 0) is 0/0 ((xxxiv) (c))
+        // F_G exact where every fixing time is one t and none is past, where Phi(1, 0) is 0/0
         double forward;
         int future = fixingTimes.Count - kStar;
         if (kStar == 0 && future > 0 && fixingTimes[0] == fixingTimes[^1])
@@ -248,7 +245,7 @@ public static class AnalyticDiscreteGeometricAveragePriceAsianHestonEngine
         };
     }
 
-    // The price on the damped contour, the switch before it ((xxxiv), BR10–BR12), for one strike, discount and forward.
+    // The price on the damped contour, the switch before it, for one strike, discount and forward.
     private sealed class Route(CharacteristicFunction model, double strike, double discount, double forward, bool call, double xiRightLimit)
     {
         private readonly double logStrike = Math.Log(strike);
@@ -358,7 +355,7 @@ public static class AnalyticDiscreteGeometricAveragePriceAsianHestonEngine
             return double.IsFinite(best) ? discount * Math.Exp(best) : double.PositiveInfinity;
         }
 
-        // The strip and Lord and Kahl's alpha + 1 on it ((xxxiv) (e), (f))
+        // The strip and Lord and Kahl's alpha + 1 on it
         private (bool OtmCall, Strip Strip, double A1) Contour(double sStar, double sMinus)
         {
             bool otmCall = strike >= forward;
@@ -435,9 +432,9 @@ public static class AnalyticDiscreteGeometricAveragePriceAsianHestonEngine
             return cut;
         }
 
-        // the damped integral over [0, cut], split at the decades of xi and at the peak's width below 1, the breakpoints
-        // shifted by an offset in the exponent, each piece on its share of the tolerance, the set capped at 1e6
-        // evaluations ((xxxiv) (h), (j), (k))
+        // the damped integral over [0, cut], split at the decades of xi and at the peak's width below 1, the
+        // breakpoints shifted by an offset in the exponent, each piece on its share of the tolerance, the set capped at
+        // 1e6 evaluations
         private double Integral(double a1, double lp0, Strip strip, double cut, double tolerance, double offset)
         {
             double alpha = a1 - 1;
@@ -531,8 +528,8 @@ public static class AnalyticDiscreteGeometricAveragePriceAsianHestonEngine
         return 0.5 * (lo + hi);
     }
 
-    // QuantLib's Phi on one option's fixings, in (l)'s stable form, the cubic bridge below a vol of vol of 1e-4 (a
-    // per-call working object, SD23)
+    // QuantLib's Phi on one option's fixings, in the stable form, the cubic bridge below a vol of vol of 1e-4 (a
+    // per-call working object)
     private sealed class CharacteristicFunction
     {
         private readonly double v0, kappa, theta, sigma, rho, logS0;
@@ -617,7 +614,7 @@ public static class AnalyticDiscreteGeometricAveragePriceAsianHestonEngine
         }
 
         // The moment explosion past 1 (side +1) or below 0 (side -1) at real s: the last admitted point on quarter
-        // decades of s - 1 or -s from 1e-12 to 1e12, refined by bisection ((xxxiv) (a), (f))
+        // decades of s - 1 or -s from 1e-12 to 1e12, refined by bisection
         public double Explosion(int side)
         {
             double start = side > 0 ? 1.0 : 0.0;
@@ -653,8 +650,7 @@ public static class AnalyticDiscreteGeometricAveragePriceAsianHestonEngine
         }
 
         // the closed-form first zero of each interval's Riccati factor at real s: admitted where no interval's end
-        // reaches it ((xxxiv) (a)); under the cubic bridge, where every node's stable form admits it, the bridge reading
-        // them all
+        // reaches it; under the cubic bridge, where every node's stable form admits it, the bridge reading them all
         private bool Admitted(double s) =>
             bridge is null ? AdmittedHere(s) : AdmittedHere(s) && bridge.All(node => node.AdmittedHere(s));
 
@@ -733,8 +729,8 @@ public static class AnalyticDiscreteGeometricAveragePriceAsianHestonEngine
             }
         }
 
-        // QuantLib's omega_tilde(k) from omega_tilde(k + 1) = z2 and z1 = z(k + 1), in (l)'s overflow-safe form:
-        // omega + [z2 + (2 z1 - kappa z2) tanh(h)/gamma]/[1 + c tanh(h)/gamma], h = tau gamma/2, c = kappa - z2 sigma^2,
+        // QuantLib's omega_tilde(k) from omega_tilde(k + 1) = z2 and z1 = z(k + 1), in the overflow-safe form: omega +
+        // [z2 + (2 z1 - kappa z2) tanh(h)/gamma]/[1 + c tanh(h)/gamma], h = tau gamma/2, c = kappa - z2 sigma^2,
         // tanh(h)/gamma -> tau/2 where gamma = 0
         private Complex OmegaTilde(Complex s, Complex w, int k, int n, Complex z1, Complex z2, double tau)
         {
@@ -752,9 +748,9 @@ public static class AnalyticDiscreteGeometricAveragePriceAsianHestonEngine
             return g.Real < 0 ? -g : g;
         }
 
-        // QuantLib's Phi in logs: a + v0 omega_tilde(k*) + (term3 - term4), the last as
-        // kappa theta sum[tau 2 z1/(kappa + gamma) - (2/sigma^2) log1p(sigma^2 X)], X = (1 - e^(-tau gamma))(2 z1/(kappa +
-        // gamma) - z2)/(2 gamma), its limits where gamma = 0 ((l))
+        // QuantLib's Phi in logs: a + v0 omega_tilde(k*) + (term3 - term4), the last as kappa theta sum[tau 2 z1/(kappa
+        // + gamma) - (2/sigma^2) log1p(sigma^2 X)], X = (1 - e^(-tau gamma))(2 z1/(kappa + gamma) - z2)/(2 gamma), its
+        // limits where gamma = 0
         private Complex StableLogPhi(Complex s, Complex w)
         {
             int n = tN.Length;
@@ -797,7 +793,7 @@ public static class AnalyticDiscreteGeometricAveragePriceAsianHestonEngine
         }
 
         // the Black-Scholes limit at sigma = 0: a deterministic variance V(t) = theta t - (v0 - theta) expm1(-kappa t)/
-        // kappa (v0 t at kappa = 0), ln G and ln S_T normal ((l))
+        // kappa (v0 t at kappa = 0), ln G and ln S_T normal
         private Complex BlackScholesLogPhi(Complex s, Complex w)
         {
             double V(double time) => kappa == 0.0

@@ -29,9 +29,9 @@ namespace NanoQL.Experimental;
 /// Kennedy, "Implied interest rate pricing models", Finance Stochast. 2, 275-293 (1998).
 /// </para>
 /// <para>
-/// A static class, D14's form. The floating leg's spread moves to the fixed leg first, the fixed rates lowered by the
-/// rate whose fixed-leg value is the spread's; the swap then splits into vanilla swaps ending at each fixed payment
-/// date, whose weights solve a linear system (by <see cref="SVD"/>) and whose rates are shifted by a λ that
+/// A static class in the engines' form. The floating leg's spread moves to the fixed leg first, the fixed rates lowered
+/// by the rate whose fixed-leg value is the spread's; the swap then splits into vanilla swaps ending at each fixed
+/// payment date, whose weights solve a linear system (by <see cref="SVD"/>) and whose rates are shifted by a λ that
 /// <see cref="Bisection"/> finds in [−0.5, 0.5] to 1e-8 so that the basket's value matches the swap's; the price is the
 /// sum of the weighted vanilla swaptions, each by <see cref="BachelierSwaptionEngine"/> on a normal volatility. The
 /// basket is a working object per call. As QuantLib warns, a spread isn't handled exactly, and the swaptions assume

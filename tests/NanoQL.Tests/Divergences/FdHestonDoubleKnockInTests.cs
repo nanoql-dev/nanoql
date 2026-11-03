@@ -12,15 +12,14 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The FD Heston double knock-in (the S-bar plan's BR8 (b), a refusal lifted under the user's rule of 2026-10-20).
-/// QuantLib refuses "only Knock-Out double barrier options are supported" (<c>fdhestondoublebarrierengine.cpp:52</c>),
-/// where its single-barrier FD Heston engine prices knock-ins as vanilla + rebate − knock-out
-/// (<c>fdhestonbarrierengine.cpp:165-196</c>). nanoql prices the double knock-in so: QuantLib's FD Heston vanilla less
-/// its double knock-out without a rebate, plus the rebate, paid at expiry where no barrier is touched, as R × the
-/// engine's cash-or-nothing knock-out at strike 0 (BR5 (xlvi)'s convention), every leg with the knock-out's leverage
-/// function and mixing factor (Revision 6, F3-2). Checks: at a vanishing vol of vol, QuantLib's own legs, 11.124212 −
-/// 1.897300 = 9.226912, and its analytic double knock-in 9.242178, the FD grid's 0.17% (the reviewer's r2b); the binary
-/// leg against QuantLib's analytic double-barrier binary engine; and parity on a stochastic-local model.
+/// The FD Heston double knock-in (a refusal lifted). QuantLib refuses "only Knock-Out double barrier options are
+/// supported" (<c>fdhestondoublebarrierengine.cpp:52</c>), where its single-barrier FD Heston engine prices knock-ins
+/// as vanilla + rebate − knock-out (<c>fdhestonbarrierengine.cpp:165-196</c>). nanoql prices the double knock-in so:
+/// QuantLib's FD Heston vanilla less its double knock-out without a rebate, plus the rebate, paid at expiry where no
+/// barrier is touched, as R × the engine's cash-or-nothing knock-out at strike 0 (the analytic engines' convention),
+/// every leg with the knock-out's leverage function and mixing factor. Checks: at a vanishing vol of vol, QuantLib's
+/// own legs, 11.124212 − 1.897300 = 9.226912, and its analytic double knock-in 9.242178, the FD grid's 0.17%; the
+/// binary leg against QuantLib's analytic double-barrier binary engine; and parity on a stochastic-local model.
 /// </summary>
 public class FdHestonDoubleKnockInTests
 {

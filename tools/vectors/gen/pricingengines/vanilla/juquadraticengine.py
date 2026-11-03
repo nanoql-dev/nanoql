@@ -8,14 +8,14 @@ delta and gamma where early exercise can be optimal, the European value and ever
 option whose window opened before the evaluation date, an expired one, and the refusals of a European exercise, a
 payoff at expiry and a spot at zero.
 
-The outputs QuantLib's master changes since the pin are left out (the S-van plan's VR5 (iii), #2906): where QuantLib's
-value falls below the European value, which the master floors at it (tests/NanoQL.Tests/TestSuite/
-AmericanOptionTests.cs' testJuNotBelowEuropeanValue), judged against the analytic European engine with a margin. So
-are the outputs nanoql fixes in the critical price Ju shares with Barone-Adesi-Whaley, where its Newton iteration
-leaves its range (VR4 (vii), Divergences/BaroneAdesiWhaleyCriticalPriceTests.cs), and the puts' in-the-money
-probability (the S-eq plan's SEQR7), both as the Barone-Adesi-Whaley generator judges them.
-Every structure is dated on the evaluation date and counts on Actual/365 (Fixed), and no window opens after it, so the
-mismatched-dates class (ApproximationTheta...) and the window (ApproximationWindowTests.cs) don't reach the file.
+The outputs QuantLib's master changes since the pin are left out (#2906): where QuantLib's value falls below the
+European value, which the master floors at it (tests/NanoQL.Tests/TestSuite/AmericanOptionTests.cs'
+testJuNotBelowEuropeanValue), judged against the analytic European engine with a margin. So are the outputs nanoql
+fixes in the critical price Ju shares with Barone-Adesi-Whaley, where its Newton iteration leaves its range
+(Divergences/BaroneAdesiWhaleyCriticalPriceTests.cs), and the puts' in-the-money probability, both as the
+Barone-Adesi-Whaley generator judges them. Every structure is dated on the evaluation date and counts on Actual/365
+(Fixed), and no window opens after it, so the mismatched-dates class (ApproximationTheta...) and the window
+(ApproximationWindowTests.cs) don't reach the file.
 
 The wheel's calls, by QuantLib-SWIG 1.44's options.i: JuQuadraticApproximationEngine(process), the C++ constructor,
 VanillaOption(payoff, exercise), and the option's NPV and Greeks, OneAssetOption's accessors; the European value from

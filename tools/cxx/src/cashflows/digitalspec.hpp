@@ -11,7 +11,7 @@
 // position Position::Type's integer. A leg's digital settings are {"callStrikes", "longCallOption", "callATM",
 // "callPayoffs", "putStrikes", "longPutOption", "putATM", "putPayoffs", "replication", "nakedOption"}, the strikes and
 // payoffs lists whose null elements are Null<Rate>(); the leg's builder always sets the naked option flag, which
-// QuantLib's leaves uninitialized otherwise (the S-cms plan's CMR5 (viii)).
+// QuantLib's leaves uninitialized otherwise.
 //
 // A digital coupon's inspectors are {"callStrike", "putStrike", "callDigitalPayoff", "putDigitalPayoff" (null for
 // Null<Rate>()), "hasCall", "hasPut", "hasCollar", "isLongCall", "isLongPut", "date", "accrualStartDate",

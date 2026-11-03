@@ -14,9 +14,8 @@ namespace NanoQL.Methods;
 /// after each application of the operator and each solve.
 /// </summary>
 /// <remarks>
-/// A working type (the S-eq plan's SEQR1): <see cref="SetTime"/> evaluates the function and holds its values for the
-/// step; the schemes call it in QuantLib's order. Its values before the first <see cref="SetTime"/> are 0, where
-/// QuantLib's are uninitialized.
+/// A working type: <see cref="SetTime"/> evaluates the function and holds its values for the step; the schemes call it
+/// in QuantLib's order. Its values before the first <see cref="SetTime"/> are 0, where QuantLib's are uninitialized.
 /// </remarks>
 [WorkingType]
 public sealed class FdmTimeDepDirichletBoundary : BoundaryCondition<FdmLinearOp>

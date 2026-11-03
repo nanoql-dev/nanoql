@@ -4,8 +4,8 @@
 # REUSE-IgnoreStart
 """The shipped conventions' catalogue, docs/conventions-catalogue.md, written from the presets files: every record
 ConventionSet.QuantLib reads, by kind, each with its name, QuantLib's name where the record gives one, its base and its
-fields, in the files' order; and FpML's codes with Exhibit A's notice, since the page displays them outside software
-(the plan's CVR18). The page carries FpML's licence beside nanoql's, as aliases.xml does."""
+fields, in the files' order; and FpML's codes with Exhibit A's notice, since the page displays them outside software.
+The page carries FpML's licence beside nanoql's, as aliases.xml does."""
 import os
 import sys
 import xml.etree.ElementTree as ET

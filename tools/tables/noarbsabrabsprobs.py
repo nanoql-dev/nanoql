@@ -1,8 +1,7 @@
 # SPDX-FileCopyrightText: 2026 The nanoql Authors
 # SPDX-License-Identifier: Apache-2.0
 """Generates the absorption table QuantLib's no-arbitrage SABR model reads, from
-ql/experimental/volatility/noarbsabrabsprobs.cpp at the pin (docs/porting-playbook.md §1, generated tables; the S-xeq
-plan's XED4).
+ql/experimental/volatility/noarbsabrabsprobs.cpp at the pin (docs/porting-playbook.md §1, generated tables).
 
 Usage: .venv\\Scripts\\python -I tools/tables/noarbsabrabsprobs.py <QuantLib v1.44 worktree> [<output root>]
 
@@ -11,7 +10,7 @@ QuantLib's array sabrabsprob, its 1,209,600 absorption counts out of 2,500,000 s
 expiries, initial volatilities, correlations, volatilities of volatility and betas, in QuantLib's order, as
 little-endian 32-bit signed integers. QuantLib's array is of unsigned long, every entry an integer literal below 2^31,
 so each converts exactly. The loader, src/NanoQL/Experimental/Volatility/NoArbSabrAbsProbs.cs, reads it back.
-tools/check-upstream.py (G4 (6)) regenerates it into a temporary folder and compares the bytes with the committed file.
+tools/check-upstream.py regenerates it into a temporary folder and compares the bytes with the committed file.
 """
 import os
 import re

@@ -17,7 +17,7 @@ namespace NanoQL.PricingEngines;
 /// <summary>
 /// <see cref="MCAmericanEngine"/> on pseudo-random draws with QuantLib's default statistics: QuantLib-Python's
 /// <c>MCPRAmericanEngine</c>, QuantLib's <c>MCAmericanEngine&lt;PseudoRandom&gt;</c>, its calculations closed at
-/// <see cref="PseudoRandom"/> and <see cref="GeneralStatistics"/> (D12).
+/// <see cref="PseudoRandom"/> and <see cref="GeneralStatistics"/>.
 /// </summary>
 public static class MCPRAmericanEngine
 {
@@ -46,7 +46,7 @@ public static class MCPRAmericanEngine
     /// <see langword="null"/>.</exception>
     /// <exception cref="ArgumentException">
     /// The time steps are given neither or both ways, or aren't positive; the basis family is insufficient; a
-    /// regression's matrix isn't finite (the second-kind Chebyshev basis on a call, VR7).
+    /// regression's matrix isn't finite (the second-kind Chebyshev basis on a call).
     /// </exception>
     /// <exception cref="ArgumentOutOfRangeException">
     /// A number of samples is negative, a seed is outside its range, or the default calibration seed is 0.

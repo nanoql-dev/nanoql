@@ -13,8 +13,8 @@ namespace NanoQL.Experimental;
 /// <summary>The base class of random default models: sequences of random default times, one for each name in the
 /// pool.</summary>
 /// <remarks>
-/// A working type (the S-xcr plan's XR5): each <see cref="NextSequence"/> replaces <see cref="Pool"/> by a copy holding
-/// the sequence's default times, where QuantLib's sets them on the pool it shares.
+/// A working type: each <see cref="NextSequence"/> replaces <see cref="Pool"/> by a copy holding the sequence's default
+/// times, where QuantLib's sets them on the pool it shares.
 /// </remarks>
 [Experimental("NQL0001")]
 [WorkingType]

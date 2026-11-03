@@ -20,7 +20,7 @@ namespace NanoQL.Experimental;
 /// It has no payoff, and its results are an engine's <see cref="InstrumentResults"/>: Hagan's engine prices it
 /// (<see cref="HaganIrregularSwaptionEngine"/>). QuantLib's <c>impliedVolatility</c> isn't ported: on QuantLib 1.44
 /// every call throws, "null pricing engine" on an unpriced swaption and "wrong argument type" on a priced one, its Black
-/// helper's arguments being a vanilla swaption's (the S-xrt plan's XRD9).
+/// helper's arguments being a vanilla swaption's.
 /// </remarks>
 [Experimental("NQL0001")]
 public sealed class IrregularSwaption : Option

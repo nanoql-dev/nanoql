@@ -21,7 +21,7 @@ namespace NanoQL.Experimental;
 /// <para>
 /// An extension point, as in QuantLib: an engine for another model derives it and returns, for each expiry, the model's
 /// state there: its characteristic function, its discount factors and the strip of exponents with a finite moment.
-/// Immutable: QuantLib's cache of precalculated prices is the list form's result (the S-xeq plan's XER1), so
+/// Immutable: QuantLib's cache of precalculated prices is the list form's result, so
 /// <see cref="Calculate(IReadOnlyList{VanillaOption}, EvaluationContext)"/> returns each option's results in the list's
 /// order, QuantLib's <c>precalculate</c> followed by each option's <c>NPV()</c>, one transform per expiry on the grid
 /// QuantLib's map would hold; a single option is a list of one, QuantLib's uncached route. An expired option gets its
@@ -29,22 +29,21 @@ namespace NanoQL.Experimental;
 /// no state to clear or separate.
 /// </para>
 /// <para>
-/// Documented divergences (<c>Divergences/VarianceGammaFftTests.cs</c>). The grid is sized from the largest |log K| of the
-/// expiry's strikes and at least 2^14 points, QuantLib's size wherever its own is at least 2^14 (every QuantLib case),
-/// where QuantLib's size is undefined when every strike is below e^(−λ), and below 2^14 points, as for any strike
-/// between 1 and about 60, its frequency spacing 2π/(λn) is too coarse for the transform to price (XER5 (xix); the
-/// user's ruling at the S-xeq run's stop 6). The damping is QuantLib's 1.25, and its grid, wherever E[S^2.25] is finite
-/// (every Black-Scholes market, every QuantLib case), the grid doubled at the same spacing until two successive grids
-/// agree within 5e-5 of the spot at every strike, QuantLib's prices where its own grid agrees with the first doubling
-/// and the finer grid's where a later one agrees, up to 2^22, past which a refusal: QuantLib's period λn aliases the
-/// damped call's tail once σ√T passes about 1.2, an at-the-money call pricing −298.9 against 66.80 at σ√T 2 (the user's
-/// ruling at the S-xeq run's stop 9); the same refusal where the damped tail's growth, ln E[S^2.25] − 2.25 ln E[S]
-/// (α(α + 1)σ²T/2 under Black-Scholes), passes 18, σ√T 3.58, where the recovered prices carry a rounding error no grid
-/// changes, so two grids agree while both are off (the code review's O2-1); otherwise half the strip's upper bound with the grid doubled
-/// until α·nλ/2 ≥ 20, while the grid stays within 2^22 points; past that the put side, α + 1 = max(u_lo/2, −0.25)
-/// inside the strip's lower part, the grid doubled from QuantLib's until two successive grids agree within 1e-8 of each
-/// strike's larger of call and put, up to 2^22, the calls by QuantLib's parity; past that a refusal (XER5 (xviii), the
-/// user's rulings of 2026-10-28 at about 10:22, 10:55 and 11:27).
+/// Documented divergences (<c>Divergences/VarianceGammaFftTests.cs</c>). The grid is sized from the largest |log K| of
+/// the expiry's strikes and at least 2^14 points, QuantLib's size wherever its own is at least 2^14 (every QuantLib
+/// case), where QuantLib's size is undefined when every strike is below e^(−λ), and below 2^14 points, as for any
+/// strike between 1 and about 60, its frequency spacing 2π/(λn) is too coarse for the transform to price. The damping
+/// is QuantLib's 1.25, and its grid, wherever E[S^2.25] is finite (every Black-Scholes market, every QuantLib case),
+/// the grid doubled at the same spacing until two successive grids agree within 5e-5 of the spot at every strike,
+/// QuantLib's prices where its own grid agrees with the first doubling and the finer grid's where a later one agrees,
+/// up to 2^22, past which a refusal: QuantLib's period λn aliases the damped call's tail once σ√T passes about 1.2, an
+/// at-the-money call pricing −298.9 against 66.80 at σ√T 2; the same refusal where the damped tail's growth, ln
+/// E[S^2.25] − 2.25 ln E[S] (α(α + 1)σ²T/2 under Black-Scholes), passes 18, σ√T 3.58, where the recovered prices carry
+/// a rounding error no grid changes, so two grids agree while both are off; otherwise half the strip's upper bound with
+/// the grid doubled until α·nλ/2 ≥ 20, while the grid stays within 2^22 points; past that the put side, α + 1 =
+/// max(u_lo/2, −0.25) inside the strip's lower part, the grid doubled from QuantLib's until two successive grids agree
+/// within 1e-8 of each strike's larger of call and put, up to 2^22, the calls by QuantLib's parity; past that a
+/// refusal.
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]
@@ -61,8 +60,8 @@ public abstract class FFTEngine
     // own change on doubling is at most 4.0e-5 up to σ√T 1.1, 3.6e-4 and more where its period aliases (stop 9)
     private const double TailAgreement = 5e-5;
 
-    // the damped tail's growth past which two grids agree on a rounding floor: 17.2 at σ√T 3.5 prices within 5e-5 of the
-    // spot, 19.8 at 3.75 errs 3.3e-4 at a spot of 1 (the code review's O2-1)
+    // the damped tail's growth past which two grids agree on a rounding floor: 17.2 at σ√T 3.5 prices within 5e-5 of
+    // the spot, 19.8 at 3.75 errs 3.3e-4 at a spot of 1
     private const double TailGrowthBound = 18.0;
 
     private const string TailRefusal =
@@ -163,7 +162,8 @@ public abstract class FFTEngine
     /// <returns>The state, its characteristic function and discount factors.</returns>
     protected abstract ExpiryState PrecalculateExpiry(Date d, EvaluationContext context);
 
-    // One expiry's prices: the damping and grid by XER5 (xviii) and (xix), then QuantLib's transform and interpolation
+    // One expiry's prices: the damping and grid as the class documents them, then QuantLib's transform and
+    // interpolation
     private double[] PriceExpiry(Date expiryDate, EvaluationContext context, double[] strikes, OptionType[] types)
     {
         double lambda = LogStrikeSpacing;
@@ -176,7 +176,7 @@ public abstract class FFTEngine
         double[] puts;
         if (state.StripUpper is not double hi || hi > QuantLibAlpha + 1.0)
         {
-            // QuantLib's damping and grid, doubled where its period aliases the damped tail (the ruling at stop 9)
+            // QuantLib's damping and grid, doubled where its period aliases the damped tail
             calls = TailAgreedGrid(state, strikes, n0, df);
             puts = Parity(calls, strikes, df, div, toPuts: true);
         }
@@ -248,7 +248,7 @@ public abstract class FFTEngine
     }
 
     // QuantLib's grid at the damping 1.25 where its first doubling agrees within 5e-5 of the spot at every strike, the
-    // finer grid of the first two successive grids that agree otherwise, up to 2^22 points (the ruling at stop 9)
+    // finer grid of the first two successive grids that agree otherwise, up to 2^22 points
     private double[] TailAgreedGrid(ExpiryState state, double[] strikes, int n0, double df)
     {
         // ln E[S^(α+1)] − (α+1) ln E[S], the transform at −(α+1)i and at −i
@@ -301,8 +301,8 @@ public abstract class FFTEngine
         return result;
     }
 
-    // QuantLib's n, from the expiry's largest |log K| (XER5 (xix)): its largest strike's log wherever that dominates, and
-    // at least 2^14 (the ruling at stop 6)
+    // QuantLib's n, from the expiry's largest |log K|: its largest strike's log wherever that dominates, and at least
+    // 2^14
     private static int QuantLibPoints(double[] strikes, double lambda)
     {
         double maxStrike = 0.0;

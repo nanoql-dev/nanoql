@@ -15,7 +15,7 @@ namespace NanoQL.Bind.Emitting;
 /// PEP 8's snake case with nanoql's defaults, an overload group as one method that picks its form by the arguments and
 /// declares each with <c>typing.overload</c>; the experimental API in <c>nanoql.experimental</c>, whose import adds the
 /// experimental members of stable classes. Each function's kinds go into a table the runtime makes its prototype from. A
-/// user's assembly gets a package of its own, named by its prefix, whose classes extend nanoql's (BIR9).
+/// user's assembly gets a package of its own, named by its prefix, whose classes extend nanoql's.
 /// </summary>
 internal sealed class PythonWriter(Surface surface)
 {
@@ -74,9 +74,9 @@ internal sealed class PythonWriter(Surface surface)
     }
 
     /// <summary>
-    /// Each C function's Python member as the generated modules write it, for the Excel back end's repro templates
-    /// (XLR14): its module, nanoql's or a user prefix's and its experimental module where its class is experimental, its
-    /// class, its name, its style and its parameters' Python names. Nothing is written.
+    /// Each C function's Python member as the generated modules write it, for the Excel back end's repro templates: its
+    /// module, nanoql's or a user prefix's and its experimental module where its class is experimental, its class, its
+    /// name, its style and its parameters' Python names. Nothing is written.
     /// </summary>
     /// <returns>The members by C name.</returns>
     public IReadOnlyDictionary<string, (string Module, string Class, string Member, string Style, IReadOnlyList<string> Params)> Table()
@@ -164,8 +164,8 @@ internal sealed class PythonWriter(Surface surface)
 
             if (!fs.Any(f => f.Kind == "new" && (t.Experimental || !f.Experimental)))
             {
-                // No base's constructor builds this class (B2D10): the runtime's refusal, a preset's naming its lookup.
-                // An experimental constructor attached on import replaces it.
+                // No base's constructor builds this class: the runtime's refusal, a preset's naming its lookup. An
+                // experimental constructor attached on import replaces it.
                 sb.AppendLine("    __init__ = Object.__init__");
                 if (MadeBy(t.Type) is { } lookup)
                 {
@@ -234,8 +234,8 @@ internal sealed class PythonWriter(Surface surface)
             stableAll.Count + experimentalAll.Count, surface.Enums.Count(e => e.Prefix == prefix));
     }
 
-    // A user's package's __init__.py: the superset library beside it loaded in place of nanoql's own, before any object
-    // (BIR9), unless NANOQL_LIBRARY names one; then its classes.
+    // A user's package's __init__.py: the superset library beside it loaded in place of nanoql's own, before any
+    // object, unless NANOQL_LIBRARY names one; then its classes.
     private static string UserInit(string prefix)
     {
         var sb = new StringBuilder();
@@ -362,7 +362,7 @@ internal sealed class PythonWriter(Surface surface)
     }
 
     // A class's name in the module being written: a user's module names another prefix's class through its module, as
-    // the user's own may take the same name (B2-1).
+    // the user's own may take the same name.
     private string Name(TypeRow t) => Name(t.Prefix, t.CName, t.Experimental);
 
     private string Name(string owner, string name, bool experimental) => owner == prefix ? name : (experimental ? "_nx." : "_n.") + name;

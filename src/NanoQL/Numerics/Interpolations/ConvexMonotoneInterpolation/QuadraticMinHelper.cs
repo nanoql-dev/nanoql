@@ -9,7 +9,7 @@ namespace NanoQL.Numerics;
 // QuantLib's detail::QuadraticMinHelper: the section's quadratic kept non-negative. Where the parabola dips below 0
 // inside the section it is split: its average raised, the parabola squeezed to the section's ends and 0 between them.
 //
-// Two fixes of QuantLib's split test (the S-core plan's CR7 (i) and (ii); documented divergences):
+// Two fixes of QuantLib's split test (documented divergences):
 // - QuantLib splits wherever the discriminant b² − 4ac is positive (convexmonotoneinterpolation.hpp:524), even where
 //   the parabola never dips below 0 inside the section, a linear or concave piece, which breaks the section's average
 //   and the forwards' continuity. Here it splits only where the parabola is convex, its vertex inside (0, 1) and the

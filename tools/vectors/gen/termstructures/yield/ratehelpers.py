@@ -14,23 +14,24 @@ helpers on each date, appended after them.
   Saturday and Good Friday, which QuantLib refuses as fixing dates).
 - 63 swap helpers on Euribor-style indexes, the base 5 years on Euribor 6M against an annual, unadjusted 30/360 fixed
   leg on TARGET: tenors from 1 to 30 years; fixed frequencies (Once among them) and conventions; fixed day counters;
-  spreads; forward starts, a negative one among them; a discounting curve; settlement days from 0 to 5; the three
-  pillar choices, a custom pillar too late and none at all refused; end of month; indexed and at-par coupons, by the
-  helper's choice and by the context's switch; floating-leg conventions; Euribor 3M and 1Y, and an index of the US
-  dollar on the US SOFR calendar; S5R4's three: QuantLib's empty calendar with unadjusted conventions, which builds,
-  and with an adjusting one, which QuantLib refuses ("no calendar implementation provided"), and no fixed day counter,
-  which takes the currency's; and 12 dated helpers (built with forDates), month ends with end of month either way, a
-  short front stub, a seasoned swap, and the Once frequency and reversed dates, which QuantLib refuses.
+  spreads; forward starts, a negative one among them; a discounting curve; settlement days from 0 to 5; the three pillar
+  choices, a custom pillar too late and none at all refused; end of month; indexed and at-par coupons, by the helper's
+  choice and by the context's switch; floating-leg conventions; Euribor 3M and 1Y, and an index of the US dollar on the
+  US SOFR calendar; three more: QuantLib's empty calendar with unadjusted conventions, which builds, and with an
+  adjusting one, which QuantLib refuses ("no calendar implementation provided"), and no fixed day counter, which takes
+  the currency's; and 12 dated helpers (built with forDates), month ends with end of month either way, a short front
+  stub, a seasoned swap, and the Once frequency and reversed dates, which QuantLib refuses.
 - 42 FRA helpers in QuantLib's five wrapped forms: from months to start and end with conventions (the months out of
   order and equal, which QuantLib refuses after building the dates; the calendars, conventions, end of month, day
-  counters, pillar choices, a custom pillar too late and none at all refused, and the indexed coupon); from months to start on an index; from a period to start on an
-  index (weeks and days added to a tenor in months, which QuantLib refuses); from IMM offsets on an index (the spot
-  date itself for an offset of 0, offsets out of order, which QuantLib takes as they are, DS14); and between dates
-  (built with forDates), reversed dates among them, which QuantLib takes as they are.
+  counters, pillar choices, a custom pillar too late and none at all refused, and the indexed coupon); from months to
+  start on an index; from a period to start on an index (weeks and days added to a tenor in months, which QuantLib
+  refuses); from IMM offsets on an index (the spot date itself for an offset of 0, offsets out of order, which QuantLib
+  takes as they are); and between dates (built with forDates), reversed dates among them, which QuantLib takes as they
+  are.
 - 41 futures helpers in QuantLib's three forms, IMM, ASX and custom: a start date that is an IMM or ASX date on either
   cycle, and one that isn't, which QuantLib refuses; lengths, calendars, conventions, end of month, day counters and
   convexity adjustments; from dates, with no end date (three IMM or ASX dates on, and for a custom helper a null
-  maturity, DS13), an end date not after the start (refused for IMM and ASX, taken for custom); and on an index.
+  maturity), an end date not after the start (refused for IMM and ASX, taken for custom); and on an index.
 - 20 FX swap helpers: from a tenor (spot and tomorrow-next swaps, tenors to 2 years, fixing days, the TARGET, US and UK
   calendars, a trading calendar, conventions and end of month, either currency the collateral's, and no collateral
   curve, with which QuantLib builds the helper but can't bind it); and between dates (built with forDates).
@@ -94,20 +95,20 @@ the harness counterpart cxx/termstructures/yield/ratehelpers, which import this 
   QuantLib's empty values and nulls;
 - {"kind": "BMASwapRateHelper", "form": "tenor", "rate", "tenor", "settlementDays", "calendar", "bmaPeriod",
   "bmaConvention", "bmaDayCount", "index"}, the rate being the Libor fraction, the BMA index QuantLib's BMAIndex with no
-  curve (the helper reads its calendar only), and a null day counter QuantLib's empty one;
-a period is [length, units]; a calendar and a day counter are specs of indexes/interestrateindex.py, null for
-QuantLib's empty one; an index is a spec of instruments/fixedvsfloatingswap.py; the discounting curve is null or a flat
-forward spec; null settlement days are Null<Natural>(), a null custom pillar date Date(), and null coupon and floating
-convention choices std::nullopt; enums are QuantLib's integers. The wheel's helpers take the quote as a float, but for
-the fixing-date and dated forms, which take a QuoteHandle; a zero spread is an empty handle, which QuantLib reads as 0.
-QuantLib-Python can't build an empty calendar or day counter: the empty ones are ql.Schedule().calendar() and
-ql.InterestRate().dayCounter(). SwapRateHelper.forDates, FraRateHelper.forDates, FxSwapRateHelper.forDates and
-OISRateHelper.forDates are statics the wheel adds, calling QuantLib's dated constructors.
+  curve (the helper reads its calendar only), and a null day counter QuantLib's empty one; a period is [length, units];
+  a calendar and a day counter are specs of indexes/interestrateindex.py, null for QuantLib's empty one; an index is a
+  spec of instruments/fixedvsfloatingswap.py; the discounting curve is null or a flat forward spec; null settlement days
+  are Null<Natural>(), a null custom pillar date Date(), and null coupon and floating convention choices std::nullopt;
+  enums are QuantLib's integers. The wheel's helpers take the quote as a float, but for the fixing-date and dated forms,
+  which take a QuoteHandle; a zero spread is an empty handle, which QuantLib reads as 0. QuantLib-Python can't build an
+  empty calendar or day counter: the empty ones are ql.Schedule().calendar() and ql.InterestRate().dayCounter().
+  SwapRateHelper.forDates, FraRateHelper.forDates, FxSwapRateHelper.forDates and OISRateHelper.forDates are statics the
+  wheel adds, calling QuantLib's dated constructors.
 
-An OIS helper with telescopic value dates takes QuantLib's values by S3R11's rule, as the overnight coupons' vectors do:
-QuantLib builds it with the flag first, so a refusal is its own; its values are then those of the same helper built
-without the flag, its coupons given ArithmeticAveragedOvernightIndexedCouponPricer(byApprox=True) where they average,
-the pricer the flag selects (value_spec). Read back by
+An OIS helper with telescopic value dates takes QuantLib's values by the telescopic rule, as the overnight coupons'
+vectors do: QuantLib builds it with the flag first, so a refusal is its own; its values are then those of the same
+helper built without the flag, its coupons given ArithmeticAveragedOvernightIndexedCouponPricer(byApprox=True) where
+they average, the pricer the flag selects (value_spec). Read back by
 tests/NanoQL.Tests/Vectors/TermStructures/Yield/RateHelpersVectorTests.cs, with
 tests/NanoQL.Tests/Vectors/RateHelperInputs.cs, which documents the specs."""
 import importlib.util
@@ -323,8 +324,8 @@ def ois_dates(rate, start, end, index=ESTR, discount=None, telescopic=False, pay
 
 
 def value_spec(spec):
-    """The spec whose wheel helper gives QuantLib's values by S3R11's rule: an OIS helper with telescopic value dates
-    without the flag, its coupons given the averaging approximation's pricer where they average and have none."""
+    """The spec whose wheel helper gives QuantLib's values by the telescopic rule: an OIS helper with telescopic value
+    dates without the flag, its coupons given the averaging approximation's pricer where they average and have none."""
     if spec["kind"] != "OISRateHelper" or not spec["telescopicValueDates"]:
         return spec
     out = dict(spec, telescopicValueDates=False)
@@ -446,7 +447,7 @@ def make_helper(spec):
 
 
 def make_value_helper(spec):
-    """The wheel's helper whose values are QuantLib's by S3R11's rule (value_spec), after the helper as specified,
+    """The wheel's helper whose values are QuantLib's by the telescopic rule (value_spec), after the helper as specified,
     whose refusal is QuantLib's own, has been built."""
     h = make_helper(spec)
     return h if value_spec(spec) is spec else make_helper(value_spec(spec))
@@ -954,7 +955,7 @@ def check_rows(out):
                     "swap custom pillar not given", "swap empty calendar, ModifiedFollowing",
                     "swap dated, paying once", "swap dated, reversed"):
         assert by_name[f"{first} {refused}"] == {"built": v.THROWS}, refused
-    # S5R4: QuantLib's empty calendar builds with unadjusted conventions.
+    # QuantLib's empty calendar builds with unadjusted conventions.
     assert by_name[f"{first} swap empty calendar, unadjusted"]["built"] is True
     # The at-par switch moves the default pillar through the last coupon's fixing end date.
     assert (by_name[f"{first} swap the switch's indexed coupons"]["pillarDate"]

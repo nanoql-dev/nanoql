@@ -10,9 +10,9 @@ refuses others). The forward deltas, which the wheel's options don't return, are
 testGoldenChoiBasketEngineExample's (tests/NanoQL.Tests/TestSuite/BasketOptionTests.cs).
 
 Every node prices by the single-factor engine's formula at the root of a sum of exponentials, found by Brent's solver,
-so S7R6 applies (the S-exo plan's ED12): each case is refitted with each spot, the strike, each weight and each
-correlation (its two halves together) moved one ulp up and down, and a value that moves by more than 1e-12 relative in
-any refit is dropped, QuantLib's own cases covering the solve.
+so the stability filter applies: each case is refitted with each spot, the strike, each weight and each correlation (its
+two halves together) moved one ulp up and down, and a value that moves by more than 1e-12 relative in any refit is
+dropped, QuantLib's own cases covering the solve.
 
 The specs are tools/vectors/gen/instruments/basketoption.py's options and an engine {"processes", "rho", "lambda",
 "maxNrIntegrationSteps" (null for QuantLib's default, the largest Size), "calcFwdDelta", "controlVariate"}. The wheel's

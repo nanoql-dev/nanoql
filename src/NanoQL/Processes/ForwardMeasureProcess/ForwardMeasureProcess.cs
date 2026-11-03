@@ -10,9 +10,9 @@ namespace NanoQL.Processes;
 /// <remarks>
 /// <para>
 /// QuantLib's <c>setForwardMeasureTime</c> changes the process; here <see cref="WithForwardMeasureTime"/> returns a
-/// copy at the new time (PR6.4b), which a derived process overrides with its own type, rebuilding there any state of
-/// its own that reads the time. A process built without a forward measure time refuses to read one, where QuantLib's
-/// reads its uninitialized member: a divergence (master plan §2.2's undefined-path row).
+/// copy at the new time, which a derived process overrides with its own type, rebuilding there any state of its own
+/// that reads the time. A process built without a forward measure time refuses to read one, where QuantLib's reads its
+/// uninitialized member: a divergence (the playbook's undefined-behaviour row).
 /// </para>
 /// <para>An extension point, as in QuantLib: G2's forward process derives from it.</para>
 /// </remarks>

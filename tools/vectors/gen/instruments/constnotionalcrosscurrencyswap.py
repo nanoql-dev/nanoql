@@ -12,7 +12,7 @@ payer flags, leg currencies (codes), start and maturity dates and whether it has
 amounts; and DiscountingConstNotionalCrossCurrencySwapEngine's results, USD domestic and EUR foreign at a spot of 1.1:
 the NPV, the per-leg NPV and BPS, each in the NPV's currency and in the leg's own, the start and end discounts, or the
 refused pricing, the one output "calculate". NPVs and amounts are compared at the largest notional, BPS at it times
-1e-4. Left out (the S-rx plan's SRXR3 (xviii)): legs whose BPS is zero.
+1e-4. Left out: legs whose BPS is zero.
 
 The functions here build the specs and the swaps every cross-currency generator shares (instruments/
 constnotionalcrosscurrencybasisswap, constnotionalcrosscurrencyfixedvsfloatingswap, pricingengines/swap/

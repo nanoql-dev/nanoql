@@ -11,7 +11,7 @@ namespace NanoQL.Experimental;
 
 /// <summary>
 /// A base model of the base-correlation loss model: a loss model of one correlation, built per correlation the surface
-/// gives, QuantLib's <c>setupModels</c> specialisations (the S-xcr plan's XR2 (d)).
+/// gives, QuantLib's <c>setupModels</c> specialisations.
 /// </summary>
 /// <typeparam name="TInitTraits">The copula's initialization parameters.</typeparam>
 /// <remarks>An extension point: QuantLib's four base models implement it, and a model of one's own can.</remarks>

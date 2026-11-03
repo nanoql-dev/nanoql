@@ -18,8 +18,8 @@ namespace NanoQL.Coupons;
 /// the leg through <see cref="CashFlowVectorsFunctions.FloatingDigitalLeg{TIndex, TCoupon}"/> in place of QuantLib's
 /// conversion operator. The coupons are built without pricers, as QuantLib's are. The leg pays the underlying's rate
 /// unless <see cref="WithNakedOption"/> is set: QuantLib's builder leaves its flag uninitialized until that call, an
-/// undefined read (R8, the S-cms plan's CMR5 (viii); QuantLib's check, its legs built with
-/// <c>withNakedOption(false)</c>). A builder has no value equality: its vectors compare by reference.
+/// undefined read (QuantLib's check, its legs built with <c>withNakedOption(false)</c>). A builder has no value
+/// equality: its vectors compare by reference.
 /// </remarks>
 public sealed record DigitalIborLeg
 {

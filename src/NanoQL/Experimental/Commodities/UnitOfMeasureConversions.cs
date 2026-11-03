@@ -22,9 +22,9 @@ namespace NanoQL.Experimental;
 /// them stored the right way round: QuantLib stores one litre as worth 3.78541 gallons and one gallon as worth 42,000
 /// thousand-barrels (<c>unitofmeasureconversionmanager.cpp:115-122</c>), where one gallon is 3.785 411 784 litres and,
 /// "by custom", 42 gallons a barrel (NIST Handbook 44, Appendix C), so a direct lookup converts 1,000 litres into
-/// 3,785.41 gallons there and 264.17 here (the S-xrt plan's XRR4; <c>Divergences/CommodityKnownFactorsTests.cs</c>).
-/// <see cref="Add"/> replaces a conversion of the same commodity type between the same two units, either way round,
-/// and puts the new one last, as QuantLib's <c>add</c> does.
+/// 3,785.41 gallons there and 264.17 here (<c>Divergences/CommodityKnownFactorsTests.cs</c>). <see cref="Add"/>
+/// replaces a conversion of the same commodity type between the same two units, either way round, and puts the new one
+/// last, as QuantLib's <c>add</c> does.
 /// </para>
 /// <para>
 /// <see cref="Lookup"/> finds a direct, triangulated or chained conversion in QuantLib's order. QuantLib's chained
@@ -59,8 +59,8 @@ public sealed class UnitOfMeasureConversions : IEquatable<UnitOfMeasureConversio
         hash = h.ToHashCode();
     }
 
-    /// <summary>Gets the registry holding QuantLib's known factors alone, as XRR4 stores them: its state at start and
-    /// after <c>clear()</c>.</summary>
+    /// <summary>Gets the registry holding QuantLib's known factors alone: its state at start and after
+    /// <c>clear()</c>.</summary>
     public static UnitOfMeasureConversions Default { get; } = ConventionProvider.BuildUnderQuantLib(KnownConversionFactors);
 
     /// <summary>Gets the conversions held, in the order lookups try them.</summary>
@@ -181,7 +181,7 @@ public sealed class UnitOfMeasureConversions : IEquatable<UnitOfMeasureConversio
         r = r.Add(new UnitOfMeasureConversion(none, new BarrelUnitOfMeasure(), new GallonUnitOfMeasure(), 42));
 
         // QuantLib's (GallonUnitOfMeasure, MBUnitOfMeasure, 1000 * 42) and (LitreUnitOfMeasure, GallonUnitOfMeasure,
-        // 3.78541), stored the right way round (XRR4)
+        // 3.78541), stored the right way round
         r = r.Add(new UnitOfMeasureConversion(none, new MBUnitOfMeasure(), new GallonUnitOfMeasure(), 1000 * 42));
         r = r.Add(new UnitOfMeasureConversion(none, new GallonUnitOfMeasure(), new LitreUnitOfMeasure(), 3.78541));
         r = r.Add(new UnitOfMeasureConversion(none, new BarrelUnitOfMeasure(), new LitreUnitOfMeasure(), 158.987));

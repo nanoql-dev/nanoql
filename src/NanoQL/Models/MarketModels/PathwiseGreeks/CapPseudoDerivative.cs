@@ -16,11 +16,10 @@ namespace NanoQL.Models;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Immutable (the S-mmp plan's MMPR1 (ii)): computed at construction, as QuantLib's constructor computes; its matrix
-/// reads return copies.
+/// Immutable: computed at construction, as QuantLib's constructor computes; its matrix reads return copies.
 /// </para>
 /// <para>
-/// <b>The implied volatility's solve</b> (MMPR4 (xviii), a documented divergence;
+/// <b>The implied volatility's solve</b> (a documented divergence;
 /// <c>Divergences/CapPseudoDerivativeBracketTests.cs</c>): QuantLib's Brent bracket, [0.99, 1.01] times the least
 /// displaced and the greatest scaled caplet volatility (<c>swaptionpseudojacobian.cpp:331</c>), first; where it doesn't
 /// hold the root, as away from the money on a displaced model, Brent's bracketing solve from QuantLib's guess, where
@@ -150,7 +149,7 @@ public sealed class CapPseudoDerivative
 
         Brent solver = new Brent().SetMaxEvaluations(maxEvaluations);
 
-        // QuantLib's bracket first; where it doesn't hold the root, the bracketing solve from its guess (MMPR4 (xviii))
+        // QuantLib's bracket first; where it doesn't hold the root, the bracketing solve from its guess
         double xMin = minVol * 0.99, xMax = maxVol * 1.01;
         double fxMin = capPricer.Value(xMin), fxMax = capPricer.Value(xMax);
         ImpliedVolatility = fxMin == 0.0 || fxMax == 0.0 || fxMin * fxMax < 0.0

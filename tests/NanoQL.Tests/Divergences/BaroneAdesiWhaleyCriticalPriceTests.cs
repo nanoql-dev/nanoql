@@ -11,14 +11,13 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// Barone-Adesi-Whaley's critical price where its Newton iteration leaves its range (the S-van plan's VR4 (vii)). A
-/// put's step can leave (0, K) and a call's seed or step (K, ∞), and QuantLib's next Black formula throws "forward +
-/// displacement (0 + 0) must be positive" (<c>baroneadesiwhaleyengine.cpp:59-130</c>); Ju's engine calls the same
-/// critical price (<c>juquadraticengine.cpp:126</c>) and throws with it [executed on the wheel:
-/// <c>scratchpad\c2\oracle_c2.py</c>, section baw]. nanoql takes the root of QuantLib's own equation over the range, by
-/// Brent's method. QuantLib's check: the equation's residual at the root, within QuantLib's own tolerance, and its FD
-/// engine (2,000 × 2,000) on the option. Where Newton stays in range the critical price is QuantLib's, bit for bit (the
-/// engines' vectors).
+/// Barone-Adesi-Whaley's critical price where its Newton iteration leaves its range. A put's step can leave (0, K) and
+/// a call's seed or step (K, ∞), and QuantLib's next Black formula throws "forward + displacement (0 + 0) must be
+/// positive" (<c>baroneadesiwhaleyengine.cpp:59-130</c>); Ju's engine calls the same critical price
+/// (<c>juquadraticengine.cpp:126</c>) and throws with it (QuantLib-Python 1.44). nanoql takes the root of QuantLib's
+/// own equation over the range, by Brent's method. QuantLib's check: the equation's residual at the root, within
+/// QuantLib's own tolerance, and its FD engine (2,000 × 2,000) on the option. Where Newton stays in range the critical
+/// price is QuantLib's, bit for bit (the engines' vectors).
 /// </summary>
 public class BaroneAdesiWhaleyCriticalPriceTests
 {
@@ -68,9 +67,8 @@ public class BaroneAdesiWhaleyCriticalPriceTests
     public void TestBaroneAdesiWhaleyAndJuWithCarryAboveVolatility()
     {
         // Upstream: QuantLib's master's case for #2907 (americanoption.cpp's
-        // testBaroneAdesiWhaleyAndJuWithCarryAboveVolatility), the master's fix of VR4 (vii)'s throws: its seed moved
-        // to the right side of the strike, where nanoql takes the equation's root by Brent's method (the user's ruling
-        // SWR3 (b) of 2026-10-29)
+        // testBaroneAdesiWhaleyAndJuWithCarryAboveVolatility), the master's fix of its throws: its seed moved to the
+        // right side of the strike, where nanoql takes the equation's root by Brent's method
 
         // When |b|T exceeds 2*sigma*sqrt(T), with the sign that makes early exercise worth considering, the seed of the
         // critical-price iteration used to land on the wrong side of the strike: negative for calls, or far above the

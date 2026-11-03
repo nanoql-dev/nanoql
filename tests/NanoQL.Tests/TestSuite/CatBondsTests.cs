@@ -17,10 +17,10 @@ namespace NanoQL.Tests.TestSuite;
 
 /// <summary>QuantLib's cat bond tests, <c>test-suite/catbonds.cpp</c>.</summary>
 /// <remarks>
-/// <c>testBetaRisk</c> runs on the Poisson process (the S-xcr plan's XR8 (xlii)): its counts at QuantLib's 2% and 5%,
-/// its loss mean and variance within three standard errors of their estimators, computed from the sample (the mean's
-/// s/√n; the variance's fourth-moment form √((m₄ − s⁴)/n), the loss being compound Poisson), where QuantLib's checks
-/// them at 1%, which its geometric process passes on its seed and the fixed one misses by 2.22% on the variance
+/// <c>testBetaRisk</c> runs on the Poisson process: its counts at QuantLib's 2% and 5%, its loss mean and variance
+/// within three standard errors of their estimators, computed from the sample (the mean's s/√n; the variance's
+/// fourth-moment form √((m₄ − s⁴)/n), the loss being compound Poisson), where QuantLib's checks them at 1%, which its
+/// geometric process passes on its seed and the fixed one misses by 2.22% on the variance
 /// (<c>Divergences/BetaRiskTests.cs</c>).
 /// </remarks>
 [Trait("Oracle", "QuantLib")]
@@ -108,8 +108,7 @@ public class CatBondsTests
         Assert.False(simulation.NextPath(path));
     }
 
-    // Adapted: the loss moments are checked at three standard errors of their estimators (XR8 (xlii); the class
-    // remarks).
+    // Adapted: the loss moments are checked at three standard errors of their estimators (the class remarks).
     [Fact]
     public void TestBetaRisk()
     {

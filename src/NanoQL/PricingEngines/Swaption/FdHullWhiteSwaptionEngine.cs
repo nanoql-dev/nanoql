@@ -23,10 +23,9 @@ namespace NanoQL.PricingEngines;
 /// A static class: <c>Calculate</c> runs QuantLib's four steps (playbook §2.1) on the model, an argument where QuantLib's
 /// engine holds it. The mesher is the factor's Ornstein-Uhlenbeck quantiles up to the last exercise; the swap's
 /// coupons forecast on a Hull-White with the model's parameters on the index's curve, which must share the discount
-/// curve's day counter and reference date, as QuantLib refuses otherwise (the S-sr plan's SSD19); the value is read
-/// at the factor's origin.
+/// curve's day counter and reference date, as QuantLib refuses otherwise; the value is read at the factor's origin.
 /// </para>
-/// <para>An American exercise reaches the inner value at times off its exercise dates, which it refuses (SSR6 (x)).</para>
+/// <para>An American exercise reaches the inner value at times off its exercise dates, which it refuses.</para>
 /// </remarks>
 public static class FdHullWhiteSwaptionEngine
 {
@@ -126,7 +125,7 @@ public static class FdHullWhiteSwaptionEngine
         return t2d;
     }
 
-    // The index's forwarding curve, on the discount curve's day counter and reference date (SSD19).
+    // The index's forwarding curve, on the discount curve's day counter and reference date.
     internal static YieldTermStructure ForwardingCurve(Swaption swaption, YieldTermStructure disTs)
     {
         YieldTermStructure fwdTs = swaption.Underlying.IborIndex.ForwardingTermStructure

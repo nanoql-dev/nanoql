@@ -12,18 +12,17 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The fix QuantLib's master made to the binomial convertible engine after the pin, which nanoql takes (R8, the
-/// upstream sweep; the user's ruling SWR1 (a) of 2026-10-29): #2752 (<c>d51f02be2</c>, issue #2701) rolls the spot to
-/// the bond's settlement date, <c>s0 /= D_r(settlement)</c>, after the dividends' present values are subtracted. The
-/// tree's times run from the settlement date, and QuantLib 1.44 starts its stock at the evaluation date's spot
-/// (<c>binomialconvertibleengine.hpp:93-104</c>), so a bond with a settlement lag prices its conversion on a spot short
-/// of the carry over the lag. QuantLib's check: master's engine itself, its header and its discretized convertible
-/// (#2878 among master's changes there) compiled, renamed, against the 1.44 install beside the install's own engine
-/// (the sweep's SWR1 (a)), on lagged bonds whose structures share the risk-free curve's day counter and reference date:
-/// a callable fixed-coupon convertible under each exercise on three trees, one with a dividend in the lag, and master's
-/// own case, each master's price within R7 and 1.44's past it. Master's case below passes on 1.44 too: a dividend in
-/// the lag is subtracted from the spot and never paid in the tree, as 1.44 has it. The vectors price each bond settling
-/// on the evaluation date, where the fix divides by a discount of 1 (SWI2).
+/// The fix QuantLib's master made to the binomial convertible engine after the pin, which nanoql takes: #2752
+/// (<c>d51f02be2</c>, issue #2701) rolls the spot to the bond's settlement date, <c>s0 /= D_r(settlement)</c>, after
+/// the dividends' present values are subtracted. The tree's times run from the settlement date, and QuantLib 1.44
+/// starts its stock at the evaluation date's spot (<c>binomialconvertibleengine.hpp:93-104</c>), so a bond with a
+/// settlement lag prices its conversion on a spot short of the carry over the lag. QuantLib's check: master's engine
+/// itself, its header and its discretized convertible (#2878 among master's changes there) compiled, renamed, against
+/// the 1.44 install beside the install's own engine, on lagged bonds whose structures share the risk-free curve's day
+/// counter and reference date: a callable fixed-coupon convertible under each exercise on three trees, one with a
+/// dividend in the lag, and master's own case, each master's price within the tolerance and 1.44's past it. Master's
+/// case below passes on 1.44 too: a dividend in the lag is subtracted from the spot and never paid in the tree, as 1.44
+/// has it. The vectors price each bond settling on the evaluation date, where the fix divides by a discount of 1.
 /// </summary>
 public class ConvertibleUpstreamFixesTests
 {
@@ -150,7 +149,7 @@ public class ConvertibleUpstreamFixesTests
         AssertMasters(master, v144, npv);
     }
 
-    // within R7 of master's price, at the bond's scale of 100, and past it from 1.44's
+    // within the tolerance of master's price, at the bond's scale of 100, and past it from 1.44's
     private static void AssertMasters(double master, double v144, double npv)
     {
         Assert.True(Math.Abs(npv - master) <= 1e-10 * Math.Max(Math.Max(Math.Abs(npv), Math.Abs(master)), 100.0), $"{npv} against master's {master}");

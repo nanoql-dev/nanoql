@@ -17,8 +17,7 @@ the C++ harness (docs/porting-playbook.md §9.4), on the evaluation date 15 Octo
 Left out: strikes at or below zero, where nanoql scales the state by 1/|K| and by 1 at K = 0
 (tests/NanoQL.Tests/Divergences/AmericanBasketStrikeScalingTests.cs); and the builder's prices, which read the
 Longstaff-Schwartz calibration seed, QuantLib's the narrowed null (4294967295 through C++) where nanoql's is the seed
-plus QuantLib's offset (the master plan's S-van VR4 (v)): mcamericanbasketengine.json's wheel vectors price the engine
-with the calibration seed given.
+plus QuantLib's offset: mcamericanbasketengine.json's wheel vectors price the engine with the calibration seed given.
 
 A path case holds the "assetNumber", "payoff" ([kind, optionType, strike, weights or null]), "polynomialOrder",
 "polynomialType" (the enum's integer), "times" and "paths" (one list of values per asset, each of the grid's size); a

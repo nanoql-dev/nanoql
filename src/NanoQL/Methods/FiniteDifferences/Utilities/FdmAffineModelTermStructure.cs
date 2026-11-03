@@ -16,9 +16,8 @@ namespace NanoQL.Methods;
 /// from that date's time on the model's clock, P(t, t + T) at the factors.
 /// </summary>
 /// <remarks>
-/// Immutable: the factors are fixed at construction (the S-sr plan's SSD11), where QuantLib's <c>setVariable</c>
-/// changes them and notifies; a curve at another state is a new curve. The finite-difference inner value's own
-/// per-point curve is internal to it (SSR4).
+/// Immutable: the factors are fixed at construction, where QuantLib's <c>setVariable</c> changes them and notifies; a
+/// curve at another state is a new curve. The finite-difference inner value's own per-point curve is internal to it.
 /// </remarks>
 public sealed class FdmAffineModelTermStructure : YieldTermStructure
 {

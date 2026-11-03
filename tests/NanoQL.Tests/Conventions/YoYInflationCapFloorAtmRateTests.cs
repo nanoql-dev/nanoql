@@ -11,12 +11,12 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The year-on-year cap's at-the-money rate (SID23), which no vector reads: QuantLib's
-/// <c>CashFlows::atmRate(yoyLeg_, discountCurve, false, discountCurve.referenceDate())</c>
-/// (<c>inflationcapfloor.cpp:214-217</c>). On <see cref="InflationFixture"/>'s market with a year-on-year curve from 2%
-/// in April 2024 to 4% in April 2034, a three-year annual leg of 1,000,000 from 15 June 2024, lagged two months and
-/// observed flat, forecasts the rates 0.021998904709748083, 0.02399780941949617 and 0.02599671412924425, and the
-/// wheel's <c>CashFlows.atmRate</c> on the same leg and the nominal curve gives 0.023944593435950047.
+/// The year-on-year cap's at-the-money rate, which no vector reads: QuantLib's <c>CashFlows::atmRate(yoyLeg_,
+/// discountCurve, false, discountCurve.referenceDate())</c> (<c>inflationcapfloor.cpp:214-217</c>). On
+/// <see cref="InflationFixture"/>'s market with a year-on-year curve from 2% in April 2024 to 4% in April 2034, a
+/// three-year annual leg of 1,000,000 from 15 June 2024, lagged two months and observed flat, forecasts the rates
+/// 0.021998904709748083, 0.02399780941949617 and 0.02599671412924425, and the wheel's <c>CashFlows.atmRate</c> on the
+/// same leg and the nominal curve gives 0.023944593435950047.
 /// </summary>
 public class YoYInflationCapFloorAtmRateTests
 {

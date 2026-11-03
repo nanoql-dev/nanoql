@@ -6,9 +6,9 @@ payer and receiver swaps on monthly periods priced from fixings and from the for
 secondary costs, an old last quote date's warning, a payment within two days of today, and an expired swap; their NPV,
 pricing errors, cost amounts, daily positions and payment cash flows.
 
-On the base unit and currency alone (the S-xrt plan's §2.8): QuantLib's unit factors invert a price or a quantity on
-any other unit (XRR5 (i)), and its payments pair one leg's currency with the other's rate (XRR5 (viii)), which agree
-in one currency; an index with no fixings, which QuantLib refuses, is left out (XRR5 (vi)). Read back by
+On the base unit and currency alone: QuantLib's unit factors invert a price or a quantity on any other unit, and its
+payments pair one leg's currency with the other's rate, which agree in one currency; an index with no fixings, which
+QuantLib refuses, is left out. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Experimental/Commodities/EnergyVanillaSwapCxxVectorTests.cs."""
 import importlib.util
 import os

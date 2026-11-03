@@ -7,9 +7,8 @@ a month's middle, its first and its last day, over a year and over part of a mon
 refuses, and unit costs on the base unit; the payment terms and unit costs as QuantLib writes them, and the terms'
 equality.
 
-Left out (the S-xrt plan's §2.8): daily periods, one day short in QuantLib (XRR5 (iv)); the other schedules, which
-QuantLib leaves without periods and nanoql refuses (XRR5 (v)); unit costs in another unit, which QuantLib converts
-backward (XRR5 (i)). Read back by
+Left out: daily periods, one day short in QuantLib; the other schedules, which QuantLib leaves without periods and
+nanoql refuses; unit costs in another unit, which QuantLib converts backward. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Experimental/Commodities/CommodityPricingHelperCxxVectorTests.cs."""
 import importlib.util
 import os

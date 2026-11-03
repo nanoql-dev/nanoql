@@ -11,15 +11,15 @@ namespace NanoQL.TermStructures;
 /// <summary>The base class of inflation term structures: a base date, a frequency and an optional seasonality.</summary>
 /// <remarks>
 /// <para>
-/// An extension point. Every built structure has a fixed reference date (D15): QuantLib's constructor that takes
-/// neither a reference date nor settlement days is the reference-date form, and the settlement-days form takes the
-/// reference date its concrete class's <c>Create</c> computed from the evaluation context.
+/// An extension point. Every built structure has a fixed reference date: QuantLib's constructor that takes neither a
+/// reference date nor settlement days is the reference-date form, and the settlement-days form takes the reference date
+/// its concrete class's <c>Create</c> computed from the evaluation context.
 /// </para>
 /// <para>
-/// <see cref="BaseDate"/> and <see cref="Frequency"/> aren't virtual, where QuantLib's are: the constructor's seasonality
-/// check reads them, and C# would run a derived override before the derived constructor. A derived curve passes its
-/// base date in; QuantLib's piecewise zero-inflation curve, whose base date is computed lazily, computes it at
-/// construction (master §2.2's constructor-read row).
+/// <see cref="BaseDate"/> and <see cref="Frequency"/> aren't virtual, where QuantLib's are: the constructor's
+/// seasonality check reads them, and C# would run a derived override before the derived constructor. A derived curve
+/// passes its base date in; QuantLib's piecewise zero-inflation curve, whose base date is computed lazily, computes it
+/// at construction (the playbook's constructor-read row).
 /// </para>
 /// <para>
 /// QuantLib's <c>setSeasonality</c> changes a built curve; here

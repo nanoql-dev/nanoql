@@ -21,13 +21,12 @@ namespace NanoQL.PricingEngines;
 /// The value alone, as QuantLib's; an option with past fixings is refused, as QuantLib refuses it.
 /// </para>
 /// <para>
-/// Documented divergences (the S-bar plan's BR4 (a), BR5 (xxvi), (xxxiii)). The exchange is priced exactly under
-/// deterministic term structures: ln S_T and ln G are jointly normal, ln G with mean (1/N)Σ[ln F(tᵢ) − V(tᵢ)/2] and
-/// variance (1/N²)ΣΣV(min(tᵢ, tⱼ)), their covariance (1/N)ΣV(min(tᵢ, T)), F the forward and V the Black variance at the
-/// spot, each read by date, where QuantLib reads one volatility at the exercise date and the zero rates to it
-/// (<c>Divergences/GeometricAsianTermStructureTests.cs</c>). Every time is measured from the evaluation date, where
-/// QuantLib measures the fixing times from the first fixing, so a forward-starting average misses e^(−q t₁)
-/// (<c>Divergences/GeometricAverageStrikeForwardStartTests.cs</c>).
+/// Documented divergences. The exchange is priced exactly under deterministic term structures: ln S_T and ln G are
+/// jointly normal, ln G with mean (1/N)Σ[ln F(tᵢ) − V(tᵢ)/2] and variance (1/N²)ΣΣV(min(tᵢ, tⱼ)), their covariance
+/// (1/N)ΣV(min(tᵢ, T)), F the forward and V the Black variance at the spot, each read by date, where QuantLib reads one
+/// volatility at the exercise date and the zero rates to it (<c>Divergences/GeometricAsianTermStructureTests.cs</c>).
+/// Every time is measured from the evaluation date, where QuantLib measures the fixing times from the first fixing, so
+/// a forward-starting average misses e^(−q t₁) (<c>Divergences/GeometricAverageStrikeForwardStartTests.cs</c>).
 /// </para>
 /// </remarks>
 public static class AnalyticDiscreteGeometricAverageStrikeAsianEngine

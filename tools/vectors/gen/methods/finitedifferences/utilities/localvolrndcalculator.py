@@ -8,18 +8,17 @@ grids (101 x 51 by default, 81 x 41 with a Gaussian first step of 0.01, 61 x 21)
 spots around the log forward at times inside the grid, the inverse at probabilities from 1e-3 to 0.999, the grid at
 five of its times, and the steps at which it widened.
 
-**The stability filter** (the S7 plan's S7R6, the S-van plan's VD17) on the inverse, which QuantLib solves with Brent:
-each is solved again with its probability moved one ulp up and one down (math.nextafter), and a point is written only
-where both solves agree within 1e-8 × max(1, |base|, |moved|), the solver's accuracy. The generator prints the points
-dropped.
+**The stability filter** on the inverse, which QuantLib solves with Brent: each is solved again with its probability
+moved one ulp up and one down (math.nextafter), and a point is written only where both solves agree within 1e-8 ×
+max(1, |base|, |moved|), the solver's accuracy. The generator prints the points dropped.
 
-Left out (the S-van plan's §2.10): structures on another clock, which nanoql reads at the instants the local
-volatility's times denote and QuantLib at those times (VR4 (xxiii); tests/NanoQL.Tests/Divergences/
-LocalVolMismatchedTimesTests.cs): every structure here is dated 15 October 2026 on Actual/365 (Fixed). The fixed
-surfaces extrapolate by their interpolator on both sides, past VR4 (xviii)'s reach, and the Black surface is held flat
-in strike, past S-eq's variance floor. The specs are fixedlocalvolsurface.py's and blackscholesprocess.py's. The
-wheel's calls, by QuantLib-SWIG 1.44: LocalVolRNDCalculator(spot, rTS, qTS, localVol, xGrid, tGrid, x0Density,
-localVolProbEps, maxIter, gaussianStepSize) and its pdf, cdf, invcdf, mesher and rescaleTimeSteps. Read back by
+Left out: structures on another clock, which nanoql reads at the instants the local volatility's times denote and
+QuantLib at those times (tests/NanoQL.Tests/Divergences/LocalVolMismatchedTimesTests.cs): every structure here is dated
+15 October 2026 on Actual/365 (Fixed). The fixed surfaces extrapolate by their interpolator on both sides, which
+nanoql's fixes don't reach, and the Black surface is held flat in strike, past nanoql's variance floor. The specs are
+fixedlocalvolsurface.py's and blackscholesprocess.py's. The wheel's calls, by QuantLib-SWIG 1.44:
+LocalVolRNDCalculator(spot, rTS, qTS, localVol, xGrid, tGrid, x0Density, localVolProbEps, maxIter, gaussianStepSize)
+and its pdf, cdf, invcdf, mesher and rescaleTimeSteps. Read back by
 tests/NanoQL.Tests/Vectors/Methods/FiniteDifferences/Utilities/LocalVolRNDCalculatorVectorTests.cs."""
 import importlib.util
 import math

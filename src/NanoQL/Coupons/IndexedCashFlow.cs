@@ -19,8 +19,8 @@ namespace NanoQL.Coupons;
 /// Paying the whole ratio is a bond's setting, the growth only a swap's.
 /// </para>
 /// <para>
-/// The amount is computed on each call, where QuantLib caches it (R1). An extension point: the CPI and zero-inflation
-/// cash flows derive from it, as will an equity cash flow.
+/// The amount is computed on each call, where QuantLib caches it. An extension point: the CPI and zero-inflation cash
+/// flows derive from it, as will an equity cash flow.
 /// </para>
 /// </remarks>
 public class IndexedCashFlow : CashFlow

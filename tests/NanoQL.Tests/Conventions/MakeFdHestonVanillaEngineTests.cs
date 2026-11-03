@@ -13,7 +13,7 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// <see cref="MakeFdHestonVanillaEngine"/> is an immutable builder with QuantLib's defaults (SEQR2): its engine is
+/// <see cref="MakeFdHestonVanillaEngine"/> is an immutable builder with QuantLib's defaults: its engine is
 /// <see cref="FdHestonVanillaEngine"/>'s with the settings given, QuantLib's 100 × 100 × 50 grid and Hundsdorfer's
 /// scheme by default, bit for bit; each method returns a copy, the builder it was called on unchanged; and the grid
 /// sizes and damping steps are refused when negative, naming their parameter.

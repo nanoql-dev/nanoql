@@ -10,7 +10,7 @@ namespace NanoQL.Numerics;
 /// <remarks>
 /// QuantLib's exit on a midpoint whose value is close to 0 returns its running root, the bracket's low side, where
 /// the midpoint's value is above 0: x − 1.5 + 1e-30 on [0, 3] returns 0. nanoql returns the midpoint there, QuantLib's
-/// own return wherever the midpoint's value is at or below 0 (the S-core plan's CR7 (xv), a documented divergence).
+/// own return wherever the midpoint's value is at or below 0 (a documented divergence).
 /// </remarks>
 public sealed class Bisection : Solver1D<Bisection, ISolver1DFunction>
 {

@@ -11,15 +11,14 @@ basket of each type (naive and by delta and gamma) on a EuriborSwapIsdaFixA stan
 and discounted on the 2.7%, against a constant 20% lognormal swaption volatility. Per helper: its swaption's expiry and
 maturity dates, nominal and strike, its volatility and its market value.
 
-**The stability filter** (the S7 plan's S7R6) runs on every output: each basket is generated again with the volatility,
-then the forecast curve's rate, moved one ulp up and down by math.nextafter; an output is written only where every
-regeneration leaves it within 1e-12 x max(|base|, |moved|, 1) (the dates where they agree), a market value, its nominal
-times a unit price, only with its nominal, and the generator prints the outputs dropped per case. Left out: the two
-refusals #2845 adds (G1R5 (iv), FloatFloatBasketRefusalTests); and a basket's nominals and market values where a
-helper's nominal is QuantLib's floor of 1e-6, a match that may be flipped, whose nominal nanoql gives its size (G1R6
-(xxiv), CalibrationBasketNominalTests). The wheel's FloatFloatSwaption.calibrationBasket(swapIndex, swaptionVolatility,
-typeStr) is the C++ member's proxy, its helpers read through as_swaption_helper. Read back by
-tests/NanoQL.Tests/Vectors/Instruments/FloatFloatSwaptionVectorTests.cs."""
+**The stability filter** runs on every output: each basket is generated again with the volatility, then the forecast
+curve's rate, moved one ulp up and down by math.nextafter; an output is written only where every regeneration leaves it
+within 1e-12 x max(|base|, |moved|, 1) (the dates where they agree), a market value, its nominal times a unit price,
+only with its nominal, and the generator prints the outputs dropped per case. Left out: the two refusals #2845 adds
+(FloatFloatBasketRefusalTests); and a basket's nominals and market values where a helper's nominal is QuantLib's floor
+of 1e-6, a match that may be flipped, whose nominal nanoql gives its size (CalibrationBasketNominalTests). The wheel's
+FloatFloatSwaption.calibrationBasket(swapIndex, swaptionVolatility, typeStr) is the C++ member's proxy, its helpers read
+through as_swaption_helper. Read back by tests/NanoQL.Tests/Vectors/Instruments/FloatFloatSwaptionVectorTests.cs."""
 import importlib.util
 import math
 import os

@@ -14,9 +14,9 @@ namespace NanoQL.Methods;
 /// probabilities, the ends held to include the mandatory point and the initial value.
 /// </summary>
 /// <remarks>
-/// A mesher of no point is refused, where QuantLib's reads the back of an empty vector, undefined behaviour (the S-sr
-/// plan's SSR6 (xi), master §2.2's undefined-path row); one point is QuantLib's, the sum of the two ends' quantiles at
-/// its one location.
+/// A mesher of no point is refused, where QuantLib's reads the back of an empty vector, undefined behaviour (the
+/// playbook's undefined-behaviour row); one point is QuantLib's, the sum of the two ends' quantiles at its one
+/// location.
 /// </remarks>
 public sealed class FdmSimpleProcess1dMesher : Fdm1dMesher
 {

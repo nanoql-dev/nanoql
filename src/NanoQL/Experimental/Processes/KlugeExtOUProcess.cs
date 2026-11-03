@@ -18,14 +18,13 @@ namespace NanoQL.Experimental;
 /// <para>
 /// Immutable; three state variables (X, Y, U) and four factors (the power process's three, then U's own draw, mixed
 /// with X's by ρ). The in-place
-/// <see cref="Evolve(double, ReadOnlySpan{double}, double, ReadOnlySpan{double}, Span{double})"/> allocates nothing
-/// (the S-xeq plan's XED7).
+/// <see cref="Evolve(double, ReadOnlySpan{double}, double, ReadOnlySpan{double}, Span{double})"/> allocates nothing.
 /// </para>
 /// <para>
 /// Documented divergence (<c>Divergences/KlugeExtOUDiffusionTests.cs</c>): QuantLib's diffusion writes the gas row at
 /// row <c>size()</c> and column <c>factors()</c>, one past each end of its <c>size() × factors()</c> matrix, so its gas
 /// row is 0 and the writes corrupt the heap; here the gas row is the last, ρσ in the first column and √(1 − ρ²)σ in
-/// the last, so the diffusion's square is the covariance (XER5 (xxviii)).
+/// the last, so the diffusion's square is the covariance.
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]
@@ -99,7 +98,7 @@ public sealed class KlugeExtOUProcess : StochasticProcess
         double vol = ExtOUProcess.Diffusion(t, x[x.Size - 1]);
         retVal[0, 0] = KlugeProcess.Diffusion(t, x)[0, 0];
 
-        // the gas row is the last, its columns the first and the last: QuantLib writes one past each end ((xxviii))
+        // the gas row is the last, its columns the first and the last: QuantLib writes one past each end
         retVal[Size - 1, 0] = Rho * vol;
         retVal[Size - 1, Factors - 1] = sqrtMRho * vol;
         return retVal;

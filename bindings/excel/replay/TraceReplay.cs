@@ -127,9 +127,9 @@ internal sealed class TraceReplay(Dictionary<string, Dictionary<long, string>> e
         if (v.ValueKind == JsonValueKind.Object && v.TryGetProperty("x", out _)) throw new StopException("an input the trace couldn't write");
         if (v.ValueKind is JsonValueKind.Null or JsonValueKind.Undefined)
         {
-            // XLR2: an argument left out takes its default; where the default isn't none, no cell gives none
+            // An argument left out takes its default; where the default isn't none, no cell gives none
             if (p.TryGetProperty("optional", out var opt) && opt.ValueKind == JsonValueKind.True && p.TryGetProperty("default", out var def) && def.ValueKind != JsonValueKind.Null)
-                throw new StopException("none where the argument's default isn't none, which no cell gives (XLR2)");
+                throw new StopException("none where the argument's default isn't none, which no cell gives");
             return ExcelMissing.Value;
         }
 

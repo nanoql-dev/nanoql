@@ -15,7 +15,7 @@ namespace NanoQL.Tests.Vectors;
 /// The VanillaOption vectors, <c>tests/vectors/instruments/vanillaoption.json</c>: European options' expiry and expired
 /// results, and implied volatilities with and without dividends, with the refusals, and those of American and Bermudan
 /// options on the finite-difference engine. The implied volatilities whose solves a one-ulp move of their inputs moves
-/// are left out of the file (the S7R6 filter).
+/// are left out of the file (the stability filter).
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class VanillaOptionVectorTests

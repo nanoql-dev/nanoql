@@ -39,7 +39,7 @@ internal sealed class TypeNamer
     /// <summary>Gets the number of types whose name takes their namespace's segment.</summary>
     public int QualifiedCount => names.Count(kv => kv.Value != Simple(kv.Key));
 
-    /// <summary>A type's C name; a closed generic type's is its definition's and its arguments' (R14):
+    /// <summary>A type's C name; a closed generic type's is its definition's and its arguments':
     /// <c>CalibrationResults_Gsr</c>, <c>TimeSeries_double</c>.</summary>
     /// <param name="t">A top-level type of the inputs, or a closed construction of one.</param>
     /// <returns>Its name.</returns>

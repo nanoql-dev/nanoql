@@ -6,14 +6,13 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The copulas on the unit square's edges (the S-core plan's CR7 (xxxiii)): every copula is defined on [0, 1]² with
-/// C(u, 0) = C(0, v) = 0, C(u, 1) = u and C(1, v) = v, and QuantLib's checks accept the edges, but its formulas miss
-/// them: Hüsler-Reiss is NaN at (0, 0) and wherever an argument is 1 but at (1, 1) (−ln 1 is −0, so the ratio's
-/// logarithm is that of −∞), and at θ 0 on every edge point but (1, 1); Galambos and Ali-Mikhail-Haq are NaN at (0, 0);
-/// the Gaussian copula is NaN at (0, 0) and (1, 1) at ρ 0.5, at (0, 1) and (1, 0) at −0.5, and 2e-10 off on the edges
-/// at 1; Clayton below 0 takes the power of a negative base. nanoql's copulas return the boundary values before their
-/// formulas. QuantLib's values are its own classes', from this run's <c>probes\c2_facts.cpp</c> (<c>c2_facts.out</c>),
-/// the points the planner's <c>r1_edges.cpp</c> found.
+/// The copulas on the unit square's edges: every copula is defined on [0, 1]² with C(u, 0) = C(0, v) = 0, C(u, 1) = u
+/// and C(1, v) = v, and QuantLib's checks accept the edges, but its formulas miss them: Hüsler-Reiss is NaN at (0, 0)
+/// and wherever an argument is 1 but at (1, 1) (−ln 1 is −0, so the ratio's logarithm is that of −∞), and at θ 0 on
+/// every edge point but (1, 1); Galambos and Ali-Mikhail-Haq are NaN at (0, 0); the Gaussian copula is NaN at (0, 0)
+/// and (1, 1) at ρ 0.5, at (0, 1) and (1, 0) at −0.5, and 2e-10 off on the edges at 1; Clayton below 0 takes the power
+/// of a negative base. nanoql's copulas return the boundary values before their formulas. QuantLib's values are its own
+/// classes'.
 /// </summary>
 public class CopulaEdgeTests
 {
@@ -43,7 +42,7 @@ public class CopulaEdgeTests
     [Fact]
     public void QuantLibsFormulasMissTheEdges()
     {
-        // QuantLib's values (c2_facts.out) beside nanoql's boundary values
+        // QuantLib's values beside nanoql's boundary values
         Assert.Equal(0.0, new HuslerReissCopula(1.0).Evaluate(0.0, 0.0));   // QuantLib NaN
         Assert.Equal(0.5, new HuslerReissCopula(1.0).Evaluate(0.5, 1.0));   // QuantLib NaN
         Assert.Equal(0.5, new HuslerReissCopula(1.0).Evaluate(1.0, 0.5));   // QuantLib NaN

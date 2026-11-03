@@ -14,7 +14,7 @@ namespace NanoQL.PricingEngines;
 /// <see cref="MCEuropeanGJRGARCHEngine"/> on low-discrepancy draws with QuantLib's default statistics:
 /// QuantLib-Python's <c>MCLDEuropeanGJRGARCHEngine</c>, QuantLib's
 /// <c>MCEuropeanGJRGARCHEngine&lt;LowDiscrepancy&gt;</c>, its calculations closed at <see cref="LowDiscrepancy"/> and
-/// <see cref="GeneralStatistics"/> (D12).
+/// <see cref="GeneralStatistics"/>.
 /// </summary>
 public static class MCLDEuropeanGJRGARCHEngine
 {

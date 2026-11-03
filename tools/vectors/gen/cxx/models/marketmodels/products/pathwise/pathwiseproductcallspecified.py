@@ -9,8 +9,8 @@ Rate grids: six semi-annual rates and five irregular ones; a pathwise receiver s
 last on a swap-rate trigger, into QuantLib's default rebate (a pathwise cash rebate of 0) and into a pathwise cash
 rebate of 1%; triggers at the forwards' mean and rising.
 
-Left out: exercise or strategy times off the underlying's, where QuantLib writes no counts at an idle step (the S-mmp
-plan's MMPR4 (xvi), tests/NanoQL.Tests/Divergences/CallSpecifiedIdleStepTests.cs).
+Left out: exercise or strategy times off the underlying's, where QuantLib writes no counts at an idle step
+(tests/NanoQL.Tests/Divergences/CallSpecifiedIdleStepTests.cs).
 
 The harness unit is tools/cxx/src/models/marketmodels/products/products.cpp. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Models/MarketModels/CallSpecifiedPathwiseMultiProductCxxVectorTests.cs."""

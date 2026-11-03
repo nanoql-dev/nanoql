@@ -64,8 +64,8 @@ internal sealed class CppWriter
     private readonly HashSet<string> typeNames;
     private readonly List<TypeRow> classes;
 
-    // The prefix whose header is being written: another prefix's classes and enums are named with their namespace, since
-    // a user's class may take one of nanoql's names (B2-1).
+    // The prefix whose header is being written: another prefix's classes and enums are named with their namespace,
+    // since a user's class may take one of nanoql's names.
     private string context = "nql";
 
     /// <summary>Initializes a new instance of the <see cref="CppWriter"/> class, planning every function's member.</summary>
@@ -94,8 +94,8 @@ internal sealed class CppWriter
         : name.Length > 1 && char.IsUpper(name[1]) ? name : name.Length > 0 ? char.ToLowerInvariant(name[0]) + name[1..] : name;
 
     /// <summary>
-    /// Writes the headers: <c>nanoql.hpp</c>, and for each user prefix <c>&lt;prefix&gt;.hpp</c>, its classes in a namespace of
-    /// that name over nanoql's (BIR9: a user's classes extend nanoql's).
+    /// Writes the headers: <c>nanoql.hpp</c>, and for each user prefix <c>&lt;prefix&gt;.hpp</c>, its classes in a
+    /// namespace of that name over nanoql's (a user's classes extend nanoql's).
     /// </summary>
     /// <param name="runtime">The hand-written part's text (<c>bindings/cpp/runtime.hpp</c>).</param>
     /// <returns>Each header's text by its file name, LF line endings.</returns>
@@ -494,7 +494,7 @@ internal sealed class CppWriter
             var ps = f.Params.Where(p => !p.IsSelf).ToList();
             List<string> names = ParamNames(ps);
             var m = new CppMember(f, t.CName, name, style, value, names, [.. ps.Select(p => Type(p.Kind, p))]);
-            // By prefix and name: a user's class may take one of nanoql's names (B2-1).
+            // By prefix and name: a user's class may take one of nanoql's names.
             if (!byClass.TryGetValue(t.Prefix + "." + t.CName, out List<CppMember>? list))
             {
                 byClass[t.Prefix + "." + t.CName] = list = [];
@@ -943,7 +943,7 @@ internal sealed class CppWriter
                 args.AddRange([local + ".ptr()", local + ".count()"]);
                 return;
             case "tuple":
-                // One C argument per element, in its own form (B2R3).
+                // One C argument per element, in its own form.
                 for (int i = 0; i < k.Items.Count; i++)
                 {
                     CKind e = k.Items[i];
@@ -958,7 +958,7 @@ internal sealed class CppWriter
 
                 return;
             case "array" when k.Element!.Name == "tuple":
-                // One C array per element, a nullable one with its flags, then the count (B2R3).
+                // One C array per element, a nullable one with its flags, then the count.
                 for (int i = 0; i < k.Element.Items.Count; i++)
                 {
                     CKind e = k.Element.Items[i];
@@ -1100,8 +1100,8 @@ internal sealed class CppWriter
                 return $"detail::take_numbers({o}, {o}count)";
             case "array" when k.Element!.Name is "tuple" or "tuple?":
             {
-                // One out array per element, a nullable tuple's flags, the count (B2R10): a std::vector of std::tuple,
-                // of std::optional ones for nullable tuples.
+                // One out array per element, a nullable tuple's flags, the count: a std::vector of std::tuple, of
+                // std::optional ones for nullable tuples.
                 CKind te = k.Element;
                 bool nullable = te.Name == "tuple?";
                 var parts = new List<string>();

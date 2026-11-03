@@ -9,7 +9,7 @@ It writes src/NanoQL/Numerics/RandomNumbers/LatticeRules/LatticeRules.bin under 
 repository): QuantLib's arrays latticeA, latticeB, latticeC and latticeD, in that order, each its 3,600 entries, the
 rules of Cools, Kuo and Nuyens (SIAM J. Sci. Comp., 2006) for up to 2^20 points, as little-endian 32-bit signed
 integers. QuantLib's arrays are of Real, every entry an integer literal below 2^20, so each converts exactly. The
-loader, src/NanoQL/Numerics/RandomNumbers/LatticeRules/LatticeRule.cs, reads it back. tools/check-upstream.py (G4 (6))
+loader, src/NanoQL/Numerics/RandomNumbers/LatticeRules/LatticeRule.cs, reads it back. tools/check-upstream.py
 regenerates it into a temporary folder and compares the bytes with the committed file.
 """
 import os

@@ -9,10 +9,10 @@ namespace NanoQL.Tests.Conventions;
 
 /// <summary>
 /// The exception type, message and parameter name of the refusals of the basket core's mathematics, each QuantLib's
-/// text (the S-exo plan's ED14): <c>getCovariance</c> and <see cref="CovarianceDecomposition"/> (whose size message
-/// prints the rows twice, as QuantLib's does, <c>getcovariance.cpp:31-32</c>), the Householder reflection of the zero
-/// vector, Halley's solver out of evaluations, the multi-cubic spline's checks of its flat inputs (D1-5), and the
-/// single-factor engine's root solver, internal as in QuantLib's <c>detail</c> namespace and read through reflection.
+/// text: <c>getCovariance</c> and <see cref="CovarianceDecomposition"/> (whose size message prints the rows twice, as
+/// QuantLib's does, <c>getcovariance.cpp:31-32</c>), the Householder reflection of the zero vector, Halley's solver out
+/// of evaluations, the multi-cubic spline's checks of its flat inputs, and the single-factor engine's root solver,
+/// internal as in QuantLib's <c>detail</c> namespace and read through reflection.
 /// </summary>
 public class BasketMathErrorTests
 {

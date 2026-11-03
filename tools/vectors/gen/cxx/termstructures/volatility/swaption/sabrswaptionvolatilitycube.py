@@ -15,8 +15,8 @@ can't be compared with the short index's 1Y, and 0M, whose swap can't be built, 
 marketVolCube(i) for each strike spread i, which QuantLib reads without its calculation (here after it, as nanoql's
 cube computes it at construction), each matrix's elements row by row, strike spread after strike spread.
 
-The SABR cubes calibrate, so their outputs go through the stability filter (the S7 plan's S7R6), as
-swaptionvolcube.py's do; none of these outputs depends on a fit, and none is dropped.
+The SABR cubes calibrate, so their outputs go through the stability filter, as swaptionvolcube.py's do; none of these
+outputs depends on a fit, and none is dropped.
 
 The refusals, each a cube whose construction or calibration QuantLib refuses, its one output {"throws": true} (the
 calculation is sparseSabrParameters): non-increasing strike spreads; no volatility spreads; a row count and a column

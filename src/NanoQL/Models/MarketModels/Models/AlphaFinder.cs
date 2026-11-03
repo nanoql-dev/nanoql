@@ -17,22 +17,21 @@ namespace NanoQL.Models;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A working type (the S-mm plan's MR2 (b)): each solve keeps its inputs, as QuantLib's members, and sets the form's α;
-/// the alpha calibration builds one per calibration around its own copy of the form. It isn't thread-safe.
+/// A working type: each solve keeps its inputs, as QuantLib's members, and sets the form's α; the alpha calibration
+/// builds one per calibration around its own copy of the form. It isn't thread-safe.
 /// </para>
 /// <para>
-/// QuantLib's master's finder (#2910, the upstream sweep's SWR2 (a); <c>Divergences/AlphaFinderTests.cs</c>), which
-/// fixes four of QuantLib 1.44's defects: the downward bracket search stops at its first acceptable α, testing the
-/// value it moves, where 1.44's tests the upward one's (MR3 (ix); <c>alphafinder.cpp:372-373</c>); the minimization's
-/// feasibility test reads the trial α, where 1.44's reads the objective's value there (MR3 (x); <c>:117</c>,
-/// <c>:145</c>); the bisection returns at an exact root and where its point no longer moves; and
-/// <see cref="Solve"/> and <see cref="SolveWithMaxHomogeneity"/> return their final part's success, where 1.44's
-/// return true where it fails, at α₀ or at the search's α (<c>:335-346</c>, <c>:405-415</c>, <c>:550-561</c>), the
-/// swap rate's last volatility then left as the caller's. Two of nanoql's own: the searches and the minimization also
-/// stop where their point no longer moves, where QuantLib's never end at a tolerance of 0 (MR3 (xii); <c>:30-111</c>);
-/// and b is NaN where the final part fails, where QuantLib leaves the caller's value (the S-mm run's R4-4). The alpha
-/// calibration's fallback minimizes on 1.44's test of the objective's value (MR3 (x), as the user ruled it on
-/// 2026-10-27). Inputs shorter than the step index reads, which QuantLib reads past, are refused (MR3 (xx)).
+/// QuantLib's master's finder (#2910; <c>Divergences/AlphaFinderTests.cs</c>), which fixes four of QuantLib 1.44's
+/// defects: the downward bracket search stops at its first acceptable α, testing the value it moves, where 1.44's tests
+/// the upward one's (<c>alphafinder.cpp:372-373</c>); the minimization's feasibility test reads the trial α, where
+/// 1.44's reads the objective's value there (<c>:117</c>, <c>:145</c>); the bisection returns at an exact root and
+/// where its point no longer moves; and <see cref="Solve"/> and <see cref="SolveWithMaxHomogeneity"/> return their
+/// final part's success, where 1.44's return true where it fails, at α₀ or at the search's α (<c>:335-346</c>,
+/// <c>:405-415</c>, <c>:550-561</c>), the swap rate's last volatility then left as the caller's. Two of nanoql's own:
+/// the searches and the minimization also stop where their point no longer moves, where QuantLib's never end at a
+/// tolerance of 0 (<c>:30-111</c>); and b is NaN where the final part fails, where QuantLib leaves the caller's value.
+/// The alpha calibration's fallback minimizes on 1.44's test of the objective's value. Inputs shorter than the step
+/// index reads, which QuantLib reads past, are refused.
 /// </para>
 /// </remarks>
 [WorkingType]
@@ -64,7 +63,7 @@ public sealed class AlphaFinder
     /// <summary>
     /// Initializes a new instance of the <see cref="AlphaFinder"/> class whose maximum-homogeneity minimization tests
     /// the objective's value, as QuantLib's does: the alpha calibration's fallback where the fixed test leaves a caplet
-    /// no α (MR3 (x) as the user ruled it on 2026-10-27).
+    /// no α.
     /// </summary>
     /// <param name="parametricForm">The alpha form, whose α each solve sets.</param>
     /// <param name="quantLibsMinimizeTest">Whether the minimization tests the objective's value, as QuantLib's.</param>
@@ -156,7 +155,7 @@ public sealed class AlphaFinder
         if (bottomValue > targetVariance && topValue > targetVariance)
         {
             // see if ok at some intermediate point by stepping through, testing the bottom value it moves, where
-            // QuantLib's tests the top value (MR3 (ix))
+            // QuantLib's tests the top value
             int i = 1;
             while (i < steps && bottomValue > targetVariance)
             {
@@ -234,7 +233,7 @@ public sealed class AlphaFinder
         out double b,
         Span<double> rateTwoVols)
     {
-        // QuantLib's (Size)steps loops about 2^64 times at a negative count (MR3 (xx))
+        // QuantLib's (Size)steps loops about 2^64 times at a negative count
         ArgumentOutOfRangeException.ThrowIfNegative(steps);
         Setup(stepIndex, rateOneVols, rateTwoHomogeneousVols, correlations, w0, w1, targetVariance, rateTwoVols);
 
@@ -321,7 +320,7 @@ public sealed class AlphaFinder
     }
 
     // QuantLib's anonymous Bisection, returning at an exact root and where its point no longer moves (QuantLib's
-    // master, #2910; MR3 (xii)): neither end moves at an exact root, so its next point is its last.
+    // master, #2910): neither end moves at an exact root, so its next point is its last.
     private static double Bisection(double target, double low, double high, double tolerance, Func<double, double> value)
     {
         double x = 0.5 * (low + high);
@@ -352,7 +351,7 @@ public sealed class AlphaFinder
         return x;
     }
 
-    // QuantLib's anonymous FindHighestOK, also stopping where its point no longer moves (MR3 (xii)).
+    // QuantLib's anonymous FindHighestOK, also stopping where its point no longer moves.
     private static double FindHighestOK(double low, double high, double tolerance, Func<double, bool> value)
     {
         double x = 0.5 * (low + high);
@@ -383,7 +382,7 @@ public sealed class AlphaFinder
         return x;
     }
 
-    // QuantLib's anonymous FindLowestOK, also stopping where its point no longer moves (MR3 (xii)).
+    // QuantLib's anonymous FindLowestOK, also stopping where its point no longer moves.
     private static double FindLowestOK(double low, double high, double tolerance, Func<double, bool> value)
     {
         double x = 0.5 * (low + high);
@@ -414,9 +413,9 @@ public sealed class AlphaFinder
         return x;
     }
 
-    // QuantLib's anonymous Minimize, its feasibility test on the trial α before its value, QuantLib's master's (#2910;
-    // MR3 (x)), or on the objective's value as 1.44's where asked (the alpha calibration's fallback), and also stopping
-    // where its interval and point no longer move (MR3 (xii)).
+    // QuantLib's anonymous Minimize, its feasibility test on the trial α before its value, QuantLib's master's (#2910),
+    // or on the objective's value as 1.44's where asked (the alpha calibration's fallback), and also stopping where its
+    // interval and point no longer move.
     private static double Minimize(
         double low,
         double high,
@@ -531,7 +530,7 @@ public sealed class AlphaFinder
     {
         ArgumentOutOfRangeException.ThrowIfNegative(stepIndex);
 
-        // QuantLib reads the vectors to the step index plus one or two, past shorter ones (MR3 (xx)).
+        // QuantLib reads the vectors to the step index plus one or two, past shorter ones.
         CheckLength(rateOneVols.Length, stepIndex + 1, nameof(rateOneVols));
         CheckLength(rateTwoHomogeneousVols.Length, stepIndex + 2, nameof(rateTwoHomogeneousVols));
         CheckLength(correlations.Length, stepIndex + 1, nameof(correlations));

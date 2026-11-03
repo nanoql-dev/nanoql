@@ -210,7 +210,7 @@ public sealed class ConstNotionalCrossCurrencyBasisSwap : ConstNotionalCrossCurr
     /// <remarks>
     /// The fair spreads are the engine's when it gives them; otherwise each is derived from the NPV and its leg's BPS,
     /// and is <see langword="null"/> when that BPS is unknown or zero, where QuantLib divides by it and gives an
-    /// infinite spread (the S-rx plan's SRXR3 (xviii); QuantLib's float-float and mark-to-market swaps test the zero).
+    /// infinite spread (QuantLib's float-float and mark-to-market swaps test the zero).
     /// </remarks>
     public override ConstNotionalCrossCurrencyBasisSwapResults FetchResults(InstrumentResults results)
     {

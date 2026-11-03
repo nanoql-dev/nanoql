@@ -21,30 +21,27 @@ namespace NanoQL.PricingEngines;
 /// <para>
 /// The knock-out and knock-in take a European exercise; KIKO and KOKI an American one paying at the hit, its window
 /// open from the start. Each rate is read on the volatility's clock and each time is the volatility's, as
-/// <see cref="AnalyticBarrierEngine"/> reads them, where QuantLib reads every structure at the risk-free curve's times
-/// (the S-bar plan's BR5 (i)).
+/// <see cref="AnalyticBarrierEngine"/> reads them, where QuantLib reads every structure at the risk-free curve's times.
 /// </para>
 /// <para>
-/// Documented divergences (BR5, BR8 (c), BR9). The knock-out integrates the killed density over the payoff's region,
-/// [max(K, L), U] for a call and [L, min(K, U)] for a put, where QuantLib's series integrates over the whole corridor
-/// whatever the payoff's strike and type, so a put struck at 0 pays (BR5 (xxxviii),
-/// <c>Divergences/DoubleBinaryStrikeTests.cs</c>); the knock-in is the European cash-or-nothing less the knock-out, and
-/// one already knocked in is that European, where QuantLib pays the cash undiscounted (BR5 (vi),
-/// <c>Divergences/DoubleBinaryKnockedInTests.cs</c>). QuantLib's value stands for a call at K ≤ L, its own cases. Hui's
-/// series is taken where a bound on its dropped tail free of its sines, the terms' envelope, is within 1e-11 of its
-/// sum, where QuantLib checks its last term, which carries a sine and passes unconverged at x/Z = j/99 (BR5 (xlviii),
-/// <c>Divergences/DoubleBinaryHuiCheckTests.cs</c>); elsewhere, where QuantLib refuses ("serie did not converge
+/// Documented divergences. The knock-out integrates the killed density over the payoff's region, [max(K, L), U] for a
+/// call and [L, min(K, U)] for a put, where QuantLib's series integrates over the whole corridor whatever the payoff's
+/// strike and type, so a put struck at 0 pays (<c>Divergences/DoubleBinaryStrikeTests.cs</c>); the knock-in is the
+/// European cash-or-nothing less the knock-out, and one already knocked in is that European, where QuantLib pays the
+/// cash undiscounted (<c>Divergences/DoubleBinaryKnockedInTests.cs</c>). QuantLib's value stands for a call at K ≤ L,
+/// its own cases. Hui's series is taken where a bound on its dropped tail free of its sines, the terms' envelope, is
+/// within 1e-11 of its sum, where QuantLib checks its last term, which carries a sine and passes unconverged at x/Z =
+/// j/99 (<c>Divergences/DoubleBinaryHuiCheckTests.cs</c>); elsewhere, where QuantLib refuses ("serie did not converge
 /// sufficiently fast") among them, the knock-out is the cash-or-nothing part of QuantLib's double-barrier image series,
-/// <see cref="AnalyticDoubleBarrierEngine"/>'s callKO and putKO, which converges fastest there, its terms in logs (BR8
-/// (c), <c>Divergences/DoubleBinarySmallVarianceTests.cs</c>). The rebate is priced as the double barrier engine prices
-/// it, a knock-out's at the first touch of either barrier, now where one is already touched, a knock-in's at expiry
-/// where neither is touched, where QuantLib's engine reads none; a KIKO's or KOKI's, for which no convention fixes the
-/// payment, is refused (BR5 (xlvi), <c>Divergences/DoubleBinaryRebateTests.cs</c>). KIKO and KOKI are QuantLib's
-/// 999-term sums where Abel's bound on their dropped tail is within 1e-11 of the sum, QuantLib's value and bits there;
-/// elsewhere, where QuantLib's 999 terms run unconverged or it refuses, the absorption flux of QuantLib's own
-/// image-series killed density at the barrier, integrated in log time between the roots that bound its mass (BR5
-/// (xlvii), BR9, <c>Divergences/DoubleBinaryKikoTests.cs</c>). Below machine-epsilon variance the underlying follows
-/// its forward.
+/// <see cref="AnalyticDoubleBarrierEngine"/>'s callKO and putKO, which converges fastest there, its terms in logs
+/// (<c>Divergences/DoubleBinarySmallVarianceTests.cs</c>). The rebate is priced as the double barrier engine prices it,
+/// a knock-out's at the first touch of either barrier, now where one is already touched, a knock-in's at expiry where
+/// neither is touched, where QuantLib's engine reads none; a KIKO's or KOKI's, for which no convention fixes the
+/// payment, is refused (<c>Divergences/DoubleBinaryRebateTests.cs</c>). KIKO and KOKI are QuantLib's 999-term sums
+/// where Abel's bound on their dropped tail is within 1e-11 of the sum, QuantLib's value and bits there; elsewhere,
+/// where QuantLib's 999 terms run unconverged or it refuses, the absorption flux of QuantLib's own image-series killed
+/// density at the barrier, integrated in log time between the roots that bound its mass
+/// (<c>Divergences/DoubleBinaryKikoTests.cs</c>). Below machine-epsilon variance the underlying follows its forward.
 /// </para>
 /// <para>
 /// The degenerate branches, where a barrier is already touched, set the value, delta, gamma, vega and rho as QuantLib
@@ -53,8 +50,8 @@ namespace NanoQL.PricingEngines;
 /// <para>
 /// The series are first-passage closed forms in equivalent-constant rates and a volatility, the variance and discounts
 /// to expiry: no exact closed form exists for a first passage under general deterministic term structures, and on
-/// shaped markets an independent Monte Carlo finds a knock-out +0.66% and +1.78% off, within two of its standard errors
-/// (the S-bar plan's BR4 (d)); the term-structure-exact route is a Monte Carlo on the process.
+/// shaped markets an independent Monte Carlo finds a knock-out +0.66% and +1.78% off, within two of its standard
+/// errors; the term-structure-exact route is a Monte Carlo on the process.
 /// </para>
 /// </remarks>
 public static class AnalyticDoubleBarrierBinaryEngine
@@ -63,13 +60,13 @@ public static class AnalyticDoubleBarrierBinaryEngine
     private const int HuiIterations = 100;
     private const int KikoIterations = 1000;
 
-    // the relative bound on a series' dropped tail under which the series stands (BR5 (xlvii), (xlviii))
+    // the relative bound on a series' dropped tail under which the series stands
     private const double TailBound = 1e-11;
 
     // the most envelope terms summed for a tail bound: past it the bound fails, the terms decaying too slowly
     private const int MaxEnvelopeTerms = 100000;
 
-    // SD24's tolerance and cap for the flux integral
+    // The integration's tolerance and cap for the flux integral
     private const double FluxTolerance = 1e-12;
     private const int MaxFluxEvaluations = 100000;
 
@@ -100,16 +97,15 @@ public static class AnalyticDoubleBarrierBinaryEngine
         return option.FetchResults(Body(option, process));
     }
 
-    // The value at unit cash of a payment at the first touch of the lower barrier (KIKO) or the upper one (KOKI)
-    // before the other and before the date, the variance read at a strike: the double-barrier engine's rebate (BR5
-    // (xlvi))
+    // The value at unit cash of a payment at the first touch of the lower barrier (KIKO) or the upper one (KOKI) before
+    // the other and before the date, the variance read at a strike: the double-barrier engine's rebate
     internal static double HitValue(
         GeneralizedBlackScholesProcess process, Date lastDate, double barrierLo, double barrierHi, double volStrike,
         DoubleBarrierType barrierType) =>
         new Market(process, lastDate, barrierLo, barrierHi, volStrike).Kiko(1.0, barrierType);
 
     // The value at unit cash of a payment at the date where neither barrier is touched: the double-barrier engine's
-    // knock-in rebate (BR5 (xlvi))
+    // knock-in rebate
     internal static double NoTouchValue(
         GeneralizedBlackScholesProcess process, Date lastDate, double barrierLo, double barrierHi, double volStrike) =>
         new Market(process, lastDate, barrierLo, barrierHi, volStrike).KnockOut(1.0, OptionType.Call, 0.0);
@@ -130,7 +126,7 @@ public static class AnalyticDoubleBarrierBinaryEngine
             }
 
             // no convention fixes when a KIKO's or KOKI's rebate is paid, at the knock-out's touch or at expiry if the
-            // knock-in never comes (BR5 (xlvi))
+            // knock-in never comes
             if (option.Rebate != 0.0)
             {
                 throw new NanoQLException("rebate not supported for KIKO/KOKI options");
@@ -175,7 +171,7 @@ public static class AnalyticDoubleBarrierBinaryEngine
             case DoubleBarrierType.KnockOut:
                 if (spot <= barrierLo || spot >= barrierHi)
                 {
-                    // knocked out: its rebate, paid at the hit, now, where QuantLib's has no value (BR5 (xlvi))
+                    // knocked out: its rebate, paid at the hit, now, where QuantLib's has no value
                     return Touched(option.Rebate);
                 }
 
@@ -184,7 +180,7 @@ public static class AnalyticDoubleBarrierBinaryEngine
             case DoubleBarrierType.KnockIn:
                 if (spot <= barrierLo || spot >= barrierHi)
                 {
-                    // knocked in: the European cash-or-nothing, paid at expiry (BR5 (vi))
+                    // knocked in: the European cash-or-nothing, paid at expiry
                     OneAssetOptionResults european = AnalyticEuropeanEngine.Body(
                         new VanillaOption(payoff, option.Exercise), process, process.RiskFreeRate);
                     return new OneAssetOptionResults
@@ -236,9 +232,9 @@ public static class AnalyticDoubleBarrierBinaryEngine
             _ => market.Kiko(payoff.CashPayoff, barrierType),
         };
 
-        // the rebate QuantLib's engine drops, the double barrier engine's convention (BR5 (xlvi)): a knock-out's paid
-        // at the first touch of either barrier, R × (KIKO + KOKI) at unit cash; a knock-in's at expiry where neither is
-        // touched, R × the unit-cash knock-out at strike 0
+        // the rebate QuantLib's engine drops, the double barrier engine's convention: a knock-out's paid at the first
+        // touch of either barrier, R × (KIKO + KOKI) at unit cash; a knock-in's at expiry where neither is touched, R ×
+        // the unit-cash knock-out at strike 0
         if (option.Rebate != 0.0)
         {
             value += barrierType == DoubleBarrierType.KnockOut
@@ -259,7 +255,7 @@ public static class AnalyticDoubleBarrierBinaryEngine
         Rho = 0.0,
     };
 
-    // The market as the series read it, on the volatility's clock (BR5 (i)), with the routes
+    // The market as the series read it, on the volatility's clock, with the routes
     private sealed class Market
     {
         private readonly GeneralizedBlackScholesProcess process;
@@ -313,8 +309,7 @@ public static class AnalyticDoubleBarrierBinaryEngine
         // The cash-or-nothing knock-out paying on terminal spots in the payoff's region, floored at 0 as QuantLib's
         internal double KnockOut(double cash, OptionType type, double strike) => Max(KnockOutSum(cash, type, strike), 0.0);
 
-        // The knock-out before QuantLib's floor: Hui's series under its tail bound, the image series elsewhere (BR5
-        // (xxxviii), (xlviii), BR8 (c))
+        // The knock-out before QuantLib's floor: Hui's series under its tail bound, the image series elsewhere
         private double KnockOutSum(double cash, OptionType type, double strike)
         {
             double lo = type == OptionType.Call ? Max(strike, barrierLo) : barrierLo;
@@ -342,8 +337,7 @@ public static class AnalyticDoubleBarrierBinaryEngine
             return cash * discount * ImageCash(lo, hi);
         }
 
-        // The cash-or-nothing knock-in: the European less the knock-out (BR5 (xxxviii)); QuantLib's cash × D − KO for
-        // its strike-0 call
+        // The cash-or-nothing knock-in: the European less the knock-out; QuantLib's cash × D − KO for its strike-0 call
         internal double KnockIn(CashOrNothingPayoff payoff)
         {
             double ko = KnockOutSum(payoff.CashPayoff, payoff.OptionType, payoff.Strike);
@@ -361,7 +355,7 @@ public static class AnalyticDoubleBarrierBinaryEngine
             return Max(european - ko, 0.0);
         }
 
-        // KIKO or KOKI: QuantLib's 999-term sum under Abel's bound, the absorption flux elsewhere (BR5 (xlvii), BR9)
+        // KIKO or KOKI: QuantLib's 999-term sum under Abel's bound, the absorption flux elsewhere
         internal double Kiko(double cash, DoubleBarrierType barrierType)
         {
             if (Deterministic)
@@ -379,7 +373,7 @@ public static class AnalyticDoubleBarrierBinaryEngine
         }
 
         // QuantLib's payoffAtExpiry for the knock-out, its tot before the max, and whether the sine-free bound on its
-        // dropped tail is within 1e-11 of it (BR5 (xlviii))
+        // dropped tail is within 1e-11 of it
         private (double Tot, bool Converged) HuiFull(double cash)
         {
             double z = Math.Log(barrierHi / barrierLo);
@@ -411,7 +405,7 @@ public static class AnalyticDoubleBarrierBinaryEngine
         }
 
         // Hui's series over the region [lo, hi] of terminal spots: ∫ e^(−αy) sin(ωy) dy in closed form over
-        // y ∈ [ln(lo/L), ln(hi/L)] in place of QuantLib's whole corridor (BR5 (xxxviii)), with its envelope's tail bound
+        // y ∈ [ln(lo/L), ln(hi/L)] in place of QuantLib's whole corridor, with its envelope's tail bound
         private (double Tot, bool Converged) HuiRegion(double cash, double lo, double hi)
         {
             double z = Math.Log(barrierHi / barrierLo);
@@ -446,7 +440,7 @@ public static class AnalyticDoubleBarrierBinaryEngine
             return (tot, double.IsFinite(tot) && EnvelopeTail(TailTerm, HuiIterations, Math.Abs(alpha) * z / Math.PI) <= TailBound * Math.Abs(tot));
         }
 
-        // QuantLib's payoffKIKO, and whether Abel's bound on its dropped tail is within 1e-11 of its sum (BR5 (xlvii))
+        // QuantLib's payoffKIKO, and whether Abel's bound on its dropped tail is within 1e-11 of its sum
         private (double Value, bool Converged) QuantLibKiko(double cash, DoubleBarrierType barrierType)
         {
             double barrierLo = this.barrierLo;
@@ -525,8 +519,8 @@ public static class AnalyticDoubleBarrierBinaryEngine
             return double.PositiveInfinity;
         }
 
-        // The image route (BR8 (c)): the cash part of QuantLib's double-barrier image series over [lo, hi], its terms in
-        // logs and its normal differences from the small tail (BR5 (xvi), F3-1)
+        // The image route: the cash part of QuantLib's double-barrier image series over [lo, hi], its terms in logs and
+        // its normal differences from the small tail
         private double ImageCash(double lo, double hi)
         {
             double sd = Math.Sqrt(variance);
@@ -537,11 +531,11 @@ public static class AnalyticDoubleBarrierBinaryEngine
                 Math.Log(spot), Math.Log(barrierLo), Math.Log(barrierHi), lo, hi, sd, bsigma, mu1 - 2, -sd, 5);
         }
 
-        // The absorption flux of QuantLib's image-series killed density at the barrier (BR5 (xlvii)): KIKO at the lower
-        // barrier, ∫₀ᵀ e^(−rt) (σ²/2) ∂ᵧp(t; x, 0) dt, each image paired with its reflection, so nothing cancels; KOKI the
-        // same mirrored, Z − x for x and −μ for μ. The time integral runs in log time between the two roots of
-        // (d − m t)² = 1400σ²t, d the spot's log distance to the barrier and m the drift toward it, past which the
-        // nearest image is below e^(−700), on SD24's first estimate at 1e-12
+        // The absorption flux of QuantLib's image-series killed density at the barrier: KIKO at the lower barrier, ∫₀ᵀ
+        // e^(−rt) (σ²/2) ∂ᵧp(t; x, 0) dt, each image paired with its reflection, so nothing cancels; KOKI the same
+        // mirrored, Z − x for x and −μ for μ. The time integral runs in log time between the two roots of (d − m t)² =
+        // 1400σ²t, d the spot's log distance to the barrier and m the drift toward it, past which the nearest image is
+        // below e^(−700), on the first-estimate scale at 1e-12
         private double Flux(DoubleBarrierType barrierType)
         {
             double z = Math.Log(barrierHi / barrierLo);

@@ -12,11 +12,11 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// <see cref="AnalyticGJRGARCHEngine"/>'s moments' memo can't change an answer (the S-hes plan's HR4 (iv), the master
-/// plan's Revision 79): QuantLib's engine keeps one maturity's moments at a time and serves a later price at that
-/// maturity from them; nanoql's memo keeps each maturity's moments, keyed by the day count and the rate they read and
-/// computed on the engine's immutable model, so a warm engine's price is a fresh engine's bit for bit, in any order of
-/// strikes and maturities, for expiries sharing a day count on a sloped curve, and on eight threads sharing the engine.
+/// <see cref="AnalyticGJRGARCHEngine"/>'s moments' memo can't change an answer: QuantLib's engine keeps one maturity's
+/// moments at a time and serves a later price at that maturity from them; nanoql's memo keeps each maturity's moments,
+/// keyed by the day count and the rate they read and computed on the engine's immutable model, so a warm engine's price
+/// is a fresh engine's bit for bit, in any order of strikes and maturities, for expiries sharing a day count on a
+/// sloped curve, and on eight threads sharing the engine.
 /// </summary>
 public class GjrGarchMemoTests
 {

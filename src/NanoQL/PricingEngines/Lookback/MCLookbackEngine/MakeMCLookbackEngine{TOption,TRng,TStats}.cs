@@ -13,16 +13,16 @@ namespace NanoQL.PricingEngines;
 
 /// <summary>
 /// The Monte Carlo lookback engine's builder, QuantLib's <c>MakeMCLookbackEngine</c>: its members, defaults, checks and
-/// texts, the seed required (S2R4).
+/// texts, the seed required.
 /// </summary>
 /// <typeparam name="TOption">The lookback instrument the engine prices: one of the four continuous lookback
 /// options.</typeparam>
 /// <typeparam name="TRng">The random-number traits.</typeparam>
 /// <typeparam name="TStats">The statistics accumulator.</typeparam>
 /// <remarks>
-/// A sealed, immutable record (the S-eq plan's SEQR2): each <c>With</c> member returns a copy. <see cref="ToEngine"/>
-/// returns <see cref="MCLookbackEngine"/>'s overload for the instrument type (the S-bar plan's BR1 (ii)); another type,
-/// which QuantLib's template can't instantiate, is refused there.
+/// A sealed, immutable record: each <c>With</c> member returns a copy. <see cref="ToEngine"/> returns
+/// <see cref="MCLookbackEngine"/>'s overload for the instrument type; another type, which QuantLib's template can't
+/// instantiate, is refused there.
 /// </remarks>
 public sealed record MakeMCLookbackEngine<TOption, TRng, TStats>
     where TOption : OneAssetOption

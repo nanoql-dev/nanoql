@@ -13,21 +13,20 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The partial lookbacks' windows opening or closing today or before it (the S-bar code review's B2-2, BR5 (xiii)'s
-/// class for the partial-time barrier, fixed under R8). QuantLib's partial formulas take f₁ = 0/0 for a window date
-/// today at the money and √t₁ of a negative time before it: on spot 100, r 5%, q 1%, σ 20% over a year, its partial
-/// fixed call struck at 100 opening today and its partial floating call closing today are NaN, and a window dated
-/// yesterday throws the bivariate normal's "rho must be >= -1.0 (NaN not allowed)"; its Monte Carlo engine prices a
-/// window opened before today as opening today and folds today's spot into a window that has closed (the S-bar run's
-/// <c>c2_window_today.py</c>; the reviewer's <c>q12_ql.py</c>). nanoql takes each limit: a fixed window opening today
-/// is the full fixed lookback with the spot as its maximum; a floating window closing today the European at λ times the
-/// minimum (or maximum) with the spot, and one closed before today the European at λ times the extremum as given; a
-/// fixed window opened before today is refused, the option holding no extremum observed since. Checks: QuantLib's full
-/// fixed engine and its analytic European engine, and the partial engine a day out. "Before today" is before the
-/// evaluation date and "today" runs from it to the clock's origin, inclusive (the review's B2-3): on a market settling
-/// two days after the evaluation date, a window dated on it or a day after takes today's limit, where reading a clock's
-/// time refused the fixed window and dropped the spot from the floating one, 24% low; the checks the full fixed engine
-/// and the European engine on that market, the Monte Carlo's full fixed lookback on the same paths to the bit.
+/// The partial lookbacks' windows opening or closing today or before it (fixed, as for the partial-time barrier).
+/// QuantLib's partial formulas take f₁ = 0/0 for a window date today at the money and √t₁ of a negative time before it:
+/// on spot 100, r 5%, q 1%, σ 20% over a year, its partial fixed call struck at 100 opening today and its partial
+/// floating call closing today are NaN, and a window dated yesterday throws the bivariate normal's "rho must be >= -1.0
+/// (NaN not allowed)"; its Monte Carlo engine prices a window opened before today as opening today and folds today's
+/// spot into a window that has closed. nanoql takes each limit: a fixed window opening today is the full fixed lookback
+/// with the spot as its maximum; a floating window closing today the European at λ times the minimum (or maximum) with
+/// the spot, and one closed before today the European at λ times the extremum as given; a fixed window opened before
+/// today is refused, the option holding no extremum observed since. Checks: QuantLib's full fixed engine and its
+/// analytic European engine, and the partial engine a day out. "Before today" is before the evaluation date and "today"
+/// runs from it to the clock's origin, inclusive: on a market settling two days after the evaluation date, a window
+/// dated on it or a day after takes today's limit, where reading a clock's time refused the fixed window and dropped
+/// the spot from the floating one, 24% low; the checks the full fixed engine and the European engine on that market,
+/// the Monte Carlo's full fixed lookback on the same paths to the bit.
 /// </summary>
 public class LookbackPartialWindowTodayTests
 {

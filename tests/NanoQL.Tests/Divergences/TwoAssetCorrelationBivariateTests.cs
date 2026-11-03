@@ -11,9 +11,9 @@ namespace NanoQL.Tests.Divergences;
 /// The two-asset correlation engine's bivariate normal. QuantLib's engine reads Drezner's 1978 algorithm
 /// (<c>analytictwoassetcorrelationengine.cpp:44</c>), "six decimal places accuracy" by its header
 /// (<c>bivariatenormaldistribution.hpp:33</c>), where QuantLib's default bivariate normal is West's; the value moves by
-/// 2.5e-7 on QuantLib's own case. nanoql reads West's (the S-exo plan's ER7, ruled by the user on 2026-10-25): a
-/// quadrature over the joint lognormal (<see cref="TwoAssetCorrelationQuadrature"/>) is the check, at 1e-9, which
-/// QuantLib's value meets within Drezner's accuracy.
+/// 2.5e-7 on QuantLib's own case. nanoql reads West's: a quadrature over the joint lognormal (<see
+/// cref="TwoAssetCorrelationQuadrature"/>) is the check, at 1e-9, which QuantLib's value meets within Drezner's
+/// accuracy.
 /// </summary>
 public class TwoAssetCorrelationBivariateTests
 {

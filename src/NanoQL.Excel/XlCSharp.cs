@@ -8,16 +8,17 @@ using System.Text.Json;
 namespace NanoQL.Excel;
 
 /// <summary>
-/// XLR14's <c>"csharp"</c>: a vector's calls as the nanoql calls the cell ran, from the Excel back end's repro templates.
-/// Each Excel value is a C# literal by its parameter's type; a bound engine is the shared emitter's adapter with its bound
-/// inputs; draws are the generator and its loop; the date system is applied; the conventions file and each read file are
-/// set up from the vector. The program compiles against nanoql alone, and prints the cell's outcome as a grid of cells.
+/// The repro's <c>"csharp"</c> format: a vector's calls as the nanoql calls the cell ran, from the Excel back end's
+/// repro templates. Each Excel value is a C# literal by its parameter's type; a bound engine is the shared emitter's
+/// adapter with its bound inputs; draws are the generator and its loop; the date system is applied; the conventions
+/// file and each read file are set up from the vector. The program compiles against nanoql alone, and prints the cell's
+/// outcome as a grid of cells.
 /// </summary>
 internal sealed class XlCSharp
 {
     private const string Q = "global::";
 
-    // The current convention set, as an empty set argument and a name read it (XLR9, XLR16).
+    // The current convention set, as an empty set argument and a name read it.
     private const string CurrentSet = "(global::NanoQL.ConventionProvider.Current as global::NanoQL.Extensions.Conventions.ConventionSet ?? global::NanoQL.Extensions.Conventions.ConventionSet.QuantLib)";
 
     private static readonly string[] Named = ["global::NanoQL.Time.Calendar", "global::NanoQL.Time.DayCounter"];
@@ -56,7 +57,7 @@ internal sealed class XlCSharp
         List<string> body = r.Body();
         var program = new List<string>
         {
-            "// nqlxlRepro: a cell's nanoql calls as C# (XLR14). Compile it against NanoQL.dll and NanoQL.Extensions.dll and run it:",
+            "// nqlxlRepro: a cell's nanoql calls as C#. Compile it against NanoQL.dll and NanoQL.Extensions.dll and run it:",
             "// Main prints the cell's outcome as a grid of cells, each a double's bits, a text, a boolean, an object's type or an",
             "// error's code.",
             "#nullable disable",
@@ -123,7 +124,7 @@ internal sealed class XlCSharp
 
     private static bool Multi(JsonElement? x) => Has(x, "rows") && x!.Value.GetProperty("rows").GetInt32() * x.Value.GetProperty("cols").GetInt32() > 1;
 
-    // A kind one Excel cell holds, which a range given in its place loops over (XLR15).
+    // A kind one Excel cell holds, which a range given in its place loops over.
     private static bool ScalarKind(string kind)
         => !(kind.StartsWith("array:", StringComparison.Ordinal) || kind.StartsWith("jagged:", StringComparison.Ordinal) || kind.StartsWith("map:", StringComparison.Ordinal)
             || kind.StartsWith("tuple:", StringComparison.Ordinal) || kind is "matrix" or "vector");
@@ -291,7 +292,7 @@ internal sealed class XlCSharp
                 return vars[xs[0]!.Value.GetProperty("ref").GetString()!];
             }
 
-            // A calendar's or a day counter's name, looked up in the current convention set (XLR16).
+            // A calendar's or a day counter's name, looked up in the current convention set.
             if (r * c == 1 && xs[0] is { ValueKind: JsonValueKind.String } name && Named.Contains(cs))
             {
                 return $"{CurrentSet}.{cs[(cs.LastIndexOf('.') + 1)..]}({Str(name.GetString()!)})";
@@ -301,7 +302,7 @@ internal sealed class XlCSharp
         }
 
         // A matrix's and a vector's cells as the add-in reads them: numbers alone, a vector's trailing empty cells trimmed and
-        // an inner one refused (XLR2).
+        // an inner one refused.
         if (kind == "matrix")
         {
             Numerics.Matrix m = X.Converted(x ?? default, p.GetProperty("name").GetString()!, X.Mat);
@@ -315,7 +316,7 @@ internal sealed class XlCSharp
             return $"new {Q}NanoQL.Numerics.Vector(new double[] {{ {string.Join(", ", ds.Select(Num))} }})";
         }
 
-        // A tuple across a row of its cells; an array of tuples a row per element, the empty rows at its end trimmed (XLR17).
+        // A tuple across a row of its cells; an array of tuples a row per element, the empty rows at its end trimmed.
         if (kind.StartsWith("tuple:", StringComparison.Ordinal))
         {
             (_, _, List<JsonElement?> xs) = Cells(x);
@@ -427,7 +428,7 @@ internal sealed class XlCSharp
                 return vars[v!.Value.GetProperty("ref").GetString()!];
             }
 
-            // A name inside an array of calendars or day counters, as the runtime's Objs<T> takes it (round 7's B7-1).
+            // A name inside an array of calendars or day counters, as the runtime's Objs<T> takes it.
             if (v is { ValueKind: JsonValueKind.String } name && Named.Contains(cs))
             {
                 return $"{CurrentSet}.{cs[(cs.LastIndexOf('.') + 1)..]}({Str(name.GetString()!)})";
@@ -527,8 +528,9 @@ internal sealed class XlCSharp
             args.Add(null);
         }
 
-        // Loop exactly where the add-in's mask loops (binds and draws included); a multi-cell range where one value goes and
-        // the mask doesn't loop is the add-in's refusal, never its first cell; ranges pair as Excel pairs them (round 7's B7-1).
+        // Loop exactly where the add-in's mask loops (binds and draws included); a multi-cell range where one value
+        // goes and the mask doesn't loop is the add-in's refusal, never its first cell; ranges pair as Excel pairs
+        // them.
         string mask = S(f, "loops") ?? string.Empty;
         var lifted = Enumerable.Range(0, args.Count).Where(i => i < mask.Length && mask[i] == '1' && Multi(args[i])).ToList();
         var unlooped = Enumerable.Range(0, ps.Count).Where(i => ScalarKind(ps[i].GetProperty("kind").GetString()!) && Multi(args[i]) && !lifted.Contains(i)).ToList();

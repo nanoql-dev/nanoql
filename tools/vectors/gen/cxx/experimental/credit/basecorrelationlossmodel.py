@@ -1,11 +1,11 @@
 # SPDX-FileCopyrightText: 2026 The nanoql Authors
 # SPDX-License-Identifier: Apache-2.0
 """Vectors for QuantLib's BaseCorrelationLossModel (ql/experimental/credit/basecorrelationlossmodel.hpp), which
-the wheel doesn't expose, each output computed by the C++ harness (tools/cxx/src/experimental/credit/
-basket.cpp) on tools/vectors/gen/cxx/experimental/credit/defaultevent.py's specs: the model on QuantLib's
-four bilinear base models (the Gaussian LHP, the Gaussian and Student t binomial on a homogeneous pool, whose
-weight XR8 (xviii) fixes elsewhere, and the Gaussian inhomogeneous pool), tranches inside the surface's loss
-levels; the expected tranche loss at dates to ten years, and the statistics the model refuses. Read back by
+the wheel doesn't expose, each output computed by the C++ harness (tools/cxx/src/experimental/credit/basket.cpp) on
+tools/vectors/gen/cxx/experimental/credit/defaultevent.py's specs: the model on QuantLib's four bilinear base models
+(the Gaussian LHP, the Gaussian and Student t binomial on a homogeneous pool, whose weight nanoql fixes elsewhere, and
+the Gaussian inhomogeneous pool), tranches inside the surface's loss levels; the expected tranche loss at dates to ten
+years, and the statistics the model refuses. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Experimental/Credit/BaseCorrelationLossModelCxxVectorTests.cs through tests/NanoQL.Tests/Vectors/LossModelStatistics.cs."""
 import importlib.util
 import os

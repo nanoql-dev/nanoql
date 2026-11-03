@@ -16,9 +16,9 @@ namespace NanoQL.Tests.TestSuite;
 [Trait("Oracle", "QuantLib")]
 public class InstrumentsTests
 {
-    // Adapted: Date::todaysDate() (line 75) is a fixed date, as the suite reads none of the clock (the S-core plan's
-    // CD16). QuantLib's flatRate and flatVol curves move with the evaluation date, and the option carries its engine;
-    // here the component's engine builds them on the context's evaluation date.
+    // Adapted: Date::todaysDate() (line 75) is a fixed date, as the suite reads none of the clock. QuantLib's
+    // flatRate and flatVol curves move with the evaluation date, and the option carries its engine; here the
+    // component's engine builds them on the context's evaluation date.
     [Fact]
     public void TestCompositeWhenShiftingDates()
     {

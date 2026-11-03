@@ -10,10 +10,9 @@ namespace NanoQL.Tests.Divergences;
 
 /// <summary>
 /// The square-root CLV model's non-centrality 4κe^(−κt)x₀/(σ²(1 − e^(−κt))) with 1 − e^(−κt) through expm1 below κt
-/// 1e-2 (the S-xrt plan's XRR5 (xxiv), fixed under R8). QuantLib's 1 − e^(−κt) cancels as κt falls: at κ 1e-4 and a day,
-/// κt 2.7e-7, its non-centrality is 7.0e-11 relative off the 40-digit value (mpmath; the run's
-/// <c>c3\probes\xxiv_refs.py</c>), 3284.99955000002, and the collocation points move with it. nanoql's points, on bounds
-/// that don't clamp, are the Gauss nodes at the reference non-centrality.
+/// 1e-2 (fixed). QuantLib's 1 − e^(−κt) cancels as κt falls: at κ 1e-4 and a day, κt 2.7e-7, its non-centrality is
+/// 7.0e-11 relative off the 40-digit value (mpmath), 3284.99955000002, and the collocation points move with it.
+/// nanoql's points, on bounds that don't clamp, are the Gauss nodes at the reference non-centrality.
 /// </summary>
 public class SquareRootCLVNonCentralityTests
 {

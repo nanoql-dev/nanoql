@@ -15,9 +15,9 @@ namespace NanoQL.Tests.Vectors;
 
 /// <summary>
 /// The AnalyticHestonEngine vectors, <c>tests/vectors/pricingengines/vanilla/analytichestonengine.json</c>: the
-/// characteristic function and its logarithm on SP4's contours, the NPVs and evaluation counts of calls and puts under
-/// each complex-log formula and integration, OptimalAlpha's searches, choice, bounds and functions, and the branch
-/// correction's refusal of an adaptive integration.
+/// characteristic function and its logarithm on the real line and three shifted lines, the NPVs and evaluation counts
+/// of calls and puts under each complex-log formula and integration, OptimalAlpha's searches, choice, bounds and
+/// functions, and the branch correction's refusal of an adaptive integration.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class AnalyticHestonEngineVectorTests

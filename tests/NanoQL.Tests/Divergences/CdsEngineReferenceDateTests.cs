@@ -9,19 +9,17 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The CDS engines' reads before a curve's reference date (the S-core plan's CR7 (xxxiv)), on curves that settle after
-/// the evaluation date and on curves dated the evaluation date alike: QuantLib's integral engine integrates the default
-/// leg from the evaluation date, reading the discount and the default probability before a T+2 curve's reference date,
-/// both engines read the survival at a coupon paying before a T+2 hazard curve's date and the mid-point engine its
-/// default date or its period's end there, and both read a live coupon's past period (one paid after a weekend that
-/// ended it) before curves dated the evaluation date, where QuantLib's curves refuse a negative time.
-/// nanoql's engines read nothing accrued before a curve's reference date: a discount of 1, a survival of 1 and a default
-/// probability of 0, QuantLib's own premise for its two-date default probability. Each value is QuantLib's on the
-/// market restated from the evaluation date, a curve dated then that accrues nothing up to the T+2 date and is the T+2
-/// curve after it (the planner's <c>r1_cdshazard.cpp</c>, <c>r1_cdsshort.cpp</c> and the reviewer's <c>r8d.cpp</c>,
-/// <c>r8g.cpp</c>, rerun by the planner), or, for curves dated the evaluation date, restated alike from the past
-/// period's start (the reviewer's <c>r8j.cpp</c>); QuantLib's refusals, with their times, are its values on the curves
-/// given.
+/// The CDS engines' reads before a curve's reference date, on curves that settle after the evaluation date and on
+/// curves dated the evaluation date alike: QuantLib's integral engine integrates the default leg from the evaluation
+/// date, reading the discount and the default probability before a T+2 curve's reference date, both engines read the
+/// survival at a coupon paying before a T+2 hazard curve's date and the mid-point engine its default date or its
+/// period's end there, and both read a live coupon's past period (one paid after a weekend that ended it) before curves
+/// dated the evaluation date, where QuantLib's curves refuse a negative time. nanoql's engines read nothing accrued
+/// before a curve's reference date: a discount of 1, a survival of 1 and a default probability of 0, QuantLib's own
+/// premise for its two-date default probability. Each value is QuantLib's on the market restated from the evaluation
+/// date, a curve dated then that accrues nothing up to the T+2 date and is the T+2 curve after it (QuantLib 1.44), or,
+/// for curves dated the evaluation date, restated alike from the past period's start; QuantLib's refusals, with their
+/// times, are its values on the curves given.
 /// </summary>
 public class CdsEngineReferenceDateTests
 {
@@ -140,7 +138,7 @@ public class CdsEngineReferenceDateTests
         // curves dated that Sunday: the coupon is alive, and QuantLib reads its default probability (and, paid at
         // default, its discount) at the period's dates before the curves' reference date, refused, "negative time
         // (-0.00277778) given" in the mid-point engine and "(-0.508333)" in the integral one; nanoql's values are
-        // QuantLib's on the curves restated from the period's start (the reviewer's r8j.cpp)
+        // QuantLib's on the curves restated from the period's start
         var sunday = new Date(11, Month.June, 2006);
         var context = new EvaluationContext { EvaluationDate = sunday };
         var schedule = new Schedule(

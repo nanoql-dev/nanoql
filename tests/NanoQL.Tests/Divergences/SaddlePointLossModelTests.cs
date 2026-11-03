@@ -10,8 +10,7 @@ using static NanoQL.Tests.Conventions.CreditPortfolioBuilders;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The saddle-point model's tail reads (the S-xcr plan's XR8 (xxiii), (xlvii)), on pools of n names at hazard 0.03,
-/// recovery 0.4 and notional 1 (the S-xcr run's <c>c3_facts.cpp</c> and <c>c3_saddle_pct.cpp</c>):
+/// The saddle-point model's tail reads, on pools of n names at hazard 0.03, recovery 0.4 and notional 1:
 /// <list type="bullet">
 /// <item>Above the whole tranche the probability is 0: on 100 names over [0, 30%] QuantLib's reads 0.0016176810243568769
 /// at a fraction of 1.5 (it compares the fraction with the detachment amount); and the shortfall is at most the
@@ -21,25 +20,21 @@ namespace NanoQL.Tests.Divergences;
 /// evaluation date, and on 100 names from correlation 0.8 at five years, 0.85 from three months, 0.9 from a month and
 /// 0.95 throughout; its tail elsewhere reads the exact (recursive) model's within 1% at 10% and 7% to 8% at 1% a year
 /// out (0.2165 for 0.2021 at 0.7, 0.1899 for 0.1755 at 0.75). Here those nodes are exact, the tail within 2% at 10%
-/// through correlation 0.9 and 5% at 0.95 (the run's stop 2, ruled on 2026-10-28), and 10% at 1%, of the exact
-/// one.</item>
+/// through correlation 0.9 and 5% at 0.95, and 10% at 1%, of the exact one.</item>
 /// <item>A tail outside [0, 1] is refused: on ten names, 26.815515432090283 a day out at correlation 0.548 and
 /// 2.6118595103824398 at a week at 0.3, where the exact ones are 0.00073 and 0.0055.</item>
-/// <item>The percentile reads the exact distribution's within its loss unit where single nodes leave [0, 1] (the
-/// run's stop 1, ruled on 2026-10-28): on 100 names over the whole pool, QuantLib's 4.9485835 at 90% a year out at
-/// correlation 0.3, 55.627361 at 99% ten years out at 0.5 and 0.064772838 at 50% 30 days out at 0.1, the exact 4.8,
-/// 55.8 and 0 at its loss unit 0.6; its search solves below QuantLib's bracket (stop 3), so it isn't QuantLib's to the
-/// digit.</item>
+/// <item>The percentile reads the exact distribution's within its loss unit where single nodes leave [0, 1]: on 100
+/// names over the whole pool, QuantLib's 4.9485835 at 90% a year out at correlation 0.3, 55.627361 at 99% ten years out
+/// at 0.5 and 0.064772838 at 50% 30 days out at 0.1, the exact 4.8, 55.8 and 0 at its loss unit 0.6; its search solves
+/// below QuantLib's bracket, so it isn't QuantLib's to the digit.</item>
 /// <item>Where the level falls outside the bracket QuantLib places on its name of largest loss, it returns the
-/// bracket's end (the run's stop 3, ruled on 2026-10-28; the S-xcr code review's C3 O1-3): on 95 names at hazard 0.03
-/// and notional 1 with five at 0.001 and 3, it reads 0.97841938 at 1% a year out at correlation 0.7 and 0.20082286 at
-/// 10% 30 days out at 0.9, and throws a year out at 0.9, where the exact tails are 0.198289, 0.00494071 and 0.0564909;
-/// here the bracket widens and the point is solved.</item>
+/// bracket's end: on 95 names at hazard 0.03 and notional 1 with five at 0.001 and 3, it reads 0.97841938 at 1% a year
+/// out at correlation 0.7 and 0.20082286 at 10% 30 days out at 0.9, and throws a year out at 0.9, where the exact tails
+/// are 0.198289, 0.00494071 and 0.0564909; here the bracket widens and the point is solved.</item>
 /// <item>Above the largest loss a factor node reaches, the widened search's end reads 0/0 in the density and the
-/// conditional shortfall, so a tranche detaching above the pool's largest loss read NaN (the S-xcr code review's C3
-/// O2-1); here both read 0 there, as the tail does, and the tranche reads its shortfall detaching at the largest loss.
-/// The split's contributions read ∞/∞ at a widened point on QuantLib's form; here they take the cumulants' treatment
-/// and add up to the loss (O2-2).</item>
+/// conditional shortfall, so a tranche detaching above the pool's largest loss read NaN; here both read 0 there, as the
+/// tail does, and the tranche reads its shortfall detaching at the largest loss. The split's contributions read ∞/∞ at
+/// a widened point on QuantLib's form; here they take the cumulants' treatment and add up to the loss.</item>
 /// </list>
 /// </summary>
 public class SaddlePointLossModelTests
@@ -62,8 +57,7 @@ public class SaddlePointLossModelTests
     public void ATranchesShortfallIsItsTrancheLoss(double a, double d, double p, double exact, double quantLibs)
     {
         // the tranche loss's shortfall, within the expansion's error of the exact (recursive) model's; QuantLib's
-        // integrates the portfolio's tail above the tranche's percentile and caps it at quantLibs (the S-xcr code
-        // review's C3 O1-2, its rv_c3_misc.cpp)
+        // integrates the portfolio's tail above the tranche's percentile and caps it at quantLibs
         double esf = Pool(100, 0.3, a, d).ExpectedShortfall(D5, p);
         Assert.Equal(exact, esf, 0.03 * exact);
         Assert.True(esf <= (d - a) * 100.0);

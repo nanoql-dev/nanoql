@@ -13,13 +13,13 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The Monte Carlo lookback engine's builder and engine (the S-bar plan's BR1 (ii)): QuantLib's checks with its texts,
-/// each refusal's type, message and parameter asserted (the S-van plan's VD19), and the seed explicit: 0, which
-/// QuantLib reads as a seed drawn from the clock, refused naming the parameter (S2R4). QuantLib's builder checks the
-/// samples beside a tolerance and an error estimate the traits can't give as they are set, and the steps at the
-/// conversion to an engine; its engine's constructor checks the steps; and the engine checks the payoff and the spot as
-/// it prices. The builder's type parameter is the instrument, which QuantLib's template can't instantiate for another
-/// type; nanoql's refuses one at the conversion, naming the four it prices.
+/// The Monte Carlo lookback engine's builder and engine: QuantLib's checks with its texts, each refusal's type, message
+/// and parameter asserted, and the seed explicit: 0, which QuantLib reads as a seed drawn from the clock, refused
+/// naming the parameter. QuantLib's builder checks the samples beside a tolerance and an error estimate the traits
+/// can't give as they are set, and the steps at the conversion to an engine; its engine's constructor checks the steps;
+/// and the engine checks the payoff and the spot as it prices. The builder's type parameter is the instrument, which
+/// QuantLib's template can't instantiate for another type; nanoql's refuses one at the conversion, naming the four it
+/// prices.
 /// </summary>
 public class MakeMcLookbackEngineTests
 {

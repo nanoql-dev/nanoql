@@ -17,8 +17,8 @@ namespace NanoQL.Methods;
 /// <para>
 /// QuantLib refuses β = 1, where δ = (1 − 2β)/(1 − β) divides by zero, and near it Boost's non-central chi-squared
 /// refuses or runs for seconds. Here β = 1 is the lognormal density of the driftless forward, the CEV density's limit,
-/// with no mass at zero; for 0 &lt; |β − 1| &lt; 1e-3 the constructor refuses. A documented divergence (the S-van plan's
-/// VR10, <c>Divergences/CevNearOneTests.cs</c>).
+/// with no mass at zero; for 0 &lt; |β − 1| &lt; 1e-3 the constructor refuses. A documented divergence
+/// (<c>Divergences/CevNearOneTests.cs</c>).
 /// </para>
 /// <para>
 /// The inverse first solves Sankaran's approximation by Brent's method for its guess; where that fails, QuantLib's
@@ -32,7 +32,7 @@ namespace NanoQL.Methods;
 /// </remarks>
 public sealed class CEVRNDCalculator : RiskNeutralDensityCalculator
 {
-    // the band around β = 1 the non-central chi-squared can't reach (VR10)
+    // the band around β = 1 the non-central chi-squared can't reach
     private const double NearOne = 1e-3;
 
     private readonly double f0;

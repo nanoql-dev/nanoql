@@ -7,8 +7,8 @@ Two Heston parameter sets (tools/vectors/gen/processes/hestonprocess.py's equity
 and linear zero curves, at QuantLib's default accuracy (1e-6) and at 1e-8, at three times: the density and distribution
 at log spots from 2.5 standard deviations of the average variance below the log forward to 2.5 above, the inverse at
 probabilities from 0.01 to 0.99. Every structure is dated 15 October 2026 on Actual/365 (Fixed), so the dividend curve
-read at the risk-free curve's times is read at its instants (the S-hes plan's HR7 (xi)), and every κt is far above HR7
-(xxv)'s floor. The wheel's calls, by QuantLib-SWIG 1.44: HestonRNDCalculator(process, integrationEps,
+read at the risk-free curve's times is read at its instants, and every κt is far above the floor where nanoql's form
+departs. The wheel's calls, by QuantLib-SWIG 1.44: HestonRNDCalculator(process, integrationEps,
 maxIntegrationIterations) and its pdf, cdf and invcdf. Read back by
 tests/NanoQL.Tests/Vectors/Methods/FiniteDifferences/Utilities/HestonRNDCalculatorVectorTests.cs."""
 import importlib.util

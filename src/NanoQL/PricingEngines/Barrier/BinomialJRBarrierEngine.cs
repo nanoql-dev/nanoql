@@ -13,7 +13,7 @@ namespace NanoQL.PricingEngines;
 /// <summary>
 /// The binomial barrier engine on the Jarrow-Rudd tree and Derman and Kani's discretized barrier option:
 /// QuantLib-Python's <c>BinomialJRBarrierEngine</c>, QuantLib's <c>BinomialBarrierEngine&lt;JarrowRudd,
-/// DiscretizedDermanKaniBarrierOption&gt;</c>, the wheel's closing (D12).
+/// DiscretizedDermanKaniBarrierOption&gt;</c>, the wheel's closing.
 /// </summary>
 public static class BinomialJRBarrierEngine
 {

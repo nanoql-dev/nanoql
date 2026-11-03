@@ -5,10 +5,10 @@ the evaluation date 15 October 2026: the NPV, delta, gamma and theta it reports.
 
 Shout calls and puts at the money and away from it, their windows from today and from a quarter on, on four processes
 (flat and zero curves, constant and surface volatilities: tools/vectors/gen/processes/blackscholesprocess.py's), on a
-small grid (40 x 80, Douglas) and on testFDShoutNPV's market and grid (400 x 200); then other damping steps and
-schemes, a dividend before the window, and an expired option. A dividend between a shout and expiry, where QuantLib
-strikes the residual option at the escrowed level and nanoql at the spot (the S-van plan's VR4 (xxx),
-tests/NanoQL.Tests/Divergences/ShoutDividendStrikeTests.cs), is left out: the one dividend is paid before the window
+small grid (40 x 80, Douglas) and on testFDShoutNPV's market and grid (400 x 200); then other damping steps and schemes,
+a dividend before the window, and an expired option. A dividend between a shout and expiry, where QuantLib strikes the
+residual option at the escrowed level and nanoql at the spot
+(tests/NanoQL.Tests/Divergences/ShoutDividendStrikeTests.cs), is left out: the one dividend is paid before the window
 opens, where the two levels are one. Every structure is on the risk-free curve's day counter and reference date
 (tests/NanoQL.Tests/Divergences/FdShoutSwingCirMismatchedTimesTests.cs).
 

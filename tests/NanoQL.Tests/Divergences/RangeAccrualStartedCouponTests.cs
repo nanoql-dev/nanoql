@@ -13,28 +13,27 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// A range accrual in progress (the S-cms plan's CMR5 (xviii)): QuantLib's BGM pricer prices an observation from its
-/// expiry, so a coupon whose start is past is priced on QuantLib's call-spread route and smile correction with the
-/// before-fixing phase clamped (<c>rangeaccrual.cpp:403-423</c>, <c>:474-478</c>), but its no-smile route takes the
-/// phase unclamped (<c>:365-372</c>), and an observation whose expiry is past is priced by no route (NaN): on the
-/// wheel, on the C++ range accrual vectors' Euribor 6M, curve and fixings, a weekly coupon from 10 January 2025 (its
-/// first observation on 17 January, fixing on the evaluation date, 15 January) pays 0.033335938211808636 on the
-/// no-smile route at volatilities 10% and 30% and 0.03337731105469358 on the call-spread route, and the no-smile route
-/// refuses at 30% and 10% (0.03465775920672742 by call spread); a coupon from 19 December 2024 refuses on every route.
-/// nanoql's no-smile route clamps the phase as the other two do, and an observation whose fixing is known, its fixing
-/// date before the evaluation date, or on it once published, is counted by its fixing f, the deflator times 1{f &gt; l}
-/// − 1{f &gt; u}, the two digitals QuantLib's range reads, its date past or not. QuantLib's checks: its call-spread
-/// route, within that route's rounding; its pricer on the coupon restated with only its observations not yet known (the
-/// same start, end and fixings), scaled by their share, plus the known part, with the 19 December coupon's fourth known
-/// observation dated after the evaluation date (16 January, fixing on 14 January), and a coupon from 9 January whose
-/// one known observation is that one, which QuantLib's pricer takes as a digital on a day's expiry,
-/// 0.014901944616257642 at 2.92% to 4% where the known fixing gives 0.015369074793388015; the 19 December coupon
-/// below 3.2%, from 2.6% (known fixings 3.3022%, above, 2.589% and 2.5592%, below, and 2.9258%) and from 0, a lower
-/// trigger at or below the pricer's ε/2, which QuantLib's digital takes as 1 (<c>:347</c>); on a coupon's start date,
-/// QuantLib's values on every route; and the smile-correction route, which reads the no-smile digital
-/// (<c>:474-478</c>), so QuantLib's equals its unclamped no-smile route on the 10 January coupon, 0.033335938211808636
-/// at 10% and 30%, and refuses at 30% and 10%, where nanoql's equals its clamped one, the correction 0 once the start
-/// is past.
+/// A range accrual in progress: QuantLib's BGM pricer prices an observation from its expiry, so a coupon whose start is
+/// past is priced on QuantLib's call-spread route and smile correction with the before-fixing phase clamped
+/// (<c>rangeaccrual.cpp:403-423</c>, <c>:474-478</c>), but its no-smile route takes the phase unclamped
+/// (<c>:365-372</c>), and an observation whose expiry is past is priced by no route (NaN): on the wheel, on the C++
+/// range accrual vectors' Euribor 6M, curve and fixings, a weekly coupon from 10 January 2025 (its first observation on
+/// 17 January, fixing on the evaluation date, 15 January) pays 0.033335938211808636 on the no-smile route at
+/// volatilities 10% and 30% and 0.03337731105469358 on the call-spread route, and the no-smile route refuses at 30% and
+/// 10% (0.03465775920672742 by call spread); a coupon from 19 December 2024 refuses on every route. nanoql's no-smile
+/// route clamps the phase as the other two do, and an observation whose fixing is known, its fixing date before the
+/// evaluation date, or on it once published, is counted by its fixing f, the deflator times 1{f &gt; l} − 1{f &gt; u},
+/// the two digitals QuantLib's range reads, its date past or not. QuantLib's checks: its call-spread route, within that
+/// route's rounding; its pricer on the coupon restated with only its observations not yet known (the same start, end
+/// and fixings), scaled by their share, plus the known part, with the 19 December coupon's fourth known observation
+/// dated after the evaluation date (16 January, fixing on 14 January), and a coupon from 9 January whose one known
+/// observation is that one, which QuantLib's pricer takes as a digital on a day's expiry, 0.014901944616257642 at 2.92%
+/// to 4% where the known fixing gives 0.015369074793388015; the 19 December coupon below 3.2%, from 2.6% (known fixings
+/// 3.3022%, above, 2.589% and 2.5592%, below, and 2.9258%) and from 0, a lower trigger at or below the pricer's ε/2,
+/// which QuantLib's digital takes as 1 (<c>:347</c>); on a coupon's start date, QuantLib's values on every route; and
+/// the smile-correction route, which reads the no-smile digital (<c>:474-478</c>), so QuantLib's equals its unclamped
+/// no-smile route on the 10 January coupon, 0.033335938211808636 at 10% and 30%, and refuses at 30% and 10%, where
+/// nanoql's equals its clamped one, the correction 0 once the start is past.
 /// </summary>
 public class RangeAccrualStartedCouponTests
 {

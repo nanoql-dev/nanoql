@@ -14,11 +14,10 @@ namespace NanoQL.Models;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Immutable (the S-mmp plan's MMPR1 (ii)): its checks are computed at each call (SMD8, PR6.9), where QuantLib caches
-/// them in <c>mutable</c> flags.
+/// Immutable: its checks are computed at each call, where QuantLib caches them in <c>mutable</c> flags.
 /// </para>
 /// <para>
-/// <b>The checks</b> (MMPR4 (xii), a documented divergence; <c>Divergences/VegaBumpCollectionCheckTests.cs</c>):
+/// <b>The checks</b> (a documented divergence; <c>Divergences/VegaBumpCollectionCheckTests.cs</c>):
 /// <see cref="IsFull"/> and <see cref="IsNonOverlapping"/> are true where no element fails; QuantLib's are true where
 /// one fails (<c>vegabumpcluster.cpp:179</c>, <c>:218</c>), so its own default collection given as its clusters reports
 /// not full, overlapping and not sensible. The default collection's flags are QuantLib's, true.
@@ -116,7 +115,7 @@ public sealed class VegaBumpCollection
             }
         }
 
-        // no element fails (MMPR4 (xii))
+        // no element fails
         return numberFailures == 0;
     }
 
@@ -126,7 +125,7 @@ public sealed class VegaBumpCollection
     {
         _ = Marks(out int numberFailures);
 
-        // no element fails (MMPR4 (xii))
+        // no element fails
         return numberFailures == 0;
     }
 

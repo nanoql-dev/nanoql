@@ -11,11 +11,11 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// GSR's iterative calibrations (the S-g1d plan's G1R2 (iii)): QuantLib's run one calibration per helper on the model,
-/// each moving one parameter, and the model then reports the last calibration's end criteria and values
-/// (<c>gsr.hpp:104-137</c>); here each returns the last step's <see cref="CalibrationResults{TModel}"/>, its model the
-/// final one, the steps' own calibrations run in turn on the model the step before returned; an empty set of helpers,
-/// which leaves QuantLib's model and record as they were, has no record to return and is refused.
+/// GSR's iterative calibrations: QuantLib's run one calibration per helper on the model, each moving one parameter, and
+/// the model then reports the last calibration's end criteria and values (<c>gsr.hpp:104-137</c>); here each returns
+/// the last step's <see cref="CalibrationResults{TModel}"/>, its model the final one, the steps' own calibrations run
+/// in turn on the model the step before returned; an empty set of helpers, which leaves QuantLib's model and record as
+/// they were, has no record to return and is refused.
 /// </summary>
 public class GsrIterativeCalibrationTests
 {

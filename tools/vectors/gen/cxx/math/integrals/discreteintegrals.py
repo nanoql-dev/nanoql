@@ -10,10 +10,9 @@ each output computed by the C++ harness.
   tools/cxx/src/math/integrals/trapezoidintegral.cpp names them) over four intervals, forward, reversed and empty, at
   3 to 10, 101 and 1000 evaluations, and the trapezoid at 2: the value and the evaluations counted.
 
-Left out (the S-van plan's §2.10): the integrators below two evaluations, where QuantLib's count of intervals wraps
-below zero (VR4 (xix)), and Simpson's at two, where QuantLib counts f(a) twice (VR4 (xx);
-tests/NanoQL.Tests/Divergences/DiscreteIntegratorFewPointsTests.cs). Read back by
-tests/NanoQL.Tests/Vectors/Cxx/Numerics/Integrals/DiscreteIntegralsCxxVectorTests.cs."""
+Left out: the integrators below two evaluations, where QuantLib's count of intervals wraps below zero, and Simpson's
+at two, where QuantLib counts f(a) twice (tests/NanoQL.Tests/Divergences/DiscreteIntegratorFewPointsTests.cs). Read
+back by tests/NanoQL.Tests/Vectors/Cxx/Numerics/Integrals/DiscreteIntegralsCxxVectorTests.cs."""
 import math
 import os
 import sys

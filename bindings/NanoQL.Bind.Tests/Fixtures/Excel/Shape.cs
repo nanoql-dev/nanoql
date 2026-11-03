@@ -3,7 +3,7 @@
 
 namespace NanoQL.Bind.Tests.Fixtures.Excel;
 
-/// <summary>A base with instance members a listed derived type inherits, a static member and a static getter it doesn't (XLD33).</summary>
+/// <summary>A base with instance members a listed derived type inherits, a static member and a static getter it doesn't.</summary>
 public abstract class Shape
 {
     /// <summary>Gets a static instance, which a derived type doesn't inherit.</summary>

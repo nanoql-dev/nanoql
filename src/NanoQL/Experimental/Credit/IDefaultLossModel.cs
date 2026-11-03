@@ -19,9 +19,9 @@ namespace NanoQL.Experimental;
 /// <para>
 /// A model is an immutable configuration until it is bound: <see cref="SetBasket"/> returns a copy bound to a basket,
 /// its per-basket precomputation run once there (QuantLib's <c>resetModel</c>), and a basket's
-/// <see cref="Experimental.Basket.SetLossModel"/> binds it (the S-xcr plan's XR1). Every statistic is a member with a
-/// body that refuses, with QuantLib's text, unless the model implements it; QuantLib's protected statistics are public
-/// here, the basket reading them through this interface (XR2 (a)).
+/// <see cref="Experimental.Basket.SetLossModel"/> binds it. Every statistic is a member with a body that refuses, with
+/// QuantLib's text, unless the model implements it; QuantLib's protected statistics are public here, the basket reading
+/// them through this interface.
 /// </para>
 /// <para>
 /// An interface, beside the abstract class, so that a model with another base implements the contract over it, as

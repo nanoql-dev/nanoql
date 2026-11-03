@@ -15,7 +15,7 @@ namespace NanoQL.PricingEngines;
 
 /// <summary>
 /// The binomial convertible engine on the Joshi tree: QuantLib-Python's <c>BinomialJ4ConvertibleEngine</c>, QuantLib's
-/// <c>BinomialConvertibleEngine&lt;Joshi4&gt;</c> (D12).
+/// <c>BinomialConvertibleEngine&lt;Joshi4&gt;</c>.
 /// </summary>
 public static class BinomialJ4ConvertibleEngine
 {

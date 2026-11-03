@@ -11,7 +11,7 @@ namespace NanoQL.Models;
 
 /// <summary>
 /// What <see cref="HistoricalRatesAnalysisFunctions.HistoricalRatesAnalysis"/> leaves in QuantLib's reference
-/// outputs: the dates skipped, where a fixing was missing or refused, each with its error's message (S2R5).
+/// outputs: the dates skipped, where a fixing was missing or refused, each with its error's message.
 /// </summary>
 /// <param name="SkippedDates">The dates skipped, in order.</param>
 /// <param name="SkippedDatesErrorMessage">Each skipped date's error message.</param>

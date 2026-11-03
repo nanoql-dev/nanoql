@@ -34,15 +34,15 @@ namespace NanoQL.Models;
 /// <para>
 /// The Black price and the option's type read both curves by the exercise date, as the engine's forward does. QuantLib
 /// reads them at the risk-free curve's time to it, which on a dividend curve with another day counter or reference date
-/// is another date, so its market value and its model value price different forwards (the S-eq plan's ruling of
-/// 2026-10-20, <c>Divergences/HestonForwardByDateTests.cs</c>). Where the curves share the day counter and the
-/// reference date, the two reads are the same.
+/// is another date, so its market value and its model value price different forwards
+/// (<c>Divergences/HestonForwardByDateTests.cs</c>). Where the curves share the day counter and the reference date, the
+/// two reads are the same.
 /// </para>
 /// <para>
 /// The maturity runs from the earlier curve's reference date, as the engine's model time does, so beside a risk-free
 /// curve settling later the Black price's variance accrues from the evaluation date, as QuantLib's helper on the market
-/// restated from that date reads it; QuantLib's runs from the risk-free curve's date (the S-eq plan's ruling of
-/// 2026-10-21, <c>Divergences/HestonMismatchedTimesTests.cs</c>).
+/// restated from that date reads it; QuantLib's runs from the risk-free curve's date
+/// (<c>Divergences/HestonMismatchedTimesTests.cs</c>).
 /// </para>
 /// </remarks>
 public sealed class HestonModelHelper : BlackCalibrationHelper
@@ -97,7 +97,7 @@ public sealed class HestonModelHelper : BlackCalibrationHelper
 
         // the time to the exercise on the risk-free curve's day counter from the earlier curve's reference date, as the
         // engine's model time runs; QuantLib's, the risk-free curve's own, where the dividend curve isn't dated before
-        // it (the S-eq plan's ruling of 2026-10-21, C4R5-O1)
+        // it
         Maturity = dividendYield.ReferenceDate < riskFreeRate.ReferenceDate
             ? riskFreeRate.DayCounter.YearFraction(dividendYield.ReferenceDate, ExerciseDate)
             : riskFreeRate.TimeFromReference(ExerciseDate);
@@ -125,8 +125,8 @@ public sealed class HestonModelHelper : BlackCalibrationHelper
     /// </summary>
     /// <typeparam name="TModel">The model type the engine prices with.</typeparam>
     /// <param name="engine">
-    /// The engine: the option, the context and the model being calibrated, in D14's order; <see langword="null"/>
-    /// for none.
+    /// The engine: the option, the context and the model being calibrated, in the engines' order;
+    /// <see langword="null"/> for none.
     /// </param>
     /// <returns>The copy.</returns>
     /// <remarks>

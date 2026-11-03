@@ -22,15 +22,14 @@ namespace NanoQL.Experimental;
 /// <typeparam name="TInitTraits">The policy's initialization parameters.</typeparam>
 /// <remarks>
 /// <para>
-/// Immutable (the S-xcr plan's XR5): <see cref="ResetBasket"/> returns a copy bound to a basket's live names, default
-/// row i with recovery row i + n kept, the live count the new n (XR2 (f)). A model parameter A of 0 is refused: the
-/// conditional recovery divides by it (<c>spotlosslatentmodel.hpp:271-276</c>; XR8 (xxxiv)). A default probability
-/// before a curve's reference date reads 0 (XR8 (x)).
+/// Immutable: <see cref="ResetBasket"/> returns a copy bound to a basket's live names, default row i with recovery row
+/// i + n kept, the live count the new n. A model parameter A of 0 is refused: the conditional recovery divides by it
+/// (<c>spotlosslatentmodel.hpp:271-276</c>). A default probability before a curve's reference date reads 0.
 /// </para>
 /// <para>
 /// The conditional recovery is QuantLib's formula, whose documentation claims the single-name expected loss
 /// pdef·(1 − R) and which reads E[R | default] 0.361 for R = 0.40 at A = 0.8, at equal betas too: kept, recorded for
-/// revisiting (XR8 (xxxvii)).
+/// revisiting.
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]

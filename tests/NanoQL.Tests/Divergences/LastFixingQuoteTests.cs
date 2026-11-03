@@ -8,13 +8,13 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// <see cref="LastFixingQuote"/>'s reference date on a store holding later fixings (the S-core plan's CR7 (xxxv)):
-/// QuantLib's is the earlier of the store's last date and the evaluation date (<c>lastfixingquote.cpp:40-43</c>), the
-/// evaluation date itself on a store holding later fixings, as a backtest on one full history does, whose fixing is
-/// refused on a non-fixing day or forecast where it is missing. nanoql's is the last stored date on or before the
-/// evaluation date: Euribor 6M fixed through 30 April 2021, on Saturday 13 March 2021 and Good Friday 2 April 2021,
-/// where QuantLib refuses the evaluation date's fixing (the reviewer's <c>r8a.cpp</c>), nanoql's quote is the last
-/// fixing available, on the 12th and the 1st, and is QuantLib's own quote on the store cut at the evaluation date.
+/// <see cref="LastFixingQuote"/>'s reference date on a store holding later fixings: QuantLib's is the earlier of the
+/// store's last date and the evaluation date (<c>lastfixingquote.cpp:40-43</c>), the evaluation date itself on a store
+/// holding later fixings, as a backtest on one full history does, whose fixing is refused on a non-fixing day or
+/// forecast where it is missing. nanoql's is the last stored date on or before the evaluation date: Euribor 6M fixed
+/// through 30 April 2021, on Saturday 13 March 2021 and Good Friday 2 April 2021, where QuantLib refuses the evaluation
+/// date's fixing, nanoql's quote is the last fixing available, on the 12th and the 1st, and is QuantLib's own quote on
+/// the store cut at the evaluation date.
 /// </summary>
 public class LastFixingQuoteTests
 {

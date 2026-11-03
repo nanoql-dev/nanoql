@@ -20,11 +20,11 @@ namespace NanoQL.Experimental;
 /// three dimensions QuantLib's hyperspherical angles are each uniform in [0, π], where a uniform direction needs
 /// densities ∝ sin^(d−k−1)φ, so its draws crowd the poles; nanoql's direction is Muller's (1959), d standard normals
 /// from the walk's generator through the inverse cumulative normal, scaled to unit length, the radius and weights then
-/// QuantLib's (the S-xrt plan's XRR5 (xxxiii) and XRR11; <c>Divergences/IsotropicRandomWalkTests.cs</c>).
+/// QuantLib's (<c>Divergences/IsotropicRandomWalkTests.cs</c>).
 /// </para>
 /// <para>
 /// A working type, as the generators are: each draw and each <c>SetDimension</c> changes it, and it is not
-/// thread-safe. The seed is required: QuantLib's default, 0, seeds the twister from the clock (the S-xrt plan's XRD3).
+/// thread-safe. The seed is required: QuantLib's default, 0, seeds the twister from the clock.
 /// </para>
 /// </remarks>
 /// <typeparam name="TDistribution">The radius's distribution.</typeparam>

@@ -15,9 +15,9 @@ namespace NanoQL.Tests.Vectors;
 /// The C++ harness's SABR surface vectors, <c>tests/vectors/cxx/experimental/volatility/sabrvolsurface.json</c>:
 /// <see cref="SabrVolSurface"/> on Euribor over an abcd at-the-money curve, its maximum date and strike range, its
 /// tenors' option dates and volatility spreads, its volatility spreads by date, and at times whose dates are fixing
-/// dates its sections' levels, exercise dates and volatilities and its at-the-money volatility, the elements S7R6's
-/// one-ulp refits leave stable; QuantLib's refusals.
-/// The surface as <c>tools/cxx/src/experimental/volatility/sabrvolsurface.cpp</c> builds it.
+/// dates its sections' levels, exercise dates and volatilities and its at-the-money volatility, the elements one-ulp
+/// refits leave stable; QuantLib's refusals. The surface as
+/// <c>tools/cxx/src/experimental/volatility/sabrvolsurface.cpp</c> builds it.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class SabrVolSurfaceCxxVectorTests

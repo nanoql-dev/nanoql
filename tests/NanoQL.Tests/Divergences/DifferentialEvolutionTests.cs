@@ -6,10 +6,10 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// Differential evolution's generator, one per minimization (the S-core plan's CR2 (c)): QuantLib's optimizer keeps its
-/// Mersenne Twister as a member (<c>differentialevolution.hpp:164</c>), so a second minimization on the same object
-/// continues the first's stream; nanoql's builds one from the seed in each minimization, so a second is the first.
-/// QuantLib's values are its own class's, from this run's <c>probes\c2_facts.cpp</c> (<c>c2_facts.out</c>).
+/// Differential evolution's generator, one per minimization: QuantLib's optimizer keeps its Mersenne Twister as a
+/// member (<c>differentialevolution.hpp:164</c>), so a second minimization on the same object continues the first's
+/// stream; nanoql's builds one from the seed in each minimization, so a second is the first. QuantLib's values are its
+/// own class's.
 /// </summary>
 public class DifferentialEvolutionTests
 {

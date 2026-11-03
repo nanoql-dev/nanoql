@@ -12,17 +12,16 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The American payoff at the hit under negative rates (the S-van plan's VR4 (i), master Revision 57, S-rx's (xv)).
-/// QuantLib's closed form takes λ = √(μ² − 2 ln D / σ²T) (<c>americanpayoffathit.cpp:75</c>, <c>:90</c>), the square
-/// root of a negative number where r &lt; 0 and μ² &lt; −2r/σ², so the value is NaN: at r −1%, q −1.5% and 20%, and at
-/// r −0.75%, q −0.4% and 8%, a down-and-in put at 90 and an up-and-in call at 110 paying 5 [executed on the wheel:
-/// <c>oracle_c1.py</c>]. nanoql's value there is the payoff's present value at the hit integrated over the
-/// first-passage density, which is QuantLib's closed form where λ is real; its Greeks are that integral's derivatives.
-/// QuantLib's checks: its closed form, the same quantity where it works (the integral here computed by the test); and
-/// its finite-difference barrier engine (400 × 800) where it doesn't: the cash at the hit is a knock-out's rebate on a
-/// payoff that pays nothing, within that engine's grid error. Near the spot, where the Greeks' integrals grow as 1/b
-/// and 1/b², the value and Greeks are checked against the integrals computed to 40 digits, independently of the
-/// quadrature.
+/// The American payoff at the hit under negative rates. QuantLib's closed form takes λ = √(μ² − 2 ln D / σ²T)
+/// (<c>americanpayoffathit.cpp:75</c>, <c>:90</c>), the square root of a negative number where r &lt; 0 and μ² &lt;
+/// −2r/σ², so the value is NaN: at r −1%, q −1.5% and 20%, and at r −0.75%, q −0.4% and 8%, a down-and-in put at 90 and
+/// an up-and-in call at 110 paying 5 (QuantLib-Python 1.44). nanoql's value there is the payoff's present value at the
+/// hit integrated over the first-passage density, which is QuantLib's closed form where λ is real; its Greeks are that
+/// integral's derivatives. QuantLib's checks: its closed form, the same quantity where it works (the integral here
+/// computed by the test); and its finite-difference barrier engine (400 × 800) where it doesn't: the cash at the hit is
+/// a knock-out's rebate on a payoff that pays nothing, within that engine's grid error. Near the spot, where the
+/// Greeks' integrals grow as 1/b and 1/b², the value and Greeks are checked against the integrals computed to 40
+/// digits, independently of the quadrature.
 /// </summary>
 public class AmericanPayoffAtHitNegativeRateTests
 {
@@ -33,7 +32,7 @@ public class AmericanPayoffAtHitNegativeRateTests
     [Fact]
     public void WhereLambdaIsRealTheFirstPassageIntegralIsQuantLibsClosedForm()
     {
-        // (r, q, σ, type, strike, QuantLib's closed form for 5 at the hit) [executed on the wheel: oracle_c1d.py]
+        // (r, q, σ, type, strike, QuantLib's closed form for 5 at the hit) (QuantLib-Python 1.44)
         (double R, double Q, double Vol, OptionType Type, double Strike, double QuantLib)[] cases =
         [
             (0.05, 0.02, 0.25, OptionType.Put, 90.0, 3.3277010715615774),
@@ -83,9 +82,9 @@ public class AmericanPayoffAtHitNegativeRateTests
     [Fact]
     public void NearTheSpotTheValueAndGreeksAreTheFirstPassageIntegralsToTheirPrecision()
     {
-        // a strike 1% from the spot, where QuantLib's value is NaN: (r, q, σ, type, strike, and the 40-digit
-        // integrals of the density and of its first and second derivatives by b = ln(H/S), the last two of order 1/b
-        // and 1/b²) [executed: fp_reference.py, composite 20-point Gauss-Legendre in ln s, decimal arithmetic]
+        // a strike 1% from the spot, where QuantLib's value is NaN: (r, q, σ, type, strike, and the 40-digit integrals
+        // of the density and of its first and second derivatives by b = ln(H/S), the last two of order 1/b and 1/b²)
+        // (composite 20-point Gauss-Legendre in ln s, decimal arithmetic)
         (double R, double Q, double Vol, OptionType Type, double Strike, double I0, double I1, double I2)[] cases =
         [
             (-0.02, -0.015, 0.10, OptionType.Put, 99.0, 0.9303081798010805, 6.995974537773846, -9.532180319354639),

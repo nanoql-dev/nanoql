@@ -14,7 +14,7 @@ namespace NanoQL.Experimental;
 /// <summary>
 /// The binomial double-barrier engine on the Jarrow-Rudd tree and Derman and Kani's discretized double-barrier option:
 /// QuantLib-Python's <c>BinomialJRDoubleBarrierEngine</c>, QuantLib's <c>BinomialDoubleBarrierEngine&lt;JarrowRudd,
-/// DiscretizedDermanKaniDoubleBarrierOption&gt;</c>, the wheel's closing (D12).
+/// DiscretizedDermanKaniDoubleBarrierOption&gt;</c>, the wheel's closing.
 /// </summary>
 [Experimental("NQL0001")]
 public static class BinomialJRDoubleBarrierEngine

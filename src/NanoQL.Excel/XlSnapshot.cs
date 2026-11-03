@@ -3,7 +3,7 @@
 
 namespace NanoQL.Excel;
 
-/// <summary>A generator's snapshot behind a handle: the generator, never drawn from itself (BIR3's R3, XLR2).</summary>
+/// <summary>A generator's snapshot behind a handle: the generator, never drawn from itself.</summary>
 /// <param name="generator">The generator.</param>
 public sealed class XlSnapshot(object generator)
 {

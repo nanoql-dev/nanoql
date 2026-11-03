@@ -17,11 +17,10 @@ namespace NanoQL.Experimental;
 /// option of an expiry (<see cref="FFTEngine"/>).
 /// </summary>
 /// <remarks>
-/// Immutable. Each curve's discount is read by date, nothing accrued before its own date, and the time on the
-/// risk-free clock from its reference date, as QuantLib's (the S-xeq plan's XER5 (xxxiii)). The state reports the strip
-/// of exponents u with E[S^u] finite, the roots of 1 − θνu − σ²νu²/2, which the base's damping reads (XER5 (xviii));
-/// where 1 − θν − σ²ν/2 isn't positive the spot's mean is infinite and the engine refuses, where QuantLib returns NaN
-/// (XER5 (xvii)).
+/// Immutable. Each curve's discount is read by date, nothing accrued before its own date, and the time on the risk-free
+/// clock from its reference date, as QuantLib's. The state reports the strip of exponents u with E[S^u] finite, the
+/// roots of 1 − θνu − σ²νu²/2, which the base's damping reads; where 1 − θν − σ²ν/2 isn't positive the spot's mean is
+/// infinite and the engine refuses, where QuantLib returns NaN.
 /// </remarks>
 [Experimental("NQL0001")]
 public sealed class FFTVarianceGammaEngine : FFTEngine
@@ -58,7 +57,7 @@ public sealed class FFTVarianceGammaEngine : FFTEngine
         VanillaOption option, EvaluationContext context, VarianceGammaProcess process, double logStrikeSpacing = 0.001) =>
         new FFTVarianceGammaEngine(process, logStrikeSpacing).Calculate(option, context);
 
-    /// <summary>Prices a list of European options, one transform per expiry (the S-xeq plan's XER1).</summary>
+    /// <summary>Prices a list of European options, one transform per expiry.</summary>
     /// <param name="options">The options, each European on a striked payoff.</param>
     /// <param name="context">The evaluation context.</param>
     /// <param name="process">The variance gamma process.</param>

@@ -26,16 +26,15 @@ namespace NanoQL.PricingEngines;
 /// The critical price's Newton step can leave (0, K) for a put, or (K, ∞) for a call, and the next Black formula then
 /// throws (<c>baroneadesiwhaleyengine.cpp:83-130</c>); so does a call's seed where h > 0 takes it below zero
 /// (<c>:59-64</c>, then the Black formula of <c>:93</c>). Here the critical price is then the root of QuantLib's own
-/// equation over that range, by Brent's method. Every case where Newton stays in range keeps QuantLib's bits (the S-van
-/// plan's VR4 (vii), <c>Divergences/BaroneAdesiWhaleyCriticalPriceTests.cs</c>).
+/// equation over that range, by Brent's method. Every case where Newton stays in range keeps QuantLib's bits
+/// (<c>Divergences/BaroneAdesiWhaleyCriticalPriceTests.cs</c>).
 /// </para>
 /// <para>
-/// Each structure is read at the exercise date by date, nothing accrued before its own reference date (the
-/// mismatched-dates class); where early exercise is never optimal the theta's terms run over each structure's own time,
-/// as S-eq's analytic European engine's, where QuantLib's run over the volatility's (VR4, "across C1–C4";
-/// <c>Divergences/ApproximationThetaMismatchedTimesTests.cs</c>). An exercise window opening after the reference date
-/// is priced by <see cref="ApproximationWindow"/>, where QuantLib reads the last date alone (VR4 (xxvi),
-/// <c>Divergences/ApproximationWindowTests.cs</c>).
+/// Each structure is read at the exercise date by date, nothing accrued before its own reference date; where early
+/// exercise is never optimal the theta's terms run over each structure's own time, as the analytic European engine's,
+/// where QuantLib's run over the volatility's (<c>Divergences/ApproximationThetaMismatchedTimesTests.cs</c>). An
+/// exercise window opening after the reference date is priced by <see cref="ApproximationWindow"/>, where QuantLib
+/// reads the last date alone (<c>Divergences/ApproximationWindowTests.cs</c>).
 /// </para>
 /// </remarks>
 public static class BaroneAdesiWhaleyApproximationEngine
@@ -169,7 +168,7 @@ public static class BaroneAdesiWhaleyApproximationEngine
         }
 
         // a call's seed below zero, where h > 0 takes it and QuantLib's first Black formula throws: the equation's root
-        // over (K, ∞) (VR4 (vii))
+        // over (K, ∞)
         if (payoff.OptionType == OptionType.Call && !(si > 0.0))
         {
             return Bracketed(payoff, riskFreeDiscount, dividendDiscount, variance);
@@ -197,7 +196,7 @@ public static class BaroneAdesiWhaleyApproximationEngine
                 {
                     si = (strike + rhs - (bi * si)) / (1 - bi);
 
-                    // the step left (K, ∞): the equation's root there (VR4 (vii))
+                    // the step left (K, ∞): the equation's root there
                     if (!(si > strike))
                     {
                         return Bracketed(payoff, riskFreeDiscount, dividendDiscount, variance);
@@ -224,7 +223,7 @@ public static class BaroneAdesiWhaleyApproximationEngine
                 {
                     si = (strike - rhs + (bi * si)) / (1 + bi);
 
-                    // the step left (0, K): the equation's root there (VR4 (vii))
+                    // the step left (0, K): the equation's root there
                     if (!(si > 0.0 && si < strike))
                     {
                         return Bracketed(payoff, riskFreeDiscount, dividendDiscount, variance);
@@ -253,8 +252,8 @@ public static class BaroneAdesiWhaleyApproximationEngine
         (dividendDiscount >= 1.0 && dividendDiscount >= riskFreeDiscount && type == OptionType.Call)
         || (riskFreeDiscount >= 1.0 && riskFreeDiscount >= dividendDiscount && type == OptionType.Put);
 
-    // QuantLib's never-optimal branch, Ju's too: the European value and Greeks, each rate over its own curve's time
-    // and the theta's terms over each structure's own (S-eq's analytic European engine's form).
+    // QuantLib's never-optimal branch, Ju's too: the European value and Greeks, each rate over its own curve's time and
+    // the theta's terms over each structure's own (the analytic European engine's form).
     internal static OneAssetOptionResults EuropeanResults(
         StrikedTypePayoff payoff, GeneralizedBlackScholesProcess process, Date lastDate, ApproximationWindow.Market market)
     {
@@ -348,7 +347,7 @@ public static class BaroneAdesiWhaleyApproximationEngine
     }
 
     // The root of QuantLib's critical-price equation, LHS − RHS, over the range Newton left: (0, K) for a put,
-    // (K, ∞) for a call, by Brent's method to the strike's 1e-12 (the S-van plan's VR4 (vii)).
+    // (K, ∞) for a call, by Brent's method to the strike's 1e-12.
     private static double Bracketed(
         StrikedTypePayoff payoff, double riskFreeDiscount, double dividendDiscount, double variance)
     {

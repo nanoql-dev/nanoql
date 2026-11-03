@@ -21,10 +21,10 @@ namespace NanoQL.Tests.Divergences;
 /// refuses them against its tolerance where nanoql's cube records its best parameters' errors and builds.
 /// <para>
 /// Each fit's claim is asserted in the same run, bit for bit: its values and errors are its own section's at the
-/// parameters it reports. QuantLib's numbers are asserted within bounds above what S7R6's one-ulp moves of the five
+/// parameters it reports. QuantLib's numbers are asserted within bounds above what one-ulp moves of the five
 /// volatilities, together and each alone, change: the maximum-error fit's by up to 1.5e-11, within the vectors'
-/// tolerance; the Simplex fit's parameters by up to 1.6e-9 and its values by 2.9e-10, within 1e-8, both in S7R6's
-/// measure at scale 1.
+/// tolerance; the Simplex fit's parameters by up to 1.6e-9 and its values by 2.9e-10, within 1e-8, both in the
+/// stability measure at scale 1.
 /// </para>
 /// </summary>
 public class ZabrRestartInstanceTests
@@ -32,7 +32,7 @@ public class ZabrRestartInstanceTests
     private static readonly double[] Strikes = [0.02, 0.025, 0.03, 0.035, 0.04];
     private static readonly double[] Volatilities = [0.25, 0.22, 0.2, 0.19, 0.195];
 
-    // The Simplex fit's bound in S7R6's measure, above its measured one-ulp moves (1.6e-9).
+    // The Simplex fit's bound in the stability measure, above its measured one-ulp moves (1.6e-9).
     private const double SimplexBound = 1e-8;
 
     [Fact]
@@ -172,7 +172,7 @@ public class ZabrRestartInstanceTests
         Assert.Equal(worst, fit.MaxError);
     }
 
-    // Within relative of the expected value, in S7R6's measure at scale 1.
+    // Within relative of the expected value, in the stability measure at scale 1.
     private static void AssertWithin(double expected, double actual, double relative) =>
         Assert.True(Tolerance.Within(expected, actual, 1.0, relative), $"expected {expected} within {relative}, got {actual}");
 }

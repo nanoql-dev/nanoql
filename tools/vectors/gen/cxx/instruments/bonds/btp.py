@@ -14,13 +14,13 @@ January 2025, a Euribor 6M index forecasting on a flat 3.1% curve and a flat 2.9
   compounded annually) at the settlement date and at the last date given.
 - RendistatoBasket: two baskets (its size, outstanding, outstandings and weights) and four refusals (empty, and the
   outstandings or the prices of another size than the bonds, a negative outstanding).
-- RendistatoCalculator: three baskets, of short, medium and long BTPs, on the Euribor index and the discount curve:
-  the basket's yield and duration, the bonds' yields and durations, the 15 swaps' lengths, rates, yields and
-  durations, the equivalent swap's rate, yield, duration, length and spread, its fixed rate and maturity, and the two
-  quotes' values; and one with no discount curve, refused. The calculator stops at the first swap whose duration
-  exceeds the basket's: the later swaps' rates and durations are QuantLib's null, recorded as null, and their yields
-  its starting guess, 5%, generated and left out ("solvedSwapYields" holds the computed ones): nanoql's are null (the
-  S-cms plan's run-found R8; tests/NanoQL.Tests/Divergences/RendistatoUnsolvedSwapsTests.cs).
+- RendistatoCalculator: three baskets, of short, medium and long BTPs, on the Euribor index and the discount curve: the
+  basket's yield and duration, the bonds' yields and durations, the 15 swaps' lengths, rates, yields and durations, the
+  equivalent swap's rate, yield, duration, length and spread, its fixed rate and maturity, and the two quotes' values;
+  and one with no discount curve, refused. The calculator stops at the first swap whose duration exceeds the basket's:
+  the later swaps' rates and durations are QuantLib's null, recorded as null, and their yields its starting guess, 5%,
+  generated and left out ("solvedSwapYields" holds the computed ones): nanoql's are null
+  (tests/NanoQL.Tests/Divergences/RendistatoUnsolvedSwapsTests.cs).
 
 A case's inputs hold its settings and the method's arguments. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Instruments/BtpCxxVectorTests.cs."""
@@ -160,7 +160,7 @@ def cases():
                     e = {"construct": r}
                 else:
                     e = dict(zip(CALCULATOR_OUTPUTS, r))
-                    # the unsolved swaps' yields are QuantLib's starting guess (the run-found R8): left out
+                    # the unsolved swaps' yields are QuantLib's starting guess: left out
                     solved = [y for y, rate in zip(e.pop("swapYields"), e["swapRates"]) if rate is not None]
                     e["solvedSwapYields"] = solved
                 out.append({"name": f"RendistatoCalculator / {name}",

@@ -12,8 +12,8 @@ namespace NanoQL.Tests.Vectors;
 /// <see cref="KahaleSmileSection"/> over QuantLib's own test smiles (linearly interpolated, arbitrage free and with an
 /// arbitrageable point) and an unshifted SABR smile, plain, interpolated, exponentially extrapolated and deleting
 /// arbitrage points, and with the core forced to given indices: its inspectors, and at strikes in the grid and in both
-/// wings the call and put prices, the volatility, the digital call price and the density, each where stable (the S7
-/// plan's S7R6).
+/// wings the call and put prices, the volatility, the digital call price and the density, each where stable under
+/// one-ulp moves of the inputs.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class KahaleSmileSectionVectorTests

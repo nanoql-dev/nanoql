@@ -16,8 +16,8 @@ namespace NanoQL.Tests.Vectors;
 /// <see cref="ZabrShortMaturityNormalInterpolatedSmileSection"/>,
 /// <see cref="ZabrLocalVolatilityInterpolatedSmileSection"/> and <see cref="ZabrFullFdInterpolatedSmileSection"/>),
 /// fits of a one-year smile with fixed and free parameters, unweighted, on floating strikes and with a quote missing,
-/// each section's fitted parameters, errors and end criteria where stable (the S7 plan's S7R6), its inspectors, and its
-/// volatilities and variances; and the sections QuantLib refuses.
+/// each section's fitted parameters, errors and end criteria where stable under one-ulp moves of the inputs, its
+/// inspectors, and its volatilities and variances; and the sections QuantLib refuses.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class ZabrInterpolatedSmileSectionVectorTests

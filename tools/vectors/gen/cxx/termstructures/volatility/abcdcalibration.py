@@ -2,20 +2,20 @@
 # SPDX-License-Identifier: Apache-2.0
 """Vectors for QuantLib's AbcdCalibration (ql/termstructures/volatility/abcdcalibration.hpp, .cpp), which the wheel
 doesn't bind, each output computed by the C++ harness on calibrations built inside the call: fits of term structures of
-Black volatilities at 0.5 to 20 years, the S-g1d plan's sets 0, 1, 4 and 5 (falling, rising, and two dips whose total
+Black volatilities at 0.5 to 20 years, the generator's sets 0, 1, 4 and 5 (falling, rising, and two dips whose total
 variance grows), from QuantLib's default guess (−0.06, 0.17, 0.54, 0.17) and from a second (0.05, −0.05, 0.30, 0.15),
 with d fixed, vega weighted, and capped at 20 iterations; each gives the fitted a, b, c and d, the errors and the end
 criteria, the adjustment factors k on the fit's times and the fitted volatility at six times. Then the members at the
 guesses, before any fit, on sets 0 and 6; and the fits QuantLib refuses: sets 2 and 3, whose total variance shrinks, and
 a guess with c negative.
 
-**The stability filter** (the S7 plan's S7R6) runs on the fits' outputs: each fit is rerun with every volatility moved
-one ulp up, then down, by math.nextafter, together; then each alone, up and down; an output (a parameter, an error, the
-end criteria, an array) is written only where every refit leaves it within 1e-12 x max(|base|, |moved|, 1), and the
-generator prints "dropped n of m outputs" per case.
+**The stability filter** runs on the fits' outputs: each fit is rerun with every volatility moved one ulp up, then down,
+by math.nextafter, together; then each alone, up and down; an output (a parameter, an error, the end criteria, an array)
+is written only where every refit leaves it within 1e-12 x max(|base|, |moved|, 1), and the generator prints "dropped n
+of m outputs" per case.
 
-Left out, each a documented divergence: set 6, a dip QuantLib refuses that the guard fits (the S-g1d plan's G1R6 (xxv);
-tests/NanoQL.Tests/Divergences/AbcdCalibrationGuardTests.cs); and a fixed with d free, which QuantLib's transformation
+Left out, each a documented divergence: set 6, a dip QuantLib refuses that the guard fits
+(tests/NanoQL.Tests/Divergences/AbcdCalibrationGuardTests.cs); and a fixed with d free, which QuantLib's transformation
 fixes as a + d (tests/NanoQL.Tests/Divergences/AbcdCalibrationFixedATests.cs). A refused value is {"throws": true}. Each
 case's input "fit" is the spec tools/cxx/src/termstructures/volatility/abcdspec.hpp reads;
 tests/NanoQL.Tests/Vectors/Cxx/TermStructures/AbcdCalibrationCxxVectorTests.cs reads it back."""

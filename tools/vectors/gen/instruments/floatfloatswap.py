@@ -10,10 +10,10 @@ nominals, and caps given for some coupons only ("cappedRate 1 must be null for a
 Each case's outputs are whether the swap builds, QuantLib's refusal recorded as its throw; then each leg's payment
 dates, whether each cash flow is a floating-rate coupon (a zero gearing made QuantLib's machine epsilon keeps its
 coupons floating), and amounts, a coupon's amount refused where QuantLib refuses it (a capped coupon or a CMS coupon
-without a pricer, which wait for batch 3); and DiscountingSwapEngine's results on a flat curve: the NPV, the per-leg NPV
-and BPS and the two fair spreads, null where QuantLib refuses them, or the refused pricing, the one output "calculate".
-NPVs and amounts are compared at the largest nominal, BPS at it times 1e-4. Left out (the S-rx plan's SRXR3 (ix)): a
-schedule of one date, on which QuantLib reads an empty vector and the process dies.
+without a pricer); and DiscountingSwapEngine's results on a flat curve: the NPV, the per-leg NPV and BPS and the two
+fair spreads, null where QuantLib refuses them, or the refused pricing, the one output "calculate". NPVs and amounts are
+compared at the largest nominal, BPS at it times 1e-4. Left out: a schedule of one date, on which QuantLib reads an
+empty vector and the process dies.
 
 Each case's inputs hold its settings and "swap" ({"type", "nominal1", "nominal2", "schedule1", "index1", "dayCount1",
 "schedule2", "index2", "dayCount2", "intermediateCapitalExchange", "finalCapitalExchange", "gearing1", "spread1",

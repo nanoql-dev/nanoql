@@ -15,22 +15,22 @@ negative tenors among them), and the four-argument discountBondOption at sixteen
 curve's discounts, a zero maturity among them (Hull-White has no zero-maturity branch, unlike Vasicek).
 
 Then setParams, each on a fresh model (the wheel survey's caveat 4: QuantLib's model changes in place, nanoql's
-SetParams returns a new one), on a flat and a bootstrapped model: the parameters before and, after a call that
-succeeds, the parameters, discounts, discount bonds and options after it (a negative sigma, which setParams doesn't
-check, makes the options refuse, blackFormula's); and its refusals of too few, too many and no parameters ("parameter
-array too small", "parameter array too big!"), whose model the case doesn't read again (QuantLib's has changed in
-part, nanoql's hasn't, MX3). Then the static convexityBias at fifteen points (a reversion of 0 and below QL_EPSILON,
-QuantLib's own branch, and T equal to t among them) and its five refusals, with NaN inputs; and the constructor's
-refusals of a zero or negative reversion or volatility, and a NaN one ("<value>: invalid value").
+SetParams returns a new one), on a flat and a bootstrapped model: the parameters before and, after a call that succeeds,
+the parameters, discounts, discount bonds and options after it (a negative sigma, which setParams doesn't check, makes
+the options refuse, blackFormula's); and its refusals of too few, too many and no parameters ("parameter array too
+small", "parameter array too big!"), whose model the case doesn't read again (QuantLib's has changed in part, nanoql's
+hasn't). Then the static convexityBias at fifteen points (a reversion of 0 and below QL_EPSILON, QuantLib's own branch,
+and T equal to t among them) and its five refusals, with NaN inputs; and the constructor's refusals of a zero or
+negative reversion or volatility, and a NaN one ("<value>: invalid value").
 
-Left out where nanoql's forms, QuantLib's master's B (#2882) and the members written in its cancellation-free forms
-(the S-sr plan's SSR3 and SSR6 (iii)), move the outputs beyond the tolerance: the three models at a = 1e-9 and 1.4e-8
-and the two setParams cases to a = 1e-9, generated and left out (QuantLib 1.44's forms there take the a = 0 limit or
-cancel); the convexity bias at a = 1e-9, which cancels in 1.44's (1 - exp(-a*x))/a; and, in the two setParams cases to
-a negative sigma, the option of maturity 1e-17, whose variance 1.44's 1 - exp(-2*a*T) rounds to 0, so its price is the
-intrinsic 0 where nanoql's variance is T and the negative sigma meets blackFormula's refusal. Their checks are
-QuantLib's closed forms at ordinary a and its second routes at small a
-(tests/NanoQL.Tests/Divergences/SmallReversionTests.cs). Elsewhere the forms move the last bits only.
+Left out where nanoql's forms, QuantLib's master's B (#2882) and the members written in its cancellation-free forms,
+move the outputs beyond the tolerance: the three models at a = 1e-9 and 1.4e-8 and the two setParams cases to a = 1e-9,
+generated and left out (QuantLib 1.44's forms there take the a = 0 limit or cancel); the convexity bias at a = 1e-9,
+which cancels in 1.44's (1 - exp(-a*x))/a; and, in the two setParams cases to a negative sigma, the option of maturity
+1e-17, whose variance 1.44's 1 - exp(-2*a*T) rounds to 0, so its price is the intrinsic 0 where nanoql's variance is T
+and the negative sigma meets blackFormula's refusal. Their checks are QuantLib's closed forms at ordinary a and its
+second routes at small a (tests/NanoQL.Tests/Divergences/SmallReversionTests.cs). Elsewhere the forms move the last bits
+only.
 
 The wheel's calls, by QuantLib-SWIG's shortratemodels.i: ql.HullWhite(YieldTermStructureHandle, a, sigma), params(),
 termStructure() (a handle, whose discount(t) is the curve's), discount(t), discountBond(now, maturity, rate) and
@@ -154,8 +154,8 @@ def make_model(spec):
     return ql.HullWhite(ql.YieldTermStructureHandle(curve), spec["a"], spec["sigma"]), (curve, keep)
 
 
-# The models and setParams cases SSR3's forms move beyond the tolerance, generated and left out; and the option
-# left out of the setParams cases to a negative sigma.
+# The models and setParams cases the cancellation-free forms move beyond the tolerance, generated and left out; and the
+# option left out of the setParams cases to a negative sigma.
 LEFT_OUT = {2, 5, 13}
 LEFT_OUT_SET_PARAMS = {"to a = 1e-9"}
 NEGATIVE_SIGMA_OPTIONS = [o for o in OPTIONS if o[2] != 1e-17]

@@ -15,9 +15,9 @@ namespace NanoQL.Methods;
 /// after implicit Euler damping steps, applying the step conditions at every step.
 /// </summary>
 /// <remarks>
-/// A working type (the S-eq plan's SEQR1). QuantLib builds its schemes and model at each rollback; the solver here
-/// builds them at its first rollback and reuses them, a scheme's state being only its step, which each rollback sets,
-/// and the buffers it holds, so a later rollback of the same size allocates nothing.
+/// A working type. QuantLib builds its schemes and model at each rollback; the solver here builds them at its first
+/// rollback and reuses them, a scheme's state being only its step, which each rollback sets, and the buffers it holds,
+/// so a later rollback of the same size allocates nothing.
 /// </remarks>
 [WorkingType]
 public sealed class FdmBackwardSolver

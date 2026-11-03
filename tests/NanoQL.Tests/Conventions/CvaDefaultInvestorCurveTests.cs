@@ -11,12 +11,11 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The CVA swap engine's investor curve (the S-cms plan's CMD11): QuantLib's constructors build, for an empty investor
-/// handle, a flat hazard rate of 1e-12 on no settlement days, the null calendar and the counterparty curve's day
-/// counter (<c>cvaswapengine.cpp:46-48</c>, <c>:72-74</c>, <c>:97-99</c>); nanoql's
-/// <see cref="CounterpartyAdjSwapEngine"/> takes the curve as nullable and builds that one per call, under the call's
-/// context, so with none given the results are those on that curve given explicitly, bit for bit; a curve given is
-/// used.
+/// The CVA swap engine's investor curve: QuantLib's constructors build, for an empty investor handle, a flat hazard
+/// rate of 1e-12 on no settlement days, the null calendar and the counterparty curve's day counter
+/// (<c>cvaswapengine.cpp:46-48</c>, <c>:72-74</c>, <c>:97-99</c>); nanoql's <see cref="CounterpartyAdjSwapEngine"/>
+/// takes the curve as nullable and builds that one per call, under the call's context, so with none given the results
+/// are those on that curve given explicitly, bit for bit; a curve given is used.
 /// </summary>
 public class CvaDefaultInvestorCurveTests
 {

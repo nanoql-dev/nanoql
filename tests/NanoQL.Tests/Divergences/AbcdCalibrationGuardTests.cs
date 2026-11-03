@@ -8,13 +8,12 @@ using static NanoQL.Tests.Divergences.AbcdTermStructures;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The abcd calibration's guard (the S-g1d plan's G1R6 (xxv)): QuantLib's transformation leaves b free, so its
-/// optimizer can step to a trial point the abcd function's validation refuses, and the fit throws. On set 6, a dip
-/// whose total variance grows, QuantLib refuses with "b (-0.374029) less than -0.267779: negative function value at
-/// stationary point 2.45429" [the harness]; nanoql's guard fits it validly, at a minimum (each parameter's gradient
-/// within the end criteria's tolerance) that a restart from a second guess reaches too. And on the sets QuantLib
-/// completes, 0, 1, 4 and 5, the guard never acts: their fits are QuantLib's bit for bit, set 1's among them although
-/// its gradient is above the tolerance.
+/// The abcd calibration's guard: QuantLib's transformation leaves b free, so its optimizer can step to a trial point
+/// the abcd function's validation refuses, and the fit throws. On set 6, a dip whose total variance grows, QuantLib
+/// refuses with "b (-0.374029) less than -0.267779: negative function value at stationary point 2.45429" [the harness];
+/// nanoql's guard fits it validly, at a minimum (each parameter's gradient within the end criteria's tolerance) that a
+/// restart from a second guess reaches too. And on the sets QuantLib completes, 0, 1, 4 and 5, the guard never acts:
+/// their fits are QuantLib's bit for bit, set 1's among them although its gradient is above the tolerance.
 /// </summary>
 public class AbcdCalibrationGuardTests
 {

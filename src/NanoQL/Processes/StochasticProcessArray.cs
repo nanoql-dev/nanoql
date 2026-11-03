@@ -59,7 +59,7 @@ public sealed class StochasticProcessArray : StochasticProcess
     }
 
     // The array on other processes with this one's correlation root, as it stands: the basket engines' processes on
-    // their clock (the S-exo plan's ED10), with no second pseudo square root, so the root's bits are the array's.
+    // their clock, with no second pseudo square root, so the root's bits are the array's.
     private StochasticProcessArray(Matrix sqrtCorrelation, ImmutableArray<StochasticProcess1D> processes)
     {
         this.processes = processes;
@@ -241,7 +241,7 @@ public sealed class StochasticProcessArray : StochasticProcess
 
     // The array with each Black-Scholes process on a clock (GeneralizedBlackScholesProcess.OnClock) and the other
     // processes as they stand, its correlation root kept: the basket engines' paths on the clock spanning every
-    // process's structures (the S-exo plan's ER5 (i), ED10); the array itself where no process moves.
+    // process's structures; the array itself where no process moves.
     internal StochasticProcessArray OnClock(TermStructure clock)
     {
         StochasticProcess1D[] onClock = new StochasticProcess1D[processes.Length];

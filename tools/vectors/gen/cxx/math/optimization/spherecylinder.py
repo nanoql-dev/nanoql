@@ -8,8 +8,7 @@ pairs that don't meet: whether they meet, the closest point, the projection; the
 where they don't meet.
 
 Negative cylinder radii are left out: QuantLib's constructor clamps its parameter after storing the unclamped one, so
-its solves read a radius its intersection test doesn't (the S-mm plan's MR3 (xxiii),
-tests/NanoQL.Tests/Divergences/SphereCylinderClampTests.cs).
+its solves read a radius its intersection test doesn't (tests/NanoQL.Tests/Divergences/SphereCylinderClampTests.cs).
 
 The harness unit is tools/cxx/src/math/optimization/spherecylinder.cpp. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Math/Optimization/SphereCylinderCxxVectorTests.cs."""

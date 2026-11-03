@@ -14,9 +14,9 @@ namespace NanoQL.TermStructures;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Immutable over its original (the S-van plan's VD24): QuantLib's structure follows its handle, and an original that
-/// changes is a new structure here. Its day counter, maximum date and strike range are the original's. As QuantLib warns,
-/// an implied structure makes financial sense only over an original that depends on time alone, not on the asset.
+/// Immutable over its original: QuantLib's structure follows its handle, and an original that changes is a new
+/// structure here. Its day counter, maximum date and strike range are the original's. As QuantLib warns, an implied
+/// structure makes financial sense only over an original that depends on time alone, not on the asset.
 /// </para>
 /// <para>
 /// A time on the structure is read from the original between the reference date's time on the original's clock and
@@ -24,10 +24,10 @@ namespace NanoQL.TermStructures;
 /// where the sum and the date's own time on the original's clock differ by more than 1e-12 relative, the structure's
 /// variance at a date is the original's forward variance from the reference date to that date by date, and its
 /// volatilities and forward variances by date follow it. On Thirty360 QuantLib's sum misses that variance, by +3.70% at
-/// 28 February and +0.75% at 30 June over a constant volatility (the S-van plan's VR4 (xxii)); on every other date, and
-/// on the day counters whose year fractions add, the structure keeps QuantLib's bits. A reference date before the
-/// original's accrues no variance before the original's, where QuantLib's read counts the original's variance at a
-/// negative time (the mismatched-dates class). A documented divergence.
+/// 28 February and +0.75% at 30 June over a constant volatility; on every other date, and on the day counters whose
+/// year fractions add, the structure keeps QuantLib's bits. A reference date before the original's accrues no variance
+/// before the original's, where QuantLib's read counts the original's variance at a negative time (the mismatched-dates
+/// class). A documented divergence.
 /// </para>
 /// </remarks>
 public sealed class ImpliedVolTermStructure : BlackVarianceTermStructure

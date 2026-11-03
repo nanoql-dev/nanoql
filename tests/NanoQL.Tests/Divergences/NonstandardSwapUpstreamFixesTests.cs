@@ -11,9 +11,9 @@ namespace NanoQL.Tests.Divergences;
 
 /// <summary>
 /// The fix QuantLib's master made to the nonstandard swap's conversion from a vanilla or overnight-indexed swap after
-/// the pin, which nanoql takes (R8, the upstream sweep): #2956 (<c>a069a0955</c>), each leg's own nominals, the last
-/// one repeated to the leg's length. QuantLib 1.44 repeats the swap's <c>nominal()</c> on every coupon
-/// (<c>nonstandardswap.cpp:39-44</c>), which refuses an amortizing swap, "nominal is not constant".
+/// the pin, which nanoql takes: #2956 (<c>a069a0955</c>), each leg's own nominals, the last one repeated to the leg's
+/// length. QuantLib 1.44 repeats the swap's <c>nominal()</c> on every coupon (<c>nonstandardswap.cpp:39-44</c>),
+/// which refuses an amortizing swap, "nominal is not constant".
 /// </summary>
 public class NonstandardSwapUpstreamFixesTests
 {

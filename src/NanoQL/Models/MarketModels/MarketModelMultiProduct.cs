@@ -15,16 +15,16 @@ namespace NanoQL.Models;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A working type (the S-mmp plan's MMPR1 (i)): a product is a state machine over a path, <see cref="Reset"/> putting
-/// it at the path's start and <see cref="NextTimeStep"/> moving it a step, so it isn't thread-safe; <see cref="Clone"/>
-/// copies it deeply, its state included, as QuantLib's <c>clone</c>. A holder of products (a composite, an engine)
-/// holds its own clones, so the caller's object is never stepped by another.
+/// A working type: a product is a state machine over a path, <see cref="Reset"/> putting it at the path's start and
+/// <see cref="NextTimeStep"/> moving it a step, so it isn't thread-safe; <see cref="Clone"/> copies it deeply, its
+/// state included, as QuantLib's <c>clone</c>. A holder of products (a composite, an engine) holds its own clones, so
+/// the caller's object is never stepped by another.
 /// </para>
 /// <para>
-/// <see cref="NextTimeStep"/> writes into buffers the caller sizes once (MMPR1 (iii)): a count per product and, per
-/// product, <see cref="MaxNumberOfCashFlowsPerProductPerStep"/> cash flows, so a step allocates nothing.
+/// <see cref="NextTimeStep"/> writes into buffers the caller sizes once: a count per product and, per product,
+/// <see cref="MaxNumberOfCashFlowsPerProductPerStep"/> cash flows, so a step allocates nothing.
 /// </para>
-/// <para>An extension point (U13).</para>
+/// <para>An extension point.</para>
 /// </remarks>
 [WorkingType]
 public abstract class MarketModelMultiProduct

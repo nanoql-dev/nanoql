@@ -13,19 +13,18 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The Monte Carlo partial lookbacks' window (the S-bar plan's BR5 (xx), Revision 2's F1-5, fixed under R8). QuantLib's
-/// partial pricers snap the window's date to the closest time of a regular grid that doesn't carry it, and the partial
-/// fixed pricer drops the window's first node: a partial floating call (running minimum 100, λ 1) whose window ends 37
-/// days into a year, on spot 100, r 5%, q 2%, σ 20%, 4 steps, 100,000 antithetic samples at seed 42, snaps its window
-/// to the first node and reads the spot a quarter on, at 7.805558043540716 (the S-bar run's probe harness,
-/// <c>probe_mc_ql.py</c>). nanoql makes the window's date a time of the grid, its start node included, so on this grid
-/// the window is {0, 37 days}. Check: the discrete payoff's exact value on that window, e^(−rT) E[(S_T − λ min(m,
-/// S_t₁))⁺], a quadrature over S_t₁ of the Black call on S_T given it: 10.221335405994491, within three of the engine's
-/// error estimates (the continuous window's analytic value, 11.617971695171292, lies above both, the discrete minimum
-/// over two nodes missing the path's dips between them). And a partial fixed call struck at 100 whose window opens 300
-/// days into the year, on the same paths, snaps its window to the grid's node at three quarters and drops it, so it
-/// reads the terminal spot alone, a vanilla call, at 9.179431603675994; nanoql's window is {300 days, a year}, its
-/// exact value e^(−rT) E[(max(S_t₁, S_T) − K)⁺] 10.686101666470105, the engine within three of its error estimates.
+/// The Monte Carlo partial lookbacks' window (fixed). QuantLib's partial pricers snap the window's date to the closest
+/// time of a regular grid that doesn't carry it, and the partial fixed pricer drops the window's first node: a partial
+/// floating call (running minimum 100, λ 1) whose window ends 37 days into a year, on spot 100, r 5%, q 2%, σ 20%, 4
+/// steps, 100,000 antithetic samples at seed 42, snaps its window to the first node and reads the spot a quarter on, at
+/// 7.805558043540716. nanoql makes the window's date a time of the grid, its start node included, so on this grid the
+/// window is {0, 37 days}. Check: the discrete payoff's exact value on that window, e^(−rT) E[(S_T − λ min(m, S_t₁))⁺],
+/// a quadrature over S_t₁ of the Black call on S_T given it: 10.221335405994491, within three of the engine's error
+/// estimates (the continuous window's analytic value, 11.617971695171292, lies above both, the discrete minimum over
+/// two nodes missing the path's dips between them). And a partial fixed call struck at 100 whose window opens 300 days
+/// into the year, on the same paths, snaps its window to the grid's node at three quarters and drops it, so it reads
+/// the terminal spot alone, a vanilla call, at 9.179431603675994; nanoql's window is {300 days, a year}, its exact
+/// value e^(−rT) E[(max(S_t₁, S_T) − K)⁺] 10.686101666470105, the engine within three of its error estimates.
 /// </summary>
 public class McLookbackWindowTests
 {

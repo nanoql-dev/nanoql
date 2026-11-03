@@ -15,8 +15,8 @@ public static class GFunctionFactory
     /// <summary>The standard model's g-function.</summary>
     /// <param name="q">The fixed leg's payments a year.</param>
     /// <param name="delta">The payment's distance from the swap's start, in fixed-leg periods.</param>
-    /// <param name="swapLength">The swap's length in years, where QuantLib's is a whole number of the tenor's units
-    /// (the S-cms plan's CMR5 (i)); the model presumes swapLength·q equal periods.</param>
+    /// <param name="swapLength">The swap's length in years, where QuantLib's is a whole number of the tenor's units;
+    /// the model presumes swapLength·q equal periods.</param>
     /// <returns>The g-function.</returns>
     public static GFunction NewGFunctionStandard(int q, double delta, double swapLength) =>
         new GFunctionStandard(q, delta, swapLength);

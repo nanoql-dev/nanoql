@@ -22,7 +22,7 @@ namespace NanoQL.PricingEngines;
 /// </summary>
 /// <remarks>
 /// <para>
-/// QuantLib's template on the tree (D12): <see cref="Calculate{TTree}"/> takes the tree as its type argument, which the
+/// QuantLib's template on the tree: <see cref="Calculate{TTree}"/> takes the tree as its type argument, which the
 /// engine builds through <see cref="IBinomialTree{TSelf}.Create"/>; the seven named engines, as QuantLib-Python names
 /// them, fix it. The delta and gamma come from the lattice's first two steps, the theta from the Black-Scholes
 /// relation, as QuantLib's do.
@@ -31,8 +31,7 @@ namespace NanoQL.PricingEngines;
 /// The time grid and the lattice take their step count from the tree, its columns less one, where QuantLib's take the
 /// count given (<c>binomialengine.hpp:111-116</c>): the Leisen-Reimer and Joshi trees build an even count on the next
 /// odd one, so QuantLib rolls back a tree built for n + 1 steps over n, which at 250 steps errs by 4.7e-2 against the
-/// analytic engine. Every odd count and every other tree is QuantLib's. A documented divergence (the S-eq plan's SEQR7
-/// (x)).
+/// analytic engine. Every odd count and every other tree is QuantLib's. A documented divergence.
 /// </para>
 /// <para>
 /// QuantLib's tree runs on the risk-free curve's time to maturity, and QuantLib flattens the dividend curve and the
@@ -41,11 +40,10 @@ namespace NanoQL.PricingEngines;
 /// from the earliest reference date of the structures, as the finite-difference engine's grid does, and a structure on
 /// another day counter or reference date is flattened on it, its rate or volatility the one whose discount or variance
 /// at the maturity date is the structure's own; where every structure shares the risk-free curve's day counter and
-/// reference date, the tree is QuantLib's (the S-eq plan's rulings of 2026-10-20 and 2026-10-21,
-/// <c>Divergences/BinomialMismatchedTimesTests.cs</c>). A structure accrues nothing before its own date, so an option
-/// expiring before a later risk-free curve's is priced, where QuantLib's read throws, and the theta reads no rate or
-/// volatility of a structure dated on or after the exercise, where QuantLib reads each at the structure's own time 0
-/// (<c>Divergences/ExerciseBeforeReferenceDateTests.cs</c>).
+/// reference date, the tree is QuantLib's (<c>Divergences/BinomialMismatchedTimesTests.cs</c>). A structure accrues
+/// nothing before its own date, so an option expiring before a later risk-free curve's is priced, where QuantLib's read
+/// throws, and the theta reads no rate or volatility of a structure dated on or after the exercise, where QuantLib
+/// reads each at the structure's own time 0 (<c>Divergences/ExerciseBeforeReferenceDateTests.cs</c>).
 /// </para>
 /// </remarks>
 public static class BinomialVanillaEngine
@@ -101,8 +99,7 @@ public static class BinomialVanillaEngine
         // the tree runs on the risk-free curve's day counter from the earliest reference date of the structures it
         // reads, the risk-free curve's where none is dated before it: a structure on another day counter or reference
         // date is flattened on it, from its discount or variance at the maturity date, each counted from its own
-        // reference date and none accrued before it (the S-eq plan's rulings of 2026-10-20 and 2026-10-21); QuantLib's
-        // reads where the structure shares the tree's times
+        // reference date and none accrued before it; QuantLib's reads where the structure shares the tree's times
         Date maturityDate = option.Exercise.LastDate();
         Date referenceDate = process.RiskFreeRate.ReferenceDate;
         Date origin = process.EarliestReferenceDate();
@@ -146,7 +143,7 @@ public static class BinomialVanillaEngine
 
         TTree tree = TTree.Create(bs, maturity, timeSteps, payoff.Strike);
 
-        // SEQR7 (x): the grid and the lattice on the steps the tree was built on
+        // The grid and the lattice on the steps the tree was built on
         int steps = tree.Columns - 1;
         var grid = new TimeGrid(maturity, steps);
         var lattice = new BlackScholesLattice<TTree>(tree, r, maturity, steps);

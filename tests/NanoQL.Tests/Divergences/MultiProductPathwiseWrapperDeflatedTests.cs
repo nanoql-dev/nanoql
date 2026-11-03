@@ -9,11 +9,10 @@ using NanoQL.Tests.Conventions;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The pathwise wrapper on an already-deflated product (the S-mmp plan's MMPR4 (xvii), Revision 2's O1-3, fixed under
-/// R8). QuantLib's <c>MultiProductPathwiseWrapper</c> hands the accounting engine a deflated product's amount as it is
-/// (<c>multisteppathwisewrapper.cpp:69</c>), and the engine discounts it again: deflated caplets struck at the forwards,
-/// wrapped, come out 1.8% to 11.7% below <c>MultiStepOptionlets</c> on the same paths (this run's
-/// <c>probes\c2_facts.cpp</c>; the planner's MPP22). nanoql divides a deflated product's amount by its payment time's
+/// The pathwise wrapper on an already-deflated product (fixed). QuantLib's <c>MultiProductPathwiseWrapper</c> hands the
+/// accounting engine a deflated product's amount as it is (<c>multisteppathwisewrapper.cpp:69</c>), and the engine
+/// discounts it again: deflated caplets struck at the forwards, wrapped, come out 1.8% to 11.7% below
+/// <c>MultiStepOptionlets</c> on the same paths. nanoql divides a deflated product's amount by its payment time's
 /// money-market deflator on the current state (<see cref="MarketModelDiscounter.NumeraireBonds"/> at numeraire 0), the
 /// factor the pathwise engine skips for it. Checks: QuantLib's <c>MultiStepOptionlets</c> on the same paths; QuantLib's
 /// bits on an undeflated product (the vectors, QuantLib's <c>testInverseFloater</c>).

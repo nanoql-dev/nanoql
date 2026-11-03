@@ -13,8 +13,8 @@ namespace NanoQL.Tests.Divergences;
 /// <c>FlatHazardRate(0, WeekendsOnly(), …)</c> (<c>creditdefaultswap.cpp:352, 393</c>), which rolls a weekend to
 /// Monday, and its own ISDA engine then refuses it: on Saturday 15 March 2025, for <c>MakeCreditDefaultSwap(5Y, 1%)</c>
 /// on a discount curve flat at 3%, Actual/365 (Fixed), at a recovery of 40%, both throw "probability term structure
-/// reference date (March 17th, 2025 should be evaluation date (March 15th, 2025)" (QuantLib's defect, R8). nanoql's
-/// ISDA model dates its curve on the evaluation date. QuantLib's ISDA engine on QuantLib's <c>FlatHazardRate</c> dated
+/// reference date (March 17th, 2025 should be evaluation date (March 15th, 2025)" (QuantLib's defect). nanoql's ISDA
+/// model dates its curve on the evaluation date. QuantLib's ISDA engine on QuantLib's <c>FlatHazardRate</c> dated
 /// there, solved by QuantLib's <c>Brent</c> on the wheel, gives the hazard rate 0.016833960395149727 for a zero target,
 /// and the fair spread at the conventional root, 0.009999999999972463; on the Friday before, the same oracle gives
 /// QuantLib's own 0.01683399613622196 and 0.009999999999972453. The mid-point model keeps QuantLib's curve and its

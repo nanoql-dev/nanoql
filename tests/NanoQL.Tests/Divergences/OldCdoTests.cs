@@ -9,18 +9,16 @@ using static NanoQL.Tests.Conventions.CreditPortfolioBuilders;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The older CDO's maximum loss given default (the S-xcr plan's XR8 (xxvii)): the sum of the names' losses given
-/// default, which QuantLib's sums onto an uninitialized value (<c>cdo.cpp:73-77</c>), so its <c>lgd()</c> is
-/// undefined; the vectors leave it out.
+/// The older CDO's maximum loss given default: the sum of the names' losses given default, which QuantLib's sums onto
+/// an uninitialized value (<c>cdo.cpp:73-77</c>), so its <c>lgd()</c> is undefined; the vectors leave it out.
 /// </summary>
 public class OldCdoTests
 {
     [Fact]
     public void ALaterCurvesProbabilityBeforeItsDateIsZero()
     {
-        // the first curve dated today, the other three T+2: QuantLib refuses ("negative time (-0.00821918) given"),
-        // and on the three restated from today (hazard 0 to T+2) reads -0.28223274402690984 (the S-xcr run's
-        // c3_facts.cpp; the S-xcr code review's C3 O1-6 (b))
+        // the first curve dated today, the other three T+2: QuantLib refuses ("negative time (-0.00821918) given"), and
+        // on the three restated from today (hazard 0 to T+2) reads -0.28223274402690984
         Date t2 = new TARGET().Advance(Today, 2, TimeUnit.Days);
         DefaultProbabilityTermStructure[] curves = [Flat(Today, 0.02), Flat(t2, 0.02), Flat(t2, 0.02), Flat(t2, 0.02)];
         var cdo = new CDO(

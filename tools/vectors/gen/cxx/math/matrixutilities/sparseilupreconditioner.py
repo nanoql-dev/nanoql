@@ -4,8 +4,7 @@
 doesn't bind, each output computed by the C++ harness: the incomplete LU factors at fill levels 0 to 3 and the
 preconditioner applied to random vectors, on banded and random sparse matrices whose entries are random reals, so
 nothing cancels; and on fdmlinearop.cpp's test matrix. Matrices whose eliminations cancel an entry to 0, where nanoql
-keeps each fill entry's own level (the S-core plan's CR7 (xxiv); tests/NanoQL.Tests/Divergences/SparseIluTests.cs), are
-left out. Read back by
+keeps each fill entry's own level (tests/NanoQL.Tests/Divergences/SparseIluTests.cs), are left out. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Numerics/MatrixUtilities/SparseILUPreconditionerCxxVectorTests.cs."""
 import os
 import random

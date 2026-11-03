@@ -7,10 +7,10 @@ using NanoQL.PricingEngines;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The internal extended-range double the Heston expansions and COS cumulants evaluate past κt's upper cut (the S-hes
-/// plan's HR11): a double mantissa in [1, 2) times 2 to a long exponent, double's precision past its range. Its
-/// arithmetic is double's within the range; e^{2000} and its reciprocal keep their exponents and multiply back to 1;
-/// a non-finite input propagates. Read through reflection, the type being internal.
+/// The internal extended-range double the Heston expansions and COS cumulants evaluate past κt's upper cut: a double
+/// mantissa in [1, 2) times 2 to a long exponent, double's precision past its range. Its arithmetic is double's within
+/// the range; e^{2000} and its reciprocal keep their exponents and multiply back to 1; a non-finite input propagates.
+/// Read through reflection, the type being internal.
 /// </summary>
 public class ExtendedDoubleTests
 {

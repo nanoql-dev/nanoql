@@ -9,15 +9,15 @@ adjustment factors and option times, its maximum date and strike range, its vola
 between its first and last fitted tenors, and its volatility and variance at its fitted tenors (BlackAtmVolCurve's
 period overloads) and at the dates of those times. Then an empty tenor list and a decreasing tenor, which the curve refuses.
 
-The outputs nanoql fixes are left out (the S-xeq plan's §2.8): no time lies outside the fitted tenors, where QuantLib's
-factor refuses (the S-xeq run's R3-1); no market's fit steps to a trial point the abcd function's validation refuses,
-where QuantLib's fit throws and nanoql's guard fits on (the S-g1d plan's G1R6 (xxv)), as the curve's second fit does on
-falling volatilities with the 6M and 2Y left out and on rising ones over the null calendar.
+The outputs nanoql fixes are left out: no time lies outside the fitted tenors, where QuantLib's factor refuses; no
+market's fit steps to a trial point the abcd function's validation refuses, where QuantLib's fit throws and nanoql's
+guard fits on, as the curve's second fit does on falling volatilities with the 6M and 2Y left out and on rising ones
+over the null calendar.
 
-**The stability filter** (the S7 plan's S7R6): every curve is refitted with every volatility moved one ulp up, then down,
-by math.nextafter, together and each alone; an output is written only where every refit leaves it within 1e-12 x
-max(|base|, |moved|, 1) (equal, for the end criterion and the dates), the others dropped by leaving their keys out, an
-array only whole; the generator prints the dropped outputs per case and for the file.
+**The stability filter**: every curve is refitted with every volatility moved one ulp up, then down, by math.nextafter,
+together and each alone; an output is written only where every refit leaves it within 1e-12 x max(|base|, |moved|, 1)
+(equal, for the end criterion and the dates), the others dropped by leaving their keys out, an array only whole; the
+generator prints the dropped outputs per case and for the file.
 
 The curve is tools/cxx/src/experimental/volatility/abcdatmvolcurve.cpp's. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Experimental/Volatility/AbcdAtmVolCurveCxxVectorTests.cs."""

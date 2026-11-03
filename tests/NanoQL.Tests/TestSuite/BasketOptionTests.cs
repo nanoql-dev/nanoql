@@ -620,7 +620,7 @@ public class BasketOptionTests
 
         DayCounter dc = new Actual360();
 
-        // QuantLib's today, Date::todaysDate(): the context's date (D13)
+        // QuantLib's today, Date::todaysDate(): the context's date
         Date today = Context.EvaluationDate;
 
         const Real mcRelativeErrorTolerance = 0.01;
@@ -822,7 +822,7 @@ public class BasketOptionTests
         int timeSteps = 20;
 
         // QuantLib passes seed 0, a seed from the clock, which its tolerance must meet on any draw; a fixed seed here
-        // (S2R4, the S-exo plan's ED13)
+        //
         long seed = 42;
 
         var payoff = new PlainVanillaPayoff(values[0].Type, values[0].Strike);
@@ -886,7 +886,7 @@ public class BasketOptionTests
         int timeSteps = 52;
 
         // QuantLib passes seed 0, a seed from the clock, which its tolerance must meet on any draw; a fixed seed here
-        // (S2R4, the S-exo plan's ED13)
+        //
         long seed = 42;
 
         for (int i = from; i < to; i++)
@@ -939,7 +939,7 @@ public class BasketOptionTests
         DayCounter dc = new Actual360();
         Date today = Context.EvaluationDate;
 
-        // QuantLib passes seed 0, a seed from the clock (S2R4, the S-exo plan's ED13)
+        // QuantLib passes seed 0, a seed from the clock
         long seed = 42;
 
         foreach (BasketOptionOneData value in values)

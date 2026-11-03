@@ -17,17 +17,17 @@ namespace NanoQL.Tests.Divergences;
 /// paid between the evaluation date and a risk-free curve settling later is left out: on a one-year put, a 2.0 dividend
 /// paid the day after the evaluation date doesn't move the analytic price. On the market restated from the evaluation
 /// date, the risk-free curve discounting nothing before its own date, both engines count it. nanoql's engines run from
-/// the earliest reference date of the structures, each discounting nothing before its own (the user's rulings), so they
-/// count it, and price the market as QuantLib's engines price it restated: the analytic engine's value, delta, gamma
-/// and vega, and the finite-difference engine's value under both cash-dividend models. The analytic engine's rho keeps
-/// QuantLib's times, the risk-free curve's own, so a dividend before its reference date adds nothing to it: QuantLib's
-/// rho on the market as given, with that dividend's value taken off the spot. Its theta runs each structure over its
-/// own time (<c>AnalyticThetaMismatchedTimesTests</c>), QuantLib's <c>blackScholesTheta</c> at the spot less the
-/// dividends' value plus QuantLib's own dividend term. QuantLib's analytic engine also reads the dividend curve's rate
-/// per its own day counter's year in the theta, and the curve at the risk-free curve's time in the rho
-/// (<c>:93-105</c>); here each is read per the risk-free curve's time and by date, as on the curve restated on that day
-/// counter, QuantLib's read where the two curves share their times. Where every structure shares the risk-free curve's
-/// day counter and reference date, the settlement date, the times and the reads are QuantLib's.
+/// the earliest reference date of the structures, each discounting nothing before its own, so they count it, and price
+/// the market as QuantLib's engines price it restated: the analytic engine's value, delta, gamma and vega, and the
+/// finite-difference engine's value under both cash-dividend models. The analytic engine's rho keeps QuantLib's times,
+/// the risk-free curve's own, so a dividend before its reference date adds nothing to it: QuantLib's rho on the market
+/// as given, with that dividend's value taken off the spot. Its theta runs each structure over its own time
+/// (<c>AnalyticThetaMismatchedTimesTests</c>), QuantLib's <c>blackScholesTheta</c> at the spot less the dividends'
+/// value plus QuantLib's own dividend term. QuantLib's analytic engine also reads the dividend curve's rate per its own
+/// day counter's year in the theta, and the curve at the risk-free curve's time in the rho (<c>:93-105</c>); here each
+/// is read per the risk-free curve's time and by date, as on the curve restated on that day counter, QuantLib's read
+/// where the two curves share their times. Where every structure shares the risk-free curve's day counter and reference
+/// date, the settlement date, the times and the reads are QuantLib's.
 /// </summary>
 public class DividendMismatchedTimesTests
 {

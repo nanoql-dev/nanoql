@@ -10,8 +10,7 @@ namespace NanoQL.Experimental;
 /// <summary>
 /// Marks a loss model whose <see cref="IDefaultLossModel.LossDistribution"/> is the tranche's loss distribution, as
 /// QuantLib's random models' histograms of tranched path losses are (<c>randomdefaultlatentmodel.hpp:401-439</c>),
-/// where the recursive model's is the pool's: a basket with realized defaults shifts it by the realized tranche loss
-/// (the S-xcr plan's XR8 (ii)).
+/// where the recursive model's is the pool's: a basket with realized defaults shifts it by the realized tranche loss.
 /// </summary>
 internal interface ITrancheLossDistribution
 {

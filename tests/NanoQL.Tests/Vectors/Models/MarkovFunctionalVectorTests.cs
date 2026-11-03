@@ -12,11 +12,12 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Vectors;
 
 /// <summary>
-/// The wheel's Markov-functional model vectors, <c>tests/vectors/models/shortrate/onefactormodels/markovfunctional.json</c>:
-/// four calibrations of <see cref="MarkovFunctional"/>, to swaptions and to caplets, with Kahale's smile or none and the
-/// adjustments, and at a zero reversion: the volatilities, the numeraire and zero bonds, a curve of the model's clock,
-/// a forward rate, a swap rate and annuity and zero-bond options; and a calibration to coterminal swaptions, each output
-/// where stable (the S7 plan's S7R6).
+/// The wheel's Markov-functional model vectors,
+/// <c>tests/vectors/models/shortrate/onefactormodels/markovfunctional.json</c>: four calibrations of
+/// <see cref="MarkovFunctional"/>, to swaptions and to caplets, with Kahale's smile or none and the adjustments, and at
+/// a zero reversion: the volatilities, the numeraire and zero bonds, a curve of the model's clock, a forward rate, a
+/// swap rate and annuity and zero-bond options; and a calibration to coterminal swaptions, each output where stable
+/// under one-ulp moves of the inputs.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class MarkovFunctionalVectorTests

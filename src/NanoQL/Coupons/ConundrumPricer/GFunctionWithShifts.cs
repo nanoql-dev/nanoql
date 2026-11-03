@@ -30,7 +30,7 @@ namespace NanoQL.Coupons;
 /// <para>
 /// The shift's shape, (1 − e^(−a·x))/a, loses digits as the reversion a nears 0 from above, and QuantLib reads a
 /// negative reversion as 0; below a reversion of 1e-4 the shape is −expm1(−a·x)/a, negative reversions included, and x
-/// at 0, with QuantLib's form at and above 1e-4 (the S-cms plan's CMR5 (v)).
+/// at 0, with QuantLib's form at and above 1e-4.
 /// </para>
 /// </remarks>
 internal sealed class GFunctionWithShifts : GFunction
@@ -90,7 +90,7 @@ internal sealed class GFunctionWithShifts : GFunction
         discountRatio_ = swapPaymentDiscounts_[^1] / discountAtStart_;
     }
 
-    // The forwarding curve's discount at the swap's start, P(T0), which the shift models' G(R0) = P(T0)/A0 carries.
+    // The forwarding curve's discount at the swap's start, P, which the shift models' G = P/A0 carries.
     internal double DiscountAtStart => discountAtStart_;
 
     public override double Evaluate(double x)

@@ -22,12 +22,12 @@ namespace NanoQL.PricingEngines;
 /// </summary>
 /// <remarks>
 /// <para>
-/// An immutable object over its model, its formulation and its integration (the S-hes plan's HD7); the static
-/// <c>Calculate</c> builds one. Each price returns its integrations' evaluations as the additional result
-/// "numberOfEvaluations", where QuantLib's engine keeps the count in a mutable member (HR4 (v)). The model's time runs
-/// from the earlier of its curves' dates and the discounts are read by date, the forward rates between its grid's times
-/// at the instants they denote on that clock (HR7 (xi)); at the model's time 0 the price is the forward's discounted
-/// intrinsic value, where QuantLib's Gauss-Laguerre integrates sin(φ(x − ln K))/φ, which doesn't decay (HR7 (xxxi)).
+/// An immutable object over its model, its formulation and its integration; the static <c>Calculate</c> builds one.
+/// Each price returns its integrations' evaluations as the additional result "numberOfEvaluations", where QuantLib's
+/// engine keeps the count in a mutable member. The model's time runs from the earlier of its curves' dates and the
+/// discounts are read by date, the forward rates between its grid's times at the instants they denote on that clock; at
+/// the model's time 0 the price is the forward's discounted intrinsic value, where QuantLib's Gauss-Laguerre integrates
+/// sin(φ(x − ln K))/φ, which doesn't decay.
 /// </para>
 /// <para>
 /// References: S. Heston, A Closed-Form Solution for Options with Stochastic Volatility with Applications to Bond and
@@ -274,7 +274,7 @@ public sealed class AnalyticPTDHestonEngine
 
     private static double Squared(double x) => x * x;
 
-    // QuantLib's calculate, the model's time and discounts by date and its forward rates on the model's clock (HR7 (xi))
+    // QuantLib's calculate, the model's time and discounts by date and its forward rates on the model's clock
     private (double Value, int Evaluations) Value(VanillaOption option)
     {
         // this is an european option pricer
@@ -318,7 +318,7 @@ public sealed class AnalyticPTDHestonEngine
 
         if (term == 0.0)
         {
-            // no variance has accrued: the forward's discounted intrinsic value (HR7 (xxxi))
+            // no variance has accrued: the forward's discounted intrinsic value
             return (riskFreeDiscount * payoff.Evaluate(spotPrice * dividendDiscount / riskFreeDiscount), 0);
         }
 

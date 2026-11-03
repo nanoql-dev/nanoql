@@ -11,13 +11,13 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// Vecer's Asian engine at its grid's upper end and on mixed clocks (the S-xeq plan's XER5 (xxi), (xxii)). QuantLib
-/// interpolates between the nodes below and above the initial point, so where the point lies on the grid's upper end it
-/// reads one node past the grid (<c>continuousarithmeticasianvecerengine.cpp:185-190</c>); nanoql takes the last node's
-/// value there, the interpolation's own limit. QuantLib measures the time from the evaluation date on the risk-free day
-/// counter beside each structure's own zero rate and volatility; nanoql reads each on the engine's clock, so the market
-/// restated on one day counter prices the same. Checks: the price continuous as the point reaches the upper end; the
-/// restated market's price, against QuantLib's reading of the unrestated rates and volatility.
+/// Vecer's Asian engine at its grid's upper end and on mixed clocks. QuantLib interpolates between the nodes below and
+/// above the initial point, so where the point lies on the grid's upper end it reads one node past the grid
+/// (<c>continuousarithmeticasianvecerengine.cpp:185-190</c>); nanoql takes the last node's value there, the
+/// interpolation's own limit. QuantLib measures the time from the evaluation date on the risk-free day counter beside
+/// each structure's own zero rate and volatility; nanoql reads each on the engine's clock, so the market restated on
+/// one day counter prices the same. Checks: the price continuous as the point reaches the upper end; the restated
+/// market's price, against QuantLib's reading of the unrestated rates and volatility.
 /// </summary>
 public class VecerEngineTests
 {

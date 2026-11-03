@@ -5,7 +5,7 @@ namespace NanoQL.Numerics;
 
 /// <summary>
 /// One of QuantLib's generated Heston expressions (LPP2's and LPP3's coefficients, COS's cumulants) as a function of κ,
-/// its other inputs fixed, written once over <see cref="IRealArithmetic{T}"/> (the S-hes plan's HR6 and HR11).
+/// its other inputs fixed, written once over <see cref="IRealArithmetic{T}"/>.
 /// </summary>
 internal interface IKappaTExpression
 {
@@ -19,9 +19,8 @@ internal interface IKappaTExpression
     /// <summary>
     /// The expression's value at κ for a term t, in the arithmetic κt calls for: QuantLib's double, and so its bits,
     /// from the cut to the upper cut; double-double below the cut, down to its floor; quad-double below that, down to
-    /// its own floor (the user's ruling of R2-1); below the quad-double floor the cubic in κ through the quad-double
-    /// values at κ = quadFloor/t and its next three multiples; and extended range past the upper cut, where e^{κt}'s
-    /// powers overflow (HR11).
+    /// its own floor; below the quad-double floor the cubic in κ through the quad-double values at κ = quadFloor/t and
+    /// its next three multiples; and extended range past the upper cut, where e^{κt}'s powers overflow.
     /// </summary>
     /// <typeparam name="TExpression">The expression's type.</typeparam>
     /// <param name="expression">The expression.</param>

@@ -15,7 +15,7 @@ namespace NanoQL.Experimental;
 /// </summary>
 /// <remarks>
 /// Its isotropic walk draws the radius on a <c>std::mt19937</c> and the direction on a Mersenne Twister, both on the
-/// seed, which is required: QuantLib's default seeds from the clock (the S-xrt plan's XRD3).
+/// seed, which is required: QuantLib's default seeds from the clock.
 /// </remarks>
 /// <typeparam name="TDistribution">The radius's distribution.</typeparam>
 [Experimental("NQL0001")]

@@ -15,9 +15,9 @@ namespace NanoQL.Experimental;
 /// dimension outermost: it generalizes <see cref="TwoDimensionalIntegral"/> to any number of dimensions up to 15.
 /// </summary>
 /// <remarks>
-/// Immutable; QuantLib's integration-variable buffer is a per-call buffer (PR6.9). An integration of no dimension
-/// is refused: QuantLib's entry point reads <c>integrationLevelEntries_[size - 1]</c> of an empty set
-/// (<c>multidimintegrator.hpp:55</c>), as one of more than 15 is, QuantLib's own check (the S-xcr plan's XR8 (xxx)).
+/// Immutable; QuantLib's integration-variable buffer is a per-call buffer. An integration of no dimension is
+/// refused: QuantLib's entry point reads <c>integrationLevelEntries_[size - 1]</c> of an empty set
+/// (<c>multidimintegrator.hpp:55</c>), as one of more than 15 is, QuantLib's own check.
 /// </remarks>
 [Experimental("NQL0001")]
 public sealed class MultidimIntegral

@@ -18,7 +18,7 @@ namespace NanoQL.PricingEngines;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Three of QuantLib's results are fixed, documented divergences (the S-exo plan's ER5 (xxvi)–(xxviii)):
+/// Three of QuantLib's results are fixed, documented divergences:
 /// </para>
 /// <list type="bullet">
 /// <item><description>QuantLib tells a call from a put by <c>alpha &gt;= 0</c> (<c>bacheliercalculator.cpp:102-114</c>,

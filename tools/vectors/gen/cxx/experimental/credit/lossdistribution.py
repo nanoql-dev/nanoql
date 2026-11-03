@@ -5,11 +5,10 @@ doesn't expose, each output computed by the C++ harness (tools/cxx/src/experimen
 
 The probabilities of n events, binomial (on the first name's probability) and exact (Ma's recursion), static and as
 functors, for every n from 0 to the pool's size plus one where defined (the binomial at least 0 wraps to 0 in
-QuantLib's, the S-xcr plan's XR8 (xxvii), held in Divergences/DistributionMembersTests.cs); the homogeneous pool's
-distribution with its by-products, on a volume and on volume vectors; Hull-White bucketing on unequal volumes and
-probabilities; and the Monte Carlo distribution at QuantLib's seed, 42, and at 7, each with its buckets and
-maximum. The binomial distribution reads a member QuantLib never sets (XR8 (xxvii)), so of it only the bucket count
-and maximum are read. Read back by
+QuantLib's, held in Divergences/DistributionMembersTests.cs); the homogeneous pool's distribution with its
+by-products, on a volume and on volume vectors; Hull-White bucketing on unequal volumes and probabilities; and the
+Monte Carlo distribution at QuantLib's seed, 42, and at 7, each with its buckets and maximum. The binomial
+distribution reads a member QuantLib never sets, so of it only the bucket count and maximum are read. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Experimental/Credit/LossDistCxxVectorTests.cs."""
 import os
 import sys

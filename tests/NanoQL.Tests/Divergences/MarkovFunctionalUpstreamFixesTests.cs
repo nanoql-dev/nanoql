@@ -12,18 +12,17 @@ using static NanoQL.Models.MarkovFunctionalModelSettingsAdjustments;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The fixes QuantLib's master made to the Markov-functional model after the pin, which nanoql takes (R8, the upstream
-/// sweep): #2912 (<c>b762b0b02</c>) strikes the upper rate bound's digital at the bound, where QuantLib 1.44 subtracts
-/// the smile's shift (<c>markovfunctional.cpp:432-436</c>), so on a shifted smile the model's rates are capped below
-/// the bound the rest of the model reads unshifted; it asks for at least two grid points, where 1.44 asks for one
+/// The fixes QuantLib's master made to the Markov-functional model after the pin, which nanoql takes: #2912
+/// (<c>b762b0b02</c>) strikes the upper rate bound's digital at the bound, where QuantLib 1.44 subtracts the smile's
+/// shift (<c>markovfunctional.cpp:432-436</c>), so on a shifted smile the model's rates are capped below the bound the
+/// rest of the model reads unshifted; it asks for at least two grid points, where 1.44 asks for one
 /// (<c>markovfunctional.hpp:168-172</c>), and on one the grid's spacing divides by zero; and its refusal of two smile
-/// pretreatments is restated, "At most one of …". Its count of the pretreatments nanoql has
-/// (<c>MfSmileFlagsTests</c>). The master's cases below are its tests of the settings, the grid points, the shifted
-/// smile's bound, the SABR and payoff-extrapolation fits and the trace. Not ported: <c>testNullSwapIndex</c> and
-/// <c>testNullIborIndex</c> (nanoql's constructors refuse a null index before the model reads it),
-/// <c>testTimeZeroNumeraireAfterDateChange</c>, <c>testModelOutputsAfterRecalculation</c> and
-/// <c>testModelOutputsAfterMarketUpdate</c> (R1: no observers; nanoql's outputs are computed once from the model's own
-/// state, <c>MarkovFunctionalOutputsTests</c>).
+/// pretreatments is restated, "At most one of …". Its count of the pretreatments nanoql has (<c>MfSmileFlagsTests</c>).
+/// The master's cases below are its tests of the settings, the grid points, the shifted smile's bound, the SABR and
+/// payoff-extrapolation fits and the trace. Not ported: <c>testNullSwapIndex</c> and <c>testNullIborIndex</c> (nanoql's
+/// constructors refuse a null index before the model reads it), <c>testTimeZeroNumeraireAfterDateChange</c>,
+/// <c>testModelOutputsAfterRecalculation</c> and <c>testModelOutputsAfterMarketUpdate</c> (no observers: nanoql's
+/// outputs are computed once from the model's own state, <c>MarkovFunctionalOutputsTests</c>).
 /// </summary>
 public class MarkovFunctionalUpstreamFixesTests
 {

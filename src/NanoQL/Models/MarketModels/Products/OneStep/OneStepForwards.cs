@@ -12,8 +12,8 @@ namespace NanoQL.Models;
 /// Forward-rate agreements valued in one step: at the last rate's reset, product i pays (fᵢ − Kᵢ) τᵢ at its payment time.
 /// </summary>
 /// <remarks>
-/// A working type (the S-mmp plan's MMPR1 (i)). It refuses inputs QuantLib reads past (MMPR4's refusals): no strike,
-/// more strikes than rates, and fewer accruals or payment times than strikes.
+/// A working type. It refuses inputs QuantLib reads past: no strike, more strikes than rates, and fewer accruals or
+/// payment times than strikes.
 /// </remarks>
 [WorkingType]
 public sealed class OneStepForwards : MultiProductOneStep

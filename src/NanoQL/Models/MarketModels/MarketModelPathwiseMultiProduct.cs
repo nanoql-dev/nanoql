@@ -15,12 +15,11 @@ namespace NanoQL.Models;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A working type (the S-mmp plan's MMPR1 (i)): <see cref="Reset"/> and <see cref="NextTimeStep"/> move it along a
-/// path, and <see cref="Clone"/> copies it deeply. <see cref="NextTimeStep"/> writes into buffers the caller sizes
-/// once: a count per product and, per product, <see cref="MaxNumberOfCashFlowsPerProductPerStep"/> cash flows, each of
-/// 1 + the number of rates amounts.
+/// A working type: <see cref="Reset"/> and <see cref="NextTimeStep"/> move it along a path, and <see cref="Clone"/>
+/// copies it deeply. <see cref="NextTimeStep"/> writes into buffers the caller sizes once: a count per product and, per
+/// product, <see cref="MaxNumberOfCashFlowsPerProductPerStep"/> cash flows, each of 1 + the number of rates amounts.
 /// </para>
-/// <para>An extension point (U13).</para>
+/// <para>An extension point.</para>
 /// </remarks>
 [WorkingType]
 public abstract class MarketModelPathwiseMultiProduct

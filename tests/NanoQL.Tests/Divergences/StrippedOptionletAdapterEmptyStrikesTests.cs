@@ -17,10 +17,10 @@ namespace NanoQL.Tests.Divergences;
 /// <c>minStrike()</c> and <c>maxStrike()</c> read the front and back of the empty strikes before any calculation
 /// (<c>strippedoptionletadapter.cpp:128, 132</c>), which a volatility without extrapolation reaches through its strike
 /// check: the wheel's process ends with an access violation, 0xC0000005, in 3 of 3 runs. nanoql's adapter does
-/// QuantLib's first calculation when it is built (S7R4), so it refuses the empty strikes there, with QuantLib's text, as
-/// an <see cref="ArgumentException"/> naming <c>stripper</c>, before the reads; and a base with no fixing dates, which
-/// builds no interpolation, is refused by <c>MinStrike</c> and <c>MaxStrike</c> with <see cref="NanoQLException"/>,
-/// "no strikes given" (S7D16).
+/// QuantLib's first calculation when it is built, so it refuses the empty strikes there, with QuantLib's text, as an
+/// <see cref="ArgumentException"/> naming <c>stripper</c>, before the reads; and a base with no fixing dates, which
+/// builds no interpolation, is refused by <c>MinStrike</c> and <c>MaxStrike</c> with <see cref="NanoQLException"/>, "no
+/// strikes given".
 /// </summary>
 public class StrippedOptionletAdapterEmptyStrikesTests
 {

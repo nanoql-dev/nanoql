@@ -6,12 +6,12 @@ using NanoQL.Models;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The Vasicek model at small mean reversion (the S-sr plan's SSR3): QuantLib 1.44's A and B cut to their a = 0 forms
-/// below √ε, dropping terms of order a·τ, and above it subtract O(1/a) terms (<c>vasicek.cpp:36-58</c>), so its zero
-/// bond is anywhere between 4.6e-163 and 9.1e131 for a between 1.5e-8 and 1e-7 (the wheel, below) and still off by
-/// 5.4e-4 at 1e-6. nanoql's are QuantLib's master's forms (#2882, <c>da854f617</c>): B as τ·(1 − e^(−aτ))/(aτ) and the
-/// exponent of A by the φ and h series below aτ = 1, the bond option's variance likewise. QuantLib's check: upstream's
-/// new test lines, <c>testVasicekDiscountFactorJustAboveSmallMeanReversionCutoff</c> and
+/// The Vasicek model at small mean reversion: QuantLib 1.44's A and B cut to their a = 0 forms below √ε, dropping terms
+/// of order a·τ, and above it subtract O(1/a) terms (<c>vasicek.cpp:36-58</c>), so its zero bond is anywhere between
+/// 4.6e-163 and 9.1e131 for a between 1.5e-8 and 1e-7 (the wheel, below) and still off by 5.4e-4 at 1e-6. nanoql's are
+/// QuantLib's master's forms (#2882, <c>da854f617</c>): B as τ·(1 − e^(−aτ))/(aτ) and the exponent of A by the φ and h
+/// series below aτ = 1, the bond option's variance likewise. QuantLib's check: upstream's new test lines,
+/// <c>testVasicekDiscountFactorJustAboveSmallMeanReversionCutoff</c> and
 /// <c>testVasicekDiscountBondOptionForSmallMeanReversion</c>, against 60-digit references at upstream's tolerances.
 /// </summary>
 public class VasicekCancellationTests

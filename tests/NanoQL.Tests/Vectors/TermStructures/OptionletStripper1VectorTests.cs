@@ -7,10 +7,11 @@ using NanoQL.Tests.Harness;
 namespace NanoQL.Tests.Vectors;
 
 /// <summary>
-/// <see cref="OptionletStripper1"/>'s vectors, <c>tests/vectors/termstructures/volatility/optionlet/optionletstripper1.json</c>:
-/// strips of QuantLib's test surfaces and the cap survey's, both volatility types, a displacement, dontThrow, a given
-/// switch strike, the at-par switch, Euribor and SOFR; their dates, rates, strikes, volatilities (S7R6's filter's
-/// dropped ones null), matrices and inspectors; and the strippers QuantLib refuses, which nanoql refuses when built.
+/// <see cref="OptionletStripper1"/>'s vectors,
+/// <c>tests/vectors/termstructures/volatility/optionlet/optionletstripper1.json</c>: strips of QuantLib's test surfaces
+/// and the cap survey's, both volatility types, a displacement, dontThrow, a given switch strike, the at-par switch,
+/// Euribor and SOFR; their dates, rates, strikes, volatilities (the ones the stability filter drops null), matrices and
+/// inspectors; and the strippers QuantLib refuses, which nanoql refuses when built.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class OptionletStripper1VectorTests

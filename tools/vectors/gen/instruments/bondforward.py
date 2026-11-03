@@ -8,7 +8,7 @@ The bonds are tools/vectors/gen/instruments/bond.py's specs: annual and semiannu
 zero-coupon bond, a floating-rate bond on Euribor 6M with its current coupon's fixing stored, an amortizing fixed-rate
 bond and QuantLib's test-suite bond on its face of 1e5 (bondforward.cpp's), each settling on the evaluation date: the
 spot value, the dirty price at the bond's settlement date, is then a reference-date value, as QuantLib's forward reads
-it (C4's review, C4-O1: on a bond settling later QuantLib grows the settlement-date price from the reference date,
+it (on a bond settling later QuantLib grows the settlement-date price from the reference date,
 tests/NanoQL.Tests/Divergences/BondForwardSpotDateTests.cs). Each forward is long or short, struck at 0 or at 100,
 settling in 2 TARGET business days on Actual/Actual (ISDA), delivering before the bond's next coupon, after one or two
 coupons, on a coupon date, or before the evaluation date (expired: an NPV of 0, its other results never computed).
@@ -16,10 +16,10 @@ coupons, on a coupon date, or before the evaluation date (expired: an NPV of 0, 
 Each forward's outputs are its settlement date, whether it has expired, the spot value (the bond's dirty price on
 DiscountingBondEngine on the curve), the spot income on the curve, the forward value, the forward price, the clean
 forward price, the NPV, and the implied yield of the spot value and the forward value from the settlement date,
-continuous and compounded annually on Actual/365 (Fixed). The forwards with an income on a bond whose notional at
-its settlement date isn't 100, the 1e5 face and the amortizing bond's 50, are generated and left out but their dates
-and spot value: QuantLib's income is the flows' amounts, where the spot value is per 100 of that notional (the S-cms
-plan's CMR5 (xxv); tests/NanoQL.Tests/Divergences/BondForwardIncomeTests.cs). Amounts are per 100 of notional.
+continuous and compounded annually on Actual/365 (Fixed). The forwards with an income on a bond whose notional at its
+settlement date isn't 100, the 1e5 face and the amortizing bond's 50, are generated and left out but their dates and
+spot value: QuantLib's income is the flows' amounts, where the spot value is per 100 of that notional
+(tests/NanoQL.Tests/Divergences/BondForwardIncomeTests.cs). Amounts are per 100 of notional.
 
 A case's inputs hold its settings, the bond (bond.py's spec), the curve, and the forward's value date, delivery date,
 position, strike and settlement days. The wheel's BondForward is the proxy of the C++ constructor, every argument
@@ -121,7 +121,8 @@ def cases():
             rows.append(("short struck at 100", deliveries(bond)[0][1], SHORT, 100.0))
             for label, delivery, position, strike in rows:
                 f = forward(spec, bond, h, delivery, position, strike)
-                # QuantLib's income is the flows' amounts, its spot value per 100 of the notional: CMR5 (xxv)
+                # QuantLib's income is the flows' amounts, its spot value per 100 of the notional, where nanoql's are
+                # at the bond's notional
                 keep = bond.notional(bond.settlementDate()) == 100.0 or f.spotIncome(h) == 0.0
                 out.append({"name": f"{name} / {label} / {'long' if position == LONG else 'short'} {strike:g}",
                             "inputs": {"settings": st, "bond": spec, "curve": CURVE, "valueDate": v.enc(TODAY),

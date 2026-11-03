@@ -17,10 +17,9 @@ volatility at the 3 strikes, converted to a normal volatility and to a shifted l
 the type asked for with a member its constructor leaves uninitialized, so only a conversion to another shift is
 defined whatever the member holds.
 
-The stability filter (the S7 plan's S7R6) runs on the cases over a calibrated cube as on the cubes' own files: each is
-rebuilt over its base with every input volatility moved one ulp up, then down, and an output is written only where
-both rebuilds leave it within 1e-12 x max(|a|, |b|, 1); the indexes of each output's dropped elements are in the
-case's inputs "dropped".
+The stability filter runs on the cases over a calibrated cube as on the cubes' own files: each is rebuilt over its base
+with every input volatility moved one ulp up, then down, and an output is written only where both rebuilds leave it
+within 1e-12 x max(|a|, |b|, 1); the indexes of each output's dropped elements are in the case's inputs "dropped".
 
 A refused value is {"throws": true}. A case's inputs hold its settings, "spreaded" ({"base", "baseExtrapolates",
 "spread"}: the base a matrix spec of swaptionvolcube.py's or a cube spec, its extrapolation enabled where

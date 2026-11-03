@@ -13,7 +13,7 @@ namespace NanoQL.Models;
 /// An exercise strategy on swap-rate triggers: at each exercise, exercises where the coterminal swap rate from the next
 /// rate is above the exercise's trigger.
 /// </summary>
-/// <remarks>A working type (the S-mmp plan's MMPR1 (i)).</remarks>
+/// <remarks>A working type.</remarks>
 [WorkingType]
 public sealed class SwapRateTrigger : ExerciseStrategy<CurveState>
 {

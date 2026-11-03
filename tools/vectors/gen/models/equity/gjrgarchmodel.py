@@ -9,14 +9,14 @@ calibrations from both processes, on a flat risk-free curve and no dividend yiel
 months, six months and a year, strikes at 0.9, 1 and 1.1 of the spot, quoted at volatilities of a skew), each helper
 priced by the analytic GJR-GARCH engine on the model, by Levenberg-Marquardt at QuantLib's defaults and QuantLib's DAX
 case's end criteria: the calibrated params, the helpers' calibration errors, the end criteria and the function
-evaluations, through the S7R6 filter of the master plan: each calibration is refit with every nonzero real input (the
-vols, the spot, the curves' rates and the starting parameters) moved one ulp, up and down together, and an output is
-written only where both refits keep it within 1e-12 x max(|a|, |b|, 1) (an integer, where they give the same); the
-generator prints "dropped n of m outputs".
+evaluations, through the stability filter: each calibration is refit with every nonzero real input (the vols, the spot,
+the curves' rates and the starting parameters) moved one ulp, up and down together, and an output is written only where
+both refits keep it within 1e-12 x max(|a|, |b|, 1) (an integer, where they give the same); the generator prints
+"dropped n of m outputs".
 
-Left out (the S-hes plan's §2.10): every structure is on the risk-free curve's day counter and reference date; the
-calibrations hold no dividend yield, where nanoql's analytic engine prices on r − q (HR7 (xxix),
-tests/NanoQL.Tests/Divergences/AnalyticGjrGarchDividendTests.cs).
+Left out: every structure is on the risk-free curve's day counter and reference date; the calibrations hold no dividend
+yield, where nanoql's analytic engine prices on r − q
+(tests/NanoQL.Tests/Divergences/AnalyticGjrGarchDividendTests.cs).
 
 A case holds one process, gjrgarchprocess.py's spec, and for a calibration its helpers [{"months", "strike", "vol"}].
 The wheel's calls, by QuantLib-SWIG 1.44's calibratedmodel.i and calibrationhelpers.i: GJRGARCHModel(GJRGARCHProcess(

@@ -11,17 +11,15 @@ the first asset at 100 with a dividend yield of 0 or 3% and a constant volatilit
 and 110): the NPV, the engine's one result. Then an expired option and the refusals: a cash-or-nothing payoff and the
 second spot beyond the barrier ("barrier touched").
 
-QuantLib's engine reads Drezner's bivariate normal, nanoql's West's (the S-bar plan's BR4 (e), the S-exo plan's ER7),
-so every value carries §3.3's override: Drezner's accuracy, 6e-7 (EP39) times the bivariate terms' coefficients,
-S1 e^((b1-r)T)(1 + (H/S2)^(2(mu2+rho sigma1 sigma2)/sigma2^2)) + X e^(-rT)(1 + (H/S2)^(2 mu2/sigma2^2)), relative to the
-value.
+QuantLib's engine reads Drezner's bivariate normal, nanoql's West's, so every value carries §3.3's override: Drezner's
+accuracy, 6e-7 times the bivariate terms' coefficients, S1 e^((b1-r)T)(1 + (H/S2)^(2(mu2+rho sigma1 sigma2)/sigma2^2)) +
+X e^(-rT)(1 + (H/S2)^(2 mu2/sigma2^2)), relative to the value.
 
-The outputs nanoql fixes are left out (the S-bar plan's §2.10): the two processes share one risk-free curve, on which
-QuantLib's b2 = r1 - q2 is r2 - q2 (BR5 (vii), tests/NanoQL.Tests/Divergences/TwoAssetBarrierTwoCurvesTests.cs), and
-one day counter and reference date (BR5 (i), BarrierClosedFormMismatchedTimesTests.cs); a knock-in is written only on
-a first asset without dividends, where QuantLib's vanilla is right (BR5 (viii), TwoAssetBarrierDividendTests.cs); and
-every volatility is strike-independent, where QuantLib's read of the second at the first's strike is nanoql's at the
-barrier (BR5 (ix), TwoAssetBarrierSmileTests.cs).
+The outputs nanoql fixes are left out: the two processes share one risk-free curve, on which QuantLib's b2 = r1 - q2 is
+r2 - q2 (tests/NanoQL.Tests/Divergences/TwoAssetBarrierTwoCurvesTests.cs), and one day counter and reference date
+(BarrierClosedFormMismatchedTimesTests.cs); a knock-in is written only on a first asset without dividends, where
+QuantLib's vanilla is right (TwoAssetBarrierDividendTests.cs); and every volatility is strike-independent, where
+QuantLib's read of the second at the first's strike is nanoql's at the barrier (TwoAssetBarrierSmileTests.cs).
 
 A case holds the two process specs (tools/vectors/gen/processes/blackscholesprocess.py's), the correlation, the
 exercise and barrier (tools/vectors/gen/pricingengines/barrier/analyticbarrierengine.py's, the rebate unread), its
@@ -55,7 +53,7 @@ bsp, bc = abe.bsp, abe.bc
 R = abe.R
 CALL, PUT = abe.CALL, abe.PUT
 DRZ = 6e-7
-REASON = "ER7: QuantLib's engine reads Dr78, nanoql's We04DP; 6e-7 times the bivariate terms' coefficients (EP39)"
+REASON = "QuantLib's engine reads Dr78, nanoql's We04DP; 6e-7 times the bivariate terms' coefficients"
 CURVES = [("flat", bsp.FLAT_R, bsp.FLAT_Q), ("zero curves", bsp.ZERO_R, bsp.ZERO_Q)]
 VOLS = [("constant", bsp.CONSTANT), ("variance curve", bsp.CURVE)]
 

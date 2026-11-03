@@ -9,8 +9,8 @@ the wheel doesn't bind, each output computed by the C++ harness (tools/cxx/src/e
   itself, and to a true Euribor 3M: the volatility at option tenors of one to twenty years, swap tenors of one to
   twenty years and strikes of 0 to 2%, and the smile section's at-the-money level at each.
 
-Left out: swap tenors that aren't whole years, whose swaps QuantLib truncates to whole years (the S-xrt plan's XRR5
-(xv), tests/NanoQL.Tests/Divergences/TenorSwaptionLengthTests.cs). Read back by
+Left out: swap tenors that aren't whole years, whose swaps QuantLib truncates to whole years
+(tests/NanoQL.Tests/Divergences/TenorSwaptionLengthTests.cs). Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Experimental/BasisModels/TenorSwaptionVTSCxxVectorTests.cs."""
 import importlib.util
 import os

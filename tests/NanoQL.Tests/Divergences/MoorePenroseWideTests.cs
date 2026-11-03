@@ -8,11 +8,10 @@ using static NanoQL.Numerics.MatrixFunctions;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The Moore-Penrose inverse of a wide matrix (the S-xrt plan's XRR5 (xxxv), fixed under R8). QuantLib's reads the
-/// singular values past their end and then throws "matrices with different sizes (3x2, 3x3) cannot be multiplied" on
-/// a 2 × 3 matrix (the S-xrt planner's XRP9). nanoql's is ((Aᵀ)⁺)ᵀ, Penrose's identity; on wide, tall,
-/// rank-deficient and zero matrices it meets Penrose's four conditions, A A⁺ A = A, A⁺ A A⁺ = A⁺ and A A⁺, A⁺ A
-/// symmetric.
+/// The Moore-Penrose inverse of a wide matrix (fixed). QuantLib's reads the singular values past their end and then
+/// throws "matrices with different sizes (3x2, 3x3) cannot be multiplied" on a 2 × 3 matrix. nanoql's is ((Aᵀ)⁺)ᵀ,
+/// Penrose's identity; on wide, tall, rank-deficient and zero matrices it meets Penrose's four conditions, A A⁺ A = A,
+/// A⁺ A A⁺ = A⁺ and A A⁺, A⁺ A symmetric.
 /// </summary>
 public class MoorePenroseWideTests
 {

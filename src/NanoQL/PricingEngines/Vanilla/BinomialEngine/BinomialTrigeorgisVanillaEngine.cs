@@ -15,7 +15,7 @@ namespace NanoQL.PricingEngines;
 
 /// <summary>
 /// The binomial engine on the Trigeorgis tree: QuantLib-Python's <c>BinomialTrigeorgisVanillaEngine</c>, QuantLib's
-/// <c>BinomialVanillaEngine&lt;Trigeorgis&gt;</c> (D12).
+/// <c>BinomialVanillaEngine&lt;Trigeorgis&gt;</c>.
 /// </summary>
 public static class BinomialTrigeorgisVanillaEngine
 {

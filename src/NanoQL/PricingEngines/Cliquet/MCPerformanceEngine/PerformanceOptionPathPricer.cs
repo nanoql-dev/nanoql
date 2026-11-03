@@ -15,10 +15,10 @@ namespace NanoQL.PricingEngines;
 /// </summary>
 /// <remarks>
 /// Immutable. QuantLib reads the periods as the path's consecutive points after its start, refusing a path of another
-/// length ("discounts/options mismatch"), so a reset at the grid's start, which the grid merges into it, is refused (the
-/// S-exo plan's ER5 (xxxix), <c>Divergences/McPerformanceResetTodayTests.cs</c>); given the resets' indices on the
-/// grid, it reads each period between its own points, as the Monte Carlo forward engines read their reset, and on a
-/// grid of distinct reset times the same points as QuantLib's.
+/// length ("discounts/options mismatch"), so a reset at the grid's start, which the grid merges into it, is refused
+/// (<c>Divergences/McPerformanceResetTodayTests.cs</c>); given the resets' indices on the grid, it reads each period
+/// between its own points, as the Monte Carlo forward engines read their reset, and on a grid of distinct reset times
+/// the same points as QuantLib's.
 /// </remarks>
 public sealed class PerformanceOptionPathPricer : PathPricer<MonteCarloPath>
 {

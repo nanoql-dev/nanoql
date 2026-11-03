@@ -13,10 +13,9 @@ namespace NanoQL.Methods;
 /// the conditions and the boundaries, and interpolates the result.
 /// </summary>
 /// <remarks>
-/// Immutable: the rollback runs in the constructor, where QuantLib's solver runs it lazily on the first query (the
-/// S-hes plan's HD8, S-sr's <see cref="Fdm2DimSolver"/> form). A value is a bicubic spline in each layer of the third
-/// coordinate, then a monotonic natural cubic spline across the layers, QuantLib's. A snapshot just after the start
-/// gives the theta.
+/// Immutable: the rollback runs in the constructor, where QuantLib's solver runs it lazily on the first query (<see
+/// cref="Fdm2DimSolver"/>'s form). A value is a bicubic spline in each layer of the third coordinate, then a monotonic
+/// natural cubic spline across the layers, QuantLib's. A snapshot just after the start gives the theta.
 /// </remarks>
 public sealed class Fdm3DimSolver
 {

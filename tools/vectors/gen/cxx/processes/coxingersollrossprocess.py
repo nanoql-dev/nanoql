@@ -8,12 +8,12 @@ and its quadratic-exponential evolve, on both of its branches (psi at most 1.5, 
 cumulative normal picks a zero or an exponential state).
 
 Generated and left out: the diffusion, the variance and the standard deviation. QuantLib's diffusion is the constant
-sigma, its variance reads the constructor's x0 where the step's state is given and its level term is twice evolve's,
-and its standard deviation is the variance's root; nanoql's diffusion is sigma sqrt(x), the header's SDE, and its
-variance evolve's own s2 at the state (the S-sr plan's SSR7, K2;
-tests/NanoQL.Tests/Divergences/CirProcessMomentsTests.cs). nanoql writes s2's (1 - e^(-k dt))/k as dt (1 - e^(-x))/x,
-x = k dt, the cancellation-free form of the Ornstein-Uhlenbeck ruling, which moves evolve's last bits only at these
-speeds. tests/NanoQL.Tests/Vectors/Cxx/Processes/CoxIngersollRossProcessCxxVectorTests.cs reads it back."""
+sigma, its variance reads the constructor's x0 where the step's state is given and its level term is twice evolve's, and
+its standard deviation is the variance's root; nanoql's diffusion is sigma sqrt(x), the header's SDE, and its variance
+evolve's own s2 at the state (tests/NanoQL.Tests/Divergences/CirProcessMomentsTests.cs). nanoql writes s2's (1 - e^(-k
+dt))/k as dt (1 - e^(-x))/x, x = k dt, the cancellation-free form of the Ornstein-Uhlenbeck process, which moves
+evolve's last bits only at these speeds.
+tests/NanoQL.Tests/Vectors/Cxx/Processes/CoxIngersollRossProcessCxxVectorTests.cs reads it back."""
 import os
 import random
 import sys

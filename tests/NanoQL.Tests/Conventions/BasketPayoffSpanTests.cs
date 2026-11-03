@@ -7,9 +7,9 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The basket payoffs over spans (the S-exo plan's ER1 (ii)): an array, a <see cref="Vector"/>'s storage and a stack
-/// buffer give one value, the payoff's call on a price passes to its base payoff, and the minimum and maximum keep the
-/// first of equal extremes and drop or keep a NaN by position, as <c>std::min_element</c> and <c>std::max_element</c>.
+/// The basket payoffs over spans: an array, a <see cref="Vector"/>'s storage and a stack buffer give one value, the
+/// payoff's call on a price passes to its base payoff, and the minimum and maximum keep the first of equal extremes and
+/// drop or keep a NaN by position, as <c>std::min_element</c> and <c>std::max_element</c>.
 /// </summary>
 public class BasketPayoffSpanTests
 {

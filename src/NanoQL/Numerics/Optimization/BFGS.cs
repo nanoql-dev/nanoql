@@ -13,15 +13,15 @@ namespace NanoQL.Numerics;
 /// <remarks>
 /// <para>
 /// The user has to provide a line-search method and optimization end criteria. Immutable: each minimization runs on a
-/// new line search and a new inverse Hessian, the identity at its start (the S-core plan's CR5 (a); SciPy's
-/// <c>hess_inv0</c>). QuantLib's method keeps its inverse Hessian as a member, built on its first minimization only, so
-/// a second minimization on one object starts from the first's Hessian, and one of another dimension reads it out of
-/// range: a documented divergence (<c>Divergences/BFGSTests.cs</c>).
+/// new line search and a new inverse Hessian, the identity at its start (SciPy's <c>hess_inv0</c>). QuantLib's method
+/// keeps its inverse Hessian as a member, built on its first minimization only, so a second minimization on one object
+/// starts from the first's Hessian, and one of another dimension reads it out of range: a documented divergence
+/// (<c>Divergences/BFGSTests.cs</c>).
 /// </para>
 /// <para>
 /// The update is QuantLib's, on the search direction before the line search's step scales it, not on the step, which
 /// QuantLib's Armijo search, starting each iteration from the previous step and only shrinking it, compensates; kept as
-/// it is (the plan's CR7, its kept designs): the textbook update fails to converge with the same searches.
+/// it is: the textbook update fails to converge with the same searches.
 /// </para>
 /// </remarks>
 public sealed class BFGS : LineSearchBasedMethod

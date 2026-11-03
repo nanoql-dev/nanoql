@@ -13,10 +13,10 @@ namespace NanoQL.PricingEngines;
 /// <typeparam name="TRng">The random-number traits.</typeparam>
 /// <typeparam name="TStats">The statistics accumulator.</typeparam>
 /// <remarks>
-/// An immutable builder (SEQR2): each method returns a modified copy. <see cref="ToEngine"/> returns the engine as a
-/// function of the option and the context, its settings bound, in place of QuantLib's conversion to a pricing engine,
-/// with QuantLib's checks on the steps. The seed is a constructor argument (S2R4). QuantLib's
-/// <c>withBrownianBridge</c> defaults its argument to <see langword="false"/>, kept. A builder has no value equality.
+/// An immutable builder: each method returns a modified copy. <see cref="ToEngine"/> returns the engine as a function
+/// of the option and the context, its settings bound, in place of QuantLib's conversion to a pricing engine, with
+/// QuantLib's checks on the steps. The seed is a constructor argument. QuantLib's <c>withBrownianBridge</c> defaults
+/// its argument to <see langword="false"/>, kept. A builder has no value equality.
 /// </remarks>
 public sealed record MakeMCForwardEuropeanBSEngine<TRng, TStats>
     where TRng : IRngTraits

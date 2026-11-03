@@ -5,9 +5,9 @@
 which the wheel doesn't expose.
 
 tools/vectors/gen/cxx/models/equity/batesmodel.py's two Heston sets at QuantLib's default accuracy and at 1e-8: Pv at
-five log spots and cdf at five spots around the spot, at three times. The members read the model's density on its
-clock, the curves sharing their reference date and day counter, so the risk-free curve's times (the S-hes plan's HR7
-(xi)); every κt is far above HR7 (xxv)'s floor.
+five log spots and cdf at five spots around the spot, at three times. The members read the model's density on its clock,
+the curves sharing their reference date and day counter, so the risk-free curve's times; every κt is far above the floor
+where nanoql's form departs.
 
 A case holds the "process" (batesmodel.py's harness spec), "eps", "maxIterations", "xs", "ss" and "ts". The harness's
 call: AnalyticPDFHestonEngine::members (tools/cxx/src/pricingengines/vanilla/analyticpdfhestonengine.cpp). Read back by

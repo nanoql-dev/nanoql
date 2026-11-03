@@ -8,12 +8,12 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// Cubic B-splines on a repeated knot (the S-sr plan's SSR6 (vi)). QuantLib's recursion divides by a knot span that is
-/// zero on a repeated knot (<c>bspline.cpp:56-57</c>), giving NaN, so a cubic B-spline fit on the knots −30, −20, 0, 5,
-/// 10, 10, 15, 20, 25 and 30 throws "N_th cubic B-spline must be nonzero at t=0" on the wheel, where the knots 10 and
-/// 10.001 fit, the parameters 0.9, 0.8, 0.7, 0.6 and 0.5 discounting 0.9194765141427983 at t = 7. nanoql reads a term
-/// over a zero span as 0, the Cox–de Boor convention. QuantLib has no value on a repeated knot, so its check is its own
-/// values on knots a gap apart, which nanoql gives bit for bit, converging to the convention's as the gap closes.
+/// Cubic B-splines on a repeated knot. QuantLib's recursion divides by a knot span that is zero on a repeated knot
+/// (<c>bspline.cpp:56-57</c>), giving NaN, so a cubic B-spline fit on the knots −30, −20, 0, 5, 10, 10, 15, 20, 25 and
+/// 30 throws "N_th cubic B-spline must be nonzero at t=0" on the wheel, where the knots 10 and 10.001 fit, the
+/// parameters 0.9, 0.8, 0.7, 0.6 and 0.5 discounting 0.9194765141427983 at t = 7. nanoql reads a term over a zero span
+/// as 0, the Cox–de Boor convention. QuantLib has no value on a repeated knot, so its check is its own values on knots
+/// a gap apart, which nanoql gives bit for bit, converging to the convention's as the gap closes.
 /// </summary>
 public class BSplineRepeatedKnotTests
 {

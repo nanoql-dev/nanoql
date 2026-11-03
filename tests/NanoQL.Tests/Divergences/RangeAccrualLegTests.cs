@@ -11,12 +11,11 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The range accrual leg's null entries (the S-cms plan's CMR5 (xii)): QuantLib's <c>RangeAccrualLeg</c> builds <c>Leg
-/// leg(n)</c>, n null cash flows, then pushes its n coupons after them (<c>rangeaccrual.cpp</c>, its <c>operator
-/// Leg</c>), so the leg holds 2n flows, the first n null, which setCouponPricer and every reader of the leg
-/// dereference: on the wheel, the vectors' semiannual leg of four periods has eight flows, and setCouponPricer refuses
-/// it ("Boost assertion failed: px != 0"). nanoql's leg holds the n coupons. QuantLib's check: its coupons, the leg's
-/// second half, bit for bit (the vectors).
+/// The range accrual leg's null entries: QuantLib's <c>RangeAccrualLeg</c> builds <c>Leg leg(n)</c>, n null cash
+/// flows, then pushes its n coupons after them (<c>rangeaccrual.cpp</c>, its <c>operator Leg</c>), so the leg holds 2n
+/// flows, the first n null, which setCouponPricer and every reader of the leg dereference: on the wheel, the vectors'
+/// semiannual leg of four periods has eight flows, and setCouponPricer refuses it ("Boost assertion failed: px != 0").
+/// nanoql's leg holds the n coupons. QuantLib's check: its coupons, the leg's second half, bit for bit (the vectors).
 /// </summary>
 public class RangeAccrualLegTests
 {

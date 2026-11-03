@@ -8,13 +8,13 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The G2 model at small mean reversion (the S-sr plan's SSR3): QuantLib 1.44's <c>V</c> (<c>g2.cpp:89-100</c>) sums
-/// O(a²t³) differences of O(1/a) terms, so its zero bond's error grows like 1/a³: on the wheel, 0.8997958885633307 at
-/// a = 1e-9, 58,421.40718574682 at 1e-7 and 0.8800439590760323 at 1e-4 (against 0.88003659…, 0.88003659… and
+/// The G2 model at small mean reversion: QuantLib 1.44's <c>V</c> (<c>g2.cpp:89-100</c>) sums O(a²t³) differences of
+/// O(1/a) terms, so its zero bond's error grows like 1/a³: on the wheel, 0.8997958885633307 at a = 1e-9,
+/// 58,421.40718574682 at 1e-7 and 0.8800439590760323 at 1e-4 (against 0.88003659…, 0.88003659… and
 /// 0.88004395350237115). nanoql's are QuantLib's master's forms (#2885, <c>81fac76b8</c>): the three terms through one
 /// function of at and bt, its series below aτ + bτ = 2, and B with expm1. QuantLib's check: upstream's new test line,
-/// <c>testG2DiscountBondForSmallMeanReversion</c>, against its 60-digit references at upstream's tolerance; and, at
-/// a = 1e-4, QuantLib's own formulas evaluated in 60 digits.
+/// <c>testG2DiscountBondForSmallMeanReversion</c>, against its 60-digit references at upstream's tolerance; and, at a =
+/// 1e-4, QuantLib's own formulas evaluated in 60 digits.
 /// </summary>
 public class G2CancellationTests
 {

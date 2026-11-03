@@ -22,9 +22,9 @@ namespace NanoQL.PricingEngines;
 /// </para>
 /// <para>
 /// The path grid runs on the process's clock (<see cref="FdmBlackScholesOp.Clock"/>), the earliest reference date of
-/// its structures, each read there accruing nothing before its own date, and the payment discounted by date (the S-exo
-/// plan's ER5 (xxix), <c>Divergences/McVarianceSwapMismatchedTimesTests.cs</c>), where QuantLib's grid runs on the
-/// risk-free curve's time; on structures dated alike, QuantLib's.
+/// its structures, each read there accruing nothing before its own date, and the payment discounted by date
+/// (<c>Divergences/McVarianceSwapMismatchedTimesTests.cs</c>), where QuantLib's grid runs on the risk-free curve's
+/// time; on structures dated alike, QuantLib's.
 /// </para>
 /// </remarks>
 public static class MCVarianceSwapEngine

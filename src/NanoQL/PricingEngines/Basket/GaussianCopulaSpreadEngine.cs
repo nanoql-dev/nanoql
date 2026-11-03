@@ -26,8 +26,8 @@ namespace NanoQL.PricingEngines;
 /// object, as QuantLib requires the same handle link; the payoff is discounted on it.
 /// </para>
 /// <para>
-/// Each curve is read by date and accrues nothing before its reference date, where QuantLib's reads throw for an
-/// option expiring before a later structure's date (the playbook's dates row,
+/// Each curve is read by date and accrues nothing before its reference date, where QuantLib's reads throw for an option
+/// expiring before a later structure's date (the playbook's row for structures on another clock,
 /// <c>Divergences/TwoAssetMismatchedTimesTests.cs</c>). An asset whose volatility accrues no variance to expiry, an
 /// expiry on or before the volatility's date or a zero volatility, is at its forward there, where QuantLib's density
 /// calculator refuses ("non-positive at-the-money volatility", <c>Divergences/GaussianCopulaZeroVarianceTests.cs</c>);

@@ -972,7 +972,7 @@ public class MarketModelTests
                         bool logNormal = true;
                         MarketModel marketModel = vars.MakeMarketModel(logNormal, evolution, factors, j);
 
-                        // Adapted: the constrained evolvers take the unbumped model as their reference (the S-mmp plan's MMPR3)
+                        // Adapted: the constrained evolvers take the unbumped model as their reference
                         MarketModel originalModel = marketModel;
 
                         var evolver = new LogNormalFwdRateEuler(marketModel, generatorFactory, numeraires);
@@ -1045,7 +1045,7 @@ public class MarketModelTests
                         engine.MultiplePathValues(stats, greekStats, CommonVars.Paths);
 
                         // QuantLib's test prints the values and Greeks beside Black's and asserts nothing: nanoql's facts
-                        // assert them (Divergences/ProxyGreekVegaTests.cs; the S-mmp plan's SMD13)
+                        // assert them (Divergences/ProxyGreekVegaTests.cs)
                     }
                 }
             }
@@ -3148,8 +3148,8 @@ public class MarketModelTests
 
         // The callable cases' upper bound (marketmodel.cpp:1491-1525): Sobol outer paths on seed + 142, an inner
         // Mersenne-twister evolver on seed + s from each exercise step s, 255 outer paths of 256 inner ones. QuantLib
-        // prints the bound and asserts nothing; the port computes it as QuantLib does (the S-mmp plan's SMD13), its
-        // facts in Divergences/UpperBoundEngineTests.cs.
+        // prints the bound and asserts nothing; the port computes it as QuantLib does, its facts in
+        // Divergences/UpperBoundEngineTests.cs.
         public (double Delta, double DeltaError) UpperBound(
             MarketModel marketModel,
             int[] numeraires,

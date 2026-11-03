@@ -11,9 +11,9 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// Batch 7's restructure: with nothing set the eight units, the generic indexes and their region hold QuantLib's data;
-/// under a scope a unit's or the region's record reaches the coded constructor; the registry default stays QuantLib's
-/// (CVD45); and a provider that changes a unit's code, its identity, is refused.
+/// The commodity restructure: with nothing set the eight units, the generic indexes and their region hold QuantLib's
+/// data; under a scope a unit's or the region's record reaches the coded constructor; the registry default stays
+/// QuantLib's; and a provider that changes a unit's code, its identity, is refused.
 /// </summary>
 public class CommodityProviderTests
 {
@@ -77,7 +77,7 @@ public class CommodityProviderTests
             Assert.Equal("Oil barrels", new GallonUnitOfMeasure().TriangulationUnitOfMeasure!.Name);
             Assert.Equal("Oil barrels", new CommoditySettings().UnitOfMeasure.Name);
 
-            // CVD45: the registry default and the context's settings are built under QuantLib's conventions
+            // The registry default and the context's settings are built under QuantLib's conventions
             Assert.Equal("Barrels", UnitOfMeasureConversions.Default.Conversions[0].Target.Name);
             Assert.Equal("Barrels", new EvaluationContext { EvaluationDate = new Date(15, Month.October, 2026) }.CommoditySettings.UnitOfMeasure.Name);
         }

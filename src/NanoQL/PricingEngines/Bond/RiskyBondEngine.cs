@@ -26,7 +26,7 @@ namespace NanoQL.PricingEngines;
 /// </para>
 /// <para>
 /// A static class: <see cref="Calculate"/> takes the engine's inputs and returns the results, in place of QuantLib's
-/// engine object (D14), as S-bond's <see cref="DiscountingBondEngine"/> does. An expired bond's results are
+/// engine object, as <see cref="DiscountingBondEngine"/> does. An expired bond's results are
 /// <see cref="Bond.SetupExpired"/>'s.
 /// </para>
 /// </remarks>

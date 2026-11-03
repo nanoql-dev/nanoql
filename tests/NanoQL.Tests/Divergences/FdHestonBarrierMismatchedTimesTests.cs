@@ -12,14 +12,13 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The finite-difference Heston barrier engines on structures that measure time differently (the S-bar plan's BR5
-/// (iv), the S-hes plan's HR7 form, fixed under R8). QuantLib reads the process's time, the risk-free curve's, and the
-/// dividend curve at it (<c>fdhestonbarrierengine.cpp:72</c>), as though the two curves shared a clock. nanoql's times
-/// run on <c>FdmHestonOp.Clock</c>, each curve read at the instants they denote. QuantLib's check: its own engine on the
-/// market restated onto the risk-free curve's day counter, the dividend rate scaled so its discounts by date are
-/// unchanged; and a risk-free curve settling two days after the dividend curve, read from its own date on the clock
-/// from the earliest, where QuantLib's times start at the risk-free curve's date (QuantLib's values from the S-bar run's
-/// <c>c1_clock_later.py</c>).
+/// The finite-difference Heston barrier engines on structures that measure time differently (fixed). QuantLib reads the
+/// process's time, the risk-free curve's, and the dividend curve at it (<c>fdhestonbarrierengine.cpp:72</c>), as though
+/// the two curves shared a clock. nanoql's times run on <c>FdmHestonOp.Clock</c>, each curve read at the instants they
+/// denote. QuantLib's check: its own engine on the market restated onto the risk-free curve's day counter, the dividend
+/// rate scaled so its discounts by date are unchanged; and a risk-free curve settling two days after the dividend
+/// curve, read from its own date on the clock from the earliest, where QuantLib's times start at the risk-free curve's
+/// date.
 /// </summary>
 public class FdHestonBarrierMismatchedTimesTests
 {

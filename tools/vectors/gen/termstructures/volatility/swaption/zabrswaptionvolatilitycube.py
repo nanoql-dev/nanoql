@@ -19,23 +19,23 @@ the wheel doesn't bind: the matrices hold them) by option and swap tenors at 8 p
 length at 4, each as its ATM level, exercise time, shift, volatility type and volatility at its ATM level and 1% on
 either side.
 
-The parameter matrices' rmsError and maxError columns are recomputed from each row's parameters (the S7 plan's S7R5
-(ii)): QuantLib's ZABR model is a section built from a copy of the parameters, which its fit doesn't rebuild after its
-restarts, so where the restarts run out, or Simplex's last trial isn't the vertex it returns, the recorded errors are
-the last trial's while the parameters are the best restart's. nanoql rebuilds the section at the best parameters, so
-its errors are those of QuantLib's section at the parameters it reports: a fresh ZabrShortMaturityLognormalSmileSection
-on the row's parameters and forward, at the strikes the fit took (the forward plus each strike spread at or above the
-cutoff strike), against the row's market volatilities, with QuantLib's error formulas and equal weights. The generator
-prints, per case, how many recorded errors the recomputation changes.
+The parameter matrices' rmsError and maxError columns are recomputed from each row's parameters: QuantLib's ZABR model
+is a section built from a copy of the parameters, which its fit doesn't rebuild after its restarts, so where the
+restarts run out, or Simplex's last trial isn't the vertex it returns, the recorded errors are the last trial's while
+the parameters are the best restart's. nanoql rebuilds the section at the best parameters, so its errors are those of
+QuantLib's section at the parameters it reports: a fresh ZabrShortMaturityLognormalSmileSection on the row's parameters
+and forward, at the strikes the fit took (the forward plus each strike spread at or above the cutoff strike), against
+the row's market volatilities, with QuantLib's error formulas and equal weights. The generator prints, per case, how
+many recorded errors the recomputation changes.
 
-testZabrObservability's replacement (the S7 plan's S7D4): as for the SABR cube, a cube built before the evaluation
-date moves follows the date in QuantLib, so QuantLib's case checks that it agrees with one built after the move within
-1e-14 at its 45 points; a nanoql cube is built for one context. So testZabrVols' cube is a case under 16 June 2025 and
-under 17 June 2025, with its volatilities at the 45 points, and the generator checks QuantLib's agreement.
+testZabrObservability's replacement: as for the SABR cube, a cube built before the evaluation date moves follows the
+date in QuantLib, so QuantLib's case checks that it agrees with one built after the move within 1e-14 at its 45 points;
+a nanoql cube is built for one context. So testZabrVols' cube is a case under 16 June 2025 and under 17 June 2025, with
+its volatilities at the 45 points, and the generator checks QuantLib's agreement.
 
-The stability filter (the S7 plan's S7R6) runs on each case as on the SABR cube's: each is refitted with every input
-volatility moved one ulp up, then down, and an output is written only where both refits leave it within 1e-12 x
-max(|a|, |b|, 1); the indexes of each output's dropped elements are in the case's inputs "dropped".
+The stability filter runs on each case as on the SABR cube's: each is refitted with every input volatility moved one
+ulp up, then down, and an output is written only where both refits leave it within 1e-12 x max(|a|, |b|, 1); the
+indexes of each output's dropped elements are in the case's inputs "dropped".
 
 A refused value is {"throws": true}. A case's inputs hold its settings, its "cube" spec (swaptionvolcube.py's, of
 type "ZabrSwaptionVolatilityCube") and "dropped". Read back by

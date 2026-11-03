@@ -12,11 +12,11 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// C3's Monte Carlo builders (S2R4; SEQR2): <see cref="MakeMCForwardEuropeanBSEngine{TRng, TStats}"/>,
-/// <see cref="MakeMCForwardEuropeanHestonEngine{TRng, TStats}"/> and <see cref="MakeMCPerformanceEngine{TRng, TStats}"/>
-/// take the seed explicitly and refuse 0, QuantLib's seed from the clock, naming the parameter; QuantLib's checks keep
-/// their texts; a builder kept and reused is never changed; and the forward engines refuse a payoff that isn't plain
-/// vanilla and an exercise that isn't European with QuantLib's texts.
+/// The forward and performance Monte Carlo builders: <see cref="MakeMCForwardEuropeanBSEngine{TRng, TStats}"/>,
+/// <see cref="MakeMCForwardEuropeanHestonEngine{TRng, TStats}"/> and
+/// <see cref="MakeMCPerformanceEngine{TRng, TStats}"/> take the seed explicitly and refuse 0, QuantLib's seed from the
+/// clock, naming the parameter; QuantLib's checks keep their texts; a builder kept and reused is never changed; and the
+/// forward engines refuse a payoff that isn't plain vanilla and an exercise that isn't European with QuantLib's texts.
 /// </summary>
 public class MakeMcForwardEngineTests
 {

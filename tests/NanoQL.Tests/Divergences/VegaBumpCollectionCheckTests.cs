@@ -7,11 +7,10 @@ using NanoQL.Tests.Conventions;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The vega bump collection's checks (the S-mmp plan's MMPR4 (xii), ruled by the user). QuantLib's <c>isFull</c> and
-/// <c>isNonOverlapping</c> are true where an element fails (<c>vegabumpcluster.cpp:179</c>, <c>:218</c>): on six
-/// semi-annual rates, FlatVol 20%, 3 factors, its own default collection, given as its clusters, reports not full,
-/// overlapping and not sensible (this run's <c>probes\c4_facts.cpp</c>); half its clusters report full and one cluster
-/// given twice non-overlapping (the planner's MPP10 (f)). nanoql's are true where no element fails. Checks: QuantLib's
+/// The vega bump collection's checks. QuantLib's <c>isFull</c> and <c>isNonOverlapping</c> are true where an element
+/// fails (<c>vegabumpcluster.cpp:179</c>, <c>:218</c>): on six semi-annual rates, FlatVol 20%, 3 factors, its own
+/// default collection, given as its clusters, reports not full, overlapping and not sensible; half its clusters report
+/// full and one cluster given twice non-overlapping. nanoql's are true where no element fails. Checks: QuantLib's
 /// default collection's flags, true.
 /// </summary>
 public class VegaBumpCollectionCheckTests

@@ -12,13 +12,12 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The Monte Carlo Asian engines' builders and engines (the S-bar plan's BR1 (iii)): QuantLib's checks with its texts,
-/// each refusal's type, message and parameter asserted (the S-van plan's VD19), and the seed explicit: 0, which QuantLib
-/// reads as a seed drawn from the clock, refused naming the parameter (S2R4). QuantLib's builders check the samples
-/// beside a tolerance and an error estimate the traits can't give as they are set, its Heston builders the steps beside
-/// the steps a year; its Heston engines' constructors refuse both; and every engine refuses every fixing in the past, or
-/// the one left today, with QuantLib's "all fixings are in the past", the text of its internal
-/// <c>detail::PastFixingsOnly</c> (SD14).
+/// The Monte Carlo Asian engines' builders and engines: QuantLib's checks with its texts, each refusal's type, message
+/// and parameter asserted, and the seed explicit: 0, which QuantLib reads as a seed drawn from the clock, refused
+/// naming the parameter. QuantLib's builders check the samples beside a tolerance and an error estimate the traits
+/// can't give as they are set, its Heston builders the steps beside the steps a year; its Heston engines' constructors
+/// refuse both; and every engine refuses every fixing in the past, or the one left today, with QuantLib's "all fixings
+/// are in the past", the text of its internal <c>detail::PastFixingsOnly</c>.
 /// </summary>
 public class MakeMcAsianEngineTests
 {

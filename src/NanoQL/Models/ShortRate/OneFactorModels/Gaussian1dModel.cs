@@ -27,21 +27,21 @@ namespace NanoQL.Models;
 /// Immutable, unsealed: GSR and the Markov-functional model derive from it, as a model of one's own may (an extension
 /// point). QuantLib's model is a <c>LazyObject</c> that copies the evaluation date and the historic-fixings flag at its
 /// calculation and keeps every swap it builds; here the members that read the date or the flag take the
-/// <see cref="EvaluationContext"/> (<c>ForwardRate</c>, <c>SwapRate</c>, and <c>SwapAnnuity</c>,
-/// whose swap is built under it), and what one call computes twice it computes once, through a memo that lives for the
-/// call: each engine call builds one and passes it through the internal members, and each public member builds its
-/// own, so nothing outlives the call (the S-g1d plan's G1R1; master plan §2.2's Gaussian1d row).
+/// <see cref="EvaluationContext"/> (<c>ForwardRate</c>, <c>SwapRate</c>, and <c>SwapAnnuity</c>, whose swap is built
+/// under it), and what one call computes twice it computes once, through a memo that lives for the call: each engine
+/// call builds one and passes it through the internal members, and each public member builds its own, so nothing
+/// outlives the call (the playbook's Gaussian1d row).
 /// </para>
 /// <para>
 /// A derived model of another assembly implements <see cref="NumeraireImpl"/> and <see cref="ZerobondImpl"/>,
 /// QuantLib's hooks, and sets its state process with <see cref="SetStateProcess"/> while its constructor runs.
 /// </para>
 /// <para>
-/// A curve given on another clock than the model's own (another day counter or reference date) is read at the
-/// instant QuantLib's argument denotes: by the date QuantLib derives a time from, where it has one, and the numeraire
-/// time, which has no date, at the instant it denotes on the model's clock; where the curves share a clock, QuantLib's
-/// reads and bits stand. QuantLib reads such a curve at the model curve's times: a documented divergence (the plan's
-/// G1R6 (xvi); <c>Divergences/Gaussian1dMismatchedTimesTests.cs</c>).
+/// A curve given on another clock than the model's own (another day counter or reference date) is read at the instant
+/// QuantLib's argument denotes: by the date QuantLib derives a time from, where it has one, and the numeraire time,
+/// which has no date, at the instant it denotes on the model's clock; where the curves share a clock, QuantLib's reads
+/// and bits stand. QuantLib reads such a curve at the model curve's times: a documented divergence
+/// (<c>Divergences/Gaussian1dMismatchedTimesTests.cs</c>).
 /// </para>
 /// </remarks>
 public abstract class Gaussian1dModel : ITermStructureConsistentModel
@@ -78,7 +78,7 @@ public abstract class Gaussian1dModel : ITermStructureConsistentModel
     /// <remarks>
     /// QuantLib's <c>std::erf</c> is QuantLib's own <see cref="ErrorFunction"/> here, which .NET lacks; the C runtime's
     /// differs from it by a few ulp on some arguments, so an output that reaches it can differ from QuantLib's in its
-    /// last places, within the tolerance (the plan's G1R3; master plan §3.3's C runtime classes).
+    /// last places, within the tolerance.
     /// </remarks>
     public static double GaussianPolynomialIntegral(double a, double b, double c, double d, double e, double x0, double x1)
     {
@@ -183,9 +183,9 @@ public abstract class Gaussian1dModel : ITermStructureConsistentModel
     /// <paramref name="yGridPoints"/> is negative.</exception>
     /// <remarks>
     /// With <paramref name="flatPayoffExtrapolation"/>, the right tail integrates the payoff's last node, where
-    /// QuantLib's integrates its second-last: a documented divergence (the plan's G1R6 (xxi);
-    /// <c>Divergences/FlatPayoffExtrapolationTests.cs</c>). The numeraire at the expiry reads a curve on another clock
-    /// at the expiry's date (G1R6 (xvi)).
+    /// QuantLib's integrates its second-last: a documented divergence
+    /// (<c>Divergences/FlatPayoffExtrapolationTests.cs</c>). The numeraire at the expiry reads a curve on another clock
+    /// at the expiry's date.
     /// </remarks>
     public double ZerobondOption(
         OptionType type,
@@ -353,7 +353,7 @@ public abstract class Gaussian1dModel : ITermStructureConsistentModel
         {
             if (flatPayoffExtrapolation)
             {
-                // the right tail at the last node's value, where QuantLib's takes the second-last's (G1R6 (xxi))
+                // the right tail at the last node's value, where QuantLib's takes the second-last's
                 price += GaussianShiftedPolynomialIntegral(0.0, 0.0, 0.0, 0.0, p[z.Size - 1], z[z.Size - 2], z[z.Size - 1], 100.0);
                 price += GaussianShiftedPolynomialIntegral(0.0, 0.0, 0.0, 0.0, p[0], z[0], -100.0, z[0]);
             }
@@ -530,9 +530,9 @@ public abstract class Gaussian1dModel : ITermStructureConsistentModel
     // A curve's discount factor at an instant of the model's clock: QuantLib's read at the model's time where the curve
     // shares its clock, or where none is given the model's own; otherwise by the date the time comes from, nothing
     // accrued before the curve's reference date, and for a time without a date, the numeraire time, at the instant the
-    // time denotes (the plan's G1R6 (xvi)). With extrapolation by default, as QuantLib reads its own curve, where it
-    // reads a given one at the numeraire time without it (G1R6 (i)); without it where QuantLib reads both curves
-    // without it (the Markov-functional model's ratios).
+    // time denotes. With extrapolation by default, as QuantLib reads its own curve, where it reads a given one at the
+    // numeraire time without it; without it where QuantLib reads both curves without it (the Markov-functional model's
+    // ratios).
     internal double Discount(YieldTermStructure? yts, double time, Date? date, bool extrapolate = true)
     {
         if (yts is null || yts.SharesTimes(TermStructure))
@@ -588,11 +588,11 @@ public abstract class Gaussian1dModel : ITermStructureConsistentModel
     internal virtual double StateStdDeviation(double t0, double x0, double dt, Gaussian1dMemo memo) => StateProcess().StdDeviation(t0, x0, dt);
 
     // The sensitivity of the log of the bond from t to T to the model's state at t, for a model with a short rate,
-    // GSR's G(t, T); null for one without, the Markov-functional model (the S-g1d plan's G1R6 (xx)).
+    // GSR's G(t, T); null for one without, the Markov-functional model.
     internal virtual double? StateBondSensitivity(double t, double T, Gaussian1dMemo memo) => null;
 
     // The variance of Σᵢ cᵢ·x(tᵢ) given the state at t0, the times sorted from t0: Σᵢⱼ cᵢcⱼ Cov(x(tᵢ), x(tⱼ) | x(t0));
-    // null for a model without a short rate (G1R6 (xx)).
+    // null for a model without a short rate.
     internal virtual double? CompoundingLogVariance(double t0, ReadOnlySpan<double> times, ReadOnlySpan<double> coefficients, Gaussian1dMemo memo) => null;
 
     // A schedule's calendar, QuantLib's empty one where it has none.

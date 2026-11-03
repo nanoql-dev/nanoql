@@ -20,9 +20,9 @@ namespace NanoQL.Experimental;
 /// <remarks>
 /// <para>
 /// The losses are split into buckets from 0 to the tranche's detachment, and the expected tranche loss is a left
-/// Riemann sum of the excess probability: QuantLib's design, kept (the S-xcr plan's XR8 (xxxv)). Bound to a basket
-/// with realized defaults, the model prices its live names over the restated tranche (XR8 (ii)); QuantLib's pairs the
-/// latent model's recoveries with the live notionals and refuses ("sizes differ: 3 vs 2").
+/// Riemann sum of the excess probability: QuantLib's design, kept. Bound to a basket with realized defaults, the model
+/// prices its live names over the restated tranche; QuantLib's pairs the latent model's recoveries with the live
+/// notionals and refuses ("sizes differ: 3 vs 2").
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]

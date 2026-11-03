@@ -7,13 +7,12 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// <see cref="SwingExercise"/>'s date times (run finds of the S-van plan's C4, under R8). QuantLib's Bermudan base sorts
-/// the dates and leaves the seconds in the order given (<c>vanillaswingoption.cpp:52-69</c>), so date times given out
-/// of order pair each second with another date: days 3 and 1 at 0 and 43,200 seconds become day 1 at 0 and day 3 at
-/// 43,200; and its fixed step moves one day whenever the seconds pass a day (<c>vanillaswingoption.cpp:37-48</c>), so a
-/// two-day step from day 1 to day 9 exercises on each of days 1 to 9 [executed:
-/// <c>scratchpad\c4\probe\swing_seconds.cpp</c>]. nanoql sorts the date times together, and a step moves as many days
-/// as it holds. Given in order, and at steps under a day, QuantLib's date times.
+/// <see cref="SwingExercise"/>'s date times. QuantLib's Bermudan base sorts the dates and leaves the seconds in the
+/// order given (<c>vanillaswingoption.cpp:52-69</c>), so date times given out of order pair each second with another
+/// date: days 3 and 1 at 0 and 43,200 seconds become day 1 at 0 and day 3 at 43,200; and its fixed step moves one day
+/// whenever the seconds pass a day (<c>vanillaswingoption.cpp:37-48</c>), so a two-day step from day 1 to day 9
+/// exercises on each of days 1 to 9 (QuantLib 1.44). nanoql sorts the date times together, and a step moves as many
+/// days as it holds. Given in order, and at steps under a day, QuantLib's date times.
 /// </summary>
 public class SwingExerciseDateTimesTests
 {

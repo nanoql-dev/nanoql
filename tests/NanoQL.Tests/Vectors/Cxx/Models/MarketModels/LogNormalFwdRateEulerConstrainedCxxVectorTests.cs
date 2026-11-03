@@ -14,7 +14,7 @@ namespace NanoQL.Tests.Vectors;
 /// money-market measures, from the first and a later step, with the model's and a set initial state, on models of equal
 /// displacements: each step's weight, current step, forwards, discount ratios and coterminal swap rates. QuantLib's
 /// constraint type is set again before each step, so each step's covariances are its own pseudo-root's, as nanoql's
-/// constraint type, set once, builds them (the S-mm plan's MR3 (vi)).
+/// constraint type, set once, builds them.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class LogNormalFwdRateEulerConstrainedCxxVectorTests

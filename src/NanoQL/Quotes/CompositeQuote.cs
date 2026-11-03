@@ -8,9 +8,9 @@ namespace NanoQL.Quotes;
 
 /// <summary>A quote whose value is a function of two other quotes' values: QuantLib's <c>CompositeQuote</c>.</summary>
 /// <remarks>
-/// Immutable: its value is computed once, at construction, from the elements' values (§2.2's quote row; the S-core
-/// plan's CR1 (a)). QuantLib's quote recomputes when an element notifies it; here new element values are a new quote.
-/// QuantLib's <c>isValid</c> isn't ported: a value is always valid.
+/// Immutable: its value is computed once, at construction, from the elements' values (§2.2's quote row). QuantLib's
+/// quote recomputes when an element notifies it; here new element values are a new quote. QuantLib's <c>isValid</c>
+/// isn't ported: a value is always valid.
 /// </remarks>
 public sealed class CompositeQuote
 {

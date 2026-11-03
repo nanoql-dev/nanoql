@@ -11,13 +11,12 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The soft barrier engine's exercise (the S-bar run's own find). QuantLib's engine never reads the exercise's type and
-/// prices any exercise to its last date: a down-and-in call at 90 on the band [85, 90], an American exercise to a year,
-/// prices 2.906045178994 on the vectors' first market, its European value (the S-bar run's
-/// <c>analyticsoftbarrierengine.py</c>); its own implied volatility refuses a non-European soft barrier ("engine not
-/// available for non-European soft barrier option"). nanoql refuses a non-European exercise, as the family's European
-/// engines do: the soft barrier's average, the route off Haug's domain, runs on the analytic barrier engine, which
-/// prices European options only.
+/// The soft barrier engine's exercise. QuantLib's engine never reads the exercise's type and prices any exercise to its
+/// last date: a down-and-in call at 90 on the band [85, 90], an American exercise to a year, prices 2.906045178994 on
+/// the vectors' first market, its European value; its own implied volatility refuses a non-European soft barrier
+/// ("engine not available for non-European soft barrier option"). nanoql refuses a non-European exercise, as the
+/// family's European engines do: the soft barrier's average, the route off Haug's domain, runs on the analytic barrier
+/// engine, which prices European options only.
 /// </summary>
 public class SoftBarrierExerciseTests
 {

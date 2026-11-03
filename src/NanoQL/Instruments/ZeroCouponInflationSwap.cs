@@ -204,8 +204,8 @@ public sealed class ZeroCouponInflationSwap : Swap
     /// </summary>
     /// <remarks>Given at the results' NPV date, as their leg NPVs are: the end discount over the NPV date's discount,
     /// where QuantLib's reads the end discount alone, from the curve's reference date, so with a later NPV date its BPS
-    /// isn't the fixed leg's NPV move (<c>zerocouponinflationswap.cpp:147-154</c>; C3's review, C3-O1's class, ruled
-    /// by the user on 2026-10-24). At the default NPV date the two agree.</remarks>
+    /// isn't the fixed leg's NPV move (<c>zerocouponinflationswap.cpp:147-154</c>). At the default NPV date the two
+    /// agree.</remarks>
     /// <param name="results">The results.</param>
     /// <returns>The sensitivity, signed by whether the leg is paid.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="results"/> is null.</exception>

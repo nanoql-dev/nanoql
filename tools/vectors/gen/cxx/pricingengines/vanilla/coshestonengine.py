@@ -5,11 +5,10 @@ evaluation date 15 October 2026: the normalized characteristic function, the cum
 variance, skew and kurtosis, which the wheel doesn't expose.
 
 tools/vectors/gen/cxx/models/equity/batesmodel.py's two Heston sets and a third with κ 4 and σ 1.8 (QuantLib's
-testCosHestonEngine's), at two truncations and orders: the characteristic function at six u at three times, the
-members at those times. Every κt is between 1.2 and 20, at or above every cumulant's cut and below HR11's, so the
-cumulants are QuantLib's double arithmetic (the S-hes plan's HR6); every σ is far above the small-σ branch (HR7
-(viii)); §2.10 leaves out the κt below the cuts, where QuantLib's rounding passes 1e-12 (HR7 (ix)'s facts), and the
-members at t = 0 are HR7 (xxxii)'s facts.
+testCosHestonEngine's), at two truncations and orders: the characteristic function at six u at three times, the members
+at those times. Every κt is between 1.2 and 20, at or above every cumulant's cut and below nanoql's large-κt cut, so the
+cumulants are QuantLib's double arithmetic; every σ is far above the small-σ branch; the κt below the cuts, where
+QuantLib's rounding passes 1e-12, and the members at t = 0 are left out, both divergence facts.
 
 A case holds the "process" (batesmodel.py's harness spec), "L", "N", "us" and "ts". The harness's call:
 COSHestonEngine::members (tools/cxx/src/pricingengines/vanilla/coshestonengine.cpp). Read back by

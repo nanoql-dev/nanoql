@@ -6,11 +6,10 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// BFGS's inverse Hessian, one per minimization (the S-core plan's CR5 (a)): QuantLib's method keeps it as a member,
-/// built at its first minimization only (<c>bfgs.cpp:29-32</c>), so a second minimization on the same object starts from
-/// the first's final Hessian, and one of another dimension reads it out of range; nanoql's starts each minimization from
-/// the identity, so a second is the first. QuantLib's values are its own class's, from this run's
-/// <c>probes\c2_facts.cpp</c> (<c>c2_facts.out</c>).
+/// BFGS's inverse Hessian, one per minimization: QuantLib's method keeps it as a member, built at its first
+/// minimization only (<c>bfgs.cpp:29-32</c>), so a second minimization on the same object starts from the first's final
+/// Hessian, and one of another dimension reads it out of range; nanoql's starts each minimization from the identity, so
+/// a second is the first. QuantLib's values are its own class's.
 /// </summary>
 public class BFGSTests
 {

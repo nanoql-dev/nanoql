@@ -12,10 +12,10 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Extensions;
 
 /// <summary>
-/// The index kinds in the set: a user's index on an overridden calendar; fixings found under the resolved index's
-/// name; built indexes through <c>Describe</c>, the writer, the reader and resolution (CVD14); a coded index preset's
-/// name keeping its class and its constructor's arguments (CVD28); the fields a user's style can't take refused
-/// (CVD38); and <see cref="ConventionSet.Empty"/> refusing an index preset it doesn't define (CVD25).
+/// The index kinds in the set: a user's index on an overridden calendar; fixings found under the resolved index's name;
+/// built indexes through <c>Describe</c>, the writer, the reader and resolution; a coded index preset's name keeping
+/// its class and its constructor's arguments; the fields a user's style can't take refused; and
+/// <see cref="ConventionSet.Empty"/> refusing an index preset it doesn't define.
 /// </summary>
 public class IndexSetTests
 {

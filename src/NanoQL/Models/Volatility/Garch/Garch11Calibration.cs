@@ -11,7 +11,7 @@ namespace NanoQL.Models;
 
 /// <summary>
 /// A GARCH(1,1) calibration to squared returns, QuantLib's <c>calibrate_r2</c>: the parameters it writes through its
-/// references and the minimization it returns (the S-bar plan's BR3 (ii)).
+/// references and the minimization it returns.
 /// </summary>
 /// <param name="Alpha">α, the weight of the last squared return.</param>
 /// <param name="Beta">β, the weight of the last variance.</param>

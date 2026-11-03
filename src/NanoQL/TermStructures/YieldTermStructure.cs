@@ -392,8 +392,7 @@ public abstract class YieldTermStructure : TermStructure
 
     // The discount factor at a date, which Discount(Date), ZeroRate(Date, …) and ForwardRate(Date, Date, …) read: the
     // discount at the date's time, QuantLib's read. A curve whose times can't carry its dates reads them by date (the
-    // implied curve on a day counter whose year fractions don't add, the S-sr plan's SSR6 (viii)); every other curve
-    // keeps this read and its bits.
+    // implied curve on a day counter whose year fractions don't add); every other curve keeps this read and its bits.
     internal virtual double DiscountOn(Date d, bool extrapolate) => Discount(TimeFromReference(d), extrapolate);
 
     /// <summary>The dates of the discount-factor jumps, one per jump.</summary>

@@ -69,7 +69,7 @@ public sealed class CPICashFlow : IndexedCashFlow
     {
     }
 
-    // The leg's constructor: the base observation given, SIR5 (xi)'s one base for every flow of a leg.
+    // The leg's constructor: the base observation given, one base for every flow of a leg.
     internal CPICashFlow(
         double notional,
         ZeroInflationIndex index,

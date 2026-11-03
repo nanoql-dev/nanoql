@@ -7,13 +7,12 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The non-central χ² polynomial's recursion on exact moments, α and β rounded once (the S-xrt plan's XRR8, ruled
-/// 2026-10-28). QuantLib sums each moment's closed form in double and runs the ill-conditioned moment recursion in
-/// double: at QuantLib's own CLV cases its 14 nodes are 2.6e-2 relative off the exact ones at ν 6, λ 31.7, and 0.61 at
-/// ν 9, λ 31.7, the smallest node 2.97 for 7.66; at λ 50 and 75 Boost refuses a negative node and at λ 100 the rule
-/// doesn't return (the S-xrt planner's XRP23). nanoql's nodes meet references from the same exact moments by the Hankel
-/// matrix's Cholesky factor and the Jacobi matrix's eigenvalues at 160 digits (mpmath; the run's
-/// <c>c3\probes\xrr8_refs.py</c>), an independent route, to 1e-13 relative.
+/// The non-central χ² polynomial's recursion on exact moments, α and β rounded once. QuantLib sums each moment's closed
+/// form in double and runs the ill-conditioned moment recursion in double: at QuantLib's own CLV cases its 14 nodes are
+/// 2.6e-2 relative off the exact ones at ν 6, λ 31.7, and 0.61 at ν 9, λ 31.7, the smallest node 2.97 for 7.66; at λ 50
+/// and 75 Boost refuses a negative node and at λ 100 the rule doesn't return. nanoql's nodes meet references from the
+/// same exact moments by the Hankel matrix's Cholesky factor and the Jacobi matrix's eigenvalues at 160 digits
+/// (mpmath), an independent route, to 1e-13 relative.
 /// </summary>
 public class NonCentralChiSquaredPolynomialTests
 {

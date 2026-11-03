@@ -9,8 +9,7 @@ kurtosis, min and max, then after reset; and add's refusal of a negative and of 
 
 Left out: the variance, standard deviation and error estimate of a set whose leading samples weigh 0 ("Gaussian,
 random weights"), where Boost's recurrence divides 0 by 0 and QuantLib's variance is NaN for good, and nanoql's skips
-the update (the S-sr plan's C1 review, B1-2; tests/NanoQL.Tests/Divergences/
-IncrementalStatisticsLeadingZeroWeightTests.cs).
+the update (tests/NanoQL.Tests/Divergences/IncrementalStatisticsLeadingZeroWeightTests.cs).
 
 The wheel binds no downside member (downsideSamples, downsideWeightSum, downsideVariance, downsideDeviation), which
 QuantLib's stats case checks. Read back by tests/NanoQL.Tests/Vectors/Numerics/Statistics/
@@ -30,7 +29,7 @@ import generalstatistics  # noqa: E402
 import vectors as v  # noqa: E402
 
 
-# The members that read Boost's weighted variance, left out of a set whose leading samples weigh 0 (B1-2).
+# The members that read Boost's weighted variance, left out of a set whose leading samples weigh 0.
 VARIANCE_MEMBERS = ("variance", "standardDeviation", "errorEstimate")
 
 

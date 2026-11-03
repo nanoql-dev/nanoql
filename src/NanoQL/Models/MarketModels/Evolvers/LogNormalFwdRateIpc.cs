@@ -15,9 +15,8 @@ namespace NanoQL.Models;
 /// the forwards stepped from the last to the first, each corrected with the drift its later forwards' new values give.
 /// </summary>
 /// <remarks>
-/// A working type (the S-mm plan's MR1 (ii)). It copies each step's pseudo-root and covariance from the model at
-/// construction (MR1 (iv)), so a step reads nothing shared; one step allocates nothing after a path's warm-up (MR1
-/// (v)).
+/// A working type. It copies each step's pseudo-root and covariance from the model at construction, so a step reads
+/// nothing shared; one step allocates nothing after a path's warm-up.
 /// </remarks>
 [WorkingType]
 public sealed class LogNormalFwdRateIpc : MarketModelEvolver

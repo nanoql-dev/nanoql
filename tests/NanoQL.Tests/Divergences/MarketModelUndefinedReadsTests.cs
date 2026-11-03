@@ -8,9 +8,9 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The market-model framework's inputs whose QuantLib path is undefined, each refused before the undefined step (the
-/// S-mm plan's MR3 (xx), and those this run's C1 to C4 found, under the playbook's row for undefined behaviour).
-/// The refusals' types, texts and parameters are asserted by <c>Conventions/MarketModelRefusalTests.cs</c>.
+/// The market-model framework's inputs whose QuantLib path is undefined, each refused before the undefined step (under
+/// the playbook's row for undefined behaviour). The refusals' types, texts and parameters are asserted by
+/// <c>Conventions/MarketModelRefusalTests.cs</c>.
 /// </summary>
 public class MarketModelUndefinedReadsTests
 {
@@ -21,7 +21,7 @@ public class MarketModelUndefinedReadsTests
     {
         // lmmcurvestate.cpp:107, :116, :140, :156, :168 and the coterminal and CMS states' checks admit i == n, then
         // read forwardRates_[n], cotAnnuities_[n], cmSwapRates_[n] past their vectors: forwardRate(6) of six rates
-        // returns 3.3e-307 (the planner's MP5).
+        // returns 3.3e-307.
         foreach (CurveState cs in States())
         {
             int n = cs.NumberOfRates;
@@ -40,7 +40,7 @@ public class MarketModelUndefinedReadsTests
         var evolution = new EvolutionDescription(Times);
 
         // evolutiondescription.cpp:122 reads rateTimes[numeraires[i]], past the rate times for a numeraire past them
-        // (numeraire 9 of 7 rate times reads 1.9e-307, the planner's MP5).
+        // (numeraire 9 of 7 rate times reads 1.9e-307).
         Assert.Throws<ArgumentOutOfRangeException>(() => EvolutionDescriptionFunctions.CheckCompatibility(evolution, [9, 3, 3]));
 
         // :132 dereferences std::min_element's end on no numeraires.
@@ -58,7 +58,7 @@ public class MarketModelUndefinedReadsTests
         double[] vols = [0.2, 0.2, 0.2], rates = [0.03, 0.03, 0.03], d = [0.0, 0.0, 0.0];
 
         // flatvol.cpp:96 reads corrTimes past their end where they end before the last evolution time: an abort,
-        // 0xC0000409, 3 runs of 3 (the planner's MP5).
+        // 0xC0000409, 3 runs of 3.
         var shortTimes = new TimeHomogeneousForwardCorrelation(new Matrix(3, 3, 0.5), [0.25, 0.5, 0.75, 1.0]);
         Assert.Throws<ArgumentException>(() => new FlatVol(vols, shortTimes, evolution, 3, rates, d));
 

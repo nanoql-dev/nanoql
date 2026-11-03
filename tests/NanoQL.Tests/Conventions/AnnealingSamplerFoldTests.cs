@@ -7,15 +7,14 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The annealing's ring and mirror samplers on narrow and zero-width dimensions (the S-xrt plan's XRR12 and XRR13).
-/// QuantLib's folds never return on a zero width and take about |step|/width passes on a narrow one, none moving the
-/// point once the width is below its last bit. nanoql's hold a zero-width dimension at its bound, its draw still taken,
-/// so the other dimensions draw as a run whose zero-width dimension is unbounded; and after 10,000 passes fold in one step
-/// from the drawn point, inside the box and equal to the exact fold of the same double point within one rounding of
-/// x − lower, at widths 1e-6 (QuantLib's own loop ends 6.0e-12 off the fold for the ring, 4.6e-14 for the mirror, the
-/// S-xrt planner's XRP27) to 1e-20; an annealing with a dimension narrower than its step finishes; and an annealing
-/// holding a parameter on a zero-width dimension, started on its bound, reaches the other parameter's minimum (XRR12's
-/// second check).
+/// The annealing's ring and mirror samplers on narrow and zero-width dimensions. QuantLib's folds never return on a
+/// zero width and take about |step|/width passes on a narrow one, none moving the point once the width is below its
+/// last bit. nanoql's hold a zero-width dimension at its bound, its draw still taken, so the other dimensions draw as a
+/// run whose zero-width dimension is unbounded; and after 10,000 passes fold in one step from the drawn point, inside
+/// the box and equal to the exact fold of the same double point within one rounding of x − lower, at widths 1e-6
+/// (QuantLib's own loop ends 6.0e-12 off the fold for the ring, 4.6e-14 for the mirror) to 1e-20; an annealing with a
+/// dimension narrower than its step finishes; and an annealing holding a parameter on a zero-width dimension, started
+/// on its bound, reaches the other parameter's minimum.
 /// </summary>
 public class AnnealingSamplerFoldTests
 {

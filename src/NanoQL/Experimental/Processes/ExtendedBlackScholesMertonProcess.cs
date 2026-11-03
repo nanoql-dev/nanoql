@@ -20,19 +20,19 @@ namespace NanoQL.Experimental;
 /// rates over the next 1e-4 of a year less half its square, as QuantLib's. The step is the scheme's, in the log price.
 /// </para>
 /// <para>
-/// Three fixes (the S-xrt plan's XRR5 (xxvi) and XRR7; <c>Divergences/ExtendedBlackScholesProcessTests.cs</c>). Milstein's
-/// correction is the log price's, ½σ·∂σ/∂ln S·(ΔW² − 1)Δt, ∂σ/∂ln S the Black volatility's central difference over a
-/// log strike of ±1e-4, 0 on a strike-independent volatility, where the step is the log-Euler one; QuantLib adds the
-/// asset's own, ½σ²(ΔW² − 1)Δt, to the log price, its mean 1.25e-3 high a step at Δt 0.25 and σ 0.4. Euler's step, and
-/// the predictor-corrector's predictor, are the log-Euler step on the process's drift and diffusion; QuantLib's centre
-/// on the asset's mean, x₀e^((r−q)Δt), which lacks the −σ²Δt/2 (2.02e-2 high a step at Δt 0.25 and σ 0.4) and refuses a
-/// strike-dependent volatility ("not implemented"). The corrector is QuantLib's on a strike-independent volatility. On
-/// one that depends on the strike, QuantLib's corrector, its diffusion the mean of the two ends' on the same increment,
-/// is Heun's scheme, which converges to the Stratonovich equation, ½σ·∂σ/∂ln S above the log drift: on a SABR smile its
-/// error stops falling with the step, E[S_T] 0.09% low; nanoql's takes each end's drift less ½σ·∂σ/∂ln S, the Itô
-/// predictor-corrector, which converges at order 1 there and keeps QuantLib's bits where ∂σ/∂ln S is 0 (the S-xrt run's
-/// B3-1, ruled 2026-10-29). On flat curves and a flat volatility all three are then the exact step, and on a smile they
-/// converge to the process at their orders, Euler's ½ and the others' 1.
+/// Three fixes (<c>Divergences/ExtendedBlackScholesProcessTests.cs</c>). Milstein's correction is the log price's,
+/// ½σ·∂σ/∂ln S·(ΔW² − 1)Δt, ∂σ/∂ln S the Black volatility's central difference over a log strike of ±1e-4, 0 on a
+/// strike-independent volatility, where the step is the log-Euler one; QuantLib adds the asset's own, ½σ²(ΔW² − 1)Δt,
+/// to the log price, its mean 1.25e-3 high a step at Δt 0.25 and σ 0.4. Euler's step, and the predictor-corrector's
+/// predictor, are the log-Euler step on the process's drift and diffusion; QuantLib's centre on the asset's mean,
+/// x₀e^((r−q)Δt), which lacks the −σ²Δt/2 (2.02e-2 high a step at Δt 0.25 and σ 0.4) and refuses a strike-dependent
+/// volatility ("not implemented"). The corrector is QuantLib's on a strike-independent volatility. On one that depends
+/// on the strike, QuantLib's corrector, its diffusion the mean of the two ends' on the same increment, is Heun's
+/// scheme, which converges to the Stratonovich equation, ½σ·∂σ/∂ln S above the log drift: on a SABR smile its error
+/// stops falling with the step, E[S_T] 0.09% low; nanoql's takes each end's drift less ½σ·∂σ/∂ln S, the Itô
+/// predictor-corrector, which converges at order 1 there and keeps QuantLib's bits where ∂σ/∂ln S is 0. On flat curves
+/// and a flat volatility all three are then the exact step, and on a smile they converge to the process at their
+/// orders, Euler's ½ and the others' 1.
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]
@@ -83,7 +83,7 @@ public sealed class ExtendedBlackScholesMertonProcess : GeneralizedBlackScholesP
     public override double Diffusion(double t, double x) => BlackVolatility.BlackVol(t, x, true);
 
     /// <inheritdoc/>
-    /// <remarks>The scheme's step in the log price (XRR5 (xxvi), XRR7).</remarks>
+    /// <remarks>The scheme's step in the log price.</remarks>
     public override double Evolve(double t0, double x0, double dt, double dw)
     {
         switch (Scheme)

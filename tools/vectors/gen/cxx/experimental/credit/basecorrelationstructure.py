@@ -1,11 +1,11 @@
 # SPDX-FileCopyrightText: 2026 The nanoql Authors
 # SPDX-License-Identifier: Apache-2.0
 """Vectors for QuantLib's BaseCorrelationTermStructure (ql/experimental/credit/basecorrelationstructure.hpp) and
-CorrelationTermStructure (correlationstructure.hpp), which the wheel doesn't expose, each output computed by the
-C++ harness (tools/cxx/src/experimental/credit/basecorrelationstructure.cpp): bilinear surfaces of two to four tenors
-and loss levels, settled 0 and 2 days, under two conventions; the reference and maximum dates, the size and the
-convention, the correlation by date and by time at the grid's nodes, between them and off the grid (bilinear
-extrapolation, the extrapolate flag unread, XR8 (xl)), and the dates of tenors. Read back by
+CorrelationTermStructure (correlationstructure.hpp), which the wheel doesn't expose, each output computed by the C++
+harness (tools/cxx/src/experimental/credit/basecorrelationstructure.cpp): bilinear surfaces of two to four tenors and
+loss levels, settled 0 and 2 days, under two conventions; the reference and maximum dates, the size and the convention,
+the correlation by date and by time at the grid's nodes, between them and off the grid (bilinear extrapolation, the
+extrapolate flag unread), and the dates of tenors. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Experimental/Credit/BaseCorrelationTermStructureCxxVectorTests.cs."""
 import importlib.util
 import os

@@ -15,8 +15,8 @@ namespace NanoQL.Methods;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Immutable once built (the S-eq plan's SEQR1). An extension point, as in QuantLib: a derived mesher fills the
-/// protected <see cref="locations"/>, <see cref="dplus"/> and <see cref="dminus"/> in its constructor, and never after.
+/// Immutable once built. An extension point, as in QuantLib: a derived mesher fills the protected
+/// <see cref="locations"/>, <see cref="dplus"/> and <see cref="dminus"/> in its constructor, and never after.
 /// </para>
 /// <para>
 /// The distance past an edge is QuantLib's <c>Null&lt;Real&gt;()</c>, 3.4028234663852886e38: the derivative operators

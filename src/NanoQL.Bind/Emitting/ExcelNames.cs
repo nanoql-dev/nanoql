@@ -9,21 +9,22 @@ using NanoQL.Bind.Selecting;
 namespace NanoQL.Bind.Emitting;
 
 /// <summary>
-/// The Excel names (XLR1): the prefix, then the type's and the member's words run together; the names that meet
-/// regardless of case form one group, numbered in its stated order, the first plain and the rest <c>2</c>, <c>3</c>, …;
-/// one numbering over the whole filtered surface, the experimental API included, before the list and the stable build
-/// cut it; a released name kept (functions.shipped.json), a new function taking its group's lowest unused number.
+/// The Excel names: the prefix, then the type's and the member's words run together; the names that meet regardless of
+/// case form one group, numbered in its stated order, the first plain and the rest <c>2</c>, <c>3</c>, …; one numbering
+/// over the whole filtered surface, the experimental API included, before the list and the stable build cut it; a
+/// released name kept (functions.shipped.json), a new function taking its group's lowest unused number.
 /// </summary>
 internal static class ExcelNames
 {
-    /// <summary>The add-in's own functions (XLR13), which no generated name may meet regardless of case.</summary>
+    /// <summary>The add-in's own functions, which no generated name may meet regardless of case.</summary>
     public static readonly IReadOnlyList<string> Own = ["nqlxlError", "nqlxlRepro", "nqlxlRecipe", "nqlxlVersion", "nqlxlStats", "nqlxlDrawsValues", "nqlxlDrawsWeights", "nqlxlDrawsNext"];
 
     // A1 or R1C1: Excel's columns to XFD and rows to 1,048,576.
     private static readonly Regex A1 = new("^([A-Za-z]{1,3})([0-9]+)$", RegexOptions.CultureInvariant);
     private static readonly Regex R1C1 = new("^[Rr]([0-9]*)[Cc]([0-9]*)$", RegexOptions.CultureInvariant);
 
-    /// <summary>Names every function of the whole filtered surface, a family by its generic type, in XLR1's order.</summary>
+    /// <summary>Names every function of the whole filtered surface, a family by its generic type, in the naming
+    /// order.</summary>
     /// <param name="all">The functions to name: every kept one, a family by its representative alone.</param>
     /// <param name="families">Each family's members by its representative.</param>
     /// <param name="shipped">The last release's names.</param>
@@ -37,14 +38,14 @@ internal static class ExcelNames
         {
             if (Own.Contains(g.Key, StringComparer.OrdinalIgnoreCase))
             {
-                throw new BindException($"{g.First().CName}: its Excel name {g.Key} meets the add-in's own {Own.First(o => string.Equals(o, g.Key, StringComparison.OrdinalIgnoreCase))} regardless of case (XLR13)");
+                throw new BindException($"{g.First().CName}: its Excel name {g.Key} meets the add-in's own {Own.First(o => string.Equals(o, g.Key, StringComparison.OrdinalIgnoreCase))} regardless of case");
             }
 
-            // XLR1's order has no place for a function with no member or metadata token, so one in a numbered group comes
-            // to a ruling (round 4's B4-1).
+            // The naming order has no place for a function with no member or metadata token, so one in a numbered group
+            // is refused.
             if (g.Count() > 1 && g.FirstOrDefault(f => f.Kind == "new" && f.Member == null) is { } tokenless)
             {
-                throw new BindException($"{tokenless.CName}: a constructor with no member or metadata token in the numbered group {g.Key}; XLR1's order has no place for it");
+                throw new BindException($"{tokenless.CName}: a constructor with no member or metadata token in the numbered group {g.Key}; the naming order has no place for it");
             }
 
             // A released name stays its function's.
@@ -82,12 +83,12 @@ internal static class ExcelNames
         {
             if (IsCellReference(name))
             {
-                throw new BindException($"the Excel name {name} reads as a cell reference (XLR1)");
+                throw new BindException($"the Excel name {name} reads as a cell reference");
             }
 
             if (name.Length > 255)
             {
-                throw new BindException($"the Excel name {name[..40]}… is over 255 characters (XLR1)");
+                throw new BindException($"the Excel name {name[..40]}… is over 255 characters");
             }
         }
 
@@ -134,9 +135,9 @@ internal static class ExcelNames
         return f.Prefix + (family ? ExcelSelection.DefName(f.Type) : f.TypeName) + member;
     }
 
-    // XLR1's stated order: the function's own type by full name, its own members before inherited ones, then the
-    // declaring type's full name, then the member's metadata token; bind and bindon functions after the members, by
-    // their input set's index; draws last; a struct's default constructor, which has no token, after its type's members.
+    // The naming order: the function's own type by full name, its own members before inherited ones, then the declaring
+    // type's full name, then the member's metadata token; bind and bindon functions after the members, by their input
+    // set's index; draws last; a struct's default constructor, which has no token, after its type's members.
     private static (string, int, string, long) Order(CFunction f) => f.Kind switch
     {
         "bind" or "bindon" => (f.Type.FullName!, 2, string.Empty, f.InputSet!.Index),

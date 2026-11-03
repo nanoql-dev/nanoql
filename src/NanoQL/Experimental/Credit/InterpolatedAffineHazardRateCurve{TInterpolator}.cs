@@ -21,9 +21,9 @@ namespace NanoQL.Experimental;
 /// <typeparam name="TInterpolator">The interpolator.</typeparam>
 /// <remarks>
 /// The formulas are <see cref="AffineHazardRate"/>'s, the model's initial intensity its dynamics' short rate at x0,
-/// where QuantLib squares x0 (the S-xcr plan's XR8 (xiii)). <see cref="FromNodes{TBootstrap}"/> builds the curve on a
-/// piecewise affine curve's nodes, for its conditional survival: QuantLib's piecewise affine curve is this curve, and
-/// nanoql's piecewise curve can't change its base by its traits (XR3 (c)).
+/// where QuantLib squares x0. <see cref="FromNodes{TBootstrap}"/> builds the curve on a piecewise affine curve's nodes,
+/// for its conditional survival: QuantLib's piecewise affine curve is this curve, and nanoql's piecewise curve can't
+/// change its base by its traits.
 /// </remarks>
 [Experimental("NQL0001")]
 public class InterpolatedAffineHazardRateCurve<TInterpolator> : OneFactorAffineSurvivalStructure

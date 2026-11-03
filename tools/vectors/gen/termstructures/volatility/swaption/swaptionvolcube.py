@@ -27,11 +27,10 @@ the evaluation date, with no fixing stored, and one 40 years out, and the tenors
 and 0M, whose swap can't be built. The wheel has no atmStrike(Period, Period), which QuantLib defines as the date
 overload at optionDateFromTenor, so the points carry the option tenor and its date.
 
-The SABR cubes calibrate, so their outputs go through the stability filter (the S7 plan's S7R6): each SABR case is
-refitted with every input volatility (the at-the-money matrix's and every spread) moved one ulp up, then down, and an
-output is written only where both refits leave it within 1e-12 x max(|a|, |b|, 1); the indexes of the dropped
-elements of each output are in the case's inputs "dropped", and the generator prints the counts. No output here
-depends on a fit, so none is dropped.
+The SABR cubes calibrate, so their outputs go through the stability filter: each SABR case is refitted with every input
+volatility (the at-the-money matrix's and every spread) moved one ulp up, then down, and an output is written only where
+both refits leave it within 1e-12 x max(|a|, |b|, 1); the indexes of the dropped elements of each output are in the
+case's inputs "dropped", and the generator prints the counts. No output here depends on a fit, so none is dropped.
 
 A refused value is {"throws": true}. A case's inputs hold its settings and its "cube" spec (the functions below build
 it), and its points. Every output is a flat list. The cube functions here are shared by the cube generators of this
@@ -97,7 +96,7 @@ GUESS = [0.2, 0.5, 0.4, 0.0]
 FREE = [False, False, False, False]
 BETA_FIXED = [False, True, False, False]
 
-# The stability filter's measure (the S7 plan's S7R6).
+# The stability filter's measure.
 STABLE = 1e-12
 
 

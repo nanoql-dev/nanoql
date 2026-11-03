@@ -95,7 +95,7 @@ internal static class MarketModelGreeksCxxInputs
 
     /// <summary>
     /// Checks the proxy Greek engine's values and Greeks, each constrained evolver's reference its own model,
-    /// QuantLib's weight (the S-mmp plan's MMPR3).
+    /// QuantLib's weight.
     /// </summary>
     /// <param name="path">The vector file's path under tests/vectors/.</param>
     public static void CheckProxy(string path)

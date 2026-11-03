@@ -10,14 +10,13 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The affine hazard-rate curve's initial intensity (the S-xcr plan's XR8 (xiii)): the model's dynamics' short rate at
-/// the process's x0, where QuantLib squares x0. On nodes today and one, three and five years out (Actual/365 Fixed),
-/// with the Cox-Ingersoll-Ross model r0 0.02, θ 0.03, k 0.5, σ 0.05, QuantLib's curve of zero hazard rates reads
-/// S(5) 0.90893263808262059, P(0, 5, r0²), where its own base structure on the same model reads 0.87690828065332527,
-/// P(0, 5, r0); on hazard rates 0.01 to 0.04 its S(5) is 0.79418153056948726, and its conditional survival from one to
-/// three years at an intensity of 0.025 is 0.90156675873632208, which reads no x0. On Vasicek r0 0.02, a 0.1, b 0.03,
-/// σ 0.01, whose x0 is r0 − b, its curve reads 0.96957583433..., its base 0.89655379153... (the S-xcr run's
-/// <c>c4_facts.cpp</c>).
+/// The affine hazard-rate curve's initial intensity: the model's dynamics' short rate at the process's x0, where
+/// QuantLib squares x0. On nodes today and one, three and five years out (Actual/365 Fixed), with the
+/// Cox-Ingersoll-Ross model r0 0.02, θ 0.03, k 0.5, σ 0.05, QuantLib's curve of zero hazard rates reads S(5)
+/// 0.90893263808262059, P(0, 5, r0²), where its own base structure on the same model reads 0.87690828065332527, P(0, 5,
+/// r0); on hazard rates 0.01 to 0.04 its S(5) is 0.79418153056948726, and its conditional survival from one to three
+/// years at an intensity of 0.025 is 0.90156675873632208, which reads no x0. On Vasicek r0 0.02, a 0.1, b 0.03, σ 0.01,
+/// whose x0 is r0 − b, its curve reads 0.96957583433..., its base 0.89655379153....
 /// </summary>
 public class AffineHazardRateTests
 {

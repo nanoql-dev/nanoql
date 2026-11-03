@@ -20,7 +20,7 @@ namespace NanoQL.Numerics;
 /// QuantLib's iterators do, so a shorter input is zero-padded where the caller's span is zero.
 /// </para>
 /// <para>
-/// A documented divergence (the S-bar plan's §2.2 undefined row): an input longer than 2ᵏ points is refused before
+/// A documented divergence (the playbook's undefined-behaviour row): an input longer than 2ᵏ points is refused before
 /// anything is written, where QuantLib writes past the output's end and then refuses.
 /// </para>
 /// </remarks>

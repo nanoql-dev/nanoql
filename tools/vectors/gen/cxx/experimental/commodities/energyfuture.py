@@ -5,9 +5,9 @@ expose, each output computed by the C++ harness (tools/cxx/src/experimental/comm
 sold futures quoted off today's fixing and off the forward curve, with unit and fixed secondary costs; their NPV,
 pricing errors and cost amounts.
 
-On the base unit and currency at one lot alone (the S-xrt plan's §2.8): QuantLib's unit factors invert on any other unit
-(XRR5 (i)), it squares the lot (XRR5 (vii)) and charges its costs on the raw quantity (XRR5 (xxxix)), all of which agree
-at one lot of barrels; a last fixing yesterday, which QuantLib refuses, is left out (XRR5 (xl)). Read back by
+On the base unit and currency at one lot alone: QuantLib's unit factors invert on any other unit, it squares the lot and
+charges its costs on the raw quantity, all of which agree at one lot of barrels; a last fixing yesterday, which QuantLib
+refuses, is left out. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Experimental/Commodities/EnergyFutureCxxVectorTests.cs."""
 import importlib.util
 import os

@@ -7,12 +7,12 @@ using static NanoQL.Numerics.MatrixFunctions;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// A line-search-based minimization ends at the point its line search last accepted (the S-sr plan's SSR6 (xvii)):
-/// QuantLib's <c>LineSearchBasedMethod::minimize</c> returns on the function tolerance or the iteration limit
+/// A line-search-based minimization ends at the point its line search last accepted: QuantLib's
+/// <c>LineSearchBasedMethod::minimize</c> returns on the function tolerance or the iteration limit
 /// (linesearchbasedmethod.cpp:98-103) before it sets the problem's current value (line 105), so its problem holds the
 /// point before with the function value of the point after. The port sets the current value first, the failed search's
-/// own line (line 112). QuantLib's check: the point its line search last accepted, read from the cost function's
-/// trace on the wheel. The hypersphere and lower-diagonal pseudo square roots, which minimize with
+/// own line (line 112). QuantLib's check: the point its line search last accepted, read from the cost function's trace
+/// on the wheel. The hypersphere and lower-diagonal pseudo square roots, which minimize with
 /// <see cref="ConjugateGradient"/> (pseudosqrt.cpp:166-244), move with it.
 /// </summary>
 public class LineSearchReturnTests

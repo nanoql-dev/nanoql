@@ -17,7 +17,7 @@ namespace NanoQL.Experimental;
 /// <remarks>
 /// An instrument QuantLib prices without an engine: <see cref="Calculate"/> computes it. At a zero standard deviation,
 /// an expiry on the evaluation date or a zero volatility, the value is the formula's limit, the intrinsic value, where
-/// QuantLib's reads 0·∞, NaN (the S-xcr plan's XR8 (xxii); <c>Divergences/RiskyAssetSwapOptionTests.cs</c>).
+/// QuantLib's reads 0·∞, NaN (<c>Divergences/RiskyAssetSwapOptionTests.cs</c>).
 /// </remarks>
 [Experimental("NQL0001")]
 public sealed class RiskyAssetSwapOption : Instrument

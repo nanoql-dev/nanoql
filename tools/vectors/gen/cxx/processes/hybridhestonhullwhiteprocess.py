@@ -11,11 +11,10 @@ diffusion at four states (the variance positive, small and negative) and three t
 times over the steps and draws below; and the numeraire at the states and times. Then the constructor's refusal of
 correlations whose squares sum past 1.
 
-Left out (the S-hes plan's §2.10): steps whose a·dt falls below the step terms' cut, 0.1, where nanoql evaluates them
-in double-double (HR6, HR7 (xv), tests/NanoQL.Tests/Divergences/HybridHestonHullWhiteStepTests.cs): the steps here are
-0.25, 1 and 2 years, each kept where a·dt reaches the cut; structures off the process's reference date and day counter
-(HR7 (xix)); and a forward process on another curve (HR10, tests/NanoQL.Tests/Divergences/
-HybridHestonHullWhiteCurveTests.cs).
+Left out: steps whose a·dt falls below the step terms' cut, 0.1, where nanoql evaluates them in double-double
+(tests/NanoQL.Tests/Divergences/HybridHestonHullWhiteStepTests.cs): the steps here are 0.25, 1 and 2 years, each kept
+where a·dt reaches the cut; structures off the process's reference date and day counter; and a forward process on
+another curve (tests/NanoQL.Tests/Divergences/HybridHestonHullWhiteCurveTests.cs).
 
 A case holds the "process" (tools/cxx/src/processes/hybridspec.hpp's spec), the "times", "states", "evolve" ([t0, x0,
 dt, dw]) and "numeraire" points. The harness's calls: HybridHestonHullWhiteProcess::summary, ::drift, ::diffusion,

@@ -13,12 +13,11 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The Monte Carlo vanilla engines' loops allocate nothing per sample after their first batch (the S-van plan's VD12,
-/// S3's closing ruling, S-sr's one-dimensional form): the European pricer's and the digital pricer's draw-price-add on
-/// Black-Scholes paths, the digital pricer's uniform numbers drawn as a view of its generator's buffer, and the
-/// Longstaff-Schwartz pricer's pricing phase after its calibration. Each batch goes into an
-/// <see cref="IncrementalStatistics"/>, which keeps no sample; the Black-Scholes process reads its rates without
-/// building the rate objects. The calibration phase copies each path by design and isn't pinned.
+/// The Monte Carlo vanilla engines' loops allocate nothing per sample after their first batch: the European pricer's
+/// and the digital pricer's draw-price-add on Black-Scholes paths, the digital pricer's uniform numbers drawn as a view
+/// of its generator's buffer, and the Longstaff-Schwartz pricer's pricing phase after its calibration. Each batch goes
+/// into an <see cref="IncrementalStatistics"/>, which keeps no sample; the Black-Scholes process reads its rates
+/// without building the rate objects. The calibration phase copies each path by design and isn't pinned.
 /// </summary>
 public class McVanillaAllocationTests
 {

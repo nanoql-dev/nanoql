@@ -32,10 +32,9 @@ public sealed class BlackYoYInflationCouponPricer : YoYInflationCouponPricer
     /// <inheritdoc/>
     /// <remarks>
     /// Black's formula on the strike and the forward, unshifted, as QuantLib's. Where the formula refuses the strike,
-    /// at or below 0, a caplet is the forward less the strike and a floorlet 0, the formula's limits there (the S-cms
-    /// plan's CMR5 (xxiii)), where QuantLib refuses ("strike + displacement (… + 0) must be non-negative"); at 0 itself
-    /// that is QuantLib's value. On a forward at or below 0 the model has no rate distribution, and the formula's
-    /// refusal stands.
+    /// at or below 0, a caplet is the forward less the strike and a floorlet 0, the formula's limits there, where
+    /// QuantLib refuses ("strike + displacement (… + 0) must be non-negative"); at 0 itself that is QuantLib's value.
+    /// On a forward at or below 0 the model has no rate distribution, and the formula's refusal stands.
     /// </remarks>
     protected override double OptionletPriceImp(OptionType optionType, double strike, double forward, double stdDev)
     {

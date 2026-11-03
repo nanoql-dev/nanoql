@@ -12,15 +12,14 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The Gaussian1d Jamshidian engine's bracket (the S-g1d plan's G1R6 (xviii)): QuantLib solves for y* on the fixed
-/// bracket [−8, 8] (<c>gaussian1djamshidianswaptionengine.cpp:142-147</c>) and refuses short-dated swaptions away from
-/// the money: on the wheel, on a GSR model (a = 0.02, σ = 0.01) on a flat 3% curve, a 1-day payer on a 5-year swap at
-/// 1% throws "root not bracketed: f[-8,8] -> [7.575587e-02,1.111667e-01]", as does a 1-day receiver at 6% and a 1-month
-/// receiver at 6% ("[-2.604803e-01,-2.535408e-02]"), which Hull-White's Jamshidian engine on the equal
-/// constant-parameter model prices at 0.09363555834330271, 0.13506769382915945 and 0.13466680676149342. nanoql's
-/// bracket is QuantLib's first and is doubled only where it doesn't bracket the root, so where QuantLib brackets, its
-/// solver's call and path are QuantLib's. QuantLib's checks: Hull-White's Jamshidian engine and QuantLib's own values
-/// where it prices.
+/// The Gaussian1d Jamshidian engine's bracket: QuantLib solves for y* on the fixed bracket [−8, 8]
+/// (<c>gaussian1djamshidianswaptionengine.cpp:142-147</c>) and refuses short-dated swaptions away from the money: on
+/// the wheel, on a GSR model (a = 0.02, σ = 0.01) on a flat 3% curve, a 1-day payer on a 5-year swap at 1% throws "root
+/// not bracketed: f[-8,8] -> [7.575587e-02,1.111667e-01]", as does a 1-day receiver at 6% and a 1-month receiver at 6%
+/// ("[-2.604803e-01,-2.535408e-02]"), which Hull-White's Jamshidian engine on the equal constant-parameter model prices
+/// at 0.09363555834330271, 0.13506769382915945 and 0.13466680676149342. nanoql's bracket is QuantLib's first and is
+/// doubled only where it doesn't bracket the root, so where QuantLib brackets, its solver's call and path are
+/// QuantLib's. QuantLib's checks: Hull-White's Jamshidian engine and QuantLib's own values where it prices.
 /// </summary>
 public class JamshidianBracketTests
 {

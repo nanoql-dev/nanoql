@@ -5,8 +5,8 @@ harness, which the wheel doesn't expose: the value and the spot-based Greeks (de
 day) of plain-vanilla, cash-or-nothing, asset-or-nothing and gap calls and puts at strikes below, at and above the
 forward, on three markets (spot, growth, standard deviation, discount) and the times the thetas take.
 
-Zero standard deviations are left out: BlackCalculator's Greeks there are S-eq's fixes (SEQR7,
-tests/NanoQL.Tests/Divergences/BlackCalculatorZeroVolatilityTests.cs).
+Zero standard deviations are left out: BlackCalculator's Greeks there are nanoql's fixes
+(tests/NanoQL.Tests/Divergences/BlackCalculatorZeroVolatilityTests.cs).
 
 A case holds the "payoff" ([kind, optionType, strike, extra], extra the cash-or-nothing's cash or the gap's second
 strike), "spot", "growth", "stdDev", "discount" and "maturity". The harness's call: BlackScholesCalculator::greeks

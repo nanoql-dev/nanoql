@@ -16,23 +16,22 @@ namespace NanoQL.Models;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A working type (the S-mmp plan's MMPR1 (i)), unsealed: QuantLib's upper-bound engine derives its decorated hedge
-/// from it. It steps its own clones of the underlying, the strategy and the rebate.
+/// A working type, unsealed: QuantLib's upper-bound engine derives its decorated hedge from it. It steps its own clones
+/// of the underlying, the strategy and the rebate.
 /// </para>
 /// <para>
-/// Its end (the S-mmp plan's MMPR4 (vii), option (1), ruled by the user, with Revision 4's (b), a documented
-/// divergence): QuantLib's end, with its underlying, is kept, but on an underlying with no possible cash-flow times
-/// (QuantLib's <c>MultiStepNothing</c>), which can't end it while an exercise time remains; a finished underlying isn't
-/// stepped again; and once ended with its underlying it stays ended, with no call and no cash flow. QuantLib's
-/// standalone Bermudan on <c>MultiStepNothing</c>, done at its first step, ends at once
+/// Its end (a documented divergence): QuantLib's end, with its underlying, is kept, but on an underlying with no
+/// possible cash-flow times (QuantLib's <c>MultiStepNothing</c>), which can't end it while an exercise time remains; a
+/// finished underlying isn't stepped again; and once ended with its underlying it stays ended, with no call and no cash
+/// flow. QuantLib's standalone Bermudan on <c>MultiStepNothing</c>, done at its first step, ends at once
 /// (<c>Divergences/CallSpecifiedEndTests.cs</c>).
 /// </para>
 /// <para>
-/// Every count is zeroed at each step's start (MMPR4 (xvi), a documented divergence): QuantLib writes none at a step
-/// where neither the underlying nor the rebate steps, so the engine adds the previous step's flows again
-/// (<c>callspecifiedmultiproduct.cpp:144-167</c>). A rebate of more products than the underlying, which writes past
-/// the buffers QuantLib sizes by the underlying's, is refused; a rebate of fewer pays its own products, the others
-/// nothing (the upper-bound engine's one-product rebate of a hedge of several, <c>upperboundengine.cpp:124-125</c>).
+/// Every count is zeroed at each step's start (a documented divergence): QuantLib writes none at a step where neither
+/// the underlying nor the rebate steps, so the engine adds the previous step's flows again
+/// (<c>callspecifiedmultiproduct.cpp:144-167</c>). A rebate of more products than the underlying, which writes past the
+/// buffers QuantLib sizes by the underlying's, is refused; a rebate of fewer pays its own products, the others nothing
+/// (the upper-bound engine's one-product rebate of a hedge of several, <c>upperboundengine.cpp:124-125</c>).
 /// </para>
 /// </remarks>
 [WorkingType]

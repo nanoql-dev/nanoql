@@ -13,9 +13,8 @@ namespace NanoQL.Methods;
 /// <remarks>
 /// <para>
 /// QuantLib's schemes share no base: the model's template takes any class with <c>step</c> and <c>setStep</c>. Here the
-/// model's type parameter is constrained to this interface (D12), and every QuantLib scheme implements it. A scheme is
-/// a working type (the S-eq plan's SEQR1): <see cref="Step"/> modifies the values in place, through scratch buffers
-/// the scheme holds.
+/// model's type parameter is constrained to this interface, and every QuantLib scheme implements it. A scheme is a
+/// working type: <see cref="Step"/> modifies the values in place, through scratch buffers the scheme holds.
 /// </para>
 /// <para>An extension point: a later unit's scheme implements it.</para>
 /// </remarks>

@@ -15,11 +15,10 @@ gammaAt at a shift of 1% of the spot, as QuantLib's engine reads them; and theta
 doesn't cancel ("thetaPoints", tools/vectors/gen/methods/finitedifferences/solvers/fdm2dimsolver.py's rule: kept where
 the value is at most 1e4 times the theta's change over its snapshot interval).
 
-Left out (the S-hes plan's §2.10): every structure is on the risk-free curve's day counter and reference date (on
-others QuantLib reads the dividend curve at the risk-free curve's times,
-tests/NanoQL.Tests/Divergences/HestonHullWhiteMismatchedTimesTests.cs); and cash dividends, which QuantLib's dividend
-handler applies on a three-dimensional grid to the lines through the other directions' first points only, nanoql to
-every line (tests/NanoQL.Tests/Divergences/FdmDividendHandler3dTests.cs; D3-3 of the S-hes run record).
+Left out: every structure is on the risk-free curve's day counter and reference date (on others QuantLib reads the
+dividend curve at the risk-free curve's times, tests/NanoQL.Tests/Divergences/HestonHullWhiteMismatchedTimesTests.cs);
+and cash dividends, which QuantLib's dividend handler applies on a three-dimensional grid to the lines through the other
+directions' first points only, nanoql to every line (tests/NanoQL.Tests/Divergences/FdmDividendHandler3dTests.cs).
 
 A case holds the set-up spec {"process", "hullWhite", "correlation", "payoff", "exercise", "dividends", "mesher",
 "tGrid", "dampingSteps"}, the process hestonprocess.py's, the Hull-White process and the mesher fdmhestonhullwhiteop.py's,

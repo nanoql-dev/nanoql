@@ -8,9 +8,8 @@ C++ harness (tools/cxx/src/experimental/math/hybridsimulatedannealing.cpp).
   Boltzmann and Boltzmann-downhill probabilities, the Cauchy, Boltzmann, very fast and one-dimensional Cauchy
   temperatures and the trivial and finite-difference reannealings, each without a local optimizer and with
   Levenberg-Marquardt at every best point; the samplers' and probabilities' std::normal, std::uniform_real and
-  std::cauchy draws on std::mt19937 as MSVC 14.44 draws them (the S-xrt plan's XRD4), and every point the cost
-  function evaluates, the ring case's NaN trial points among them. The ring sampler's folds end within XRR13's 10,000
-  passes there.
+  std::cauchy draws on std::mt19937 as MSVC 14.44 draws them, and every point the cost function evaluates, the ring
+  case's NaN trial points among them. The ring sampler's folds end within nanoql's cap of 10,000 passes there.
 
 Read back by tests/NanoQL.Tests/Vectors/Cxx/Experimental/Math/HybridSimulatedAnnealingCxxVectorTests.cs."""
 import os

@@ -12,9 +12,9 @@ namespace NanoQL.Tests.Divergences;
 /// <see cref="ZeroCouponInflationSwap"/>'s inflation-leg convention given as Following. QuantLib's default for it is
 /// <c>BusinessDayConvention()</c>, which is Following (0), and the constructor replaces that value by the fixed leg's
 /// convention (<c>zerocouponinflationswap.cpp:73-74</c>), so an explicit Following is silently replaced (QuantLib's
-/// defect, R8). nanoql's parameter is a nullable convention, null for the fixed leg's, so a given Following is kept.
-/// For a swap from 15 June 2024 to Saturday 31 May 2025 on the UK calendar, its fixed leg ModifiedFollowing, the
-/// wheel's inflation leg asked for Following pays on 30 May 2025, as the fixed leg does; nanoql's pays on 2 June.
+/// defect). nanoql's parameter is a nullable convention, null for the fixed leg's, so a given Following is kept. For
+/// a swap from 15 June 2024 to Saturday 31 May 2025 on the UK calendar, its fixed leg ModifiedFollowing, the wheel's
+/// inflation leg asked for Following pays on 30 May 2025, as the fixed leg does; nanoql's pays on 2 June.
 /// </summary>
 public class ZeroCouponInflationSwapConventionTests
 {

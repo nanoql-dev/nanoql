@@ -12,7 +12,7 @@ namespace NanoQL.Models;
 /// An inverse floater: at each rate's reset, the inverse floating coupon max(Kᵢ − mᵢ fᵢ, 0) τᶠⁱˣᵢ less the floating
 /// coupon (fᵢ + sᵢ) τᶠˡᵒᵃᵗᵢ, received, or paid by a payer.
 /// </summary>
-/// <remarks>A working type (the S-mmp plan's MMPR1 (i)).</remarks>
+/// <remarks>A working type.</remarks>
 [WorkingType]
 public sealed class MultiStepInverseFloater : MultiProductMultiStep
 {

@@ -12,11 +12,10 @@ OneAssetOption, null where QuantLib doesn't provide one (here the value alone wh
 European value and every Greek where it never is). Then an option whose window opened before the evaluation date, an
 expired one, and the refusals of a European exercise, a payoff at expiry, a spot at zero and a negative rate.
 
-The outputs nanoql fixes are left out: where QuantLib's Newton iteration for the critical price leaves (0, K) for a
-put or (K, ∞) for a call, judged by newton_leaves() below, QuantLib's own iteration with a margin (the S-van plan's
-VR4 (vii), tests/NanoQL.Tests/Divergences/BaroneAdesiWhaleyCriticalPriceTests.cs); and the puts' in-the-money
-probability, which QuantLib's BlackCalculator gives as the call's (the S-eq plan's SEQR7,
-BlackCalculatorItmProbabilityTests.cs). Every structure is dated on the
+The outputs nanoql fixes are left out: where QuantLib's Newton iteration for the critical price leaves (0, K) for a put
+or (K, ∞) for a call, judged by newton_leaves() below, QuantLib's own iteration with a margin
+(tests/NanoQL.Tests/Divergences/BaroneAdesiWhaleyCriticalPriceTests.cs); and the puts' in-the-money probability, which
+QuantLib's BlackCalculator gives as the call's (BlackCalculatorItmProbabilityTests.cs). Every structure is dated on the
 evaluation date and counts on Actual/365 (Fixed), and no window opens after it, so the mismatched-dates class and the
 window (ApproximationTheta..., ApproximationWindowTests.cs) don't reach the file.
 
@@ -88,7 +87,7 @@ def american(spec):
 
 
 def put_greeks(greeks):
-    """The Greeks recorded for a put: all but the in-the-money probability (SEQR7)."""
+    """The Greeks recorded for a put: all but the in-the-money probability."""
     return [g for g in greeks if g != "itmCashProbability"]
 
 

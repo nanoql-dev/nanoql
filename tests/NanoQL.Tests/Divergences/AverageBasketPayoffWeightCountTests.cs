@@ -14,7 +14,7 @@ namespace NanoQL.Tests.Divergences;
 /// 2.4177 on one run, the Monte Carlo 11.902 and 11.896 on two), and one weight prices asset 1 alone (the 2-D engine
 /// 13.1679), where its Choi, Deng-Li-Zhou and single-factor engines refuse ("wrong number of weights
 /// arguments in payoff", <c>choibasketengine.cpp:97-98</c>). nanoql's payoff refuses a price count other than its
-/// weights' with that text (the S-exo plan's ER5 (v)): QuantLib's own check, everywhere.
+/// weights' with that text: QuantLib's own check, everywhere.
 /// </summary>
 public class AverageBasketPayoffWeightCountTests
 {

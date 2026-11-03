@@ -6,10 +6,10 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// <see cref="ChebyshevInterpolation.WithY"/>, QuantLib's in-place <c>updateY</c> as a copy (the S-van plan's VD7, S2's
-/// immutable interpolations): the new values on the same nodes, the receiver unchanged, the barycentric weights shared
-/// since they depend on the nodes alone. QuantLib refuses values of another length ("interpolation override has the
-/// wrong length", <c>chebyshevinterpolation.cpp:77-78</c>).
+/// <see cref="ChebyshevInterpolation.WithY"/>, QuantLib's in-place <c>updateY</c> as a copy (the interpolations are
+/// immutable): the new values on the same nodes, the receiver unchanged, the barycentric weights shared since they
+/// depend on the nodes alone. QuantLib refuses values of another length ("interpolation override has the wrong length",
+/// <c>chebyshevinterpolation.cpp:77-78</c>).
 /// </summary>
 public class ChebyshevInterpolationWithYTests
 {

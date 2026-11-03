@@ -18,9 +18,8 @@ namespace NanoQL.Processes;
 /// <para>
 /// Immutable. QuantLib's process caches its integrals for performance, so that a parameter change needs
 /// <c>flushCache()</c>; here each public member computes its terms afresh, within one call, and a model's engine call
-/// shares one memo across its reads through the internal overloads (the S-g1d plan's G1R1 (iii)). QuantLib's
-/// <c>flushCache</c> and its parameter setters, which only the model calls, have no counterpart: a parameter change
-/// builds a new process.
+/// shares one memo across its reads through the internal overloads. QuantLib's <c>flushCache</c> and its parameter
+/// setters, which only the model calls, have no counterpart: a parameter change builds a new process.
 /// </para>
 /// <para>
 /// <see cref="WithForwardMeasureTime"/> moves the core's forward measure time with the process's and refuses one below

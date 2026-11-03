@@ -23,12 +23,11 @@ namespace NanoQL.TermStructures;
 /// <para>
 /// QuantLib reads every structure at the time the dividend curve's day counter measures, with its own comment that this
 /// assumes one day count and "should be QL_REQUIREd" (<c>quantotermstructure.hpp:124-131</c>), so curves equal at every
-/// date but on different day counters give different quanto rates. Here a structure on another day counter or
-/// reference date is read at the instants the curve's times denote, on its own clock: the curves' discounts and the
-/// volatilities' variances accrued from the curve's reference date to the time, the correlation term the root of the
-/// two variances' product. Where every structure shares the dividend curve's day counter and reference date, the zero
-/// rate is QuantLib's. A documented divergence (the S-eq plan's SEQR7 (xi), re-ruled on 2026-10-20 under R8 with the
-/// finite-difference engine's mismatched times).
+/// date but on different day counters give different quanto rates. Here a structure on another day counter or reference
+/// date is read at the instants the curve's times denote, on its own clock: the curves' discounts and the volatilities'
+/// variances accrued from the curve's reference date to the time, the correlation term the root of the two variances'
+/// product. Where every structure shares the dividend curve's day counter and reference date, the zero rate is
+/// QuantLib's. A documented divergence, as the finite-difference engine's mismatched times are.
 /// </para>
 /// </remarks>
 public sealed class QuantoTermStructure : ZeroYieldStructure

@@ -6,10 +6,10 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// <c>rankReducedSqrt</c> with a retained negative eigenvalue (the S-sr plan's C1 review, B1-1): QuantLib floors
-/// negative eigenvalues under <c>Spectral</c> only (<c>pseudosqrt.cpp:496</c>), so the eigenvalues <c>None</c> accepts
-/// down to −1e-16 (<c>:486-491</c>) and those of Higham's adjusted matrix, positive semi-definite only to its
-/// projections' tolerance (<c>:498-505</c>), reach <c>std::sqrt(eigenValues[i])</c> (<c>:531</c>): a NaN column, and
+/// <c>rankReducedSqrt</c> with a retained negative eigenvalue: QuantLib floors negative eigenvalues under
+/// <c>Spectral</c> only (<c>pseudosqrt.cpp:496</c>), so the eigenvalues <c>None</c> accepts down to −1e-16
+/// (<c>:486-491</c>) and those of Higham's adjusted matrix, positive semi-definite only to its projections' tolerance
+/// (<c>:498-505</c>), reach <c>std::sqrt(eigenValues[i])</c> (<c>:531</c>): a NaN column, and
 /// <c>normalizePseudoRoot</c> skips every row whose norm is NaN (<c>:64</c>), leaving the others unnormalized. The port
 /// floors the root at 0. QuantLib's check: its own root at the rank that keeps the non-negative eigenvalues, with zero
 /// columns appended, bit for bit (the harness's).

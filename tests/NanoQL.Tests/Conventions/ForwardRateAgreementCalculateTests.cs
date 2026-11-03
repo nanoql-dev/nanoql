@@ -11,10 +11,10 @@ namespace NanoQL.Tests.Conventions;
 
 /// <summary>
 /// The FRA, which QuantLib prices in the instrument with no engine, computes in
-/// <see cref="ForwardRateAgreement.Calculate"/> (the S-rx plan's SRXR2): each call computes its results again from its
-/// context, nothing cached, and the expiry reads the context's flags, as QuantLib's
-/// <c>simple_event(valueDate_).hasOccurred()</c> reads the Settings' (<c>forwardrateagreement.cpp:70-72</c>). The
-/// values are QuantLib's on the wheel for a 6M Euribor FRA, value date 17 June 2026, strike 2.5% on 1 million.
+/// <see cref="ForwardRateAgreement.Calculate"/>: each call computes its results again from its context, nothing
+/// cached, and the expiry reads the context's flags, as QuantLib's <c>simple_event(valueDate_).hasOccurred()</c> reads
+/// the Settings' (<c>forwardrateagreement.cpp:70-72</c>). The values are QuantLib's on the wheel for a 6M Euribor FRA,
+/// value date 17 June 2026, strike 2.5% on 1 million.
 /// </summary>
 public class ForwardRateAgreementCalculateTests
 {

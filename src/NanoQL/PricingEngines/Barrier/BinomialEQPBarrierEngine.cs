@@ -13,8 +13,8 @@ namespace NanoQL.PricingEngines;
 /// <summary>
 /// The binomial barrier engine on the additive equal-probabilities tree and Derman and Kani's discretized barrier
 /// option: QuantLib-Python's <c>BinomialEQPBarrierEngine</c>, QuantLib's
-/// <c>BinomialBarrierEngine&lt;AdditiveEQPBinomialTree, DiscretizedDermanKaniBarrierOption&gt;</c>, the wheel's closing
-/// (D12).
+/// <c>BinomialBarrierEngine&lt;AdditiveEQPBinomialTree, DiscretizedDermanKaniBarrierOption&gt;</c>, the wheel's
+/// closing.
 /// </summary>
 public static class BinomialEQPBarrierEngine
 {

@@ -11,11 +11,11 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The irregular swap's conventions and two routes (the S-xrt plan's XRR5 (xx) and §2.5): on a swap engine its fair rate
-/// and fair spread are null, QuantLib's own "result not available", where QuantLib's <c>fetchResults</c> sets a debug 0
-/// (0 where the vanilla fair rate is 0.0305, the S-xrt planner's <c>xp_c3.cpp</c>); at constant notionals and rates it
-/// prices as the vanilla swap, leg by leg; and Hagan's engine on its regular swaption prices as the Bachelier engine
-/// within its bisection's 1e-8 on λ, 5.1e-7 relative, QuantLib's prices to 12 digits.
+/// The irregular swap's conventions and two routes: on a swap engine its fair rate and fair spread are null, QuantLib's
+/// own "result not available", where QuantLib's <c>fetchResults</c> sets a debug 0 (0 where the vanilla fair rate is
+/// 0.0305); at constant notionals and rates it prices as the vanilla swap, leg by leg; and Hagan's engine on its
+/// regular swaption prices as the Bachelier engine within its bisection's 1e-8 on λ, 5.1e-7 relative, QuantLib's prices
+/// to 12 digits.
 /// </summary>
 public class IrregularSwapTests
 {
@@ -48,7 +48,7 @@ public class IrregularSwapTests
         Assert.Equal(plain.LegBPS[0], irregular.LegBPS[0]);
     }
 
-    // QuantLib 1.44's prices on this set-up (the S-xrt planner's xp_c3.cpp hagan section)
+    // QuantLib 1.44's prices on this set-up
     [Theory]
     [InlineData(0.02, 0.0498539343948, 0.049853958473)]
     [InlineData(0.03, 0.0187725096698, 0.0187725191931)]

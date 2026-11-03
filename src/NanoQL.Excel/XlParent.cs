@@ -3,7 +3,7 @@
 
 namespace NanoQL.Excel;
 
-/// <summary>The call presenting a result, whose objects inside are keyed by it and their place (XLD12).</summary>
+/// <summary>The call presenting a result, whose objects inside are keyed by it and their place.</summary>
 /// <param name="Fn">The worksheet function.</param>
 /// <param name="Args">Its Excel arguments.</param>
 /// <param name="Children">The elements' entries made while presenting it.</param>

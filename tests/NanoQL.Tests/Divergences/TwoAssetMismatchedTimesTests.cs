@@ -12,18 +12,17 @@ using static NanoQL.Tests.Divergences.TwoAssetMarket;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// C2's engines on structures dated apart (the playbook's dates row; the S-exo plan's ER5 (xviii)). The spread
+/// The two-asset engines on structures dated apart (the playbook's row for structures on another clock). The spread
 /// engines, Stulz, the Gaussian copula and the cash-dividend engine read by date, which QuantLib refuses for an option
 /// expiring before a later structure's date ("negative time"); the two-asset correlation engine reads each volatility
-/// at its own process's time and everything else at the second's (+0.84% on the plan's market with asset 2's curves
-/// on Act/360), and the American Margrabe engine builds flat curves from the evaluation date with rates over the
-/// risk-free curve's time (<c>analytictwoassetcorrelationengine.cpp:54-66</c>,
-/// <c>analyticamericanmargrabeengine.cpp:53-79</c>). nanoql's by-date reads accrue nothing before a structure's date,
-/// and its clocked engines read every structure on the clock across both processes; the cash-dividend engine dates and
-/// counts each dividend's volatility on the clock, where QuantLib sizes it on the risk-free curve's time but reads it
-/// on the volatility's own (+0.48% with the volatility on Act/360 under curves on Act/365,
-/// <c>cashdividendeuropeanengine.cpp:139-151</c>). QuantLib's engine on the market restated from the evaluation date,
-/// onto one clock, is the check.
+/// at its own process's time and everything else at the second's (+0.84% on the test's market with asset 2's curves on
+/// Act/360), and the American Margrabe engine builds flat curves from the evaluation date with rates over the risk-free
+/// curve's time (<c>analytictwoassetcorrelationengine.cpp:54-66</c>, <c>analyticamericanmargrabeengine.cpp:53-79</c>).
+/// nanoql's by-date reads accrue nothing before a structure's date, and its clocked engines read every structure on the
+/// clock across both processes; the cash-dividend engine dates and counts each dividend's volatility on the clock,
+/// where QuantLib sizes it on the risk-free curve's time but reads it on the volatility's own (+0.48% with the
+/// volatility on Act/360 under curves on Act/365, <c>cashdividendeuropeanengine.cpp:139-151</c>). QuantLib's engine on
+/// the market restated from the evaluation date, onto one clock, is the check.
 /// </summary>
 public class TwoAssetMismatchedTimesTests
 {

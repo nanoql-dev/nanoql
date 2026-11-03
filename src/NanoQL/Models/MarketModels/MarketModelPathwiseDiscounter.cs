@@ -18,13 +18,13 @@ namespace NanoQL.Models;
 /// Discounting reads the simulated rates only: to discount back to time 0, multiply by the discount factor of the
 /// first rate time.
 /// </para>
-/// <para>Immutable (the S-mmp plan's MMPR1 (ii)): a pure function of a step's discount factors.</para>
+/// <para>Immutable: a pure function of a step's discount factors.</para>
 /// <para>
-/// <b>The bracket</b> (MMPR4 (ix), a documented divergence): the period's start is the last rate time at or before
-/// the payment, clamped to the periods, as <see cref="MarketModelDiscounter"/>'s. QuantLib's <c>lower_bound</c> takes
-/// the first rate time at or after the payment (<c>pathwisediscounter.cpp:32</c>), so a payment strictly inside a
-/// period but the last is extrapolated from the next period (<c>Divergences/MarketModelDiscounterBracketTests.cs</c>).
-/// A payment on a rate time, before the first or after the last gives QuantLib's bits.
+/// <b>The bracket</b> (a documented divergence): the period's start is the last rate time at or before the payment,
+/// clamped to the periods, as <see cref="MarketModelDiscounter"/>'s. QuantLib's <c>lower_bound</c> takes the first
+/// rate time at or after the payment (<c>pathwisediscounter.cpp:32</c>), so a payment strictly inside a period but the
+/// last is extrapolated from the next period (<c>Divergences/MarketModelDiscounterBracketTests.cs</c>). A payment on a
+/// rate time, before the first or after the last gives QuantLib's bits.
 /// </para>
 /// </remarks>
 public sealed class MarketModelPathwiseDiscounter

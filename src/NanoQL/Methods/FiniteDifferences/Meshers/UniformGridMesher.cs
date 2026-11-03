@@ -12,7 +12,7 @@ namespace NanoQL.Methods;
 
 /// <summary>A uniform grid mesher: in each direction of a layout, its points evenly spaced between two
 /// boundaries.</summary>
-/// <remarks>Immutable (the S-eq plan's SEQR1).</remarks>
+/// <remarks>Immutable.</remarks>
 public sealed class UniformGridMesher : FdmMesher
 {
     private readonly double[] dx;

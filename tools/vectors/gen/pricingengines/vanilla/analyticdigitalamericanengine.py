@@ -10,12 +10,12 @@ volatilities of 0.1% to 60%, and on zero curves and a variance curve: at the hit
 expiry the NPV. Then the refusals of a European exercise, of a window opening after the evaluation date and of a
 spot at zero.
 
-The outputs nanoql fixes are left out (the S-van plan's VR4 (i), (ii)): at the hit where λ² = μ² − 2 ln D / σ²T is
-negative, which QuantLib prices NaN (tests/NanoQL.Tests/Divergences/AmericanPayoffAtHitNegativeRateTests.cs); and
-below a variance of ε (AmericanPayoffZeroVarianceTests.cs). The knock-out engine at the hit, which QuantLib prices as
-the knock-in and nanoql refuses (DigitalAmericanKnockOutAtHitTests.cs), and the cases QuantLib's master's #2855
-changes (its tests/NanoQL.Tests/TestSuite/DigitalOptionTests.cs case) aren't written either: a knock-in or knock-out
-at expiry where the formula's N(D₂) underflows or (H/S)^2μ overflows, judged here with a margin.
+The outputs nanoql fixes are left out: at the hit where λ² = μ² − 2 ln D / σ²T is negative, which QuantLib prices NaN
+(tests/NanoQL.Tests/Divergences/AmericanPayoffAtHitNegativeRateTests.cs); and below a variance of ε
+(AmericanPayoffZeroVarianceTests.cs). The knock-out engine at the hit, which QuantLib prices as the knock-in and nanoql
+refuses (DigitalAmericanKnockOutAtHitTests.cs), and the cases QuantLib's master's #2855 changes (its
+tests/NanoQL.Tests/TestSuite/DigitalOptionTests.cs case) aren't written either: a knock-in or knock-out at expiry where
+the formula's N(D₂) underflows or (H/S)^2μ overflows, judged here with a margin.
 
 The process specs are tools/vectors/gen/processes/blackscholesprocess.py's and the payoff specs
 tools/vectors/gen/pricingengines/blackcalculator.py's; an exercise {"type": "American", "date", "payoffAtExpiry"} from

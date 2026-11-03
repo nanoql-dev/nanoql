@@ -10,8 +10,8 @@ using ExcelDna.Integration;
 namespace NanoQL.Excel;
 
 /// <summary>
-/// A cell's calls as a vector (XLR14), §3.2's envelope with the Excel layer's departures: each call its Excel function and
-/// the Excel values it was given (a range with its shape and its empty cells, a handle argument a reference to the call
+/// A cell's calls as a vector, §3.2's envelope with the Excel layer's departures: each call its Excel function and the
+/// Excel values it was given (a range with its shape and its empty cells, a handle argument a reference to the call
 /// that made it, an object inside a returned array its parent call's item), the provider, the calls' date system, the
 /// settings' conventions file and every file a call read, embedded; the expected output the cell's own outcome. The
 /// refusals: a cell whose value isn't its last call's outcome, an Excel error argument, an object inside a returned map
@@ -93,7 +93,7 @@ internal sealed class XlVectorWriter
         shifts.Add(rootShift);
         string root = outcome is string rh && X.TryEntry(rh, out XlEntry re) && re.Args != null ? Visit(rootFn, rootArgs, rh) : Visit(rootFn, rootArgs, null);
 
-        // A spilled root's objects carry their read files (a looped reader), as a visited handle's do (round 7's F7-2).
+        // A spilled root's objects carry their read files (a looped reader), as a visited handle's do.
         if (outcome is object[,] spilledRoot)
         {
             foreach (object x in spilledRoot)
@@ -111,15 +111,15 @@ internal sealed class XlVectorWriter
             throw new ArgumentException("the cell's calls were made in workbooks of both date systems (1900 and 1904): export from one workbook's calls");
         }
 
-        // A call reporting a read file's path gives the path the cell read, which a replay, reading the embedded file from a
-        // temporary path, can't reproduce (round 5's B5-1); the generated assembly names the reporters (round 6's F6-1).
+        // A call reporting a read file's path gives the path the cell read, which a replay, reading the embedded file
+        // from a temporary path, can't reproduce; the generated assembly names the reporters.
         if (calls.Any(c => X.PathReporters.Any(n => c.Contains("\"fn\":\"" + n + "\"", StringComparison.Ordinal))))
         {
             throw new ArgumentException("the cell reports a read file's path, which a replay can't reproduce: export a cell that uses the conventions");
         }
 
-        // A handle on a tree that reads a file is expected by its type, since its key holds the path's text (XLR3). A text
-        // is a handle only where the store holds it: text holding "#" stays text.
+        // A handle on a tree that reads a file is expected by its type, since its key holds the path's text. A text is
+        // a handle only where the store holds it: text holding "#" stays text.
         bool readsFiles = files.Count > 0;
         string Out(object x) => x switch
         {
@@ -153,7 +153,7 @@ internal sealed class XlVectorWriter
                 string s when X.TryEntry(s, out _) => "{ \"handle\": " + Str(readsFiles ? s[..s.IndexOf('#', StringComparison.Ordinal)] : s) + " }",
                 string s => "{ \"value\": " + Str(s) + " }",
 
-                // No value (#N/A) is null; another error Excel shows, a non-finite number's #NUM!, is that error (round 5's F5-1).
+                // No value (#N/A) is null; another error Excel shows, a non-finite number's #NUM!, is that error.
                 ExcelError xe when xe != ExcelError.ExcelErrorNA => "{ \"value\": {\"error\":" + ((int)xe).ToString(CultureInfo.InvariantCulture) + "} }",
                 _ => "{ \"value\": null }",
             };
@@ -207,7 +207,7 @@ internal sealed class XlVectorWriter
         return id;
     }
 
-    // An object inside a returned array is its parent call's item, the parent visited once (round 4's B4-2).
+    // An object inside a returned array is its parent call's item, the parent visited once.
     private string VisitParent(XlEntry element)
     {
         string synthetic = "(call)" + element.ParentKey;

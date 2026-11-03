@@ -15,9 +15,9 @@ namespace NanoQL.Experimental;
 /// </summary>
 /// <remarks>
 /// Unsealed and immutable. QuantLib's derives the latent model and the loss model both; here it derives the latent
-/// model and implements <see cref="IDefaultLossModel"/> over it (the S-xcr plan's XR2 (a)): its correlations, event
-/// counts and recoveries are the latent model's, its other statistics refuse with QuantLib's texts.
-/// <see cref="SetBasket"/> is QuantLib's <c>resetModel</c>, the latent model bound to the basket's live names.
+/// model and implements <see cref="IDefaultLossModel"/> over it: its correlations, event counts and recoveries are the
+/// latent model's, its other statistics refuse with QuantLib's texts. <see cref="SetBasket"/> is QuantLib's
+/// <c>resetModel</c>, the latent model bound to the basket's live names.
 /// </remarks>
 /// <typeparam name="TCopula">The copula policy.</typeparam>
 /// <typeparam name="TInitTraits">The policy's initialization parameters.</typeparam>

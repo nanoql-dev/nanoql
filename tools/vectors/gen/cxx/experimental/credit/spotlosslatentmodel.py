@@ -7,9 +7,9 @@ on tools/vectors/gen/cxx/experimental/credit/defaultevent.py's basket specs.
 Gaussian and Student t models of one and two factors, the defaults' weights then the recoveries', at several model
 parameters A, reset on baskets of curves dated at the evaluation date: each name's conditional default probability by
 dates and from probabilities below and above 1e-10, its expected conditional recovery, its spot recovery on latent
-values and its recovery variable on samples of every factor; and the refused models (odd rows, recoveries not
-matching, a basket of another size). A model parameter of 0 divides by 0 in QuantLib's conditional recovery, so it is
-refused and left out (the S-xcr plan's XR8 (xxxiv), held in Conventions/RandomModelConventionTests.cs). Read back by
+values and its recovery variable on samples of every factor; and the refused models (odd rows, recoveries not matching,
+a basket of another size). A model parameter of 0 divides by 0 in QuantLib's conditional recovery, so it is refused and
+left out (held in Conventions/RandomModelConventionTests.cs). Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Experimental/Credit/SpotRecoveryLatentModelCxxVectorTests.cs."""
 import importlib.util
 import os

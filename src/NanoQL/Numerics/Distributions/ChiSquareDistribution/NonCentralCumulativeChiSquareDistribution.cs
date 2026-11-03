@@ -20,9 +20,9 @@ namespace NanoQL.Numerics;
 /// converged. Here the series is QuantLib's master's, upstream's #2908 (<c>b76016ff5</c>): it skips the underflowing
 /// weights and terms by their logarithms, returns 1 where a Chernoff bound puts the upper tail below 1e-12, runs to
 /// 1,000,000 iterations, and refuses a loop that ends before its bound can be computed ("didn't converge"). A
-/// documented divergence from 1.44 (the S-van plan's VR11, <c>Divergences/ChiSquaredSeriesRefusalTests.cs</c>), checked
-/// by upstream's case against Boost's distribution (<c>DistributionsTests.TestNonCentralChiSquareLargeArguments</c>);
-/// every value inside 1.44's range is QuantLib's bit for bit.
+/// documented divergence from 1.44 (<c>Divergences/ChiSquaredSeriesRefusalTests.cs</c>), checked by upstream's case
+/// against Boost's distribution (<c>DistributionsTests.TestNonCentralChiSquareLargeArguments</c>); every value inside
+/// 1.44's range is QuantLib's bit for bit.
 /// </para>
 /// <para>
 /// QuantLib's large-df branch tests |x/2 − df/2| without assigning it and starts from t = 0 (<c>:48-52</c>), as

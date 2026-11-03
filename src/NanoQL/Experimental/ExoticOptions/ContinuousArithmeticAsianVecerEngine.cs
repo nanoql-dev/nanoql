@@ -23,13 +23,13 @@ namespace NanoQL.Experimental;
 /// <remarks>
 /// <para>
 /// The engine reads every structure on one clock, the earliest reference date of the process's structures on the
-/// risk-free day counter, each at the instant a time denotes and nothing accrued before its own date (the S-xeq plan's
-/// XER5 (xxii)), where QuantLib measures the time from the evaluation date on the risk-free day counter beside each
-/// curve's zero rate from its own date: each rate is the curve's own zero rate to the maturity times its own time over
-/// the clock's, and the volatility its own Black volatility at the maturity times the square root of its time over the
-/// clock's; on structures sharing the evaluation date and the day counter each factor is 1 and QuantLib's numbers
-/// stand. Where the initial point lies on the grid's upper end the price is the last node's value, the interpolation's
-/// own limit, where QuantLib reads one node past the grid (XER5 (xxi)). The operators are built per call.
+/// risk-free day counter, each at the instant a time denotes and nothing accrued before its own date, where QuantLib
+/// measures the time from the evaluation date on the risk-free day counter beside each curve's zero rate from its own
+/// date: each rate is the curve's own zero rate to the maturity times its own time over the clock's, and the volatility
+/// its own Black volatility at the maturity times the square root of its time over the clock's; on structures sharing
+/// the evaluation date and the day counter each factor is 1 and QuantLib's numbers stand. Where the initial point lies
+/// on the grid's upper end the price is the last node's value, the interpolation's own limit, where QuantLib reads one
+/// node past the grid. The operators are built per call.
 /// </para>
 /// <para>
 /// The averaging starts at the engine's start date, as QuantLib's; an option carrying a start date of its own that
@@ -125,7 +125,7 @@ public static class ContinuousArithmeticAsianVecerEngine
             throw new NanoQLException("strike (0 for vecer fixed strike asian)  not on Grid");
         }
 
-        // the engine's clock: each read at the instant its time denotes (XER5 (xxii))
+        // the engine's clock: each read at the instant its time denotes
         TermStructure clock = FdmBlackScholesOp.Clock(process);
         double clockT = clock.AccrualTimeTo(maturity);
         BlackVolTermStructure volatility = process.BlackVolatility;
@@ -245,7 +245,7 @@ public static class ContinuousArithmeticAsianVecerEngine
         var rounding = new DownRounding(0);
         int lowerI = (int)rounding.Evaluate((z0 - zMin) / h);
 
-        // Interpolate solution; the last node at the grid's upper end, where QuantLib reads past it (XER5 (xxi))
+        // Interpolate solution; the last node at the grid's upper end, where QuantLib reads past it
         double pv = lowerI >= assetSteps
             ? u[assetSteps]
             : u[lowerI] + ((u[lowerI + 1] - u[lowerI]) * (z0 - sVec[lowerI]) / h);

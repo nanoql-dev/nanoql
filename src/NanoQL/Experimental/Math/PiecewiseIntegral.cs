@@ -21,7 +21,7 @@ namespace NanoQL.Experimental;
 /// QuantLib's multiplication moves the end the wrong way, or not at all: a step at −1 integrates to 3.5 over [−3, 3],
 /// exactly 4, and a step at 0 to 3.75, exactly 3. nanoql's nudge is mirrored below 0, c·(1 + ε) to the left and
 /// c/(1 + ε) to the right, and at 0 is the next double each way, C's <c>nextafter</c>, at each of QuantLib's five
-/// nudges (the S-xrt plan's XRR5 (xxxvi); <c>Divergences/PiecewiseIntegralNudgeTests.cs</c>).
+/// nudges (<c>Divergences/PiecewiseIntegralNudgeTests.cs</c>).
 /// </para>
 /// <para>
 /// Its result counts no evaluations and carries no error estimate, QuantLib's own state after a call; each piece's

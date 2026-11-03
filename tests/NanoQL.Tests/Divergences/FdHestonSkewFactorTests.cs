@@ -12,14 +12,14 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The Heston variance mesher's skew factor bounded at σ_m/κ = 2 (the S-hes plan's HR9, by the user's ruling). QuantLib's
-/// factor, max(1, σ_m/κ)^1.5 (<c>fdmhestonvariancemesher.cpp:122-128</c>), widens the equity mesher at small κ until
-/// its prices leave QuantLib's own analytic engine, refining the grid not bringing them back: an at-the-money put
-/// (v₀ = θ 0.04, ρ −0.7, a year, r 3%, q 1%) prices 4.8106 for 3.7045 at σ 1.0 and κ 0.1, 26.48 for 3.590 at κ 0.02
-/// (15.69 on 200 × 200 × 100) and 48.52 for 6.2144 at σ 0.3 and κ 1e-8 [executed on the wheel:
-/// <c>scratchpad\c1\oracle_c1.py</c>]. The bounded factor, min(2, max(1, σ_m/κ))^1.5, brings them within the grid's own
-/// error of the analytic engine, an American put converges as the grid is refined, and wherever σ_m/κ ≤ 2, every
-/// QuantLib case among them, QuantLib's engine stands, the Kahl-Jaeckel ratio at the cap itself.
+/// The Heston variance mesher's skew factor bounded at σ_m/κ = 2. QuantLib's factor, max(1, σ_m/κ)^1.5
+/// (<c>fdmhestonvariancemesher.cpp:122-128</c>), widens the equity mesher at small κ until its prices leave QuantLib's
+/// own analytic engine, refining the grid not bringing them back: an at-the-money put (v₀ = θ 0.04, ρ −0.7, a year, r
+/// 3%, q 1%) prices 4.8106 for 3.7045 at σ 1.0 and κ 0.1, 26.48 for 3.590 at κ 0.02 (15.69 on 200 × 200 × 100) and
+/// 48.52 for 6.2144 at σ 0.3 and κ 1e-8 (QuantLib-Python 1.44). The bounded factor, min(2, max(1, σ_m/κ))^1.5, brings
+/// them within the grid's own error of the analytic engine, an American put converges as the grid is refined, and
+/// wherever σ_m/κ ≤ 2, every QuantLib case among them, QuantLib's engine stands, the Kahl-Jaeckel ratio at the cap
+/// itself.
 /// </summary>
 public class FdHestonSkewFactorTests
 {

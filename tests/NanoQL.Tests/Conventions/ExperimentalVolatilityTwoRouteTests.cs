@@ -9,10 +9,11 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// C3's two routes to one value (the S-xeq plan's §2.5): the no-arbitrage SABR section against S7's SABR section
-/// (Hagan's 2002 expansion) where both are arbitrage-free; the SVI interpolated section against S-rx's SVI section it was
-/// fitted to; the extended Black variance curve and surface on fixed values against S-eq's curve and surface; the abcd
-/// curve's volatility against its adjustment factor times the abcd Black volatility of its fitted coefficients.
+/// Two routes to one value for the experimental volatility structures: the no-arbitrage SABR section against the SABR
+/// section (Hagan's 2002 expansion) where both are arbitrage-free; the SVI interpolated section against the SVI section
+/// it was fitted to; the extended Black variance curve and surface on fixed values against the Black variance curve and
+/// surface; the abcd curve's volatility against its adjustment factor times the abcd Black volatility of its fitted
+/// coefficients.
 /// </summary>
 public class ExperimentalVolatilityTwoRouteTests
 {
@@ -36,7 +37,7 @@ public class ExperimentalVolatilityTwoRouteTests
     [Fact]
     public void TheSviInterpolatedSectionIsTheSviSectionItIsFittedTo()
     {
-        // vols from S-rx's section at a, b, σ, ρ, m; the fit, every parameter free, recovers them within 1e-6
+        // vols from the SVI section at a, b, σ, ρ, m; the fit, every parameter free, recovers them within 1e-6
         double t = 1.0, forward = 0.03;
         double[] parameters = [0.0005, 0.01, 0.1, -0.3, 0.0];
         var svi = new SviSmileSection(t, forward, parameters);

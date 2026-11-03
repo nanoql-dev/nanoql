@@ -16,7 +16,7 @@ namespace NanoQL.Models;
 /// The outcome of a statistical analysis of historical forward rates: the dates skipped and failed, their messages,
 /// and the forwards' fixing periods.
 /// </summary>
-/// <remarks>An extension point (U13), abstract as QuantLib's; immutable once built.</remarks>
+/// <remarks>An extension point, abstract as QuantLib's; immutable once built.</remarks>
 public abstract class HistoricalForwardRatesAnalysis
 {
     /// <summary>Gets the dates skipped, where a fixing was missing or refused.</summary>

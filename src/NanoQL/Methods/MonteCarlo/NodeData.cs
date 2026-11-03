@@ -11,8 +11,8 @@ namespace NanoQL.Methods;
 /// exercise variables, the control's value, and whether the path reached the node, each in numeraire units.
 /// </summary>
 /// <remarks>
-/// A working type (the S-mmp plan's MMPR1 (i)): the node-data collection writes it and the regression and the
-/// parametric optimisation add into its <see cref="CumulatedCashFlows"/>.
+/// A working type: the node-data collection writes it and the regression and the parametric optimisation add into its
+/// <see cref="CumulatedCashFlows"/>.
 /// </remarks>
 [WorkingType]
 public sealed class NodeData

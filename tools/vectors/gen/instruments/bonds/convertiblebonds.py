@@ -7,21 +7,21 @@ evaluation date 15 October 2026.
 Zero-coupon, fixed-coupon (annual and semiannual, with and without an ex-coupon period) and floating-rate convertibles,
 issued two TARGET days after the evaluation date or seasoned, under European, American and Bermudan exercises, with
 calls and puts at clean and dirty prices, soft calls with triggers, callabilities before and on the settlement date
-(which setupArguments leaves out) and an unsorted schedule whose last callability is before maturity (QuantLib checks the
-last only). Each case's outputs are the bond's inspectors without a date (tools/vectors/gen/instruments/bond.py's static
-outputs, amounts at the notional of 100), its settlement date, and its NPV and settlement value on the
+(which setupArguments leaves out) and an unsorted schedule whose last callability is before maturity (QuantLib checks
+the last only). Each case's outputs are the bond's inspectors without a date (tools/vectors/gen/instruments/bond.py's
+static outputs, amounts at the notional of 100), its settlement date, and its NPV and settlement value on the
 Cox-Ross-Rubinstein convertible engine with 101 steps, a credit spread of 1% and no dividends on
 tools/vectors/gen/processes/blackscholesprocess.py's first process (Merton, flat, constant, on Actual/365 (Fixed)
-throughout), which reads the arguments setupArguments computes. The engine prices the bond settling on the
-evaluation date ("pricedBond", priced_at_evaluation's spec: "settlementDays" 0, an issue date after the evaluation
-date moved to it), where QuantLib's master's spot at the settlement date (#2752, taken ahead of the pin as the upstream
-sweep's SWR1 (a) and SWI2 rule) is QuantLib 1.44's, divided by a discount of 1; a lag is checked in
-tests/NanoQL.Tests/Divergences/ConvertibleUpstreamFixesTests.cs. Then the refusal of a last callability
-after maturity, QuantLib's "last callability date (...) later than maturity (...)", at construction.
+throughout), which reads the arguments setupArguments computes. The engine prices the bond settling on the evaluation
+date ("pricedBond", priced_at_evaluation's spec: "settlementDays" 0, an issue date after the evaluation date moved to
+it), where QuantLib's master's spot at the settlement date (#2752, taken ahead of the pin) is QuantLib 1.44's, divided
+by a discount of 1; a lag is checked in tests/NanoQL.Tests/Divergences/ConvertibleUpstreamFixesTests.cs. Then the
+refusal of a last callability after maturity, QuantLib's "last callability date (...) later than maturity (...)", at
+construction.
 
 Generated and left out: an engine price under an American exercise whose time grid's last time rounds below the tree's
-maturity, where QuantLib 1.44 skips the conversion at expiry and nanoql takes upstream's fix after v1.44 (#2878, the S-sr
-plan's SSR5; tests/NanoQL.Tests/Divergences/AmericanBoundsOnTimeTests.cs), by the grid's arithmetic, (T/N)·N against T.
+maturity, where QuantLib 1.44 skips the conversion at expiry and nanoql takes upstream's fix after v1.44 (#2878;
+tests/NanoQL.Tests/Divergences/AmericanBoundsOnTimeTests.cs), by the grid's arithmetic, (T/N)·N against T.
 
 A bond spec is {"type", "exercise" ({"type", "dates"}: European on its one date, American from its first to its second,
 Bermudan on all), "conversionRatio", "callability" (tools/vectors/gen/experimental/callablebonds/callablebond.py's

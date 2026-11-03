@@ -13,14 +13,13 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The Monte Carlo barrier engine's exercise (the S-bar code review's B1-3). QuantLib's engine never reads the
-/// exercise's type and prices any exercise to its last date: a down-and-out put struck at 100, barrier 80, on spot 100,
-/// r 5%, q 1%, σ 20% over a year, 20 steps, 20,000 pseudo-random samples at seed 42, prices 1.670455625787 for an
-/// American exercise, its European value, where QuantLib's binomial engine (Cox-Ross-Rubinstein, Derman and Kani's
-/// asset, 400 steps) prices the American at 6.364401494576 and the European at 1.674490747474 (the review's
-/// <c>r14_exercise_ql.py</c>). nanoql refuses a non-European exercise, as the family's European engines do: the paths
-/// price a European exercise only, early exercise wanting a regression. The binomial engine prices American barrier
-/// options and stays.
+/// The Monte Carlo barrier engine's exercise. QuantLib's engine never reads the exercise's type and prices any exercise
+/// to its last date: a down-and-out put struck at 100, barrier 80, on spot 100, r 5%, q 1%, σ 20% over a year, 20
+/// steps, 20,000 pseudo-random samples at seed 42, prices 1.670455625787 for an American exercise, its European value,
+/// where QuantLib's binomial engine (Cox-Ross-Rubinstein, Derman and Kani's asset, 400 steps) prices the American at
+/// 6.364401494576 and the European at 1.674490747474. nanoql refuses a non-European exercise, as the family's European
+/// engines do: the paths price a European exercise only, early exercise wanting a regression. The binomial engine
+/// prices American barrier options and stays.
 /// </summary>
 public class McBarrierExerciseTests
 {

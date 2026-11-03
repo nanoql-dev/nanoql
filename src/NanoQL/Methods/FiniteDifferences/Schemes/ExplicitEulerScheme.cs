@@ -12,8 +12,8 @@ namespace NanoQL.Methods;
 
 /// <summary>The explicit Euler scheme: a ← a + θ·dt·A a, the operator set over the step.</summary>
 /// <remarks>
-/// A working type (the S-eq plan's SEQR1): <see cref="Step(Span{double}, double)"/> steps the caller's values in place
-/// through a buffer the scheme holds, so a step allocates nothing after the first.
+/// A working type: <see cref="Step(Span{double}, double)"/> steps the caller's values in place through a buffer the
+/// scheme holds, so a step allocates nothing after the first.
 /// </remarks>
 [WorkingType]
 public sealed class ExplicitEulerScheme : IFdmScheme, IFdmSetOperatorScheme

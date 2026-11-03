@@ -18,15 +18,15 @@ namespace NanoQL.Processes;
 /// <para>
 /// Immutable. QuantLib's core caches its integrals in six maps that every parameter change flushes; here each member
 /// takes the call's <see cref="GsrProcessCoreMemo"/>, which holds them for one call only, and a change of parameters,
-/// times or forward measure time builds a new core (the S-g1d plan's G1R1 (iii)).
+/// times or forward measure time builds a new core.
 /// </para>
 /// <para>
 /// Below a reversion of 1e-2 in absolute value, each term is computed in a form continuous in the reversion: the
-/// first-order kernels (1 − e^(−ad))/a through <c>expm1</c>, and the two terms over a², the risk-neutral part's
-/// αₖζₖ and the forward-measure part's ηₖζₖ, through φ₂(u) = (eᵘ − 1 − u)/u²; at a reversion of exactly 0, QuantLib's
+/// first-order kernels (1 − e^(−ad))/a through <c>expm1</c>, and the two terms over a², the risk-neutral part's αₖζₖ
+/// and the forward-measure part's ηₖζₖ, through φ₂(u) = (eᵘ − 1 − u)/u²; at a reversion of exactly 0, QuantLib's
 /// zero-reversion formulas, the forms' limits; at and above 1e-2, QuantLib's formulas and bits. QuantLib switches to
 /// its zero-reversion formulas below 1e-4, so its outputs jump there, and above it its terms over a² cancel to second
-/// order: a documented divergence (the plan's G1R4 (i); <c>Divergences/GsrSmallReversionTests.cs</c>).
+/// order: a documented divergence (<c>Divergences/GsrSmallReversionTests.cs</c>).
 /// </para>
 /// <para>
 /// <see cref="WithForwardMeasureTime"/> moves the forward measure time and refuses one below the last step time, as
@@ -35,7 +35,7 @@ namespace NanoQL.Processes;
 /// </remarks>
 internal sealed class GsrProcessCore
 {
-    // The reversion below which the cancellation-free forms replace QuantLib's (the plan's G1R4 (i)).
+    // The reversion below which the cancellation-free forms replace QuantLib's.
     internal const double SmallReversion = 1e-2;
 
     private readonly ImmutableArray<double> times;

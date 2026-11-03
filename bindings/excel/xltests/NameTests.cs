@@ -7,9 +7,9 @@ using Microsoft.Office.Interop.Excel;
 namespace NanoQL.Excel.XlTests;
 
 /// <summary>
-/// A calendar's or a day counter's name where its handle goes (XLR16, XLP76): each name form equal to the handle's, the
-/// FpML aliases, a misspelt name, a handle the session doesn't hold, a name where another object goes, a joint calendar
-/// from two names, and looping with a name.
+/// A calendar's or a day counter's name where its handle goes: each name form equal to the handle's, the FpML aliases,
+/// a misspelt name, a handle the session doesn't hold, a name where another object goes, a joint calendar from two
+/// names, and looping with a name.
 /// </summary>
 [ExcelTestSettings(OutOfProcess = true)]
 public class NameTests : RunnerTest

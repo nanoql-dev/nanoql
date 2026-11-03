@@ -6,16 +6,16 @@ using NanoQL.Models;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The constrained Euler evolver's step covariances (the S-mm plan's MR3 (vi), fixed under R8). QuantLib's
+/// The constrained Euler evolver's step covariances (fixed). QuantLib's
 /// <c>LogNormalFwdRateEulerConstrained::setConstraintType</c> builds every step's covariances from the pseudo-root of
 /// the step it is called at (<c>lognormalfwdrateeulerconstrained.cpp:117</c>), so a later step shifts its forwards by
 /// another step's covariances and misses its own constraint, though the code states the intent ("shift each rate by
 /// multiplier * weighting of index rate across the step", <c>:191</c>): on FlatVol of a 3-month first period then
 /// semi-annual, each step's first alive rate constrained to its initial value plus 0.2% and the type set at step 0, the
-/// constrained forward lands at step 0 and misses by +0.00097, −0.00196, −0.00323 and −0.00857 at steps 1 to 4 (this
-/// run's <c>probes\c2_facts.cpp</c>; the planner's MP6 on an abcd model). nanoql builds step i's covariances from step
-/// i's pseudo-root. Checks: QuantLib's own evolver with its type set again before each step, so each step's covariances
-/// are its own (the vectors), bit for bit; and the constraint landing to rounding at every step.
+/// constrained forward lands at step 0 and misses by +0.00097, −0.00196, −0.00323 and −0.00857 at steps 1 to 4. nanoql
+/// builds step i's covariances from step i's pseudo-root. Checks: QuantLib's own evolver with its type set again before
+/// each step, so each step's covariances are its own (the vectors), bit for bit; and the constraint landing to rounding
+/// at every step.
 /// </summary>
 public class ConstrainedEulerCovarianceTests
 {

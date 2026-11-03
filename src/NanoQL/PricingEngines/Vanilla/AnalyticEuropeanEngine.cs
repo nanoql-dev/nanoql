@@ -34,12 +34,11 @@ namespace NanoQL.PricingEngines;
 /// <para>
 /// QuantLib divides the theta's terms by the volatility's time, and runs the rho's two rates, the forward's and the
 /// payoff discount's, over one time, the discount curve's day counter from the risk-free curve's reference date. Here
-/// each term runs over its own structure's time on the volatility's day counter, as QuantLib's
-/// <c>blackScholesTheta</c> reads them, and each rate over its own curve's time. An exercise before a structure's
-/// reference date sees nothing accrue on it, where QuantLib's reads throw. Where the structures share their times,
-/// every value is QuantLib's. A documented divergence (the S-eq plan's rulings of 2026-10-21,
-/// <c>Divergences/AnalyticThetaMismatchedTimesTests.cs</c>, <c>Divergences/EuropeanRhoDiscountCurveTests.cs</c>,
-/// <c>Divergences/ExerciseBeforeReferenceDateTests.cs</c>).
+/// each term runs over its own structure's time on the volatility's day counter, as QuantLib's <c>blackScholesTheta</c>
+/// reads them, and each rate over its own curve's time. An exercise before a structure's reference date sees nothing
+/// accrue on it, where QuantLib's reads throw. Where the structures share their times, every value is QuantLib's. A
+/// documented divergence (<c>Divergences/AnalyticThetaMismatchedTimesTests.cs</c>,
+/// <c>Divergences/EuropeanRhoDiscountCurveTests.cs</c>, <c>Divergences/ExerciseBeforeReferenceDateTests.cs</c>).
 /// </para>
 /// </remarks>
 public static class AnalyticEuropeanEngine
@@ -125,7 +124,7 @@ public static class AnalyticEuropeanEngine
         }
 
         // each structure read at the exercise date, none accruing before its own reference date, where QuantLib's reads
-        // throw (the S-eq plan's ruling of 2026-10-21, C4R2-O2 (i))
+        // throw
         Date lastDate = option.Exercise.LastDate();
         double variance = process.BlackVolatility.AccruedVariance(lastDate, payoff.Strike);
         double dividendDiscount = process.DividendYield.AccruedDiscount(lastDate);
@@ -149,8 +148,7 @@ public static class AnalyticEuropeanEngine
 
         // each structure's time to the exercise its own, none before its reference date; QuantLib's rho runs the
         // forward's and the payoff discount's rates over one time, the discount curve's day counter from the risk-free
-        // curve's date, and here each runs over its own curve's time (the S-eq plan's ruling of 2026-10-21), QuantLib's
-        // where the two curves share their times
+        // curve's date, and here each runs over its own curve's time, QuantLib's where the two curves share their times
         DayCounter voldc = process.BlackVolatility.DayCounter;
         double riskFreeTime = process.RiskFreeRate.AccrualTimeTo(lastDate);
         double rho = discountPtr.SharesTimes(process.RiskFreeRate)
@@ -163,7 +161,7 @@ public static class AnalyticEuropeanEngine
         double vega = black.Vega(t);
 
         // QuantLib divides the theta's terms by the volatility's time; here each by its own structure's, on the
-        // volatility's day counter (the S-eq plan's ruling of 2026-10-21, under R8), QuantLib's where they agree
+        // volatility's day counter, QuantLib's where they agree
         double? theta, thetaPerDay;
         try
         {

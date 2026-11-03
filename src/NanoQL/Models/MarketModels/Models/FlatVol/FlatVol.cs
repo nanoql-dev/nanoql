@@ -21,9 +21,9 @@ namespace NanoQL.Models;
 /// piecewise-constant correlation, each step's pseudo-root the rank-reduced square root of its covariance.
 /// </summary>
 /// <remarks>
-/// <para>Immutable (the S-mm plan's MR1 (i)): its pseudo-roots are computed at construction, and a read returns a copy.</para>
+/// <para>Immutable: its pseudo-roots are computed at construction, and a read returns a copy.</para>
 /// <para>
-/// Two inputs whose reads QuantLib leaves undefined are refused (MR3 (xx); <c>Divergences/MarketModelUndefinedReadsTests.cs</c>):
+/// Two inputs whose reads QuantLib leaves undefined are refused (<c>Divergences/MarketModelUndefinedReadsTests.cs</c>):
 /// correlation times ending before the last evolution time, which QuantLib reads past (an abort, 0xC0000409), and a
 /// correlation with fewer rates than the model, whose matrices QuantLib reads past.
 /// </para>
@@ -112,7 +112,7 @@ public sealed class FlatVol : MarketModel
         ImmutableArray<double> corrTimes = corr.Times;
         ImmutableArray<double> evolTimes = evolution.EvolutionTimes;
 
-        // QuantLib reads past the correlation times where they end before the last evolution time: refused (MR3 (xx)).
+        // QuantLib reads past the correlation times where they end before the last evolution time: refused.
         if (!(!corrTimes.IsEmpty && corrTimes[^1] >= evolTimes[^1]))
         {
             throw new ArgumentException(

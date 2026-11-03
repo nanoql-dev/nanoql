@@ -7,9 +7,9 @@ using static NanoQL.Excel.Tests.Xl;
 namespace NanoQL.Excel.Tests;
 
 /// <summary>
-/// Each failure's message by its cell (XLR4, XLR15; rounds 7 to 9), through the runtime's host seam, the test host
-/// standing in for Excel's caller, values and spills: a cell Excel doesn't show as spilled gives its own call's message;
-/// a spilled cell its element's while the spill shows the looped call's result, else the formula's.
+/// Each failure's message by its cell (rounds 7 to 9), through the runtime's host seam, the test host standing in for
+/// Excel's caller, values and spills: a cell Excel doesn't show as spilled gives its own call's message; a spilled cell
+/// its element's while the spill shows the looped call's result, else the formula's.
 /// </summary>
 [Collection(TestSettings.Name)]
 public sealed class MessageTests
@@ -40,7 +40,7 @@ public sealed class MessageTests
         Assert.Contains("row 2, column 1 of the spill", X.ErrorOf(TestHost.At(1, 0)), StringComparison.Ordinal);
     }
 
-    /// <summary>A nested looped call's message is the formula's cell's; a neighbour's own message kept (F7-1, F8-1).</summary>
+    /// <summary>A nested looped call's message is the formula's cell's; a neighbour's own message kept.</summary>
     [Fact]
     public void ANestedLoopedCallKeepsItsNeighbours()
     {
@@ -57,8 +57,8 @@ public sealed class MessageTests
     }
 
     /// <summary>
-    /// A nested looped call whose first element fails, so the formula's #VALUE! equals the first element: a neighbour where
-    /// the next element would spill keeps its own message, Excel showing no spill there (F8-1, XLP79).
+    /// A nested looped call whose first element fails, so the formula's #VALUE! equals the first element: a neighbour
+    /// where the next element would spill keeps its own message, Excel showing no spill there.
     /// </summary>
     [Fact]
     public void TheFirstElementFailing()
@@ -73,7 +73,8 @@ public sealed class MessageTests
         Assert.Contains("row 1, column 1", X.ErrorOf(TestHost.At(0, 0)), StringComparison.Ordinal);
     }
 
-    /// <summary>A looped call becoming single gives the single call's message; a failed single call's message kept beside a looped call that succeeds (F9-1).</summary>
+    /// <summary>A looped call becoming single gives the single call's message; a failed single call's message kept
+    /// beside a looped call that succeeds.</summary>
     [Fact]
     public void ASingleCallsMessage()
     {

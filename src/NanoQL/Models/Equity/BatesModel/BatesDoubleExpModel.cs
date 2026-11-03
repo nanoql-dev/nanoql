@@ -16,8 +16,8 @@ namespace NanoQL.Models;
 /// <remarks>
 /// <para>
 /// Its arguments are the Heston model's five, then p in [0, 1], η_d and λ positive, and η_u in (0, 1), in QuantLib's
-/// order; its process the Heston model's, as QuantLib's (the S-hes plan's HR1 (ii)). An extension point:
-/// <see cref="BatesDoubleExpDetJumpModel"/> derives from it.
+/// order; its process the Heston model's, as QuantLib's. An extension point: <see cref="BatesDoubleExpDetJumpModel"/>
+/// derives from it.
 /// </para>
 /// <para>
 /// QuantLib constrains η_u to be positive, yet for η_u ≥ 1 the up-jumps' exponential moment, which the model's drift
@@ -25,7 +25,7 @@ namespace NanoQL.Models;
 /// finite expectation" (Gulisashvili and Vives, on Kou's model, η1 = 1/η_u), and QuantLib's engine prices there, a
 /// plausible 26.98 at η_u = 1.5. Here η_u's constraint is (0, 1), so the constructor refuses η_u ≥ 1 and a calibration
 /// stays inside the model's domain, and <see cref="PricingEngines.BatesDoubleExpEngine"/> refuses a model at η_u ≥ 1
-/// (the S-hes plan's HR7 (v), a refusal by the user's ruling, <c>Divergences/BatesDoubleExpUpJumpTests.cs</c>).
+/// (a refusal, <c>Divergences/BatesDoubleExpUpJumpTests.cs</c>).
 /// </para>
 /// </remarks>
 public class BatesDoubleExpModel : HestonModel

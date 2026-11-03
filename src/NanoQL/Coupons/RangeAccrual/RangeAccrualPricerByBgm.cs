@@ -26,15 +26,14 @@ namespace NanoQL.Coupons;
 /// A trigger at or below ε/2, ε = 1e-8, prices as the deflator, as QuantLib's.
 /// </para>
 /// <para>
-/// A coupon in progress (the S-cms plan's CMR5 (xviii), as ruled): QuantLib's call-spread route and its smile
-/// correction take the variance and the drift over the before-fixing phase clamped,
-/// max(S, 0)·λS² + min(U − S, U)·λT², and its drift and volatility functions carry the after-fixing branches for
-/// S ≤ 0; its no-smile route alone takes S·λS² + (U − S)·λT² unclamped, high on a started coupon when λS &lt; λT and a
-/// NaN refusal when λS &gt; λT, so here it is clamped as the other two. And an observation whose fixing is known is
-/// counted by its fixing f, deflator × (1{f &gt; l} − 1{f &gt; u}), the two digitals QuantLib's range reads, where no
-/// QuantLib route prices a past one: known as QuantLib's index decides it, its fixing date (the observation date less
-/// the fixing days) before the evaluation date, or on it once its fixing is published or the context enforces it.
-/// Before the coupon's start every route is QuantLib's.
+/// A coupon in progress: QuantLib's call-spread route and its smile correction take the variance and the drift over the
+/// before-fixing phase clamped, max(S, 0)·λS² + min(U − S, U)·λT², and its drift and volatility functions carry the
+/// after-fixing branches for S ≤ 0; its no-smile route alone takes S·λS² + (U − S)·λT² unclamped, high on a started
+/// coupon when λS &lt; λT and a NaN refusal when λS &gt; λT, so here it is clamped as the other two. And an observation
+/// whose fixing is known is counted by its fixing f, deflator × (1{f &gt; l} − 1{f &gt; u}), the two digitals
+/// QuantLib's range reads, where no QuantLib route prices a past one: known as QuantLib's index decides it, its fixing
+/// date (the observation date less the fixing days) before the evaluation date, or on it once its fixing is published
+/// or the context enforces it. Before the coupon's start every route is QuantLib's.
 /// </para>
 /// </remarks>
 public sealed class RangeAccrualPricerByBgm : RangeAccrualPricer
@@ -68,8 +67,8 @@ public sealed class RangeAccrualPricerByBgm : RangeAccrualPricer
     }
 
     /// <inheritdoc/>
-    /// <exception cref="NanoQLException">The coupon has no observation dates, where QuantLib's price is 0/0 (the S-cms
-    /// plan's CMR5 (xiii)); or a digital's price is out of its bounds, with QuantLib's texts.</exception>
+    /// <exception cref="NanoQLException">The coupon has no observation dates, where QuantLib's price is 0/0; or a
+    /// digital's price is out of its bounds, with QuantLib's texts.</exception>
     protected override double SwapletPrice(State state, EvaluationContext context)
     {
         ArgumentNullException.ThrowIfNull(state);
@@ -184,8 +183,8 @@ public sealed class RangeAccrualPricerByBgm : RangeAccrualPricer
         double lambdaS = smilesOnExpiry.Volatility(strike);
         double lambdaT = smilesOnPayment.Volatility(strike);
 
-        // the before-fixing phase clamped, as the other two routes clamp it (CMR5 (xviii)); QuantLib's bits before the
-        // coupon's start, where the clamps take S and U − S
+        // the before-fixing phase clamped, as the other two routes clamp it; QuantLib's bits before the coupon's start,
+        // where the clamps take S and U − S
         double[] lambdaU = LambdasOverPeriod(s, expiry, lambdaS, lambdaT);
         double variance = (Math.Max(s.StartTime, 0.0) * lambdaU[0] * lambdaU[0])
             + (Math.Min(expiry - s.StartTime, expiry) * lambdaU[1] * lambdaU[1]);

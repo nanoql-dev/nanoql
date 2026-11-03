@@ -10,7 +10,7 @@ namespace NanoQL.Instruments;
 /// A component of a <see cref="CompositeInstrument"/>: an instrument, the engine that prices it and its multiplier,
 /// QuantLib's <c>std::pair&lt;ext::shared_ptr&lt;Instrument&gt;, Real&gt;</c> with the engine the instrument carries.
 /// </summary>
-/// <remarks>Immutable. The engine is a delegate (S-exo's ER2 form), as nanoql's instruments carry none.</remarks>
+/// <remarks>Immutable. The engine is a delegate, as nanoql's instruments carry none.</remarks>
 public sealed class CompositeInstrumentComponent
 {
     /// <summary>Initializes a new instance of the <see cref="CompositeInstrumentComponent"/> class.</summary>

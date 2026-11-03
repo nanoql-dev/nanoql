@@ -9,11 +9,11 @@ American over it and Bermudan at its quarters, on Cox-Ross-Rubinstein trees of 5
 and 1%, volatility 20%: the NPV, delta, gamma and theta. Then each asset's mandatory times, plain and Derman-Kani, for
 each exercise on no grid and on grids of 50 and 51 steps.
 
-The outputs nanoql fixes are left out (the S-xeq plan's §2.8): the process's structures share the evaluation date and
-Act/365, so the tree's clock is the risk-free curve's (XER5 (xi)), and the Cox-Ross-Rubinstein tree builds on the
-steps given (XER5 (x)); an American is kept only where the grid's last time, maturity/steps × steps, isn't below the
-maturity, where QuantLib 1.44 skips the exercise at expiry and nanoql takes #2878 (XER5 (xii)). The process and option
-are tools/cxx/src/experimental/barrieroption/discretizeddoublebarrieroption.cpp's. Read back by
+The outputs nanoql fixes are left out: the process's structures share the evaluation date and Act/365, so the tree's
+clock is the risk-free curve's, and the Cox-Ross-Rubinstein tree builds on the steps given; an American is kept only
+where the grid's last time, maturity/steps × steps, isn't below the maturity, where QuantLib 1.44 skips the exercise at
+expiry and nanoql takes #2878. The process and option are
+tools/cxx/src/experimental/barrieroption/discretizeddoublebarrieroption.cpp's. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Experimental/BarrierOption/DiscretizedDoubleBarrierOptionCxxVectorTests.cs."""
 import os
 import sys

@@ -9,7 +9,7 @@ FlatVol 20% on six semi-annual rates and five irregular ones, one and three fact
 last; clusters drawn within the model's factors, rates and steps and past them; the default collection factor by factor
 and by rate.
 
-Left out (nanoql's checks are true where no element fails, the S-mmp plan's MMPR4 (xii);
+Left out (nanoql's checks are true where no element fails;
 tests/NanoQL.Tests/Divergences/VegaBumpCollectionCheckTests.cs): the checks of given clusters.
 
 The harness unit is tools/cxx/src/models/marketmodels/pathwisegreeks/pathwisegreeks.cpp. Read back by

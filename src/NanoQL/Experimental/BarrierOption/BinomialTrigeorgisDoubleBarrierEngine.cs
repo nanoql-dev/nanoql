@@ -14,8 +14,7 @@ namespace NanoQL.Experimental;
 /// <summary>
 /// The binomial double-barrier engine on the Trigeorgis tree and Derman and Kani's discretized double-barrier option:
 /// QuantLib-Python's <c>BinomialTrigeorgisDoubleBarrierEngine</c>, QuantLib's
-/// <c>BinomialDoubleBarrierEngine&lt;Trigeorgis, DiscretizedDermanKaniDoubleBarrierOption&gt;</c>, the wheel's closing
-/// (D12).
+/// <c>BinomialDoubleBarrierEngine&lt;Trigeorgis, DiscretizedDermanKaniDoubleBarrierOption&gt;</c>, the wheel's closing.
 /// </summary>
 [Experimental("NQL0001")]
 public static class BinomialTrigeorgisDoubleBarrierEngine

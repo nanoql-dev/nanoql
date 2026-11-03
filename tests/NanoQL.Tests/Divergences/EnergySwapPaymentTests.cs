@@ -9,20 +9,20 @@ using static NanoQL.Tests.Conventions.CommodityMarkets;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// An energy swap's payments in the currency of the leg the net amount goes through, at that currency's rate (the S-xrt
-/// plan's XRR5 (viii), fixed under R8). QuantLib's vanilla swap files its fixed leg under the pay currency and its
-/// floating leg under the receive currency whichever way it faces (<c>energyvanillaswap.cpp:104-113</c>), and nanoql
-/// keeps that; but it pairs a payer's payment currency with the other leg's rate, and gives a receiver a pay-receive
-/// flag of 0, so a receiver's payment never changes currency (<c>:220-225</c>); the basis swap pairs a payment's
-/// currency with the other leg's rate too (<c>energybasisswap.cpp:263-266</c>). On QuantLib 1.44 (the run's
-/// <c>probes\xi_c1.cpp</c>: paying dollars and receiving euros at 1.25 dollars a euro, 3% flat), a payer vanilla swap
-/// at 1.5 on 1,000 barrels a month from March to May 2025 on an index at 2 is paid 496.72311389766810 "EUR", its dollar
-/// amount, in April, and a payer at 2.5 pays −397.37849111813631 "USD", its euro amount; a receiver pays and is paid in
-/// dollars. A basis swap on 1,000 barrels in March, its pay index at 70, is paid 2,980.3386833860422 "EUR" with its
-/// receive index at 73 and pays −2,384.2709467087875 "USD" at 67, the other leg's amount each time. nanoql pays a payer
-/// in euros and takes its payments in dollars, each at its own rate (397.37849111813467 EUR and −496.72311389767009
-/// USD); a receiver is paid its fixed leg in dollars, QuantLib's payments, and pays its floating leg in euros; a basis
-/// swap pays 2,384.27 EUR and takes −2,980.34 USD. The NPV, in the base currency, is QuantLib's either way.
+/// An energy swap's payments in the currency of the leg the net amount goes through, at that currency's rate (fixed).
+/// QuantLib's vanilla swap files its fixed leg under the pay currency and its floating leg under the receive currency
+/// whichever way it faces (<c>energyvanillaswap.cpp:104-113</c>), and nanoql keeps that; but it pairs a payer's payment
+/// currency with the other leg's rate, and gives a receiver a pay-receive flag of 0, so a receiver's payment never
+/// changes currency (<c>:220-225</c>); the basis swap pairs a payment's currency with the other leg's rate too
+/// (<c>energybasisswap.cpp:263-266</c>). On QuantLib 1.44 (paying dollars and receiving euros at 1.25 dollars a euro,
+/// 3% flat), a payer vanilla swap at 1.5 on 1,000 barrels a month from March to May 2025 on an index at 2 is paid
+/// 496.72311389766810 "EUR", its dollar amount, in April, and a payer at 2.5 pays −397.37849111813631 "USD", its euro
+/// amount; a receiver pays and is paid in dollars. A basis swap on 1,000 barrels in March, its pay index at 70, is paid
+/// 2,980.3386833860422 "EUR" with its receive index at 73 and pays −2,384.2709467087875 "USD" at 67, the other leg's
+/// amount each time. nanoql pays a payer in euros and takes its payments in dollars, each at its own rate
+/// (397.37849111813467 EUR and −496.72311389767009 USD); a receiver is paid its fixed leg in dollars, QuantLib's
+/// payments, and pays its floating leg in euros; a basis swap pays 2,384.27 EUR and takes −2,980.34 USD. The NPV, in
+/// the base currency, is QuantLib's either way.
 /// </summary>
 public class EnergySwapPaymentTests
 {

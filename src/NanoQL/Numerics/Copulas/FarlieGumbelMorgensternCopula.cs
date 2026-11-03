@@ -11,7 +11,7 @@ namespace NanoQL.Numerics;
 /// <summary>The Farlie-Gumbel-Morgenstern copula, C(x, y) = xy + θxy(1 − x)(1 − y).</summary>
 /// <remarks>
 /// Immutable. On the unit square's edges it returns the boundary values, C(u, 0) = C(0, v) = 0, C(u, 1) = u and C(1, v)
-/// = v, before its formula, as every copula here does (the S-core plan's CR7 (xxxiii)).
+/// = v, before its formula, as every copula here does.
 /// </remarks>
 public sealed class FarlieGumbelMorgensternCopula
 {

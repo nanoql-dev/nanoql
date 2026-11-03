@@ -13,7 +13,7 @@ namespace NanoQL.PricingEngines;
 /// <summary>
 /// The binomial barrier engine on the Joshi tree and Derman and Kani's discretized barrier option: QuantLib-Python's
 /// <c>BinomialJ4BarrierEngine</c>, QuantLib's <c>BinomialBarrierEngine&lt;Joshi4,
-/// DiscretizedDermanKaniBarrierOption&gt;</c>, the wheel's closing (D12).
+/// DiscretizedDermanKaniBarrierOption&gt;</c>, the wheel's closing.
 /// </summary>
 public static class BinomialJ4BarrierEngine
 {

@@ -15,19 +15,18 @@ prices don't read the reversion, which no pricer here can read unmoved by a fix 
 compute()'s result, flattened row by row, error() and endCriteria(), and the members compute() leaves on the
 calibration, which the wheel reaches through the cube and market it recalibrated and repriced in place: the cube's
 sparseSabrParameters() and the market's browse(), each flattened row by row, and the cube's denseSabrParameters() where
-it has them, the ATM-calibrated and the single-pass cubes, cms.cpp's cube having none. Left out, the S-cms plan's CMR5
-fixes: the vector guess with the reversion fixed, whose betas QuantLib's guess leaves untransformed ((x)); a fixed
-negative reversion ((xxvi)); and the Simplex fits, whose reversion QuantLib's transform returns as NaN ((xi)), as it
-does for a free reversion that the prices read, whose Levenberg-Marquardt steps reach y below 0 (the linear TSR pricer's
-fit visits 32 such points in nanoql's port); the analytic Hagan pricer's shift models, whose prices the normalisation
-moves ((xxii)), where cms.cpp's probes (CP8) read the non-parallel shifts; and the linear TSR pricer, whose sections on
-the SABR cube carry the cube's interpolated forward ((xxvii)). QuantLib's numeric Hagan pricer on the non-parallel
-shifts refuses this market at a reversion of 1% ("root not bracketed", its g-function's shift solve on the 10-year
-swaps).
+it has them, the ATM-calibrated and the single-pass cubes, cms.cpp's cube having none. Left out, nanoql's fixes: the
+vector guess with the reversion fixed, whose betas QuantLib's guess leaves untransformed; a fixed negative reversion;
+and the Simplex fits, whose reversion QuantLib's transform returns as NaN, as it does for a free reversion that the
+prices read, whose Levenberg-Marquardt steps reach y below 0 (the linear TSR pricer's fit visits 32 such points in
+nanoql's port); the analytic Hagan pricer's shift models, whose prices the normalisation moves, where cms.cpp's probes
+read the non-parallel shifts; and the linear TSR pricer, whose sections on the SABR cube carry the cube's interpolated
+forward. QuantLib's numeric Hagan pricer on the non-parallel shifts refuses this market at a reversion of 1% ("root not
+bracketed", its g-function's shift solve on the 10-year swaps).
 
-The outputs take the stability filter (the S7 plan's S7R6): each case is calibrated again with each of the eight bid and
-ask quotes moved one ulp up, then down, and an output is written only where every move leaves it within 1e-12 x max(|a|,
-|b|, 1); the dropped indexes per output are in the case's inputs "dropped".
+The outputs take the stability filter: each case is calibrated again with each of the eight bid and ask quotes moved one
+ulp up, then down, and an output is written only where every move leaves it within 1e-12 x max(|a|, |b|, 1); the dropped
+indexes per output are in the case's inputs "dropped".
 
 Each case's inputs hold its settings, the cube (a SABR spec of swaptionvolcube.py's), the swap lengths, the index, the
 bid and ask spreads, the pricer ({"type": "analytic", "model", "meanReversion"}, on the cube's at-the-money matrix), the

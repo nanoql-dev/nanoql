@@ -12,7 +12,7 @@ rates, its own among them, and the three vector reads) and every swapRate(begin,
 or at an index past the rates.
 
 Left out: a rate read at the number of rates, which QuantLib's index check admits, reading past its vectors (nanoql
-refuses it, the S-mm plan's MR3 (xx)).
+refuses it).
 
 The harness unit is tools/cxx/src/models/marketmodels/curvestate.cpp ("CurveState.reads"). Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Models/MarketModels/CMSwapCurveStateCxxVectorTests.cs."""

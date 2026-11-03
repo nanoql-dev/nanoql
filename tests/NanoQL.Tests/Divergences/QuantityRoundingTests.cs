@@ -7,12 +7,12 @@ using static NanoQL.Tests.Conventions.CommodityMarkets;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// Quantity's conversions unrounded (the S-xrt plan's XRR10, ruled 2026-10-28). QuantLib's <c>convertTo</c> rounds every
-/// converted quantity to its target unit's rounding (<c>quantity.cpp:33-40</c>), and every unit's is <c>Rounding(0)</c>,
-/// to the closest whole unit, which its public constructor can't change: under automated conversion 2 MB == 1,500 BBL
-/// is true and 1,500 BBL == 2 MB false, 2 MB / 1,500 BBL is 1, 2 MB + 1,500 BBL is 4 MB and 1 BBL + 20 GAL is 1 BBL
-/// (the S-xrt planner's <c>xr_c1.cpp</c>). nanoql's units round nothing, QuantLib's default <c>Rounding()</c>: the
-/// comparisons are symmetric and the ratio and sums exact, 1.333…, 3.5 MB and 1.476… BBL.
+/// Quantity's conversions unrounded. QuantLib's <c>convertTo</c> rounds every converted quantity to its target unit's
+/// rounding (<c>quantity.cpp:33-40</c>), and every unit's is <c>Rounding(0)</c>, to the closest whole unit, which its
+/// public constructor can't change: under automated conversion 2 MB == 1,500 BBL is true and 1,500 BBL == 2 MB false, 2
+/// MB / 1,500 BBL is 1, 2 MB + 1,500 BBL is 4 MB and 1 BBL + 20 GAL is 1 BBL. nanoql's units round nothing, QuantLib's
+/// default <c>Rounding()</c>: the comparisons are symmetric and the ratio and sums exact, 1.333…, 3.5 MB and 1.476…
+/// BBL.
 /// </summary>
 public class QuantityRoundingTests
 {

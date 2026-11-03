@@ -36,11 +36,11 @@ overnightindexedswap, makevanillaswap, makeois and their harness counterparts, w
   (overnightindexedswap.cpp:106-142), so the wheel builds it so. The wheel takes the arguments by position and can't
   build QuantLib's empty calendar, so a swap with no payment calendar keeps every later argument at its default.
 
-A telescopic overnight swap follows the plan's telescopic rule (S3R11, SD11): it is built with the flag first, so that
-a refusal is QuantLib's own; its expected values are then those of the same swap built without the flag, with
+A telescopic overnight swap follows the telescopic rule: it is built with the flag first, so that a refusal is
+QuantLib's own; its expected values are then those of the same swap built without the flag, with
 ArithmeticAveragedOvernightIndexedCouponPricer(byApprox=True) set on its overnight leg (setCouponPricer) when it
-averages, the pricer the flag selects. The wheel's ArithmeticAveragedOvernightIndexedCouponPricer is built with
-keyword arguments only: a positional True binds to meanReversion.
+averages, the pricer the flag selects. The wheel's ArithmeticAveragedOvernightIndexedCouponPricer is built with keyword
+arguments only: a positional True binds to meanReversion.
 
 Read back by tests/NanoQL.Tests/Vectors/Instruments/FixedVsFloatingSwapVectorTests.cs, with
 tests/NanoQL.Tests/Vectors/SwapInputs.cs, which documents the specs."""

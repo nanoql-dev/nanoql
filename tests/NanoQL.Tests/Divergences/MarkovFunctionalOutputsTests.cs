@@ -9,11 +9,11 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The Markov-functional model's outputs after a recalculation (the S-g1d plan's G1R1 (v), round 1's O1-10): QuantLib's
-/// <c>modelOutputs</c> clears every output but the at-the-money levels and the annuities, which it appends to
-/// (<c>markovfunctional.cpp:618-648</c>), so its first call after a recalculation (a changed market or
-/// <c>forceArbitrageIndices</c>) returns them twice, the stale ones first [read]. nanoql computes the outputs per call:
-/// a copy calibrated again gives a fresh model's. QuantLib's check: its own first call on a fresh model.
+/// The Markov-functional model's outputs after a recalculation: QuantLib's <c>modelOutputs</c> clears every output but
+/// the at-the-money levels and the annuities, which it appends to (<c>markovfunctional.cpp:618-648</c>), so its first
+/// call after a recalculation (a changed market or <c>forceArbitrageIndices</c>) returns them twice, the stale ones
+/// first. nanoql computes the outputs per call: a copy calibrated again gives a fresh model's. QuantLib's check: its
+/// own first call on a fresh model.
 /// </summary>
 public class MarkovFunctionalOutputsTests
 {

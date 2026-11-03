@@ -16,24 +16,23 @@ namespace NanoQL.Experimental;
 /// </summary>
 /// <remarks>
 /// <para>
-/// <b>The draws</b> are those of QuantLib built with MSVC 14.44, its oracle's standard library (the S-xcr plan's XR4
-/// (c)): a 32-bit Mersenne Twister seeded with QuantLib's constant 5489, no parameter, as <c>std::mt19937</c>'s
-/// default; each uniform from two of its integers as MSVC's <c>generate_canonical</c> forms it, the first's top 21 bits
-/// and the second's 32, (g₀ &gt;&gt; 11) + (g₁ &lt;&lt; 21) times 2⁻⁵³, truncating where the standard's form rounds; the
-/// exponential as −log(1 − u)/λ; and the gamma by Knuth's published algorithms (TAOCP vol. 2, §3.4.1) in the order
-/// MSVC draws them: Ahrens-Dieter's GS below α = 1, the exponential at α = 1, a product of uniforms for an integer α
-/// below 20, and Ahrens' tangent method otherwise. They are written from those algorithms and this description of
-/// MSVC's behaviour; the standard leaves a distribution's algorithm to the implementation.
+/// <b>The draws</b> are those of QuantLib built with MSVC 14.44, its oracle's standard library: a 32-bit Mersenne
+/// Twister seeded with QuantLib's constant 5489, no parameter, as <c>std::mt19937</c>'s default; each uniform from two
+/// of its integers as MSVC's <c>generate_canonical</c> forms it, the first's top 21 bits and the second's 32, (g₀
+/// &gt;&gt; 11) + (g₁ &lt;&lt; 21) times 2⁻⁵³, truncating where the standard's form rounds; the exponential as −log(1 −
+/// u)/λ; and the gamma by Knuth's published algorithms (TAOCP vol. 2, §3.4.1) in the order MSVC draws them:
+/// Ahrens-Dieter's GS below α = 1, the exponential at α = 1, a product of uniforms for an integer α below 20, and
+/// Ahrens' tangent method otherwise. They are written from those algorithms and this description of MSVC's behaviour;
+/// the standard leaves a distribution's algorithm to the implementation.
 /// </para>
 /// <para>
-/// <b>The event times</b> are the inter-arrival times cumulated, so the count is Poisson's and a path's dates ascend
-/// (XR8 (xlii)): QuantLib's draws each event's time afresh, so its count is geometric, a mean of e^(λT) − 1 for λT
-/// (3.48 for 1.5 at a two-year return period over three years), and its dates come unordered, which the notional path
-/// reads as ascending. A path of one event or none is QuantLib's bit for bit up to the first path where QuantLib's next
-/// fresh draw falls inside the period and the cumulated time doesn't; the streams part there
-/// (<c>Divergences/BetaRiskTests.cs</c>).
+/// <b>The event times</b> are the inter-arrival times cumulated, so the count is Poisson's and a path's dates ascend:
+/// QuantLib's draws each event's time afresh, so its count is geometric, a mean of e^(λT) − 1 for λT (3.48 for 1.5 at a
+/// two-year return period over three years), and its dates come unordered, which the notional path reads as ascending.
+/// A path of one event or none is QuantLib's bit for bit up to the first path where QuantLib's next fresh draw falls
+/// inside the period and the cumulated time doesn't; the streams part there (<c>Divergences/BetaRiskTests.cs</c>).
 /// </para>
-/// <para>A working type (XR5's form): each simulation owns its generator, stepping it in place.</para>
+/// <para>A working type: each simulation owns its generator, stepping it in place.</para>
 /// </remarks>
 [Experimental("NQL0001")]
 [WorkingType]
@@ -98,7 +97,7 @@ public sealed class BetaRiskSimulation : CatSimulation
                 break;
             }
 
-            // the inter-arrival times cumulated, where QuantLib's draws each event's time afresh (XR8 (xlii))
+            // the inter-arrival times cumulated, where QuantLib's draws each event's time afresh
             eventFraction += Exponential(lambda);
         }
 

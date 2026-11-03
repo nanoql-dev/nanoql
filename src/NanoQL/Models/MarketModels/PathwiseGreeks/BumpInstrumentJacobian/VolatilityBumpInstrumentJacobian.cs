@@ -19,12 +19,12 @@ namespace NanoQL.Models;
 /// 0.01 v / ⟨v, v⟩.
 /// </para>
 /// <para>
-/// Immutable (the S-mmp plan's MMPR1 (ii)) but for QuantLib's per-instrument cache, kept under Revision 79 (SMD7): each
-/// instrument's derivatives are computed at its first read, once, from the immutable inputs, thread-safe.
+/// Immutable but for QuantLib's per-instrument cache, kept: each instrument's derivatives are computed at its first
+/// read, once, from the immutable inputs, thread-safe.
 /// </para>
 /// <para>
-/// <b>A refusal</b> (MMPR4 (xx), a documented divergence; <c>Divergences/VolatilityBumpInstrumentJacobianTests.cs</c>):
-/// an instrument whose pseudo-derivative refuses its inputs refuses at every read. QuantLib marks it computed before
+/// <b>A refusal</b> (a documented divergence; <c>Divergences/VolatilityBumpInstrumentJacobianTests.cs</c>): an
+/// instrument whose pseudo-derivative refuses its inputs refuses at every read. QuantLib marks it computed before
 /// computing it (<c>bumpinstrumentjacobian.cpp:53</c>), so after the refusal a second read returns zeros and the bump
 /// matrix a row it never wrote (<c>Matrix(rows, columns)</c> leaves its storage uninitialized).
 /// </para>

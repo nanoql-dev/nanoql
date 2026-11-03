@@ -14,9 +14,8 @@ namespace NanoQL.Tests.Vectors;
 /// <summary>
 /// The C++ harness's affine hazard-rate curve vectors,
 /// <c>tests/vectors/cxx/experimental/credit/interpolatedaffinehazardratecurve.json</c>, on Vasicek models whose x0
-/// squares to the initial intensity (the S-xcr plan's XR8 (xiii)): <see cref="InterpolatedAffineHazardRateCurve{T}"/>'s
-/// reads, linear and backward flat, and the piecewise curve on <see cref="AffineHazardRate"/> bootstrapped on spread
-/// helpers.
+/// squares to the initial intensity: <see cref="InterpolatedAffineHazardRateCurve{T}"/>'s reads, linear and backward
+/// flat, and the piecewise curve on <see cref="AffineHazardRate"/> bootstrapped on spread helpers.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class InterpolatedAffineHazardRateCurveCxxVectorTests

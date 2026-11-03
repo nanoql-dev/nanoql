@@ -12,8 +12,8 @@ namespace NanoQL.Tests.Vectors;
 /// <summary>
 /// The fitted bond curve vectors, <c>tests/vectors/termstructures/yield/fittedbonddiscountcurve.json</c>: Nelson-Siegel
 /// and Svensson evaluators on a fixed reference date and on settlement days; and fits of ten fixed-rate bonds by six
-/// methods, their outputs kept where the wheel's refits on prices one ulp apart leave them stable (the S7 plan's S7R6):
-/// the curve's maximum date and number of bonds, the method's weights, solution, iterations and cost, and discounts.
+/// methods, their outputs kept where the wheel's refits on prices one ulp apart leave them stable: the curve's maximum
+/// date and number of bonds, the method's weights, solution, iterations and cost, and discounts.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class FittedBondDiscountCurveVectorTests

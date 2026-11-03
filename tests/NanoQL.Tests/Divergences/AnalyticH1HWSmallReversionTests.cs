@@ -8,13 +8,12 @@ using NanoQL.PricingEngines;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// H1HW's I₄ at small reversion and at c = λ (the S-hes plan's HR7 (xvi)). QuantLib's I₄ = −1/λ (b/c (1 − e^(−cT)) + aT +
-/// a/λ (e^(−λT) − 1) + b/(c − λ) e^(−cT)(1 − e^(−T(λ − c)))) (<c>analytich1hwengine.cpp:126-130</c>) cancels as λT
-/// falls to order λ, its relative error about 2ε/(λT)², 1e-12 at λT 1e-2, and its last term is 0/0 at c = λ, a NaN price.
-/// nanoql evaluates the expression in double-double below λT = 2e-2, in quad-double below 1e-10 and by the cubic below
-/// 1e-12, QuantLib's double above (D3-4 of the S-hes run record), and writes the last term
-/// b·e^(−cT)·(−expm1((c − λ)T))/(c − λ), exact everywhere, −b·T·e^(−cT) at c = λ. Checked against the expression in 50
-/// digits (<c>scratchpad\c3\refs_c3.py</c>) at a 0.2, b 0.03, c 0.4 and T 10.
+/// H1HW's I₄ at small reversion and at c = λ. QuantLib's I₄ = −1/λ (b/c (1 − e^(−cT)) + aT + a/λ (e^(−λT) − 1) + b/(c −
+/// λ) e^(−cT)(1 − e^(−T(λ − c)))) (<c>analytich1hwengine.cpp:126-130</c>) cancels as λT falls to order λ, its relative
+/// error about 2ε/(λT)², 1e-12 at λT 1e-2, and its last term is 0/0 at c = λ, a NaN price. nanoql evaluates the
+/// expression in double-double below λT = 2e-2, in quad-double below 1e-10 and by the cubic below 1e-12, QuantLib's
+/// double above, and writes the last term b·e^(−cT)·(−expm1((c − λ)T))/(c − λ), exact everywhere, −b·T·e^(−cT) at c =
+/// λ. Checked against the expression in 50 digits at a 0.2, b 0.03, c 0.4 and T 10.
 /// </summary>
 public class AnalyticH1HWSmallReversionTests
 {

@@ -13,13 +13,13 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The Longstaff-Schwartz calibration seed's default (the S-van plan's VR4 (v), under R8). QuantLib's documentation
-/// says the calibration seed is the pricing seed plus an offset, "to avoid identical paths in calibration and pricing"
+/// The Longstaff-Schwartz calibration seed's default. QuantLib's documentation says the calibration seed is the pricing
+/// seed plus an offset, "to avoid identical paths in calibration and pricing"
 /// (<c>mclongstaffschwartzengine.hpp:63-71</c>), but its constructor tests <c>seedCalibration != Null&lt;Real&gt;()</c>
 /// on a <c>BigNatural</c> already narrowed from <c>Null&lt;Size&gt;()</c> (<c>:148</c>), so its default is always the
 /// narrowed null: 4294967295 through C++, 2147483647 (<c>nullInt()</c>) through the wheel. nanoql's default is the
-/// documented one, (seed + 1768237423) mod 2³². QuantLib's check: its engine with that seed passed explicitly, whose bits
-/// the fixed default reproduces; and QuantLib's default's bits through the narrowed null passed explicitly.
+/// documented one, (seed + 1768237423) mod 2³². QuantLib's check: its engine with that seed passed explicitly, whose
+/// bits the fixed default reproduces; and QuantLib's default's bits through the narrowed null passed explicitly.
 /// </summary>
 public class LongstaffSchwartzCalibrationSeedTests
 {
@@ -30,7 +30,7 @@ public class LongstaffSchwartzCalibrationSeedTests
     [Fact]
     public void TheDefaultCalibrationSeedIsTheDocumentedOne()
     {
-        // a put K 40, S 36, r 6%, vol 20%, 1 year; 50 steps, 4096 samples, seed 42 [executed on the wheel: oracle_c1.py]
+        // a put K 40, S 36, r 6%, vol 20%, 1 year; 50 steps, 4096 samples, seed 42 (QuantLib-Python 1.44)
         Assert.Equal(4.46594754120994, Price(null)); // QuantLib with seedCalibration = 42 + 1768237423
         Assert.Equal(Price(42 + 1768237423L), Price(null));
 

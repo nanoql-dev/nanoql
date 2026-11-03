@@ -17,11 +17,11 @@ namespace NanoQL.TermStructures;
 /// </summary>
 /// <remarks>
 /// <para>
-/// One of QuantLib's defects is fixed (the S-g1d plan's G1R6 (x)): QuantLib's <c>primitive</c> divides a sum by 4c³
-/// whose terms cancel to O(c³) when c·T and c·S are small, so the covariance between 0 and 1 of the 1-year rate is out
-/// by 2.4e-6 at c = 1e-4 and by 14% at c = 1e-6. Where QuantLib's form rounds by more than 1e-12 of the integral at the
-/// last time it reaches, min(T, S), the primitive is the integral from 0 written without the cancellation, each term a
-/// polynomial times a decaying exponential; elsewhere it is QuantLib's, bit for bit.
+/// One of QuantLib's defects is fixed: QuantLib's <c>primitive</c> divides a sum by 4c³ whose terms cancel to O(c³)
+/// when c·T and c·S are small, so the covariance between 0 and 1 of the 1-year rate is out by 2.4e-6 at c = 1e-4 and by
+/// 14% at c = 1e-6. Where QuantLib's form rounds by more than 1e-12 of the integral at the last time it reaches, min(T,
+/// S), the primitive is the integral from 0 written without the cancellation, each term a polynomial times a decaying
+/// exponential; elsewhere it is QuantLib's, bit for bit.
 /// </para>
 /// <para>QuantLib's polynomial branch for c = 0 is left out: the base's validation requires c &gt; 0.</para>
 /// </remarks>
@@ -151,7 +151,7 @@ public sealed class AbcdFunction : AbcdMathFunction
             return 0.0;
         }
 
-        // QuantLib's form, unless it cancels at the last time a covariance reads (G1R6 (x))
+        // QuantLib's form, unless it cancels at the last time a covariance reads
         return Cancels(Math.Min(S, T), T, S) ? PrimitiveWithoutCancellation(t, T, S) : QuantLibPrimitive(t, T, S, out _);
     }
 

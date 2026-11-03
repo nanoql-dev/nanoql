@@ -11,9 +11,8 @@ namespace NanoQL.Numerics;
 /// <summary>The Gaussian copula, C(x, y) = Φ₂(Φ⁻¹(x), Φ⁻¹(y); ρ).</summary>
 /// <remarks>
 /// Immutable. On the unit square's edges it returns the boundary values, C(u, 0) = C(0, v) = 0, C(u, 1) = u and C(1, v)
-/// = v, before its formula, as every copula here does (the S-core plan's CR7 (xxxiii)): QuantLib's is NaN at (0, 0) and
-/// (1, 1) at ρ 0.5, at (0, 1) and (1, 0) at −0.5, and 2e-10 off on the edges at 1, where the inverse normal's
-/// approximation ends.
+/// = v, before its formula, as every copula here does: QuantLib's is NaN at (0, 0) and (1, 1) at ρ 0.5, at (0, 1) and
+/// (1, 0) at −0.5, and 2e-10 off on the edges at 1, where the inverse normal's approximation ends.
 /// </remarks>
 public sealed class GaussianCopula
 {

@@ -12,8 +12,8 @@
 //         counter, recovery, discount]: its dates and data and its survival probability at each time
 //     RiskyAssetSwapOption::NPV (the swap's arguments, expiry, market spread, spread volatility): the option's NPV
 //
-// nanoql fixes the swap's fixed annuity and recovery integral (the S-xcr plan's XR8 (xii), (xxi)), so its generator
-// reads the NPV and fair spread where the schedules coincide at recovery 0.
+// nanoql fixes the swap's fixed annuity and recovery integral, so its generator reads the NPV and fair spread where the
+// schedules coincide at recovery 0.
 
 #include "termstructures/credit/creditspec.hpp"
 

@@ -7,11 +7,10 @@ on it, over discounts, dividend discounts and variances from markets of negative
 0.1% to 60% over a quarter to three years, a random draw of 400 of them. Then the refusals of a spot, a discount or a
 dividend discount that isn't positive, of a negative variance, and of a negative maturity for the rho.
 
-The inputs nanoql fixes are left out (the S-van plan's VR4 (i), (ii)): where λ² = μ² − 2 ln D / σ²T is negative,
-QuantLib's value is NaN (tests/NanoQL.Tests/Divergences/AmericanPayoffAtHitNegativeRateTests.cs); and below a variance
-of ε, where QuantLib divides by it (AmericanPayoffZeroVarianceTests.cs). A payoff is a spec of
-tools/cxx/src/instruments/payoffspec.hpp. Read back by
-tests/NanoQL.Tests/Vectors/Cxx/PricingEngines/AmericanPayoffAtHitCxxVectorTests.cs."""
+The inputs nanoql fixes are left out: where λ² = μ² − 2 ln D / σ²T is negative, QuantLib's value is NaN
+(tests/NanoQL.Tests/Divergences/AmericanPayoffAtHitNegativeRateTests.cs); and below a variance of ε, where QuantLib
+divides by it (AmericanPayoffZeroVarianceTests.cs). A payoff is a spec of tools/cxx/src/instruments/payoffspec.hpp.
+Read back by tests/NanoQL.Tests/Vectors/Cxx/PricingEngines/AmericanPayoffAtHitCxxVectorTests.cs."""
 import math
 import os
 import random

@@ -6,9 +6,9 @@ tools/vectors/gen/cxx/experimental/credit/defaultevent.py's specs: Gaussian and 
 latent models (the defaults' weights, then the recoveries'), 2,000 paths on QuantLib's Sobol sequence at its default
 seed, 2863311530, on baskets of unequal notionals and hazards, curves dated at the evaluation date, at dates within the
 horizon; model parameters A of 3 and 4, which keep every simulated recovery below 255.5/256, where QuantLib's 8 bits
-wrap 256/256 to 0 (the S-xcr plan's XR8 (xxv), held in Divergences/RandomModelStatisticsTests.cs); the expected tranche
-loss, the percentile and the shortfall, the event counts, the loss splits and distributions, and the recovery, which
-the model refuses. The default correlation is left out, as the random default model's. Read back by
+wrap 256/256 to 0 (held in Divergences/RandomModelStatisticsTests.cs); the expected tranche loss, the percentile and
+the shortfall, the event counts, the loss splits and distributions, and the recovery, which the model refuses. The
+default correlation is left out, as the random default model's. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Experimental/Credit/RandomLossLMCxxVectorTests.cs through
 tests/NanoQL.Tests/Vectors/LossModelStatistics.cs."""
 import importlib.util

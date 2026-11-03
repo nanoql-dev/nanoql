@@ -38,9 +38,9 @@ public class SeedZeroTests
         AssertRefused(() => LowDiscrepancy.MakeSequenceGenerator(3, 0));
         AssertRefused(() => GenericLowDiscrepancy<HaltonRsg, InverseCumulativeNormal>.MakeSequenceGenerator(3, 0));
 
-        // C3's generators: Knuth's and L'Ecuyer's 0 is QuantLib's clock seed; Ranlux's 0 is the standard engines'
-        // default, 19780503, which nanoql doesn't default to either; xoshiro's 0 is the clock seed among its 64-bit
-        // seeds; the randomized sequences' seed constructors pass theirs on.
+        // Knuth's and L'Ecuyer's 0 is QuantLib's clock seed; Ranlux's 0 is the standard engines' default, 19780503,
+        // which nanoql doesn't default to either; xoshiro's 0 is the clock seed among its 64-bit seeds; the randomized
+        // sequences' seed constructors pass theirs on.
         AssertRefused(() => new KnuthUniformRng(0));
         AssertRefused(() => new KnuthUniformRsg(3, 0));
         AssertRefused(() => new LecuyerUniformRng(0));

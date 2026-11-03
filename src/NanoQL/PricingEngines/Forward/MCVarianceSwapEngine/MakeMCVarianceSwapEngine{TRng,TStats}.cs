@@ -14,10 +14,9 @@ namespace NanoQL.PricingEngines;
 /// <typeparam name="TRng">The random-number traits.</typeparam>
 /// <typeparam name="TStats">The statistics accumulator.</typeparam>
 /// <remarks>
-/// An immutable builder (SEQR2): each method returns a modified copy. <see cref="ToEngine"/> returns the engine as a
-/// function of the swap and the context, its settings bound, in place of QuantLib's conversion to a pricing engine.
-/// The seed is a constructor argument (S2R4): QuantLib's default, 0, a seed from the clock, is refused. A builder has
-/// no value equality.
+/// An immutable builder: each method returns a modified copy. <see cref="ToEngine"/> returns the engine as a function
+/// of the swap and the context, its settings bound, in place of QuantLib's conversion to a pricing engine. The seed is
+/// a constructor argument: QuantLib's default, 0, a seed from the clock, is refused. A builder has no value equality.
 /// </remarks>
 public sealed record MakeMCVarianceSwapEngine<TRng, TStats>
     where TRng : IRngTraits

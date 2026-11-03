@@ -16,7 +16,7 @@ namespace NanoQL.Numerics;
 /// <para>
 /// One departure from QuantLib (<c>Divergences/SphereCylinderClampTests.cs</c>): the cylinder's radius is clamped to 0
 /// and the clamped radius kept, where QuantLib's constructor clamps it after storing it, so its intersection test reads
-/// the clamped radius and its solves the unclamped one (the S-mm plan's MR3 (xxiii); <c>spherecylinder.cpp:87</c>).
+/// the clamped radius and its solves the unclamped one (<c>spherecylinder.cpp:87</c>).
 /// </para>
 /// </remarks>
 public sealed class SphereCylinderOptimizer
@@ -48,7 +48,7 @@ public sealed class SphereCylinderOptimizer
             throw new ArgumentException("sphere must have positive radius", nameof(r));
         }
 
-        // the clamped radius, kept, where QuantLib stores the radius given (MR3 (xxiii))
+        // the clamped radius, kept, where QuantLib stores the radius given
         s = Math.Max(s, 0.0);
         if (!(alpha > 0))
         {

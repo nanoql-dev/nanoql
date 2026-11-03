@@ -9,13 +9,12 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The vega-stressed process's stress reaching its standard deviation, variance and step (the S-xrt plan's XRR5 (xxvii),
-/// fixed under R8). QuantLib's take the exact forms from the term structures on a strike-independent volatility, which
-/// read no diffusion, so the stress never reaches them. On QuantLib 1.44 (the S-xrt planner's <c>xp_c3.cpp</c>: stress
-/// 0.1 on a flat 0.2, r − q 0.03) the diffusion is 0.3 but the deviation over a year 0.2 and the step from 100 at a draw
-/// of 1 123.367806, the unstressed process's. nanoql's go through the Euler discretization with the stressed diffusion
-/// inside the box and the plain one outside; with no stress they are QuantLib's, and the expectation is the unstressed
-/// one, the mean of the asset reading no volatility.
+/// The vega-stressed process's stress reaching its standard deviation, variance and step (fixed). QuantLib's take the
+/// exact forms from the term structures on a strike-independent volatility, which read no diffusion, so the stress
+/// never reaches them. On QuantLib 1.44 (stress 0.1 on a flat 0.2, r − q 0.03) the diffusion is 0.3 but the deviation
+/// over a year 0.2 and the step from 100 at a draw of 1 123.367806, the unstressed process's. nanoql's go through the
+/// Euler discretization with the stressed diffusion inside the box and the plain one outside; with no stress they are
+/// QuantLib's, and the expectation is the unstressed one, the mean of the asset reading no volatility.
 /// </summary>
 public class VegaStressedProcessTests
 {

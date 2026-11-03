@@ -17,9 +17,8 @@ namespace NanoQL.Models;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A working type (the S-mm plan's MR1 (ii)): QuantLib's mutable scratch is the calculator's own, so it is owned by one
-/// computation and isn't thread-safe. The drifts' size is checked at every computation, QuantLib's extra-safety check
-/// (SD8).
+/// A working type: QuantLib's mutable scratch is the calculator's own, so it is owned by one computation and isn't
+/// thread-safe. The drifts' size is checked at every computation, QuantLib's extra-safety check.
 /// </para>
 /// <para>
 /// A spanning of no forwards is refused: QuantLib's drifts then read each swap's cross variation from its own

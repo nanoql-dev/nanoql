@@ -24,9 +24,9 @@ namespace NanoQL.PricingEngines;
 /// Winter 1998).
 /// </summary>
 /// <remarks>
-/// A working type (S2R2), as in QuantLib: it draws a new uniform sequence for each path it prices, from a copy of the
+/// A working type, as in QuantLib: it draws a new uniform sequence for each path it prices, from a copy of the
 /// generator it is given, read as a view of the generator's buffer where QuantLib copies a vector per path, so a price
-/// allocates nothing (the S-bar plan's BR1 (iv)). A knock-out pays its rebate at the hit's node, a knock-in at expiry.
+/// allocates nothing. A knock-out pays its rebate at the hit's node, a knock-in at expiry.
 /// </remarks>
 [WorkingType]
 public sealed class BarrierPathPricer : PathPricer<MonteCarloPath>

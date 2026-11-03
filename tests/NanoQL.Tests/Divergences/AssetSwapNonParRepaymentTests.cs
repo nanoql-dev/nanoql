@@ -10,17 +10,17 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The asset swap's final repayment (the S-cms plan's CMR5 (xix), (xx)): QuantLib pays a given non-par repayment as an
-/// amount (<c>assetswap.cpp:125-134</c>), while <c>fairNonParRepayment</c> reads it per 100 of the bond's notional
+/// The asset swap's final repayment: QuantLib pays a given non-par repayment as an amount
+/// (<c>assetswap.cpp:125-134</c>), while <c>fairNonParRepayment</c> reads it per 100 of the bond's notional
 /// (<c>:284-296</c>), and with none given it repays the bond's redemption but stores 100 (<c>:130</c>). On the wheel, a
 /// 7-year 4% bond issued 15 March 2024 on a flat 3% curve, swapped at its clean price on Euribor 6M on 23 October 2026:
-/// on a 1e6 face a given repayment of 100 pays 100, the NPV 876,253.3609798652 and the fair spread
-/// −0.21178102152342376 at par, where with none given both are 0; its fair repayment (QuantLib's formula on the wheel's
-/// results, which hide the member), 199.99 with 100 given and 100 with none, fed back leaves 876,165.7356437672 and
-/// 876,253.3609798652; on a face of 100 redeemed at 101 the fair repayment is 99.99999999999999, which fed back leaves
-/// 0.8763409950793744. nanoql pays a given repayment as that share of the notional, and with none given stores the
-/// redemption per 100 of notional, 101 here. QuantLib's check: its fair repayment fed back gives an NPV of 0 only on
-/// the consistent reading; on a face of 100 redeemed at 100 the two agree, and QuantLib's cases keep their bits.
+/// on a 1e6 face a given repayment of 100 pays 100, the NPV 876,253.3609798652 and the fair spread −0.21178102152342376
+/// at par, where with none given both are 0; its fair repayment (QuantLib's formula on the wheel's results, which hide
+/// the member), 199.99 with 100 given and 100 with none, fed back leaves 876,165.7356437672 and 876,253.3609798652; on
+/// a face of 100 redeemed at 101 the fair repayment is 99.99999999999999, which fed back leaves 0.8763409950793744.
+/// nanoql pays a given repayment as that share of the notional, and with none given stores the redemption per 100 of
+/// notional, 101 here. QuantLib's check: its fair repayment fed back gives an NPV of 0 only on the consistent reading;
+/// on a face of 100 redeemed at 100 the two agree, and QuantLib's cases keep their bits.
 /// </summary>
 public class AssetSwapNonParRepaymentTests
 {

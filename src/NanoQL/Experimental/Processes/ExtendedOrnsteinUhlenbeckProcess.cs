@@ -21,19 +21,19 @@ namespace NanoQL.Experimental;
 /// <para>
 /// Two of QuantLib's defects are fixed (<c>Divergences/ExtendedOrnsteinUhlenbeckExpectationTests.cs</c>): the
 /// trapezoidal rule's (1 − e^(−a·dt))/(a·dt), 0/0 at a speed of 0 and cancelling below, is a series below a·dt of 1e-2
-/// and QuantLib's quotient from it (the S-xeq plan's XER5 (xxix), S-g1d's G1R4 cut); and the Gauss-Lobatto rule, whose
-/// integrand b(x)e^(ax) QuantLib integrates to an absolute accuracy e^(a(t₀+dt)) puts out of reach (it throws from
-/// a(t₀+dt) of 35), integrates the bounded b(x)e^(−a(t₀+dt−x)) where a(t₀+dt) passes 30, with a relative accuracy of
-/// 1e-10 beside the absolute one, and QuantLib's integrand at and below 30 ((xxx)).
+/// and QuantLib's quotient from it; and the Gauss-Lobatto rule, whose integrand b(x)e^(ax) QuantLib integrates to an
+/// absolute accuracy e^(a(t₀+dt)) puts out of reach (it throws from a(t₀+dt) of 35), integrates the bounded
+/// b(x)e^(−a(t₀+dt−x)) where a(t₀+dt) passes 30, with a relative accuracy of 1e-10 beside the absolute one, and
+/// QuantLib's integrand at and below 30.
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]
 public sealed class ExtendedOrnsteinUhlenbeckProcess : StochasticProcess1D
 {
-    // a·dt below which the trapezoidal rule's quotient is its series ((xxix))
+    // a·dt below which the trapezoidal rule's quotient is its series
     private const double SeriesBelow = 1e-2;
 
-    // a(t₀ + dt) past which the Gauss-Lobatto rule integrates the bounded integrand, and its relative accuracy ((xxx))
+    // a(t₀ + dt) past which the Gauss-Lobatto rule integrates the bounded integrand, and its relative accuracy
     private const double BoundedAbove = 30.0;
     private const double BoundedRelativeAccuracy = 1e-10;
     private const int MaxIterations = 100000;
@@ -114,7 +114,7 @@ public sealed class ExtendedOrnsteinUhlenbeckProcess : StochasticProcess1D
                 double ex = Math.Exp(-Speed * dt);
                 double x = Speed * dt;
 
-                // (1 − e^(−x))/x: QuantLib's quotient, 0/0 at a speed of 0, from x of 1e-2, its series below ((xxix))
+                // (1 − e^(−x))/x: QuantLib's quotient, 0/0 at a speed of 0, from x of 1e-2, its series below
                 double ratio = x < SeriesBelow
                     ? 1.0 - (x * ((1.0 / 2.0) - (x * ((1.0 / 6.0) - (x * ((1.0 / 24.0) - (x * ((1.0 / 120.0) - (x * ((1.0 / 720.0) - (x / 5040.0)))))))))))
                     : (1 - ex) / (Speed * dt);
@@ -137,7 +137,7 @@ public sealed class ExtendedOrnsteinUhlenbeckProcess : StochasticProcess1D
                 + (a * Math.Exp(-a * end) * new GaussLobattoIntegral(MaxIterations, intEps).Integrate(x => b(x) * Math.Exp(a * x), t0, end));
         }
 
-        // the bounded integrand b(x)e^(−a(t₀+dt−x)), where e^(a(t₀+dt)) puts QuantLib's accuracy out of reach ((xxx))
+        // the bounded integrand b(x)e^(−a(t₀+dt−x)), where e^(a(t₀+dt)) puts QuantLib's accuracy out of reach
         return ouProcess.Expectation(t0, x0, dt)
             + (a * new GaussLobattoIntegral(MaxIterations, intEps, BoundedRelativeAccuracy).Integrate(x => b(x) * Math.Exp(-a * (end - x)), t0, end));
     }

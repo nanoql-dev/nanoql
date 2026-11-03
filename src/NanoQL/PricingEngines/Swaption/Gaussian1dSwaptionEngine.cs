@@ -21,26 +21,25 @@ namespace NanoQL.PricingEngines;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A static class (master plan §2's engine row): <c>Calculate</c> runs QuantLib's four steps (playbook §2.1), the model
+/// A static class (the playbook's engine row): <c>Calculate</c> runs QuantLib's four steps (playbook §2.1), the model
 /// and QuantLib's settings arguments. Every fixed coupon whose start is on or after an exercise date is part of the
 /// swap exercised into there. An overnight-indexed underlying is supported: a compounded coupon's daily compounding
 /// telescopes to a zero bonds' ratio over its rate period, over the shifted value dates under an observation shift,
 /// normalised by the coupon's own rate accrual, which is exact for plain compounding and a lookback with the shift; a
-/// lookback without the shift and a lockout are priced as if they weren't there. A payment delay is handled
-/// statically. Cash-settled swaptions and arithmetically averaged overnight coupons aren't supported.
+/// lookback without the shift and a lockout are priced as if they weren't there. A payment delay is handled statically.
+/// Cash-settled swaptions and arithmetically averaged overnight coupons aren't supported.
 /// </para>
 /// <para>
-/// One call shares one memo of the model's terms, built inside it (the S-g1d plan's G1R1 (iii)). QuantLib's OpenMP
-/// branch, which warms the model's caches before a parallel loop, isn't ported: the loop runs in sequence, as
-/// QuantLib's default build does.
+/// One call shares one memo of the model's terms, built inside it. QuantLib's OpenMP branch, which warms the model's
+/// caches before a parallel loop, isn't ported: the loop runs in sequence, as QuantLib's default build does.
 /// </para>
 /// <para>
-/// Two documented divergences. A discount or forwarding curve on another clock than the model's is read at the
-/// instants QuantLib's arguments denote: the exercise's date in the numeraire's read and the Digital probabilities'
-/// discount, the coupons' dates where QuantLib passes them; QuantLib's reads where the curves share a clock (the plan's
-/// G1R6 (xvi); <c>Divergences/Gaussian1dMismatchedTimesTests.cs</c>). With <c>flatPayoffExtrapolation</c>, the right
-/// tail integrates the payoff's last node, where QuantLib's integrates its second-last (G1R6 (xxi);
-/// <c>Divergences/FlatPayoffExtrapolationTests.cs</c>).
+/// Two documented divergences. A discount or forwarding curve on another clock than the model's is read at the instants
+/// QuantLib's arguments denote: the exercise's date in the numeraire's read and the Digital probabilities' discount,
+/// the coupons' dates where QuantLib passes them; QuantLib's reads where the curves share a clock
+/// (<c>Divergences/Gaussian1dMismatchedTimesTests.cs</c>). With <c>flatPayoffExtrapolation</c>, the right tail
+/// integrates the payoff's last node, where QuantLib's integrates its second-last
+/// (<c>Divergences/FlatPayoffExtrapolationTests.cs</c>).
 /// </para>
 /// </remarks>
 public static class Gaussian1dSwaptionEngine
@@ -117,7 +116,7 @@ public static class Gaussian1dSwaptionEngine
         {
             if (flatPayoffExtrapolation)
             {
-                // the right tail at the last node's value, where QuantLib's takes the second-last's (G1R6 (xxi))
+                // the right tail at the last node's value, where QuantLib's takes the second-last's
                 price += Gaussian1dModel.GaussianShiftedPolynomialIntegral(0.0, 0.0, 0.0, 0.0, p[z.Size - 1], z[z.Size - 2], z[z.Size - 1], 100.0)
                     * zSpreadDf;
                 price += Gaussian1dModel.GaussianShiftedPolynomialIntegral(0.0, 0.0, 0.0, 0.0, p[0], z[0], -100.0, z[0]) * zSpreadDf;
@@ -320,7 +319,7 @@ public static class Gaussian1dSwaptionEngine
                         fixedLegNpv += arguments.FixedCoupons[l] * model.Zerobond(arguments.FixedPayDates[l], expiry0, z[k], discountCurve, memo);
                     }
 
-                    // the numeraire read at the exercise's date (G1R6 (xvi))
+                    // the numeraire read at the exercise's date
                     double exerciseValue = (type == OptionType.Call ? 1.0 : -1.0) * (floatingLegNpv - fixedLegNpv)
                         / model.NumeraireCore(expiry0Time, expiry0, z[k], discountCurve, memo);
 

@@ -7,12 +7,12 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The ultimate-forward curve's kernel at small α (the S-sr plan's SSR6 (xviii)). QuantLib's B(x) =
-/// (1 − e^(−αx))/(αx) (<c>ultimateforwardtermstructure.hpp:169</c>) is unguarded: on the wheel, over a flat 3%
-/// Actual/365 (Fixed) curve from 15 January 2025 with an LLFR of 3%, a UFR of 4% and a 20-year first smoothing point,
-/// α = 0 refuses the 60-year zero rate with "positive compound factor required", α = 1e-12 gives 0.029999995243582964
-/// against its limit 0.03, and α = 0.1 gives 0.035031562480595566. nanoql's kernel is −expm1(−αx)/(αx), and 1 at 0, as
-/// upstream's own <c>oneMinusExpOverX</c> after the pin. QuantLib's check: the limit, and its own values at ordinary α.
+/// The ultimate-forward curve's kernel at small α. QuantLib's B(x) = (1 − e^(−αx))/(αx)
+/// (<c>ultimateforwardtermstructure.hpp:169</c>) is unguarded: on the wheel, over a flat 3% Actual/365 (Fixed) curve
+/// from 15 January 2025 with an LLFR of 3%, a UFR of 4% and a 20-year first smoothing point, α = 0 refuses the 60-year
+/// zero rate with "positive compound factor required", α = 1e-12 gives 0.029999995243582964 against its limit 0.03, and
+/// α = 0.1 gives 0.035031562480595566. nanoql's kernel is −expm1(−αx)/(αx), and 1 at 0, as upstream's own
+/// <c>oneMinusExpOverX</c> after the pin. QuantLib's check: the limit, and its own values at ordinary α.
 /// </summary>
 public class UfrSmallAlphaTests
 {

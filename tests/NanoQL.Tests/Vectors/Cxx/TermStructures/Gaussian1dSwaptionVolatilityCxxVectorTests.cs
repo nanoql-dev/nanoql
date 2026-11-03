@@ -14,7 +14,8 @@ namespace NanoQL.Tests.Vectors;
 /// <c>tests/vectors/cxx/termstructures/volatility/swaption/gaussian1dswaptionvolatility.json</c>:
 /// <see cref="Gaussian1dSwaptionVolatility"/> on a Euribor swap base with curves or the model's, three GSR models and
 /// an engine given; its dates, strike range and maximum swap tenor, its volatilities by tenor, date and time where
-/// stable (the S7 plan's S7R6), and its smile sections by date and by time, their exercise dates and times and levels.
+/// stable under one-ulp moves of the inputs, and its smile sections by date and by time, their exercise dates and times
+/// and levels.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class Gaussian1dSwaptionVolatilityCxxVectorTests

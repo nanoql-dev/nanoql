@@ -10,11 +10,11 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The market-model callability of the S-mmp plan's third commit: the refusals of inputs QuantLib reads past or
-/// misreads (MMPR4's refusals: the node-data collection's times, the strategies' coefficients and parameters, the
-/// call-specified product's rebate, the upper-bound engine's inner evolvers), with QuantLib's default nothing control
-/// accepted beside a rebate at a subset of the times (MPP24); and two routes to one value: the Longstaff-Schwartz
-/// regression against least squares, and the lower bound against the upper bound (SMD13).
+/// The market-model callability : the refusals of inputs QuantLib reads past or misreads (the node-data collection's
+/// times, the strategies' coefficients and parameters, the call-specified product's rebate, the upper-bound engine's
+/// inner evolvers), with QuantLib's default nothing control accepted beside a rebate at a subset of the times; and two
+/// routes to one value: the Longstaff-Schwartz regression against least squares, and the lower bound against the upper
+/// bound.
 /// </summary>
 public class MarketModelCallabilityTests
 {
@@ -131,7 +131,7 @@ public class MarketModelCallabilityTests
     [Fact]
     public void QuantLibsDefaultControlBesideARebateAtASubsetIsTheMatchedOne()
     {
-        // MPP24: a rebate and basis system at 0.5, 1.5 and 2.5; QuantLib's default control flagged at every rate time
+        // A rebate and basis system at 0.5, 1.5 and 2.5; QuantLib's default control flagged at every rate time
         double[] rt = Market.RateTimes;
         var receiver = new MultiStepSwap(rt, Market.Accruals, Market.Accruals, Market.PaymentTimes, K, false);
         bool[] flags = [true, false, true, false, true, false];

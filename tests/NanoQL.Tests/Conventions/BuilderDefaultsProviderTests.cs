@@ -95,7 +95,7 @@ public class BuilderDefaultsProviderTests
     [Fact]
     public void ASwapIndexBuiltInTheSetForecastsItsCmsRateWithTheSetsRuleAndEndOfMonth()
     {
-        // the swap index's underlying swap takes its rules and end of month from the set's EUR defaults (CVD44)
+        // the swap index's underlying swap takes its rules and end of month from the set's EUR defaults
         ConventionSet set = ConventionsText.OnQuantLib(
             "<SwapConvention name=\"MakeVanillaSwap.EUR\" base=\"MakeVanillaSwap.EUR\"><FixedLegRule>Forward</FixedLegRule><FixedLegEndOfMonth>true</FixedLegEndOfMonth>"
             + "<FloatingLegRule>Forward</FloatingLegRule><FloatingLegEndOfMonth>true</FloatingLegEndOfMonth></SwapConvention>");
@@ -142,7 +142,7 @@ public class BuilderDefaultsProviderTests
     [Fact]
     public void ASetWithoutQuantLibsPresetsRefusesABuilderWhoseDefaultRecordItDoesntDefine()
     {
-        // an index of the set's own, and no MakeVanillaSwap.EUR or MakeOIS record (CVD25)
+        // an index of the set's own, and no MakeVanillaSwap.EUR or MakeOIS record
         ConventionSet set = ConventionSet.Empty.With(ConventionsText.Records(
             "<IborIndex name=\"Desk6M\"><Family>Desk</Family><Tenor>6M</Tenor><FixingDays>2</FixingDays><Currency>EUR</Currency><FixingCalendar>TARGET</FixingCalendar>"
             + "<Convention>ModifiedFollowing</Convention><EndOfMonth>false</EndOfMonth><DayCounter>Actual360</DayCounter></IborIndex>"

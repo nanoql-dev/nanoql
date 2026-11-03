@@ -15,7 +15,7 @@ namespace NanoQL.Experimental;
 /// The binomial double-barrier engine on the additive equal-probabilities tree and Derman and Kani's discretized
 /// double-barrier option: QuantLib-Python's <c>BinomialEQPDoubleBarrierEngine</c>, QuantLib's
 /// <c>BinomialDoubleBarrierEngine&lt;AdditiveEQPBinomialTree, DiscretizedDermanKaniDoubleBarrierOption&gt;</c>, the
-/// wheel's closing (D12).
+/// wheel's closing.
 /// </summary>
 [Experimental("NQL0001")]
 public static class BinomialEQPDoubleBarrierEngine

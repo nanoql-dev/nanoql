@@ -36,8 +36,8 @@ namespace NanoQL.PricingEngines;
 /// <para>
 /// The formulas are first-passage closed forms in one equivalent-constant carry and volatility, the variance and
 /// discounts to expiry: no exact closed form exists for a first passage under general deterministic term structures,
-/// and on shaped markets they miss QuantLib's finite-difference barrier engine by -1.6% to +0.6% (the S-bar plan's BR4
-/// (d)); the term-structure-exact routes are <see cref="FdBlackScholesBarrierEngine"/> and the Monte Carlo engines.
+/// and on shaped markets they miss QuantLib's finite-difference barrier engine by -1.6% to +0.6%; the
+/// term-structure-exact routes are <see cref="FdBlackScholesBarrierEngine"/> and the Monte Carlo engines.
 /// </para>
 /// <para>QuantLib's references: Haug's formulas, and its <c>testHaugValues</c> table.</para>
 /// </remarks>
@@ -103,7 +103,7 @@ public static class AnalyticBarrierEngine
     // own time over the volatility's, the rate at which its discount accrues per unit of the volatility's time; 0 where
     // the curve accrues nothing (a date on or before its reference date); the curve's own rate where the volatility's
     // time is 0, as there is no other clock to read it on. The barrier family's closed forms read their rates through
-    // it (the S-rx plan's SRXR3 (iii), the S-bar plan's BR5 (i)).
+    // it.
     internal static double RateOnVolatilityClock(YieldTermStructure curve, BlackVolTermStructure volatility, Date date)
     {
         double curveTime = curve.AccrualTimeTo(date);

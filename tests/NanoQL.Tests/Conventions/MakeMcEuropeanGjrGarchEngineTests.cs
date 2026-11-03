@@ -12,11 +12,11 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// <see cref="MakeMCEuropeanGJRGARCHEngine{TRng, TStats}"/>'s seed is explicit (S2R4; the S-hes plan's HR2 (v)): 0,
-/// QuantLib's seed from the clock, is refused, naming the parameter. QuantLib's checks keep their texts: the steps given
-/// one way at most, the samples beside no tolerance, a tolerance only where the traits estimate an error, and the steps
-/// given before the conversion; and the engine is <see cref="MCEuropeanGJRGARCHEngine"/>'s with the settings given, bit
-/// for bit, its payoff plain vanilla.
+/// <see cref="MakeMCEuropeanGJRGARCHEngine{TRng, TStats}"/>'s seed is explicit: 0, QuantLib's seed from the clock, is
+/// refused, naming the parameter. QuantLib's checks keep their texts: the steps given one way at most, the samples
+/// beside no tolerance, a tolerance only where the traits estimate an error, and the steps given before the conversion;
+/// and the engine is <see cref="MCEuropeanGJRGARCHEngine"/>'s with the settings given, bit for bit, its payoff plain
+/// vanilla.
 /// </summary>
 public class MakeMcEuropeanGjrGarchEngineTests
 {

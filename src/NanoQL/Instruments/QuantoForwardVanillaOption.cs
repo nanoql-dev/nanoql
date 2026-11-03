@@ -13,7 +13,7 @@ namespace NanoQL.Instruments;
 /// A quanto forward-start vanilla option: a forward-start option on an asset in a foreign currency, paid in the
 /// domestic one.
 /// </summary>
-/// <remarks>Immutable. As in QuantLib it derives <see cref="ForwardVanillaOption"/> (the S-exo plan's ER2 (ii)).</remarks>
+/// <remarks>Immutable. As in QuantLib it derives <see cref="ForwardVanillaOption"/>.</remarks>
 public sealed class QuantoForwardVanillaOption : ForwardVanillaOption
 {
     /// <summary>Initializes a new instance of the <see cref="QuantoForwardVanillaOption"/> class.</summary>

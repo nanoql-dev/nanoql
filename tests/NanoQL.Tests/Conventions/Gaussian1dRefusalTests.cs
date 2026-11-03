@@ -14,8 +14,8 @@ namespace NanoQL.Tests.Conventions;
 
 /// <summary>
 /// The refusals of GSR, its process, the Gaussian1d model's members and the two Gaussian1d swaption engines, by type,
-/// message and parameter (playbook §2; the S-g1d plan's G1D17): QuantLib's texts, a check of an argument an
-/// <see cref="ArgumentException"/> naming it, a check of a value already stored a <see cref="NanoQLException"/>.
+/// message and parameter (playbook §2): QuantLib's texts, a check of an argument an <see cref="ArgumentException"/>
+/// naming it, a check of a value already stored a <see cref="NanoQLException"/>.
 /// </summary>
 public class Gaussian1dRefusalTests
 {

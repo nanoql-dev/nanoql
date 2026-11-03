@@ -5,10 +5,9 @@
 harness (tools/cxx/src/experimental/credit/onefactorcopula.cpp): the densities, the distributions of Z and Y (Y's from
 the table each constructor computes) and Y's inverse, the conditional probabilities and the integrals of a
 probability, at degrees of freedom from 3 to 12 and correlations from 0 to 1. The densities and distributions are
-S-core's Student t (its CR7 (xxii), (xxiii)), so the tables read the last bits of their fixes (the kickoff's Student
-cdf class, within R7). The integrals of a probability are null: QuantLib's Student classes integrate the factor over
-[-5, 10], losing its left tail, where nanoql integrates over [-maximum, maximum] (the S-xcr code review's C3 O1-4;
-Divergences/OneFactorStudentCopulaRangeTests.cs). Read back by
+nanoql's Student t, so the tables read the last bits of its fixes, within the tolerance. The integrals of a
+probability are null: QuantLib's Student classes integrate the factor over [-5, 10], losing its left tail, where
+nanoql integrates over [-maximum, maximum] (Divergences/OneFactorStudentCopulaRangeTests.cs). Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Experimental/Credit/OneFactorStudentCopulaCxxVectorTests.cs."""
 import os
 import sys

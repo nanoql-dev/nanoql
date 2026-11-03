@@ -11,10 +11,10 @@ namespace NanoQL.Tests.Divergences;
 
 /// <summary>
 /// The lognormal CMS spread pricer without a coupon discount curve discounts each coupon on its own first swap index's
-/// curve (the S-xrt plan's XRR5 (xviii)). QuantLib's <c>initialize</c> fills its empty coupon curve handle with the first
-/// coupon's index's curve and keeps it (<c>lognormalcmsspreadpricer.cpp</c>, <c>couponDiscountCurve_ = …</c>), so one
-/// pricer serving coupons on different indexes discounts every later coupon on the first's curve: its price is the
-/// price on a pricer given that curve, which this fact computes as QuantLib's. Rates don't read the curve.
+/// curve. QuantLib's <c>initialize</c> fills its empty coupon curve handle with the first coupon's index's curve and
+/// keeps it (<c>lognormalcmsspreadpricer.cpp</c>, <c>couponDiscountCurve_ = …</c>), so one pricer serving coupons on
+/// different indexes discounts every later coupon on the first's curve: its price is the price on a pricer given that
+/// curve, which this fact computes as QuantLib's. Rates don't read the curve.
 /// </summary>
 public class CmsSpreadCouponDiscountCurveTests
 {

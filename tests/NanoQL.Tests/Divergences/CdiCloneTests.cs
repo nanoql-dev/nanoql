@@ -13,9 +13,8 @@ namespace NanoQL.Tests.Divergences;
 /// <c>clone</c>, so <c>clone(h)</c>, "a copy of itself linked to a different forwarding curve"
 /// (<c>iborindex.hpp:60-62</c>), is a plain <c>OvernightIndex</c> of the same name, forecasting by the generic formula:
 /// on a flat 10.75% Business/252 curve its fixing for 28 March 2024 is 0.10752293232819721 against <c>Cdi</c>'s
-/// 0.11349086074650594, and an OIS helper bootstrapping a CDI curve clones its index. nanoql's
-/// <see cref="Cdi.Clone"/> returns a <see cref="Cdi"/>. QuantLib's check: <c>Cdi</c>'s own forecast on the new curve
-/// [executed on the wheel].
+/// 0.11349086074650594, and an OIS helper bootstrapping a CDI curve clones its index. nanoql's <see cref="Cdi.Clone"/>
+/// returns a <see cref="Cdi"/>. QuantLib's check: <c>Cdi</c>'s own forecast on the new curve (QuantLib-Python 1.44).
 /// </summary>
 public class CdiCloneTests
 {

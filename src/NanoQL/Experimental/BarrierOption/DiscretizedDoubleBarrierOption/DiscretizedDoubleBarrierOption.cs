@@ -17,15 +17,14 @@ namespace NanoQL.Experimental;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A working type, as every discretized asset is (S-bond's protocol, SBR1): its values are views of its buffers, its
-/// exercise reads the lattice's grid into a buffer it reserves at its widest step, and the vanilla sub-asset rolled back
-/// beside it is kept and initialized again at each reset, so a rollback allocates nothing.
+/// A working type, as every discretized asset is: its values are views of its buffers, its exercise reads the lattice's
+/// grid into a buffer it reserves at its widest step, and the vanilla sub-asset rolled back beside it is kept and
+/// initialized again at each reset, so a rollback allocates nothing.
 /// </para>
 /// <para>
 /// <b>The American window</b> is bounded by its two times compared with <c>IsOnTime</c> as well, upstream's fix after
-/// v1.44 (#2878, the S-xeq plan's XER5 (xii)): the grid's last time can be an ulp off the maturity the engine starts
-/// the asset at, where QuantLib 1.44's plain comparison skips the exercise at expiry
-/// (<c>Divergences/DoubleBarrierUpstreamFixesTests.cs</c>).
+/// v1.44 (#2878): the grid's last time can be an ulp off the maturity the engine starts the asset at, where QuantLib
+/// 1.44's plain comparison skips the exercise at expiry (<c>Divergences/DoubleBarrierUpstreamFixesTests.cs</c>).
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]

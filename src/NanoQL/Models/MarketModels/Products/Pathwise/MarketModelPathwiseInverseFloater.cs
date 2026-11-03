@@ -12,7 +12,7 @@ namespace NanoQL.Models;
 /// An inverse floater for the pathwise engines: <see cref="MultiStepInverseFloater"/>'s cash flows, with each coupon's
 /// derivative with respect to its rate's forward.
 /// </summary>
-/// <remarks>A working type (the S-mmp plan's MMPR1 (i)).</remarks>
+/// <remarks>A working type.</remarks>
 [WorkingType]
 public sealed class MarketModelPathwiseInverseFloater : MarketModelPathwiseMultiProduct
 {

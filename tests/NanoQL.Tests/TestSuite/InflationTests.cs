@@ -312,8 +312,8 @@ public class InflationTests
         }
     }
 
-    // Adapted: the base date is a function of the context, called by the constructor (SID21), so the lazy curve is
-    // built once the fixings are in the context, and its helpers take their quotes at construction.
+    // Adapted: the base date is a function of the context, called by the constructor, so the lazy curve is built once
+    // the fixings are in the context, and its helpers take their quotes at construction.
     [Fact]
     public void TestZeroTermStructureLazyBaseDate()
     {
@@ -499,7 +499,7 @@ public class InflationTests
         }
     }
 
-    // Adapted: QuantLib's deprecated interpolated() check (line 769) isn't ported (D5): the index never interpolates.
+    // Adapted: QuantLib's deprecated interpolated() check (line 769) isn't ported: the index never interpolates.
     [Fact]
     public void TestQuotedYYIndex()
     {
@@ -554,7 +554,7 @@ public class InflationTests
         CheckEmptyHandle(() => quoted.Fixing(new Date(1, April, 2024), context));
     }
 
-    // Adapted: QuantLib's deprecated interpolated() check (line 826) isn't ported (D5); the fixings go into the case's
+    // Adapted: QuantLib's deprecated interpolated() check (line 826) isn't ported; the fixings go into the case's
     // evaluation context.
     [Fact]
     public void TestRatioYYIndex()
@@ -801,7 +801,7 @@ public class InflationTests
     }
 
     // Adapted: QuantLib's fairRate() and fairSpread() refuse "result not available" where the results hold none, a
-    // null here (PR4); the fixings go into the case's evaluation context.
+    // null here; the fixings go into the case's evaluation context.
     [Fact]
     public void TestZeroBpsYoYInflationSwapFairRateAndSpread()
     {

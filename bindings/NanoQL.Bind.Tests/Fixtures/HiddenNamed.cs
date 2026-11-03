@@ -5,7 +5,7 @@ using NanoQL.Numerics;
 
 namespace NanoQL.Bind.Tests.Fixtures;
 
-/// <summary>A named class (D12) whose own <c>Create</c> hides its closing's, carrying its closing's other statics.</summary>
+/// <summary>A named class whose own <c>Create</c> hides its closing's, carrying its closing's other statics.</summary>
 public sealed class HiddenNamed : Hidable<Linear>
 {
     private HiddenNamed(double value)

@@ -8,16 +8,16 @@ on fewer fixings than assets, as many and more; then an expired option, a fixing
 unsorted fixings, which the engine refuses.
 
 The expired option's error estimate is left out: QuantLib's MultiAssetOption leaves it unset on expiry, so reading it
-throws, where nanoql's multi-asset results carry the 0 of an instrument's expired results (the S-xeq run's R2-6).
+throws, where nanoql's multi-asset results carry the 0 of an instrument's expired results.
 
 Every structure is on Act/365 (Fixed) from the evaluation date and every process shares one risk-free curve, so the
-engine's clock is every structure's own (the S-xeq plan's §2.8). The specs: an option {"fixingDates" (serial numbers),
-"strike"}, and tools/vectors/gen/experimental/exoticoptions/mceverestengine.py's engine, its steps
-unused (the engine's grid is the fixings'). The wheel's calls, by QuantLib-SWIG 1.44's exoticoptions.i:
-StochasticProcessArray(processes, correlation); HimalayaOption(fixingDates, strike); MCPRHimalayaEngine or
-MCLDHimalayaEngine(process, brownianBridge, antitheticVariate, requiredSamples, requiredTolerance, maxSamples, seed),
-QuantLib's MCHimalayaEngine<PseudoRandom> or <LowDiscrepancy> with Statistics; the option's NPV and errorEstimate. Read
-back by tests/NanoQL.Tests/Vectors/Experimental/ExoticOptions/MCHimalayaEngineVectorTests.cs."""
+engine's clock is every structure's own. The specs: an option {"fixingDates" (serial numbers), "strike"}, and
+tools/vectors/gen/experimental/exoticoptions/mceverestengine.py's engine, its steps unused (the engine's grid is the
+fixings'). The wheel's calls, by QuantLib-SWIG 1.44's exoticoptions.i: StochasticProcessArray(processes, correlation);
+HimalayaOption(fixingDates, strike); MCPRHimalayaEngine or MCLDHimalayaEngine(process, brownianBridge,
+antitheticVariate, requiredSamples, requiredTolerance, maxSamples, seed), QuantLib's MCHimalayaEngine<PseudoRandom> or
+<LowDiscrepancy> with Statistics; the option's NPV and errorEstimate. Read back by
+tests/NanoQL.Tests/Vectors/Experimental/ExoticOptions/MCHimalayaEngineVectorTests.cs."""
 import importlib.util
 import os
 import sys

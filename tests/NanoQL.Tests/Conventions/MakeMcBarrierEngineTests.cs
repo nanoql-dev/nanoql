@@ -13,12 +13,11 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The Monte Carlo barrier engine's builder, constructor and pricers (the S-bar plan's BR1): QuantLib's checks with its
-/// texts, each refusal's type, message and parameter asserted (the S-van plan's VD19), and the seed explicit: 0, which
-/// QuantLib reads as a seed drawn from the clock, refused naming the parameter (S2R4). QuantLib's builder checks the
-/// samples beside a tolerance and an error estimate the traits can't give as they are set, and the steps at the
-/// conversion to an engine; its engine's constructor checks the steps; its pricers check the strike and the barrier;
-/// and the engine checks the payoff and the spot as it prices.
+/// The Monte Carlo barrier engine's builder, constructor and pricers: QuantLib's checks with its texts, each refusal's
+/// type, message and parameter asserted, and the seed explicit: 0, which QuantLib reads as a seed drawn from the clock,
+/// refused naming the parameter. QuantLib's builder checks the samples beside a tolerance and an error estimate the
+/// traits can't give as they are set, and the steps at the conversion to an engine; its engine's constructor checks the
+/// steps; its pricers check the strike and the barrier; and the engine checks the payoff and the spot as it prices.
 /// </summary>
 public class MakeMcBarrierEngineTests
 {

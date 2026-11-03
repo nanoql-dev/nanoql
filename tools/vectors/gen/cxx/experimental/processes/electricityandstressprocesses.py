@@ -7,16 +7,16 @@ C++ harness (tools/cxx/src/experimental/processes/electricityandstressprocesses.
 
 - "geman-roncoroni" case: vpp.cpp's testGemanRoncoroniProcess paths at seed 421, the first three paths' first thirty
   steps of the electricity and fuel log prices.
-- "extended" cases: the extended process on flat curves and a flat 0.4 at three points: its drift and diffusion on
-  each scheme, and its predictor-corrector step, the exact step there; QuantLib's Euler and Milstein steps are left
-  out, nanoql's are the log-Euler step (the S-xrt plan's XRR5 (xxvi), XRR7).
+- "extended" cases: the extended process on flat curves and a flat 0.4 at three points: its drift and diffusion on each
+  scheme, and its predictor-corrector step, the exact step there; QuantLib's Euler and Milstein steps are left out,
+  nanoql's are the log-Euler step.
 - "vega" cases: the vega-stressed process with no stress, every member at three points, and with a stress of 0.1 in a
   box, its drift, diffusion and expectation; QuantLib's stressed deviation, variance and step are left out, nanoql's
-  read the stressed diffusion (XRR5 (xxvii)).
+  read the stressed diffusion.
 - "vega setters" case: a stress box set through the process's five setters on QuantLib's default box, the box read back
   and the diffusion at three points.
 - "geman-roncoroni values" case: vpp.cpp's process's drift, diffusion and deviation at three points, each step long
-  enough that the deviation is QuantLib's formula (XRR5 (xxv)).
+  enough that the deviation is QuantLib's formula.
 
 Read back by tests/NanoQL.Tests/Vectors/Cxx/Experimental/Processes/ElectricityAndStressProcessesCxxVectorTests.cs."""
 import os
@@ -33,7 +33,7 @@ import vectors as v  # noqa: E402
 REFERENCE = 46311  # Friday 16 October 2026
 EULER, MILSTEIN, PREDICTOR_CORRECTOR = 0, 1, 2
 POINTS = [[0.0, 100.0, 0.25, -1.0], [0.5, 90.0, 0.1, 0.5], [1.0, 110.0, 0.02, 2.0]]
-# |2 theta1 dt| at or above 1e-2 (theta1 35), where nanoql's deviation is QuantLib's formula (XRR5 (xxv))
+# |2 theta1 dt| at or above 1e-2 (theta1 35), where nanoql's deviation is QuantLib's formula
 GR_POINTS = [[0.0, 3.3, 0.004], [0.25, 3.5, 0.004], [1.3, 2.9, 0.1]]
 
 

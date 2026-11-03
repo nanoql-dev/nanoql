@@ -16,8 +16,8 @@ namespace NanoQL.Models;
 /// initial rates and displacements given; the coterminal swap market model a caplet calibration builds.
 /// </summary>
 /// <remarks>
-/// Immutable (the S-mm plan's MR1 (i)): it copies the pseudo-roots given, and a read returns a copy. No pseudo-roots,
-/// where QuantLib reads the first of none, are refused (MR3 (xx)).
+/// Immutable: it copies the pseudo-roots given, and a read returns a copy. No pseudo-roots, where QuantLib reads the
+/// first of none, are refused.
 /// </remarks>
 public sealed class PseudoRootFacade : MarketModel
 {
@@ -51,7 +51,7 @@ public sealed class PseudoRootFacade : MarketModel
     {
         ArgumentNullException.ThrowIfNull(covariancePseudoRoots);
 
-        // QuantLib reads the first pseudo-root's size before its checks (MR3 (xx))
+        // QuantLib reads the first pseudo-root's size before its checks
         if (covariancePseudoRoots.Count == 0)
         {
             throw new ArgumentException("no pseudo-roots given", nameof(covariancePseudoRoots));

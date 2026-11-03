@@ -9,9 +9,8 @@
 namespace NanoQL.Methods;
 
 /// <summary>
-/// A binomial tree a binomial engine builds: the constructor QuantLib's engine template calls,
-/// <c>T(process, end, steps, strike)</c> (<c>binomialengine.hpp:113-114</c>), as a static factory (the S-eq plan's
-/// SEQD6).
+/// A binomial tree a binomial engine builds: the constructor QuantLib's engine template calls, <c>T(process, end,
+/// steps, strike)</c> (<c>binomialengine.hpp:113-114</c>), as a static factory.
 /// </summary>
 /// <typeparam name="TSelf">The tree's own type.</typeparam>
 public interface IBinomialTree<TSelf>

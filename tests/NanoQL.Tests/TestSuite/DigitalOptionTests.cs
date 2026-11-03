@@ -18,7 +18,7 @@ namespace NanoQL.Tests.TestSuite;
 
 /// <summary>
 /// QuantLib's digital option cases, with QuantLib's master's <c>testCashAtExpiryOrNothingAmericanLowVolatility</c>
-/// (#2855, taken under R8 by the S-van plan's VR5 (i)).
+/// (#2855, taken as a fix).
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class DigitalOptionTests

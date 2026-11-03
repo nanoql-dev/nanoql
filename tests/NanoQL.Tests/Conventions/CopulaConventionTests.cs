@@ -6,11 +6,11 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The copulas' conventions (the S-core plan's C2): QuantLib's checks of their parameters and arguments, its texts, as
-/// <see cref="ArgumentException"/>s naming the parameter; Marshall-Olkin's parameters above 1 refused (CR7 (xxxii)),
-/// where QuantLib's accepts them and returns values above the Fréchet-Hoeffding bound; and every copula between the
-/// Fréchet-Hoeffding bounds, max(u + v − 1, 0) ≤ C(u, v) ≤ min(u, v), and increasing in each argument, on a grid
-/// (§2.6's second route, independent of QuantLib).
+/// The copulas' conventions: QuantLib's checks of their parameters and arguments, its texts, as
+/// <see cref="ArgumentException"/>s naming the parameter; Marshall-Olkin's parameters above 1 refused, where QuantLib's
+/// accepts them and returns values above the Fréchet-Hoeffding bound; and every copula between the Fréchet-Hoeffding
+/// bounds, max(u + v − 1, 0) ≤ C(u, v) ≤ min(u, v), and increasing in each argument, on a grid (§2.6's second route,
+/// independent of QuantLib).
 /// </summary>
 public class CopulaConventionTests
 {
@@ -35,8 +35,8 @@ public class CopulaConventionTests
     {
         Func<double, double, double> c = Make(name, parameter);
 
-        // the Gaussian copula reads the inverse normal's approximation, accurate to about 1e-9 (QuantLib's design, kept:
-        // the plan's CR7); the others to rounding
+        // the Gaussian copula reads the inverse normal's approximation, accurate to about 1e-9 (QuantLib's design,
+        // kept); the others to rounding
         double tolerance = name == "Gaussian" ? 2e-9 : 1e-15;
         foreach (double u in Grid)
         {
@@ -108,8 +108,8 @@ public class CopulaConventionTests
     [Fact]
     public void MarshallOlkinsParametersAboveOneAreRefused()
     {
-        // QuantLib accepts them and, at (2, 2), C(0.2, 0.9) is 0.22222222222222224 (probes\c2_facts.out), above
-        // min(x, y) = 0.2, the Fréchet-Hoeffding bound every copula meets
+        // QuantLib accepts them and, at (2, 2), C(0.2, 0.9) is 0.22222222222222224, above min(x, y) = 0.2, the
+        // Fréchet-Hoeffding bound every copula meets
         Refused(() => new MarshallOlkinCopula(2.0, 0.5), "a1", "1st parameter (2) must not exceed 1");
         Refused(() => new MarshallOlkinCopula(0.5, 2.0), "a2", "2nd parameter (2) must not exceed 1");
         Assert.True(new MarshallOlkinCopula(1.0, 1.0).Evaluate(0.2, 0.9) <= 0.2);

@@ -5,8 +5,8 @@
 of 1 to 10 coefficients, fixed and from a fixed random sample, their values, derivatives and primitives at points across
 both signs, their definite integrals and the definite integral's and derivative's coefficients on windows forward and
 backward, and an empty window, whose definite derivative's coefficients QuantLib refuses (its matrix singular); and
-Pascal's rows 0 to 34. From row 35 MSVC's 32-bit BigNatural wraps, where nanoql's rows are exact (the S-core plan's CR7
-(xiv); tests/NanoQL.Tests/Divergences/PascalTriangleTests.cs), so those rows are left out. Read back by
+Pascal's rows 0 to 34. From row 35 MSVC's 32-bit BigNatural wraps, where nanoql's rows are exact
+(tests/NanoQL.Tests/Divergences/PascalTriangleTests.cs), so those rows are left out. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Numerics/PolynomialFunctionCxxVectorTests.cs."""
 import os
 import random

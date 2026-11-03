@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 // ql/models/marketmodels/forwardforwardmappings.hpp, .cpp's RestrictCurveState, which the wheel doesn't expose; its
-// Jacobian and Y matrix, which nanoql fixes (the S-mm plan's MR3 (i)), are left to the divergence facts.
+// Jacobian and Y matrix, which nanoql fixes, are left to the divergence facts.
 //
 // "ForwardForwardMappings::RestrictCurveState" takes (rateTimes, forwards, multiplier, offset), the offset at most the
 // rates: the state restricted from an LMMCurveState on the forwards, {"rateTimes", "forwardRates", "discountRatios"

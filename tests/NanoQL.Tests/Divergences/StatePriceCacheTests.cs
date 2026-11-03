@@ -12,8 +12,8 @@ namespace NanoQL.Tests.Divergences;
 /// every row it computes in a <c>mutable</c> cache (<c>lattice.hpp:87, 112-117</c>), and <c>setSpread</c> changes only
 /// the tree's spread (<c>onefactormodel.hpp:105-108</c>), so a row read before the spread is set keeps its unspread
 /// values afterwards, and a row first read after it carries the spread. nanoql's lattices keep no row beyond those
-/// their construction stored (PR6.9), and <c>SetSpread</c> returns a copy: the copy's later rows carry the spread
-/// whatever was read before, so reading a row changes nothing.
+/// their construction stored, and <c>SetSpread</c> returns a copy: the copy's later rows carry the spread whatever was
+/// read before, so reading a row changes nothing.
 /// </summary>
 public class StatePriceCacheTests
 {

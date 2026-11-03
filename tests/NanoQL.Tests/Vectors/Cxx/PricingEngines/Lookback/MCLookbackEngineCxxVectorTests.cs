@@ -19,8 +19,8 @@ namespace NanoQL.Tests.Vectors;
 /// <c>tests/vectors/cxx/pricingengines/lookback/mclookbackengine.json</c>: the checks of
 /// <see cref="MakeMCLookbackEngine{TOption, TRng, TStats}"/> for each of the four lookback options; and the fixed and
 /// floating options' prices through <see cref="MCPRLookbackEngine"/> and <see cref="MCLDLookbackEngine"/>, within the
-/// tolerance their file sets for BR5 (xx)'s fold; the processes as
-/// <c>tools/cxx/src/pricingengines/lookback/mclookbackengine.cpp</c> builds them.
+/// tolerance their file sets; the processes as <c>tools/cxx/src/pricingengines/lookback/mclookbackengine.cpp</c> builds
+/// them.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class MCLookbackEngineCxxVectorTests

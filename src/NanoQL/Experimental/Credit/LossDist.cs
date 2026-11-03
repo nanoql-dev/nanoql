@@ -16,7 +16,7 @@ namespace NanoQL.Experimental;
 /// </summary>
 /// <remarks>
 /// <see cref="BinomialProbabilityOfAtLeastNEvents"/> at n of 0 or below is 1, where QuantLib's wraps n − 1 to the
-/// largest unsigned value and returns 0 (<c>lossdistribution.cpp:37-38</c>; the S-xcr plan's XR8 (xxvii);
+/// largest unsigned value and returns 0 (<c>lossdistribution.cpp:37-38</c>;
 /// <c>Divergences/DistributionMembersTests.cs</c>).
 /// </remarks>
 [Experimental("NQL0001")]

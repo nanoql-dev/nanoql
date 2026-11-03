@@ -24,12 +24,12 @@ public class BermudanSwaptionTests
     // 76), is the curve itself, built first, with the index built on it, and its today and settlement dates (lines
     // 80-81, which read today's date) are the case's (lines 121 and 125); the evaluation date it sets (line 123) is the
     // context the swaps' Ibor legs and the engines read; the engines are the static DiscountingSwapEngine.Calculate,
-    // TreeSwaptionEngine.Calculate and FdHullWhiteSwaptionEngine.Calculate. Restated (the S-cms plan's CMR4): the
-    // tree's cached values are QuantLib 1.25's (fd67ce0cc's parent), which nanoql's discretized swaption, paying on the
-    // swap's own dates and snapping no date after an exercise, gives; QuantLib 1.44's, its snapped swap's, are
-    // (42.2402, 12.9032, 2.49758) and (42.2460, 12.9069, 2.4985) on the coupons' starts, (42.1791, 12.7699, 2.4368) and
-    // (42.1849, 12.7736, 2.4379) ten days before (tests/NanoQL.Tests/Divergences/TreeSwaptionSnappingTests.cs). The
-    // finite-difference values are QuantLib's.
+    // TreeSwaptionEngine.Calculate and FdHullWhiteSwaptionEngine.Calculate. Restated: the tree's cached values are
+    // QuantLib 1.25's (fd67ce0cc's parent), which nanoql's discretized swaption, paying on the swap's own dates and
+    // snapping no date after an exercise, gives; QuantLib 1.44's, its snapped swap's, are (42.2402, 12.9032, 2.49758)
+    // and (42.2460, 12.9069, 2.4985) on the coupons' starts, (42.1791, 12.7699, 2.4368) and (42.1849, 12.7736, 2.4379)
+    // ten days before (tests/NanoQL.Tests/Divergences/TreeSwaptionSnappingTests.cs). The finite-difference values are
+    // QuantLib's.
     [Fact]
     public void TestCachedValues()
     {

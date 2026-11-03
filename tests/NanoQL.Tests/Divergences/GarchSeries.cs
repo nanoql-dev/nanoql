@@ -9,9 +9,9 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The series of the S-bar plan's GARCH facts: QuantLib's own calibration case, 50,000 daily returns from 7 July 1962
-/// simulated by GARCH(1,1) at α 0.2, β 0.3 and V_L 0.4 on QuantLib's Mersenne twister at seed 48 and inverse normal,
-/// as <c>garch.cpp</c>'s <c>testCalibration</c> builds it.
+/// The series of the GARCH facts: QuantLib's own calibration case, 50,000 daily returns from 7 July 1962 simulated by
+/// GARCH(1,1) at α 0.2, β 0.3 and V_L 0.4 on QuantLib's Mersenne twister at seed 48 and inverse normal, as
+/// <c>garch.cpp</c>'s <c>testCalibration</c> builds it.
 /// </summary>
 internal static class GarchSeries
 {

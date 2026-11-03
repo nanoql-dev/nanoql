@@ -9,14 +9,14 @@ using NanoQL.Tests.Vectors;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The Black year-on-year pricer's option struck at or below 0 (the S-cms plan's CMR5 (xxiii), its year-on-year part):
-/// QuantLib's <c>BlackYoYInflationCouponPricer</c> prices an optionlet by <c>blackFormula</c> at the coupon's effective
-/// strike, unshifted (<c>inflationcouponpricer.cpp:178-188</c>), which refuses a strike below 0, so a coupon capped or
-/// floored below 0 refuses: on the wheel, the vectors' at-the-money coupon (a forward of 3.05%) capped at −1% refuses
-/// ("strike + displacement (-0.01 + 0) must be non-negative"), at −1e-12 likewise, and at 0 pays 0.0. nanoql's caplet
-/// there is the forward less the strike and its floorlet 0, the formula's limits, so a coupon capped below 0 pays its
-/// cap and one floored there its swaplet. QuantLib's check: its Black formula at 0 and at 1e-12, a coupon capped at
-/// 1e-12 paying 9.999986949615902e-13.
+/// The Black year-on-year pricer's option struck at or below 0 (its year-on-year part): QuantLib's
+/// <c>BlackYoYInflationCouponPricer</c> prices an optionlet by <c>blackFormula</c> at the coupon's effective strike,
+/// unshifted (<c>inflationcouponpricer.cpp:178-188</c>), which refuses a strike below 0, so a coupon capped or floored
+/// below 0 refuses: on the wheel, the vectors' at-the-money coupon (a forward of 3.05%) capped at −1% refuses ("strike
+/// + displacement (-0.01 + 0) must be non-negative"), at −1e-12 likewise, and at 0 pays 0.0. nanoql's caplet there is
+/// the forward less the strike and its floorlet 0, the formula's limits, so a coupon capped below 0 pays its cap and
+/// one floored there its swaplet. QuantLib's check: its Black formula at 0 and at 1e-12, a coupon capped at 1e-12
+/// paying 9.999986949615902e-13.
 /// </summary>
 public class BlackYoYBelowShiftTests
 {

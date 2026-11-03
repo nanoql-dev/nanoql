@@ -11,8 +11,8 @@ models, under the Douglas, Hundsdorfer, Craig-Sneyd, modified Craig-Sneyd, modif
 implicit Euler and TR-BDF2 schemes (the one-direction step solving by splitting), one with two damping steps. Each case's
 output is valueAt at seven points of the factor.
 
-Generated and left out: TR-BDF2 on a time-dependent operator, as fdmg2solver.py's (the S-eq plan's SEQR9;
-tests/NanoQL.Tests/Divergences/TrBdf2TimeDependentTests.cs), the Hull-White operator's short-rate term moving with
+Generated and left out: TR-BDF2 on a time-dependent operator, as fdmg2solver.py's
+(tests/NanoQL.Tests/Divergences/TrBdf2TimeDependentTests.cs), the Hull-White operator's short-rate term moving with
 time.
 
 The specs are fdmg2solver.py's. The wheel's calls, by QuantLib-SWIG 1.44's fdm.i: fdmg2solver.py's set-up with

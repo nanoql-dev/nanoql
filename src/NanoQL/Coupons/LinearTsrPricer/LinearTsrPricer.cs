@@ -28,23 +28,21 @@ namespace NanoQL.Coupons;
 /// </para>
 /// <para>
 /// Immutable: each public member computes, inside the call, what QuantLib's <c>initialize(coupon)</c> stores in the
-/// pricer (the S-cms plan's CMR1 (i)), and a capped or collared coupon's rate reads its three rates from one such
-/// state.
+/// pricer, and a capped or collared coupon's rate reads its three rates from one such state.
 /// <see cref="WithMeanReversion"/> and <see cref="WithSwaptionVolatility"/> return copies, where QuantLib's setters
 /// replace its quote and handle in place; the day counter of the model's slope is the volatility's the pricer holds,
 /// where QuantLib's keeps its constructor's volatility's after <c>setSwaptionVolatility</c>.
 /// </para>
 /// <para>
-/// QuantLib's fixes here (the S-cms plan's CMR5): the price-threshold strategy searches with its threshold, from the
-/// bracket's midpoint, where QuantLib's passes the vega ratio and a guess at the bracket's end, which Brent refuses, so
-/// every threshold gave the default bounds' price (ii); the standard-deviations strategy sets each option's own bound,
-/// its lognormal width k·σ·√T and the shift subtracted once (iii); below a reversion of 1e-4 the model's shape is
-/// −expm1(−a·τ)/a, τ at 0, where QuantLib's reads every such reversion as 0 (iv); on a lognormal section and a forward
-/// above −shift a caplet struck at or below −shift is the coupon's expected rate less the strike and a floorlet there
-/// 0, where QuantLib's refuses, a forward at or below −shift keeping QuantLib's refusal (xxiii); every section is
-/// wrapped at the coupon's forward, where QuantLib's keeps a section's own at-the-money level, which on S7's SABR and
-/// ZABR cubes is an interpolated forward (xxvii); and the vega-ratio search reads a normal section's vega from
-/// Bachelier's derivative, where QuantLib's section refuses it (xxviii).
+/// QuantLib's fixes here: the price-threshold strategy searches with its threshold, from the bracket's midpoint, where
+/// QuantLib's passes the vega ratio and a guess at the bracket's end, which Brent refuses, so every threshold gave the
+/// default bounds' price; the standard-deviations strategy sets each option's own bound, its lognormal width k·σ·√T and
+/// the shift subtracted once; below a reversion of 1e-4 the model's shape is −expm1(−a·τ)/a, τ at 0, where QuantLib's
+/// reads every such reversion as 0; on a lognormal section and a forward above −shift a caplet struck at or below
+/// −shift is the coupon's expected rate less the strike and a floorlet there 0, where QuantLib's refuses, a forward at
+/// or below −shift keeping QuantLib's refusal; every section is wrapped at the coupon's forward, where QuantLib's keeps
+/// a section's own at-the-money level, which on the SABR and ZABR cubes is an interpolated forward; and the vega-ratio
+/// search reads a normal section's vega from Bachelier's derivative, where QuantLib's section refuses it.
 /// </para>
 /// </remarks>
 public sealed class LinearTsrPricer : CmsCouponPricer, IMeanRevertingPricer
@@ -163,7 +161,7 @@ public sealed class LinearTsrPricer : CmsCouponPricer, IMeanRevertingPricer
     private static double Max0(double x) => x < 0.0 ? 0.0 : x;
 
     // QuantLib's GsrG(d) on the volatility's day counter: (1 − e^(−a·τ))/a, τ from the fixing to d; below a reversion
-    // of 1e-4 −expm1(−a·τ)/a, and τ at 0, where QuantLib's returns τ for every |a| 1e-4 (CMR5 (iv)).
+    // of 1e-4 −expm1(−a·τ)/a, and τ at 0, where QuantLib's returns τ for every |a| 1e-4.
     private double GsrG(DayCounter volDayCounter, Date fixingDate, Date d)
     {
         double yf = volDayCounter.YearFraction(fixingDate, d);
@@ -279,7 +277,7 @@ public sealed class LinearTsrPricer : CmsCouponPricer, IMeanRevertingPricer
         }
 
         // every section is wrapped at the coupon's forward, where QuantLib keeps one with an at-the-money level of its
-        // own, as S7's SABR and ZABR cubes' interpolated forward (CMR5 (xxvii))
+        // own, as the SABR and ZABR cubes' interpolated forward
         SmileSection smileSection = new AtmSmileSection(sectionTmp, swapRateValue);
 
         // compute linear model's parameters
@@ -341,7 +339,7 @@ public sealed class LinearTsrPricer : CmsCouponPricer, IMeanRevertingPricer
         2.0 * s.A * s.SmileSection!.OptionPrice(strike, strike < s.SwapRateValue ? OptionType.Put : OptionType.Call);
 
     // A section's vega at a strike: QuantLib's on a lognormal section; on a normal one, which QuantLib's section
-    // refuses, Bachelier's derivative in the standard deviation times √T (CMR5 (xxviii)).
+    // refuses, Bachelier's derivative in the standard deviation times √T.
     private static double Vega(SmileSection section, double strike)
     {
         if (section.VolatilityType == VolatilityType.ShiftedLognormal)
@@ -386,7 +384,7 @@ public sealed class LinearTsrPricer : CmsCouponPricer, IMeanRevertingPricer
     }
 
     // QuantLib's search starts at the swap rate, the bracket's end, which Brent refuses, so every search fell back to
-    // the default bound; it starts at the bracket's midpoint here, as the vega-ratio search does (CMR5 (ii)).
+    // the default bound; it starts at the bracket's midpoint here, as the vega-ratio search does.
     private static double StrikeFromPrice(LinearTsrPricerState s, double price, OptionType optionType, double referenceStrike)
     {
         double a, b, min, max, k;
@@ -433,8 +431,8 @@ public sealed class LinearTsrPricer : CmsCouponPricer, IMeanRevertingPricer
             && s.SwapRateValue > -section.Shift)
         {
             // where QuantLib's section refuses the strike, the caplet is the expected rate less the strike and the
-            // floorlet 0, the limits of the replication's own formula (CMR5 (xxiii)); on a forward at or below
-            // −shift the model has no rate distribution, and QuantLib's refusal stands
+            // floorlet 0, the limits of the replication's own formula; on a forward at or below −shift the model has no
+            // rate distribution, and QuantLib's refusal stands
             return optionType == OptionType.Call
                 ? ExpectedRatePrice(s) - (strike * (s.AccrualPeriod * s.DiscountCurvePaymentDiscount * s.CouponDiscountRatio))
                 : 0.0;
@@ -480,7 +478,7 @@ public sealed class LinearTsrPricer : CmsCouponPricer, IMeanRevertingPricer
             case LinearTsrPricerSettingsStrategy.PriceThreshold:
             {
                 // strikeFromPrice ensures that returned strike is on the expected
-                // side of strike; QuantLib passes the vega ratio here (CMR5 (ii))
+                // side of strike; QuantLib passes the vega ratio here
                 double bound = StrikeFromPrice(s, settings.PriceThreshold, optionType, strike);
                 if (optionType == OptionType.Call)
                 {
@@ -497,7 +495,7 @@ public sealed class LinearTsrPricer : CmsCouponPricer, IMeanRevertingPricer
             default:
             {
                 // BSStdDevs: each option's own bound, the lognormal width k·σ·√T, the shift subtracted once, where
-                // QuantLib's sets both bounds, takes k·σ and subtracts the shift twice (CMR5 (iii))
+                // QuantLib's sets both bounds, takes k·σ and subtracts the shift twice
                 double atm = section.AtmLevel()!.Value;
                 double atmVol = section.Volatility(atm);
                 double shift = section.Shift;
@@ -555,7 +553,7 @@ public sealed class LinearTsrPricer : CmsCouponPricer, IMeanRevertingPricer
     }
 
     // The swaplet's price at a gearing of 1 and no spread, the fixing's own price on the model: a caplet struck at or
-    // below −shift, on a forward above it, is this less the strike's price (CMR5 (xxiii)).
+    // below −shift, on a forward above it, is this less the strike's price.
     private double ExpectedRatePrice(LinearTsrPricerState s)
     {
         double atmCapletPrice = OptionletPrice(s, OptionType.Call, s.SwapRateValue);

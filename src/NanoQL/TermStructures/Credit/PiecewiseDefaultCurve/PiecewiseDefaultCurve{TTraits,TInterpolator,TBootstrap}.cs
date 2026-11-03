@@ -34,13 +34,12 @@ namespace NanoQL.TermStructures;
 /// calls on the curve under construction are sealed.
 /// </para>
 /// <para>
-/// QuantLib's settlement-days constructors are <see cref="Create"/> (D15). Its constructor on a one-factor affine model
-/// of the default intensity is the one taking a <see cref="OneFactorAffineModel"/>, for the affine hazard-rate traits:
-/// the curve calls the traits' model-aware members when it holds a model, which other traits refuse, and the landed
-/// formulas otherwise (the S-xcr plan's XR3 (c)). QuantLib's piecewise affine curve is a one-factor affine survival
-/// structure, with its conditional survival; this one can't change its base by its traits, so that structure is built
-/// on its nodes. A curve is always built afresh, as the piecewise yield curve is. Unsealed for its named class, which
-/// adds constructors only.
+/// QuantLib's settlement-days constructors are <see cref="Create"/>. Its constructor on a one-factor affine model of
+/// the default intensity is the one taking a <see cref="OneFactorAffineModel"/>, for the affine hazard-rate traits: the
+/// curve calls the traits' model-aware members when it holds a model, which other traits refuse, and the landed
+/// formulas otherwise. QuantLib's piecewise affine curve is a one-factor affine survival structure, with its
+/// conditional survival; this one can't change its base by its traits, so that structure is built on its nodes. A curve
+/// is always built afresh, as the piecewise yield curve is. Unsealed for its named class, which adds constructors only.
 /// </para>
 /// </remarks>
 public class PiecewiseDefaultCurve<TTraits, TInterpolator, TBootstrap>
@@ -180,7 +179,7 @@ public class PiecewiseDefaultCurve<TTraits, TInterpolator, TBootstrap>
 
     /// <summary>
     /// A curve whose reference date is the given number of business days after the context's evaluation date:
-    /// QuantLib's settlement-days constructors (D15).
+    /// QuantLib's settlement-days constructors.
     /// </summary>
     /// <param name="settlementDays">The business days from the evaluation date to the reference date.</param>
     /// <param name="calendar">The calendar the days are counted on.</param>

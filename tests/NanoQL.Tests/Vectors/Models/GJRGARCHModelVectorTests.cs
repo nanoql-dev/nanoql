@@ -16,7 +16,8 @@ namespace NanoQL.Tests.Vectors;
 /// The GJRGARCHModel vectors, <c>tests/vectors/models/equity/gjrgarchmodel.json</c>: two processes' six parameters
 /// through the model's accessors, the parameters set to other values on the new model
 /// <see cref="CalibratedModelExtensions.SetParams{TModel}"/> returns, its process a GJR-GARCH process on them, and two
-/// calibrations to nine helpers priced by the analytic GJR-GARCH engine, compared on the outputs the S7R6 filter keeps.
+/// calibrations to nine helpers priced by the analytic GJR-GARCH engine, compared on the outputs the stability filter
+/// keeps.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class GJRGARCHModelVectorTests

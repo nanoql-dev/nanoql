@@ -9,8 +9,8 @@ using static NanoQL.Tests.Conventions.CommodityMarkets;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The commodities' two routes (the S-xrt plan's §2.5): the energy swaps against their discounted commodity cash flows,
-/// on one curve, and each quantity's conversion into another unit and back.
+/// The commodities' two routes: the energy swaps against their discounted commodity cash flows, on one curve, and each
+/// quantity's conversion into another unit and back.
 /// </summary>
 public class CommodityTwoRouteTests
 {

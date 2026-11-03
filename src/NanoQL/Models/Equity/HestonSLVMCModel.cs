@@ -21,22 +21,22 @@ namespace NanoQL.Models;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Immutable: the calibration runs at construction (the S-hes plan's HR3 (i)), where QuantLib's model calibrates at its
-/// first read; its draws are kept per path and step in one array as QuantLib keeps them (HR3 (iii)). The leverage
-/// function is <see cref="FixedLocalVolSurface"/> on the calibrated values (HR5).
+/// Immutable: the calibration runs at construction, where QuantLib's model calibrates at its first read; its draws are
+/// kept per path and step in one array as QuantLib keeps them. The leverage function is
+/// <see cref="FixedLocalVolSurface"/> on the calibrated values.
 /// </para>
 /// <para>
 /// The calibration's paths read the leverage at each step's start, a node of the surface being calibrated, as QuantLib
 /// 1.44 reads it there, beyond the time's strikes by the time's line (<see cref="FixedLocalVolWorkingSurface"/>), so the
-/// calibration is QuantLib's bit for bit (HR5); the surface the model returns holds a strike beyond a time's strikes at
-/// the nearest one, at a node as between nodes. The local volatility is read at each step's end, where QuantLib 1.44
-/// reads it at the step's start (QuantLib's #2860, HR8 (i)).
+/// calibration is QuantLib's bit for bit; the surface the model returns holds a strike beyond a time's strikes at the
+/// nearest one, at a node as between nodes. The local volatility is read at each step's end, where QuantLib 1.44 reads
+/// it at the step's start (QuantLib's #2860).
 /// </para>
 /// <para>
 /// The model's times are a clock's, from the earliest reference date of the curves and the local volatility on the
 /// risk-free curve's day counter, and each structure is read at the instants they denote: QuantLib's grid runs from the
-/// risk-free curve's reference date and reads the dividend curve and the local volatility at its times (HR7 (xxi)).
-/// Where every structure shares the risk-free curve's day counter and reference date, QuantLib's reads and bits.
+/// risk-free curve's reference date and reads the dividend curve and the local volatility at its times. Where every
+/// structure shares the risk-free curve's day counter and reference date, QuantLib's reads and bits.
 /// </para>
 /// </remarks>
 public sealed class HestonSLVMCModel

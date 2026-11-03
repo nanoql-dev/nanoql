@@ -14,8 +14,7 @@ namespace NanoQL.Methods;
 
 /// <summary>A composite of step conditions, applied in turn, with the union of their stopping times.</summary>
 /// <remarks>
-/// A working type (the S-eq plan's SEQR1), as the conditions it holds are; applying it allocates nothing beyond what
-/// they do.
+/// A working type, as the conditions it holds are; applying it allocates nothing beyond what they do.
 /// </remarks>
 [WorkingType]
 public sealed class FdmStepConditionComposite : StepCondition

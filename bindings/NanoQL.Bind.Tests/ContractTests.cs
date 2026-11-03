@@ -9,11 +9,11 @@ using NanoQL.Bind.Selecting;
 namespace NanoQL.Bind.Tests;
 
 /// <summary>
-/// The C ABI's forms and rules after S-bind2's contract (docs/bindings.md): tuples in, as a parameter per element or an
-/// array per element and a count, and collections of tuples out; a bound engine's nullable inputs open on both sides
-/// as null; optional parameters of a type that doesn't cross left at their defaults; a closed generator construction
-/// taking a deriving class's snapshot; a type's own members hiding its base's; statics under their declaring type; and
-/// Python's classes each with a constructor of their own.
+/// The C ABI's forms and rules (docs/bindings.md): tuples in, as a parameter per element or an array per element and a
+/// count, and collections of tuples out; a bound engine's nullable inputs open on both sides as null; optional
+/// parameters of a type that doesn't cross left at their defaults; a closed generator construction taking a deriving
+/// class's snapshot; a type's own members hiding its base's; statics under their declaring type; and Python's classes
+/// each with a constructor of their own.
 /// </summary>
 public class ContractTests
 {
@@ -145,8 +145,8 @@ public class ContractTests
     public void EveryClosedGeneratorConstructionParameterHasACrossingClassDerivingIt()
     {
         // Over every function by reflection: a snapshot parameter of a closed construction can take a crossing
-        // generator's snapshot, one with a constructor of its own (round 1's B1-1).
-        // The generator's metadata context is gone after its run: its types are read as the test process's own.
+        // generator's snapshot, one with a constructor of its own. The generator's metadata context is gone after its
+        // run: its types are read as the test process's own.
         static Type Loaded(Type t) => Type.GetType(t.AssemblyQualifiedName!, throwOnError: true)!;
         Generation g = Surfaces.Nanoql;
         var makers = g.Surface.Functions.Where(f => f.Kind == "new").Select(f => f.Type).ToHashSet();

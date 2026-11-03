@@ -21,9 +21,9 @@ namespace NanoQL.Models;
 /// (<see cref="HistoricalForwardRatesAnalysisFunctions.HistoricalForwardRatesAnalysis"/>).
 /// </summary>
 /// <remarks>
-/// Immutable once built (the S-mmp plan's SMD6): its constructor fills the caller's statistics, which it gives no
-/// accessor to, as QuantLib's (its <c>stats()</c> is commented out). The constructor with no argument gives an analysis
-/// of nothing, QuantLib's default constructor.
+/// Immutable once built: its constructor fills the caller's statistics, which it gives no accessor to, as QuantLib's
+/// (its <c>stats()</c> is commented out). The constructor with no argument gives an analysis of nothing, QuantLib's
+/// default constructor.
 /// </remarks>
 /// <typeparam name="TTraits">The curve's bootstrap traits.</typeparam>
 /// <typeparam name="TInterpolator">The curve's interpolator.</typeparam>

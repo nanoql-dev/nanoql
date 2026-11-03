@@ -18,10 +18,10 @@ namespace NanoQL.PricingEngines;
 /// </summary>
 /// <remarks>
 /// <para>
-/// An <see cref="AnalyticHestonEngine"/> on Gatheral's formulation, as QuantLib's derives from it (the S-hes plan's
-/// HR1 (iv), SEQR5's form): an immutable object over its <see cref="BatesModel"/>; the static <c>Calculate</c>
-/// overloads build one and price through it. An extension point: <see cref="BatesDetJumpEngine"/> derives from it.
-/// The model's time, its curves and an option at model time 0 are the analytic engine's.
+/// An <see cref="AnalyticHestonEngine"/> on Gatheral's formulation, as QuantLib's derives from it: an immutable object
+/// over its <see cref="BatesModel"/>; the static <c>Calculate</c> overloads build one and price through it. An
+/// extension point: <see cref="BatesDetJumpEngine"/> derives from it. The model's time, its curves and an option at
+/// model time 0 are the analytic engine's.
 /// </para>
 /// <para>
 /// References: D. Bates, Jumps and stochastic volatility: exchange rate processes implicit in Deutsche mark options,

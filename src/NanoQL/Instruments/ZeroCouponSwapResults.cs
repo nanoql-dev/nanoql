@@ -13,9 +13,9 @@ namespace NanoQL.Instruments;
 /// <remarks>
 /// QuantLib's swap derives the fair payment from its results on each call (<c>fairFixedPayment</c>); here it is a
 /// member of the results, which <see cref="PricingEngines.DiscountingSwapEngine"/>'s <see cref="ZeroCouponSwap"/>
-/// overload gives (the S-cms plan's CMD7), <see langword="null"/>, QuantLib's "result not available", from another
-/// engine. QuantLib's <c>fairFixedRate</c>, which takes a day counter, is <see cref="ZeroCouponSwap.FairFixedRate"/>.
-/// Equality compares the swap's results and the fair payment.
+/// overload gives, <see langword="null"/>, QuantLib's "result not available", from another engine. QuantLib's
+/// <c>fairFixedRate</c>, which takes a day counter, is <see cref="ZeroCouponSwap.FairFixedRate"/>. Equality compares
+/// the swap's results and the fair payment.
 /// </remarks>
 public sealed record ZeroCouponSwapResults : SwapResults
 {

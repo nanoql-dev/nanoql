@@ -9,7 +9,7 @@ It writes src/NanoQL/Numerics/RandomNumbers/PrimitivePolynomials.bin under the o
 repository): QuantLib's array PrimitivePolynomials, degree by degree from 1 to N_MAX_DEGREE, each degree's
 polynomials followed by its -1, as little-endian 32-bit signed integers. QuantLib compiles the degrees PPMT_MAX_DIM
 asks for; at its default, N_PRIMITIVES_UP_TO_DEGREE_18, that is all 18 arrays of the file, 21,200 polynomials. The
-loader, src/NanoQL/Numerics/RandomNumbers/PrimitivePolynomials.cs, reads it back. tools/check-upstream.py (G4 (6))
+loader, src/NanoQL/Numerics/RandomNumbers/PrimitivePolynomials.cs, reads it back. tools/check-upstream.py
 regenerates it into a temporary folder and compares the bytes with the committed file.
 """
 import os

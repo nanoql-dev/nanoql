@@ -4,9 +4,9 @@
 bind, each output computed by the C++ harness on a fresh core: the seven processes of gen/processes/gsrprocess.py
 (constant and piecewise volatilities and reversions, a zero reversion among them, at forward measure times from 10 to
 60), and at its points the core's members: expectation_x0dep_part, expectation_rn_part and expectation_tf_part at the
-eight (w, xw, dt) steps, variance at the same steps, y, sigma and reversion at its seven times, and G at its eight
-(t, w) pairs. The reversions stay at 0 or at |a| >= 1e-2, where nanoql keeps QuantLib's formulas (the S-g1d plan's
-G1R4 (i)). tests/NanoQL.Tests/Vectors/Cxx/Processes/GsrProcessCoreCxxVectorTests.cs reads it back."""
+eight (w, xw, dt) steps, variance at the same steps, y, sigma and reversion at its seven times, and G at its eight (t,
+w) pairs. The reversions stay at 0 or at |a| >= 1e-2, where nanoql keeps QuantLib's formulas.
+tests/NanoQL.Tests/Vectors/Cxx/Processes/GsrProcessCoreCxxVectorTests.cs reads it back."""
 import importlib.util
 import os
 import sys

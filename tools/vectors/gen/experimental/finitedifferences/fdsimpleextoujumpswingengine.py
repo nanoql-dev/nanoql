@@ -10,10 +10,9 @@ on the evaluation date 18 December 2011.
 - "ou" cases: vanilla options on an Ornstein-Uhlenbeck process, European and American calls and puts at strikes around
   its level, on a flat curve and with a cash dividend: each value, delta, gamma and theta.
 
-No output is left out (the S-xeq plan's §2.8): the engines read their structures as QuantLib's, and every shape's last
-time is the maturity's, so no lookup passes it (XER5 (xxxi)): the wheel's engine always takes a shape, and an empty one,
-which QuantLib reads past its end (an access violation in the wheel), is a zero shape at the maturity here. Nothing is
-fitted, so no output is filtered.
+No output is left out: the engines read their structures as QuantLib's, and every shape's last time is the maturity's,
+so no lookup passes it: the wheel's engine always takes a shape, and an empty one, which QuantLib reads past its end (an
+access violation in the wheel), is a zero shape at the maturity here. Nothing is fitted, so no output is filtered.
 
 A swing spec is {"process" (an extended OU spec of tools/vectors/gen/experimental/processes/
 extendedornsteinuhlenbeckprocess.py, a constant level), "jumps", "type", "strike", "minRights", "maxRights", "grids"

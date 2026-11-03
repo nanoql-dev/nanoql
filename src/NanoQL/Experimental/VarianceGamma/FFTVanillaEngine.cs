@@ -20,8 +20,8 @@ namespace NanoQL.Experimental;
 /// </summary>
 /// <remarks>
 /// Immutable. Each curve's discount is read by date, nothing accrued before its own date, and the time on the
-/// risk-free clock from its reference date, as QuantLib's (the S-xeq plan's XER5 (xxxiii)). Every moment is finite, so
-/// the damping and grid are always QuantLib's.
+/// risk-free clock from its reference date, as QuantLib's. Every moment is finite, so the damping and grid are always
+/// QuantLib's.
 /// </remarks>
 [Experimental("NQL0001")]
 public sealed class FFTVanillaEngine : FFTEngine
@@ -56,7 +56,7 @@ public sealed class FFTVanillaEngine : FFTEngine
         VanillaOption option, EvaluationContext context, GeneralizedBlackScholesProcess process, double logStrikeSpacing = 0.001) =>
         new FFTVanillaEngine(process, logStrikeSpacing).Calculate(option, context);
 
-    /// <summary>Prices a list of European options, one transform per expiry (the S-xeq plan's XER1).</summary>
+    /// <summary>Prices a list of European options, one transform per expiry.</summary>
     /// <param name="options">The options, each European on a striked payoff.</param>
     /// <param name="context">The evaluation context.</param>
     /// <param name="process">The Black-Scholes process, on a constant volatility.</param>

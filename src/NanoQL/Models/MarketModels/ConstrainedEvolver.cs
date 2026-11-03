@@ -10,7 +10,7 @@ namespace NanoQL.Models;
 /// A constrained market-model evolver: an evolver whose rates can be fixed by importance sampling, for the Fries-Joshi
 /// proxy simulation approach to Greeks.
 /// </summary>
-/// <remarks>A working type (the S-mm plan's MR1 (ii)). An extension point, as in QuantLib.</remarks>
+/// <remarks>A working type. An extension point, as in QuantLib.</remarks>
 [WorkingType]
 public abstract class ConstrainedEvolver : MarketModelEvolver
 {

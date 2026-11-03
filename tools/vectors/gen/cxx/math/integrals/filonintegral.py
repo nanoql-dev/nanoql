@@ -4,8 +4,8 @@
 computed by the C++ harness: the sine and cosine integrals of four integrands over three intervals, at frequencies of
 both signs and 2 to 1,000 intervals; and an odd number of intervals, which QuantLib refuses. Only inputs whose theta = t
 (b - a) / intervals is at least 1.7 in size are kept: below it nanoql takes the coefficients' Taylor series, where
-QuantLib's closed forms cancel (the S-core plan's CR7 (x); tests/NanoQL.Tests/Divergences/FilonIntegralTests.cs). Read
-back by tests/NanoQL.Tests/Vectors/Cxx/Numerics/Integrals/FilonIntegralCxxVectorTests.cs."""
+QuantLib's closed forms cancel (tests/NanoQL.Tests/Divergences/FilonIntegralTests.cs). Read back by
+tests/NanoQL.Tests/Vectors/Cxx/Numerics/Integrals/FilonIntegralCxxVectorTests.cs."""
 import os
 import sys
 

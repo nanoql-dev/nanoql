@@ -21,11 +21,10 @@ namespace NanoQL.PricingEngines;
 /// <para>
 /// The value alone, as QuantLib's. The bivariate normal is QuantLib's default,
 /// <see cref="BivariateCumulativeNormalDistributionWe04DP"/>, where QuantLib's engine reads Drezner's 1978 algorithm,
-/// to six decimal places (the S-exo plan's ER7, <c>Divergences/TwoAssetCorrelationBivariateTests.cs</c>). The second
-/// asset's volatility is read at its own strike X₂, where QuantLib reads it at X₁
-/// (<c>Divergences/TwoAssetCorrelationSmileTests.cs</c>). At X₂ &lt; 0 the call is linear in the second asset where the
-/// first is in the money and the put worth nothing, where QuantLib takes the log of a negative ratio
-/// (<c>Divergences/TwoAssetCorrelationNegativeStrikeTests.cs</c>).
+/// to six decimal places (<c>Divergences/TwoAssetCorrelationBivariateTests.cs</c>). The second asset's volatility is
+/// read at its own strike X₂, where QuantLib reads it at X₁ (<c>Divergences/TwoAssetCorrelationSmileTests.cs</c>). At
+/// X₂ &lt; 0 the call is linear in the second asset where the first is in the money and the put worth nothing, where
+/// QuantLib takes the log of a negative ratio (<c>Divergences/TwoAssetCorrelationNegativeStrikeTests.cs</c>).
 /// </para>
 /// <para>
 /// Each asset's carry reads its own process's curves and the payoff is discounted on the first process's risk-free

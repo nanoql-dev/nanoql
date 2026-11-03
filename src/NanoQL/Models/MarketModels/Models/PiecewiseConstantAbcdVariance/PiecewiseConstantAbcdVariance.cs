@@ -16,9 +16,9 @@ namespace NanoQL.Models;
 /// the reset the abcd function's variance over the step, 0 after it.
 /// </summary>
 /// <remarks>
-/// Immutable (the S-mm plan's MR1 (i)). QuantLib's <c>getABCD</c> out-parameters are <see cref="GetABCD"/>'s record.
-/// Rate times QuantLib allocates its vectors from before checking them, an empty set among them, are refused with
-/// QuantLib's check of the times (MR3 (xx)).
+/// Immutable. QuantLib's <c>getABCD</c> out-parameters are <see cref="GetABCD"/>'s record. Rate times QuantLib
+/// allocates its vectors from before checking them, an empty set among them, are refused with QuantLib's check of the
+/// times.
 /// </remarks>
 public sealed class PiecewiseConstantAbcdVariance : PiecewiseConstantVariance
 {

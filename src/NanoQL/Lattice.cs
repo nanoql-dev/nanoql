@@ -63,8 +63,8 @@ public abstract class Lattice
 
     /// <summary>
     /// The lattice's values of the underlying variable at a time, written into the caller's span, so that a working
-    /// asset reads them at each step without allocating (the S-eq plan's SEQD18). This default copies
-    /// <see cref="Grid(double)"/>; a lattice that can write its nodes directly overrides it.
+    /// asset reads them at each step without allocating. This default copies <see cref="Grid(double)"/>; a lattice that
+    /// can write its nodes directly overrides it.
     /// </summary>
     /// <param name="t">The time.</param>
     /// <param name="destination">The span the values go to, at least one per node.</param>

@@ -14,13 +14,13 @@ namespace NanoQL.Instruments;
 
 /// <summary>A helper building multiple-resets swaps: QuantLib's <c>MakeMultipleResetsSwap</c>.</summary>
 /// <remarks>
-/// An immutable builder (the S-cms plan's CMD8): each method returns a modified copy, and <see cref="ToSwap"/> builds
-/// the swap under a context, in place of QuantLib's conversion operators. By default the fixed leg's frequency is the
-/// coupons' period, the index's tenor times the resets per coupon. With no fixed rate given, the swap is built at its
-/// par rate, priced by the engine set, or by <see cref="DiscountingSwapEngine"/> on the index's forwarding curve; the
-/// engine is never stored on the swap, where QuantLib's builder attaches it. A builder has no value equality. An
-/// option the builder isn't given that QuantLib's builder fixes takes the builder's provider's default
-/// (<see cref="Defaults"/>), read when the swap is built: QuantLib's values with nothing configured.
+/// An immutable builder: each method returns a modified copy, and <see cref="ToSwap"/> builds the swap under a context,
+/// in place of QuantLib's conversion operators. By default the fixed leg's frequency is the coupons' period, the
+/// index's tenor times the resets per coupon. With no fixed rate given, the swap is built at its par rate, priced by
+/// the engine set, or by <see cref="DiscountingSwapEngine"/> on the index's forwarding curve; the engine is never
+/// stored on the swap, where QuantLib's builder attaches it. A builder has no value equality. An option the builder
+/// isn't given that QuantLib's builder fixes takes the builder's provider's default (<see cref="Defaults"/>), read when
+/// the swap is built: QuantLib's values with nothing configured.
 /// </remarks>
 public sealed record MakeMultipleResetsSwap
 {
@@ -29,8 +29,7 @@ public sealed record MakeMultipleResetsSwap
     /// <param name="iborIndex">The index whose fixings the floating coupons combine.</param>
     /// <param name="resetsPerCoupon">The number of resets per floating coupon.</param>
     /// <exception cref="ArgumentNullException"><paramref name="iborIndex"/> is null.</exception>
-    /// <exception cref="ArgumentOutOfRangeException"><paramref name="resetsPerCoupon"/> isn't positive (the S-cms
-    /// plan's CMR5 (xiv)).</exception>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="resetsPerCoupon"/> isn't positive.</exception>
     public MakeMultipleResetsSwap(Period tenor, IborIndex iborIndex, int resetsPerCoupon)
     {
         ArgumentNullException.ThrowIfNull(iborIndex);

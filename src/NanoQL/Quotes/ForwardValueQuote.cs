@@ -11,9 +11,9 @@ namespace NanoQL.Quotes;
 
 /// <summary>The forward value of an index: its fixing at a date, QuantLib's <c>ForwardValueQuote</c>.</summary>
 /// <remarks>
-/// Immutable: its value is the index's fixing under the context, computed once at construction (§2.2's quote row; the
-/// S-core plan's CR1 (b)). QuantLib's quote reads the index whenever it is asked; here a new curve or evaluation date is a
-/// new quote. QuantLib's <c>isValid</c> isn't ported: a fixing the index can't give is refused at construction.
+/// Immutable: its value is the index's fixing under the context, computed once at construction (§2.2's quote row).
+/// QuantLib's quote reads the index whenever it is asked; here a new curve or evaluation date is a new quote.
+/// QuantLib's <c>isValid</c> isn't ported: a fixing the index can't give is refused at construction.
 /// </remarks>
 public sealed class ForwardValueQuote
 {

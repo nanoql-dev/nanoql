@@ -10,10 +10,10 @@ monotonicity and positivity (QuantLib's default 0.3, 0.7 and forced; 1 and 0.5 w
 forced, at monotonicities of 0.7 and 1; 0.3 at monotonicity 0; and 0.7 at 0.5), each built whole, with and without a
 flat final period, and built as the local bootstrap builds it, at localisations of 2 and 3: the values and primitives
 at the nodes, the sections' quarter points, and points below and above the range, extrapolated. Quadraticity 0 with
-positivity forced and negative averages are left out: there the S-core plan's CR7 (i)-(iii) fixes depart from
-QuantLib's sections (tests/NanoQL.Tests/Divergences/ConvexMonotoneTests.cs). A case's inputs are "x", "y",
-"quadraticity", "monotonicity", "forcePositive", "form" ("whole" with "flatFinalPeriod", or "local" with
-"localisation") and "points"; a local case's outputs hold one array per step. The harness unit is
+positivity forced and negative averages are left out: there nanoql's fixes depart from QuantLib's sections
+(tests/NanoQL.Tests/Divergences/ConvexMonotoneTests.cs). A case's inputs are "x", "y", "quadraticity",
+"monotonicity", "forcePositive", "form" ("whole" with "flatFinalPeriod", or "local" with "localisation") and
+"points"; a local case's outputs hold one array per step. The harness unit is
 tools/cxx/src/math/interpolations/convexmonotoneinterpolation.cpp. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Math/Interpolations/ConvexMonotoneInterpolationCxxVectorTests.cs."""
 import os

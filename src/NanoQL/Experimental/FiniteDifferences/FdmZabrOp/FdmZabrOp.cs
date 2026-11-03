@@ -16,9 +16,8 @@ namespace NanoQL.Experimental;
 /// ½v²F<sup>2β</sup>·∂²/∂F² + ½ν²v<sup>2γ</sup>·∂²/∂v² + νρ|v|<sup>γ+1</sup>F<sup>β</sup>·∂²/∂F∂v; γ = 1 is SABR.
 /// </summary>
 /// <remarks>
-/// A working type (the S-eq plan's SEQR1): its bands are built at construction and never change, and the sum
-/// <see cref="Apply"/> forms is written through buffers it holds, so a step allocates nothing (the S-g1d plan's G1D11);
-/// not thread-safe. Experimental, as in QuantLib.
+/// A working type: its bands are built at construction and never change, and the sum <see cref="Apply"/> forms is
+/// written through buffers it holds, so a step allocates nothing; not thread-safe. Experimental, as in QuantLib.
 /// </remarks>
 [Experimental("NQL0001")]
 [WorkingType]

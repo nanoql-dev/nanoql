@@ -11,15 +11,14 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// Haug's soft-barrier form outside its domain (the S-bar plan's BR5 (xlv), fixed under R8). The closed form integrates
-/// the standard knock-in's branch for a barrier at or below the strike, so it is the average only for a down barrier on
-/// a call with U ≤ K, or an up barrier on a put with L ≥ K, the spot outside the band; QuantLib's cases all hold S 100,
-/// X 100, U 95. With the band reaching above the strike it is high by up to 1.5%, and with the spot inside the band, the
-/// barriers above it already knocked in, it prices 12.286 for 8.803 (the reviewer's a4, a6b, a16). nanoql takes the band
-/// average wherever the band reaches across the strike or the spot is inside it. Check: the band average of QuantLib's
-/// analytic barrier engine by Simpson's rule (<see cref="SoftBarrierBandAverage"/>), and a deep out-of-the-money average,
-/// a call at 300 with the spot inside the band, below 2.2e-4, which an unscaled tolerance would refuse at construction
-/// (SD24).
+/// Haug's soft-barrier form outside its domain (fixed). The closed form integrates the standard knock-in's branch for a
+/// barrier at or below the strike, so it is the average only for a down barrier on a call with U ≤ K, or an up barrier
+/// on a put with L ≥ K, the spot outside the band; QuantLib's cases all hold S 100, X 100, U 95. With the band reaching
+/// above the strike it is high by up to 1.5%, and with the spot inside the band, the barriers above it already knocked
+/// in, it prices 12.286 for 8.803. nanoql takes the band average wherever the band reaches across the strike or the
+/// spot is inside it. Check: the band average of QuantLib's analytic barrier engine by Simpson's rule (<see
+/// cref="SoftBarrierBandAverage"/>), and a deep out-of-the-money average, a call at 300 with the spot inside the band,
+/// below 2.2e-4, which an unscaled tolerance would refuse at construction.
 /// </summary>
 public class SoftBarrierDomainTests
 {
@@ -53,7 +52,7 @@ public class SoftBarrierDomainTests
         Assert.True(value > 0.0 && value < 2.2e-4, $"{value}");
     }
 
-    // R7's measure on the average, its scale 1
+    // the tolerance's measure on the average, its scale 1
     private static double Check(BarrierType type, double l, double u, double strike)
     {
         var payoff = new PlainVanillaPayoff(OptionType.Call, strike);

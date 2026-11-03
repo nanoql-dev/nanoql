@@ -11,9 +11,8 @@ first date, at and between the dates and past the last, with and without extrapo
 section by date and by time, its exercise time and its volatility and variance at a strike.
 
 Left out, a documented divergence: the smile section's volatility type and shift, which QuantLib's FlatSmileSection
-drops (the S-g1d plan's G1R6 (xiii); tests/NanoQL.Tests/Divergences/CapletVarianceCurveSmileTests.cs). A refused value
-is {"throws": true}. Each case's input "curve" is the spec
-tools/cxx/src/termstructures/volatility/optionlet/capletvariancecurve.cpp reads;
+drops (tests/NanoQL.Tests/Divergences/CapletVarianceCurveSmileTests.cs). A refused value is {"throws": true}. Each
+case's input "curve" is the spec tools/cxx/src/termstructures/volatility/optionlet/capletvariancecurve.cpp reads;
 tests/NanoQL.Tests/Vectors/Cxx/TermStructures/CapletVarianceCurveCxxVectorTests.cs reads it back."""
 import os
 import sys

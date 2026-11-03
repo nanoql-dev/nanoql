@@ -7,8 +7,8 @@ namespace NanoQL.Tests.Vectors;
 
 /// <summary>
 /// The JuQuadraticApproximationEngine vectors, <c>tests/vectors/pricingengines/vanilla/juquadraticengine.json</c>:
-/// American calls and puts priced by Ju's quadratic approximation over S-van's grid, their NPVs and Greeks, and the
-/// refusals; the outputs nanoql fixes are left out of the file.
+/// American calls and puts priced by Ju's quadratic approximation over the vanilla engines' grid, their NPVs and
+/// Greeks, and the refusals; the outputs nanoql fixes are left out of the file.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class JuQuadraticApproximationEngineVectorTests

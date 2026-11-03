@@ -12,9 +12,9 @@ the second with antithetic variates, and low-discrepancy paths at seed 5 on a Br
 call and a put at the spot: the NPV and the error estimate (null on low-discrepancy paths, which give none). Then an
 expired option and the refusals: a spot beyond the barrier ("barrier touched") and a cash-or-nothing payoff.
 
-The outputs nanoql fixes are left out (the S-bar plan's §2.10): every process here has one day counter and reference
-date, so the grid is QuantLib's (BR5 (iii), tests/NanoQL.Tests/Divergences/McBarrierMismatchedTimesTests.cs); and no
-pseudo-random run is at seed 5, where nanoql's bridge reads MT(6) (BR5 (v), McBarrierSeed5Tests.cs).
+The outputs nanoql fixes are left out: every process here has one day counter and reference date, so the grid is
+QuantLib's (tests/NanoQL.Tests/Divergences/McBarrierMismatchedTimesTests.cs); and no pseudo-random run is at seed 5,
+where nanoql's bridge reads MT(6) (McBarrierSeed5Tests.cs).
 
 A case holds one process, exercise and barrier (tools/vectors/gen/pricingengines/barrier/analyticbarrierengine.py's
 specs) and a Monte Carlo spec {"traits" ("pseudorandom" or "lowdiscrepancy"), "timeSteps", "brownianBridge",

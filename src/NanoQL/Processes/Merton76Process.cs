@@ -16,10 +16,10 @@ namespace NanoQL.Processes;
 /// intensity.
 /// </summary>
 /// <remarks>
-/// Immutable: the jump intensity, the mean log jump and the log jump volatility are numbers, as every quote is (R1).
-/// As QuantLib's, the process carries its parameters for the jump-diffusion engine and implements no dynamics: its
-/// drift, diffusion and step refuse with QuantLib's texts, and so do its expectation, standard deviation and variance,
-/// which the discretization reads from them.
+/// Immutable: the jump intensity, the mean log jump and the log jump volatility are numbers, as every quote is. As
+/// QuantLib's, the process carries its parameters for the jump-diffusion engine and implements no dynamics: its drift,
+/// diffusion and step refuse with QuantLib's texts, and so do its expectation, standard deviation and variance, which
+/// the discretization reads from them.
 /// </remarks>
 public sealed class Merton76Process : StochasticProcess1D
 {

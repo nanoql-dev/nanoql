@@ -15,7 +15,7 @@ namespace NanoQL.Numerics;
 /// QuantLib's general parametrization checks its angles' count against the rank's formula, which holds for a rank
 /// from 1 to the matrix's size, and at size + 1, whose count and loops are rank size's, so its matrix is rank size's;
 /// beyond, and for a matrix of size 0, it writes or reads outside its arrays, and its LMM form reads its angles
-/// unchecked. Those are refused here (the S-core plan's CR7 (xxix)).
+/// unchecked. Those are refused here.
 /// </remarks>
 public static class TapCorrelationsFunctions
 {

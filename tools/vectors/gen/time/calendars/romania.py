@@ -4,10 +4,9 @@
 weekday from 1 January 1901 to 30 December 2199, the whole range QuantLib's holidayList can walk (it steps past
 Date::maxDate() when its range ends on 31 December 2199, a documented divergence). The market is QuantLib's
 Romania::Market integer. The case's "skip" input lists the dates QuantLib's master adds to both markets (#2919, taken
-ahead of the pin as the upstream sweep's SWD14 rules), which the reader leaves out of nanoql's list: Orthodox Good
-Friday from 2018, Epiphany and St John the Baptist (6 and 7 January) from 2024, but those that are no business day in
-QuantLib 1.44 already (a weekend, or a Good Friday on May 1st). tests/NanoQL.Tests/Vectors/Time/
-Calendars/RomaniaVectorTests.cs reads it."""
+ahead of the pin), which the reader leaves out of nanoql's list: Orthodox Good Friday from 2018, Epiphany and St John
+the Baptist (6 and 7 January) from 2024, but those that are no business day in QuantLib 1.44 already (a weekend, or a
+Good Friday on May 1st). tests/NanoQL.Tests/Vectors/Time/Calendars/RomaniaVectorTests.cs reads it."""
 import os
 import sys
 

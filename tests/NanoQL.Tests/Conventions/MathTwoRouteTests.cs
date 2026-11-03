@@ -7,11 +7,10 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The experimental maths against a second route to the same values (the S-xrt plan's §2.5): the Moore-Penrose inverse
-/// of an invertible matrix is its inverse; Laplace interpolation of complete data is the data; the piecewise integral of
-/// a smooth function is the integrator's over the whole interval; the Clayton generator at a negative θ samples
-/// Clayton's copula, which QuantLib's test leaves out; and the Ziggurat generator's moments and tail are the standard
-/// normal's.
+/// The experimental maths against a second route to the same values: the Moore-Penrose inverse of an invertible matrix
+/// is its inverse; Laplace interpolation of complete data is the data; the piecewise integral of a smooth function is
+/// the integrator's over the whole interval; the Clayton generator at a negative θ samples Clayton's copula, which
+/// QuantLib's test leaves out; and the Ziggurat generator's moments and tail are the standard normal's.
 /// </summary>
 public class MathTwoRouteTests
 {

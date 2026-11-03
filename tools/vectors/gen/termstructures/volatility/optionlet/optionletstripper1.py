@@ -16,11 +16,10 @@ optionlet prices (each matrix as rows), the switch strike, the settlement days (
 on a fixed date), the calendar's and day counter's names, the business-day convention, the volatility type, the
 displacement, and the volatilities at the date past the last ({"throws": true}).
 
-The stability filter of the plan's S7R6 runs on the implied volatilities: the strip is redone with every surface quote
-moved one ulp up and then down, together, and, on a surface of at most 32 quotes, each quote alone up and down; a
-volatility is written only where every move leaves it within 1e-12 x max(|a|, |b|, 1), a dropped one as null in its
-row and its [date, strike] index listed in the case's "dropped" input, and the generator prints "dropped n of m
-outputs" per case and for the file.
+The stability filter runs on the implied volatilities: the strip is redone with every surface quote moved one ulp up and
+then down, together, and, on a surface of at most 32 quotes, each quote alone up and down; a volatility is written only
+where every move leaves it within 1e-12 x max(|a|, |b|, 1), a dropped one as null in its row and its [date, strike]
+index listed in the case's "dropped" input, and the generator prints "dropped n of m outputs" per case and for the file.
 
 A case's inputs are {"settings", "surface" (a surface spec of termstructures/volatility/capfloor/capfloortermvolsurface.py),
 "curve" (the index's forwarding curve), "index" ({"type": "Euribor6M" | "Euribor3M" | "Sofr"}), "discount" (null,
@@ -116,7 +115,7 @@ def matrix(m):
 
 
 def moves(quotes):
-    """S7R6's moves of the surface's quotes: all up, all down; then, on a small surface, each alone."""
+    """The moves of the surface's quotes: all up, all down; then, on a small surface, each alone."""
     flat = [x for row in quotes for x in row]
     width = len(quotes[0])
 

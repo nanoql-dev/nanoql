@@ -11,9 +11,9 @@ namespace NanoQL.Numerics;
 /// <summary>The CMA-ES optimizer's configuration, QuantLib's <c>Cmaes::Configuration</c>.</summary>
 /// <remarks>
 /// Immutable, with QuantLib's defaults: each <c>With…</c> method returns a modified copy, where QuantLib's setters
-/// change the configuration and return it (the S-core plan's CD12). QuantLib's <c>seed</c> isn't here: the seed is
-/// the optimizer's own argument, required (<see cref="Cmaes"/>). Its vectors compare by reference, so two
-/// configurations are equal only when they share them.
+/// change the configuration and return it. QuantLib's <c>seed</c> isn't here: the seed is the optimizer's own
+/// argument, required (<see cref="Cmaes"/>). Its vectors compare by reference, so two configurations are equal
+/// only when they share them.
 /// </remarks>
 public sealed record CmaesConfiguration
 {

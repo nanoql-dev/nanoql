@@ -20,15 +20,15 @@ namespace NanoQL.TermStructures;
 /// <para>
 /// Immutable: its matrix and strikes are copied when it is built, where QuantLib's surface shares the caller's
 /// matrix. <see cref="WithInterpolation{TInterpolator}"/> returns a copy re-interpolated in strike, QuantLib's
-/// <c>setInterpolation</c> (the S-van plan's VD23).
+/// <c>setInterpolation</c>.
 /// </para>
 /// <para>
 /// A strike outside a time's strikes is held at the nearest one wherever the constant extrapolation is asked for,
 /// at a node time as between nodes, where QuantLib's surface clamps between nodes alone and at a node, and at every time
 /// before the first, which clamps onto it, extrapolates by the interpolator (<c>fixedlocalvolsurface.cpp:135-137</c>):
 /// at the first node, a strike below the strikes read the interpolator's line extended, and a nanosecond later the
-/// clamped volatility (the S-van plan's VR4 (xviii)). nanoql's value at a node is QuantLib's own limit as the time
-/// tends to the node. A documented divergence.
+/// clamped volatility. nanoql's value at a node is QuantLib's own limit as the time tends to the node. A documented
+/// divergence.
 /// </para>
 /// </remarks>
 public sealed class FixedLocalVolSurface : LocalVolTermStructure
@@ -219,7 +219,7 @@ public sealed class FixedLocalVolSurface : LocalVolTermStructure
         {
             if (strikes[idx][0] < strikes[idx][^1])
             {
-                // the constant extrapolation at a node too (VR4 (xviii))
+                // the constant extrapolation at a node too
                 return localVolInterpol[idx].Evaluate(Clamped(strike, strikes[idx]), true);
             }
             else

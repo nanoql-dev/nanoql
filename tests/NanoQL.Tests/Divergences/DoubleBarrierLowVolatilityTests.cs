@@ -11,16 +11,16 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The analytic double-barrier engine at low volatility (the S-bar plan's BR5 (xvi), fixed under R8). The series' powers
-/// (U/L)^(n·μ₁) overflow where μ₁ = 2b/σ² + 1 is large, and the product with a vanishing normal difference is NaN, which
-/// QuantLib's <c>std::max(0, ·)</c> turns into 0: a knock-out call whose forward stays inside the corridor prices 0 at
-/// σ = 1e-4 and at every σ below about 1.6% at a 4% carry. nanoql takes each term's power and normal difference in logs
-/// where the power overflows, QuantLib's technique in the binary barrier engine, each difference of same-signed
-/// arguments from the small tail, and follows the forward below machine-epsilon variance. Checks: the deterministic
-/// limit D·(F − K), and continuity with QuantLib's finite values above the overflow; and the image series in 50 digits
-/// where the small tail keeps the digits a plain difference cancels, a call at 101 on [98, 102] at spot 100.5, r 4%, q
-/// 1%, σ 0.7% over a year (the reviewer's r3d case, F3-1): 0.00590299270662953, where QuantLib's five terms give
-/// 0.0059033353, 5.8e-5 off, and its 50 terms 0, by overflow (the S-bar run's <c>c1_f31_knockout.py</c>).
+/// The analytic double-barrier engine at low volatility (fixed). The series' powers (U/L)^(n·μ₁) overflow where μ₁ =
+/// 2b/σ² + 1 is large, and the product with a vanishing normal difference is NaN, which QuantLib's <c>std::max(0,
+/// ·)</c> turns into 0: a knock-out call whose forward stays inside the corridor prices 0 at σ = 1e-4 and at every σ
+/// below about 1.6% at a 4% carry. nanoql takes each term's power and normal difference in logs where the power
+/// overflows, QuantLib's technique in the binary barrier engine, each difference of same-signed arguments from the
+/// small tail, and follows the forward below machine-epsilon variance. Checks: the deterministic limit D·(F − K), and
+/// continuity with QuantLib's finite values above the overflow; and the image series in 50 digits where the small tail
+/// keeps the digits a plain difference cancels, a call at 101 on [98, 102] at spot 100.5, r 4%, q 1%, σ 0.7% over a
+/// year: 0.00590299270662953, where QuantLib's five terms give 0.0059033353, 5.8e-5 off, and its 50 terms 0, by
+/// overflow.
 /// </summary>
 public class DoubleBarrierLowVolatilityTests
 {

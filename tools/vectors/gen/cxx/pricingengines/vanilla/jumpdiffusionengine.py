@@ -9,9 +9,9 @@ gamma, theta, vega, rho and dividend rho; on the evaluation date 15 October 2026
 iterations for the accuracy.
 
 The outputs nanoql fixes are left out: structures dated apart, the rate's reference date where QuantLib reads the
-volatility's (the S-van plan's VR4 (xiii), tests/NanoQL.Tests/Divergences/JumpDiffusionReferenceDateTests.cs), which a
-single reference date for every structure avoids; and the vega and theta at a zero volatility (VR4 (xxix),
-JumpDiffusionZeroVolatilityTests.cs), which the volatilities here never are. Read back by
+volatility's (tests/NanoQL.Tests/Divergences/JumpDiffusionReferenceDateTests.cs), which a single reference date for
+every structure avoids; and the vega and theta at a zero volatility (JumpDiffusionZeroVolatilityTests.cs), which the
+volatilities here never are. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/PricingEngines/JumpDiffusionEngineCxxVectorTests.cs."""
 import os
 import sys

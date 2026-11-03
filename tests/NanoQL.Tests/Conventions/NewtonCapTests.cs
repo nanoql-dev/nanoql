@@ -7,13 +7,12 @@ using NanoQL.PricingEngines;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The cap on QuantLib's Newton loops in the complex chooser and holder-extensible engines (the S-exo plan's ER5 (xxv),
-/// ED24): QuantLib's steps and stopping rule, the value within 0.001 of zero, refused past 1,000 steps with "critical
-/// value not found after 1000 iterations". No engine input is known whose loop doesn't converge, so the engines'
-/// shared loop runs on test-side functions: one without a root (x² + 1 from 0.5), refused; one meeting the rule after
-/// exactly 1,000 steps, returned, and after 1,001, refused; and x² − 2 from 1, QuantLib's steps to within its rule of √2.
-/// A NaN value stops the loop, as QuantLib's (x² + 1 from 1 steps to 0, then to infinity): no engine input is known to
-/// reach one.
+/// The cap on QuantLib's Newton loops in the complex chooser and holder-extensible engines: QuantLib's steps and
+/// stopping rule, the value within 0.001 of zero, refused past 1,000 steps with "critical value not found after 1000
+/// iterations". No engine input is known whose loop doesn't converge, so the engines' shared loop runs on test-side
+/// functions: one without a root (x² + 1 from 0.5), refused; one meeting the rule after exactly 1,000 steps, returned,
+/// and after 1,001, refused; and x² − 2 from 1, QuantLib's steps to within its rule of √2. A NaN value stops the loop,
+/// as QuantLib's (x² + 1 from 1 steps to 0, then to infinity): no engine input is known to reach one.
 /// </summary>
 public class NewtonCapTests
 {

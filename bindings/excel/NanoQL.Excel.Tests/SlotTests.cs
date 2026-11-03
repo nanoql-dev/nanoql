@@ -7,8 +7,8 @@ using static NanoQL.Excel.Tests.Xl;
 namespace NanoQL.Excel.Tests;
 
 /// <summary>
-/// Objects inside a returned collection (XLD12, F5-2): keyed by the parent call and their place, never by identity, so
-/// fresh objects get the same handles; each records its parent call and position, which <c>nqlxlRecipe</c> shows.
+/// Objects inside a returned collection: keyed by the parent call and their place, never by identity, so fresh objects
+/// get the same handles; each records its parent call and position, which <c>nqlxlRecipe</c> shows.
 /// </summary>
 [Collection(TestSettings.Name)]
 public sealed class SlotTests

@@ -7,12 +7,12 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The particle swarm's adaptive and decreasing inertias (the S-xrt plan's XRR5 (xxxi), fixed under R8). QuantLib's
-/// adaptive counter is unsigned, so its first improvement wraps it to 2⁶⁴ − 1 and halves the inertia as if the swarm had
-/// stalled; its decreasing inertia never sets its swarm size, which it loops over, and never advances its iteration, so
-/// it never decreases. On the inertia form with c₁ = c₂ = 0 each velocity changes only by the inertia's factor, so a
-/// recording topology reads each iteration's factor from the velocities, on a linear cost whose leading particle's drift
-/// improves the swarm, an improvement at a net count of 0 among them: nanoql's are each inertia's formula.
+/// The particle swarm's adaptive and decreasing inertias (fixed). QuantLib's adaptive counter is unsigned, so its first
+/// improvement wraps it to 2⁶⁴ − 1 and halves the inertia as if the swarm had stalled; its decreasing inertia never
+/// sets its swarm size, which it loops over, and never advances its iteration, so it never decreases. On the inertia
+/// form with c₁ = c₂ = 0 each velocity changes only by the inertia's factor, so a recording topology reads each
+/// iteration's factor from the velocities, on a linear cost whose leading particle's drift improves the swarm, an
+/// improvement at a net count of 0 among them: nanoql's are each inertia's formula.
 /// </summary>
 public class ParticleSwarmInertiaTests
 {

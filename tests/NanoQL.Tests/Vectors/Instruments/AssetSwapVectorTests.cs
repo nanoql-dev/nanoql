@@ -46,8 +46,7 @@ public class AssetSwapVectorTests
                 CashFlowInputs.NullableDate(engine.GetProperty("settlementDate")),
                 CashFlowInputs.NullableDate(engine.GetProperty("npvDate")));
 
-            // assetswap.py leaves out the outputs that read a repayment given on a face other than 100 (the S-cms
-            // plan's CMR5 (xix)).
+            // assetswap.py leaves out the outputs that read a repayment given on a face other than 100.
             if (c.Expected.TryGetProperty("NPV", out _))
             {
                 check.Output(c, "NPV", results.NPV);

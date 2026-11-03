@@ -15,7 +15,7 @@ namespace NanoQL.Tests.Vectors;
 /// Heston models on flat and zero curves, the NPVs of plain calls and puts, cash-or-nothing calls and asset-or-nothing
 /// puts at five strikes and two maturities at two accuracies, each priced through the static <c>Calculate</c> and
 /// through the engine object. The output is the window's value, QuantLib's price: the NPV less the tails nanoql adds
-/// beyond the window (the code review's C2-B1-2), which <c>Divergences/AnalyticPdfHestonTailsTests.cs</c> checks.
+/// beyond the window, which <c>Divergences/AnalyticPdfHestonTailsTests.cs</c> checks.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class AnalyticPDFHestonEngineVectorTests

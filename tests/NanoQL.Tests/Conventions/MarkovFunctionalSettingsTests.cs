@@ -7,7 +7,7 @@ using static NanoQL.Models.MarkovFunctionalModelSettingsAdjustments;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The Markov-functional model's settings (the S-g1d plan's G1D17): QuantLib's chained setters return copies, and
+/// The Markov-functional model's settings: QuantLib's chained setters return copies, and
 /// <see cref="MarkovFunctionalModelSettings.Validate"/> completes the flags (Kahale's interpolation implies Kahale's
 /// smile; Kahale's smile with the deletion of arbitrage points implies Kahale's interpolation) and refuses QuantLib's
 /// cases, each with QuantLib's text (<c>markovfunctional.hpp:152-199</c>), as <see cref="NanoQLException"/>: the

@@ -13,9 +13,9 @@ namespace NanoQL.Tests.Divergences;
 /// QuantLib's fix after v1.44 to the holder-extensible engine (#2892, <c>453e6605c</c>): the put's correlation sign, the
 /// Newton seeds at the strike, the put's derivative, the empty extension region and the call's with dividends
 /// (<c>analyticholderextensibleoptionengine.cpp:87-88</c>, <c>:96-197</c>); 1.44 prices a put −1.063 where its value
-/// is 7.428. nanoql takes the fix (the S-exo plan's ER6 (iii)). The check is master's case,
-/// <c>testHolderExtensibleOptionCriticalPrices</c>: options whose extension region is empty or unbounded against values
-/// from numerical integration at the first expiry, within 1e-4, here until the pin moves.
+/// is 7.428. nanoql takes the fix. The check is master's case, <c>testHolderExtensibleOptionCriticalPrices</c>: options
+/// whose extension region is empty or unbounded against values from numerical integration at the first expiry, within
+/// 1e-4, here until the pin moves.
 /// </summary>
 public class HolderExtensibleCriticalPricesTests
 {

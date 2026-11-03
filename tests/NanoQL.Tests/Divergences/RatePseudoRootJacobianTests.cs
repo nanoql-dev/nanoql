@@ -7,14 +7,14 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The analytic pseudo-root Jacobians (the S-mmp plan's MMPR4 (iv), ruled by the user). The derivative of an Euler step's
-/// end rate j along rate k's root carries the drift's sum e_j = Σ_{k&lt;j} τ_k (f_k + d_k) P_k a_k and the displaced
-/// rate f_j + d_j; QuantLib's sums the terms without τ_k and multiplies by τ_j, right on equal periods only, and carries
-/// f_j (<c>ratepseudorootjacobian.cpp:183</c>, <c>:191</c>, <c>:197</c>, <c>:280</c>, <c>:294</c>, <c>:298</c>). On six
+/// The analytic pseudo-root Jacobians. The derivative of an Euler step's end rate j along rate k's root carries the
+/// drift's sum e_j = Σ_{k&lt;j} τ_k (f_k + d_k) P_k a_k and the displaced rate f_j + d_j; QuantLib's sums the terms
+/// without τ_k and multiplies by τ_j, right on equal periods only, and carries f_j
+/// (<c>ratepseudorootjacobian.cpp:183</c>, <c>:191</c>, <c>:197</c>, <c>:280</c>, <c>:294</c>, <c>:298</c>). On six
 /// unequal periods, FlatVol 20%, 3 factors, displacement 2%, the money-market measure, step 0 from the forwards with
-/// Gaussians 0.3, −0.5, 1.1, every element bumped 1e-6 (this run's <c>probes\c4_facts.cpp</c>; the planner's MPP7,
-/// MPP8): nanoql's analytic Jacobians meet the numerical within QuantLib's own test's 5e-11; QuantLib's misses by
-/// 1.98e-4. Checks: QuantLib's <c>RatePseudoRootJacobianNumerical</c>, its bits.
+/// Gaussians 0.3, −0.5, 1.1, every element bumped 1e-6: nanoql's analytic Jacobians meet the numerical within
+/// QuantLib's own test's 5e-11; QuantLib's misses by 1.98e-4. Checks: QuantLib's
+/// <c>RatePseudoRootJacobianNumerical</c>, its bits.
 /// </summary>
 public class RatePseudoRootJacobianTests
 {

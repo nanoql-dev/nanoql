@@ -13,10 +13,10 @@ namespace NanoQL.Methods;
 /// direction, the first direction running fastest.
 /// </summary>
 /// <remarks>
-/// A working type (the S-eq plan's SEQD17): mutable, owned by one computation and not thread-safe.
-/// <see cref="Increment"/> advances it in place, as QuantLib's <c>operator++</c> does; <see cref="Reset"/> returns it
-/// to the first point, so that a walk repeated every time step allocates nothing. <see cref="FdmLinearOpLayout.Begin"/>
-/// returns a new one, as QuantLib's <c>begin()</c> does.
+/// A working type: mutable, owned by one computation and not thread-safe. <see cref="Increment"/> advances it in place,
+/// as QuantLib's <c>operator++</c> does; <see cref="Reset"/> returns it to the first point, so that a walk repeated
+/// every time step allocates nothing. <see cref="FdmLinearOpLayout.Begin"/> returns a new one, as QuantLib's
+/// <c>begin()</c> does.
 /// </remarks>
 [WorkingType]
 public sealed class FdmLinearOpIterator

@@ -16,7 +16,7 @@ namespace NanoQL.Tests.TestSuite;
 /// <remarks>
 /// QuantLib's cases set one loss model on the basket and change its correlation quote between pricings, the swaps
 /// repricing through the observers; here a model is built and bound per correlation, and the swaps on the bound
-/// basket (the S-xcr plan's XR1 (d)).
+/// basket.
 /// </remarks>
 [Trait("Oracle", "QuantLib")]
 public class NthToDefaultTests

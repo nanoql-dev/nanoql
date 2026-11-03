@@ -27,7 +27,7 @@ namespace NanoQL.Processes;
 /// caches it by (t₀, dt) when the derived class says the cross-model correlation doesn't depend on the state
 /// (<c>jointstochasticprocess.cpp:189-268</c>): its key leaves out the state the constituents' deviations read, so a
 /// later path at the same step can reuse an earlier path's matrix, and no class in QuantLib derives the process to
-/// measure what the cache pays (the S-hes plan's HR4 (iii)).
+/// measure what the cache pays.
 /// </para>
 /// </remarks>
 public abstract class JointStochasticProcess : StochasticProcess
@@ -196,9 +196,9 @@ public abstract class JointStochasticProcess : StochasticProcess
     }
 
     /// <inheritdoc/>
-    /// <remarks>The step's correlation is built at each call (HR4 (iii)); the derived class's
-    /// <see cref="PreEvolve"/> sees the correlated increments before the constituents step, and its
-    /// <see cref="PostEvolve"/> returns the joint state from theirs.</remarks>
+    /// <remarks>The step's correlation is built at each call; the derived class's <see cref="PreEvolve"/> sees the
+    /// correlated increments before the constituents step, and its <see cref="PostEvolve"/> returns the joint state
+    /// from theirs.</remarks>
     public override Vector Evolve(double t0, Vector x0, double dt, Vector dw)
     {
         ArgumentNullException.ThrowIfNull(x0);

@@ -5,8 +5,8 @@ namespace NanoQL.Numerics;
 
 /// <summary>
 /// A double-double: an unevaluated sum of two doubles, <see cref="Hi"/> + <see cref="Lo"/> with |Lo| at most half an
-/// ulp of Hi, about 31 decimal digits (the S-hes plan's HR6), in which QuantLib's own expressions evaluate where their
-/// double arithmetic cancels.
+/// ulp of Hi, about 31 decimal digits, in which QuantLib's own expressions evaluate where their double arithmetic
+/// cancels.
 /// </summary>
 /// <param name="Hi">The leading double, the value rounded to a double.</param>
 /// <param name="Lo">The trailing double.</param>

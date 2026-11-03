@@ -8,10 +8,10 @@ using static NanoQL.Tests.Conventions.CreditPortfolioBuilders;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// A basket's remaining tranche computed after its attachment and detachment amounts (the S-xcr plan's XR8 (xliii)):
-/// QuantLib's constructor computes the basket's evaluation-date state before it sets the amounts
-/// (<c>basket.cpp:57-68</c>), so the remaining amounts read 0 and 0 until the first statistic recomputes them. QuantLib's
-/// values are the plan review's <c>rv_basket.cpp order</c>; the check is QuantLib's values after its first statistic.
+/// A basket's remaining tranche computed after its attachment and detachment amounts: QuantLib's constructor computes
+/// the basket's evaluation-date state before it sets the amounts (<c>basket.cpp:57-68</c>), so the remaining amounts
+/// read 0 and 0 until the first statistic recomputes them. QuantLib's values are recorded in the test; the check is
+/// QuantLib's values after its first statistic.
 /// </summary>
 public class BasketConstructionOrderTests
 {

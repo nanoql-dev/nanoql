@@ -4,11 +4,11 @@
 the evaluation date 15 October 2026: discrete arithmetic average-price Asian options by finite differences on the log
 spot and the log average.
 
-Arithmetic calls and puts at 90, 100 and 110, over six months and a year, with 4 and 12 fixings, unseasoned and with
-two past fixings at 95 and 105, on the ten processes of tools/vectors/gen/processes/blackscholesprocess.py, on a grid
-of 50 time steps, 50 spot points and 25 average points: the NPV, delta and gamma. Then the refusals of a geometric
-average, an exercise that isn't European, a running sum without a past fixing and a fixing in the past, and an expired
-option. Fixing dates given twice are left out (the S-bar plan's §2.10: BR5 (xxviii)).
+Arithmetic calls and puts at 90, 100 and 110, over six months and a year, with 4 and 12 fixings, unseasoned and with two
+past fixings at 95 and 105, on the ten processes of tools/vectors/gen/processes/blackscholesprocess.py, on a grid of 50
+time steps, 50 spot points and 25 average points: the NPV, delta and gamma. Then the refusals of a geometric average, an
+exercise that isn't European, a running sum without a past fixing and a fixing in the past, and an expired option.
+Fixing dates given twice are left out.
 
 The grid goes in as "tGrid", "xGrid" and "aGrid". The wheel's calls, by QuantLib-SWIG 1.44's options.i:
 FdBlackScholesAsianEngine(process, tGrid, xGrid, aGrid) and the option's NPV, delta and gamma. Read back by

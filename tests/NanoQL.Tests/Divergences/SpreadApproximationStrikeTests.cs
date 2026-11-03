@@ -12,8 +12,7 @@ namespace NanoQL.Tests.Divergences;
 /// zero or less. QuantLib takes the log of a negative ratio and returns NaN
 /// (<c>bjerksundstenslandspreadengine.cpp:48</c>, <c>operatorsplittingspreadengine.cpp:53</c>), where Kirk's engine,
 /// their sibling, refuses through Black's check ("forward (−2.19458) must be positive"). nanoql refuses before the log,
-/// "f2 + strike must be positive for this approximation" (the S-exo plan's ER5 (x)): a refusal, the approximations
-/// having no value there.
+/// "f2 + strike must be positive for this approximation": a refusal, the approximations having no value there.
 /// </summary>
 public class SpreadApproximationStrikeTests
 {

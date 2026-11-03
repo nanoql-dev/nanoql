@@ -8,14 +8,13 @@ using NanoQL.Tests.Conventions;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The basis systems' function counts (the S-mmp plan's MMPR4 (xv), fixed under R8). QuantLib adjusts only the last
-/// exercise's count (<c>swapbasissystem.cpp:46</c>, <c>swapforwardbasissystem.cpp:53</c>, <c>:56</c>), so an earlier
-/// exercise in the last periods reports more functions than its own values give: on six semi-annual rates, a swap basis
-/// system exercised at 2.6 and 2.8 counts 3 and 2 where its values give 2 and 2, and a swap-forward basis system at
-/// every rate time but the last counts 10 at its fifth exercise where its values give 6 (this run's
-/// <c>probes\c3_facts.cpp</c>; the planner's MPP10). nanoql counts each exercise's functions from its own rate, as its
-/// values decide, which the node-data collection and the Longstaff-Schwartz strategy size their buffers by. Check:
-/// QuantLib's values' lengths.
+/// The basis systems' function counts (fixed). QuantLib adjusts only the last exercise's count
+/// (<c>swapbasissystem.cpp:46</c>, <c>swapforwardbasissystem.cpp:53</c>, <c>:56</c>), so an earlier exercise in the
+/// last periods reports more functions than its own values give: on six semi-annual rates, a swap basis system
+/// exercised at 2.6 and 2.8 counts 3 and 2 where its values give 2 and 2, and a swap-forward basis system at every rate
+/// time but the last counts 10 at its fifth exercise where its values give 6. nanoql counts each exercise's functions
+/// from its own rate, as its values decide, which the node-data collection and the Longstaff-Schwartz strategy size
+/// their buffers by. Check: QuantLib's values' lengths.
 /// </summary>
 public class BasisSystemFunctionCountTests
 {

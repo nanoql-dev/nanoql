@@ -11,11 +11,10 @@ arguments and at other ones (the Bates engine's model has none), by the Gauss-La
 order 144 and at 64 and by the Gauss-Lobatto constructor at a relative tolerance of 1e-8 and 10,000 evaluations: the
 NPV and the number of evaluations of calls and puts at 80%, 100% and 120% of the spot and three maturities.
 
-Left out (the S-hes plan's §2.10): the det-jump engines where the intensity's mean-reversion speed times the maturity
-is below 1e-2, which nanoql evaluates by a series (HR7 (iv), tests/NanoQL.Tests/Divergences/
-BatesDetJumpSmallReversionTests.cs: here it is at least 0.25); and the double-exponential engines at an up-jump mean of
-1 or more, which nanoql refuses (HR7 (v), tests/NanoQL.Tests/Divergences/BatesDoubleExpUpJumpTests.cs: here it is at
-most 0.2).
+Left out: the det-jump engines where the intensity's mean-reversion speed times the maturity is below 1e-2, which nanoql
+evaluates by a series (tests/NanoQL.Tests/Divergences/BatesDetJumpSmallReversionTests.cs: here it is at least 0.25); and
+the double-exponential engines at an up-jump mean of 1 or more, which nanoql refuses
+(tests/NanoQL.Tests/Divergences/BatesDoubleExpUpJumpTests.cs: here it is at most 0.2).
 
 A case holds the "type", the "process" (batesmodel.py's harness spec), the model's "arguments", the "integration"
 ({"order"} or {"relTolerance", "maxEvaluations"}), and the "maturities" (days from the evaluation date) and "strikes";

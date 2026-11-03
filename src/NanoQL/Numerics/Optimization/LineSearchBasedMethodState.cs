@@ -14,8 +14,8 @@ namespace NanoQL.Numerics;
 /// <remarks>
 /// A working type: a <see cref="LineSearchBasedMethod"/> creates one at each minimization's start
 /// (<see cref="LineSearchBasedMethod"/>'s <c>NewMinimizationState</c>) and changes it as the minimization runs, so the
-/// method itself stays immutable and each minimization starts afresh (the S-core plan's CR5 (a)). An extension point:
-/// a method of one's own derives its state from it.
+/// method itself stays immutable and each minimization starts afresh. An extension point: a method of one's own
+/// derives its state from it.
 /// </remarks>
 [WorkingType]
 public abstract class LineSearchBasedMethodState

@@ -100,7 +100,7 @@ public class SabrErrorTests
     [Fact]
     public void FewerVolatilitiesThanStrikesReachTheInterpolationsCheck()
     {
-        // QuantLib's fit reads one volatility per strike, past the given ones (the plan's XD5); S2's base refuses.
+        // QuantLib's fit reads one volatility per strike, past the given ones; the interpolation's base refuses.
         AssertArgument(
             "y",
             "2 y values given for 3 x values",

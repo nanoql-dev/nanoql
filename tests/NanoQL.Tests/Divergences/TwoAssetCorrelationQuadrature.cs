@@ -7,10 +7,10 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// An independent value of a two-asset correlation option on flat continuous markets (the master plan's Revision 69
-/// check): the discounted expectation of the second asset's payoff where the first is in the money, integrated over
-/// the second asset's driving normal, each first-asset probability conditional on it in closed form, the payoff's kink
-/// an end of the integral; Gauss-Lobatto at an absolute accuracy of 1e-13.
+/// An independent value of a two-asset correlation option on flat continuous markets: the discounted expectation of
+/// the second asset's payoff where the first is in the money, integrated over the second asset's driving normal, each
+/// first-asset probability conditional on it in closed form, the payoff's kink an end of the integral; Gauss-Lobatto
+/// at an absolute accuracy of 1e-13.
 /// </summary>
 internal static class TwoAssetCorrelationQuadrature
 {

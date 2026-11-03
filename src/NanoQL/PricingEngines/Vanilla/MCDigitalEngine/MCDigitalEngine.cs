@@ -22,23 +22,23 @@ namespace NanoQL.PricingEngines;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A static class over <see cref="MCVanillaEngine{TMc, TPath, TStats}"/> (the S-van plan's VR1): <c>Calculate</c>
-/// builds the simulation for the call, with QuantLib's checks, and returns the NPV and, where the random-number traits
-/// allow one, the error estimate. The payoff must be cash-or-nothing and the exercise American. The bridge's uniform
-/// numbers come from QuantLib's constant seed 76 (VD26).
+/// A static class over <see cref="MCVanillaEngine{TMc, TPath, TStats}"/>: <c>Calculate</c> builds the simulation for
+/// the call, with QuantLib's checks, and returns the NPV and, where the random-number traits allow one, the error
+/// estimate. The payoff must be cash-or-nothing and the exercise American. The bridge's uniform numbers come from
+/// QuantLib's constant seed 76.
 /// </para>
 /// <para>
-/// Documented divergences beside the pricer's: the paths and the discounts run on the engine's clock (VR1 (v), as
+/// Documented divergences beside the pricer's: the paths and the discounts run on the engine's clock (as
 /// <see cref="MCEuropeanEngine"/>); an exercise window opening after the start joins the grid as a mandatory time,
-/// crossings counted from it (VR4 (iii)); and at seed 76 the bridge's seed is 77, since QuantLib's bridge then draws
-/// the uniform numbers of the pseudo-random path's own increments, step by step (VR4 (xxv),
-/// <c>Divergences/McDigitalSeed76Tests.cs</c>). The seed is explicit (S2R4).
+/// crossings counted from it; and at seed 76 the bridge's seed is 77, since QuantLib's bridge then draws the uniform
+/// numbers of the pseudo-random path's own increments, step by step (<c>Divergences/McDigitalSeed76Tests.cs</c>). The
+/// seed is explicit.
 /// </para>
 /// </remarks>
 public static class MCDigitalEngine
 {
     // QuantLib's constant seed of the bridge's uniform numbers (mcdigitalengine.hpp:178-179), and the one taken at the
-    // pricing seed 76 (the S-van plan's VR4 (xxv)).
+    // pricing seed 76.
     private const long BridgeSeed = 76;
     private const long BridgeSeedAt76 = 77;
 
@@ -153,8 +153,8 @@ public static class MCDigitalEngine
             return new DigitalPathPricer(payoff, exercise, process.RiskFreeRate, clock, (StochasticProcess1D)Process, sequenceGen);
         }
 
-        // The window's opening joins the grid as a mandatory time where it is after the start (the S-van plan's
-        // VR4 (iii)); QuantLib's grid otherwise.
+        // The window's opening joins the grid as a mandatory time where it is after the start; QuantLib's grid
+        // otherwise.
         protected override NanoQL.TimeGrid TimeGrid()
         {
             double windowStart = Process.Time(Option.Exercise.Dates[0]);

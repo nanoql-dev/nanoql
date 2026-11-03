@@ -20,9 +20,9 @@ namespace NanoQL.Numerics;
 /// </para>
 /// <para>
 /// Two departures from QuantLib's, each documented: <see cref="SkipTo"/> moves to the n-th point, as QuantLib's other
-/// sequences' <c>skipTo</c> do, where QuantLib's moves n points on (the S-core plan's CR7 (xii);
-/// <c>Divergences/LatticeRsgTests.cs</c>); and a dimension beyond the generating vector's, which QuantLib reads past
-/// its end, and a number of points below 1, a division by 0, are refused (CR7 (xxvii)).
+/// sequences' <c>skipTo</c> do, where QuantLib's moves n points on (<c>Divergences/LatticeRsgTests.cs</c>); and a
+/// dimension beyond the generating vector's, which QuantLib reads past its end, and a number of points below 1, a
+/// division by 0, are refused.
 /// </para>
 /// </remarks>
 [WorkingType]

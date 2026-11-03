@@ -15,8 +15,7 @@ namespace NanoQL.Methods;
 /// direction of a layout.
 /// </summary>
 /// <remarks>
-/// Immutable once built (the S-eq plan's SEQR1). An extension point, as in QuantLib: later units derive their meshers
-/// from it.
+/// Immutable once built. An extension point, as in QuantLib: later units derive their meshers from it.
 /// </remarks>
 public abstract class FdmMesher
 {

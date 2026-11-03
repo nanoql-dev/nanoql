@@ -62,8 +62,8 @@ public sealed class LevyFlightDistribution : IRandomWalkDistribution
     }
 
     /// <summary>
-    /// A draw, x_m · u^(−1/α) with u from <c>std::uniform_real_distribution&lt;Real&gt;(0.0, 1.0)</c> as MSVC draws it
-    /// (the S-xrt plan's XRD4): QuantLib's <c>operator()(Engine&amp;)</c>.
+    /// A draw, x_m · u^(−1/α) with u from <c>std::uniform_real_distribution&lt;Real&gt;(0.0, 1.0)</c> as MSVC draws it:
+    /// QuantLib's <c>operator()(Engine&amp;)</c>.
     /// </summary>
     /// <param name="engine">The engine.</param>
     /// <returns>The draw.</returns>

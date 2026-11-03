@@ -8,14 +8,13 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// BetaRisk's event process (the S-xcr plan's XR8 (xlii)): the inter-arrival times cumulated, a Poisson process,
-/// where QuantLib draws each event's time afresh, a geometric count whose dates come unordered. At a two-year return
-/// period over three years (2 January 2015 to 2018, maximum loss 100, mean 10, standard deviation 15) QuantLib's
-/// mean count reads 3.48466 for λT = 1.5, and 51,727 of 10⁵ paths unordered; on <c>testBetaRisk</c>'s risk (return
-/// period 100 years) QuantLib reads a count mean of 0.030433 and variance 0.031354832510999998, a loss mean of
-/// 0.30134899766945406 and variance 9.7413702370590478 over 10⁶ paths, its checks at 1% passing on its seed (the S-xcr
-/// run's <c>c4_facts.cpp</c>). QuantLib's draws are kept up to the parting path: of its first 24 paths with events
-/// (the S-xcr plan's XP16, <c>probes\xp_betarisk.cpp</c>), only the two with two events move, their second date alone.
+/// BetaRisk's event process: the inter-arrival times cumulated, a Poisson process, where QuantLib draws each event's
+/// time afresh, a geometric count whose dates come unordered. At a two-year return period over three years (2 January
+/// 2015 to 2018, maximum loss 100, mean 10, standard deviation 15) QuantLib's mean count reads 3.48466 for λT = 1.5,
+/// and 51,727 of 10⁵ paths unordered; on <c>testBetaRisk</c>'s risk (return period 100 years) QuantLib reads a count
+/// mean of 0.030433 and variance 0.031354832510999998, a loss mean of 0.30134899766945406 and variance
+/// 9.7413702370590478 over 10⁶ paths, its checks at 1% passing on its seed. QuantLib's draws are kept up to the parting
+/// path: of its first 24 paths with events, only the two with two events move, their second date alone.
 /// </summary>
 public class BetaRiskTests
 {

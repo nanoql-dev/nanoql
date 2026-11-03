@@ -28,8 +28,9 @@ namespace NanoQL.PricingEngines;
 /// <para>
 /// The draw-price-add loop allocates nothing per sample after its first batch: the paths step through
 /// <see cref="StochasticProcessArray"/>'s in-place pair and the path pricer passes its buffer
-/// (<c>Conventions/McBasketAllocationTests.cs</c>). The seed is explicit and required (master §2.2's seed row). The
-/// correctness of the returned value is tested by reproducing results available in literature.
+/// (<c>Conventions/McBasketAllocationTests.cs</c>). The seed is explicit and required (the playbook's
+/// <c>SeedGenerator</c> row). The correctness of the returned value is tested by reproducing results available in
+/// literature.
 /// </para>
 /// </remarks>
 public static class MCEuropeanBasketEngine
@@ -94,7 +95,7 @@ public static class MCEuropeanBasketEngine
         return option.FetchResults(engine.Price());
     }
 
-    // The clock spanning the array's Black-Scholes processes, where the first is one (the S-exo plan's ER5 (i)).
+    // The clock spanning the array's Black-Scholes processes, where the first is one.
     internal static TermStructure? Clock(StochasticProcessArray processes)
     {
         if (processes.Process(0) is not GeneralizedBlackScholesProcess)

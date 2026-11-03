@@ -18,9 +18,9 @@ namespace NanoQL.TermStructures;
 /// <remarks>
 /// An extension point. The default survival probability is QuantLib's: 1 less the default density integrated
 /// numerically with a 48-point Gauss-Chebyshev rule, floored at 0, which QuantLib warns "might be inefficient and
-/// inaccurate. Derived classes should override it if a more efficient implementation is available": the rule
-/// integrates a constant over [-1, 1] to 2.000357018144566, a relative error of 1.785e-4. No QuantLib class reads it;
-/// the curves of S-infl's slot implement it exactly (the S-xcr plan's XR3 (a)).
+/// inaccurate. Derived classes should override it if a more efficient implementation is available": the rule integrates
+/// a constant over [-1, 1] to 2.000357018144566, a relative error of 1.785e-4. No QuantLib class reads it; nanoql's
+/// default-density curves implement it exactly.
 /// </remarks>
 public abstract class DefaultDensityStructure : DefaultProbabilityTermStructure
 {

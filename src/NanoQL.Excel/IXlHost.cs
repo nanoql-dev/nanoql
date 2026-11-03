@@ -6,9 +6,9 @@ using ExcelDna.Integration;
 namespace NanoQL.Excel;
 
 /// <summary>
-/// What the runtime reads from Excel and hands to it, through one seam (round 8's F8-2): the calling cell, a range's
-/// values, the anchor of the spill a cell belongs to, the calling workbook's date system, and an entry presented
-/// through its RTD topic. Excel's in the add-in; a test host stands in outside Excel (the tests, the replayer).
+/// What the runtime reads from Excel and hands to it, through one seam: the calling cell, a range's values, the
+/// anchor of the spill a cell belongs to, the calling workbook's date system, and an entry presented through its RTD
+/// topic. Excel's in the add-in; a test host stands in outside Excel (the tests, the replayer).
 /// </summary>
 internal interface IXlHost
 {
@@ -26,7 +26,7 @@ internal interface IXlHost
     /// <returns>The anchor.</returns>
     ExcelReference? SpillParent(ExcelReference cell);
 
-    /// <summary>The calling workbook's date shift: 1,462 in the 1904 date system, 0 in the 1900 one (XLD8).</summary>
+    /// <summary>The calling workbook's date shift: 1,462 in the 1904 date system, 0 in the 1900 one.</summary>
     /// <returns>The shift.</returns>
     int DateShift();
 

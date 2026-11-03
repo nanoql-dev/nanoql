@@ -6,13 +6,13 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The discrete integrators with too few evaluations (the S-van plan's VR4 (xix), (xx)). With fewer than two, QuantLib's
-/// count of intervals, an unsigned <c>Size</c>, wraps below zero and its loop runs about 2⁶⁴ times
-/// (<c>discreteintegrals.cpp:74-79</c>, <c>:92</c>) [read]; nanoql refuses them, at construction and where the count is
-/// set below two since. With two, one interval, QuantLib's Simpson integrator closes its odd interval count by an end
-/// correction that counts f(a) a second time: on exp over [0, 1] it gives 2.5258075808961893, where its own
-/// <c>DiscreteSimpsonIntegral</c> on the same two points gives the trapezoid's 1.8591409142295225 [executed: the C++
-/// harness]; nanoql's integrator gives the trapezoid there. QuantLib's check: its array form.
+/// The discrete integrators with too few evaluations. With fewer than two, QuantLib's count of intervals, an unsigned
+/// <c>Size</c>, wraps below zero and its loop runs about 2⁶⁴ times (<c>discreteintegrals.cpp:74-79</c>, <c>:92</c>);
+/// nanoql refuses them, at construction and where the count is set below two since. With two, one interval, QuantLib's
+/// Simpson integrator closes its odd interval count by an end correction that counts f(a) a second time: on exp over
+/// [0, 1] it gives 2.5258075808961893, where its own <c>DiscreteSimpsonIntegral</c> on the same two points gives the
+/// trapezoid's 1.8591409142295225 (the C++ harness); nanoql's integrator gives the trapezoid there. QuantLib's check:
+/// its array form.
 /// </summary>
 public class DiscreteIntegratorFewPointsTests
 {

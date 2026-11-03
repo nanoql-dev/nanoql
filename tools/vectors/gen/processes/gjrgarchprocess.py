@@ -3,15 +3,14 @@
 """Vectors for QuantLib's GJRGARCHProcess (ql/processes/gjrgarchprocess.hpp, .cpp), on the evaluation date 15 October
 2026: the continuous-time GJR-GARCH(1,1) process of the spot and its daily variance.
 
-Two parameter sets (QuantLib's gjrgarchmodel test's omega 2e-6, alpha 0.024, beta 0.93, gamma 0.059, lambda 0.1 at
-365 days a year from its stationary variance, and a set at 252 days with a larger leverage and risk premium) on flat
-and linear zero curves, each under the three discretizations: size, factors and initial values; the drift and
-diffusion at four states (the variance positive, small and negative) and two times; and evolve from three states over
-three steps (a day, 0.05 and 0.25) with three draws. The reader checks the in-place evolve and initial values on the
-same cases (the S-hes plan's HR2; tests/NanoQL.Tests/Conventions/StochasticProcessInPlaceTests.cs compares the two
-forms).
+Two parameter sets (QuantLib's gjrgarchmodel test's omega 2e-6, alpha 0.024, beta 0.93, gamma 0.059, lambda 0.1 at 365
+days a year from its stationary variance, and a set at 252 days with a larger leverage and risk premium) on flat and
+linear zero curves, each under the three discretizations: size, factors and initial values; the drift and diffusion at
+four states (the variance positive, small and negative) and two times; and evolve from three states over three steps (a
+day, 0.05 and 0.25) with three draws. The reader checks the in-place evolve and initial values on the same cases
+(tests/NanoQL.Tests/Conventions/StochasticProcessInPlaceTests.cs compares the two forms).
 
-Left out (the S-hes plan's §2.10): every structure is on the risk-free curve's day counter and reference date.
+Left out: every structure is on the risk-free curve's day counter and reference date.
 
 A case holds one process {"riskFree", "dividend", "s0", "v0", "omega", "alpha", "beta", "gamma", "lambda",
 "daysPerYear", "discretization" (QuantLib's integer)}, the curves tools/vectors/gen/processes/blackscholesprocess.py's

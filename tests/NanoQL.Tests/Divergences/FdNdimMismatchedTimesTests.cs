@@ -18,8 +18,8 @@ namespace NanoQL.Tests.Divergences;
 /// on Act/360, their discounts and variances by date unchanged, a spread call prices 0.16% below the same market
 /// restated on Act/365, and an American average put on a risk-free curve settling two business days after the other
 /// structures 0.19% below. nanoql runs on the clock spanning every process's structures, each read at the instants its
-/// times denote and accruing nothing before its own date (the S-exo plan's ER5 (i)), so it prices the restated market:
-/// QuantLib's engine on that market is the check. A market on one clock keeps QuantLib's arithmetic.
+/// times denote and accruing nothing before its own date, so it prices the restated market: QuantLib's engine on that
+/// market is the check. A market on one clock keeps QuantLib's arithmetic.
 /// </summary>
 public class FdNdimMismatchedTimesTests
 {

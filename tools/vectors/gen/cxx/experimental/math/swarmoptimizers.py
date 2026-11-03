@@ -2,18 +2,18 @@
 # SPDX-License-Identifier: Apache-2.0
 """Vectors for QuantLib's particle swarm and firefly algorithm (ql/experimental/math/particleswarmoptimization.hpp,
 .cpp, fireflyalgorithm.hpp, .cpp), which the wheel doesn't bind, each output computed by the C++ harness
-(tools/cxx/src/experimental/math/swarmoptimizers.cpp), only where the S-xrt plan's fixes don't reach.
+(tools/cxx/src/experimental/math/swarmoptimizers.cpp), only where nanoql's fixes don't reach.
 
-- "swarm" cases: eight particles on the sphere centred at (1.2, −0.7) within [−5, 5]², seed 42, on the global topology as
-  QuantLib documents it (the harness's and the reader's, QuantLib's own keeping the worst, XRR5 (xxviii)), the
-  constriction form with the trivial, simple random and Levy flight inertias and the inertia form with the trivial
-  one: the result, the evaluations, the end criterion and every evaluated point.
-- "firefly" cases: one firefly on the sphere with each walk and both intensities, where neither QuantLib's attraction loop (XRR5 (xxxii)) nor
-  its value updates (the run's R4-1) differ from nanoql's, the decreasing walk on a constant cost, whose stationary end
-  stops it after two rounds, before QuantLib's count of its walks parts from nanoql's at the third (the S-xrt code
-  review's F4-2); and one firefly with three differential evolution members
-  on a constant cost, which keeps the population in its own order and rejects every trial, the trials' points carrying
-  the differential evolution's std::uniform_int_distribution draws as MSVC 14.44 draws them (XRD4).
+- "swarm" cases: eight particles on the sphere centred at (1.2, −0.7) within [−5, 5]², seed 42, on the global topology
+  as QuantLib documents it (the harness's and the reader's, QuantLib's own keeping the worst), the constriction form
+  with the trivial, simple random and Levy flight inertias and the inertia form with the trivial one: the result, the
+  evaluations, the end criterion and every evaluated point.
+- "firefly" cases: one firefly on the sphere with each walk and both intensities, where neither QuantLib's attraction
+  loop nor its value updates differ from nanoql's, the decreasing walk on a constant cost, whose stationary end stops it
+  after two rounds, before QuantLib's count of its walks parts from nanoql's at the third; and one firefly with three
+  differential evolution members on a constant cost, which keeps the population in its own order and rejects every
+  trial, the trials' points carrying the differential evolution's std::uniform_int_distribution draws as MSVC 14.44
+  draws them.
 
 Read back by tests/NanoQL.Tests/Vectors/Cxx/Experimental/Math/SwarmOptimizersCxxVectorTests.cs."""
 import os

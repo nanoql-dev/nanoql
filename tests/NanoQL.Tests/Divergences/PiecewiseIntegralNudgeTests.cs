@@ -7,12 +7,11 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The piecewise integral's nudges at critical points at or below 0 (the S-xrt plan's XRR5 (xxxvi), fixed under R8).
-/// QuantLib's nudges each piece's ends inward by multiplying by 1 + ε, which moves a negative point the wrong way and 0
-/// not at all, so on the two-interval segment rule a step from 0 to 1 at −1 integrates to 3.5 over [−3, 3], exactly 4,
-/// and at 0 to 3.75, exactly 3 (the S-xrt planner's XRP9); at +1 QuantLib's is exact. nanoql's nudge is mirrored below
-/// 0 and is the next double at 0, so every piece excludes its critical points and the rule is exact on each constant
-/// piece.
+/// The piecewise integral's nudges at critical points at or below 0 (fixed). QuantLib's nudges each piece's ends inward
+/// by multiplying by 1 + ε, which moves a negative point the wrong way and 0 not at all, so on the two-interval segment
+/// rule a step from 0 to 1 at −1 integrates to 3.5 over [−3, 3], exactly 4, and at 0 to 3.75, exactly 3; at +1
+/// QuantLib's is exact. nanoql's nudge is mirrored below 0 and is the next double at 0, so every piece excludes its
+/// critical points and the rule is exact on each constant piece.
 /// </summary>
 public class PiecewiseIntegralNudgeTests
 {

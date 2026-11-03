@@ -10,7 +10,7 @@ namespace NanoQL.Indexes;
 /// <summary>How an observation of an inflation index interpolates between fixings: QuantLib's
 /// <c>CPI::InterpolationType</c>.</summary>
 /// <remarks>
-/// QuantLib's values. Its <c>AsIndex = 0</c>, deprecated in 1.43, isn't ported (D5): a member given 0 refuses it with
+/// QuantLib's values. Its <c>AsIndex = 0</c>, deprecated in 1.43, isn't ported: a member given 0 refuses it with
 /// QuantLib's "unknown CPI interpolation type: 0".
 /// </remarks>
 public enum CPIInterpolationType

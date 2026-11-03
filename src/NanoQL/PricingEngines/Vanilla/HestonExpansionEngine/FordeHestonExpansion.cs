@@ -49,8 +49,7 @@ public sealed class FordeHestonExpansion : HestonExpansion
     }
 
     // The volatility's leading order in x: sqrt(v0), the term in x and the term in x*x, QuantLib's sigma00, sigma01 and
-    // sigma02, which LPP2's and LPP3's first three coefficients tend to as the term falls to 0 (the S-hes plan's
-    // HR7 (xxxii))
+    // sigma02, which LPP2's and LPP3's first three coefficients tend to as the term falls to 0
     internal static (double Sigma00, double Sigma01, double Sigma02) LeadingOrder(double sigma, double v0, double rho)
     {
         double v0Sqrt = Math.Sqrt(v0);

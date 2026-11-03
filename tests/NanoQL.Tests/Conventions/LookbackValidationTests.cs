@@ -8,10 +8,10 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The partial lookbacks' validation (the S-bar plan's BR5 (xxv)). QuantLib's dereferences a European exercise and a
-/// floating payoff unchecked (<c>lookbackoption.cpp:103-118</c>, <c>:142-145</c>): another exercise or payoff is a null
-/// read, undefined. nanoql refuses before the read, with texts naming the cause; QuantLib's own checks, their texts
-/// (the lookback period's date, λ's side of 1), come after, as the harness's vectors read them.
+/// The partial lookbacks' validation. QuantLib's dereferences a European exercise and a floating payoff unchecked
+/// (<c>lookbackoption.cpp:103-118</c>, <c>:142-145</c>): another exercise or payoff is a null read, undefined. nanoql
+/// refuses before the read, with texts naming the cause; QuantLib's own checks, their texts (the lookback period's
+/// date, λ's side of 1), come after, as the harness's vectors read them.
 /// </summary>
 public class LookbackValidationTests
 {

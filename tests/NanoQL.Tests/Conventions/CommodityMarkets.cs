@@ -11,8 +11,7 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The commodity markets the commodities' facts share: the S-xrt planner's probes' set-ups (its <c>xp_c1.cpp</c> and
-/// <c>xr_c1.cpp</c>) and the run's <c>xi_c1.cpp</c>, on 15 January 2025.
+/// The commodity markets the commodities' facts share, on 15 January 2025.
 /// </summary>
 internal static class CommodityMarkets
 {
@@ -59,8 +58,8 @@ internal static class CommodityMarkets
     public static YieldTermStructure Flat(double rate) => new FlatForward(Today, rate, new Actual365Fixed());
 
     /// <summary>
-    /// The probes' index: a flat curve at a price per its unit, from today for three years, on a null calendar, in
-    /// dollars, its one fixing at the price five days ago (the planner's <c>xp_c1.cpp</c>'s <c>makeIndex</c>).
+    /// The tests' index: a flat curve at a price per its unit, from today for three years, on a null calendar, in
+    /// dollars, its one fixing at the price five days ago.
     /// </summary>
     /// <param name="unit">The unit of the curve and the index.</param>
     /// <param name="price">The price per unit.</param>

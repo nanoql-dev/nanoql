@@ -16,10 +16,10 @@ namespace NanoQL.TermStructures;
 /// </summary>
 /// <remarks>
 /// <para>
-/// An extension point (U13), immutable: <see cref="Initialize"/> gives the optimizer's guesses for the variables, and
+/// An extension point, immutable: <see cref="Initialize"/> gives the optimizer's guesses for the variables, and
 /// <see cref="Values"/> maps the optimizer's argument to the variables' values, which
-/// <see cref="GlobalBootstrap.VariableHelpers"/> builds its helpers from at each evaluation (the S-core plan's CR3 (a),
-/// (b)). QuantLib's <c>update</c> writes the values into quotes the helpers read; here it returns them.
+/// <see cref="GlobalBootstrap.VariableHelpers"/> builds its helpers from at each evaluation. QuantLib's <c>update</c>
+/// writes the values into quotes the helpers read; here it returns them.
 /// </para>
 /// </remarks>
 public abstract class AdditionalBootstrapVariables

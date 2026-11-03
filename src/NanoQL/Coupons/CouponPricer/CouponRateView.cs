@@ -15,10 +15,10 @@ namespace NanoQL.Coupons;
 /// <c>rate()</c>).
 /// </summary>
 /// <remarks>
-/// <see cref="FloatingRateCouponPricer.RateView"/> returns it, and it lives for the call that asks for it, as the
-/// user's ruling for S-g1d's memo has it (the S-cms plan's CMR1 (ii)). Its default calls the pricer's public members,
-/// so every pricer keeps its bits; a pricer whose per-coupon state costs more than its queries (the CMS pricers) builds
-/// that state once for the view, as QuantLib's one <c>initialize</c> serves its three queries.
+/// <see cref="FloatingRateCouponPricer.RateView"/> returns it, and it lives for the call that asks for it. Its default
+/// calls the pricer's public members, so every pricer keeps its bits; a pricer whose per-coupon state costs more than
+/// its queries (the CMS pricers) builds that state once for the view, as QuantLib's one <c>initialize</c> serves its
+/// three queries.
 /// </remarks>
 internal abstract class CouponRateView
 {

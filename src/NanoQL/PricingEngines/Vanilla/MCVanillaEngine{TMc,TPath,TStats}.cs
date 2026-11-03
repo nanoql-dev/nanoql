@@ -21,16 +21,15 @@ namespace NanoQL.PricingEngines;
 /// <typeparam name="TStats">The statistics accumulator.</typeparam>
 /// <remarks>
 /// <para>
-/// An extension point and an immutable object (the S-van plan's VR1 (i), SEQR5's form over S-sr's
-/// <see cref="McSimulation{TPath, TStats}"/>): a concrete engine's static <c>Calculate</c> builds one per call from
-/// the option, the context, the process and QuantLib's settings, with QuantLib's constructor checks, implements the path
-/// pricer, and reads <see cref="Run"/>'s model and results. The vanilla option is its only instrument, as in every
-/// QuantLib instantiation. The control variate's value comes from <see cref="ControlPricingEngine"/>, an engine
-/// delegate of D14's type, on the option.
+/// An extension point and an immutable object (over <see cref="McSimulation{TPath, TStats}"/>): a concrete engine's
+/// static <c>Calculate</c> builds one per call from the option, the context, the process and QuantLib's settings, with
+/// QuantLib's constructor checks, implements the path pricer, and reads <see cref="Run"/>'s model and results. The
+/// vanilla option is its only instrument, as in every QuantLib instantiation. The control variate's value comes from
+/// <see cref="ControlPricingEngine"/>, an engine delegate of the engines' form, on the option.
 /// </para>
 /// <para>
 /// The process is the engine's: the Black-Scholes engines pass the process on their clock, whose times run from the
-/// earliest structure's reference date (the S-van plan's VR1 (v)), so <see cref="TimeGrid"/>'s times are that clock's.
+/// earliest structure's reference date, so <see cref="TimeGrid"/>'s times are that clock's.
 /// </para>
 /// </remarks>
 public abstract class MCVanillaEngine<TMc, TPath, TStats> : McSimulation<TPath, TStats>

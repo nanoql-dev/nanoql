@@ -15,8 +15,8 @@ namespace NanoQL.Tests.Extensions;
 /// <summary>
 /// The instrument conventions in the set: overrides of the builders' defaults and of an index reaching what the
 /// conventions build; each kind's route against its builder or helper given the same options by hand, bit for bit (the
-/// built instrument and its value on a flat curve, a helper's implied quote and pillar); the routes' refusals (CVD38);
-/// the default records' rules; and each kind's records through the writer, the reader and <c>Describe</c>.
+/// built instrument and its value on a flat curve, a helper's implied quote and pillar); the routes' refusals; the
+/// default records' rules; and each kind's records through the writer, the reader and <c>Describe</c>.
 /// </summary>
 public class InstrumentSetTests
 {
@@ -27,7 +27,7 @@ public class InstrumentSetTests
     private const string EurSwap = "<SwapConvention name=\"EUR-SWAP\"><SettlementDays>2</SettlementDays><FixedLegTenor>1Y</FixedLegTenor>"
         + "<FixedLegConvention>ModifiedFollowing</FixedLegConvention><FixedLegDayCounter>Thirty360.BondBasis</FixedLegDayCounter><Index>Euribor</Index><IndexTenor>6M</IndexTenor></SwapConvention>";
 
-    // S9's SOFR example: a payment lag of 2 on the government bond calendar
+    // USD SOFR as the docs' example sets it: a payment lag of 2 on the government bond calendar
     private const string UsdSofr = "<OisConvention name=\"USD-SOFR\"><Index>Sofr</Index><SettlementDays>2</SettlementDays><PaymentLag>2</PaymentLag>"
         + "<PaymentFrequency>Annual</PaymentFrequency><PaymentCalendar>USGS</PaymentCalendar><FixedLegDayCounter>ACT/360</FixedLegDayCounter></OisConvention>";
 
@@ -47,7 +47,7 @@ public class InstrumentSetTests
     [Fact]
     public void ATenorABasedRecordGivesAloneAppliesToItsBasesIndex()
     {
-        // B4-1: a 3M swap convention based on a 6M one, and a swap index based on a family's preset, built
+        // A 3M swap convention based on a 6M one, and a swap index based on a family's preset, built
         ConventionSet set = ConventionsText.OnQuantLib(EurSwap
             + "<SwapConvention name=\"EUR-SWAP-3M\" base=\"EUR-SWAP\"><IndexTenor>3M</IndexTenor></SwapConvention>"
             + "<SwapIndex name=\"MySwap\" base=\"EuriborSwapIsdaFixA\"><IborIndexTenor>3M</IborIndexTenor><ShortIborIndexTenor>1M</ShortIborIndexTenor></SwapIndex>");
@@ -63,7 +63,7 @@ public class InstrumentSetTests
     [Fact]
     public void EachPairedFieldABasedRecordGivesAloneIsTakenWithItsBasesPartner()
     {
-        // B4-1: every generated record's index tenor over a base giving the index and another tenor
+        // Every generated record's index tenor over a base giving the index and another tenor
         ConventionSet set = ConventionsText.OnQuantLib(Conventions
             + "<CapFloorConvention name=\"CAPF\"><Index>Euribor</Index><IndexTenor>6M</IndexTenor></CapFloorConvention>"
             + "<CapFloorConvention name=\"CAPF3M\" base=\"CAPF\"><IndexTenor>3M</IndexTenor></CapFloorConvention>"
@@ -94,7 +94,7 @@ public class InstrumentSetTests
     [Fact]
     public void AThresholdADefaultRecordGivesAloneReplacesItsBasesAndReachesTheBuilder()
     {
-        // B4-1: GBP's threshold at 2Y over the shipped record, and a user's NOK record giving a threshold only
+        // GBP's threshold at 2Y over the shipped record, and a user's NOK record giving a threshold only
         ConventionSet set = ConventionsText.OnQuantLib(
             "<SwapConvention name=\"MakeVanillaSwap.GBP\" base=\"MakeVanillaSwap.GBP\"><FixedLegTenorThreshold><Comparison>AtMost</Comparison>"
             + "<SwapTenor>2Y</SwapTenor><FixedLegTenor>1Y</FixedLegTenor></FixedLegTenorThreshold></SwapConvention>"
@@ -117,7 +117,7 @@ public class InstrumentSetTests
     [InlineData("<SwapConvention name=\"X\" base=\"MakeVanillaSwap.EUR\"><Index>Euribor6M</Index></SwapConvention>", "MakeVanillaSwap.EUR is the MakeVanillaSwap builder's default record")]
     public void AConventionBasedOnABuildersDefaultRecordIsRefusedNamingTheRule(string record, string refusal)
     {
-        // F4-1: the defaults reach a convention without the base, which the routes would read as the record's own fields
+        // The defaults reach a convention without the base, which the routes would read as the record's own fields
         string message = Assert.Throws<ArgumentException>(() => ConventionsText.OnQuantLib(record)).Message;
 
         Assert.Contains("a convention takes its builder's defaults without basing on them: " + refusal, message, StringComparison.Ordinal);
@@ -388,7 +388,7 @@ public class InstrumentSetTests
             () => SwapSeen(new MakeOIS(new Period(5, TimeUnit.Years), Set.OvernightIndex("Sofr", Curve)).WithSettlementDays(2).WithPaymentLag(2)
                 .WithPaymentFrequency(Frequency.Annual).WithPaymentCalendar(new UnitedStates(UnitedStatesMarket.GovernmentBond)).WithFixedLegDayCount(new Actual360())
                 .WithLookbackDays(2).WithObservationShift(true).WithFixedRate(0.03).ToOvernightIndexedSwap(Context))),
-        ["OIS helper, S9's SOFR"] = (
+        ["OIS helper, USD SOFR"] = (
             () => HelperSeen(Set.Ois("USD-SOFR").RateHelper(0.03, new Period(5, TimeUnit.Years), Context, forwardingCurve: Curve)),
             () => HelperSeen(new OISRateHelper(2, new Period(5, TimeUnit.Years), 0.03, Set.OvernightIndex("Sofr", Curve), Context, paymentLag: 2,
                 paymentConvention: BusinessDayConvention.Following, paymentFrequency: Frequency.Annual, paymentCalendar: new UnitedStates(UnitedStatesMarket.GovernmentBond),

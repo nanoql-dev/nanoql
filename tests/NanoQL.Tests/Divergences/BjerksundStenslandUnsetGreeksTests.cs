@@ -10,12 +10,12 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// Bjerksund-Stensland's three Greeks it never sets (the S-van run's own find). QuantLib's engine assigns its results
-/// from a local <c>OneAssetOption::results</c> it never resets (<c>bjerksundstenslandengine.cpp:123</c>, <c>:157</c>,
-/// <c>:183</c>), so the forward delta, elasticity and in-the-money probability it reports are uninitialized memory:
-/// denormals such as 7.756808686434e-312, 7.745284637023e-312 and 2.1219957905e-314 for a one-year put at 100, varying
-/// by run [executed on the wheel: <c>scratchpad\c2\oracle_c2.py</c>, section unset]. nanoql reports none, as every engine
-/// that doesn't compute one, in each of the engine's branches.
+/// Bjerksund-Stensland's three Greeks it never sets. QuantLib's engine assigns its results from a local
+/// <c>OneAssetOption::results</c> it never resets (<c>bjerksundstenslandengine.cpp:123</c>, <c>:157</c>, <c>:183</c>),
+/// so the forward delta, elasticity and in-the-money probability it reports are uninitialized memory: denormals such as
+/// 7.756808686434e-312, 7.745284637023e-312 and 2.1219957905e-314 for a one-year put at 100, varying by run
+/// (QuantLib-Python 1.44). nanoql reports none, as every engine that doesn't compute one, in each of the engine's
+/// branches.
 /// </summary>
 public class BjerksundStenslandUnsetGreeksTests
 {

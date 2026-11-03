@@ -3,8 +3,7 @@
 """Vectors for QuantLib's hybrid simulated annealing (ql/experimental/math/hybridsimulatedannealing.hpp,
 hybridsimulatedannealingfunctors.hpp) through the three typedefs the wheel names, GaussianSimulatedAnnealing,
 LogNormalSimulatedAnnealing and MirrorGaussianSimulatedAnnealing, on their named functors at fixed seeds: the samplers'
-std::normal_distribution and the probability's std::uniform_real_distribution on std::mt19937, as MSVC 14.44 draws them
-(the S-xrt plan's XRD4).
+std::normal_distribution and the probability's std::uniform_real_distribution on std::mt19937, as MSVC 14.44 draws them.
 
 - "annealing" cases: each typedef minimizing the sphere centred at (1.2, −0.7) from (3, 2), at starting temperatures 1
   and 200 (the default), the reset schemes to the best point (the default) and to the origin every 7 steps, and

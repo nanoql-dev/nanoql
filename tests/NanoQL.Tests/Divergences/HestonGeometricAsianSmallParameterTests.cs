@@ -8,18 +8,18 @@ using static NanoQL.Tests.Divergences.HestonGeometricAsianMarkets;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The Heston geometric Asian engine at small and long parameters (the S-bar plan's BR5 (l), Revisions 13, 15 and 17,
-/// fixed under R8). QuantLib's Phi adds κ²θT/σ² and subtracts (2κθ/σ²)·Σ ln Fᵢ, and its ω̃ subtracts 2F̃/(σ²F) from
-/// κ/σ², terms of order 1/σ² that nearly cancel at small vol of vol (<c>analytic_discr_geom_av_price_heston.cpp:165</c>,
-/// <c>:187</c>, <c>:197</c>): on a year of six fixings its formula in double is 1.0e-9 off its own value in 30 digits
-/// at vol of vol 1e-3 and 1.5e-7 at 1e-4; its cosh and sinh pass 709 before the cut at 30 years and vol of vol 2, where
-/// a cut short of the overflow leaves the price moving with α by up to 12%; QuantLib's undamped integrand never ends on
-/// NanoQL's rule at small variance near the forward; and the deterministic variance's (1 − e^(−κt))/κ is 1.1e-7 off at
-/// κ 1e-9 (the planner's BP48 to BP51). nanoql takes the stable form, ω̃ through tanh and term3 − term4 through log1p,
-/// a cubic in σ below 1e-4 through the Black-Scholes limit (its variance by expm1) and the stable form at 1e-4, 2e-4
-/// and 3e-4, and the damped contour. Checks, at R7 on BR12's scale: QuantLib's formula in 40 digits (with BR5 (xxxii)'s
-/// limit), QUADPACK on the route's contour and on a second, and the price the same across two strips. Markets: r 5%,
-/// q 0; a year is 360 days of six fixings every 60, v₀ = θ 0.04, κ 2, ρ −0.5, unless given.
+/// The Heston geometric Asian engine at small and long parameters (fixed). QuantLib's Phi adds κ²θT/σ² and subtracts
+/// (2κθ/σ²)·Σ ln Fᵢ, and its ω̃ subtracts 2F̃/(σ²F) from κ/σ², terms of order 1/σ² that nearly cancel at small vol of
+/// vol (<c>analytic_discr_geom_av_price_heston.cpp:165</c>, <c>:187</c>, <c>:197</c>): on a year of six fixings its
+/// formula in double is 1.0e-9 off its own value in 30 digits at vol of vol 1e-3 and 1.5e-7 at 1e-4; its cosh and sinh
+/// pass 709 before the cut at 30 years and vol of vol 2, where a cut short of the overflow leaves the price moving with
+/// α by up to 12%; QuantLib's undamped integrand never ends on NanoQL's rule at small variance near the forward; and
+/// the deterministic variance's (1 − e^(−κt))/κ is 1.1e-7 off at κ 1e-9. nanoql takes the stable form, ω̃ through tanh
+/// and term3 − term4 through log1p, a cubic in σ below 1e-4 through the Black-Scholes limit (its variance by expm1) and
+/// the stable form at 1e-4, 2e-4 and 3e-4, and the damped contour. Checks, at the tolerance on the engine's scale:
+/// QuantLib's formula in 40 digits (with its limits), QUADPACK on the route's contour and on a second, and the price
+/// the same across two strips. Markets: r 5%, q 0; a year is 360 days of six fixings every 60, v₀ = θ 0.04, κ 2, ρ
+/// −0.5, unless given.
 /// </summary>
 public class HestonGeometricAsianSmallParameterTests
 {
@@ -44,8 +44,8 @@ public class HestonGeometricAsianSmallParameterTests
     [Fact]
     public void ADayAtVarianceAMillionthIsPricedOnTheDampedContour()
     {
-        // a day of six fixings (P9's model: κ 2, vol of vol 0.1, ρ −0.5) at v₀ = θ 1e-6, the call at F_G(1 + 5e-5),
-        // restated on six days
+        // a day of six fixings (the short-dated market's model: κ 2, vol of vol 0.1, ρ −0.5) at v₀ = θ 1e-6, the call
+        // at F_G(1 + 5e-5), restated on six days
         const double c = 6.0;
         HestonProcess process = Market(Today, 100.0, 1e-6 / c, 2.0 / c, 1e-6 / c, 0.1 / c, -0.5, 0.05 / c);
         double price = Price(Today, process, OptionType.Call, 100.01299156421916, Days(6, 1), 6);

@@ -9,9 +9,9 @@ forward and three maturities: the value, alpha and beta, the forward delta, gamm
 elasticity at the spot, the theta and theta per day, the vega, rho and dividend rho, the strike sensitivity and strike
 gamma, the in-the-money probabilities, the vanna and the volga.
 
-The outputs nanoql fixes are left out (the S-eq plan's SEQR7; each a tests/NanoQL.Tests/Divergences/ test): at zero
-volatility, the delta, forward delta, strike sensitivity, elasticity, forward elasticity, theta, theta per day, rho
-and dividend rho of every payoff but a plain vanilla call (BlackCalculatorZeroVolatilityTests); the in-the-money probabilities of puts
+The outputs nanoql fixes are left out (each a tests/NanoQL.Tests/Divergences/ test): at zero volatility, the delta,
+forward delta, strike sensitivity, elasticity, forward elasticity, theta, theta per day, rho and dividend rho of every
+payoff but a plain vanilla call (BlackCalculatorZeroVolatilityTests); the in-the-money probabilities of puts
 (BlackCalculatorItmProbabilityTests); the vanna and volga of payoffs other than the plain vanilla, and its volga at a
 maturity other than 1, where QuantLib's is the true volga over the square root of the maturity
 (BlackCalculatorVannaVolgaTests). Then the refusals: a negative strike, a forward and a discount at zero, a negative

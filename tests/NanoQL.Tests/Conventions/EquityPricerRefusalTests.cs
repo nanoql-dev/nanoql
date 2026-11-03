@@ -11,12 +11,12 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The equity quanto pricer's inputs (the S-cms plan's CMD14): QuantLib's pricer holds handles, which may be empty, and
-/// its <c>initialize</c> refuses an empty one when a flow is priced (<c>equitycashflow.cpp:91-113</c>); nanoql's takes
-/// each input as nullable, builds with any of them null, and refuses a null one at pricing with QuantLib's text, in
-/// QuantLib's order: the fixing date before the base date first, then the quanto curve, the equity volatility, the FX
-/// volatility and the correlation. A flow's pricer is set by <see cref="EquityCashFlow.SetPricer"/>, which returns a
-/// copy holding it, where QuantLib's <c>setPricer</c> changes the flow.
+/// The equity quanto pricer's inputs: QuantLib's pricer holds handles, which may be empty, and its <c>initialize</c>
+/// refuses an empty one when a flow is priced (<c>equitycashflow.cpp:91-113</c>); nanoql's takes each input as
+/// nullable, builds with any of them null, and refuses a null one at pricing with QuantLib's text, in QuantLib's order:
+/// the fixing date before the base date first, then the quanto curve, the equity volatility, the FX volatility and the
+/// correlation. A flow's pricer is set by <see cref="EquityCashFlow.SetPricer"/>, which returns a copy holding it,
+/// where QuantLib's <c>setPricer</c> changes the flow.
 /// </summary>
 public class EquityPricerRefusalTests
 {

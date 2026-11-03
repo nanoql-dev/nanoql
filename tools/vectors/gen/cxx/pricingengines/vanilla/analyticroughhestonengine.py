@@ -7,9 +7,9 @@ doesn't expose.
 
 QuantLib's case's model (v₀ = θ 0.04, κ 0.3, σ 0.4, ρ -0.7) at Hurst exponents 0.1 and 0.3 on batesmodel.py's flat
 curves, by the Adams, Padé and lifted routes at QuantLib's defaults and the Adams route at 64 steps: chF, lnChF and
-riccatiSolution at five complex arguments (on the pricing contour u - 3i/2 the engine reads, and off it) at three
-times, and the time form's price of three calls and three puts. The curves share their reference date and day
-counter, so the time form reads them at QuantLib's times (the S-hes plan's HR7 (xii)).
+riccatiSolution at five complex arguments (on the pricing contour u - 3i/2 the engine reads, and off it) at three times,
+and the time form's price of three calls and three puts. The curves share their reference date and day counter, so the
+time form reads them at QuantLib's times.
 
 A case holds the "process" (tools/vectors/gen/cxx/models/equity/batesmodel.py's harness spec), "hurst", "order",
 "timeSteps", "approximation" (QuantLib's integer), "nFactors", "zs" ([real, imaginary] each), "ts" and "payoffs"

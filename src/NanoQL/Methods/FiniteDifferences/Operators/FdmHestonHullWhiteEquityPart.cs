@@ -14,7 +14,7 @@ using NanoQL.TermStructures;
 namespace NanoQL.Methods;
 
 // QuantLib's FdmHestonHullWhiteEquityPart: the equity direction's map, its drift the short rate x + phi(t) less half the
-// variance and the dividend rate, on the model's clock (the S-hes plan's HR7 (xix)); its step allocates nothing (HD8).
+// variance and the dividend rate, on the model's clock; its step allocates nothing.
 internal sealed class FdmHestonHullWhiteEquityPart
 {
     private static readonly Vector None = new(0);

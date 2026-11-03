@@ -10,17 +10,16 @@ deviations without payoff extrapolation; and Actual/365 (Fixed) or Actual/360 fo
 at-the-money level, the exercise date and time, the reference date and the strike range, and at eight strikes around the
 level the call and put prices, with a discount of 1 and of 0.97, and the volatility.
 
-**The stability filter** (the S7 plan's S7R6) runs on the volatilities, each implied from a price by
-blackFormulaImpliedStdDev's solve: each section is rebuilt with every model volatility and reversion and every curve's
-rate moved one ulp up, then down, by math.nextafter, together; then each alone, up and down; a volatility is written
-only where every rebuild leaves it within 1e-12 x max(|base|, |moved|, 1), its strike's other outputs kept, and the
-generator prints "dropped n of m outputs" per case. The prices go through the C runtime's erf (the S-g1d plan's G1R3),
-so their last bits differ, within R7.
+**The stability filter** runs on the volatilities, each implied from a price by blackFormulaImpliedStdDev's solve: each
+section is rebuilt with every model volatility and reversion and every curve's rate moved one ulp up, then down, by
+math.nextafter, together; then each alone, up and down; a volatility is written only where every rebuild leaves it
+within 1e-12 x max(|base|, |moved|, 1), its strike's other outputs kept, and the generator prints "dropped n of m
+outputs" per case. The prices go through the C runtime's erf, so their last bits differ, within the tolerance.
 
 Left out, each a documented divergence: the Ibor index's sections, whose constructor QuantLib refuses for every index
 (its MakeCapFloor without a strike asks for a Black or Bachelier engine) and whose caplet starts on the fixing date
-(G1R6 (xxii); tests/NanoQL.Tests/Divergences/Gaussian1dSmileSectionCapletTests.cs). A refused value is {"throws": true}.
-Each case's input "section" is the spec tools/cxx/src/termstructures/volatility/gaussian1dsmilesection.cpp reads;
+(tests/NanoQL.Tests/Divergences/Gaussian1dSmileSectionCapletTests.cs). A refused value is {"throws": true}. Each case's
+input "section" is the spec tools/cxx/src/termstructures/volatility/gaussian1dsmilesection.cpp reads;
 tests/NanoQL.Tests/Vectors/Cxx/TermStructures/Gaussian1dSmileSectionCxxVectorTests.cs reads it back."""
 import copy
 import importlib.util

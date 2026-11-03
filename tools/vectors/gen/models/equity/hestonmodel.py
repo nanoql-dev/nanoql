@@ -6,13 +6,12 @@ the model's parameters, read from its process.
 Four processes on flat and linear zero curves: params (theta, kappa, sigma, rho and v0, in that order), each accessor
 and the process's spot; then the parameters set to other values, read back with the accessors; and the constructor's
 refusals of a theta, a kappa, a sigma or a v0 at zero and a rho past 1 (QuantLib's ConstantParameter, ": invalid
-value"). The calibrated parameters aren't vectored (the S-eq plan's SEQR5); the model's prices are the analytic engine's
-file's.
+value"). The calibrated parameters aren't vectored; the model's prices are the analytic engine's file's.
 
 A case holds one process {"riskFree", "dividend", "s0", "v0", "kappa", "theta", "sigma", "rho"}, the curves
 tools/vectors/gen/processes/blackscholesprocess.py's specs. The wheel's calls, by QuantLib-SWIG 1.44's
 calibratedmodel.i: HestonModel(HestonProcess(...)), params, theta, kappa, sigma, rho, v0, process().s0() and setParams;
-the wheel's Constraint binds no member, so the constraint's test is S-bond's CalibratedModel vectors'. Read back by
+the wheel's Constraint binds no member, so the constraint's test is the CalibratedModel vectors'. Read back by
 tests/NanoQL.Tests/Vectors/Models/HestonModelVectorTests.cs."""
 import importlib.util
 import os

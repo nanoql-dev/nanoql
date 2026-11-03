@@ -5,8 +5,8 @@ namespace NanoQL.Excel;
 
 /// <summary>
 /// One entry of the store: an object behind its handle, or a value call's result holding objects, with the recipe that
-/// made it (XLR3): the function, its Excel arguments, the read files' bytes and the workbook's date system; an object
-/// inside a returned collection records its parent call and its place instead (XLD12).
+/// made it: the function, its Excel arguments, the read files' bytes and the workbook's date system; an object inside a
+/// returned collection records its parent call and its place instead.
 /// </summary>
 /// <param name="key">The key: the hash of the call's canonical bytes, as hex.</param>
 /// <param name="value">The object, or a value call's Excel result.</param>

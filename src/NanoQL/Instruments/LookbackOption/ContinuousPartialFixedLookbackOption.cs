@@ -16,8 +16,7 @@ namespace NanoQL.Instruments;
 /// </summary>
 /// <remarks>
 /// Immutable. Its extremum observed so far is 0, as QuantLib's constructor sets it: the observation starts later. Its
-/// terms are checked before they are read, where QuantLib's validation dereferences a European exercise unchecked (the
-/// S-bar plan's BR5 (xxv)).
+/// terms are checked before they are read, where QuantLib's validation dereferences a European exercise unchecked.
 /// </remarks>
 public sealed class ContinuousPartialFixedLookbackOption : ContinuousFixedLookbackOption
 {

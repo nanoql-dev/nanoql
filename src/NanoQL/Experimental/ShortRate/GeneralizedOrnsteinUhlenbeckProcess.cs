@@ -16,10 +16,10 @@ namespace NanoQL.Experimental;
 /// </summary>
 /// <remarks>
 /// The expectation and the variance over a step take the speed and the volatility at the step's start. The variance,
-/// σ²(1 − e^(−2aΔt))/(2a), cancels at small speed: QuantLib cuts to σ²Δt below a √ε, which jumps there and cancels
-/// just above, and takes that cut for a negative speed too (the variance at −0.05 4.9% low). Here, below |a| 1e-2, it is
-/// σ²·(−expm1(−2aΔt))/(2a), σ²Δt at a = 0, and QuantLib's formula at and above, a negative speed past −1e-2 on it (the
-/// S-xrt plan's XRR5 (xix); <c>Divergences/GeneralizedHullWhiteSmallReversionTests.cs</c>).
+/// σ²(1 − e^(−2aΔt))/(2a), cancels at small speed: QuantLib cuts to σ²Δt below a √ε, which jumps there and cancels just
+/// above, and takes that cut for a negative speed too (the variance at −0.05 4.9% low). Here, below |a| 1e-2, it is
+/// σ²·(−expm1(−2aΔt))/(2a), σ²Δt at a = 0, and QuantLib's formula at and above, a negative speed past −1e-2 on it
+/// (<c>Divergences/GeneralizedHullWhiteSmallReversionTests.cs</c>).
 /// </remarks>
 [Experimental("NQL0001")]
 public sealed class GeneralizedOrnsteinUhlenbeckProcess : StochasticProcess1D
@@ -75,7 +75,7 @@ public sealed class GeneralizedOrnsteinUhlenbeckProcess : StochasticProcess1D
     public override double StdDeviation(double t0, double x0, double dt) => Math.Sqrt(Variance(t0, x0, dt));
 
     /// <inheritdoc/>
-    /// <remarks>Through <c>expm1</c> below |a| 1e-2 (XRR5 (xix)).</remarks>
+    /// <remarks>Through <c>expm1</c> below |a| 1e-2.</remarks>
     public override double Variance(double t0, double x0, double dt)
     {
         double a = speed(t0);

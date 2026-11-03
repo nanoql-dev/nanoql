@@ -15,9 +15,9 @@ namespace NanoQL.TermStructures;
 
 /// <summary>A rate helper bootstrapping a curve on an overnight index future's price.</summary>
 /// <remarks>
-/// The future is priced on a copy of the index forwarding on the curve the helper is bound to (the S-cms plan's
-/// CMD12, S5's helper contract), QuantLib's index cloned on the helper's relinkable handle; its dates are fixed, so it
-/// has none to re-date. Its earliest date is the reference period's first day, its latest the delivery date.
+/// The future is priced on a copy of the index forwarding on the curve the helper is bound to (the rate helpers'
+/// contract), QuantLib's index cloned on the helper's relinkable handle; its dates are fixed, so it has none to
+/// re-date. Its earliest date is the reference period's first day, its latest the delivery date.
 /// </remarks>
 public class OvernightIndexFutureRateHelper : RateHelper
 {

@@ -8,8 +8,8 @@ using static NanoQL.Excel.Tests.Xl;
 namespace NanoQL.Excel.Tests;
 
 /// <summary>
-/// Looping over a range (XLR15): a range where a function takes one value loops, element by element, the ranges paired
-/// by Excel's rule (a single row or column repeats, a position past a shorter range #N/A), each element the scalar call
+/// Looping over a range: a range where a function takes one value loops, element by element, the ranges paired by
+/// Excel's rule (a single row or column repeats, a position past a shorter range #N/A), each element the scalar call
 /// keyed as it is; an array's range and a function returning a range don't loop.
 /// </summary>
 [Collection(TestSettings.Name)]
@@ -69,7 +69,7 @@ public sealed class LoopTests
         var discounts = Assert.IsType<object[,]>(Call("nqlYieldTermStructureDiscount2", curves, 1.0));
         Assert.Equal(Call("nqlYieldTermStructureDiscount2", curves[0, 0], 1.0), discounts[0, 0]);
 
-        // A looped bind and a looped draws (B7-1).
+        // A looped bind and a looped draws.
         var engines = Assert.IsType<object[,]>(Call("nqlDiscountingSwapEngineBind", curves));
         Assert.Equal(H(Call("nqlDiscountingSwapEngineBind", curves[1, 0])), engines[1, 0]);
         string snapshot = H(Call("nqlMersenneTwisterUniformRng", 42.0));

@@ -15,7 +15,7 @@ namespace NanoQL.PricingEngines;
 
 /// <summary>
 /// The binomial engine on Joshi's fourth-order tree: QuantLib-Python's <c>BinomialJ4VanillaEngine</c>, QuantLib's
-/// <c>BinomialVanillaEngine&lt;Joshi4&gt;</c> (D12).
+/// <c>BinomialVanillaEngine&lt;Joshi4&gt;</c>.
 /// </summary>
 public static class BinomialJ4VanillaEngine
 {

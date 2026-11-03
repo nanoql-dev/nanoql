@@ -13,9 +13,9 @@ namespace NanoQL.Numerics;
 /// (<see href="http://www.netlib.org/minpack"/>): Householder transformations with optional column pivoting.
 /// </summary>
 /// <remarks>
-/// QuantLib fills the caller's matrices; here the decomposition returns them in a record (the S-core plan's CD4).
-/// <see cref="QRSolve"/> on a rank-deficient matrix is MINPACK's documented contract, as QuantLib's: <c>qrsolv</c>
-/// tests singularity by exact zeros on R's diagonal, so a diagonal of rounding size gives a large solution.
+/// QuantLib fills the caller's matrices; here the decomposition returns them in a record. <see cref="QRSolve"/> on a
+/// rank-deficient matrix is MINPACK's documented contract, as QuantLib's: <c>qrsolv</c> tests singularity by exact
+/// zeros on R's diagonal, so a diagonal of rounding size gives a large solution.
 /// </remarks>
 public static class QRDecompositionFunctions
 {

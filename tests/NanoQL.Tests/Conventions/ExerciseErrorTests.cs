@@ -10,7 +10,7 @@ namespace NanoQL.Tests.Conventions;
 /// <c>QL_REQUIRE</c>s on the constructors' arguments (<c>exercise.cpp:37-38, 55</c>) throw
 /// <see cref="ArgumentException"/> naming the argument, with QuantLib's texts; <see cref="Exercise.LastDate"/> on an
 /// exercise without dates, a stored value, <see cref="NanoQLException"/> with QuantLib's text, which a swaption's
-/// expiry check reads; an index out of range (EX1), an exercise type outside <see cref="ExerciseType"/> and
+/// expiry check reads; an index out of range, an exercise type outside <see cref="ExerciseType"/> and
 /// <c>default(Date)</c>, which nanoql refuses on entry, <see cref="ArgumentOutOfRangeException"/> and
 /// <see cref="ArgumentException"/>.
 /// </summary>

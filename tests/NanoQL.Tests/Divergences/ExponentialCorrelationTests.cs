@@ -8,23 +8,22 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The exponential forward correlation's three departures. One rate is accepted (the S-mm plan's MR3 (xiv)): QuantLib
-/// requires <c>numberOfRates_ > 1</c> under the text "Rate times must contain at least two values", so it refuses one
-/// rate when given two times (<c>expcorrelations.cpp:82-83</c>), where its own time-homogeneous correlation accepts
-/// one. At an exponent other than 1, correlation times that skip a rate time but the last are refused (MR4 (b)):
-/// QuantLib's FIXME asks for the check (<c>:105-106</c>), and without it each period's matrix is taken at the period's
-/// midpoint, after a rate that is alive at the period's start has fixed, so the models give that rate no variance
-/// there: on nine rates fixing 0.5 … 4.5 and times {2.0, 4.5}, FlatVol's total variance of rate 0 is 0 against σ²T
-/// 0.02, rate 4's 0.08 against 0.10 (the planner's MP26, <c>probes\round1.out.txt</c>). And a last correlation time
-/// past the last rate time is refused with a text naming the time it checks, where QuantLib's calls it the
-/// next-to-last (MR3 (xv); <c>:107-110</c>).
+/// The exponential forward correlation's three departures. One rate is accepted: QuantLib requires <c>numberOfRates_ >
+/// 1</c> under the text "Rate times must contain at least two values", so it refuses one rate when given two times
+/// (<c>expcorrelations.cpp:82-83</c>), where its own time-homogeneous correlation accepts one. At an exponent other
+/// than 1, correlation times that skip a rate time but the last are refused: QuantLib's FIXME asks for the check
+/// (<c>:105-106</c>), and without it each period's matrix is taken at the period's midpoint, after a rate that is alive
+/// at the period's start has fixed, so the models give that rate no variance there: on nine rates fixing 0.5 … 4.5 and
+/// times {2.0, 4.5}, FlatVol's total variance of rate 0 is 0 against σ²T 0.02, rate 4's 0.08 against 0.10. And a last
+/// correlation time past the last rate time is refused with a text naming the time it checks, where QuantLib's calls it
+/// the next-to-last (<c>:107-110</c>).
 /// </summary>
 public class ExponentialCorrelationTests
 {
     [Fact]
     public void OneRateIsTheTimeHomogeneousCorrelationOfOneRate()
     {
-        // QuantLib: "Rate times must contain at least two values" (this run's probes\c1_facts.cpp).
+        // QuantLib: "Rate times must contain at least two values".
         double[] times = [1.0, 2.0];
         var x = new ExponentialForwardCorrelation(times, 0.5, 0.2, 1.0);
         var h = new TimeHomogeneousForwardCorrelation(ExpCorrelationsFunctions.ExponentialCorrelations(times, 0.5, 0.2, 1.0, 0.0), times);
@@ -55,7 +54,7 @@ public class ExponentialCorrelationTests
     [Fact]
     public void ALastTimePastTheLastRateTimeIsNamedAsTheLast()
     {
-        // QuantLib: "last corr time 2is after next-to-last rate time 1.5" (this run's probes\c1_facts.cpp).
+        // QuantLib: "last corr time 2is after next-to-last rate time 1.5".
         ArgumentException e = Assert.Throws<ArgumentException>(
             () => new ExponentialForwardCorrelation([0.5, 1.0, 1.5], 0.5, 0.2, 0.5, [0.5, 1.0, 2.0]));
         Assert.StartsWith("last corr time 2 is after last rate time 1.5", e.Message, StringComparison.Ordinal);

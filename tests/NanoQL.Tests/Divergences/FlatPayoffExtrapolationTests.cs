@@ -15,11 +15,10 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// Flat payoff extrapolation's right tail (the S-g1d plan's G1R6 (xxi)): with <c>flatPayoffExtrapolation</c>,
-/// QuantLib's Gaussian1d engines integrate past the grid's last node the constant <c>p[n − 2]</c>, the second-last
-/// node's value (the swaption engine <c>gaussian1dswaptionengine.cpp:166-171</c>, the nonstandard, float-float and
-/// cap/floor engines, <c>Gaussian1dModel::zerobondOption</c> and the Markov-functional model alike), where the left
-/// tail takes
+/// Flat payoff extrapolation's right tail: with <c>flatPayoffExtrapolation</c>, QuantLib's Gaussian1d engines integrate
+/// past the grid's last node the constant <c>p[n − 2]</c>, the second-last node's value (the swaption engine
+/// <c>gaussian1dswaptionengine.cpp:166-171</c>, the nonstandard, float-float and cap/floor engines,
+/// <c>Gaussian1dModel::zerobondOption</c> and the Markov-functional model alike), where the left tail takes
 /// <c>p[0]</c>, its boundary node. On the wheel, a 5Y into 10Y payer at 2% on a GSR model (a = 0.02, σ = 0.01) on a
 /// flat 3% curve, on a grid of 3 standard deviations and 16 points a side, is worth 0.102661800916881; on a grid of 12
 /// standard deviations and 256 points, where the tail's weight vanishes, 0.10415806152703168, and so on the nonstandard
@@ -31,14 +30,14 @@ namespace NanoQL.Tests.Divergences;
 /// swaptions at 20% on 32 points a side, on 3 standard deviations 0.0004285947663144643 and on 7 0.0004751894691285253.
 /// nanoql takes <c>p[n − 1]</c>. For a payoff that increases past the grid, the fixed tail lies between QuantLib's and
 /// the true one, the one assertion the two values can't both pass; the nonstandard and cap/floor facts ask a tenth of
-/// the way from QuantLib's at least, since QuantLib's own tail ties its value only within <c>erf</c>'s last bits
-/// (G1R3). No QuantLib 1.44 case sets the flag. QuantLib's check: the same engine on the widened grid. The
-/// Markov-functional model's calibration reads the tail too (<c>markovfunctional.cpp:516-519</c>), seen alone in its
-/// puts, whose payoff vanishes past the grid: on 2 standard deviations, QuantLib's puts on 32 points move as the grid
-/// refines, its second-last node meeting the last, and nanoql's on 32 points lie closer to QuantLib's on 512 at each
-/// strike from 2.3% to 15%, by up to fifteen times. QuantLib's check: its own section on the refined grid. QuantLib's
-/// master fixes the Markov-functional model's two price functions after the pin (#2916, <c>0bbf88cb3</c>), the same
-/// expression; its case is below, a check of nanoql's model.
+/// the way from QuantLib's at least, since QuantLib's own tail ties its value only within <c>erf</c>'s last bits. No
+/// QuantLib 1.44 case sets the flag. QuantLib's check: the same engine on the widened grid. The Markov-functional
+/// model's calibration reads the tail too (<c>markovfunctional.cpp:516-519</c>), seen alone in its puts, whose payoff
+/// vanishes past the grid: on 2 standard deviations, QuantLib's puts on 32 points move as the grid refines, its
+/// second-last node meeting the last, and nanoql's on 32 points lie closer to QuantLib's on 512 at each strike from
+/// 2.3% to 15%, by up to fifteen times. QuantLib's check: its own section on the refined grid. QuantLib's master fixes
+/// the Markov-functional model's two price functions after the pin (#2916, <c>0bbf88cb3</c>), the same expression; its
+/// case is below, a check of nanoql's model.
 /// </summary>
 public class FlatPayoffExtrapolationTests
 {
@@ -185,7 +184,7 @@ public class FlatPayoffExtrapolationTests
         double flat = Gaussian1dFloatFloatSwaptionEngine.Calculate(swaption, Context, model, 16, 3.0, true, true).NPV!.Value;
         double widened = Gaussian1dFloatFloatSwaptionEngine.Calculate(swaption, Context, model, 256, 12.0, true, true).NPV!.Value;
 
-        // the wheel's 0.10416117493270043, to erf's last bits (G1R3)
+        // the wheel's 0.10416117493270043, to erf's last bits
         Assert.True(Math.Abs((widened / 0.10416117493270043) - 1.0) <= 1e-11, $"{widened}");
 
         // a tenth of the way from QuantLib's at least, which QuantLib's own tail ties within erf's last bits
@@ -216,7 +215,7 @@ public class FlatPayoffExtrapolationTests
         double flat = Gaussian1dCapFloorEngine.Calculate(cap, Context, model, 16, 3.0, true, true).NPV!.Value;
         double widened = Gaussian1dCapFloorEngine.Calculate(cap, Context, model, 256, 12.0, true, true).NPV!.Value;
 
-        // QuantLib's to 6.0e-12, its bits on the C runtime's erf (G1R3)
+        // QuantLib's to 6.0e-12, its bits on the C runtime's erf
         Assert.True(Math.Abs((widened / 0.06245438129328943) - 1.0) <= 1e-11, $"{widened}");
 
         // a tenth of the way from QuantLib's at least, which QuantLib's own tail ties within erf's last bits

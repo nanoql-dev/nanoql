@@ -15,7 +15,7 @@ public enum ExtendedOrnsteinUhlenbeckProcessDiscretization
     /// <summary>The level at the step's mid-point.</summary>
     MidPoint = 0,
 
-    /// <summary>The trapezoidal rule on the level at the step's ends, QuantLib's spelling (XED8).</summary>
+    /// <summary>The trapezoidal rule on the level at the step's ends, QuantLib's spelling.</summary>
     Trapezodial = 1,
 
     /// <summary>The adaptive Gauss-Lobatto rule on the level over the step.</summary>

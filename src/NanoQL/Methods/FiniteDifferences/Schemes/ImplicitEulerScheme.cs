@@ -16,9 +16,9 @@ namespace NanoQL.Methods;
 /// iterative solver otherwise.
 /// </summary>
 /// <remarks>
-/// A working type (the S-eq plan's SEQR1): <see cref="Step(Span{double}, double)"/> steps the caller's values in place
-/// through a buffer the scheme holds, so a one-directional step allocates nothing after the first; the iterative
-/// solvers allocate their vectors, as QuantLib's do.
+/// A working type: <see cref="Step(Span{double}, double)"/> steps the caller's values in place through a buffer the
+/// scheme holds, so a one-directional step allocates nothing after the first; the iterative solvers allocate their
+/// vectors, as QuantLib's do.
 /// </remarks>
 [WorkingType]
 public sealed class ImplicitEulerScheme : IFdmScheme, IFdmSetOperatorScheme

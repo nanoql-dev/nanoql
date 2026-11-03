@@ -12,20 +12,19 @@ using static NanoQL.PricingEngines.BlackFormulaFunctions;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The geometric Asian engines on term structures (the S-bar plan's BR4 (a), the user's ER4 ruling carried to S-bar).
-/// QuantLib's discrete and continuous average-price engines read one Black volatility at the exercise date and the
-/// zero rates to it for every fixing (<c>analytic_discr_geom_av_price.cpp:92-108</c>,
-/// <c>analytic_cont_geom_av_price.cpp:57-78</c>), and the average-strike engine one volatility at the spot: on P5's
-/// rising market (forward rates 1%, 3%, 6%, dividends 0%, 1%, 3%, forward volatilities 15%, 25%, 35% to half a year, a
-/// year and two) a call at 100 on twelve fixings every 46 days prices 7.937526857004053, continuously over 548 days
-/// 7.38232785034412 and on the average strike 7.943289362148803, and on the falling market (each reversed)
-/// 7.896230538510976, 7.377847985865606 and 7.895540021985099 (the S-bar run's <c>c3_p5_ql.py</c>): +37.4% and
-/// −18.9% off the exact discrete price, +39.4% and −19.2% off the continuous one (the planner's BP20). nanoql prices
-/// the average exactly under deterministic structures, each fixing's forward and variance read by date, and takes the
-/// form's own Greeks. Checks: the exact law of ln G (and of ln S_T beside it) computed here, the continuous one's
-/// integrals by Gauss-Lobatto split at the structures' nodes; the Greeks against bumps of the spot, of the strike, of
-/// every volatility in parallel and of each curve's zero rates; and the continuous form at a variance integral below
-/// 2.2e-4 and at a mean whose integrand is rounding noise, each against the flat closed form.
+/// The geometric Asian engines on term structures. QuantLib's discrete and continuous average-price engines read one
+/// Black volatility at the exercise date and the zero rates to it for every fixing
+/// (<c>analytic_discr_geom_av_price.cpp:92-108</c>, <c>analytic_cont_geom_av_price.cpp:57-78</c>), and the
+/// average-strike engine one volatility at the spot: on a rising market (forward rates 1%, 3%, 6%, dividends 0%, 1%,
+/// 3%, forward volatilities 15%, 25%, 35% to half a year, a year and two) a call at 100 on twelve fixings every 46 days
+/// prices 7.937526857004053, continuously over 548 days 7.38232785034412 and on the average strike 7.943289362148803,
+/// and on the falling market (each reversed) 7.896230538510976, 7.377847985865606 and 7.895540021985099: +37.4% and
+/// −18.9% off the exact discrete price, +39.4% and −19.2% off the continuous one. nanoql prices the average exactly
+/// under deterministic structures, each fixing's forward and variance read by date, and takes the form's own Greeks.
+/// Checks: the exact law of ln G (and of ln S_T beside it) computed here, the continuous one's integrals by
+/// Gauss-Lobatto split at the structures' nodes; the Greeks against bumps of the spot, of the strike, of every
+/// volatility in parallel and of each curve's zero rates; and the continuous form at a variance integral below 2.2e-4
+/// and at a mean whose integrand is rounding noise, each against the flat closed form.
 /// </summary>
 public class GeometricAsianTermStructureTests
 {
@@ -170,9 +169,9 @@ public class GeometricAsianTermStructureTests
         }
     }
 
-    // P5's market: forward rates, dividends and forward volatilities piecewise flat to half a year, a year and two;
-    // the volatilities on daily nodes of the same variance, each shifted in parallel by volShift, each curve's zero
-    // rates by its shift
+    // The rising and falling markets: forward rates, dividends and forward volatilities piecewise flat to half a year,
+    // a year and two; the volatilities on daily nodes of the same variance, each shifted in parallel by volShift, each
+    // curve's zero rates by its shift
     private static GeneralizedBlackScholesProcess P5(
         bool rising, double spot = 100.0, double volShift = 0.0, double rateShift = 0.0, double dividendShift = 0.0)
     {

@@ -13,8 +13,7 @@ helper, and a call. Each case's outputs at nine points (the spot at 0.9, 1 and 1
 ("thetaPoints", tools/vectors/gen/methods/finitedifferences/solvers/fdm2dimsolver.py's rule: kept where the value is
 at most 1e4 times the theta's change over its snapshot interval, 0.99/365 here).
 
-Left out (the S-hes plan's §2.10): structures off the risk-free curve's reference date and day counter; every
-structure here is on them.
+Left out: structures off the risk-free curve's reference date and day counter; every structure here is on them.
 
 A case holds the "process" (batesmodel.py's harness spec), "optionType", "strike", "exercise" (["European" |
 "American", date]), "spots", "variances", "boundaries" ([[valueOnBoundary, direction, side]], side QuantLib's Upper 1

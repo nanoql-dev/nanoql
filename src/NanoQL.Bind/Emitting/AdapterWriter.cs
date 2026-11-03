@@ -46,7 +46,7 @@ internal sealed class AdapterWriter(Surface surface, string boundEngine)
 
             string t = Stored(rest[j].ParameterType);
             string fallback = !rest[j].HasDefaultValue ? string.Empty : t != CsNames.Of(rest[j].ParameterType) ? "null" : CsNames.Literal(rest[j].ParameterType, rest[j].RawDefaultValue);
-            // A nullable value neither bound nor supplied is null, C#'s value for it (B2R4); a required one is refused.
+            // A nullable value neither bound nor supplied is null, C#'s value for it; a required one is refused.
             bool openNull = !rest[j].HasDefaultValue && rest[j].ParameterType.NullableOf() != null;
             sb.AppendLine(rest[j].HasDefaultValue || openNull
                 ? $"                var {local} = b.TakeOr<{t}>(\"{rest[j].Name}\", {(openNull ? "null" : fallback)});"

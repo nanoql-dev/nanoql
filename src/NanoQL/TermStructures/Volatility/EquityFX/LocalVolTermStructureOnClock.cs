@@ -7,10 +7,10 @@ namespace NanoQL.TermStructures;
 
 /// <summary>
 /// A local volatility restated on another structure's clock: dated at the clock's reference date, on its day counter,
-/// its value at a time the local volatility's at the instant the time denotes, its time-0 value before its own reference
-/// date (<see cref="TermStructure.AccrualTime"/>). For the stochastic-local volatility models, whose times are one clock's
-/// (the S-hes plan's HR7 (xxi)): built on it, the local volatility's density calculator reads the curves at the same
-/// instants as the models. It extrapolates where the local volatility does, as QuantLib's models read it.
+/// its value at a time the local volatility's at the instant the time denotes, its time-0 value before its own
+/// reference date (<see cref="TermStructure.AccrualTime"/>). For the stochastic-local volatility models, whose times
+/// are one clock's: built on it, the local volatility's density calculator reads the curves at the same instants as the
+/// models. It extrapolates where the local volatility does, as QuantLib's models read it.
 /// </summary>
 internal sealed class LocalVolTermStructureOnClock : LocalVolTermStructure
 {

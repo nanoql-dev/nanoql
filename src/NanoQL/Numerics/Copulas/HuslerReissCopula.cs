@@ -12,9 +12,9 @@ namespace NanoQL.Numerics;
 /// <summary>The Hüsler-Reiss copula, C(x, y) = x^Φ(1/θ + θ/2·ln(ln x/ln y))·y^Φ(1/θ + θ/2·ln(ln y/ln x)).</summary>
 /// <remarks>
 /// Immutable. On the unit square's edges it returns the boundary values, C(u, 0) = C(0, v) = 0, C(u, 1) = u and C(1, v)
-/// = v, before its formula, as every copula here does (the S-core plan's CR7 (xxxiii)): QuantLib's is NaN at (0, 0) and
-/// wherever x or y is 1 but (1, 1), where −ln 1 is −0 and the ratio's logarithm that of −∞, and at θ 0, its own lower
-/// bound, at every edge point but (1, 1).
+/// = v, before its formula, as every copula here does: QuantLib's is NaN at (0, 0) and wherever x or y is 1 but (1, 1),
+/// where −ln 1 is −0 and the ratio's logarithm that of −∞, and at θ 0, its own lower bound, at every edge point but (1,
+/// 1).
 /// </remarks>
 public sealed class HuslerReissCopula
 {

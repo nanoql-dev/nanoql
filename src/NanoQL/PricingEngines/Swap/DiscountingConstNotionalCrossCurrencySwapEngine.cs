@@ -24,11 +24,11 @@ namespace NanoQL.PricingEngines;
 /// unit of the foreign currency, for settlement on the NPV date.
 /// </para>
 /// <para>
-/// Static (D14): QuantLib's engine object becomes the arguments of <c>Calculate</c>, one overload per swap type, each
+/// Static: QuantLib's engine object becomes the arguments of <c>Calculate</c>, one overload per swap type, each
 /// returning its swap's results. An explicit FX settlement date converts the quote from that date to the NPV date by
 /// the discount factors' parity, as QuantLib's mark-to-market engine does, where QuantLib converts it to the curves'
-/// reference date; without one, the quote is the NPV date's, as QuantLib reads it (the S-rx plan's SRXR3 (vi);
-/// <c>tests/NanoQL.Tests/Divergences/CrossCurrencySwapNpvDateFxTests.cs</c>).
+/// reference date; without one, the quote is the NPV date's, as QuantLib reads it
+/// (<c>tests/NanoQL.Tests/Divergences/CrossCurrencySwapNpvDateFxTests.cs</c>).
 /// </para>
 /// </remarks>
 public static class DiscountingConstNotionalCrossCurrencySwapEngine
@@ -234,7 +234,7 @@ public static class DiscountingConstNotionalCrossCurrencySwapEngine
     }
 
     // A leg's fair spread: QuantLib's BPS route, unless the leg compounds its spread daily, which makes the route
-    // inexact; then solved on the swap's own pricing (the S-rx plan's C3 review, B1-2).
+    // inexact; then solved on the swap's own pricing.
     internal static double? FairSpread(
         CrossCurrencySwap swap,
         int j,
@@ -432,7 +432,7 @@ public static class DiscountingConstNotionalCrossCurrencySwapEngine
     // the engine's convention. Given one, QuantLib moves it to the curves' reference date by the parity
     // fx(T1)/fx(T2) = FwdDF_Quote(T1->T2) / FwdDF_Base(T1->T2) and stops there, unless the date is the reference date,
     // which it takes for an unset date; here it moves on to the NPV date, as QuantLib's mark-to-market engine does, a
-    // move that is exactly 1 where the NPV date is the reference date (SRXR3 (vi)).
+    // move that is exactly 1 where the NPV date is the reference date.
     private static double NpvDateFx(
         double spotFx,
         Date? spotFxSettleDate,

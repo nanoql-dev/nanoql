@@ -12,7 +12,7 @@ namespace NanoQL.Models;
 /// The factory of <see cref="CotSwapToFwdAdapter"/>s, each on a coterminal swap-rate model its coterminal factory
 /// creates.
 /// </summary>
-/// <remarks>Immutable (the S-mm plan's MR1 (i)).</remarks>
+/// <remarks>Immutable.</remarks>
 public sealed class CotSwapToFwdAdapterFactory : MarketModelFactory
 {
     private readonly MarketModelFactory coterminalFactory;

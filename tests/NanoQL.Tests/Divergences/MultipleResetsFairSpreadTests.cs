@@ -12,16 +12,15 @@ using NanoQL.Tests.Vectors;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The compounded multiple-resets swap's fair spread (the S-cms plan's CMR5 (xv)): QuantLib's
-/// <c>FixedVsFloatingSwap::fairSpread</c> is the spread less the NPV over the floating leg's BPS
-/// (<c>fixedvsfloatingswap.cpp</c>), linear in the spread, while on a compounding leg the spread compounds with each
-/// fixing, so at it the swap misses par: on the wheel, on the vectors' 5-year payer of monthly resets compounded
-/// quarterly on 1e7, QuantLib's fair spread from a spread of 0 is −0.00044495679505344586, where the swap is worth
-/// −1.078e-5 a unit of nominal, and from 2% −0.000582486889730293, worth −6.618e-4. nanoql's is the spread at which the
-/// swap is worth zero, solved from QuantLib's estimate; on an averaging leg the spread is linear, and QuantLib's
-/// formula stands. QuantLib's checks: its NPV at the solved spread, the root of its own swap's NPV,
-/// −0.00044267984438780547, within 1.5e-8 of par on 1e7 (a secant on the wheel); and on the vectors' averaged swap, its
-/// fair spread, −0.001341481056075899, bit for bit, where its swap is worth −4.7e-10.
+/// The compounded multiple-resets swap's fair spread: QuantLib's <c>FixedVsFloatingSwap::fairSpread</c> is the spread
+/// less the NPV over the floating leg's BPS (<c>fixedvsfloatingswap.cpp</c>), linear in the spread, while on a
+/// compounding leg the spread compounds with each fixing, so at it the swap misses par: on the wheel, on the vectors'
+/// 5-year payer of monthly resets compounded quarterly on 1e7, QuantLib's fair spread from a spread of 0 is
+/// −0.00044495679505344586, where the swap is worth −1.078e-5 a unit of nominal, and from 2% −0.000582486889730293,
+/// worth −6.618e-4. nanoql's is the spread at which the swap is worth zero, solved from QuantLib's estimate; on an
+/// averaging leg the spread is linear, and QuantLib's formula stands. QuantLib's checks: its NPV at the solved spread,
+/// the root of its own swap's NPV, −0.00044267984438780547, within 1.5e-8 of par on 1e7 (a secant on the wheel); and on
+/// the vectors' averaged swap, its fair spread, −0.001341481056075899, bit for bit, where its swap is worth −4.7e-10.
 /// </summary>
 public class MultipleResetsFairSpreadTests
 {

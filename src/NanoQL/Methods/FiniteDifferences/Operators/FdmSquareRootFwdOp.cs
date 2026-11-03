@@ -16,9 +16,8 @@ namespace NanoQL.Methods;
 /// boundaries.
 /// </summary>
 /// <remarks>
-/// A working type (the S-hes plan's HD8): built at construction, its time-independent operator applied and solved
-/// into the caller's spans, so a step allocates nothing. The direction's grid needs at least two points, where
-/// QuantLib reads past a shorter one.
+/// A working type: built at construction, its time-independent operator applied and solved into the caller's spans, so
+/// a step allocates nothing. The direction's grid needs at least two points, where QuantLib reads past a shorter one.
 /// </remarks>
 [WorkingType]
 public sealed class FdmSquareRootFwdOp : FdmLinearOpComposite

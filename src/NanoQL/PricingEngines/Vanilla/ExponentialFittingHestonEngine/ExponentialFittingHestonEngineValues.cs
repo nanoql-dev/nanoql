@@ -12,7 +12,7 @@ namespace NanoQL.PricingEngines;
 /// QuantLib's node table for the exponentially fitted Gauss-Laguerre rule, <c>values4</c>: 147 rows of 129 doubles,
 /// each row's moneyness, its 64 nodes and its 64 weights, generated from the pin by
 /// <c>tools/tables/exponentialfittinghestonengine.py</c> into the embedded <c>ExponentialFittingHestonEngineValues.bin</c>
-/// and read once (the S-hes plan's HD15).
+/// and read once.
 /// </summary>
 internal static class ExponentialFittingHestonEngineValues
 {

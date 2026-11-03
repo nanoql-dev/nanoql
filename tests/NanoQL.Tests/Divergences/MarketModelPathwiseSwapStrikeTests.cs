@@ -7,11 +7,10 @@ using NanoQL.Tests.Conventions;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The pathwise swap's one strike (the S-mmp plan's MMPR4 (xi), fixed under R8). QuantLib's
-/// <c>MarketModelPathwiseSwap</c> expands one strike to every rate, then checks the strikes it was given, not the
-/// expanded ones (<c>pathwiseproductswap.cpp:59</c>), so it refuses one strike with the message that offers it,
-/// "strikes.size() does not equal numberOfRates or 1" (this run's <c>probes\c2_facts.cpp</c>; the planner's MPP10 (e)).
-/// nanoql checks the expanded strikes. Check: the same strike given for every rate, bit for bit.
+/// The pathwise swap's one strike (fixed). QuantLib's <c>MarketModelPathwiseSwap</c> expands one strike to every rate,
+/// then checks the strikes it was given, not the expanded ones (<c>pathwiseproductswap.cpp:59</c>), so it refuses one
+/// strike with the message that offers it, "strikes.size() does not equal numberOfRates or 1". nanoql checks the
+/// expanded strikes. Check: the same strike given for every rate, bit for bit.
 /// </summary>
 public class MarketModelPathwiseSwapStrikeTests
 {

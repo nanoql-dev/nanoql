@@ -21,30 +21,30 @@ namespace NanoQL.Models;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Immutable: the calibration runs at construction (the S-hes plan's HR3 (i), master §2.2's <c>LazyObject</c> row),
-/// where QuantLib's model calibrates at its first read. With logging, <see cref="LogEntries"/> holds each step's density
-/// and mesher, filled once (HR3 (ii)), where QuantLib's log read recomputes the calibration for the same values. The
-/// leverage function is <see cref="FixedLocalVolSurface"/> on the calibrated values; the calibration itself reads its
-/// working surface as QuantLib's does (<see cref="FixedLocalVolWorkingSurface"/>).
+/// Immutable: the calibration runs at construction (the playbook's <c>LazyObject</c> row), where QuantLib's model
+/// calibrates at its first read. With logging, <see cref="LogEntries"/> holds each step's density and mesher, filled
+/// once, where QuantLib's log read recomputes the calibration for the same values. The leverage function is
+/// <see cref="FixedLocalVolSurface"/> on the calibrated values; the calibration itself reads its working surface as
+/// QuantLib's does (<see cref="FixedLocalVolWorkingSurface"/>).
 /// </para>
 /// <para>
 /// QuantLib appends the mandatory dates' times to its exponential grid unsorted and builds the leverage surface on that
 /// list, which refuses a mandatory date inside the period ("dates must be sorted unique!") and one at its end ("need
 /// strikes for every time step") (<c>hestonslvfdmmodel.cpp:325-330</c>, <c>:412</c>). Here the surface and the loop
 /// run on the time grid's times, sorted and made unique; a mandatory date on the grid's own time is QuantLib's
-/// calibration without it (HR7 (xx), under R8).
+/// calibration without it.
 /// </para>
 /// <para>
 /// The model's times are a clock's, from the earliest reference date of the curves and the local volatility on the
 /// risk-free curve's day counter, and each structure is read at the instants they denote: QuantLib's grid runs from the
-/// risk-free curve's reference date and reads the dividend curve and the local volatility at its times (HR7 (xxi)).
-/// Where every structure shares the risk-free curve's day counter and reference date, QuantLib's reads and bits.
+/// risk-free curve's reference date and reads the dividend curve and the local volatility at its times. Where every
+/// structure shares the risk-free curve's day counter and reference date, QuantLib's reads and bits.
 /// </para>
 /// <para>
 /// The first step's density, the Green's function, is the density of the process the forward operator evolves, its
 /// variance's volatility the mixing factor times σ, as the variance mesher's: QuantLib's takes the unmixed σ, a density
-/// 76% to 113% off the mixed process's own in L1 on the Gaussian algorithm at mixing factors 0.5 and 0.2, where the mixed
-/// σ's is within 2% to 10% (D4-1 of the S-hes run record, under R8). At a mixing factor of 1, QuantLib's.
+/// 76% to 113% off the mixed process's own in L1 on the Gaussian algorithm at mixing factors 0.5 and 0.2, where the
+/// mixed σ's is within 2% to 10%. At a mixing factor of 1, QuantLib's.
 /// </para>
 /// </remarks>
 public sealed class HestonSLVFDMModel
@@ -130,7 +130,7 @@ public sealed class HestonSLVFDMModel
         int xGrid = p.XGrid;
         int vGrid = p.VGrid;
 
-        // the model's clock (HR7 (xxi)): the risk-free curve where no structure is dated before it
+        // the model's clock: the risk-free curve where no structure is dated before it
         TermStructure clock = FdmHestonOp.Clock(hestonProcess, null, localVol);
         LocalVolTermStructure localVolOnClock = localVol.SharesTimes(clock)
             ? localVol
@@ -170,7 +170,7 @@ public sealed class HestonSLVFDMModel
             times.Add(dc.YearFraction(referenceDate, mandatoryDate));
         }
 
-        // the grid's times, sorted and made unique, for the surface and the loop (HR7 (xx))
+        // the grid's times, sorted and made unique, for the surface and the loop
         var timeGrid = new TimeGrid(times.ToArray());
         double[] gridTimes = [.. timeGrid];
 
@@ -251,7 +251,7 @@ public sealed class HestonSLVFDMModel
         FdmLinearOpComposite hestonFwdOp = new FdmHestonFwdOp(mesher, hestonProcess, trafoType, leverageFct, mixingFactor, clock);
 
         // the first step's density on the process the operator evolves, its variance's volatility mixed: QuantLib's is
-        // on the unmixed σ, a density the operator's process doesn't have (D4-1 of the S-hes run record)
+        // on the unmixed σ, a density the operator's process doesn't have
         HestonProcess greensProcess = mixingFactor == 1.0
             ? hestonProcess
             : new HestonProcess(rTS, qTS, spot, v0, kappa, theta, mixedSigma, hestonProcess.Rho);

@@ -6,9 +6,9 @@ using Microsoft.Office.Interop.Excel;
 namespace NanoQL.Excel.XlTests;
 
 /// <summary>
-/// Workbooks across instances and date systems (XLR2, XLD8, XLP41, XLP47): a workbook saved and reopened in a new
-/// instance shows the saved handles and, edited, recalculates every dependent with no #REF!; a 1900 and a 1904
-/// workbook making the same raw call each get an object of their own, its date back in their own system.
+/// Workbooks across instances and date systems: a workbook saved and reopened in a new instance shows the saved handles
+/// and, edited, recalculates every dependent with no #REF!; a 1900 and a 1904 workbook making the same raw call each
+/// get an object of their own, its date back in their own system.
 /// </summary>
 public class WorkbookTests
 {

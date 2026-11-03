@@ -10,17 +10,16 @@ using NanoQL.Tests.Vectors;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// A capped year-on-year coupon read again (found while porting the S-cms plan's C3): QuantLib's
-/// <c>CappedFlooredYoYInflationCoupon::rate</c> prices its caplet and floorlet on the pricer's state
-/// (<c>capflooredinflationcoupon.cpp:92-105</c>), which its swaplet rate sets only when first computed, the coupon's
-/// <c>InflationCoupon::rate</c> being cached (<c>inflationcoupon.cpp:64-75</c>), so with one pricer on a leg a coupon
-/// read again after another reads that other coupon's state: on the wheel, on the vectors' <c>one cap</c> leg (six
-/// annual coupons capped at 3.5%, the Black pricer), the first coupon's amount read after the leg's rates is
-/// 28,665.871612869618 on 1e6, where read first it is 30,024.190259687595, its rate's. QuantLib's capped Ibor and
-/// digital coupons read their underlying's pricer the same way after its cached rate, and its stripped coupon
-/// initializes the pricer first (<c>strippedcapflooredcoupon.cpp:46-47</c>). nanoql's pricers take the coupon on every
-/// call, so a coupon's amount is the same however often and in whatever order its leg is read. QuantLib's check: its
-/// amounts read in turn, each coupon's rate and amount before the next coupon's (the vectors).
+/// A capped year-on-year coupon read again: QuantLib's <c>CappedFlooredYoYInflationCoupon::rate</c> prices its caplet
+/// and floorlet on the pricer's state (<c>capflooredinflationcoupon.cpp:92-105</c>), which its swaplet rate sets only
+/// when first computed, the coupon's <c>InflationCoupon::rate</c> being cached (<c>inflationcoupon.cpp:64-75</c>), so
+/// with one pricer on a leg a coupon read again after another reads that other coupon's state: on the wheel, on the
+/// vectors' <c>one cap</c> leg (six annual coupons capped at 3.5%, the Black pricer), the first coupon's amount read
+/// after the leg's rates is 28,665.871612869618 on 1e6, where read first it is 30,024.190259687595, its rate's.
+/// QuantLib's capped Ibor and digital coupons read their underlying's pricer the same way after its cached rate, and
+/// its stripped coupon initializes the pricer first (<c>strippedcapflooredcoupon.cpp:46-47</c>). nanoql's pricers take
+/// the coupon on every call, so a coupon's amount is the same however often and in whatever order its leg is read.
+/// QuantLib's check: its amounts read in turn, each coupon's rate and amount before the next coupon's (the vectors).
 /// </summary>
 public class CappedYoYPricerStateTests
 {

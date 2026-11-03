@@ -14,8 +14,8 @@ namespace NanoQL.Experimental;
 /// </summary>
 /// <remarks>
 /// The radius is <c>std::normal_distribution&lt;Real&gt;(0.0, σ)</c> on a <c>std::mt19937</c>, drawn as MSVC draws it
-/// (<see cref="NormalRandomWalkDistribution"/>, the S-xrt plan's XRD4), and the direction on a Mersenne Twister, both on
-/// the seed, which is required: QuantLib's default seeds from the clock (XRD3).
+/// (<see cref="NormalRandomWalkDistribution"/>), and the direction on a Mersenne Twister, both on the seed, which is
+/// required: QuantLib's default seeds from the clock.
 /// </remarks>
 [Experimental("NQL0001")]
 public class GaussianWalk : DistributionRandomWalk<NormalRandomWalkDistribution>

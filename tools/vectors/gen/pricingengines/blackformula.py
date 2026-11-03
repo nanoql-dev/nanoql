@@ -27,9 +27,9 @@ Then the other functions the wheel wraps, in cases after these, so that the case
 - "bachelierImplied" cases: for each option type, forward and discount, the prices bachelierBlackFormula gives at 3
   normal standard deviations (1e-4, 0.005 and 0.02) x the 10 strikes over a time to expiry of 2, and
   bachelierBlackFormulaImpliedVolChoi and bachelierBlackFormulaImpliedVol of each. The case's "skip" input lists the
-  [stdDev, strike] entries where QuantLib 1.44's exact inversion returns 0 on a positive time value, its price close
-  to the intrinsic value, which QuantLib's master inverts (#2924, taken ahead of the pin as the upstream sweep's
-  SWD14 rules); each is null in "impliedVol", and the reader nulls the same entries, its fixed value checked in
+  [stdDev, strike] entries where QuantLib 1.44's exact inversion returns 0 on a positive time value, its price close to
+  the intrinsic value, which QuantLib's master inverts (#2924, taken ahead of the pin); each is null in "impliedVol",
+  and the reader nulls the same entries, its fixed value checked in
   tests/NanoQL.Tests/Divergences/BlackFormulaUpstreamFixesTests.cs.
 - "bachelierItm" cases: for each option type and forward, bachelierBlackFormulaAssetItmProbability at 3 normal
   standard deviations (0, 0.005 and 0.02) x the 10 strikes; on the forward 1, also its payoff form.

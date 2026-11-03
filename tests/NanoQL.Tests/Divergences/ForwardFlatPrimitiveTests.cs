@@ -9,10 +9,10 @@ namespace NanoQL.Tests.Divergences;
 /// <summary>
 /// The forward-flat interpolation's primitive past its last node. QuantLib's <c>primitive</c> beyond <c>x[n-1]</c> adds
 /// <c>(x - x[n-2])·y[n-2]</c> (<c>forwardflatinterpolation.hpp:93-97</c>), while its value there is <c>y[n-1]</c>
-/// (<c>:87-88</c>), so the primitive's slope isn't the value (QuantLib's defect, R8). nanoql's primitive beyond
-/// <c>x[n-1]</c> is <c>primitive[n-1] + (x - x[n-1])·y[n-1]</c>, and QuantLib's expression at and before it. On
-/// x = [0, 1, 2, 3] and y = [0.01, 0.02, 0.03, 0.05], at 4 and 5 it is 0.11 and 0.16, where QuantLib's is 0.09 and
-/// 0.12: QuantLib's own forward-flat forward curve integrates there as nanoql does, its <c>-ln D(t)</c> on the wheel
+/// (<c>:87-88</c>), so the primitive's slope isn't the value (QuantLib's defect). nanoql's primitive beyond
+/// <c>x[n-1]</c> is <c>primitive[n-1] + (x - x[n-1])·y[n-1]</c>, and QuantLib's expression at and before it. On x = [0,
+/// 1, 2, 3] and y = [0.01, 0.02, 0.03, 0.05], at 4 and 5 it is 0.11 and 0.16, where QuantLib's is 0.09 and 0.12:
+/// QuantLib's own forward-flat forward curve integrates there as nanoql does, its <c>-ln D(t)</c> on the wheel
 /// 0.11000000000000003 and 0.16 (<c>forwardcurve.hpp:155-168</c>). At 2.5 and 3 both give 0.045 and 0.06.
 /// </summary>
 public class ForwardFlatPrimitiveTests

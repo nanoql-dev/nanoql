@@ -4,11 +4,10 @@
 (ql/experimental/math/convolvedstudentt.hpp, .cpp), which the wheel doesn't expose, each output computed by the C++
 harness (tools/cxx/src/experimental/math/convolvedstudentt.cpp): the cumulative distribution and the density of
 combinations of one to three t's of odd orders up to 171, the highest where QuantLib's factorial and power stay finite
-(from 173 on its series reads NaN, which nanoql scales, the S-xcr plan's XR8 (xxvi), held in
-Divergences/BehrensFisherHighOrderTests.cs), at values from -1e3 to 1e3; the inverse at probabilities from 1e-6 to
-1 - 1e-6 at two accuracies, its failures past the bracket where they come; the inspectors; and the refused
-combinations (sizes differing, an even order, a negative one). Read back by
-tests/NanoQL.Tests/Vectors/Cxx/Experimental/Math/ConvolvedStudentTCxxVectorTests.cs."""
+(from 173 on its series reads NaN, which nanoql scales, held in Divergences/BehrensFisherHighOrderTests.cs), at values
+from -1e3 to 1e3; the inverse at probabilities from 1e-6 to 1 - 1e-6 at two accuracies, its failures past the bracket
+where they come; the inspectors; and the refused combinations (sizes differing, an even order, a negative one). Read
+back by tests/NanoQL.Tests/Vectors/Cxx/Experimental/Math/ConvolvedStudentTCxxVectorTests.cs."""
 import os
 import sys
 

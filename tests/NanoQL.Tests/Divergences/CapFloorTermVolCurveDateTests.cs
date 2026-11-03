@@ -13,8 +13,8 @@ namespace NanoQL.Tests.Divergences;
 /// date gave, and its spline is over them: built on 16 June 2025 with two settlement days, tenors 1Y, 2Y and 3Y at 0.20,
 /// 0.21 and 0.22, and moved to 20 June, the wheel's curve has the reference date 24 June 2025 and the maximum date 26 June
 /// 2028, and its volatility at 1.5 years is 0.20500509503283154, its value before the move. nanoql's curves have fixed
-/// reference dates (R1): the curve for 20 June is built under that date, and gives the value of a curve QuantLib builds
-/// on it, 0.20500761138338572.
+/// reference dates: the curve for 20 June is built under that date, and gives the value of a curve QuantLib builds on
+/// it, 0.20500761138338572.
 /// </summary>
 public class CapFloorTermVolCurveDateTests
 {

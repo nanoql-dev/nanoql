@@ -19,8 +19,7 @@ namespace NanoQL.Models;
 /// √(Σu²/n − (Σu)²/(n(n + 1))), whose intent QuantLib doesn't document; it is kept as QuantLib's design.
 /// </para>
 /// <para>
-/// A documented divergence (the S-bar plan's BR5 (xxxv)): a window longer than the series is refused, where QuantLib
-/// advances past the series' end.
+/// A documented divergence: a window longer than the series is refused, where QuantLib advances past the series' end.
 /// </para>
 /// </remarks>
 public sealed class ConstantEstimator : VolatilityCompositor

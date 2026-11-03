@@ -9,9 +9,10 @@ using static NanoQL.Tests.Vectors.EquityInputs;
 namespace NanoQL.Tests.Vectors;
 
 /// <summary>
-/// The no-arbitrage SABR fit vectors, <c>tests/vectors/experimental/volatility/noarbsabrinterpolatedsmilesection.json</c>:
+/// The no-arbitrage SABR fit vectors,
+/// <c>tests/vectors/experimental/volatility/noarbsabrinterpolatedsmilesection.json</c>:
 /// <see cref="NoArbSabrInterpolatedSmileSection"/>'s fitted parameters, errors, end criterion and volatilities, the
-/// outputs S7R6's one-ulp refits leave stable.
+/// outputs one-ulp refits leave stable.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class NoArbSabrInterpolatedSmileSectionVectorTests

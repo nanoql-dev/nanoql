@@ -12,10 +12,10 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// <see cref="MakeMCVarianceSwapEngine{TRng, TStats}"/>'s seed is explicit (S2R4; SEQR2): 0, QuantLib's seed from the
-/// clock, is refused, naming the parameter. QuantLib's checks keep their texts: the steps given one way, the samples
-/// beside no tolerance, a tolerance only where the traits estimate an error; a builder kept and reused is never
-/// changed; and the engine's own checks are QuantLib's constructor's.
+/// <see cref="MakeMCVarianceSwapEngine{TRng, TStats}"/>'s seed is explicit: 0, QuantLib's seed from the clock, is
+/// refused, naming the parameter. QuantLib's checks keep their texts: the steps given one way, the samples beside no
+/// tolerance, a tolerance only where the traits estimate an error; a builder kept and reused is never changed; and the
+/// engine's own checks are QuantLib's constructor's.
 /// </summary>
 public class MakeMcVarianceSwapEngineTests
 {

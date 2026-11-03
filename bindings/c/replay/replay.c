@@ -208,7 +208,7 @@ static void* temp(rp* r, size_t bytes)
 static long long shown = 20;
 static long long stops = 0; /* how many facts' stops to print (NANOQL_REPLAY_STOPS) */
 /* NANOQL_REPLAY_TOLERANCE and NANOQL_REPLAY_ABS_TOLERANCE: off the reference platform, a double within this relative
-   difference, or else within this absolute one, is a match, each kind tallied with its widest (R19, R26). */
+   difference, or else within this absolute one, is a match, each kind tallied with its widest. */
 static double tolerance = 0, abs_tolerance = 0;
 static long long near_doubles = 0, small_doubles = 0;
 static double widest = 0, widest_abs = 0;
@@ -392,7 +392,7 @@ void rd_map(rp* r, const jv* a, int i, int kk, int vk, const void** keys, const 
 }
 
 /* A tuple argument's JSON array, its elements read by the readers above; and a collection of tuples, one array per
-   element (NULL for a null collection), with has-value flags for a nullable element (B2R3). */
+   element (NULL for a null collection), with has-value flags for a nullable element. */
 const jv* rd_tuple(rp* r, const jv* a, int i) { return arg(r, a, i); }
 
 void rd_tuples(rp* r, const jv* a, int i, int n, const int* kinds, const void** items, const bool** has, int32_t* count)
@@ -661,7 +661,7 @@ void ck_map(rp* r, const jv* res, int kk, int vk, void* keys, void* values, bool
 }
 
 /* A returned collection of tuples against the recorded list, a null tuple against null by its has-value flag, each
-   element by its kind; frees the arrays (B2R10). */
+   element by its kind; frees the arrays. */
 void ck_tuples(rp* r, const jv* res, int n, const int* kinds, void** items, bool* has, int32_t count)
 {
     if (!res || res->type != JV_ARR) {

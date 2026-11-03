@@ -11,7 +11,7 @@ namespace NanoQL.Models;
 /// <summary>
 /// The factory of <see cref="FwdToCotSwapAdapter"/>s, each on a forward-rate model its forward factory creates.
 /// </summary>
-/// <remarks>Immutable (the S-mm plan's MR1 (i)).</remarks>
+/// <remarks>Immutable.</remarks>
 public sealed class FwdToCotSwapAdapterFactory : MarketModelFactory
 {
     private readonly MarketModelFactory forwardFactory;

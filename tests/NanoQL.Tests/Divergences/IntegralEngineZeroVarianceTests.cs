@@ -10,10 +10,10 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The integral engine at zero variance (the S-van plan's VR4 (x)). QuantLib integrates the payoff over ±10√variance
-/// against a density scaled by 1/√(2π·variance) (<c>integralengine.cpp:78-83</c>), both 0 or ∞ at zero variance, so its
-/// value is NaN [executed on the wheel: <c>scratchpad\c2\oracle_c2.py</c>, section integral]. nanoql takes the limit,
-/// the discounted payoff at the forward. QuantLib's check: its analytic European engine at the same zero volatility.
+/// The integral engine at zero variance. QuantLib integrates the payoff over ±10√variance against a density scaled by
+/// 1/√(2π·variance) (<c>integralengine.cpp:78-83</c>), both 0 or ∞ at zero variance, so its value is NaN
+/// (QuantLib-Python 1.44). nanoql takes the limit, the discounted payoff at the forward. QuantLib's check: its analytic
+/// European engine at the same zero volatility.
 /// </summary>
 public class IntegralEngineZeroVarianceTests
 {

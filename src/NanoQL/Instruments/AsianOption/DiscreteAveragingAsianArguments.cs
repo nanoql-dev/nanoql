@@ -32,8 +32,7 @@ internal sealed record DiscreteAveragingAsianArguments(
 {
     /// <summary>
     /// Gets the log of the running product: QuantLib's <c>log(runningAccumulator)</c> where the product is a finite
-    /// normal double, its bits there; the past fixings' log-sum where the product has left double's range (the S-bar
-    /// plan's BR5 (xli)).
+    /// normal double, its bits there; the past fixings' log-sum where the product has left double's range.
     /// </summary>
     public double RunningLog => double.IsNormal(RunningAccumulator) && RunningAccumulator > 0.0
         ? Math.Log(RunningAccumulator)
@@ -42,8 +41,8 @@ internal sealed record DiscreteAveragingAsianArguments(
     /// <summary>
     /// The arguments with each fixing dated from the evaluation date to an engine's clock origin taken at the origin:
     /// the spot, with no variance and no discount accrued, so a past fixing at the spot. Where the structures settle
-    /// after the evaluation date, QuantLib's engines drop such a fixing from the average or refuse it as past (the
-    /// S-bar code review's B3-1, the lookbacks' B2-3 class: today's limit).
+    /// after the evaluation date, QuantLib's engines drop such a fixing from the average or refuse it as past
+    /// (today's limit).
     /// </summary>
     /// <param name="evaluationDate">The evaluation date.</param>
     /// <param name="beforeOrigin">Whether a date is before the engine's clock origin.</param>

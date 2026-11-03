@@ -21,15 +21,15 @@ namespace NanoQL.Processes;
 /// Immutable: the curves, the spot and the parameters are fixed at construction, where QuantLib's process holds handles
 /// and a quote. <see cref="Evolve(double, Vector, double, Vector)"/> steps by the chosen
 /// <see cref="HestonProcessDiscretization"/>; the exact schemes sample the variance from its non-central chi-squared
-/// law, whose inverse refuses where its series doesn't converge (the S-eq plan's SEQR7 (xvii)), and Broadie and Kaya's
-/// schemes also sample the integrated variance.
+/// law, whose inverse refuses where its series doesn't converge, and Broadie and Kaya's schemes also sample the
+/// integrated variance.
 /// </para>
 /// <para>
-/// An extension point, as in QuantLib: <see cref="BatesProcess"/> derives from it (the S-hes plan's HR1). The in-place
+/// An extension point, as in QuantLib: <see cref="BatesProcess"/> derives from it. The in-place
 /// <see cref="Evolve(double, ReadOnlySpan{double}, double, ReadOnlySpan{double}, Span{double})"/> steps the truncation,
 /// reflection and quadratic-exponential schemes without allocating, by QuantLib's arithmetic, its rates read without
-/// building QuantLib's rate objects, so its bits are the allocating form's (HR2); the exact schemes' samplers allocate,
-/// and step through the allocating form.
+/// building QuantLib's rate objects, so its bits are the allocating form's; the exact schemes' samplers allocate, and
+/// step through the allocating form.
 /// </para>
 /// </remarks>
 public class HestonProcess : StochasticProcess
@@ -136,9 +136,8 @@ public class HestonProcess : StochasticProcess
     }
 
     // The earliest reference date of the risk-free and dividend curves: the date the model's variance accrues from in
-    // the engines that read the model by date, each curve accruing nothing before its own (the user's rulings of
-    // 2026-10-21 on the S-eq plan, C4R2-O2 (i); C4R5-O1); the risk-free curve's where the dividend curve isn't dated
-    // before it.
+    // the engines that read the model by date, each curve accruing nothing before its own; the risk-free curve's where
+    // the dividend curve isn't dated before it.
     internal Date EarliestReferenceDate() =>
         dividendYield.ReferenceDate < riskFreeRate.ReferenceDate ? dividendYield.ReferenceDate : riskFreeRate.ReferenceDate;
 
@@ -165,11 +164,10 @@ public class HestonProcess : StochasticProcess
     // otherwise.
     internal TermStructure TimeClock => clock ?? riskFreeRate;
 
-    // The process on an engine's clock (the S-van plan's VR1 (v) form; the S-hes plan's HR7 (vi)): a copy, of the same
-    // type, whose times, Time(date)'s among them, are the clock's, and whose curves are read at the instants those times
-    // denote, each accruing nothing before its own reference date (TermStructure.AccrualTime); the process itself where
-    // the clock shares the risk-free curve's times, so a market on that clock keeps QuantLib's bits. The variance's
-    // dynamics run in the clock's time.
+    // The process on an engine's clock: a copy, of the same type, whose times, Time(date)'s among them, are the
+    // clock's, and whose curves are read at the instants those times denote, each accruing nothing before its own
+    // reference date (TermStructure.AccrualTime); the process itself where the clock shares the risk-free curve's
+    // times, so a market on that clock keeps QuantLib's bits. The variance's dynamics run in the clock's time.
     internal HestonProcess OnClock(TermStructure clock)
     {
         if (clock.SharesTimes(riskFreeRate))
@@ -250,19 +248,19 @@ public class HestonProcess : StochasticProcess
     /// QuantLib's density doesn't hold its digits (<c>hestonprocess.cpp:300-334</c>). It integrates over the integrated
     /// variance up to twice a Cornish-Fisher quantile whose skew and kurtosis are finite differences of the
     /// characteristic function at a step of 1e-2, which rest on its last bits, and that cut-off can fall where the
-    /// integrand is still a fifth of its peak (10% low on ordinary inputs); and its 128-point Gauss-Laguerre rule for the
-    /// conditional density reaches u ≈ 500, where at short times the characteristic function hasn't decayed (NaN and
-    /// negative densities at a quarter of a year). Here the log spot's conditional density given the variance is the
-    /// inversion of its characteristic function: given the integrated variance ξ the log spot is normal, with mean
+    /// integrand is still a fifth of its peak (10% low on ordinary inputs); and its 128-point Gauss-Laguerre rule for
+    /// the conditional density reaches u ≈ 500, where at short times the characteristic function hasn't decayed (NaN
+    /// and negative densities at a quarter of a year). Here the log spot's conditional density given the variance is
+    /// the inversion of its characteristic function: given the integrated variance ξ the log spot is normal, with mean
     /// x₀ + a − cξ and variance (1 − ρ²)ξ, c = ½ − ρκ/σ, as QuantLib's integrand has it, so its characteristic function
     /// given the variance is e^{iu(x₀ + a)}·Φ(−uc + i·½u²(1 − ρ²)), Φ the integrated variance's, with the Bessel ratio
     /// in its exponentially weighted form. The inversion integral runs by 32-point Gauss-Legendre panels no wider than
     /// the integrand's oscillation and decay allow, out to where E[e^{−½u²(1 − ρ²)ξ}], which bounds the integrand,
-    /// falls below 1e-17. A documented divergence (a run find, ruled by the user on 2026-10-24,
-    /// <c>Divergences/HestonPdfTests.cs</c>), checked by the log spot's marginal, the density integrated over the
-    /// variance, against the log spot's density from Heston's characteristic function, which QuantLib's analytic Heston
-    /// engine prices by. Where the variance's density is 0 the density is 0. The value's absolute accuracy is about
-    /// 1e-13, the inversion's rounding floor: far from the density's mass it is noise of that size, of either sign.
+    /// falls below 1e-17. A documented divergence (<c>Divergences/HestonPdfTests.cs</c>), checked by the log spot's
+    /// marginal, the density integrated over the variance, against the log spot's density from Heston's characteristic
+    /// function, which QuantLib's analytic Heston engine prices by. Where the variance's density is 0 the density is 0.
+    /// The value's absolute accuracy is about 1e-13, the inversion's rounding floor: far from the density's mass it is
+    /// noise of that size, of either sign.
     /// </para>
     /// </remarks>
     /// <exception cref="NanoQLException">Boost's non-central chi-squared refuses its arguments; |ρ| is 1, where the log
@@ -747,9 +745,8 @@ public class HestonProcess : StochasticProcess
             : riskFreeRate.ForwardRate(t1, t2, Compounding.Continuous).Rate;
 
     // q over [t1, t2] on the risk-free curve's clock: QuantLib's read where the dividend curve shares its times;
-    // otherwise at the instants they denote, nothing accruing before the curve's reference date (the user's rulings of
-    // 2026-10-21 on the S-eq plan, C4-O2 and C4R2-O2; TermStructure.AccrualTime); on the Monte Carlo engine's clock at
-    // the instants its times denote
+    // otherwise at the instants they denote, nothing accruing before the curve's reference date
+    // (TermStructure.AccrualTime); on the Monte Carlo engine's clock at the instants its times denote
     internal double DividendRate(double t1, double t2) =>
         clock is not null
             ? dividendYield.ContinuousForwardRateAt(clock, t1, t2)

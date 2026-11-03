@@ -16,14 +16,14 @@ namespace NanoQL.Numerics;
 /// <remarks>
 /// <para>
 /// Immutable: it holds a copy of the generator it is given, and each minimization draws from a copy of that, so a
-/// second minimization repeats the first's draws, where QuantLib's continues its generator's stream (the S-core plan's
-/// CR2 (c); <c>Divergences/SimulatedAnnealingTests.cs</c>). The generator is required: QuantLib's default, a Mersenne
-/// Twister seeded from the clock, is refused.
+/// second minimization repeats the first's draws, where QuantLib's continues its generator's stream
+/// (<c>Divergences/SimulatedAnnealingTests.cs</c>). The generator is required: QuantLib's default, a Mersenne Twister
+/// seeded from the clock, is refused.
 /// </para>
 /// <para>
 /// A vertex whose value is NaN enters the simplex at the largest double, where QuantLib's guard on the initial
 /// vertices tests the previous trial's value instead (left from an earlier minimization, or unset) and so lets the NaN
-/// in (CR7 (xix)); the vertices a contraction moves are guarded alike, which QuantLib's leaves out.
+/// in; the vertices a contraction moves are guarded alike, which QuantLib's leaves out.
 /// </para>
 /// </remarks>
 public sealed class SimulatedAnnealing<TRng> : OptimizationMethod

@@ -21,15 +21,15 @@ namespace NanoQL.Experimental;
 /// <para>
 /// A mutable working type (§2.7), not for a multithreaded simulation: the polar method is a rejection method. Its seed
 /// constructor is <see cref="PolarStudentTFactorSampler.Create{TUrng}"/>, a seed in [1, 4294967295] with no default,
-/// where QuantLib's defaults to 0, the clock (the S-xcr plan's XR4 (a)); a generator given instead is copied.
+/// where QuantLib's defaults to 0, the clock; a generator given instead is copied.
 /// </para>
 /// <para>
-/// One uniform stream feeds the t generators in turn, and each draw is scaled by its factor's variance factor
-/// √((ν − 2)/ν), so that the factors are independent and of unit variance, as the policy's are. QuantLib's gives each t
+/// One uniform stream feeds the t generators in turn, and each draw is scaled by its factor's variance factor √((ν −
+/// 2)/ν), so that the factors are independent and of unit variance, as the policy's are. QuantLib's gives each t
 /// generator its own copy of one uniform generator, so the systemic draw k equals the idiosyncratic stream's draw k,
-/// and leaves its draws raw, of variance ν/(ν − 2) (<c>latentmodel.hpp:779-794</c>, <c>polarstudenttrng.hpp:86</c>):
-/// at ν 5 and a weight √0.3 a 1% default threshold simulates 2.65%. A documented divergence (the S-xcr plan's XR8
-/// (xix); <c>Divergences/PolarStudentTSamplerTests.cs</c>).
+/// and leaves its draws raw, of variance ν/(ν − 2) (<c>latentmodel.hpp:779-794</c>, <c>polarstudenttrng.hpp:86</c>): at
+/// ν 5 and a weight √0.3 a 1% default threshold simulates 2.65%. A documented divergence
+/// (<c>Divergences/PolarStudentTSamplerTests.cs</c>).
 /// </para>
 /// </remarks>
 /// <typeparam name="TUrng">The uniform generator.</typeparam>

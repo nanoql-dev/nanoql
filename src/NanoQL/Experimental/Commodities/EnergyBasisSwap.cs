@@ -17,12 +17,12 @@ namespace NanoQL.Experimental;
 /// The holder pays the pay index's price and receives the receive index's, the basis added to the pay leg or the
 /// receive leg. The basis, a price per its unit in its currency, converts into the base currency from its own currency,
 /// as every other price here; QuantLib converts it from the base currency into the basis currency, the reverse
-/// (<c>energybasisswap.cpp:126-129</c>; the S-xrt plan's XRR5 (ix), <c>Divergences/EnergyBasisSwapTests.cs</c>); a basis
-/// in the base currency is QuantLib's.
+/// (<c>energybasisswap.cpp:126-129</c>; <c>Divergences/EnergyBasisSwapTests.cs</c>); a basis in the base currency is
+/// QuantLib's.
 /// </para>
 /// <para>
 /// The last quote date is the earlier of the two indexes'; an index with no fixings has none, and every day is priced
-/// from the forward curves (XRR5 (vi)), the other index's fixings unread. The spread index is held and read by nothing, as QuantLib's.
+/// from the forward curves, the other index's fixings unread. The spread index is held and read by nothing, as QuantLib's.
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]

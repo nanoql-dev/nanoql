@@ -9,15 +9,15 @@ using NanoQL.Tests.Vectors;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The CMS market calibration's guess with the reversion fixed (the S-cms plan's CMR5 (x)): QuantLib's vector overload
-/// passes the betas to the optimizer untransformed on that path alone (<c>cmsmarketcalibration.cpp:359-366</c>), where
-/// its free path and its matrix and parametric overloads transform them (<c>:379-381</c>, <c>:426-427</c>), and reads
-/// the result back through the transform (<c>:372</c>), so a guess of β starts the fit at e^(−β²): on the wheel, on the
-/// vectors' market quoting the spreads the cube's own fit implies (0.0017046615749698334, 0.0018719617461963108,
-/// 0.0020272382060141435, 0.0022422177072925265), the fit from a guess of 0.5 returns a beta of 0.5000000003809772 and
-/// an error of 4.659445968967119e-16, and on those spreads 2bp lower a beta of 0.9999985865285671, another fit. nanoql
-/// transforms the guess on every path. QuantLib's check: its vector overload given the guess's transform, √(−ln 0.5),
-/// which starts the fit at a beta of 0.5: there a beta of 0.5000000000000001 and an error of 0, and 2bp lower 1e-06 and
+/// The CMS market calibration's guess with the reversion fixed: QuantLib's vector overload passes the betas to the
+/// optimizer untransformed on that path alone (<c>cmsmarketcalibration.cpp:359-366</c>), where its free path and its
+/// matrix and parametric overloads transform them (<c>:379-381</c>, <c>:426-427</c>), and reads the result back through
+/// the transform (<c>:372</c>), so a guess of β starts the fit at e^(−β²): on the wheel, on the vectors' market quoting
+/// the spreads the cube's own fit implies (0.0017046615749698334, 0.0018719617461963108, 0.0020272382060141435,
+/// 0.0022422177072925265), the fit from a guess of 0.5 returns a beta of 0.5000000003809772 and an error of
+/// 4.659445968967119e-16, and on those spreads 2bp lower a beta of 0.9999985865285671, another fit. nanoql transforms
+/// the guess on every path. QuantLib's check: its vector overload given the guess's transform, √(−ln 0.5), which starts
+/// the fit at a beta of 0.5: there a beta of 0.5000000000000001 and an error of 0, and 2bp lower 1e-06 and
 /// 0.00019999259008147676. The matrix overload, which transforms, calibrates a beta per swap length, another problem on
 /// this market, and refuses a market of one length ("not enough points to interpolate").
 /// </summary>

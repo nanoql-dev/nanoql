@@ -16,8 +16,8 @@ using static NanoQL.PricingEngines.BlackFormulaFunctions;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The Gaussian1d cap/floor engine's compounded overnight coupons (the S-g1d plan's G1R6 (xx)): an overnight index is
-/// an Ibor index, so QuantLib's engine prices a compounded coupon on its last day's forward times the whole accrual
+/// The Gaussian1d cap/floor engine's compounded overnight coupons: an overnight index is an Ibor index, so QuantLib's
+/// engine prices a compounded coupon on its last day's forward times the whole accrual
 /// (<c>gaussian1dcapfloorengine.cpp:76-79</c>), no QuantLib route pricing a compounded caplet on a Gaussian1d model; on
 /// the wheel, a year's SOFR caplet at the money a year forward on this curve's GSR model (a = 0.03, σ = 0.009) is worth
 /// 5,781.30 per million, where the Monte Carlo below gives 3,949.84 ± 20.78 and nanoql 3,945.48. On GSR nanoql values

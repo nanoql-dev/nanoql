@@ -61,7 +61,7 @@ public class SingleFactorBsmBasketEngineCxxVectorTests
                 continue;
             }
 
-            // the root solver's outputs S7R6 keeps (the S-exo plan's ED12), each strategy's root and counts
+            // the root solver's outputs stable under one-ulp moves, each strategy's root and counts
             object solver = Solver(a, sig, k);
             double x = c.Double("x");
             check.Output(c, "value", Invoke(solver, "Evaluate", x));
@@ -80,7 +80,7 @@ public class SingleFactorBsmBasketEngineCxxVectorTests
         check.Complete();
     }
 
-    // An output the generator's stability filter kept (S7R6): it compares only what the file holds.
+    // An output the generator's stability filter kept: it compares only what the file holds.
     private static void Kept(VectorCase c, VectorAssert check, string name, object? actual)
     {
         if (c.Expected.TryGetProperty(name, out _))

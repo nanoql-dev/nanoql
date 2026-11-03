@@ -4,9 +4,9 @@
 namespace NanoQL.Excel;
 
 /// <summary>
-/// What a rendered repro carries beside its calls (XLR14): for C#, the bound engine the shared emitter's adapters read, a
+/// What a rendered repro carries beside its calls: for C#, the bound engine the shared emitter's adapters read, a
 /// generator's draws as their loop, a matrix from rows, and the outcome written in Excel's terms; for Python, the same
-/// outcome over S-bind's Python layer. Each writes a result as a grid of cells: a double's bits, a text, a boolean, an
+/// outcome over the Python layer. Each writes a result as a grid of cells: a double's bits, a text, a boolean, an
 /// object's type, an error's code (#N/A 42, #NUM! 36), as the add-in's output conversion spills it.
 /// </summary>
 internal static class XlReproText
@@ -125,7 +125,7 @@ internal static class XlReproText
             }
         }
 
-        // A bound engine's inputs, which the shared emitter's adapters read (XLR10), as the add-in's runtime holds them.
+        // A bound engine's inputs, which the shared emitter's adapters read, as the add-in's runtime holds them.
         public sealed class BoundEngine(string set, object instrument, IReadOnlyDictionary<string, object> inputs)
         {
             public string Set { get; } = set;
@@ -165,7 +165,7 @@ internal static class XlReproText
             public object Next { get; } = next;
         }
 
-        // A generator's draws from a copy of it, the generator itself never drawn from (XLR2's snapshot).
+        // A generator's draws from a copy of it, the generator itself never drawn from.
         public static class Draws
         {
             public static DrawsResult Of(NanoQL.Numerics.IRng g, int n)
@@ -205,7 +205,7 @@ internal static class XlReproText
 
     /// <summary>The Python script's head, before its calls: nanoql's Python layer and the outcome's grid.</summary>
     public const string PythonHead = """
-        # nqlxlRepro: a cell's nanoql calls as Python (XLR14), over nanoql's Python package and NumPy; it prints the cell's
+        # nqlxlRepro: a cell's nanoql calls as Python, over nanoql's Python package and NumPy; it prints the cell's
         # outcome as a grid of cells, each a double's bits, a text, a boolean, an object's type or an error's code.
         import datetime, enum, json, os, struct, tempfile
         import numpy as np

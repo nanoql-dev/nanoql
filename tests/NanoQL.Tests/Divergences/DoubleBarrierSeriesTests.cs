@@ -11,12 +11,12 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The analytic double-barrier engine's series length (the S-bar plan's BR5 (xliii), fixed under R8). QuantLib sums
-/// n from −<c>series</c> to <c>series</c>, five by default (<c>analyticdoublebarrierengine.cpp:176</c>), unconverged on
-/// narrow corridors and long terms: [95, 105] at a volatility of 50% over two years prices a knock-out 3.3e-3 where 50
-/// terms and QuantLib's binomial double-barrier engine give about 0 (the reviewer's a12). nanoql takes <c>series</c>
-/// as the minimum and adds terms while the next pair exceeds machine epsilon of the sum, QuantLib's value wherever five
-/// have converged. Checks: 50 terms; QuantLib's binomial engine, 5.5e-88 (the wheel's, recorded by a12).
+/// The analytic double-barrier engine's series length (fixed). QuantLib sums n from −<c>series</c> to <c>series</c>,
+/// five by default (<c>analyticdoublebarrierengine.cpp:176</c>), unconverged on narrow corridors and long terms: [95,
+/// 105] at a volatility of 50% over two years prices a knock-out 3.3e-3 where 50 terms and QuantLib's binomial
+/// double-barrier engine give about 0. nanoql takes <c>series</c> as the minimum and adds terms while the next pair
+/// exceeds machine epsilon of the sum, QuantLib's value wherever five have converged. Checks: 50 terms; QuantLib's
+/// binomial engine, 5.5e-88 (QuantLib-Python 1.44's).
 /// </summary>
 public class DoubleBarrierSeriesTests
 {

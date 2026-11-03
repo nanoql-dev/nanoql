@@ -6,9 +6,9 @@ using System.Text.Json;
 namespace NanoQL.Bind.Reading;
 
 /// <summary>
-/// The last release's Excel names, <c>bindings/excel/functions.shipped.json</c> (XLR1's freezing): each released name by
-/// its function's C name, or by its family's key, so a construction added later joins its family under the released
-/// name (XLD29); and the retired names, a removed function's, which no later function takes. Absent before 2.0.
+/// The last release's Excel names, <c>bindings/excel/functions.shipped.json</c>, the names a release freezes: each
+/// released name by its function's C name, or by its family's key, so a construction added later joins its family under
+/// the released name; and the retired names, a removed function's, which no later function takes. Absent before 2.0.
 /// </summary>
 internal sealed class ExcelShipped
 {

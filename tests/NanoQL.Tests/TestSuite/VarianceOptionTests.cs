@@ -27,7 +27,7 @@ public class VarianceOptionTests
 
         double s0 = 1.0;
 
-        // QuantLib's empty dividend handle: a curve the engine doesn't read (the S-xeq plan's XER2)
+        // QuantLib's empty dividend handle: a curve the engine doesn't read
         YieldTermStructure qTS = new FlatForward(today, 0.0, dc);
         YieldTermStructure rTS = new FlatForward(today, 0.0, dc);
 
@@ -56,7 +56,7 @@ public class VarianceOptionTests
             + $"\n    error:      {error}");
 
         // Moved: the check of line 104, QuantLib's put 0.0466796 from its two-dimensional integral, moves to
-        // Divergences/IntegralHestonVarianceOptionTests.cs: nanoql prices a put by parity on the call's integral, 0.0465915
-        // (the user's ruling at the S-xeq run's stop 8)
+        // Divergences/IntegralHestonVarianceOptionTests.cs: nanoql prices a put by parity on the call's integral,
+        // 0.0465915
     }
 }

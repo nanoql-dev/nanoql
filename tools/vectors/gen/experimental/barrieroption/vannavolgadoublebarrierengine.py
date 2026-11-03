@@ -11,12 +11,11 @@ put at 1.2, 1.3 and 1.4, with the vanilla price from the smile and with QuantLib
 price; the NPV. Then the spot beyond each barrier, an expired option and the KIKO type ("Only same type barrier
 supported").
 
-The outputs nanoql fixes are left out (the S-xeq plan's §2.8): the domestic and foreign rates are equal, so the
-domestic discount nanoql passes the smile's interpolation equals the foreign one QuantLib passes twice (XER5 (viii));
-the curves and the engine's volatility share Actual/365F and the evaluation date, so reading each curve at the quotes'
-instant is reading it at their time (XER5 (ix), SRXR3 (xx)); every rebate is 0 (SRXR3 (xvi)); and no spot lies on a
-barrier, where QuantLib's strict tests send it to the inner engine's "barrier touched" (XER5 (ix)). The corridors are
-wide against the vols, so both inner engines' series converge in QuantLib's terms (XER5 (iv), BR5 (xliii)).
+The outputs nanoql fixes are left out: the domestic and foreign rates are equal, so the domestic discount nanoql passes
+the smile's interpolation equals the foreign one QuantLib passes twice; the curves and the engine's volatility share
+Actual/365F and the evaluation date, so reading each curve at the quotes' instant is reading it at their time; every
+rebate is 0; and no spot lies on a barrier, where QuantLib's strict tests send it to the inner engine's "barrier
+touched". The corridors are wide against the vols, so both inner engines' series converge in QuantLib's terms.
 
 A case's inputs: the quotes {"put25", "atm", "call25", "maturity"}, the spot, the rates {"domestic", "foreign"}, the
 barrier (the analytic double-barrier generator's spec), the exercise's date, the payoffs (bc's specs), "adaptVanDelta"

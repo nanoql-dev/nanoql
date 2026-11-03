@@ -7,15 +7,14 @@ using static NanoQL.Tests.Divergences.HestonGeometricAsianMarkets;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The Heston geometric Asian engine's switch to the intrinsic value (the S-bar plan's BR5 (xxxiv), Revision 12, BR12,
-/// fixed under R8). Without it the quadrature reaches its cap where the integrand oscillates over thousands of periods
-/// before it decays (an hour at v₀ 0.0025 at the calls at 120 and 200), and at v₀ = θ = 0 the integrand overflows
-/// (the planner's BP46). nanoql prices the point mass at v₀ = θ = 0, and the discounted intrinsic where a Chernoff
-/// bound on the extrinsic value, from Phi at real s up to the moment explosion, is at or below 1e-12 × max(the
-/// discounted intrinsic, D·F_G/100); a switch on the strike's distance in standard deviations of ln G would price the
-/// one-year call at 50 at its intrinsic, 2.4e-3 off (BP47). Checks: the bound's value 0 at the hour (the S-bar run's
-/// <c>c3_heston_div_refs.py</c>), the point mass's own value, and QUADPACK on two contours at R7 on BR12's scale.
-/// P9's market: r 5%, q 0, κ 2, ρ −0.5, six fixings.
+/// The Heston geometric Asian engine's switch to the intrinsic value (fixed). Without it the quadrature reaches its cap
+/// where the integrand oscillates over thousands of periods before it decays (an hour at v₀ 0.0025 at the calls at 120
+/// and 200), and at v₀ = θ = 0 the integrand overflows. nanoql prices the point mass at v₀ = θ = 0, and the discounted
+/// intrinsic where a Chernoff bound on the extrinsic value, from Phi at real s up to the moment explosion, is at or
+/// below 1e-12 × max(the discounted intrinsic, D·F_G/100); a switch on the strike's distance in standard deviations of
+/// ln G would price the one-year call at 50 at its intrinsic, 2.4e-3 off. Checks: the bound's value 0 at the hour, the
+/// point mass's own value, and QUADPACK on two contours at the tolerance on the engine's scale. The short-dated market:
+/// r 5%, q 0, κ 2, ρ −0.5, six fixings.
 /// </summary>
 public class HestonGeometricAsianIntrinsicTests
 {

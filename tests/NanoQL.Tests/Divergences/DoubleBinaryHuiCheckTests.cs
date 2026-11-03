@@ -11,13 +11,12 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The double-barrier binary's convergence check on Hui's series (the S-bar plan's BR5 (xlviii), fixed under R8).
-/// QuantLib checks only its 99th term, |term| &lt; 1e-8 (<c>analyticdoublebarrierbinaryengine.cpp:98-110</c>), and that
-/// term carries sin(99πx/Z), so at x/Z = j/99 the check passes unconverged: on [80, 125] at 5%, r 3%, q 2.7%, two
-/// days, the spot at x/Z = 1/9 gets a unit-cash knock-out of 1.000413699, above its discounted cash 0.9998356, which no
-/// knock-out can exceed. nanoql decides Hui's convergence by a bound on the dropped tail free of its sines, the terms'
-/// envelope, and takes QuantLib's image series where it fails. Check: the image series at x/Z = j/99 (the reviewer's
-/// r4b, 0.9998356299486).
+/// The double-barrier binary's convergence check on Hui's series (fixed). QuantLib checks only its 99th term, |term|
+/// &lt; 1e-8 (<c>analyticdoublebarrierbinaryengine.cpp:98-110</c>), and that term carries sin(99πx/Z), so at x/Z = j/99
+/// the check passes unconverged: on [80, 125] at 5%, r 3%, q 2.7%, two days, the spot at x/Z = 1/9 gets a unit-cash
+/// knock-out of 1.000413699, above its discounted cash 0.9998356, which no knock-out can exceed. nanoql decides Hui's
+/// convergence by a bound on the dropped tail free of its sines, the terms' envelope, and takes QuantLib's image series
+/// where it fails. Check: the image series at x/Z = j/99 (0.9998356299486).
 /// </summary>
 public class DoubleBinaryHuiCheckTests
 {

@@ -14,15 +14,14 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// A coupon between its fixing and its start on the trees (the S-sr plan's SSR6 (iv) widened, round 1's O1-4, and
-/// (xvi)). QuantLib's discretized cap knows a caplet by its start: it values the caplet as an option on its bond
-/// whenever the start is on the grid (<c>discretizedcapfloor.cpp:55</c>) and reads the fixing only when the start is
-/// past (<c>:91</c>); its discretized swap likewise knows a floating coupon by its reset, the accrual start
-/// (<c>discretizedswap.cpp:28-33</c>, <c>:81-90</c>). So between a coupon's fixing and its start the trees ignore the
-/// fixing. nanoql knows a caplet, and a swap's coupon behind the tree swap engine and <see cref="DiscretizedSwap"/>'s
-/// public constructor, by its fixing date, and pays its amount; the tree swaption keeps QuantLib's start-date rule, its
-/// par convention at exercise. QuantLib's check: the analytic cap engine and the discounting swap engine, which the
-/// trees then converge to or equal; and QuantLib's own tree swaption.
+/// A coupon between its fixing and its start on the trees. QuantLib's discretized cap knows a caplet by its start: it
+/// values the caplet as an option on its bond whenever the start is on the grid (<c>discretizedcapfloor.cpp:55</c>) and
+/// reads the fixing only when the start is past (<c>:91</c>); its discretized swap likewise knows a floating coupon by
+/// its reset, the accrual start (<c>discretizedswap.cpp:28-33</c>, <c>:81-90</c>). So between a coupon's fixing and its
+/// start the trees ignore the fixing. nanoql knows a caplet, and a swap's coupon behind the tree swap engine and
+/// <see cref="DiscretizedSwap"/>'s public constructor, by its fixing date, and pays its amount; the tree swaption keeps
+/// QuantLib's start-date rule, its par convention at exercise. QuantLib's check: the analytic cap engine and the
+/// discounting swap engine, which the trees then converge to or equal; and QuantLib's own tree swaption.
 /// </summary>
 public class TreeKnownCouponTests
 {
@@ -30,8 +29,8 @@ public class TreeKnownCouponTests
     // fixing (13 March) stored at 5%, on Hull-White (0.1, 0.01) on a flat 4% curve from the evaluation date: one
     // business day after the fixing, the analytic engine 3.561453558384388 and the tree (200 steps) 3.0539157443699025;
     // on the fixing date, 3.5615917095494933 and 3.054109220073771. Both of nanoql's engines value the caplets still to
-    // be fixed at their fixings (the plan's B1-1, CapletFixingExpiryTests): QuantLib's analytic price with those caplets
-    // on its five-argument bond option at their fixings is 3.55973215363614 and 3.559869850972133 on the wheel.
+    // be fixed at their fixings (CapletFixingExpiryTests): QuantLib's analytic price with those caplets on its
+    // five-argument bond option at their fixings is 3.55973215363614 and 3.559869850972133 on the wheel.
     [Fact]
     public void ACapAfterItsFirstFixingIsTheAnalyticEngines()
     {

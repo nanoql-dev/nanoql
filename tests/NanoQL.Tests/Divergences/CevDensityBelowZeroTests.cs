@@ -6,12 +6,12 @@ using NanoQL.Methods;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The CEV density below zero (a run find, S-van's C3). Where the Sankaran guess's Brent fails, QuantLib's inverse
-/// starts a second Brent from the forward (<c>cevrndcalculator.cpp:105-120</c>), which can step below zero, where X(f) =
-/// f^(2(1 − β)) is NaN and Boost refuses it: QuantLib throws "Non centrality parameter is -nan(ind)" at a quantile that
-/// exists. nanoql's density and distribution are 0 below zero, the absorbing boundary, and QuantLib's values at and
-/// above it stand, so the second Brent finds the quantile to its accuracy, 1e-8 in the forward. The check: the
-/// distribution brackets the probability within that accuracy [executed on the wheel: f0 100, α = σ·f0^(1 − β)].
+/// The CEV density below zero (a run find). Where the Sankaran guess's Brent fails, QuantLib's inverse starts a second
+/// Brent from the forward (<c>cevrndcalculator.cpp:105-120</c>), which can step below zero, where X(f) = f^(2(1 − β))
+/// is NaN and Boost refuses it: QuantLib throws "Non centrality parameter is -nan(ind)" at a quantile that exists.
+/// nanoql's density and distribution are 0 below zero, the absorbing boundary, and QuantLib's values at and above it
+/// stand, so the second Brent finds the quantile to its accuracy, 1e-8 in the forward. The check: the distribution
+/// brackets the probability within that accuracy (QuantLib-Python 1.44; f0 100, α = σ·f0^(1 − β)).
 /// </summary>
 public class CevDensityBelowZeroTests
 {

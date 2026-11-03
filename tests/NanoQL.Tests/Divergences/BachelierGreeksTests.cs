@@ -14,16 +14,16 @@ namespace NanoQL.Tests.Divergences;
 /// <c>:350-370</c>). At F/S 1.04 and T 2 they are −1.9078, −0.016563 and 0.0052986 where the price bumped gives −1.8295,
 /// −0.015586 and 0.0074933; QuantLib's cases run at T 1, which hides the volga's, and record the theta and vanna at F/S
 /// 1.02, −4.3159316452046594 and 0.0048333514600356151 (their checks moved here from
-/// <c>testBachelierCalculatorGreeks</c>). nanoql takes each missing factor (the S-exo plan's ER5 (xxviii)), the vanna
-/// taking the spot as <see cref="BlackCalculator.Vanna"/> does. The checks: Bachelier's price in a spot model,
-/// F = S·e^{(r−q)T}, D = e^{−rT}, standard deviation σ_N·√T, bumped in T, in S and σ_N, and in σ_N twice.
+/// <c>testBachelierCalculatorGreeks</c>). nanoql takes each missing factor, the vanna taking the spot as
+/// <see cref="BlackCalculator.Vanna"/> does. The checks: Bachelier's price in a spot model, F = S·e^{(r−q)T}, D =
+/// e^{−rT}, standard deviation σ_N·√T, bumped in T, in S and σ_N, and in σ_N twice.
 /// </summary>
 public class BachelierGreeksTests
 {
     // QuantLib's testBachelierCalculatorGreeks: K 105, F 100, σ√T 20, D 0.95, spot 98, T 1
     private static readonly Market QuantLibsCase = new(105.0, 98.0, 1.0, 20.0, -Math.Log(0.95), -Math.Log(0.95) - Math.Log(100.0 / 98.0));
 
-    // the plan's EP21: K 100, spot 100, T 2, σ_N 8, r 5%, F/S 1.04
+    // K 100, spot 100, T 2, σ_N 8, r 5%, F/S 1.04
     private static readonly Market PlansCase = new(100.0, 100.0, 2.0, 8.0, 0.05, 0.05 - (Math.Log(1.04) / 2.0));
 
     [Fact]

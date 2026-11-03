@@ -12,8 +12,8 @@ and a zero curve interpolated linearly, each to QuantLib's accuracy 1e-12; one h
 and a horizon of 12 months, whose last forward ends past the curve on every date (the dates failed).
 
 nanoql bootstraps each date's curve afresh, where QuantLib's single curve restarts each date's bootstrap from the last
-date's solution (the S-mmp plan's SMD9): the forwards agree within the bootstrap's accuracy, and R7's tolerance on the
-statistics' outputs holds them.
+date's solution: the forwards agree within the bootstrap's accuracy, and the tolerance on the statistics' outputs holds
+them.
 
 Left out: the failed dates' messages, the curve's range check, whose text prints the times to QuantLib's six digits
 and nanoql's in full (TermStructure's check); their number is written.

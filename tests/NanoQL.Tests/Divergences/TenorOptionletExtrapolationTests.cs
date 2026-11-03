@@ -11,17 +11,16 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The tenor optionlet structure's range checked once, by the query (the S-xrt run's R2-4, fixed under R8). QuantLib's
-/// <c>volatilityImpl</c> builds the section through <c>smileSection(optionTime)</c>, which checks the range again without
-/// the caller's extrapolation flag (<c>tenoroptionletvts.hpp</c>), so a query allowed to extrapolate past the base
-/// structure's last date refuses. On QuantLib 1.44 (the run's <c>c2\probes\xd_c2.py</c> through the harness:
-/// test-suite/basismodels.cpp's caplet volatilities on 29 October 2026, the case's indexes, ρ∞ 0.3 and β 0.9) the
-/// 30-year caplet's volatility with extrapolation refuses, "time (30.0219) is past max curve time (30.0137)", where its
-/// smile section built with extrapolation gives 0.0059574843004036775, 0.006438206493492846 and 0.006675293658033079 at
-/// 0, 1% and 2%; at 25 years the two agree. nanoql's volatility is that section's. QuantLib's own
-/// <c>testTenoroptionletvts</c> asks for its 30-year caplets so and refuses on every evaluation date of 29 October to 11
-/// November 2026 but the two Wednesdays (<c>xb_tenor_d.cpp</c>); on its test runner's date, 16 September 2015, a
-/// Wednesday, it passes, so QuantLib's own run doesn't refuse.
+/// The tenor optionlet structure's range checked once, by the query (fixed). QuantLib's <c>volatilityImpl</c> builds
+/// the section through <c>smileSection(optionTime)</c>, which checks the range again without the caller's extrapolation
+/// flag (<c>tenoroptionletvts.hpp</c>), so a query allowed to extrapolate past the base structure's last date refuses.
+/// On QuantLib 1.44 (through the C++ harness: test-suite/basismodels.cpp's caplet volatilities on 29 October 2026, the
+/// case's indexes, ρ∞ 0.3 and β 0.9) the 30-year caplet's volatility with extrapolation refuses, "time (30.0219) is
+/// past max curve time (30.0137)", where its smile section built with extrapolation gives 0.0059574843004036775,
+/// 0.006438206493492846 and 0.006675293658033079 at 0, 1% and 2%; at 25 years the two agree. nanoql's volatility is
+/// that section's. QuantLib's own <c>testTenoroptionletvts</c> asks for its 30-year caplets so and refuses on every
+/// evaluation date of 29 October to 11 November 2026 but the two Wednesdays; on its test runner's date, 16 September
+/// 2015, a Wednesday, it passes, so QuantLib's own run doesn't refuse.
 /// </summary>
 public class TenorOptionletExtrapolationTests
 {

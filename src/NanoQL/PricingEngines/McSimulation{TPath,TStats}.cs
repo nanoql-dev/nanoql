@@ -19,13 +19,13 @@ namespace NanoQL.PricingEngines;
 /// <typeparam name="TStats">The statistics accumulator, QuantLib's <c>S</c>.</typeparam>
 /// <remarks>
 /// <para>
-/// An extension point and an immutable object (SEQR5's form; the S-sr plan's SSR1): an engine derives from it, holds
-/// its settings and its call's instrument and context, and implements the hooks, each returning a new object per call.
-/// <see cref="Calculate"/> builds a new <see cref="MonteCarloModel{TPath, TStats}"/>, runs QuantLib's
-/// <c>value</c> or <c>valueWithSamples</c> loop on it and returns it, so QuantLib's mutable <c>mcModel_</c> is the
-/// call's result and two calculations can share one engine; its <c>errorEstimate()</c> and
-/// <c>sampleAccumulator()</c> read the returned model's accumulator. QuantLib's <c>controlPricingEngine()</c>, which the
-/// base never reads, is declared by the engines that read it, with their own engine delegate's type.
+/// An extension point and an immutable object: an engine derives from it, holds its settings and its call's instrument
+/// and context, and implements the hooks, each returning a new object per call. <see cref="Calculate"/> builds a new
+/// <see cref="MonteCarloModel{TPath, TStats}"/>, runs QuantLib's <c>value</c> or <c>valueWithSamples</c> loop on it and
+/// returns it, so QuantLib's mutable <c>mcModel_</c> is the call's result and two calculations can share one engine;
+/// its <c>errorEstimate()</c> and <c>sampleAccumulator()</c> read the returned model's accumulator. QuantLib's
+/// <c>controlPricingEngine()</c>, which the base never reads, is declared by the engines that read it, with their own
+/// engine delegate's type.
 /// </para>
 /// <para>
 /// A NaN error estimate is refused, where QuantLib's tolerance check skips it and returns the mean; and so is a

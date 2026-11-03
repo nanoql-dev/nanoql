@@ -16,8 +16,8 @@ namespace NanoQL.Numerics;
 /// <remarks>
 /// <para>
 /// QuantLib's <c>ConvergenceStatistics&lt;T, U&gt;</c> derives from its type parameter, which C# can't; this holds its
-/// statistics and forwards <see cref="IStatistics"/> to it (the S-mmp plan's MMPR2 (c)). A working type:
-/// <see cref="Add"/> and <see cref="Reset"/> change it, and it isn't thread-safe.
+/// statistics and forwards <see cref="IStatistics"/> to it. A working type: <see cref="Add"/> and <see cref="Reset"/>
+/// change it, and it isn't thread-safe.
 /// </para>
 /// <para>
 /// <see cref="Statistics"/> is the held statistics itself: a sample added through it reaches the statistics but not

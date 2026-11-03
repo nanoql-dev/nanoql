@@ -14,20 +14,20 @@ namespace NanoQL.Experimental;
 /// <summary>The base of energy commodity instruments: the swaps and the future, priced without an engine.</summary>
 /// <remarks>
 /// <para>
-/// An extension point (U13). Each instrument values in the context's base currency and unit,
+/// An extension point. Each instrument values in the context's base currency and unit,
 /// <see cref="EvaluationContext.CommoditySettings"/>, QuantLib's <c>CommoditySettings</c>, converting its prices and
 /// quantities with the context's <see cref="EvaluationContext.UnitOfMeasureConversions"/> and
 /// <see cref="EvaluationContext.ExchangeRates"/>.
 /// </para>
 /// <para>
 /// A unit conversion factor here is the value of one unit of the first unit in the second, the conversion's own
-/// <see cref="UnitOfMeasureConversion.Convert"/> of a unit quantity, whichever way the conversion is stored; a
-/// quantity converts to the base unit by the factor from its unit to the base, and a price, money per unit, by the
-/// factor from the base to its unit. QuantLib's factor is the stored conversion's whatever its orientation, and its
-/// call sites multiply a quantity by the factor from the base to its unit and a price by the factor from its unit to
-/// the base, so one of the two is inverted: a payer vanilla swap on 1,000 gallons a month at a 0.5 spread prices
-/// 882,000 there, 42² times its value, 500, here; on the base unit every factor is 1 and the prices are QuantLib's (the
-/// S-xrt plan's XRR5 (i); <c>Divergences/EnergyUnitConversionTests.cs</c>).
+/// <see cref="UnitOfMeasureConversion.Convert"/> of a unit quantity, whichever way the conversion is stored; a quantity
+/// converts to the base unit by the factor from its unit to the base, and a price, money per unit, by the factor from
+/// the base to its unit. QuantLib's factor is the stored conversion's whatever its orientation, and its call sites
+/// multiply a quantity by the factor from the base to its unit and a price by the factor from its unit to the base, so
+/// one of the two is inverted: a payer vanilla swap on 1,000 gallons a month at a 0.5 spread prices 882,000 there, 42²
+/// times its value, 500, here; on the base unit every factor is 1 and the prices are QuantLib's
+/// (<c>Divergences/EnergyUnitConversionTests.cs</c>).
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]
@@ -85,7 +85,7 @@ public abstract class EnergyCommodity : Commodity
 
     /// <summary>
     /// The value of one unit of a unit of measure in another, for a commodity type: QuantLib's
-    /// <c>EnergyCommodity::calculateUomConversionFactor</c>, direction-aware (the S-xrt plan's XRR5 (i)).
+    /// <c>EnergyCommodity::calculateUomConversionFactor</c>, direction-aware.
     /// </summary>
     /// <param name="commodityType">The commodity type.</param>
     /// <param name="fromUnitOfMeasure">The unit converted from.</param>
@@ -104,8 +104,8 @@ public abstract class EnergyCommodity : Commodity
 
     /// <summary>
     /// A unit cost as money per base unit in the base currency: QuantLib's <c>EnergyCommodity::calculateUnitCost</c>,
-    /// the cost converted by the factor from the base unit to its unit (a price; the S-xrt plan's XRR5 (i)) and from
-    /// its currency to the base currency.
+    /// the cost converted by the factor from the base unit to its unit (a price) and from its currency to the base
+    /// currency.
     /// </summary>
     /// <param name="commodityType">The commodity type.</param>
     /// <param name="unitCost">The unit cost.</param>

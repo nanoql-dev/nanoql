@@ -7,16 +7,15 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The experimental maths' refusals (the S-xrt plan's XRR5 (xxxii) and (xxxvii), XRD3, and the S-xrt code review's
-/// B4-1 and B4-2). A firefly algorithm with one or two differential evolution members is refused, as no three distinct
-/// members exist to draw, where QuantLib's draws loop forever; a piecewise function with no values is refused, where
-/// QuantLib's macro reads past them; a clubs topology whose minimum is 0, where QuantLib's best particle leaves every
-/// club and reads particle 0's position; an annealing sampler on a lower bound above its upper, where QuantLib's loops
-/// never end, and the ring's and mirror's bounds of different sizes; the very fast sampler from a point no draw brings
-/// into its box, its width or farther from it, off a zero-width box's bound, or outside the box at a temperature of 0,
-/// alone or as an annealing's start, where QuantLib's loop never ends, each run on a thread with a time limit, while a
-/// point just within its width still draws; and every optimizer, walk, sampler and
-/// generator takes its seed in [1, 4294967295], QuantLib's default 0, which seeds from the clock, refused.
+/// The experimental maths' refusals. A firefly algorithm with one or two differential evolution members is refused, as
+/// no three distinct members exist to draw, where QuantLib's draws loop forever; a piecewise function with no values is
+/// refused, where QuantLib's macro reads past them; a clubs topology whose minimum is 0, where QuantLib's best particle
+/// leaves every club and reads particle 0's position; an annealing sampler on a lower bound above its upper, where
+/// QuantLib's loops never end, and the ring's and mirror's bounds of different sizes; the very fast sampler from a
+/// point no draw brings into its box, its width or farther from it, off a zero-width box's bound, or outside the box at
+/// a temperature of 0, alone or as an annealing's start, where QuantLib's loop never ends, each run on a thread with a
+/// time limit, while a point just within its width still draws; and every optimizer, walk, sampler and generator takes
+/// its seed in [1, 4294967295], QuantLib's default 0, which seeds from the clock, refused.
 /// </summary>
 public class ExperimentalMathRefusalTests
 {

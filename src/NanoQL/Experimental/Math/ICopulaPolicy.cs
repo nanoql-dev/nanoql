@@ -17,8 +17,8 @@ namespace NanoQL.Experimental;
 /// </summary>
 /// <remarks>
 /// QuantLib's policies are classes a latent model holds and builds from its factor weights and the policy's
-/// <c>initTraits</c>; nanoql's are <c>readonly struct</c>s over immutable state (D12's stateful branch), built through
-/// <see cref="Create"/>. The factors are expected of zero mean and unit variance; nothing checks it, as in QuantLib.
+/// <c>initTraits</c>; nanoql's are <c>readonly struct</c>s over immutable state, built through <see cref="Create"/>.
+/// The factors are expected of zero mean and unit variance; nothing checks it, as in QuantLib.
 /// </remarks>
 /// <typeparam name="TSelf">The policy itself.</typeparam>
 /// <typeparam name="TInitTraits">The policy's initialization parameters, QuantLib's nested <c>initTraits</c>.</typeparam>

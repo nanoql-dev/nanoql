@@ -16,13 +16,12 @@ namespace NanoQL.Models;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A working type (the S-mm plan's MR1 (ii)), copying each step's pseudo-root at construction (MR1 (iv)); one step
-/// allocates nothing after a path's warm-up (MR1 (v)).
+/// A working type, copying each step's pseudo-root at construction; one step allocates nothing after a path's warm-up.
 /// </para>
 /// <para>
 /// <see cref="SetInitialState"/> starts each path from the state's forwards, where QuantLib's sets only the initial
 /// drifts and leaves the paths starting from the model's forwards: its loop's body is the drifts' computation, the
-/// starting forwards never written (the S-mm plan's MR3 (iv), <c>normalfwdratepc.cpp:80-81</c>;
+/// starting forwards never written (<c>normalfwdratepc.cpp:80-81</c>;
 /// <c>Divergences/NormalFwdRatePcInitialStateTests.cs</c>).
 /// </para>
 /// </remarks>
@@ -164,7 +163,7 @@ public sealed class NormalFwdRatePc : MarketModelEvolver
         return weight;
     }
 
-    // QuantLib's loop body is the drifts' computation alone, the starting forwards never written (MR3 (iv)).
+    // QuantLib's loop body is the drifts' computation alone, the starting forwards never written.
     private void SetForwards(ReadOnlySpan<double> forwards)
     {
         if (!(forwards.Length == numberOfRates))

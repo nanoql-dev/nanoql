@@ -11,13 +11,12 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The finite-difference CEV and SABR engines near β = 1 (the S-van plan's VR10). QuantLib's mesher reads the CEV
-/// density's quantiles through Boost's non-central chi-squared, which throws within the band ("Series did not converge"
-/// at β 0.9999 on a year at α 0.75, f0 2.1; "beta can not be one" at 1) [executed:
-/// <c>scratchpad\c4\probe\fdcev_edges.cpp</c>]. Within |β − 1| &lt; 1e-3 nanoql's mesher takes its bounds from the
-/// lognormal limit's quantiles, the CEV density at β = 1, and the engines' upper boundary is the analytic engine's value,
-/// Black's formula at Hagan's equivalent volatility there (<c>Divergences/CevNearOneTests.cs</c>). The checks: the
-/// lognormal's quantiles in closed form, and the analytic CEV engine.
+/// The finite-difference CEV and SABR engines near β = 1. QuantLib's mesher reads the CEV density's quantiles through
+/// Boost's non-central chi-squared, which throws within the band ("Series did not converge" at β 0.9999 on a year at α
+/// 0.75, f0 2.1; "beta can not be one" at 1) (QuantLib 1.44). Within |β − 1| &lt; 1e-3 nanoql's mesher takes its bounds
+/// from the lognormal limit's quantiles, the CEV density at β = 1, and the engines' upper boundary is the analytic
+/// engine's value, Black's formula at Hagan's equivalent volatility there (<c>Divergences/CevNearOneTests.cs</c>). The
+/// checks: the lognormal's quantiles in closed form, and the analytic CEV engine.
 /// </summary>
 public class FdCevNearOneTests
 {

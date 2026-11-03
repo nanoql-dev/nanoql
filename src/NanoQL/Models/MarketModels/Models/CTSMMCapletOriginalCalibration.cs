@@ -17,9 +17,8 @@ namespace NanoQL.Models;
 /// a² and after it by b², a and b solving the caplet approximation's quadratic.
 /// </summary>
 /// <remarks>
-/// Immutable (the S-mm plan's MR2 (a)). <see cref="CalibrationFunction"/> returns its pass's pseudo-roots and failures
-/// in place of QuantLib's out-parameter; α shorter than the rates, which QuantLib's function reads unchecked, is
-/// refused (MR3 (xx)).
+/// Immutable. <see cref="CalibrationFunction"/> returns its pass's pseudo-roots and failures in place of QuantLib's
+/// out-parameter; α shorter than the rates, which QuantLib's function reads unchecked, is refused.
 /// </remarks>
 public sealed class CTSMMCapletOriginalCalibration : CTSMMCapletCalibration
 {
@@ -92,7 +91,7 @@ public sealed class CTSMMCapletOriginalCalibration : CTSMMCapletCalibration
 
         CheckFactors(numberOfFactors, numberOfRates);
 
-        // QuantLib's function reads α unchecked; its constructor checks it (MR3 (xx))
+        // QuantLib's function reads α unchecked; its constructor checks it
         CheckAlpha(numberOfRates, alpha);
 
         int failures = 0;

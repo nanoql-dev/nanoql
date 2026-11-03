@@ -7,7 +7,7 @@
 // "payLegCurve", "receiveLegCurve", "discountCurve"}, the specs of commodityspec.hpp, the spread index null or an
 // index, the curves indexes::curve's; the case's fixings are the Settings call's. It returns
 // commodities::swapResult's, or {"throws": true}. The generator prices on the base unit and currency, the basis in
-// the base currency (the S-xrt plan's XRR5 (i) and (ix) leave others out).
+// the base currency (others are left out).
 
 #include "experimental/commodities/commodityspec.hpp"
 

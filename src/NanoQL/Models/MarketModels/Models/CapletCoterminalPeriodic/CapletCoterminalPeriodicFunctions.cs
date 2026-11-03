@@ -25,8 +25,8 @@ public static class CapletCoterminalPeriodicFunctions
     /// <param name="evolution">The evolution: to the reset of each short rate.</param>
     /// <param name="corr">The short swap rates' correlation.</param>
     /// <param name="displacedSwapVariances">
-    /// The specifier of the short variances from the long ones; unchanged, the passes working on copies (the S-mm
-    /// plan's MR2 (c)), where QuantLib's is left at the last pass's scales.
+    /// The specifier of the short variances from the long ones; unchanged, the passes working on copies, where
+    /// QuantLib's is left at the last pass's scales.
     /// </param>
     /// <param name="capletVols">The short caplet volatilities, one per short rate.</param>
     /// <param name="cs">The curve state.</param>
@@ -71,7 +71,7 @@ public static class CapletCoterminalPeriodicFunctions
         ArgumentNullException.ThrowIfNull(cs);
 
         // QuantLib divides by the period, and writes the first pass's row of a matrix of maxPeriodIterations rows
-        // (MR3 (xx))
+        //
         if (!(period >= 1))
         {
             throw new ArgumentOutOfRangeException(nameof(period), period, "period must be at least 1");
@@ -102,7 +102,7 @@ public static class CapletCoterminalPeriodicFunctions
         }
 
         // QuantLib reads the last caplet volatility before its inner calibration checks their number, the back of none
-        // undefined (MR3 (xx)); the check's text is the inner calibration's
+        // undefined; the check's text is the inner calibration's
         if (!(capletVols.Length == numberSmallRates))
         {
             throw new ArgumentException(
@@ -116,7 +116,7 @@ public static class CapletCoterminalPeriodicFunctions
 
         double[] scalingFactors = [.. Enumerable.Repeat(1.0, numberBigRates)];
 
-        // the caller's specifier is left unchanged: the passes read copies (MR2 (c))
+        // the caller's specifier is left unchanged: the passes read copies
         VolatilityInterpolationSpecifier specifier = displacedSwapVariances.WithLastCapletVol(capletVols[^1]);
 
         double[] marketSwaptionVols = new double[numberBigRates];
@@ -132,7 +132,7 @@ public static class CapletCoterminalPeriodicFunctions
         double errorImprovement;
         ImmutableArray<Matrix> swapCovariancePseudoRoots;
 
-        // the passes run, where QuantLib's count stops one short when the loop ends on its errors (MR3 (xi))
+        // the passes run, where QuantLib's count stops one short when the loop ends on its errors
         int iterationsDone = 0;
 
         double previousError = 1.0e+10; // very large number
@@ -147,7 +147,7 @@ public static class CapletCoterminalPeriodicFunctions
             var unperiodicCalibrator = new CTSMMCapletMaxHomogeneityCalibration(
                 evolution, corr, scaled.InterpolatedVariances.AsSpan(), capletVols, cs, displacement, caplet0Swaption1Priority);
 
-            // the inner calibration's failures, where QuantLib returns its bool (MR3 (xi))
+            // the inner calibration's failures, where QuantLib returns its bool
             CTSMMCapletCalibrationResults results = unperiodicCalibrator.Calibrate(
                 numberOfFactors, maxUnperiodicIterations, toleranceUnperiodic, max1dIterations, tolerance1d);
             failures = results.Failures;

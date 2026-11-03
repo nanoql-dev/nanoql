@@ -6,7 +6,7 @@ every pair of bounds in {-5, -2, -1, -0.3, 0, 0.3, 1, 2, 5} and correlations fro
 correlation outside [-1, 1]. Correlations of ±1 and infinite bounds are left out: at ±1 Drezner's takes QuantLib's fix
 after v1.44 (#2880, tests/NanoQL.Tests/Divergences/BivariateDr78DegenerateCorrelationsTests.cs), and at an infinite
 bound West's takes its limit (BivariateInfiniteArgumentTests.cs). #2880's hypot forms move the last bits of Drezner's
-recursion where a·b·ρ > 0 (master §3.3's hypot class). The wheel's calls, by QuantLib-SWIG 1.44's distributions.i:
+recursion where a·b·ρ > 0. The wheel's calls, by QuantLib-SWIG 1.44's distributions.i:
 BivariateCumulativeNormalDistributionDr78(rho) and BivariateCumulativeNormalDistributionWe04DP(rho), their __call__ on
 (a, b). Read back by tests/NanoQL.Tests/Vectors/Numerics/Distributions/BivariateNormalDistributionVectorTests.cs."""
 import os

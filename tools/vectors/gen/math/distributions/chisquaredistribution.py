@@ -8,14 +8,13 @@ InverseNonCentralCumulativeChiSquareDistribution for three degrees of freedom an
 probabilities, under QuantLib's default evaluations and accuracy and under three evaluations and 1e-12.
 
 The non-central points leave out the region where QuantLib 1.44's series leaves its range and nanoql takes QuantLib's
-master's, #2908 (the S-van plan's VR11; Divergences/ChiSquaredSeriesRefusalTests.cs): above the degrees of freedom where
-the series' first term exp(f2·ln(x/2) − x/2 − ln Γ(f2 + 1)) leaves the normal range of doubles, tested here with a margin
-of e^5; the non-centralities stay below 1,416.8, where the Poisson weight exp(−ncp/2) does, and the points below
-df + 20,000, where 1.44's series' iterations end. The inverse's probabilities stay below 1, which
-would double its bracket into that region. The wheel's classes are SWIG wrappers of the C++ classes of the same names,
-with no logic of their own; NonCentralCumulativeChiSquareSankaranApprox isn't exposed (test-suite/distributions.cpp's
-testSankaranApproximation asserts it). Read back by
-tests/NanoQL.Tests/Vectors/Numerics/Distributions/ChiSquareDistributionVectorTests.cs."""
+master's, #2908 (Divergences/ChiSquaredSeriesRefusalTests.cs): above the degrees of freedom where the series' first term
+exp(f2·ln(x/2) − x/2 − ln Γ(f2 + 1)) leaves the normal range of doubles, tested here with a margin of e^5; the
+non-centralities stay below 1,416.8, where the Poisson weight exp(−ncp/2) does, and the points below df + 20,000, where
+1.44's series' iterations end. The inverse's probabilities stay below 1, which would double its bracket into that
+region. The wheel's classes are SWIG wrappers of the C++ classes of the same names, with no logic of their own;
+NonCentralCumulativeChiSquareSankaranApprox isn't exposed (test-suite/distributions.cpp's testSankaranApproximation
+asserts it). Read back by tests/NanoQL.Tests/Vectors/Numerics/Distributions/ChiSquareDistributionVectorTests.cs."""
 import math
 import os
 import sys

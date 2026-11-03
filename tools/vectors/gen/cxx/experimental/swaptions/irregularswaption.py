@@ -7,8 +7,7 @@ computed by the C++ harness (tools/cxx/src/experimental/swaptions/irregularswapt
 - "values" cases: five-year swaps a year forward on a flat curve, payer and receiver: constant terms, an amortizing
   notional, a step-up fixed rate, and floating spreads; the swap's NPV and legs on the discounting swap engine, and its
   European swaption at the swap's start on Hagan's engine at a normal volatility of 1%, with the swaption's type and
-  settlement type. The fair rate and spread, a debug 0 on QuantLib's swap engine and null on nanoql's (the S-xrt plan's
-  XRR5 (xx)), are left out.
+  settlement type. The fair rate and spread, a debug 0 on QuantLib's swap engine and null on nanoql's, are left out.
 - "expired" case: the constant-terms swap and its swaption on an evaluation date past the swap's end, both expired.
 
 Read back by tests/NanoQL.Tests/Vectors/Cxx/Experimental/Swaptions/IrregularSwaptionCxxVectorTests.cs."""

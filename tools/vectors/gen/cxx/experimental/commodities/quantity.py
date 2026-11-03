@@ -5,9 +5,9 @@ expose, each output computed by the C++ harness (tools/cxx/src/experimental/comm
 differences, ratios, comparisons and closeness under each of Quantity's conversion types, within one unit and across
 units, and its scalings.
 
-QuantLib rounds a converted quantity to its unit's whole units, which the S-xrt plan's XRR10 removes, so every
-conversion here yields whole units, where the rounding leaves it as it is; QuantLib's == throws on a unit mismatch
-without conversion, where nanoql's returns false (the vector test maps it). Read back by
+QuantLib rounds a converted quantity to its unit's whole units, which nanoql doesn't, so every conversion here yields
+whole units, where the rounding leaves it as it is; QuantLib's == throws on a unit mismatch without conversion, where
+nanoql's returns false (the vector test maps it). Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Experimental/Commodities/QuantityCxxVectorTests.cs."""
 import importlib.util
 import os

@@ -10,9 +10,9 @@ namespace NanoQL.Tests.Vectors;
 
 /// <summary>
 /// The C++ harness's abcd interpolation vectors, <c>tests/vectors/cxx/math/interpolations/abcdinterpolation.json</c>:
-/// <see cref="AbcdInterpolation"/>'s fits through its factory <see cref="Abcd"/> with null, given and fixed guesses
-/// and vega weights, their parameters, factors, errors, end criteria, values and interpolated factors where stable (the
-/// S7 plan's S7R6), the factory's traits, and the refusals; and <see cref="AbcdSquared"/>'s covariances.
+/// <see cref="AbcdInterpolation"/>'s fits through its factory <see cref="Abcd"/> with null, given and fixed guesses and
+/// vega weights, their parameters, factors, errors, end criteria, values and interpolated factors where stable under
+/// one-ulp moves of the inputs, the factory's traits, and the refusals; and <see cref="AbcdSquared"/>'s covariances.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class AbcdInterpolationCxxVectorTests

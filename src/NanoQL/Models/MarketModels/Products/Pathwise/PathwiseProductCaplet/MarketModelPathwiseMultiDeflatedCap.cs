@@ -13,9 +13,9 @@ namespace NanoQL.Models;
 /// before its end rate, each caplet's cash flow and derivatives its cap's.
 /// </summary>
 /// <remarks>
-/// A working type (the S-mmp plan's MMPR1 (i)): it steps its own deflated caplets
-/// (<see cref="MarketModelPathwiseMultiDeflatedCaplet"/>, MMPR4 (vi)) and copies each caplet's cash flow into each cap
-/// holding it, QuantLib's assignment (<see cref="MarketModelPathwiseMultiProductCashFlow.CopyFrom"/>).
+/// A working type: it steps its own deflated caplets (<see cref="MarketModelPathwiseMultiDeflatedCaplet"/>) and copies
+/// each caplet's cash flow into each cap holding it, QuantLib's assignment (<see
+/// cref="MarketModelPathwiseMultiProductCashFlow.CopyFrom"/>).
 /// </remarks>
 [WorkingType]
 public sealed class MarketModelPathwiseMultiDeflatedCap : MarketModelPathwiseMultiProduct

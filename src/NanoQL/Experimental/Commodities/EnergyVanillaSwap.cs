@@ -15,11 +15,10 @@ namespace NanoQL.Experimental;
 /// <remarks>
 /// A payer pays the fixed price and receives the index's; a receiver the reverse. Each period's quantity is spread
 /// evenly over its pricing days and valued in the base currency and unit, discounted on each leg's curve from two days
-/// after the evaluation date, a payment on or before then at 1; the secondary costs are charged on the total quantity in
-/// the base unit. The unit conversions are <see cref="EnergyCommodity"/>'s, direction-aware (the S-xrt plan's XRR5
-/// (i)), the payments <see cref="EnergySwap"/>'s. As QuantLib files the legs, the fixed leg is in the pay currency and
-/// the floating leg in the receive currency whichever way the swap faces, so a receiver receives the fixed price in the
-/// pay currency.
+/// after the evaluation date, a payment on or before then at 1; the secondary costs are charged on the total quantity
+/// in the base unit. The unit conversions are <see cref="EnergyCommodity"/>'s, direction-aware, the payments
+/// <see cref="EnergySwap"/>'s. As QuantLib files the legs, the fixed leg is in the pay currency and the floating leg in
+/// the receive currency whichever way the swap faces, so a receiver receives the fixed price in the pay currency.
 /// </remarks>
 [Experimental("NQL0001")]
 public sealed class EnergyVanillaSwap : EnergySwap

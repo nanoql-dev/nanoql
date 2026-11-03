@@ -10,11 +10,11 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// Every index, swap index, inflation and region preset reads its conventions through
-/// <see cref="ConventionProvider"/> once, by its class name (a family by its name and tenor), and keeps the provider it
-/// read: with nothing set the coded preset's QuantLib values, which each index's vector file checks (G3, unchanged);
-/// a provider's otherwise, the calendars and currency it builds coming from that provider too. A fixed-tenor preset is
-/// its family at its tenor, so the two read one record (CVD13). A provider changing what a preset fixes is refused.
+/// Every index, swap index, inflation and region preset reads its conventions through <see cref="ConventionProvider"/>
+/// once, by its class name (a family by its name and tenor), and keeps the provider it read: with nothing set the coded
+/// preset's QuantLib values, which each index's vector file checks (the vectors gate, unchanged); a provider's
+/// otherwise, the calendars and currency it builds coming from that provider too. A fixed-tenor preset is its family at
+/// its tenor, so the two read one record. A provider changing what a preset fixes is refused.
 /// </summary>
 public class IndexPresetProviderTests
 {

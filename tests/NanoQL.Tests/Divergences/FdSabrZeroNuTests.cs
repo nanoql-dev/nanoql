@@ -10,13 +10,13 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The finite-difference SABR engine at ν = 0 (the S-van plan's VR4 (xxxi), VD28). QuantLib's parameter check accepts
-/// ν = 0 (<c>sabr.cpp:157</c>), but the log volatility's grid collapses and its concentrating mesher refuses ("end must be
-/// larger than start", <c>fdsabrvanillaengine.cpp:87-95</c>) [read]; so it does at a tiny positive ν, where the grid's
-/// span is a few ulps of ln α or none, and a little above that it returns NaN [executed by the reviewer, C4's round 1];
-/// at ν = 1e-8 it prices as the CEV engines. SABR at ν = 0 is the CEV process with α its volatility, and wherever ν√T is
-/// at most 1e-10·max(1, |ln α|) nanoql's engine prices on the finite-difference CEV engine with its own grids, damping
-/// steps, scaling, ε and scheme. QuantLib's check: its FD CEV engine, and its FD SABR engine at ν = 1e-8.
+/// The finite-difference SABR engine at ν = 0. QuantLib's parameter check accepts ν = 0 (<c>sabr.cpp:157</c>), but the
+/// log volatility's grid collapses and its concentrating mesher refuses ("end must be larger than start",
+/// <c>fdsabrvanillaengine.cpp:87-95</c>); so it does at a tiny positive ν, where the grid's span is a few ulps of ln α
+/// or none, and a little above that it returns NaN; at ν = 1e-8 it prices as the CEV engines. SABR at ν = 0 is the CEV
+/// process with α its volatility, and wherever ν√T is at most 1e-10·max(1, |ln α|) nanoql's engine prices on the
+/// finite-difference CEV engine with its own grids, damping steps, scaling, ε and scheme. QuantLib's check: its FD CEV
+/// engine, and its FD SABR engine at ν = 1e-8.
 /// </summary>
 public class FdSabrZeroNuTests
 {
@@ -59,7 +59,7 @@ public class FdSabrZeroNuTests
         double zeroNu = FdSabrVanillaEngine.Calculate(option, Context, 100.0, 2.0, 0.5, 0.0, -0.3, curve).NPV!.Value;
         Assert.Equal(zeroNu, sabr);
 
-        // QuantLib's check: its FD SABR engine at ν = 1e-8, on its own 2-D grid (VD28's grid difference)
+        // QuantLib's check: its FD SABR engine at ν = 1e-8, on its own 2-D grid (the grids' difference)
         double nearZero = FdSabrVanillaEngine.Calculate(option, Context, 100.0, 2.0, 0.5, 1e-8, -0.3, curve).NPV!.Value;
         Assert.InRange(sabr / nearZero, 1.0 - 1e-4, 1.0 + 1e-4);
     }

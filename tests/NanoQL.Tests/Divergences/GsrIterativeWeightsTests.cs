@@ -11,13 +11,12 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// GSR's iterative calibrations with weights (the S-g1d plan's G1R6 (xiv)): QuantLib's
-/// <c>calibrateVolatilitiesIterative</c> passes the whole weight vector to each one-helper step
-/// (<c>gsr.hpp:116-120</c>), so every weight vector of more than one weight is refused: "mismatch between number of
-/// instruments (1) and weights (3)". nanoql weights each step by its own helper's weight. QuantLib's check: its
-/// one-helper calibration with that weight, step by step, which on the wheel ends at the parameters (0.02,
-/// 0.006141458164186859, 0.005500939169047698, 0.004884008618675642), its last step's end criterion 3 (stationary
-/// function) after 12 evaluations.
+/// GSR's iterative calibrations with weights: QuantLib's <c>calibrateVolatilitiesIterative</c> passes the whole weight
+/// vector to each one-helper step (<c>gsr.hpp:116-120</c>), so every weight vector of more than one weight is refused:
+/// "mismatch between number of instruments (1) and weights (3)". nanoql weights each step by its own helper's weight.
+/// QuantLib's check: its one-helper calibration with that weight, step by step, which on the wheel ends at the
+/// parameters (0.02, 0.006141458164186859, 0.005500939169047698, 0.004884008618675642), its last step's end criterion 3
+/// (stationary function) after 12 evaluations.
 /// </summary>
 public class GsrIterativeWeightsTests
 {

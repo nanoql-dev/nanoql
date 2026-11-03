@@ -7,10 +7,10 @@ mesher FdBlackScholesShoutEngine builds, the shout's exercise value, innerValue 
 times from today to maturity.
 
 Shout calls and puts at the money and away from it on spots of 100, flat curves at 5% and 2% (and at 0 and 3%),
-volatilities of 20% and 35%, maturities of half a year and two years, on meshers of 15 and 31 points; without
-dividends, and with dividends paid before every time read, where the escrowed level and the spot are one. A dividend
-between the time read and maturity, where QuantLib strikes the residual option at the escrowed level and nanoql at the
-spot (the S-van plan's VR4 (xxx), tests/NanoQL.Tests/Divergences/ShoutDividendStrikeTests.cs), is left out.
+volatilities of 20% and 35%, maturities of half a year and two years, on meshers of 15 and 31 points; without dividends,
+and with dividends paid before every time read, where the escrowed level and the spot are one. A dividend between the
+time read and maturity, where QuantLib strikes the residual option at the escrowed level and nanoql at the spot
+(tests/NanoQL.Tests/Divergences/ShoutDividendStrikeTests.cs), is left out.
 
 The harness's call is tools/cxx/src/methods/finitedifferences/utilities/fdmshoutloginnervaluecalculator.cpp's. Read
 back by tests/NanoQL.Tests/Vectors/Cxx/Methods/FiniteDifferences/Utilities/FdmShoutLogInnerValueCalculatorCxxVectorTests.cs."""

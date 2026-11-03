@@ -11,7 +11,7 @@ namespace NanoQL.Tests.Vectors;
 /// <summary>
 /// The SVI fit vectors, <c>tests/vectors/experimental/volatility/sviinterpolatedsmilesection.json</c>:
 /// <see cref="SviInterpolatedSmileSection"/>'s fitted parameters, errors, end criterion and volatilities, the outputs
-/// S7R6's one-ulp refits leave stable.
+/// one-ulp refits leave stable.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class SviInterpolatedSmileSectionVectorTests

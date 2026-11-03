@@ -9,9 +9,9 @@ and 1.1, on two flat markets under flat volatilities, at FX volatilities of 10% 
 QuantoForwardVanillaOption exposes no quanto sensitivities; the ported QuantoOptionTests' testForwardGreeks checks
 them).
 
-Left out (the S-exo plan's §2.10): volatilities off flat, where QuantLib reads qvega's and qlambda's volatility at the
-spot and a quanto forward's drift at its payoff's strike (tests/NanoQL.Tests/Divergences/QuantoSmileTests.cs), and
-the forward-start vega (ForwardVegaTermStructureTests.cs).
+Left out: volatilities off flat, where QuantLib reads qvega's and qlambda's volatility at the spot and a quanto
+forward's drift at its payoff's strike (tests/NanoQL.Tests/Divergences/QuantoSmileTests.cs), and the forward-start vega
+(ForwardVegaTermStructureTests.cs).
 
 A case holds an option (a vanilla {"payoff", "exercise"} or forwardengine.py's forward spec, by its "kind"), a
 tools/vectors/gen/processes/blackscholesprocess.py process spec and a quanto spec {"foreign" (a curve spec),

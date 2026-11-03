@@ -288,7 +288,7 @@ internal sealed class ParameterWrites : IDisposable
     private List<MethodBase> Implementations(MethodInfo m)
     {
         // Those of the member's own class and the classes below it (an interface's: its implementers), not its siblings',
-        // in the assemblies of the member's own prefix: a user's override doesn't change nanoql's functions (BIR9).
+        // in the assemblies of the member's own prefix: a user's override doesn't change nanoql's functions.
         return [.. AllImplementations(m).Where(i => set.PrefixOf(i.DeclaringType!) == set.PrefixOf(m.DeclaringType!))];
     }
 

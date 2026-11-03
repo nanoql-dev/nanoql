@@ -12,7 +12,7 @@ namespace NanoQL.PricingEngines;
 /// <summary>
 /// <see cref="MCForwardEuropeanBSEngine"/> on pseudo-random draws with QuantLib's default statistics: QuantLib-Python's
 /// <c>MCPRForwardEuropeanBSEngine</c>, QuantLib's <c>MCForwardEuropeanBSEngine&lt;PseudoRandom&gt;</c>, its
-/// calculations closed at <see cref="PseudoRandom"/> and <see cref="GeneralStatistics"/> (D12).
+/// calculations closed at <see cref="PseudoRandom"/> and <see cref="GeneralStatistics"/>.
 /// </summary>
 public static class MCPRForwardEuropeanBSEngine
 {

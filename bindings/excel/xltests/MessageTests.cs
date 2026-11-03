@@ -7,15 +7,15 @@ using Microsoft.Office.Interop.Excel;
 namespace NanoQL.Excel.XlTests;
 
 /// <summary>
-/// nqlxlError's message by cell around a looped call (XLR15, XLP78, XLP79): a nested looped call's cell gives its first
-/// failed element's message and place; a neighbour's own failed call keeps its own message, where the nested formula's
-/// value equals the first element, under MAX, after a looped call becomes single, and beside a looped call that
-/// succeeds; a spill's cells give their elements', an element-wise spill too, a reordered spill the formula's.
+/// nqlxlError's message by cell around a looped call: a nested looped call's cell gives its first failed element's
+/// message and place; a neighbour's own failed call keeps its own message, where the nested formula's value equals the
+/// first element, under MAX, after a looped call becomes single, and beside a looped call that succeeds; a spill's
+/// cells give their elements', an element-wise spill too, a reordered spill the formula's.
 /// </summary>
 [ExcelTestSettings(OutOfProcess = true)]
 public class MessageTests : RunnerTest
 {
-    /// <summary>A looped call nested in SUMPRODUCT with its second element failing (F7-1).</summary>
+    /// <summary>A looped call nested in SUMPRODUCT with its second element failing.</summary>
     [ExcelFact(AddIn = AddIns.Test)]
     public void ANestedLoopedCall()
     {
@@ -38,7 +38,7 @@ public class MessageTests : RunnerTest
         Assert.Equal(string.Empty, Xl.Text(ws, "I5"));
     }
 
-    /// <summary>The first element failing, so the formula's #VALUE! equals the spill's first element (F8-1).</summary>
+    /// <summary>The first element failing, so the formula's #VALUE! equals the spill's first element.</summary>
     [ExcelFact(AddIn = AddIns.Test)]
     public void TheFirstElementFailing()
     {
@@ -56,7 +56,7 @@ public class MessageTests : RunnerTest
         Own(ws, "G2");
     }
 
-    /// <summary>MAX over falling discount factors, the first element the maximum (F8-1).</summary>
+    /// <summary>MAX over falling discount factors, the first element the maximum.</summary>
     [ExcelFact(AddIn = AddIns.Test)]
     public void MaxOverALoopedCall()
     {
@@ -67,7 +67,7 @@ public class MessageTests : RunnerTest
         Own(ws, "G2");
     }
 
-    /// <summary>A looped call edited to a single call with the same first value (F8-1).</summary>
+    /// <summary>A looped call edited to a single call with the same first value.</summary>
     [ExcelFact(AddIn = AddIns.Test)]
     public void ALoopedCallBecomingSingle()
     {
@@ -80,7 +80,7 @@ public class MessageTests : RunnerTest
         Own(ws, "G2");
     }
 
-    /// <summary>A failed single call beside a looped call that succeeds, in one formula (F9-1).</summary>
+    /// <summary>A failed single call beside a looped call that succeeds, in one formula.</summary>
     [ExcelFact(AddIn = AddIns.Test)]
     public void AFailedCallBesideALoopedOne()
     {
@@ -142,7 +142,7 @@ public class MessageTests : RunnerTest
         Assert.DoesNotContain("row ", m, StringComparison.Ordinal);
     }
 
-    // A curve (C1) and ten dates (A3:A12), each with a weight of 1 (B3:B12).
+    // A curve and ten dates, each with a weight of 1.
     private Worksheet Dates()
     {
         Worksheet ws = NewSheet();

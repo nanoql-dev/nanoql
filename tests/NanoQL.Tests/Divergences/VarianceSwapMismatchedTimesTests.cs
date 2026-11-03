@@ -15,9 +15,9 @@ namespace NanoQL.Tests.Divergences;
 /// portfolio's options priced on each structure's own times, so where a risk-free curve settling T+2 sits beside a
 /// volatility dated today, QuantLib divides the volatility's variance by the risk-free curve's shorter time: 2.33 times
 /// high at a week and 1.1% at a year, the ratio of the two times. nanoql's variance is per year of the swap's time on
-/// the risk-free curve's day counter from the earliest reference date, each structure accruing nothing before its own
-/// (the user's rulings): QuantLib's on the market restated from today. Where no structure is dated before the risk-free
-/// curve, it is QuantLib's.
+/// the risk-free curve's day counter from the earliest reference date, each structure accruing nothing before its own:
+/// QuantLib's on the market restated from today. Where no structure is dated before the risk-free curve, it is
+/// QuantLib's.
 /// </summary>
 public class VarianceSwapMismatchedTimesTests
 {

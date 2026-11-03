@@ -10,9 +10,9 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// <see cref="Lattice.Grid(double, Span{double})"/>, the non-allocating grid read nanoql adds (the S-eq plan's SEQD18):
-/// it writes <see cref="Lattice.Grid(double)"/>'s values and returns their count, on a tree lattice through its own
-/// override and on any other lattice through the base's copy; and a destination shorter than the grid is an
+/// <see cref="Lattice.Grid(double, Span{double})"/>, the non-allocating grid read nanoql adds: it writes
+/// <see cref="Lattice.Grid(double)"/>'s values and returns their count, on a tree lattice through its own override and
+/// on any other lattice through the base's copy; and a destination shorter than the grid is an
 /// <see cref="ArgumentException"/> naming it.
 /// </summary>
 public class LatticeGridTests

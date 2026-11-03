@@ -23,13 +23,13 @@ namespace NanoQL.PricingEngines;
 /// overnight-indexed swap's index too), so its Ibor coupons read the context's at-par switch.
 /// </para>
 /// <para>
-/// <b>The snapping, fixed</b> (the S-cms plan's CMR4): QuantLib also snaps a date in the week after an exercise date
-/// back to it (<c>discretizedswaption.cpp:93-111</c>), so a swap starting on its usual two-day lag after the exercise
-/// is valued from the exercise date, its first coupon accruing days it doesn't; and its snapped swap pays every coupon
-/// on its <see cref="NullCalendar"/> schedule's dates (<c>:113-119</c>), without the swap's payment calendar,
-/// convention or lag. Here no date after an exercise date is snapped, and each coupon pays on the swap's own payment
-/// date, a snapped one on the swap's payment rule (its payment calendar, lag and convention) applied to its snapped
-/// date; with QuantLib's checks, Jamshidian's and the finite-difference engines and QuantLib 1.25's cached tree values
+/// <b>The snapping, fixed</b>: QuantLib also snaps a date in the week after an exercise date back to it
+/// (<c>discretizedswaption.cpp:93-111</c>), so a swap starting on its usual two-day lag after the exercise is valued
+/// from the exercise date, its first coupon accruing days it doesn't; and its snapped swap pays every coupon on its
+/// <see cref="NullCalendar"/> schedule's dates (<c>:113-119</c>), without the swap's payment calendar, convention or
+/// lag. Here no date after an exercise date is snapped, and each coupon pays on the swap's own payment date, a snapped
+/// one on the swap's payment rule (its payment calendar, lag and convention) applied to its snapped date; with
+/// QuantLib's checks, Jamshidian's and the finite-difference engines and QuantLib 1.25's cached tree values
 /// (<c>Divergences/TreeSwaptionSnappingTests.cs</c>). A swap without a lag on business-day schedules keeps QuantLib's
 /// values wherever nothing snaps.
 /// </para>
@@ -123,7 +123,7 @@ public sealed class DiscretizedSwaption : DiscretizedOption
 
         foreach (Date exerciseDate in swaption.Exercise.Dates)
         {
-            // CMR4: QuantLib snaps a date within one week either side; a date after the exercise isn't snapped
+            // QuantLib snaps a date within one week either side; a date after the exercise isn't snapped
             for (int j = 0; j < fixedDates.Length - 1; j++)
             {
                 Date unadjustedDate = fixedDates[j];
@@ -162,7 +162,7 @@ public sealed class DiscretizedSwaption : DiscretizedOption
             swap.PaymentConvention);
 
         // QuantLib's snapped swaption's arguments: the snapped swap's, with the swaption's exercise and settlement;
-        // CMR4: each coupon paid on the swap's own payment date, a snapped one on the swap's rule from its snapped date
+        // each coupon paid on the swap's own payment date, a snapped one on the swap's rule from its snapped date
         FixedVsFloatingSwapArguments snappedArgs = FixedVsFloatingSwapArguments.Of(snappedSwap, context);
         FixedVsFloatingSwapArguments own = FixedVsFloatingSwapArguments.Of(swap, context);
         Calendar fixedPaymentCalendar = swap.PaymentCalendar ?? swap.FixedSchedule.Calendar ?? EmptyCalendar.Instance;

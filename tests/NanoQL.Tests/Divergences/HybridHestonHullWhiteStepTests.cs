@@ -12,13 +12,12 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The hybrid Heston-Hull-White process's step terms at small reversion (the S-hes plan's HR6 and HR7 (xv)). QuantLib's
-/// m₂, m₄, m₅, v₁ and v₁₂ (<c>hybridhestonhullwhiteprocess.cpp:127-165</c>) combine terms of order one into results of
-/// order (a·dt)ᵖ: at a·dt 1e-6 its m₄ is −1.15e-5 for 4.33e-7, and at 5e-13·0.2 its v₁ is −2.5e16, a negative variance
-/// the step refuses. nanoql evaluates QuantLib's expressions in double-double below a·dt = 1e-1, in quad-double below
-/// 5e-7 and below 1e-12 by the cubic through four quad-double values, the step's length t − s exact there (D3-2 of the
-/// S-hes run record), QuantLib's double and bits from the cut up; the cut and floors measured against the expressions in
-/// 250 digits (<c>scratchpad\cxxprobe\src\hhwstep250.cpp</c>, <c>scratchpad\c3\step\cuts.py</c>).
+/// The hybrid Heston-Hull-White process's step terms at small reversion. QuantLib's m₂, m₄, m₅, v₁ and v₁₂
+/// (<c>hybridhestonhullwhiteprocess.cpp:127-165</c>) combine terms of order one into results of order (a·dt)ᵖ: at a·dt
+/// 1e-6 its m₄ is −1.15e-5 for 4.33e-7, and at 5e-13·0.2 its v₁ is −2.5e16, a negative variance the step refuses.
+/// nanoql evaluates QuantLib's expressions in double-double below a·dt = 1e-1, in quad-double below 5e-7 and below
+/// 1e-12 by the cubic through four quad-double values, the step's length t − s exact there, QuantLib's double and bits
+/// from the cut up; the cut and floors measured against the expressions in 250 digits.
 /// </summary>
 public class HybridHestonHullWhiteStepTests
 {
@@ -66,7 +65,7 @@ public class HybridHestonHullWhiteStepTests
     [Fact]
     public void QuantLibsStepStandsAtTheCut()
     {
-        // a·dt 0.1: QuantLib's double, its evolve on one clock (scratchpad\cxxprobe\src\c3oracle.cpp)
+        // a·dt 0.1: QuantLib's double, its evolve on one clock
         YieldTermStructure r = new FlatForward(Today, 0.05, A360);
         var process = new HybridHestonHullWhiteProcess(
             new HestonProcess(r, new FlatForward(Today, 0.02 * 360.0 / 365.0, A360), 100.0, 0.04, 1.5, 0.04, 0.4, -0.6),

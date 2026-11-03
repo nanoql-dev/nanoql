@@ -17,7 +17,7 @@ namespace NanoQL.Tests.Vectors;
 /// <see cref="MCAmericanBasketEngine"/>'s NPV and error estimate for American basket options on fixed seeds through
 /// <see cref="MCPRAmericanBasketEngine"/>, and its NPV through <see cref="MCLDAmericanBasketEngine"/> on
 /// low-discrepancy paths, the calibration seed the wheel's effective one, 2147483647, which QuantLib's engine takes
-/// from its base's narrowed null (the S-van plan's VR4 (v)).
+/// from its base's narrowed null.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class MCAmericanBasketEngineVectorTests

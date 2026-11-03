@@ -9,11 +9,10 @@ the spot and at 110% of it, at lambda 1 and 0.8, the lookback period ending at a
 year and two years, and at expiry (the formula's simpler branch), on the ten processes of
 tools/vectors/gen/processes/blackscholesprocess.py: the NPV, the engine's one result. Then an expired option.
 
-The outputs nanoql fixes are left out (the S-bar plan's §2.10), as
-tools/vectors/gen/pricingengines/lookback/analyticcontinuousfloatinglookback.py leaves them out: one clock per
-process (BR5 (xix)), no running extremum beyond the spot (BR5 (xxii)), no output's carry within the small-carry cuts
-(BR5 (xxiii)) and no zero volatility (BR5 (xxiv)); and no option nanoql's validation refuses where QuantLib's reads an
-exercise or payoff unchecked (BR5 (xxv)).
+The outputs nanoql fixes are left out, as
+tools/vectors/gen/pricingengines/lookback/analyticcontinuousfloatinglookback.py leaves them out: one clock per process,
+no running extremum beyond the spot, no output's carry within the small-carry cuts and no zero volatility; and no option
+nanoql's validation refuses where QuantLib's reads an exercise or payoff unchecked.
 
 A case holds one process, exercise, option type, lambda and lookback end, its outputs one per running extremum. The
 wheel's calls, by QuantLib-SWIG 1.44's options.i: ContinuousPartialFloatingLookbackOption(minmax, lambda,

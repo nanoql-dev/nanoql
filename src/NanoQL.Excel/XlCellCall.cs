@@ -3,7 +3,7 @@
 
 namespace NanoQL.Excel;
 
-/// <summary>A cell's last call: its function, its Excel arguments, its outcome and its workbook's date shift (XLR14).</summary>
+/// <summary>A cell's last call: its function, its Excel arguments, its outcome and its workbook's date shift.</summary>
 /// <param name="Fn">The worksheet function.</param>
 /// <param name="Args">Its Excel arguments.</param>
 /// <param name="Outcome">Its Excel result, an <see cref="XlFailure"/>, or an <see cref="XlPassed"/>.</param>

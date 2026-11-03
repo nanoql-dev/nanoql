@@ -12,13 +12,13 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The fix QuantLib's master made to Turnbull and Wakeman's engine after the pin, which nanoql takes (R8, the upstream
-/// sweep): #2954 (<c>f461b7852</c>) prices the last fixing on the evaluation date, at time 0, with a zero standard
-/// deviation, its σ 0, its delta <c>discount · α · E[A] / S</c> and its spot volatilities read as volatilities.
-/// QuantLib 1.44 divides the log moment ratio by the last time, 0, and its Black calculator refuses the NaN standard
-/// deviation (<c>turnbullwakemanasianengine.cpp:117-120</c>). nanoql reads the spot volatilities at the future
-/// average's own strike (BR5 (xxx)), where master reads them at K − A/m; on a flat volatility they agree. Master's
-/// every-fixing-past branch refuses an option with no fixings at all, "no fixings given", which nanoql's
+/// The fix QuantLib's master made to Turnbull and Wakeman's engine after the pin, which nanoql takes: #2954
+/// (<c>f461b7852</c>) prices the last fixing on the evaluation date, at time 0, with a zero standard deviation, its σ
+/// 0, its delta <c>discount · α · E[A] / S</c> and its spot volatilities read as volatilities. QuantLib 1.44 divides
+/// the log moment ratio by the last time, 0, and its Black calculator refuses the NaN standard deviation
+/// (<c>turnbullwakemanasianengine.cpp:117-120</c>). nanoql reads the spot volatilities at the future average's own
+/// strike, where master reads them at K − A/m; on a flat volatility they agree. Master's every-fixing-past branch
+/// refuses an option with no fixings at all, "no fixings given", which nanoql's
 /// <see cref="DiscreteAveragingAsianOption"/> accepts and 1.44's engine priced on an average of 0.
 /// </summary>
 public class AsianUpstreamFixesTests

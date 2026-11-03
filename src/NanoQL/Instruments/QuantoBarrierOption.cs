@@ -10,9 +10,8 @@ namespace NanoQL.Instruments;
 /// A quanto barrier option: a barrier option on an asset in a foreign currency, paid in the domestic one.
 /// </summary>
 /// <remarks>
-/// Immutable and sealed: QuantLib derives nothing from it. <c>QuantoEngine</c> prices it through a barrier engine on its
-/// own terms, its results a <see cref="QuantoOptionResults"/> (the S-bar plan's BR2 (iii), the S-exo plan's ER2
-/// (ii)'s form).
+/// Immutable and sealed: QuantLib derives nothing from it. <c>QuantoEngine</c> prices it through a barrier engine on
+/// its own terms, its results a <see cref="QuantoOptionResults"/>.
 /// </remarks>
 public sealed class QuantoBarrierOption : BarrierOption
 {

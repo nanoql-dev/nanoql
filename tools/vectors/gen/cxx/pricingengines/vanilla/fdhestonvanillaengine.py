@@ -12,22 +12,21 @@ C++ harness (docs/porting-playbook.md §9.4), on the evaluation date 15 October 
   then an option at each strike, of the reference's type and exercise, priced from the cache: each one's NPV, delta,
   gamma and theta. European calls and puts in turn, the reference strike at the spot and among the strikes, and away
   from the spot and not among them; and an American put.
-- The widened grid (the S-hes C1 review's B1-1, tests/NanoQL.Tests/Divergences/FdHestonHighCarryTests.cs): calls and
-  puts at 0.8, 1 and 1.25 times the forward on five markets of volatility 0.1 and carry from 0.05, where QuantLib's
-  grid holds the true forwards' band, to 0.30, where it doesn't; an American put and a call with cash dividends at
-  carry 0.30; each against QuantLib's solve assembled from its own components under the rule (the harness's
-  widenedResults: QuantLib's mesher, given its constraints at the band where its range falls short). Calls and puts
-  at 0.8, 1 and 1.25 times the dividend forward where five cash dividends take QuantLib's swapped walk below zero and
-  its bound isn't a number (the review's B2-2). And the multi-strike solve where its grid falls short, at carry 0.30
-  and with the reference strike at twice the spot (B2-1), against each strike's widened solve. And each strike's quanto
-  solve where the foreign rate sits far from the domestic one (B3-1), whose strikes the multi-strike solve takes alone
-  (tests/NanoQL.Tests/Divergences/FdHestonHighCarryTests.cs), against QuantLib's engine.
+- The widened grid (tests/NanoQL.Tests/Divergences/FdHestonHighCarryTests.cs): calls and puts at 0.8, 1 and 1.25 times
+the forward on five markets of volatility 0.1 and carry from 0.05, where QuantLib's grid holds the true forwards' band,
+to 0.30, where it doesn't; an American put and a call with cash dividends at carry 0.30; each against QuantLib's solve
+assembled from its own components under the rule (the harness's widenedResults: QuantLib's mesher, given its constraints
+at the band where its range falls short). Calls and puts at 0.8, 1 and 1.25 times the dividend forward where five cash
+dividends take QuantLib's swapped walk below zero and its bound isn't a number. And the multi-strike solve where its
+grid falls short, at carry 0.30 and with the reference strike at twice the spot, against each strike's widened solve.
+And each strike's quanto solve where the foreign rate sits far from the domestic one, whose strikes the multi-strike
+solve takes alone (tests/NanoQL.Tests/Divergences/FdHestonHighCarryTests.cs), against QuantLib's engine.
 
-Left out (the S-hes plan's §2.10): the multiple-strikes cache with a leverage function, whose strikes nanoql solves one
-by one (HR7 (i), tests/NanoQL.Tests/Divergences/FdHestonMultipleStrikesLeverageTests.cs), and on a non-plain reference
-(HR7 (xxiv), tests/NanoQL.Tests/Divergences/FdHestonStrikesReferenceTests.cs), and where its grid falls short of the
-true forwards' band, whose strikes nanoql solves one by one too, each on its widened grid; every structure on the
-process's reference date and day counter.
+Left out: the multiple-strikes cache with a leverage function, whose strikes nanoql solves one by one
+(tests/NanoQL.Tests/Divergences/FdHestonMultipleStrikesLeverageTests.cs), and on a non-plain reference
+(tests/NanoQL.Tests/Divergences/FdHestonStrikesReferenceTests.cs), and where its grid falls short of the true forwards'
+band, whose strikes nanoql solves one by one too, each on its widened grid; every structure on the process's reference
+date and day counter.
 
 A builder case holds the "process" (batesmodel.py's harness spec), the "optionType", "strike" and "exercise"
 (["European" | "American", date]) and the "setters" ([name, ...] as tools/cxx/src/pricingengines/vanilla/
@@ -67,7 +66,8 @@ HUNDSDORFER = [0, 0.5 + 3.0 ** 0.5 / 6.0, 0.5]
 DOUGLAS = [1, 0.5, 0.0]
 QUANTO = {"foreign": 0.06, "fxVolatility": 0.12, "correlation": -0.75, "atmLevel": 1.0}
 GRIDS = [["withTGrid", 40], ["withXGrid", 50], ["withVGrid", 25]]
-# B1-1's markets: v0 = theta 0.01, kappa 1.5, sigma 0.1, rho -0.5; carry from 0.05 (QuantLib's grid holds) to 0.30
+# The high-carry markets: v0 = theta 0.01, kappa 1.5, sigma 0.1, rho -0.5; carry from 0.05 (QuantLib's grid holds) to
+# 0.30
 LOW_VOL = ("low volatility", 100.0, 0.01, 1.5, 0.01, 0.1, -0.5)
 HIGH_CARRY = [(5, 0.31, 0.01), (10, 0.21, 0.01), (10, 0.01, 0.21), (2, 0.31, 0.01), (5, 0.06, 0.01)]
 DIVIDENDS = ["withCashDividends", [R + 91, R + 273], [2.0, 3.0]]
@@ -142,7 +142,7 @@ def cases():
         widened("5 y, r 0.31, q 0.01, call at 1.25F with dividends", process, CALL, round(1.25 * fwd, 6),
                 ["European", R + 365 * 5], ([R + 365, R + 730], [1.0, 1.0]))
 
-        # B2-2: five cash dividends of 8 at carry 0.30 take QuantLib's swapped walk below zero, its bound not a number
+        # Five cash dividends of 8 at carry 0.30 take QuantLib's swapped walk below zero, its bound not a number
         dates, amounts = [R + 365 * y for y in range(1, 6)], [8.0] * 5
         div_fwd = (100.0 - sum(8.0 * math.exp(-0.30 * y) for y in range(1, 6))) * math.exp(0.30 * 6)
         for k in (0.8, 1.0, 1.25):
@@ -161,8 +161,8 @@ def cases():
                                "scheme": HUNDSDORFER},
                     "expected": {k: [v.enc(s[k]) for s in per_strike] for k in KEYS}})
 
-        # B2-1: the reference strike at twice the spot, where the solve is read at S K/K_i, away from the forwards
-        # QuantLib's multi-strike mesher is sized on
+        # The reference strike at twice the spot, where the solve is read at S K/K_i, away from the forwards QuantLib's
+        # multi-strike mesher is sized on
         process = bm.process_spec(LOW_VOL, rf=0.06, q=0.04)
         strikes = [160.0, 200.0, 250.0]
         per_strike = [H.call("FdHestonVanillaEngine::widenedResults", process, CALL, k, ["European", R + 365 * 5], [],
@@ -174,7 +174,7 @@ def cases():
                                "scheme": HUNDSDORFER},
                     "expected": {k: [v.enc(s[k]) for s in per_strike] for k in KEYS}})
 
-        # B3-1: a foreign rate of 0.30 against a domestic 0.05, the quanto forward far from the curves' own; each strike
+        # A foreign rate of 0.30 against a domestic 0.05, the quanto forward far from the curves' own; each strike
         # QuantLib's engine with the quanto helper
         process = bm.process_spec(LOW_VOL, rf=0.05, q=0.01)
         far_quanto = {"foreign": 0.30, "fxVolatility": 0.1, "correlation": 0.0, "atmLevel": 1.0}

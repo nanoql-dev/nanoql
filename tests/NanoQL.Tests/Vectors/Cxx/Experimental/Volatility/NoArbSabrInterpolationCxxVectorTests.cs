@@ -13,8 +13,8 @@ namespace NanoQL.Tests.Vectors;
 /// The C++ harness's no-arbitrage SABR interpolation vectors,
 /// <c>tests/vectors/cxx/experimental/volatility/noarbsabrinterpolation.json</c>: <see cref="NoArbSabrInterpolation"/>'s
 /// fits at expiries of 5 and 10 years, their parameters, errors, end criteria, weights and values, and the
-/// <see cref="NoArbSabr"/> factory's values, the outputs S7R6's one-ulp refits leave stable; QuantLib's refusal. The
-/// fits as <c>tools/cxx/src/experimental/volatility/noarbsabrinterpolation.cpp</c> runs them.
+/// <see cref="NoArbSabr"/> factory's values, the outputs one-ulp refits leave stable; QuantLib's refusal. The fits as
+/// <c>tools/cxx/src/experimental/volatility/noarbsabrinterpolation.cpp</c> runs them.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class NoArbSabrInterpolationCxxVectorTests

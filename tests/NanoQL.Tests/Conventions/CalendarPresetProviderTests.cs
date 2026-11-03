@@ -10,7 +10,7 @@ namespace NanoQL.Tests.Conventions;
 /// Every calendar preset reads its holiday edits through <see cref="ConventionProvider"/>, by its name, once its rules
 /// are set: none with nothing set, and a provider's edits applied as <see cref="Calendar.AddHoliday"/> and
 /// <see cref="Calendar.RemoveHoliday"/> apply them. Each preset's QuantLib values with nothing set are checked by its
-/// calendar's vector file (G3, unchanged).
+/// calendar's vector file (the vectors gate, unchanged).
 /// </summary>
 public class CalendarPresetProviderTests
 {

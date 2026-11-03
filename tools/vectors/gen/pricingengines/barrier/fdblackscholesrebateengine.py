@@ -9,10 +9,10 @@ tools/vectors/gen/pricingengines/barrier/fdblackscholesbarrierengine.py, on the 
 then on the flat process: other grids and damping steps, three named scheme descriptions, the local volatility, cash
 dividends, an expired option, whose results are zero, and an American exercise, which QuantLib refuses.
 
-Every structure is on one day counter and the risk-free curve's reference date (the S-rx plan's RP15's inputs left
-out, as the barrier engine's generator states). The pricing spec is that generator's, which this file imports. The
-wheel's calls, by QuantLib-SWIG 1.44's options.i: FdBlackScholesRebateEngine's two constructors (with and without
-dividends) on a BarrierOption; NPV, delta, gamma and theta the option's accessors. Read back by
+Every structure is on one day counter and the risk-free curve's reference date (the inputs on other clocks left out, as
+the barrier engine's generator states). The pricing spec is that generator's, which this file imports. The wheel's
+calls, by QuantLib-SWIG 1.44's options.i: FdBlackScholesRebateEngine's two constructors (with and without dividends) on
+a BarrierOption; NPV, delta, gamma and theta the option's accessors. Read back by
 tests/NanoQL.Tests/Vectors/PricingEngines/FdBlackScholesRebateEngineVectorTests.cs."""
 import importlib.util
 import os

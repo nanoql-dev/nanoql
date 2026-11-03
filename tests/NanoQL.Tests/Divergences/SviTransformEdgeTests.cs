@@ -6,16 +6,15 @@ using NanoQL.Experimental;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// SVI's inverse transforms at their edges (the S-rx plan's SRXR3 (x)). QuantLib's inverse
-/// (<c>sviinterpolation.hpp:98-108</c>) takes <c>asin</c> of ρ/0.999999, <c>√(σ − 10⁻⁶)</c>, <c>√(a − 10⁻⁶ +
-/// bσ√(1−ρ²))</c> and <c>tan</c> of an argument that passes π/2 once b(1+|ρ|) exceeds 4·0.999999, each of which a value
-/// its parameters' check accepts can push out of range: on a seven-strike skew (a year, forward 100) QuantLib's fit
-/// refuses a fixed ρ of 0.9999995 ("b (nan) must be non negative"), a fixed σ of 5·10⁻⁷ ("sigma (-nan(ind)) must be
-/// positive") and an a guessed at −bσ√(1−ρ²) ("a + b sigma sqrt(1-rho^2) (a=-nan(ind), …) must be non negative"), and
-/// fits a b guessed at 4/(1+|ρ|) from a wrapped guess [executed on the harness]. Here each argument is clamped into its
-/// transform's range (<c>asin</c>'s to [−1, 1], each square root's floored at 0, the <c>tan</c> argument capped at
-/// π/2), as S7R5 (vii) clamps SABR's and ZABR's. QuantLib's check: its own fit from the clamped value, which the direct
-/// transform maps back to.
+/// SVI's inverse transforms at their edges. QuantLib's inverse (<c>sviinterpolation.hpp:98-108</c>) takes <c>asin</c>
+/// of ρ/0.999999, <c>√(σ − 10⁻⁶)</c>, <c>√(a − 10⁻⁶ + bσ√(1−ρ²))</c> and <c>tan</c> of an argument that passes π/2 once
+/// b(1+|ρ|) exceeds 4·0.999999, each of which a value its parameters' check accepts can push out of range: on a
+/// seven-strike skew (a year, forward 100) QuantLib's fit refuses a fixed ρ of 0.9999995 ("b (nan) must be non
+/// negative"), a fixed σ of 5·10⁻⁷ ("sigma (-nan(ind)) must be positive") and an a guessed at −bσ√(1−ρ²) ("a + b sigma
+/// sqrt(1-rho^2) (a=-nan(ind), …) must be non negative"), and fits a b guessed at 4/(1+|ρ|) from a wrapped guess (the
+/// C++ harness). Here each argument is clamped into its transform's range (<c>asin</c>'s to [−1, 1], each square root's
+/// floored at 0, the <c>tan</c> argument capped at π/2), as SABR's and ZABR's transforms are clamped. QuantLib's check:
+/// its own fit from the clamped value, which the direct transform maps back to.
 /// </summary>
 public class SviTransformEdgeTests
 {
@@ -58,7 +57,7 @@ public class SviTransformEdgeTests
             (0.009434466777737655, 0.13371750954118272, 0.289340941526248, -0.6527316394815342, 0.0026819289009643375));
 
     // The fit from the edge equals the fit from the clamped value, and that is QuantLib's fit from the clamped value
-    // (a, b, σ, ρ, m) [executed on the harness].
+    // (a, b, σ, ρ, m) (the C++ harness).
     private static void AssertFit(
         SviInterpolation edge, SviInterpolation clamped, (
             double A, double B, double Sigma, double Rho, double M) quantLib)

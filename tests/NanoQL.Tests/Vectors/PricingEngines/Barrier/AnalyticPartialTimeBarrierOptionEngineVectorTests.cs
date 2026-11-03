@@ -14,8 +14,8 @@ namespace NanoQL.Tests.Vectors;
 /// The AnalyticPartialTimeBarrierOptionEngine vectors,
 /// <c>tests/vectors/pricingengines/barrier/analyticpartialtimebarrieroptionengine.json</c>: knock-outs in each window
 /// and start-window knock-ins at two barriers each, over three expiries on ten processes, calls and puts at three
-/// strikes; an expired option and the refusals. Every value is within Drezner's accuracy of QuantLib's (the S-bar plan's
-/// BR4 (e)). The outputs nanoql fixes are left out of the file.
+/// strikes; an expired option and the refusals. Every value is within Drezner's accuracy of QuantLib's. The outputs
+/// nanoql fixes are left out of the file.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class AnalyticPartialTimeBarrierOptionEngineVectorTests

@@ -192,7 +192,7 @@ public sealed class UnitOfMeasureConversion : IEquatable<UnitOfMeasureConversion
     public override int GetHashCode() => HashCode.Combine(CommodityType, Source, Target, ConversionFactor, Type, first, second);
 
     // A unit factor's conversion: the value of one unit of a quantity's unit in the other unit, through this
-    // conversion's own convert, whichever way it is stored (the S-xrt plan's XRR5 (i)).
+    // conversion's own convert, whichever way it is stored.
     internal double ValueOfOne(CommodityType? commodityType, UnitOfMeasure from) =>
         Convert(new Quantity(commodityType, from, 1.0)).Amount;
 }

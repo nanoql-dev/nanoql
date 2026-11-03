@@ -10,16 +10,15 @@ variate; then on that set: the operator-splitting schemes with and without the c
 Hull-White process at the correlation 0.3, zero curves, the second Heston set, damping steps, QuantLib's default grid
 (50 x 100 x 40 x 20), and an expired option.
 
-Left out (the S-hes plan's §2.10): every structure is on the risk-free curve's day counter and reference date (on
-others QuantLib reads its times from the risk-free curve, tests/NanoQL.Tests/Divergences/
-HestonHullWhiteMismatchedTimesTests.cs); cash dividends, which QuantLib's dividend handler applies on a
-three-dimensional grid to the lines through the other directions' first points only (tests/NanoQL.Tests/Divergences/
-FdmDividendHandler3dTests.cs; D3-3 of the S-hes run record); every market whose equity grid nanoql widens, the carry
-large against the volatility or a strike far from the forwards (D3-1, tests/NanoQL.Tests/Divergences/
-FdHestonHullWhiteHighCarryTests.cs): none here, the carry 0.02 at a volatility of 0.2; TR-BDF2, which nanoql steps
-on the operator set over the whole step where QuantLib's BDF2 stage reads it over its trapezoidal sub-step, and the
-operator moves in time with the Hull-White model's fitting term (the S-eq plan's SEQR9,
-tests/NanoQL.Tests/Divergences/TrBdf2TimeDependentTests.cs); and the multiple-strikes calculation, the harness's
+Left out: every structure is on the risk-free curve's day counter and reference date (on others QuantLib reads its
+times from the risk-free curve, tests/NanoQL.Tests/Divergences/HestonHullWhiteMismatchedTimesTests.cs); cash dividends,
+which QuantLib's dividend handler applies on a three-dimensional grid to the lines through the other directions' first
+points only (tests/NanoQL.Tests/Divergences/FdmDividendHandler3dTests.cs); every market whose equity grid nanoql
+widens, the carry large against the volatility or a strike far from the forwards
+(tests/NanoQL.Tests/Divergences/FdHestonHullWhiteHighCarryTests.cs): none here, the carry 0.02 at a volatility of 0.2;
+TR-BDF2, which nanoql steps on the operator set over the whole step where QuantLib's BDF2 stage reads it over its
+trapezoidal sub-step, and the operator moves in time with the Hull-White model's fitting term
+(tests/NanoQL.Tests/Divergences/TrBdf2TimeDependentTests.cs); and the multiple-strikes calculation, the harness's
 (tools/vectors/gen/cxx/pricingengines/vanilla/fdhestonhullwhitevanillaengine.py).
 
 The specs are a pricing {"process", "hullWhite", "correlation", "payoff", "exercise", "tGrid", "xGrid", "vGrid",

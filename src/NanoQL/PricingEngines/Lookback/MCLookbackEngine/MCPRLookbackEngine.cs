@@ -12,8 +12,8 @@ namespace NanoQL.PricingEngines;
 
 /// <summary>
 /// <see cref="MCLookbackEngine"/> on pseudo-random draws with QuantLib's default statistics: <c>MCPRLookbackEngine</c>,
-/// named as QuantLib-Python names its siblings (B2R2), QuantLib's <c>MCLookbackEngine&lt;PseudoRandom&gt;</c>, its
-/// calculations closed at <see cref="PseudoRandom"/> and <see cref="GeneralStatistics"/> (D12).
+/// named as QuantLib-Python names its siblings, QuantLib's <c>MCLookbackEngine&lt;PseudoRandom&gt;</c>, its
+/// calculations closed at <see cref="PseudoRandom"/> and <see cref="GeneralStatistics"/>.
 /// </summary>
 public static class MCPRLookbackEngine
 {

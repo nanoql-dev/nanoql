@@ -15,7 +15,7 @@ namespace NanoQL.PricingEngines;
 
 /// <summary>
 /// The binomial convertible engine on the Leisen-Reimer tree: QuantLib-Python's <c>BinomialLRConvertibleEngine</c>, QuantLib's
-/// <c>BinomialConvertibleEngine&lt;LeisenReimer&gt;</c> (D12).
+/// <c>BinomialConvertibleEngine&lt;LeisenReimer&gt;</c>.
 /// </summary>
 public static class BinomialLRConvertibleEngine
 {

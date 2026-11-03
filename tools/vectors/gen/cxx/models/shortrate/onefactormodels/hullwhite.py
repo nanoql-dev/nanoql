@@ -7,16 +7,16 @@ Six models (tools/cxx/src/models/modelspec.hpp's specs, the curves those of tool
 flat and log-linear discount curves, positive and negative rates, mean reversion from 1e-9 (below sqrt(QL_EPSILON),
 QuantLib's small-reversion branches) to 2, and the first model after setParams. For each: Vasicek's inspectors a(),
 b(), sigma(), lambda() and r0() (the curve's zero rate at 0); dynamics()'s variable(t, r) and shortRate(t, x) at four
-points each, through the analytical fitting parameter, and its process's x0(), drift and diffusion at three points
-and expectation, stdDeviation and variance at three steps; the five-argument discountBondOption, called through
+points each, through the analytical fitting parameter, and its process's x0(), drift and diffusion at three points and
+expectation, stdDeviation and variance at three steps; the five-argument discountBondOption, called through
 AffineModel, at eight points (a bond starting at the option's maturity, later, and calls and puts in and out of the
 money); the model's constraint() (test, upperBound and lowerBound) at four parameter arrays; and the fitted tree(grid),
 on a grid per model (uniform, mandatory times with steps, and a step under the dx floor's threshold): every column's
 size, every node's underlying, every step's discounts, which carry the fitted values (exp(-(x + phi(t_i)) dt_i)), and
 every step's state prices, the last step's among them; the first model's tree also every node's descendants and
-probabilities. Then FixedReversion(), and the refusals: trees on a model whose sigma setParams sets to 0, its
-reversion to NaN (NaN probabilities, nanoql's MD5) or its sigma negative (the process's), and on a grid past the
-discount curve's last date; and the five-argument option at a negative sigma (blackFormula's).
+probabilities. Then FixedReversion(), and the refusals: trees on a model whose sigma setParams sets to 0, its reversion
+to NaN (NaN probabilities, nanoql's refusal) or its sigma negative (the process's), and on a grid past the discount
+curve's last date; and the five-argument option at a negative sigma (blackFormula's).
 
 Read back by tests/NanoQL.Tests/Vectors/Cxx/Models/ShortRate/OneFactorModels/HullWhiteCxxVectorTests.cs, with
 tests/NanoQL.Tests/Vectors/ModelInputs.cs."""

@@ -16,14 +16,13 @@ namespace NanoQL.Models;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A working type (the S-mm plan's MR1 (ii)). It copies each step's pseudo-root at construction and owns a copy of
-/// its volatility process (MR1 (iv)), so a step reads nothing shared; one step allocates nothing after a path's
-/// warm-up (MR1 (v)).
+/// A working type. It copies each step's pseudo-root at construction and owns a copy of its volatility process, so a
+/// step reads nothing shared; one step allocates nothing after a path's warm-up.
 /// </para>
 /// <para>
 /// QuantLib's design, kept: <c>volatilityFactorStep</c> isn't read, the process's variates spread evenly from the first
 /// volatility factor by the constructor's own rule (<c>svddfwdratepc.cpp:85-92</c>), any spread a valid estimator. A
-/// process of no variates per step, whose spread QuantLib divides by, is refused (the S-mm plan's MR3 (xx)).
+/// process of no variates per step, whose spread QuantLib divides by, is refused.
 /// </para>
 /// </remarks>
 [WorkingType]
@@ -105,7 +104,7 @@ public sealed class SVDDFwdRatePc : MarketModelEvolver
 
         EvolutionDescriptionFunctions.CheckCompatibility(evolution, numeraires);
 
-        // QuantLib divides the variates' spread by the process's variates (MR3 (xx)).
+        // QuantLib divides the variates' spread by the process's variates.
         if (!(volFactorsPerStep > 0))
         {
             throw new ArgumentException("the volatility process must draw at least one variate per step", nameof(volProcess));

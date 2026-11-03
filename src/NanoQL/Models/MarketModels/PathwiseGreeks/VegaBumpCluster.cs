@@ -10,7 +10,7 @@ namespace NanoQL.Models;
 /// A block of pseudo-root elements bumped together for a vega: the factors, rates and steps in three half-open
 /// ranges.
 /// </summary>
-/// <remarks>Immutable (the S-mmp plan's MMPR1 (ii)).</remarks>
+/// <remarks>Immutable.</remarks>
 public sealed class VegaBumpCluster
 {
     /// <summary>Initializes a new instance of the <see cref="VegaBumpCluster"/> class.</summary>

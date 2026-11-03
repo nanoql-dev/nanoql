@@ -7,7 +7,7 @@
 namespace NanoQL.Numerics;
 
 /// <summary>The quadratic a x² + b x + c: its value, turning point, discriminant and real roots.</summary>
-/// <remarks>Immutable. QuantLib's <c>quadratic</c> (the S-mm plan's SD4).</remarks>
+/// <remarks>Immutable. QuantLib's <c>quadratic</c>.</remarks>
 public sealed class Quadratic
 {
     private readonly double a;

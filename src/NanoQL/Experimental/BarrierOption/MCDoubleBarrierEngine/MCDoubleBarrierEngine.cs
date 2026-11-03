@@ -20,14 +20,13 @@ namespace NanoQL.Experimental;
 /// <remarks>
 /// <para>
 /// A static class over a private simulation deriving <see cref="McSimulation{TPath, TStats}"/> directly, as QuantLib's
-/// engine derives <c>McSimulation</c> (the S-xeq plan's §2.0, S-bar's BR1 form): <c>Calculate</c> builds the
-/// simulation with QuantLib's checks and returns the NPV and, where the random-number traits allow one, the error
-/// estimate. The seed is explicit (S2R4).
+/// engine derives <c>McSimulation</c>: <c>Calculate</c> builds the simulation with QuantLib's checks and returns the
+/// NPV and, where the random-number traits allow one, the error estimate. The seed is explicit.
 /// </para>
 /// <para>
-/// Documented divergences. The paths and the discounts run on the engine's clock, <see cref="FdmBlackScholesOp.Clock"/>,
-/// from the earliest reference date of the structures, where QuantLib's run on the risk-free curve's (XER5 (xxxiii),
-/// S-bar's BR5 (iii); <c>Divergences/McDoubleBarrierTests.cs</c>). And a non-European exercise is refused, as S-bar's
+/// Documented divergences. The paths and the discounts run on the engine's clock,
+/// <see cref="FdmBlackScholesOp.Clock"/>, from the earliest reference date of the structures, where QuantLib's run on
+/// the risk-free curve's (<c>Divergences/McDoubleBarrierTests.cs</c>). And a non-European exercise is refused, as
 /// <see cref="MCBarrierEngine"/> refuses it, where QuantLib prices any exercise to its last date.
 /// </para>
 /// </remarks>
@@ -149,7 +148,7 @@ public static class MCDoubleBarrierEngine
         public OneAssetOptionResults Price()
         {
             // QuantLib never reads the exercise's type and prices any exercise to its last date: the paths price a
-            // European exercise only, as S-bar's barrier engine refuses the others
+            // European exercise only, as the Monte Carlo barrier engine refuses the others
             if (option.Exercise.Type != ExerciseType.European)
             {
                 throw new NanoQLException("only european style option are supported");

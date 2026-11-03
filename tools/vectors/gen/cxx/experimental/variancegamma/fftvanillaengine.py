@@ -7,10 +7,10 @@ priced by the Carr-Madan transform under Black-Scholes.
 Two markets, each with calls and puts at strikes of 70 to 130 over three months, six, a year and two: each option on its
 own, and every option as one list (precalculate); the NPV.
 
-The outputs nanoql fixes are left out (the S-xeq plan's §2.8): every strike is above 1 and every expiry's largest strike
-gives QuantLib at least 2^14 points at the default log-strike spacing, where nanoql sizes its grid as QuantLib does
-(XER5 (xix)); no list holds an expired option, which QuantLib's precalculate refuses ("negative time") and nanoql prices
-as expired (XER1, tests/NanoQL.Tests/Conventions/ExperimentalExoticConventionTests.cs). The process and options are
+The outputs nanoql fixes are left out: every strike is above 1 and every expiry's largest strike gives QuantLib at least
+2^14 points at the default log-strike spacing, where nanoql sizes its grid as QuantLib does; no list holds an expired
+option, which QuantLib's precalculate refuses ("negative time") and nanoql prices as expired
+(tests/NanoQL.Tests/Conventions/ExperimentalExoticConventionTests.cs). The process and options are
 tools/cxx/src/experimental/variancegamma/fftvanillaengine.cpp's. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Experimental/VarianceGamma/FFTVanillaEngineCxxVectorTests.cs."""
 import os

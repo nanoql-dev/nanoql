@@ -24,8 +24,8 @@ namespace NanoQL.Experimental;
 /// <para>
 /// The events are kept in date order, every one of them: two events on one date both count, in the order given.
 /// QuantLib's event set orders by date alone (<c>issuer.hpp:36-38</c>), so it keeps one event per date and drops the
-/// second, where its own documentation lets several events take place on one date. A documented divergence (the S-xcr
-/// plan's XR8 (iv); <c>Divergences/IssuerEventsOnOneDateTests.cs</c>).
+/// second, where its own documentation lets several events take place on one date. A documented divergence
+/// (<c>Divergences/IssuerEventsOnOneDateTests.cs</c>).
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]

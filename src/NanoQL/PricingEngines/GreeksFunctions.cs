@@ -35,8 +35,8 @@ public static class GreeksFunctions
     }
 
     // BlackScholesTheta for an option expiring on a date: a structure dated on or after it accrues nothing over the
-    // option's life, so its rate or volatility is 0 (the S-eq plan's ruling of 2026-10-21, C4R2-O2 (i)), where QuantLib
-    // reads it at the structure's own time 0; BlackScholesTheta where every structure is dated before the exercise.
+    // option's life, so its rate or volatility is 0, where QuantLib reads it at the structure's own time 0;
+    // BlackScholesTheta where every structure is dated before the exercise.
     internal static double BlackScholesTheta(
         GeneralizedBlackScholesProcess p, double value, double delta, double gamma, Date exercise)
     {

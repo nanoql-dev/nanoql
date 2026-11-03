@@ -20,12 +20,12 @@ namespace NanoQL.Experimental;
 /// <remarks>
 /// <para>
 /// Immutable: it holds the basket with its bound loss model, and an engine's static <c>Calculate</c> prices it
-/// (<see cref="IntegralNtdEngine"/>; the S-xcr plan's XR1 (c)). The product is digital: the basket's tranche doesn't
-/// enter its price. Every name has the same weight in the protected notional.
+/// (<see cref="IntegralNtdEngine"/>). The product is digital: the basket's tranche doesn't enter its price. Every name
+/// has the same weight in the protected notional.
 /// </para>
 /// <para>
 /// An order of 0 is refused: QuantLib checks only n ≤ size (<c>nthtodefault.cpp:48</c>), and at n = 0 its fair premium
-/// is noise, 6.0e-5, its NPV 3.5e-12 (XR8 (xlv); <c>Conventions/CreditPortfolioConventionTests.cs</c>).
+/// is noise, 6.0e-5, its NPV 3.5e-12 (<c>Conventions/CreditPortfolioConventionTests.cs</c>).
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]

@@ -103,7 +103,7 @@ public static class CalibratedModelExtensions
 
         ImmutableArray<double> w = weights.IsEmpty ? ImmutableArray.CreateRange(Enumerable.Repeat(1.0, instruments.Length)) : [.. weights];
 
-        // A model that overrides QuantLib's calibrate to fix parameters by default gives them (G1R2 (ii)).
+        // A model that overrides QuantLib's calibrate to fix parameters by default gives them.
         if (fixParameters.IsEmpty)
         {
             fixParameters = model.DefaultFixParameters.AsSpan();

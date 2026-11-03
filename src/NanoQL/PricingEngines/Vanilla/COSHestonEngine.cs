@@ -18,21 +18,20 @@ namespace NanoQL.PricingEngines;
 /// <summary>The COS-method Heston engine, on efficient Fourier-cosine series expansions.</summary>
 /// <remarks>
 /// <para>
-/// An immutable object over its <see cref="HestonModel"/>, the truncation range's width and the series' length (the
-/// S-hes plan's HD7); the static <see cref="Calculate(VanillaOption, EvaluationContext, HestonModel, double, int)"/>
-/// builds one and prices through it. The model's time runs from the earliest curve date and the forward and discount
-/// are read by date (HR7 (xi), S-eq's <see cref="AnalyticHestonEngine"/>'s reads); at the model's time 0 the price is
-/// QuantLib's bound, the forward's discounted intrinsic value, before any cumulant (HR7 (xxxi)).
+/// An immutable object over its <see cref="HestonModel"/>, the truncation range's width and the series' length; the
+/// static <see cref="Calculate(VanillaOption, EvaluationContext, HestonModel, double, int)"/> builds one and prices
+/// through it. The model's time runs from the earliest curve date and the forward and discount are read by date (<see
+/// cref="AnalyticHestonEngine"/>'s reads); at the model's time 0 the price is QuantLib's bound, the forward's
+/// discounted intrinsic value, before any cumulant.
 /// </para>
 /// <para>
-/// The cumulants are QuantLib's expressions, evaluated where κt calls for it in another arithmetic (HR6, HR11):
-/// QuantLib's double, and so its bits, from each cumulant's cut to its upper cut; double-double below the cut,
-/// quad-double below double-double's floor and, below quad-double's, each cumulant's cubic in κ through four
-/// quad-double values; past the upper cut, where e^{nκt} overflows, an extended-range double, each cut measured at the
-/// run against QuantLib's expressions in 50 to 250 digits. At a term of 0 the cumulants, the skew and the kurtosis are
-/// their limits, 0 (HR7 (xxxii)). Below σ = <see cref="SigmaCut"/>, where the classic form's division by σ² cancels,
-/// the characteristic function is <see cref="AnalyticHestonEngine.ChF"/>'s, the same function in Andersen and Lake's
-/// form (HR7 (viii)).
+/// The cumulants are QuantLib's expressions, evaluated where κt calls for it in another arithmetic: QuantLib's double,
+/// and so its bits, from each cumulant's cut to its upper cut; double-double below the cut, quad-double below
+/// double-double's floor and, below quad-double's, each cumulant's cubic in κ through four quad-double values; past the
+/// upper cut, where e^{nκt} overflows, an extended-range double, each cut measured at the run against QuantLib's
+/// expressions in 50 to 250 digits. At a term of 0 the cumulants, the skew and the kurtosis are their limits, 0. Below
+/// σ = <see cref="SigmaCut"/>, where the classic form's division by σ² cancels, the characteristic function is
+/// <see cref="AnalyticHestonEngine.ChF"/>'s, the same function in Andersen and Lake's form.
 /// </para>
 /// <para>
 /// The series' length has to grow with the vol of variance and the term: at QuantLib's defaults, a range of 16 and 200
@@ -48,14 +47,14 @@ namespace NanoQL.PricingEngines;
 public sealed class COSHestonEngine
 {
     /// <summary>
-    /// The σ below which the characteristic function is the analytic engine's (HR7 (viii)): the classic form departs
-    /// from it by more than 1e-12 relative up to σ = 0.067 on a grid of six parameter sets, ten u and nine times to 30
-    /// years, and by at most 9.4e-13 at the cut.
+    /// The σ below which the characteristic function is the analytic engine's: the classic form departs from it by more
+    /// than 1e-12 relative up to σ = 0.067 on a grid of six parameter sets, ten u and nine times to 30 years, and by at
+    /// most 9.4e-13 at the cut.
     /// </summary>
     internal const double SigmaCut = 0.07;
 
     // each cumulant's cut, double-double and quad-double floors and upper cut in kappa t, measured at the run against
-    // QuantLib's expressions in 50 to 250 digits (HR6, HR11; the quad-double floors the user's ruling of R2-1)
+    // QuantLib's expressions in 50 to 250 digits
     private const double C1Cut = 2e-3, C1Floor = 1e-9, C1QuadFloor = 1e-12, C1Upper = 500.0;
     private const double C2Cut = 0.2, C2Floor = 1e-6, C2QuadFloor = 1e-12, C2Upper = 200.0;
     private const double C3Cut = 0.5, C3Floor = 1e-3, C3QuadFloor = 5e-10, C3Upper = 200.0;
@@ -126,7 +125,7 @@ public sealed class COSHestonEngine
     {
         if (sigma < SigmaCut)
         {
-            // the analytic engine's form of the same function (HR7 (viii))
+            // the analytic engine's form of the same function
             return new AnalyticHestonEngine(model).ChF(new Complex(u, 0.0), t);
         }
 
@@ -187,7 +186,7 @@ public sealed class COSHestonEngine
     // std::max, which returns its first argument where neither is less than the other
     private static double Max(double a, double b) => a < b ? b : a;
 
-    // QuantLib's calculate, the model's time from the earliest curve date and the curves read by date (HR7 (xi))
+    // QuantLib's calculate, the model's time from the earliest curve date and the curves read by date
     private double Value(VanillaOption option)
     {
         // this is a european option pricer
@@ -217,7 +216,7 @@ public sealed class COSHestonEngine
         double qf = process.DividendYield.AccruedDiscount(maturityDate);
         if (maturity == 0.0)
         {
-            // no variance has accrued: QuantLib's bound, the forward's discounted intrinsic value (HR7 (xxxi))
+            // no variance has accrued: QuantLib's bound, the forward's discounted intrinsic value
             return Bound(payoff.OptionType, spot, qf, k, df);
         }
 

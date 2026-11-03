@@ -27,7 +27,7 @@ namespace NanoQL.Experimental;
 /// and its inverse refuses with "root not bracketed" (<c>convolvedstudentt.cpp:124-127</c>), where the series stays
 /// accurate. There nanoql scales the factorial and the power together, in logarithms; QuantLib's bits wherever its
 /// arithmetic doesn't overflow, through order 171, where the series is accurate to 2e-14 relative against 50 digits.
-/// A documented divergence (the S-xcr plan's XR8 (xxvi); <c>Divergences/BehrensFisherHighOrderTests.cs</c>).
+/// A documented divergence (<c>Divergences/BehrensFisherHighOrderTests.cs</c>).
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]

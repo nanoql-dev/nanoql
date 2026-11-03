@@ -11,10 +11,9 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// C4's documented behaviours and refusals (the S-xeq plan's XER5 (xxxi), (xxxii), XED7): the shape lookups refusing a
-/// time past the shape's last, where QuantLib reads one past its end; the jump process's one jump per step, QuantLib's
-/// first-order scheme; the jump processes' paths drawn without allocating; and the energy units' refusals with
-/// QuantLib's texts.
+/// The experimental energy units' documented behaviours and refusals: the shape lookups refusing a time past the
+/// shape's last, where QuantLib reads one past its end; the jump process's one jump per step, QuantLib's first-order
+/// scheme; the jump processes' paths drawn without allocating; and the energy units' refusals with QuantLib's texts.
 /// </summary>
 public class ExperimentalEnergyConventionTests
 {

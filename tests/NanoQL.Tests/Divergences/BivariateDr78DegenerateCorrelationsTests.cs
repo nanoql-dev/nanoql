@@ -6,11 +6,11 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// QuantLib's fix after v1.44, #2880 (<c>ca8e70946</c>), to Drezner's bivariate normal, taken under R8's upstream rule
-/// (the S-exo plan's ER6 (i)), with its three cases in <c>test-suite/distributions.cpp</c> on master, here until the
-/// pin moves: at ρ = ±1, where QuantLib 1.44 divides by zero, the probabilities are Φ(min(a, b)) and max(0, Φ(a) + Φ(b)
-/// − 1); near zero bounds the recursion's derived correlations, by hypot forms, stay continuous and symmetric; and near
-/// |ρ| = 1 a one-ulp overshoot of a derived correlation is clamped, where QuantLib 1.44 throws.
+/// QuantLib's fix after v1.44, #2880 (<c>ca8e70946</c>), to Drezner's bivariate normal, taken as a fix, with its three
+/// cases in <c>test-suite/distributions.cpp</c> on master, here until the pin moves: at ρ = ±1, where QuantLib 1.44
+/// divides by zero, the probabilities are Φ(min(a, b)) and max(0, Φ(a) + Φ(b) − 1); near zero bounds the recursion's
+/// derived correlations, by hypot forms, stay continuous and symmetric; and near |ρ| = 1 a one-ulp overshoot of a
+/// derived correlation is clamped, where QuantLib 1.44 throws.
 /// </summary>
 public class BivariateDr78DegenerateCorrelationsTests
 {

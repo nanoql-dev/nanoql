@@ -15,13 +15,13 @@ oneassetoption.hpp, .cpp, europeanoption.hpp, .cpp) and its implied volatility (
   (100 x 100, the Douglas scheme), which QuantLib's impliedVolatility builds for these exercises, solved back at
   accuracy 1e-8: puts and calls at two strikes, with and without dividends, and a Bermudan put of quarterly dates.
 
-The stability filter of the S-eq plan's S7R6 runs on each solve: the solve is redone with the target price, the spot
-and the two curves' rates moved one ulp up, then down, together and each alone, and the implied volatility is written
-only where every move leaves it within 1e-12 x max(|a|, |b|, 1), or throwing where it throws; the generator prints
-"dropped n of m outputs" per solve and for the file. An American exercisable today whose finite-difference value at
-the bracket's lower volatility is below its exercise value has its implied volatility left out too: nanoql floors that
-value, QuantLib's master's #2914 (the S-van plan's VR5 (v), tests/NanoQL.Tests/Divergences/
-AmericanExerciseAtTheRootTests.cs), and Brent's method takes another path.
+The stability filter runs on each solve: the solve is redone with the target price, the spot and the two curves' rates
+moved one ulp up, then down, together and each alone, and the implied volatility is written only where every move
+leaves it within 1e-12 x max(|a|, |b|, 1), or throwing where it throws; the generator prints "dropped n of m outputs"
+per solve and for the file. An American exercisable today whose finite-difference value at the bracket's lower
+volatility is below its exercise value has its implied volatility left out too: nanoql floors that value, QuantLib's
+master's #2914 (tests/NanoQL.Tests/Divergences/AmericanExerciseAtTheRootTests.cs), and Brent's method takes another
+path.
 
 The process specs are tools/vectors/gen/processes/blackscholesprocess.py's, a payoff spec
 tools/vectors/gen/pricingengines/blackcalculator.py's, a dividend tools/vectors/gen/pricingengines/vanilla/
@@ -119,8 +119,8 @@ def solve(payoff_spec, days, pspec, dividends, target, args, kind="European"):
 
 
 def floored(payoff_spec, days, pspec, dividends, args, kind):
-    """Whether nanoql's engine floors the solver's first trial, QuantLib's master's #2914 (the S-van plan's VR5 (v)):
-    an American exercisable today whose finite-difference value at the lower volatility is below its exercise value."""
+    """Whether nanoql's engine floors the solver's first trial, QuantLib's master's #2914: an American exercisable
+    today whose finite-difference value at the lower volatility is below its exercise value."""
     if kind != "American":
         return False
     o = option(payoff_spec, days, european=False, kind=kind)

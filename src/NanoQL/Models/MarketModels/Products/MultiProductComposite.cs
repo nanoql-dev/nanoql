@@ -11,8 +11,8 @@ namespace NanoQL.Models;
 /// each part's cash flows scaled by its multiplier.
 /// </summary>
 /// <remarks>
-/// A working type (the S-mmp plan's MMPR1 (i)); a part's end is recorded and the composite's end is every part's or
-/// its last step (<see cref="MarketModelComposite"/>; MMPR4 (vii), a documented divergence).
+/// A working type; a part's end is recorded and the composite's end is every part's or its last step (<see
+/// cref="MarketModelComposite"/>; a documented divergence).
 /// </remarks>
 [WorkingType]
 public sealed class MultiProductComposite : MarketModelComposite

@@ -11,13 +11,13 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The shout, swing and CIR engines on structures dated differently (the mismatched-dates class; master Revision 58).
-/// QuantLib's engines run on the risk-free curve's times and read the dividend curve and the volatility at those times
-/// on their own clocks (<c>fdblackscholesshoutengine.cpp:65-73</c>, <c>fdsimplebsswingengine.cpp:47-77</c>,
+/// The shout, swing and CIR engines on structures dated differently. QuantLib's engines run on the risk-free curve's
+/// times and read the dividend curve and the volatility at those times on their own clocks
+/// (<c>fdblackscholesshoutengine.cpp:65-73</c>, <c>fdsimplebsswingengine.cpp:47-77</c>,
 /// <c>fdcirvanillaengine.cpp:64-69</c>): on a risk-free curve settling two business days after the other structures,
-/// QuantLib's shout engine reads 14.261505884225283 and its swing engine 17.000771278512975 [executed on the wheel:
-/// <c>scratchpad\c4\wheel_mismatched.py</c>]. nanoql's run on <see cref="FdmBlackScholesOp.Clock"/>, from the earliest
-/// reference date, each structure accruing nothing before its own, as its finite-difference Black-Scholes engine does
+/// QuantLib's shout engine reads 14.261505884225283 and its swing engine 17.000771278512975 (QuantLib-Python 1.44).
+/// nanoql's run on <see cref="FdmBlackScholesOp.Clock"/>, from the earliest reference date, each structure accruing
+/// nothing before its own, as its finite-difference Black-Scholes engine does
 /// (<c>Divergences/FdmMismatchedTimesTests.cs</c>). QuantLib's check: its own engines on the market restated from
 /// today, the risk-free curve discounting nothing before its date; for the CIR engine, whose QuantLib values are
 /// another model's (<c>Divergences/FdCirModelTests.cs</c>), nanoql's own engine on that market.

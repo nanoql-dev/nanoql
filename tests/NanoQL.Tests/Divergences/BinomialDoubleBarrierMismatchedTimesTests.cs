@@ -12,14 +12,13 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The binomial double-barrier engine's tree and steps (the S-xeq plan's XER5 (x), (xi), fixed under R8). QuantLib
-/// flattens each structure from the risk-free curve's reference date on its own day counter and runs the tree over the
-/// risk-free curve's time (<c>binomialdoublebarrierengine.hpp:73-117</c>), so a volatility on another day counter
-/// integrates the wrong variance; and it builds the grid and the lattice on the step count given where the
-/// Leisen-Reimer and Joshi trees build on one more at an even count, its 200 steps 3.8467695315 against 201's
-/// 3.8822505099 on a Leisen-Reimer tree [executed: the planner's <c>xp_c1.cpp bin</c>]. nanoql's tree is S-bar's
-/// binomial barrier engine's (BR5 (ii)) and its grid and lattice take the tree's own steps (SEQR7 (x)). Checks: the
-/// market restated onto the risk-free curve's day counter; the tree's steps.
+/// The binomial double-barrier engine's tree and steps (fixed). QuantLib flattens each structure from the risk-free
+/// curve's reference date on its own day counter and runs the tree over the risk-free curve's time
+/// (<c>binomialdoublebarrierengine.hpp:73-117</c>), so a volatility on another day counter integrates the wrong
+/// variance; and it builds the grid and the lattice on the step count given where the Leisen-Reimer and Joshi trees
+/// build on one more at an even count, its 200 steps 3.8467695315 against 201's 3.8822505099 on a Leisen-Reimer tree
+/// (QuantLib 1.44). nanoql's tree is the binomial barrier engine's and its grid and lattice take the tree's own steps.
+/// Checks: the market restated onto the risk-free curve's day counter; the tree's steps.
 /// </summary>
 public class BinomialDoubleBarrierMismatchedTimesTests
 {
@@ -50,7 +49,7 @@ public class BinomialDoubleBarrierMismatchedTimesTests
     [Fact]
     public void AnEvenCountOnALeisenReimerTreeIsTheTreesOddOne()
     {
-        // the planner's xp_c1.cpp bin market: S 100, q 0.02, r 0.05, σ 0.25, [80, 130], six months
+        // the market: S 100, q 0.02, r 0.05, σ 0.25, [80, 130], six months
         var option = new DoubleBarrierOption(
             DoubleBarrierType.KnockOut, 80.0, 130.0, 0.0, new PlainVanillaPayoff(OptionType.Call, 100.0),
             new EuropeanExercise(Today + 182));

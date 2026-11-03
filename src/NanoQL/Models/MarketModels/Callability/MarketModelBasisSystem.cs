@@ -12,7 +12,7 @@ namespace NanoQL.Models;
 /// The basis functions a Longstaff-Schwartz regression reads at each exercise: a node-data provider whose data are the
 /// functions' values.
 /// </summary>
-/// <remarks>A working type and an extension point (U13; the S-mmp plan's MMPR1 (i), (vi)).</remarks>
+/// <remarks>A working type and an extension point.</remarks>
 [WorkingType]
 public abstract class MarketModelBasisSystem : MarketModelNodeDataProvider
 {

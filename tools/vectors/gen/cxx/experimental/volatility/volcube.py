@@ -6,7 +6,7 @@ its surfaces SABR surfaces on Euribor 6M over abcd curves and its curves abcd cu
 and three surfaces on one reference date, with and without curves, the counts of its surfaces and curves; then
 QuantLib's refusals: one surface, a surface on another reference date, and a curve on another.
 
-No output is left out (the S-xeq plan's §2.8): the cube has no departure. Nothing is fitted, so no output is filtered.
+No output is left out: the cube has no departure. Nothing is fitted, so no output is filtered.
 
 The cube is tools/cxx/src/experimental/volatility/volcube.cpp's. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Experimental/Volatility/VolatilityCubeCxxVectorTests.cs."""

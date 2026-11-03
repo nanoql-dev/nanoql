@@ -22,10 +22,9 @@ namespace NanoQL.Methods;
 /// </para>
 /// <para>
 /// For a time-dependent operator QuantLib builds the trapezoidal stage's implicit part at t − Δt, where the stage ends
-/// at t − αΔt, so it steps at first order (on u_t = (1 + t)u_xx, errors 0.21, 0.040, 0.0025, 0.0030 at 25 to 200
-/// steps where TR-BDF2's are 0.25, 0.066, 0.017, 0.0041). Here the trapezoidal implicit part is built at t − αΔt and
-/// the BDF2 stage's at t − Δt (the S-core plan's CR7 (xvi), a documented divergence); for an operator constant in time,
-/// QuantLib's scheme, bit for bit.
+/// at t − αΔt, so it steps at first order (on u_t = (1 + t)u_xx, errors 0.21, 0.040, 0.0025, 0.0030 at 25 to 200 steps
+/// where TR-BDF2's are 0.25, 0.066, 0.017, 0.0041). Here the trapezoidal implicit part is built at t − αΔt and the BDF2
+/// stage's at t − Δt (a documented divergence); for an operator constant in time, QuantLib's scheme, bit for bit.
 /// </para>
 /// </remarks>
 [WorkingType]
@@ -102,7 +101,7 @@ public sealed class TRBDF2 : IFdmScheme
             bc.ApplyAfterApplying(v.AsSpan());
         }
 
-        // trapezoidal implicit part, at the stage's end t - alpha dt (CR7 (xvi)); for a constant operator, the step's
+        // trapezoidal implicit part, at the stage's end t - alpha dt; for a constant operator, the step's
         TridiagonalOperator trapezoidalImplicitPart = implicitPart;
         if (l.IsTimeDependent)
         {

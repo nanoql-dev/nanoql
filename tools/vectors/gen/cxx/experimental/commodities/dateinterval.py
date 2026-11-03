@@ -6,7 +6,7 @@ interval's intersections with overlapping, contained, touching and disjoint inte
 flag pairs at dates inside and outside it.
 
 Left out: the interval's own ends, which QuantLib's isDateBetween excludes whatever its flags say and nanoql includes
-as they say (the S-xrt plan's XRR5 (iii), tests/NanoQL.Tests/Divergences/DateIntervalTests.cs). Read back by
+as they say (tests/NanoQL.Tests/Divergences/DateIntervalTests.cs). Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Experimental/Commodities/DateIntervalCxxVectorTests.cs."""
 import importlib.util
 import os

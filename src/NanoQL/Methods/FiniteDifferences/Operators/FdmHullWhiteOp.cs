@@ -16,11 +16,10 @@ namespace NanoQL.Methods;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A working type (the S-eq plan's SEQR1): mutable, owned by one computation and not thread-safe. The direction's
-/// operator is built at construction; <see cref="SetTime"/> rewrites the step's operator in place with φ at the step's
-/// two ends' mean, and allocates nothing (the S-sr plan's SSD10), the fitting reading the curve's forward through
-/// <see cref="TermStructures.YieldTermStructure"/>'s internal <c>ContinuousForwardRate</c>, its bits
-/// <c>ForwardRate</c>'s.
+/// A working type: mutable, owned by one computation and not thread-safe. The direction's operator is built at
+/// construction; <see cref="SetTime"/> rewrites the step's operator in place with φ at the step's two ends' mean, and
+/// allocates nothing, the fitting reading the curve's forward through <see cref="TermStructures.YieldTermStructure"/>'s
+/// internal <c>ContinuousForwardRate</c>, its bits <c>ForwardRate</c>'s.
 /// </para>
 /// <para>
 /// The model's dynamics are built once, at construction, where QuantLib's <c>setTime</c> calls

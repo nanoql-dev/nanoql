@@ -21,17 +21,16 @@ namespace NanoQL.TermStructures;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Immutable (the S-g1d plan's G1D9): <see cref="Compute"/> returns the fitted calibration, where QuantLib's
-/// <c>compute()</c> changes the object; before it the parameters are the guesses, and the weights 1/n.
+/// Immutable: <see cref="Compute"/> returns the fitted calibration, where QuantLib's <c>compute()</c> changes the
+/// object; before it the parameters are the guesses, and the weights 1/n.
 /// </para>
 /// <para>
-/// One of QuantLib's refusals is narrowed (G1R6 (xxv)): QuantLib's transformation leaves b free, so its optimizer can
-/// step to a trial point the abcd function's validation refuses, and the fit throws. Here such a trial point's
-/// residuals are 1.0 each, a guard that keeps every fit QuantLib completes bit for bit, since none of them reaches such
-/// a point. A fit on which the guard acted is returned where it ends inside the valid region and refused with
-/// QuantLib's text, its first invalid trial point's, where it ends against the zero floor: its lowest instantaneous
-/// volatility below 1% of the smallest Black volatility given, as for data whose total variance shrinks, which no valid
-/// curve fits.
+/// One of QuantLib's refusals is narrowed: QuantLib's transformation leaves b free, so its optimizer can step to a
+/// trial point the abcd function's validation refuses, and the fit throws. Here such a trial point's residuals are 1.0
+/// each, a guard that keeps every fit QuantLib completes bit for bit, since none of them reaches such a point. A fit on
+/// which the guard acted is returned where it ends inside the valid region and refused with QuantLib's text, its first
+/// invalid trial point's, where it ends against the zero floor: its lowest instantaneous volatility below 1% of the
+/// smallest Black volatility given, as for data whose total variance shrinks, which no valid curve fits.
 /// </para>
 /// <para>
 /// One of QuantLib's defects is fixed: its transformation gives a as a positive a + d less d, so with a fixed and d
@@ -218,7 +217,7 @@ public sealed class AbcdCalibration
 
         if (costFunction.FirstRefusal is string refusal)
         {
-            // the guard acted (G1R6 (xxv)): QuantLib's refusal where the fit ends invalid or against the zero floor
+            // the guard acted: QuantLib's refusal where the fit ends invalid or against the zero floor
             if (AbcdMathFunction.Check(result[0], result[1], result[2], result[3]) is not null
                 || LowestInstantaneousVolatility(result[0], result[1], result[2], result[3]) < FloorFraction * blackVols.Min())
             {

@@ -16,13 +16,13 @@ namespace NanoQL.PricingEngines;
 /// <remarks>
 /// <para>
 /// A static engine over a private simulation deriving <see cref="MCVanillaEngine{TMc, TPath, TStats}"/>, QuantLib's
-/// <c>MCVanillaEngine&lt;MultiVariate, RNG, S&gt;</c> (the S-hes plan's HR2 (iv)); the seed is explicit
-/// (<see cref="MakeMCEuropeanGJRGARCHEngine{TRng, TStats}"/>). The path generator steps the process in place (HR2).
+/// <c>MCVanillaEngine&lt;MultiVariate, RNG, S&gt;</c>; the seed is explicit (<see
+/// cref="MakeMCEuropeanGJRGARCHEngine{TRng, TStats}"/>). The path generator steps the process in place.
 /// </para>
 /// <para>
 /// The path grid and the discount run on the process's model clock, from the earliest curve date, each curve read at
-/// the instant a time denotes (HR7 (xviii)): QuantLib's grid and reads where the dividend curve isn't dated before the
-/// risk-free curve.
+/// the instant a time denotes: QuantLib's grid and reads where the dividend curve isn't dated before the risk-free
+/// curve.
 /// </para>
 /// </remarks>
 public static class MCEuropeanGJRGARCHEngine

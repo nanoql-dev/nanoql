@@ -27,32 +27,32 @@ namespace NanoQL.PricingEngines;
 /// results "strikeGamma" and "exerciseType" (European, American or Immediate); no forward delta, elasticity or
 /// in-the-money probability, which QuantLib's engine leaves uninitialized (its results are built in a local it never
 /// resets; <c>Divergences/BjerksundStenslandUnsetGreeksTests.cs</c>). The Greeks call the C runtime's <c>erfc</c>,
-/// which nanoql reads through Boost's (the S-van plan's VR6), so their last bits can differ from QuantLib's.
+/// which nanoql reads through Boost's, so their last bits can differ from QuantLib's.
 /// </para>
 /// <para>
 /// Documented divergences, each leaving QuantLib's arithmetic where it doesn't apply:
 /// </para>
 /// <list type="bullet">
 /// <item><description>Below a variance of ε the value is the European one floored at the exercise value, as QuantLib's
-/// master does since the pin (#2854; VR5 (ii)).</description></item>
+/// master does since the pin (#2854).</description></item>
 /// <item><description>Where the trigger price falls below its lower bound B₀, or isn't finite
-/// (<c>bjerksundstenslandengine.cpp:196-206</c>, the trigger's exponent positive), the trigger is the perpetual boundary
-/// B∞, in the same closed form and Greeks, its derivatives B∞'s: a flat boundary at or above B₀ is a feasible exercise
-/// rule, whose value bounds the option's from below (Bjerksund and Stensland 2002, §3). QuantLib prices there with an
-/// infeasible trigger and returns its European floor, up to 3.4 below its own finite-difference engine. Where the
-/// perpetual boundary is infinite the European value stands (VR9, the user's ruling of 2026-10-24;
-/// <c>Divergences/BjerksundStenslandTriggerTests.cs</c>). The value jumps at the region's edge, between QuantLib's
-/// trigger and B∞, two of the method's lower bounds. QuantLib's shortcut to the European value where the trigger lies
-/// 12.5 standard deviations above the forward (<c>:212-216</c>) isn't taken at B∞: in the region the forward falls far
-/// below the spot while B∞ stays just above it, so the path reaches B∞ early or not at all.</description></item>
+/// (<c>bjerksundstenslandengine.cpp:196-206</c>, the trigger's exponent positive), the trigger is the perpetual
+/// boundary B∞, in the same closed form and Greeks, its derivatives B∞'s: a flat boundary at or above B₀ is a feasible
+/// exercise rule, whose value bounds the option's from below (Bjerksund and Stensland 2002, §3). QuantLib prices there
+/// with an infeasible trigger and returns its European floor, up to 3.4 below its own finite-difference engine. Where
+/// the perpetual boundary is infinite the European value stands (<c>Divergences/BjerksundStenslandTriggerTests.cs</c>).
+/// The value jumps at the region's edge, between QuantLib's trigger and B∞, two of the method's lower bounds.
+/// QuantLib's shortcut to the European value where the trigger lies 12.5 standard deviations above the forward
+/// (<c>:212-216</c>) isn't taken at B∞: in the region the forward falls far below the spot while B∞ stays just above
+/// it, so the path reaches B∞ early or not at all.</description></item>
 /// <item><description>Where a power (I/S)^κ overflows against an underflowing normal tail, QuantLib's product is NaN or
 /// 0 (<c>:37-112</c>); there the product is taken through logarithms, log N's asymptotic tail beyond −30, as one
-/// exponent with the Gaussian densities it divides; QuantLib's arithmetic elsewhere (VR4 (xxxiii),
-/// <c>Divergences/BjerksundStenslandOverflowTests.cs</c>).</description></item>
+/// exponent with the Gaussian densities it divides; QuantLib's arithmetic elsewhere
+/// (<c>Divergences/BjerksundStenslandOverflowTests.cs</c>).</description></item>
 /// <item><description>The American Greeks' times run from each structure's own reference date, where QuantLib's run from
-/// the risk-free curve's (VR4 (viii), <c>Divergences/BjerksundStenslandMismatchedTimesTests.cs</c>); each structure is read
-/// at the exercise date by date, nothing accrued before its own reference date; and an exercise window opening after
-/// the reference date is priced by <see cref="ApproximationWindow"/> (VR4 (xxvi)).</description></item>
+/// the risk-free curve's (<c>Divergences/BjerksundStenslandMismatchedTimesTests.cs</c>); each structure is read at the
+/// exercise date by date, nothing accrued before its own reference date; and an exercise window opening after the
+/// reference date is priced by <see cref="ApproximationWindow"/>.</description></item>
 /// </list>
 /// </remarks>
 public static class BjerksundStenslandApproximationEngine
@@ -103,7 +103,7 @@ public static class BjerksundStenslandApproximationEngine
         }
 
         // each structure read by date, nothing accrued before its reference date (the mismatched-dates class); the
-        // theta's day fractions from each structure's own reference date (VR4 (viii))
+        // theta's day fractions from each structure's own reference date
         TermStructure clock = FdmBlackScholesOp.Clock(process);
         Date lastDate = ex.LastDate();
         ApproximationWindow.Market market = ApproximationWindow.At(process, clock, lastDate, payoff.Strike);
@@ -215,8 +215,8 @@ public static class BjerksundStenslandApproximationEngine
         double vega = black.Vega(t);
 
         // the theta's terms over each structure's own time on the volatility's day counter, the call's risk-free and
-        // dividend curves the put's dividend and risk-free curves; QuantLib's one time where they agree (the class of
-        // S-eq's analytic European engine)
+        // dividend curves the put's dividend and risk-free curves; QuantLib's one time where they agree (the analytic
+        // European engine's class)
         double rfTime = put ? times.DividendOnVolatility : times.RiskFreeOnVolatility;
         double dTime = put ? times.RiskFreeOnVolatility : times.DividendOnVolatility;
         double theta = black.Theta(s, rfTime, rfD, rfTime, dD, dTime, t);
@@ -286,7 +286,7 @@ public static class BjerksundStenslandApproximationEngine
             : b0 + ((bInfinity - b0) * (1 - Math.Exp(ht)));
 
         // the trigger below its lower bound: the perpetual boundary in its place, a feasible flat boundary whose
-        // value is a lower bound (Bjerksund and Stensland 2002, §3); with no finite one, never exercising (VR9)
+        // value is a lower bound (Bjerksund and Stensland 2002, §3); with no finite one, never exercising
         bool perpetualTrigger = !(i >= b0) || !double.IsFinite(i);
         if (perpetualTrigger)
         {
@@ -307,10 +307,9 @@ public static class BjerksundStenslandApproximationEngine
         }
         else if (q > 12.5 && !perpetualTrigger)
         {
-            // We have a run away exercise boundary. It is numerically
-            // more accurate to use the Greeks of the European engine.
-            // (Not at the perpetual trigger: its distance from the forward says nothing of the path reaching it,
-            // VR9.)
+            // We have a run away exercise boundary. It is numerically more accurate to use the Greeks of the European
+            // engine. (Not at the perpetual trigger: its distance from the forward says nothing of the path reaching
+            // it)
             results = europeanResults;
         }
         else
@@ -336,8 +335,7 @@ public static class BjerksundStenslandApproximationEngine
                 - (x * PhiS(s, 0.0, i, i, rT, bT, variance))
                 + (x * PhiS(s, 0.0, x, i, rT, bT, variance));
 
-            // each structure's time from its own reference date (VR4 (viii)), rescaled with the swap for a put, as
-            // QuantLib's
+            // each structure's time from its own reference date, rescaled with the swap for a put, as QuantLib's
             double tq = times.Dividend;
 
             double betaDq = tq * ((1 / variance)
@@ -483,7 +481,7 @@ public static class BjerksundStenslandApproximationEngine
 
             double vol = Math.Sqrt(variance / tv);
 
-            // the day fractions of each structure's own day counter from its own reference date (VR4 (viii))
+            // the day fractions of each structure's own day counter from its own reference date
             double dtq = times.Days.Dividend;
             double dtr = times.Days.RiskFree;
             double dtv = times.Days.Volatility;
@@ -526,7 +524,7 @@ public static class BjerksundStenslandApproximationEngine
         double power = Math.Pow(i / s, kappa);
         double tail = CumNormalDist.Evaluate(tailArgument);
 
-        // the power overflowing or the tail underflowing: their product as one exponent (VR4 (xxxiii))
+        // the power overflowing or the tail underflowing: their product as one exponent
         double product = double.IsFinite(power) && tail != 0.0
             ? power * tail
             : Math.Exp((kappa * Math.Log(i / s)) + AmericanPayoffAtHit.LogCumNormal(tailArgument));
@@ -646,7 +644,7 @@ public static class BjerksundStenslandApproximationEngine
             return e * power * s * ((2 * Math.Sqrt(2 / Math.PI) / (density * sv)) + (c * tail)) / (2.0 * i * i);
         }
 
-        // the power overflowing or the density's and tail's underflowing (VR4 (xxxiii))
+        // the power overflowing or the density's and tail's underflowing
         return e * s
             * ((2 * Math.Sqrt(2 / Math.PI) / sv * Math.Exp((k * lis) - (Squared(y) / (8.0 * v))))
                + (c * Math.Exp((k * lis) + LogErfc(y / (2.0 * MathConstants.M_SQRT2 * sv)))))

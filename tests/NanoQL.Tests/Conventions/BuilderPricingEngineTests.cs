@@ -14,7 +14,7 @@ namespace NanoQL.Tests.Conventions;
 /// The swap builders take QuantLib's pricing engine as a delegate of the swap and the context, which computes what
 /// QuantLib's builder computes at build time, the par rate when no fixed rate is given, and is never stored: the swap
 /// returned holds no engine, where QuantLib's builder attaches one. The credit default swap's builder computes nothing
-/// at build time, so its engine changes nothing (SID14).
+/// at build time, so its engine changes nothing.
 /// </summary>
 public class BuilderPricingEngineTests
 {

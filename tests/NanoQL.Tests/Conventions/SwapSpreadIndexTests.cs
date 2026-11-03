@@ -9,11 +9,11 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The swap spread index's name (the S-g1d plan's G1D8): QuantLib's text, each swap index's name with its gearing to
-/// four decimals, <c>"&lt;name 1&gt;(&lt;gearing 1&gt;) + &lt;name 2&gt;(&lt;gearing 2&gt;)"</c>, its family name the
-/// one given. On the wheel, the 10-year EUR swap rate less half the 2-year's is "EuriborSwapIsdaFixA10Y 30/360 (Bond
-/// Basis)(1.0000) + EuriborSwapIsdaFixA2Y 30/360 (Bond Basis)(-0.5000)", and gearings of 1.23456789 and 0.000049 read
-/// 1.2346 and 0.0000. It allows no native fixings, its fixings its indexes' (<c>swapspreadindex.hpp:45</c>).
+/// The swap spread index's name: QuantLib's text, each swap index's name with its gearing to four decimals,
+/// <c>"&lt;name 1&gt;(&lt;gearing 1&gt;) + &lt;name 2&gt;(&lt;gearing 2&gt;)"</c>, its family name the one given. On
+/// the wheel, the 10-year EUR swap rate less half the 2-year's is "EuriborSwapIsdaFixA10Y 30/360 (Bond Basis)(1.0000) +
+/// EuriborSwapIsdaFixA2Y 30/360 (Bond Basis)(-0.5000)", and gearings of 1.23456789 and 0.000049 read 1.2346 and 0.0000.
+/// It allows no native fixings, its fixings its indexes' (<c>swapspreadindex.hpp:45</c>).
 /// </summary>
 public class SwapSpreadIndexTests
 {

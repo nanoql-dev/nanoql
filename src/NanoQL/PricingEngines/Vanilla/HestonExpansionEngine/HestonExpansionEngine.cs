@@ -14,9 +14,9 @@ namespace NanoQL.PricingEngines;
 /// <summary>The Heston expansion engine: Black's formula at an expansion's implied volatility.</summary>
 /// <remarks>
 /// <para>
-/// The model's time runs from the earliest curve date and the forward and discount are read by date (the S-hes plan's
-/// HR7 (xi), S-eq's <see cref="AnalyticHestonEngine"/>'s reads); at the model's time 0, Black's formula at a zero
-/// standard deviation, the forward's discounted intrinsic value, before any coefficient (HR7 (xxxi)).
+/// The model's time runs from the earliest curve date and the forward and discount are read by date (<see
+/// cref="AnalyticHestonEngine"/>'s reads); at the model's time 0, Black's formula at a zero standard deviation, the
+/// forward's discounted intrinsic value, before any coefficient.
 /// </para>
 /// <para>
 /// References: M. Forde, A. Jacquier, R. Lee, The small-time smile and term structure of implied volatility under the
@@ -80,7 +80,7 @@ public static class HestonExpansionEngine
         double forward = spotPrice * dividendDiscount / riskFreeDiscount;
         if (term == 0.0)
         {
-            // no variance has accrued: Black at a zero standard deviation, before any coefficient (HR7 (xxxi))
+            // no variance has accrued: Black at a zero standard deviation, before any coefficient
             return option.FetchResults(new OneAssetOptionResults
             {
                 NPV = BlackFormulaFunctions.BlackFormula(payoff, forward, 0.0, riskFreeDiscount, 0),

@@ -9,10 +9,10 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// A step of the forward operators allocates nothing (the S-van plan's VD12, S3's zero-allocation pin in S-eq's
-/// one-dimensional form): <c>SetTime</c> rewrites the bands in place through buffers the operators hold, by the Black
-/// forward variance and by the local volatility. A Douglas rollback (the local-volatility density calculator's scheme) is
-/// measured on fresh values after a warm-up (<see cref="AllocationAssert"/>), and gives the warm-up's values.
+/// A step of the forward operators allocates nothing (the one-dimensional zero-allocation pin): <c>SetTime</c> rewrites
+/// the bands in place through buffers the operators hold, by the Black forward variance and by the local volatility. A
+/// Douglas rollback (the local-volatility density calculator's scheme) is measured on fresh values after a warm-up
+/// (<see cref="AllocationAssert"/>), and gives the warm-up's values.
 /// </summary>
 public class FdmFwdOpAllocationTests
 {

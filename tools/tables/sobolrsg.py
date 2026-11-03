@@ -6,16 +6,16 @@ coefficients of the free direction integers.
 
 Usage: .venv\\Scripts\\python -I tools/tables/sobolrsg.py <QuantLib v1.44 worktree> [<output root>]
 
-It writes one file per pointer table of the .cpp's anonymous namespace under src/NanoQL/Numerics/RandomNumbers/SobolRsg/
-of the output root (by default the repository), named after QuantLib's table with its first letter capitalised:
-AltPrimitivePolynomials.bin, SLinitializers.bin, Initializers.bin (Jäckel's), Linitializers.bin, Kuoinitializers.bin,
-Kuo2initializers.bin, Kuo3initializers.bin, JoeKuoD5initializers.bin, JoeKuoD6initializers.bin and
-JoeKuoD7initializers.bin. Each holds the arrays its table points to, in the table's order, each as QuantLib lays it
-out: the alternative polynomials of each degree followed by -1, as little-endian 32-bit signed integers; a
-dimension's coefficients followed by 0, as little-endian 32-bit unsigned integers. A table that points to an array
-twice (Jäckel's starts with Sobol and Levitan's first seven) holds it twice. The loader,
-src/NanoQL/Numerics/RandomNumbers/SobolRsg/SobolRsgTables.cs, reads them back. tools/check-upstream.py (G4 (6))
-regenerates them into a temporary folder and compares the bytes with the committed files.
+It writes one file per pointer table of the .cpp's anonymous namespace under
+src/NanoQL/Numerics/RandomNumbers/SobolRsg/of the output root (by default the repository), named after QuantLib's table
+with its first letter capitalised: AltPrimitivePolynomials.bin, SLinitializers.bin, Initializers.bin (Jäckel's),
+Linitializers.bin, Kuoinitializers.bin, Kuo2initializers.bin, Kuo3initializers.bin, JoeKuoD5initializers.bin,
+JoeKuoD6initializers.bin and JoeKuoD7initializers.bin. Each holds the arrays its table points to, in the table's order,
+each as QuantLib lays it out: the alternative polynomials of each degree followed by -1, as little-endian 32-bit signed
+integers; a dimension's coefficients followed by 0, as little-endian 32-bit unsigned integers. A table that points to an
+array twice (Jäckel's starts with Sobol and Levitan's first seven) holds it twice. The loader,
+src/NanoQL/Numerics/RandomNumbers/SobolRsg/SobolRsgTables.cs, reads them back. tools/check-upstream.py regenerates them
+into a temporary folder and compares the bytes with the committed files.
 """
 import os
 import re

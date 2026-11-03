@@ -938,7 +938,7 @@ public class HestonSlvModelTests
         }
     }
 
-    // Upstream: QuantLib's master's case for #2860 (the S-hes plan's HR8 (i)).
+    // Upstream: QuantLib's master's case for #2860.
     [Fact]
     public void TestMonteCarloCalibrationTimeDependentLocalVol()
     {

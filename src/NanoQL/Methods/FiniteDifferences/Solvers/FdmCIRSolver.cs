@@ -14,9 +14,9 @@ namespace NanoQL.Methods;
 /// solver, read at a spot and a rate.
 /// </summary>
 /// <remarks>
-/// A working type built per call (the S-van plan's VD11): computed at construction, where QuantLib's lazy object
-/// computes at the first read, and immutable after. With a quanto helper the operator applies its adjustment, where
-/// QuantLib's solver takes none (<see cref="FdmCIROp"/>'s remarks).
+/// A working type built per call: computed at construction, where QuantLib's lazy object computes at the first read,
+/// and immutable after. With a quanto helper the operator applies its adjustment, where QuantLib's solver takes none
+/// (<see cref="FdmCIROp"/>'s remarks).
 /// </remarks>
 [WorkingType]
 public sealed class FdmCIRSolver

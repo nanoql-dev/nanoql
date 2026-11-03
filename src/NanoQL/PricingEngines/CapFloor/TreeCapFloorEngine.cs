@@ -16,12 +16,12 @@ namespace NanoQL.PricingEngines;
 /// <remarks>
 /// <para>
 /// A static class: <c>Calculate</c> runs QuantLib's four steps (playbook §2.1) on the model, an argument where
-/// QuantLib's engine holds it, on a lattice built through the asset's mandatory times with the given number of steps, or
-/// on a time grid, or on a lattice already built. The asset is initialized at its last payment and rolled back to its
-/// first start, or to the reference date where that start is before it (a seasoned cap, the S-sr plan's SSR6 (iv)),
-/// where QuantLib's grid refuses the negative time, or to the first caplet's fixing where the asset values that caplet
-/// there, before its start (the S-sr plan's B1-1, <c>Divergences/CapletFixingExpiryTests.cs</c>). A caplet paid on the
-/// reference date counts only when the context includes today's cash flows, as the discretized swap's known coupon does.
+/// QuantLib's engine holds it, on a lattice built through the asset's mandatory times with the given number of steps,
+/// or on a time grid, or on a lattice already built. The asset is initialized at its last payment and rolled back to
+/// its first start, or to the reference date where that start is before it (a seasoned cap), where QuantLib's grid
+/// refuses the negative time, or to the first caplet's fixing where the asset values that caplet there, before its
+/// start (<c>Divergences/CapletFixingExpiryTests.cs</c>). A caplet paid on the reference date counts only when the
+/// context includes today's cash flows, as the discretized swap's known coupon does.
 /// </para>
 /// <para>
 /// The term structure is needed only when the model can't provide one: a model that is an
@@ -164,7 +164,7 @@ public static class TreeCapFloorEngine
 
         double firstTime = dayCounter.YearFraction(referenceDate, arguments.StartDates[0]);
 
-        // B1-1: a caplet valued at its fixing, before the first start, is reached there
+        // A caplet valued at its fixing, before the first start, is reached there
         double earliestFixing = capfloor.EarliestFixingTime;
         if (earliestFixing < firstTime)
         {

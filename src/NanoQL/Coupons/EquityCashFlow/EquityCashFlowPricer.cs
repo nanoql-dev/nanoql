@@ -8,9 +8,9 @@ namespace NanoQL.Coupons;
 
 /// <summary>The base of the equity cash flow pricers: the index ratio a flow pays, per unit of notional.</summary>
 /// <remarks>
-/// QuantLib's pricer keeps the flow's index and dates in members that <c>initialize</c> sets before each
-/// <c>price</c>; here <see cref="Price"/> takes the flow, a function of the flow and the context (the S-cms plan's
-/// CMD14). An extension point: the quanto pricer derives from it.
+/// QuantLib's pricer keeps the flow's index and dates in members that <c>initialize</c> sets before each <c>price</c>;
+/// here <see cref="Price"/> takes the flow, a function of the flow and the context. An extension point: the quanto
+/// pricer derives from it.
 /// </remarks>
 public abstract class EquityCashFlowPricer
 {

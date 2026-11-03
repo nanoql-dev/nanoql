@@ -23,16 +23,14 @@ namespace NanoQL.PricingEngines;
 /// <para>
 /// The engine reports the value, delta, gamma and theta; the theta is <see langword="null"/> when the problem's first
 /// stopping time is time 0, as QuantLib's is. Its finite-difference working types are built inside each calculation and
-/// dropped after it (the S-eq plan's SEQR1). Its times are the discount curve's, from its reference date in its day
-/// counter, as QuantLib's; an exercise on or before that date leaves the engine no time to roll back over, and it is
-/// refused, as QuantLib's engine throws there (Boost's refusal of an infinite non-centrality, or a negative time in the
-/// incomplete gamma function), and as nanoql's other finite-difference engines refuse an exercise their clocks have no
-/// time for.
+/// dropped after it. Its times are the discount curve's, from its reference date in its day counter, as QuantLib's; an
+/// exercise on or before that date leaves the engine no time to roll back over, and it is refused, as QuantLib's engine
+/// throws there (Boost's refusal of an infinite non-centrality, or a negative time in the incomplete gamma function),
+/// and as nanoql's other finite-difference engines refuse an exercise their clocks have no time for.
 /// </para>
 /// <para>
 /// Near β = 1 the mesher's bounds and the upper end's value are the lognormal limit's and Black's formula at Hagan's
-/// equivalent volatility (<see cref="FdmCEV1dMesher"/>, <see cref="CEVCalculator"/>; the S-van plan's VR10), where
-/// QuantLib's engine throws.
+/// equivalent volatility (<see cref="FdmCEV1dMesher"/>, <see cref="CEVCalculator"/>), where QuantLib's engine throws.
 /// </para>
 /// </remarks>
 public static class FdCEVVanillaEngine

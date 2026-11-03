@@ -11,15 +11,14 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The seasoned arithmetic Asians on a smile (the S-bar plan's BR5 (xxx), fixed under R8). With f future fixings of m,
-/// an accrued sum A and the strike K, max(avg − K, 0) = (f/m)·max(avg_f − K_f, 0) with K_f = (K − A/m)·m/f, so a
-/// seasoned price is exactly (f/m) times the unseasoned price at K_f. QuantLib's Turnbull-Wakeman engine reads its
-/// variances at K − A/m and its Choi engine its correlations at K − A/m and its volatilities at K
-/// (<c>turnbullwakemanasianengine.cpp:94-95</c>, <c>choiasianengine.cpp:104-122</c>), so on a smile whose skew decays
-/// with maturity (0.22 + skewⱼ·(100 − K)/100, skews 0.30, 0.18 and 0.08 at 60, 120 and 240 days; spot 100, r 5%, q 0)
-/// they break the identity, Turnbull-Wakeman by +42% and +1,302% and Choi by −2.6% to +306% on six past fixings and six
-/// monthly ones to come (the planner's BP22). nanoql reads both at the future average's own strike K_f. Check: the
-/// identity, against each engine's own unseasoned value at K_f.
+/// The seasoned arithmetic Asians on a smile (fixed). With f future fixings of m, an accrued sum A and the strike K,
+/// max(avg − K, 0) = (f/m)·max(avg_f − K_f, 0) with K_f = (K − A/m)·m/f, so a seasoned price is exactly (f/m) times the
+/// unseasoned price at K_f. QuantLib's Turnbull-Wakeman engine reads its variances at K − A/m and its Choi engine its
+/// correlations at K − A/m and its volatilities at K (<c>turnbullwakemanasianengine.cpp:94-95</c>,
+/// <c>choiasianengine.cpp:104-122</c>), so on a smile whose skew decays with maturity (0.22 + skewⱼ·(100 − K)/100,
+/// skews 0.30, 0.18 and 0.08 at 60, 120 and 240 days; spot 100, r 5%, q 0) they break the identity, Turnbull-Wakeman by
+/// +42% and +1,302% and Choi by −2.6% to +306% on six past fixings and six monthly ones to come. nanoql reads both at
+/// the future average's own strike K_f. Check: the identity, against each engine's own unseasoned value at K_f.
 /// </summary>
 public class SeasonedAsianSmileTests
 {

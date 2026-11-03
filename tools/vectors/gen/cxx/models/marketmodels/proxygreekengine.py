@@ -8,10 +8,10 @@ constrained, testGreeks' weights.
 Call and put optionlets at the forwards on six semi-annual rates and five irregular ones, FlatVol 20%, 3
 factors, the money-market measure; forwards bumped 1e-6 and volatilities 1e-4; the Mersenne twister and Sobol.
 
-The constrained evolvers' reference is each one's own model, QuantLib's weight (the S-mmp plan's MMPR3;
-tests/NanoQL.Tests/Divergences/ProxyGreekVegaTests.cs holds the reference model's). The harness calls each constrained
-evolver's setConstraintType again before each step, so each step's covariances are its own pseudo-root's, nanoql's fix
-(the S-mm plan's MR3 (vi)), as evolvers/lognormalfwdrateeulerconstrained.py does.
+The constrained evolvers' reference is each one's own model, QuantLib's weight
+(tests/NanoQL.Tests/Divergences/ProxyGreekVegaTests.cs holds the reference model's). The harness calls each constrained
+evolver's setConstraintType again before each step, so each step's covariances are its own pseudo-root's, nanoql's fix,
+as evolvers/lognormalfwdrateeulerconstrained.py does.
 
 The harness unit is tools/cxx/src/models/marketmodels/pathwisegreeks/pathwisegreeks.cpp. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Models/MarketModels/ProxyGreekEngineCxxVectorTests.cs."""

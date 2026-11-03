@@ -18,23 +18,22 @@ namespace NanoQL.Models;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Immutable (the S-mm plan's MR2 (a), (b)): it holds a copy of the alpha form given, and each pass solves on a copy of
-/// that, so a <see cref="CTSMMCapletCalibration.Calibrate"/> leaves the next one's form as it was.
+/// Immutable ((b)): it holds a copy of the alpha form given, and each pass solves on a copy of that, so a
+/// <see cref="CTSMMCapletCalibration.Calibrate"/> leaves the next one's form as it was.
 /// <see cref="CapletAlphaFormCalibration"/> returns its pass's pseudo-roots and α, a and b in place of QuantLib's
 /// out-parameters, and solves on a copy of the form given.
 /// </para>
 /// <para>
 /// As in QuantLib, a caplet no α fits throws ("alpha form failure"), where the other calibrations count a failure; and,
-/// as in QuantLib's master after 1.44 (#2910, the upstream sweep's SWR2 (a), which re-rules MR3 (viii)), so does a step
-/// whose final part fails, which QuantLib 1.44's solve returns as solved with the swap rate's last volatility left as
-/// it was, its swaptions missed (<c>Divergences/CTSMMCapletAlphaFormCalibrationTests.cs</c>). Two departures from
-/// master: the calibration refuses such a step in the pass it returns, and counts it in an earlier pass, whose
-/// successor re-targets the caplets and can fit, where master throws in any pass (the sweep's ruling SWI4 (b)), so a
-/// calibration whose returned pass fits keeps QuantLib 1.44's numbers; and at maximum homogeneity, where the fixed
-/// minimization (MR3 (x)) leaves a caplet no α, the pass runs again on QuantLib 1.44's test of the objective's value
-/// before it throws (the user's ruling of 2026-10-27), where master throws. <see cref="CapletAlphaFormCalibration"/>,
-/// one pass alone, refuses a failed final part as master does. α bounds shorter than the rates, which QuantLib's
-/// function reads unchecked, are refused (MR3 (xx)).
+/// as in QuantLib's master after 1.44 (#2910), so does a step whose final part fails, which QuantLib 1.44's solve
+/// returns as solved with the swap rate's last volatility left as it was, its swaptions missed
+/// (<c>Divergences/CTSMMCapletAlphaFormCalibrationTests.cs</c>). Two departures from master: the calibration refuses
+/// such a step in the pass it returns, and counts it in an earlier pass, whose successor re-targets the caplets and can
+/// fit, where master throws in any pass, so a calibration whose returned pass fits keeps QuantLib 1.44's numbers; and
+/// at maximum homogeneity, where the fixed minimization leaves a caplet no α, the pass runs again on QuantLib 1.44's
+/// test of the objective's value before it throws, where master throws. <see cref="CapletAlphaFormCalibration"/>, one
+/// pass alone, refuses a failed final part as master does. α bounds shorter than the rates, which QuantLib's function
+/// reads unchecked, are refused.
 /// </para>
 /// </remarks>
 public sealed class CTSMMCapletAlphaFormCalibration : CTSMMCapletCalibration
@@ -160,7 +159,7 @@ public sealed class CTSMMCapletAlphaFormCalibration : CTSMMCapletCalibration
             true);
 
     // The calibration's pass counts a step whose final part fails, and refuses it in the pass it returns
-    // (CheckReturnedStep, SWI4 (b)); the pass alone refuses it at once, as QuantLib's master does.
+    // (CheckReturnedStep); the pass alone refuses it at once, as QuantLib's master does.
     private protected override void CheckReturnedStep(CTSMMCapletCalibrationStep step)
     {
         if (step.Failures > 0)
@@ -195,7 +194,7 @@ public sealed class CTSMMCapletAlphaFormCalibration : CTSMMCapletCalibration
 
         CheckFactors(numberOfFactors, numberOfRates);
 
-        // QuantLib's function reads the α vectors unchecked; its constructor checks them (MR3 (xx))
+        // QuantLib's function reads the α vectors unchecked; its constructor checks them
         CheckAlphas(numberOfRates, alphaInitial, alphaMax, alphaMin);
 
         int failures = 0;
@@ -230,8 +229,8 @@ public sealed class CTSMMCapletAlphaFormCalibration : CTSMMCapletCalibration
             alpha[0] = alphaInitial[0]; // has no effect on anything in any case
             a[0] = b[0] = 1.0; // no modifications to swap vol for first rate
 
-            // the form's α is the solver's to set: it solves on a copy (MR2 (b)); a second attempt minimizes on
-            // QuantLib's test of the objective's value
+            // the form's α is the solver's to set: it solves on a copy; a second attempt minimizes on QuantLib's test
+            // of the objective's value
             var solver = new AlphaFinder(parametricForm.Clone(), attempt == 1);
             failures = 0;
             bool passed = true;
@@ -314,7 +313,7 @@ public sealed class CTSMMCapletAlphaFormCalibration : CTSMMCapletCalibration
                 }
 
                 // a caplet no α fits: QuantLib's refusal, at maximum homogeneity after the pass again on 1.44's test
-                // (MR3 (x))
+                //
                 if (!success && double.IsNaN(alpha[i + 1]))
                 {
                     if (!(maximizeHomogeneity && attempt == 0))
@@ -326,9 +325,9 @@ public sealed class CTSMMCapletAlphaFormCalibration : CTSMMCapletCalibration
                     break;
                 }
 
-                // a step whose final part fails, its α found: QuantLib's master's refusal (#2910; SWR2 (a)), where
-                // its failure count is commented out beside its throw (capletcoterminalalphacalibration.cpp:202-203);
-                // a calibration's pass counts it, refused where the calibration returns this pass (SWI4 (b))
+                // a step whose final part fails, its α found: QuantLib's master's refusal (#2910), where its failure
+                // count is commented out beside its throw (capletcoterminalalphacalibration.cpp:202-203); a
+                // calibration's pass counts it, refused where the calibration returns this pass
                 if (!success)
                 {
                     if (!countFailedFinalParts)
@@ -344,8 +343,7 @@ public sealed class CTSMMCapletAlphaFormCalibration : CTSMMCapletCalibration
             }
 
             // the fixed minimization's α at one caplet can leave a later one none where QuantLib's first trial leaves
-            // room: the pass again on QuantLib's test (MR3 (x) as the user ruled it on 2026-10-27), unless this one
-            // passed
+            // room: the pass again on QuantLib's test, unless this one passed
             if (passed)
             {
                 break;

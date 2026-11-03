@@ -15,25 +15,24 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// A CMS caplet on the Gaussian1d cap/floor engine (the S-g1d plan's G1R6 (xix)): QuantLib's engine tests only for an
-/// Ibor index (<c>gaussian1dcapfloorengine.cpp:47-48</c>) and otherwise prices the coupon period's simple forward
-/// (<c>:81-85</c>, <c>:153-157</c>), so a CMS caplet reads no swap rate. Its same-model route is the float-float
-/// swaption engine on a European exercise at the fixing into the CMS coupon against a fixed one, which estimates the
-/// coupon by the model's swap rate at its fixing (<c>gaussian1dfloatfloatswaptionengine.cpp:460-464</c>). On the wheel,
-/// on a GSR model (a = σ = 0.01) on a flat 3% curve, a one-year caplet on 1,000,000 of the 10-year EUR swap rate (ISDA
-/// fix A), fixing in one, two or five years, is worth, against the float-float route: at 3% in a year 3845.936360680116
-/// against 4153.063226583255; at 2%, 3% and 4.5% in two years 11120.554478976486, 5251.888776300536 and
-/// 1001.0246098467576 against 11894.414352660851, 5692.585769904653 and 1092.524780338987; at 3% in five years
-/// 7470.393687093831 against 8282.86559093049. nanoql prices a CMS coupon on the model's swap rate at its fixing, the
-/// float-float engine's estimate, within 8.0e-9 of that route on the engines' default grid (64 points a side, 7
-/// standard deviations), where each route moves by up to 1.1e-3 as the grid refines, as an Ibor caplet does (the
-/// payoff's kink). QuantLib's check: that engine on the one-coupon swaption. A CMS spread caplet alike: on the 10-year
-/// rate less half the 2-year's, the float-float engine estimates its coupon by the geared spread of the model's two
-/// swap rates (<c>:465-480</c>, <c>:543-558</c>); at 1.5% in a year 2101.104009657879, at 1%, 1.5% and 2% in two years
-/// 6129.950526822571, 2916.7134855385843 and 1027.7328956208546, at 1.5% in five years 4399.2812060734495, where
-/// QuantLib's cap engine, on the period's simple forward, gives 14629.465167876351, 19008.050510174733,
-/// 14876.81979668136, 11120.554478976486 and 15437.407755498794, its coupon on a <c>LognormalCmsSpreadPricer</c>;
-/// nanoql's within 2e-8 of the float-float route.
+/// A CMS caplet on the Gaussian1d cap/floor engine: QuantLib's engine tests only for an Ibor index
+/// (<c>gaussian1dcapfloorengine.cpp:47-48</c>) and otherwise prices the coupon period's simple forward (<c>:81-85</c>,
+/// <c>:153-157</c>), so a CMS caplet reads no swap rate. Its same-model route is the float-float swaption engine on a
+/// European exercise at the fixing into the CMS coupon against a fixed one, which estimates the coupon by the model's
+/// swap rate at its fixing (<c>gaussian1dfloatfloatswaptionengine.cpp:460-464</c>). On the wheel, on a GSR model (a = σ
+/// = 0.01) on a flat 3% curve, a one-year caplet on 1,000,000 of the 10-year EUR swap rate (ISDA fix A), fixing in one,
+/// two or five years, is worth, against the float-float route: at 3% in a year 3845.936360680116 against
+/// 4153.063226583255; at 2%, 3% and 4.5% in two years 11120.554478976486, 5251.888776300536 and 1001.0246098467576
+/// against 11894.414352660851, 5692.585769904653 and 1092.524780338987; at 3% in five years 7470.393687093831 against
+/// 8282.86559093049. nanoql prices a CMS coupon on the model's swap rate at its fixing, the float-float engine's
+/// estimate, within 8.0e-9 of that route on the engines' default grid (64 points a side, 7 standard deviations), where
+/// each route moves by up to 1.1e-3 as the grid refines, as an Ibor caplet does (the payoff's kink). QuantLib's check:
+/// that engine on the one-coupon swaption. A CMS spread caplet alike: on the 10-year rate less half the 2-year's, the
+/// float-float engine estimates its coupon by the geared spread of the model's two swap rates (<c>:465-480</c>,
+/// <c>:543-558</c>); at 1.5% in a year 2101.104009657879, at 1%, 1.5% and 2% in two years 6129.950526822571,
+/// 2916.7134855385843 and 1027.7328956208546, at 1.5% in five years 4399.2812060734495, where QuantLib's cap engine, on
+/// the period's simple forward, gives 14629.465167876351, 19008.050510174733, 14876.81979668136, 11120.554478976486 and
+/// 15437.407755498794, its coupon on a <c>LognormalCmsSpreadPricer</c>; nanoql's within 2e-8 of the float-float route.
 /// </summary>
 public class CapFloorCmsTests
 {
@@ -106,7 +105,7 @@ public class CapFloorCmsTests
         }
     }
 
-    // A pricer whose rate is the index's fixing, which no CMS pricer gives before batch 3.
+    // A pricer whose rate is the index's fixing, which no CMS pricer gives.
     private sealed class IndexFixingPricer : FloatingRateCouponPricer
     {
         public override double SwapletPrice(FloatingRateCoupon coupon, EvaluationContext context) => 0.0;

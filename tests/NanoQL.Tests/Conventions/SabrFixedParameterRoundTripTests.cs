@@ -7,12 +7,12 @@ using NanoQL.TermStructures;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// A SABR fit's fixed parameters are reported through XABR's transforms, as QuantLib reports them (S7R5 (ix)): the fit
-/// writes back the direct transform of the inverse transform of the fixed value
-/// (<c>xabrinterpolation.hpp:198-217, 230-231</c>, <c>sabrinterpolation.hpp:103-129</c>), so a fixed β of 0.5 comes
-/// back as 0.5000000000000001 and one of 0.3 as 0.2999999999999999, the wheel's values, while 0.6 comes back as
-/// itself. The round trip is four transform calls, not the fit's path, so the reported value is the same whatever the
-/// fit does: S7R6's one-ulp moves of the volatilities leave it unchanged on the wheel.
+/// A SABR fit's fixed parameters are reported through XABR's transforms, as QuantLib reports them: the fit writes back
+/// the direct transform of the inverse transform of the fixed value (<c>xabrinterpolation.hpp:198-217, 230-231</c>,
+/// <c>sabrinterpolation.hpp:103-129</c>), so a fixed β of 0.5 comes back as 0.5000000000000001 and one of 0.3 as
+/// 0.2999999999999999, the wheel's values, while 0.6 comes back as itself. The round trip is four transform calls, not
+/// the fit's path, so the reported value is the same whatever the fit does: one-ulp moves of the volatilities leave it
+/// unchanged on the wheel.
 /// </summary>
 public class SabrFixedParameterRoundTripTests
 {

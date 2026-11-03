@@ -150,7 +150,7 @@ static void test_arrays()
     Echo::fill(span, 7.5);
     CHECK(span[0] == 7.5 && span[2] == 7.5, "a span written in place");
 
-    // A vector the member writes into (R15): a line search's step moves the caller's point, as C# moves it.
+    // A vector the member writes into: a line search's step moves the caller's point, as C# moves it.
     std::vector<double> point{0.5, 0.2};
     double step = BoundaryConstraint(-1.0, 1.0).update(point, {0.1, -0.3}, 1.0);
     CHECK(step == 1.0 && point == References::constraintUpdate(), "an in-out vector moved as C# moves it");
@@ -336,7 +336,7 @@ static void test_overloads()
     CHECK(a.discount(5.0) == b.discount(5.0) && a.discount(5.0) == std::exp(-0.15), "nanoql's defaults");
 }
 
-// An optional struct left out: its default, what C# passes (R16); its implicit constructor too.
+// An optional struct left out: its default, what C# passes; its implicit constructor too.
 static void test_defaults()
 {
     ConventionSet qs = ConventionSet::quantLib();
@@ -378,7 +378,7 @@ static void test_conventions()
     ConventionProvider::setDefault(ConventionProvider::quantLib());
     CHECK(ConventionSet(nullptr).dayCounter("Actual365Fixed") == dc, "QuantLib's again");
 
-    // A user's class named like one of nanoql's (B2-1): each keeps its own, nanoql's named with its namespace.
+    // A user's class named like one of nanoql's: each keeps its own, nanoql's named with its namespace.
     nqlt::Calendar mine("TARGET");
     nanoql::Calendar theirs = mine.nanoqls();
     CHECK(mine.name() == "TARGET" && theirs.isBusinessDay(Date(30, Month::October, 2026)), "the user's Calendar beside nanoql's");

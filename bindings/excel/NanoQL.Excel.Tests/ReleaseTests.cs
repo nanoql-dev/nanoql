@@ -7,8 +7,8 @@ using static NanoQL.Excel.Tests.Xl;
 namespace NanoQL.Excel.Tests;
 
 /// <summary>
-/// Lifetime through RTD topics (XLR3, XLD12): an object lives while a topic holds it and goes when its last cell does;
-/// a value call's objects (a leg's coupons) go with it; looped objects each with their own topic (F7-3).
+/// Lifetime through RTD topics: an object lives while a topic holds it and goes when its last cell does; a value call's
+/// objects (a leg's coupons) go with it; looped objects each with their own topic.
 /// </summary>
 [Collection(TestSettings.Name)]
 public sealed class ReleaseTests

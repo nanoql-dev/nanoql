@@ -8,14 +8,13 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// GARCH's minimizer convergence (the S-bar plan's BR6 (vi): QuantLib's master, #2844, taken). QuantLib 1.44 reads the
-/// minimizer's point whatever its end criterion (<c>garch.cpp:534-536</c>, "TODO: check return value from
-/// minimize()"), so a calibration stopped by its iterations returns a point short of the optimum as calibrated. nanoql
-/// refuses it, "GARCH(1,1) calibration did not converge: optimizer stopped with end criterion …", and the mode-based
-/// calibration catches the refusal and falls back to its initial guess, as master does; QuantLib's own cases, whose
-/// dummy optimizer returns <c>None</c>, expect that guess. Check: five Simplex iterations on QuantLib's calibration
-/// series, refused from a given guess, and from the moment-matching guess its values, 0.265749, 0.156956 and 0.230964
-/// (QuantLib's <c>testCalibration</c>).
+/// GARCH's minimizer convergence (QuantLib's master, #2844, taken). QuantLib 1.44 reads the minimizer's point whatever
+/// its end criterion (<c>garch.cpp:534-536</c>, "TODO: check return value from minimize()"), so a calibration stopped
+/// by its iterations returns a point short of the optimum as calibrated. nanoql refuses it, "GARCH(1,1) calibration did
+/// not converge: optimizer stopped with end criterion …", and the mode-based calibration catches the refusal and falls
+/// back to its initial guess, as master does; QuantLib's own cases, whose dummy optimizer returns <c>None</c>, expect
+/// that guess. Check: five Simplex iterations on QuantLib's calibration series, refused from a given guess, and from
+/// the moment-matching guess its values, 0.265749, 0.156956 and 0.230964 (QuantLib's <c>testCalibration</c>).
 /// </summary>
 public class GarchConvergenceTests
 {

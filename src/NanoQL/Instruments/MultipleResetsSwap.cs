@@ -19,13 +19,13 @@ namespace NanoQL.Instruments;
 /// <para>
 /// The spread is added to each fixing, the multiple-resets leg's rate spread. The floating leg is built by
 /// <see cref="FixedVsFloatingSwap"/>'s protected constructor's builder, where QuantLib replaces the base's leg after
-/// construction (the S-cms plan's CMD7); the base's floating schedule is the coupons' dates.
+/// construction; the base's floating schedule is the coupons' dates.
 /// </para>
 /// <para>
 /// QuantLib's fair spread is linear in the floating leg's BPS, exact on an averaged leg but not on a compounded one,
-/// whose spread compounds, so at it the swap misses par (the S-cms plan's CMR5 (xv)). On a compounded leg
-/// <see cref="PricingEngines.DiscountingSwapEngine"/>'s <see cref="MultipleResetsSwap"/> overload solves for the
-/// spread that zeroes the NPV, and <see cref="FetchResults"/> leaves the fair spread <see langword="null"/>, QuantLib's
+/// whose spread compounds, so at it the swap misses par. On a compounded leg
+/// <see cref="PricingEngines.DiscountingSwapEngine"/>'s <see cref="MultipleResetsSwap"/> overload solves for the spread
+/// that zeroes the NPV, and <see cref="FetchResults"/> leaves the fair spread <see langword="null"/>, QuantLib's
 /// "result not available", for another engine that gives none; an averaged leg keeps QuantLib's formula.
 /// </para>
 /// </remarks>
@@ -53,7 +53,7 @@ public sealed class MultipleResetsSwap : FixedVsFloatingSwap
     /// <see langword="null"/>.</param>
     /// <exception cref="ArgumentNullException">A schedule or the index is null.</exception>
     /// <exception cref="ArgumentOutOfRangeException"><paramref name="resetsPerCoupon"/> isn't positive, where QuantLib
-    /// divides by it first (the S-cms plan's CMR5 (xiv)); or an enum argument isn't a member of its enum.</exception>
+    /// divides by it first; or an enum argument isn't a member of its enum.</exception>
     /// <exception cref="ArgumentException">The reset periods aren't a multiple of <paramref name="resetsPerCoupon"/>,
     /// with QuantLib's text.</exception>
     /// <exception cref="NanoQLException">The fixed leg can't be built from the arguments.</exception>

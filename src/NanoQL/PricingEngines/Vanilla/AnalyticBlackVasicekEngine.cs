@@ -24,10 +24,10 @@ namespace NanoQL.PricingEngines;
 /// <para>
 /// QuantLib reads the equity volatility at time 0 and leaves the dividend curve out
 /// (<c>analyticeuropeanvasicekengine.cpp:74-91</c>), so a rising volatility curve prices on its first value and a
-/// dividend yield changes nothing. Here the equity volatility is its term volatility to the exercise, its variance
-/// over the rate's time, and the underlying is discounted by the dividend curve: QuantLib's value on a flat volatility
-/// with no dividend, and the analytic European engine's on the Vasicek bond's rate as the rate's volatility vanishes (the
-/// S-van plan's VR4 (xii), <c>Divergences/BlackVasicekVolatilityTests.cs</c>).
+/// dividend yield changes nothing. Here the equity volatility is its term volatility to the exercise, its variance over
+/// the rate's time, and the underlying is discounted by the dividend curve: QuantLib's value on a flat volatility with
+/// no dividend, and the analytic European engine's on the Vasicek bond's rate as the rate's volatility vanishes
+/// (<c>Divergences/BlackVasicekVolatilityTests.cs</c>).
 /// </para>
 /// </remarks>
 public static class AnalyticBlackVasicekEngine
@@ -78,15 +78,15 @@ public static class AnalyticBlackVasicekEngine
         double sT = blackProcess.X0;
         double k = payoff.Strike;
 
-        // the term volatility over the rate's time, where QuantLib reads the volatility at 0 (VR4 (xii)); the quote
-        // itself where the two structures share their times
+        // the term volatility over the rate's time, where QuantLib reads the volatility at 0; the quote itself where
+        // the two structures share their times
         double sigmaS = blackProcess.BlackVolatility.SharesTimes(blackProcess.RiskFreeRate)
             ? blackProcess.BlackVolatility.BlackVol(lastDate, k)
             : Math.Sqrt(blackProcess.BlackVolatility.AccruedVariance(lastDate, k) / bigT);
         double sigmaR = vasicekProcess.Sigma;
         double rT = vasicekProcess.R0;
 
-        // the underlying net of its dividends to the exercise, which QuantLib leaves out (VR4 (xii))
+        // the underlying net of its dividends to the exercise, which QuantLib leaves out
         double forwardSpot = sT * blackProcess.DividendYield.AccruedDiscount(lastDate);
 
         double zcb = vasicekProcess.DiscountBond(t, bigT, rT);

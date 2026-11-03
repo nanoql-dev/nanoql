@@ -6,7 +6,7 @@ using NanoQL.Instruments;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// <see cref="YoYInflationCapFloorType"/>'s stream text (SID6), QuantLib's <c>operator&lt;&lt;</c>
+/// <see cref="YoYInflationCapFloorType"/>'s stream text, QuantLib's <c>operator&lt;&lt;</c>
 /// (<c>inflationcapfloor.cpp:28-40</c>), which the C++ harness's builder vectors also read: "YoYInflationCap",
 /// "YoYInflationFloor" and "YoYInflationCollar", QuantLib's integers 0, 1 and 2; any other value is an
 /// <see cref="ArgumentOutOfRangeException"/> naming it, with QuantLib's "unknown YoYInflationCapFloor::Type (3)".

@@ -8,13 +8,12 @@ using static NanoQL.Tests.Conventions.CommodityMarkets;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// An index with no fixings read as having no quote date (the S-xrt plan's XRR5 (vi), fixed under R8). QuantLib's
-/// <c>lastQuoteDate()</c> reads <c>timeSeries().lastDate()</c>, which throws "empty timeseries" on an empty history, so
-/// the swaps and the future refuse an index with no fixings that the swaps' own branch prices from the forward curve with
-/// a warning (the S-xrt planner's <c>xp_c1.cpp</c>: the payer swap throws on every unit). nanoql's
-/// <see cref="CommodityIndex.LastQuoteDate"/> is null there, and every date is priced from the forward curve, QuantLib's
-/// warning recorded. Check: the instruments on an index with no fixings price as on one whose fixings all precede their
-/// first period.
+/// An index with no fixings read as having no quote date (fixed). QuantLib's <c>lastQuoteDate()</c> reads
+/// <c>timeSeries().lastDate()</c>, which throws "empty timeseries" on an empty history, so the swaps and the future
+/// refuse an index with no fixings that the swaps' own branch prices from the forward curve with a warning (the payer
+/// swap throws on every unit). nanoql's <see cref="CommodityIndex.LastQuoteDate"/> is null there, and every date is
+/// priced from the forward curve, QuantLib's warning recorded. Check: the instruments on an index with no fixings price
+/// as on one whose fixings all precede their first period.
 /// </summary>
 public class CommodityIndexNoFixingsTests
 {

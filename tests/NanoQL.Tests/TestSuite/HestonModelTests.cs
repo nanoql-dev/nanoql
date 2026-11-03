@@ -565,8 +565,8 @@ public class HestonModelTests
 
         foreach ((HestonProcessDiscretization discretization, int nSteps, string name) in qmcDescriptions)
         {
-            // QuantLib's seed 0 isn't an input here (S2R4); a Sobol sequence of so few dimensions reads no seed, its
-            // direction integers all tabulated
+            // QuantLib's seed 0 isn't an input here; a Sobol sequence of so few dimensions reads no seed, its direction
+            // integers all tabulated
             Real calculated = new MakeMCEuropeanHestonEngine<LowDiscrepancy, GeneralStatistics>(
                     new HestonProcess(riskFreeTS, dividendTS, s0, v0, kappa, theta, sigma, rho, discretization), 1)
                 .WithSteps(nSteps)
@@ -723,7 +723,7 @@ public class HestonModelTests
 
         Real[] strikes = [1.0, 0.5, 0.75, 1.5, 2.0];
 
-        // QuantLib's multiStrikeEngine, its cache filled by the first strike's option: CalculateStrikes on it (HR4 (ii))
+        // QuantLib's multiStrikeEngine, its cache filled by the first strike's option: CalculateStrikes on it
         var first = new VanillaOption(new PlainVanillaPayoff(OptionType.Put, strikes[0]), exercise);
         System.Collections.Immutable.ImmutableArray<OneAssetOptionResults> multiStrike =
             FdHestonVanillaEngine.CalculateStrikes(first, strikes, context, model, 20, 400, 50);

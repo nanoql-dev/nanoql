@@ -3,6 +3,7 @@
 
 namespace NanoQL.Excel.Replay;
 
-/// <summary>A call the replay can't make in Excel's forms: its fact replays up to it, as S-bind's replayers stop.</summary>
+/// <summary>A call the replay can't make in Excel's forms: its fact replays up to it, as the bindings' replayers
+/// stop.</summary>
 /// <param name="why">Why.</param>
 internal sealed class StopException(string why) : Exception(why);

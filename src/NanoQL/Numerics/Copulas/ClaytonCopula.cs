@@ -11,17 +11,17 @@ namespace NanoQL.Numerics;
 /// <summary>The Clayton copula, C(x, y) = max(x^−θ + y^−θ − 1, 0)^(−1/θ).</summary>
 /// <remarks>
 /// Immutable. On the unit square's edges it returns the boundary values, C(u, 0) = C(0, v) = 0, C(u, 1) = u and
-/// C(1, v) = v, before its formula, as every copula here does (the S-core plan's CR7 (xxxiii)).
+/// C(1, v) = v, before its formula, as every copula here does.
 /// <list type="bullet">
 /// <item>Below θ 0 the base is taken at 0 before the power, the copula's definition, where QuantLib takes the maximum
 /// after it, so a negative base gives NaN or, at an even exponent, a positive value: at θ −0.5, C(0.2, 0.2) 0 for
-/// QuantLib's 0.0111 (CR7 (xx)).</item>
+/// QuantLib's 0.0111.</item>
 /// <item>Near independence, |θ| below 0.1, the base is computed as (x^−θ − 1) + (y^−θ − 1) by <c>expm1</c> and the
 /// power by <c>log1p</c>, where QuantLib's cancels (4e-8 relative at θ 1e-8, on points within 1e-8 of the edges);
 /// above θ 0.1 QuantLib's formula, but where x^−θ or y^−θ would overflow (θ·(−ln min(x, y)) above 709, where
-/// QuantLib's gives 0): there m(1 + (m/M)^θ − m^θ)^(−1/θ), with m and M the smaller and larger argument (CR7 (xxi)).
-/// Each form is within 5e-15 relative of a 50-digit evaluation of QuantLib's formula on points within 1e-12 of the
-/// edges; at θ −1 the copula is max(x + y − 1, 0), whose cancellation near x + y = 1 no form avoids.</item>
+/// QuantLib's gives 0): there m(1 + (m/M)^θ − m^θ)^(−1/θ), with m and M the smaller and larger argument. Each form is
+/// within 5e-15 relative of a 50-digit evaluation of QuantLib's formula on points within 1e-12 of the edges; at θ −1
+/// the copula is max(x + y − 1, 0), whose cancellation near x + y = 1 no form avoids.</item>
 /// </list>
 /// </remarks>
 public sealed class ClaytonCopula

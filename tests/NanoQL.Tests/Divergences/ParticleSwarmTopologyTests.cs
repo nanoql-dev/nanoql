@@ -8,22 +8,20 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The particle swarm's topologies (the S-xrt plan's XRR5 (xxviii)–(xxx), fixed under R8, the run's R4-2 and R4-4, and
-/// the S-xrt code review's B4-1). QuantLib's global topology keeps the largest personal best and skips the best
-/// particle, whose social best stays at the zero vector, so it steers the swarm toward the worst; its k-neighbours
+/// The particle swarm's topologies (fixed). QuantLib's global topology keeps the largest personal best and skips the
+/// best particle, whose social best stays at the zero vector, so it steers the swarm toward the worst; its k-neighbours
 /// window runs from i − K − 1 to i + K − 1 and a particle that is its window's best takes particle 0's position; its
 /// clubs topology reads one past its clubs, takes a club's index for a particle, weighs a club's worst only on a member
-/// that isn't its new best, leaves and joins clubs past its bounds, and reads particle 0 for a club left empty. nanoql's
-/// set every particle's social best to the best personal best of its neighbourhood, the whole swarm, the window
-/// [i − K, i + K] wrapping around, or its clubs' members, which a recording inertia checks after each
+/// that isn't its new best, leaves and joins clubs past its bounds, and reads particle 0 for a club left empty.
+/// nanoql's set every particle's social best to the best personal best of its neighbourhood, the whole swarm, the
+/// window [i − K, i + K] wrapping around, or its clubs' members, which a recording inertia checks after each
 /// <c>FindSocialBest</c>; each converges on the shifted sphere; and a clubs topology driven directly keeps its
 /// invariants at every call: each club's best and worst over its members, each particle's one leave or join within
 /// [min, max] and at a reset toward the default, and each social best the best personal best among its clubs' members,
 /// on configurations where particles join clubs left empty and particle 0, the swarm's best, isn't their club-mate, and
-/// with one particle's personal best NaN, which QuantLib's comparisons pass over and nanoql's too (the S-xrt code
-/// review's F4-5); and the clubs topology converges on a cost that is NaN near the box's centre, the Sobol start's first
-/// point, on twelve particles over twenty seeds, where QuantLib's comparisons replaced by a first member's NaN stall up
-/// to 3.1e-4.
+/// with one particle's personal best NaN, which QuantLib's comparisons pass over and nanoql's too; and the clubs
+/// topology converges on a cost that is NaN near the box's centre, the Sobol start's first point, on twelve particles
+/// over twenty seeds, where QuantLib's comparisons replaced by a first member's NaN stall up to 3.1e-4.
 /// </summary>
 public class ParticleSwarmTopologyTests
 {
@@ -110,7 +108,7 @@ public class ParticleSwarmTopologyTests
     [Fact]
     public void AClubsWorstIsWeighedOverEveryMember()
     {
-        // QuantLib's else-if names the third particle worst on values 9, 1, 5 (R4-2)
+        // QuantLib's else-if names the third particle worst on values 9, 1, 5
         var clubs = new ClubsDriver(new ClubsTopology(1, 1, 1, 1, 1000, 1), 3);
         clubs.SetPersonalBests([9.0, 1.0, 5.0]);
         clubs.Call();
@@ -148,7 +146,7 @@ public class ParticleSwarmTopologyTests
             bool[][] post = clubs.ClubsOf();
             int[] bestBy = clubs.BestByClub(), worstBy = clubs.WorstByClub();
 
-            // each club's best and worst over its members before the call (R4-2), a NaN passed over (F4-5)
+            // each club's best and worst over its members before the call, a NaN passed over
             int[] best = new int[totalClubs], worst = new int[totalClubs];
             for (int j = 0; j < totalClubs; j++)
             {
@@ -170,13 +168,13 @@ public class ParticleSwarmTopologyTests
                     : c;
                 int[] now = [.. Enumerable.Range(0, totalClubs).Where(j => post[i][j])];
 
-                // one leave or join, within the bounds (R4-4)
+                // one leave or join, within the bounds
                 Assert.Equal(expected, now.Length);
                 Assert.InRange(now.Length, minClubs, maxClubs);
                 Assert.True(expected <= c ? now.All(j => preClubs[i][j]) : mine.All(j => post[i][j]));
 
-                // the social best: the best personal best among the members its clubs had before the call (B4-1), or
-                // its own where they're all NaN (F4-5)
+                // the social best: the best personal best among the members its clubs had before the call, or its own
+                // where they're all NaN
                 int[] mates = [.. now.Where(j => best[j] >= 0).SelectMany(j => Enumerable.Range(0, M).Where(k => pre[j][k] && !double.IsNaN(f[k]))).Distinct()];
                 Assert.True(mates.Length > 0 || i == nanParticle);
                 int mate = mates.Length > 0 ? mates.MinBy(k => f[k]) : i;
@@ -212,7 +210,7 @@ public class ParticleSwarmTopologyTests
     public void TheClubsSwarmConvergesWhereTheBoxsCentreIsNaN()
     {
         // twelve particles over twenty seeds: a NaN first member made its club-mates' social best NaN, stalling up to
-        // 3.1e-4 (F4-5)
+        // 3.1e-4
         for (long seed = 1; seed <= 20; seed++)
         {
             var pso = new ParticleSwarmOptimization(12, new ClubsTopology(2, 4, 3, 1, 5, seed), new TrivialInertia(), 2.05, 2.05, seed + 40);

@@ -24,9 +24,9 @@ namespace NanoQL.Models;
 /// default 0 and n.
 /// </para>
 /// <para>
-/// Immutable. QuantLib's default constructor, which leaves the number of rates uninitialized, isn't ported (the S-mm
-/// plan's SD5). Its refusal of a last evolution time past the last fixing time names the time before the one it
-/// checks; the text here names the one it checks (MR3 (xv); <c>Divergences/MarketModelTextTests.cs</c>).
+/// Immutable. QuantLib's default constructor, which leaves the number of rates uninitialized, isn't ported. Its refusal
+/// of a last evolution time past the last fixing time names the time before the one it checks; the text here names the
+/// one it checks (<c>Divergences/MarketModelTextTests.cs</c>).
 /// </para>
 /// </remarks>
 public sealed class EvolutionDescription

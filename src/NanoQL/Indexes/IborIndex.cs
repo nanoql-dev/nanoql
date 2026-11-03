@@ -136,7 +136,7 @@ public class IborIndex : InterestRateIndex
 
     // Whether a coupon on the index forecasts its fixing through ForecastFixing(fixingDate, context), the index's own
     // forecast, rather than the curve-based forecast between its dates: false for an index forecasting from its
-    // forwarding curve, true for one whose forecast is its own (ProxyIbor, the S-xrt plan's XRR5 (xxi)).
+    // forwarding curve, true for one whose forecast is its own (ProxyIbor).
     internal virtual bool ForecastsThroughFixingDate => false;
 
     /// <summary>

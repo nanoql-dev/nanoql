@@ -5,20 +5,20 @@ capped and floored overnight coupon they price (ql/cashflows/overnightindexedcou
 
 80 capped, floored and collared coupons, each with its own pricer: BlackCompoundingOvernightIndexedCouponPricer on
 compounded coupons and BlackAveragingOvernightIndexedCouponPricer on averaged ones, on ConstantOptionletVolatility
-surfaces (shifted lognormal with and without a displacement, and normal), the effective-volatility flag both ways,
-caps and floors on the period rate or on the daily rates, naked or not, a spread added or compounded daily, gearings
-of 1, 1.5 and -1, past (determined), spanning and future periods. The compounded coupons take lookbacks and lockouts,
-which choose the daily pricer's period on the lockout; the averaged ones sit on an index fixing two days back and on
-periods starting or ending on holidays, where the averaging pricer chooses it on the fixing days (D18). Each coupon's
-outputs are its rate, amount, accrued amounts at two dates, price on a flat discount curve, cap, floor, effective cap
-and floor, effective caplet and floorlet volatilities, the pricer's effective volatilities and its one-argument caplet
-and floorlet rates at 4% after the rate, the underlying's rate, and its inspectors. A volatility left out, the
-flag with daily caps and floors, and the averaging pricer on a compounded coupon record QuantLib's throws; the
-compounding pricer on an averaged coupon, which QuantLib doesn't refuse, prices.
+surfaces (shifted lognormal with and without a displacement, and normal), the effective-volatility flag both ways, caps
+and floors on the period rate or on the daily rates, naked or not, a spread added or compounded daily, gearings of 1,
+1.5 and -1, past (determined), spanning and future periods. The compounded coupons take lookbacks and lockouts, which
+choose the daily pricer's period on the lockout; the averaged ones sit on an index fixing two days back and on periods
+starting or ending on holidays, where the averaging pricer chooses it on the fixing days. Each coupon's outputs are its
+rate, amount, accrued amounts at two dates, price on a flat discount curve, cap, floor, effective cap and floor,
+effective caplet and floorlet volatilities, the pricer's effective volatilities and its one-argument caplet and floorlet
+rates at 4% after the rate, the underlying's rate, and its inspectors. A volatility left out, the flag with daily caps
+and floors, and the averaging pricer on a compounded coupon record QuantLib's throws; the compounding pricer on an
+averaged coupon, which QuantLib doesn't refuse, prices.
 
-The cap-and-floor check at a negative gearing (D7): with cap 0.01 and floor 0.05 the coupon builds at gearing -1
-without daily caps and floors, where QuantLib compares the floor with itself, and is refused at gearing 1 or with daily
-caps and floors.
+The cap-and-floor check at a negative gearing: with cap 0.01 and floor 0.05 the coupon builds at gearing -1 without
+daily caps and floors, where QuantLib compares the floor with itself, and is refused at gearing 1 or with daily caps and
+floors.
 
 Legs of capped coupons given a pricer by setCouponPricer, which sets each coupon and then its underlying: the Black
 pricers on their coupons (a daily cap and floor at gearing -1 among them, whose stored cap and floor setCouponPricer
@@ -26,9 +26,9 @@ must keep as they are), the plain compounding and averaging pricers (whose two-a
 implement), and the refusals of a pricer of the other averaging. Each leg's outputs are the capped coupons' and their
 underlyings' rates, or the call's throw.
 
-A capped coupon whose underlying's spread QuantLib's Black compounding pricer drops over the telescopic forecast
-range, which nanoql compounds (the S-rx plan's C3 review, B1-1; overnightindexedcoupon.py's spread_dropped), is
-generated and left out; the random draws all come before it, so the other cases are kept.
+A capped coupon whose underlying's spread QuantLib's Black compounding pricer drops over the telescopic forecast range,
+which nanoql compounds (overnightindexedcoupon.py's spread_dropped), is generated and left out; the random draws all
+come before it, so the other cases are kept.
 
 Each case's inputs hold its settings and its "capped" spec (or "coupons") and "pricer", as
 tools/vectors/gen/cashflows/overnightindexedcoupon.py writes them. Read back by
@@ -141,7 +141,7 @@ def fixings(index, spec):
 
 
 def capped_case_doc(name, spec, pspec):
-    """The case, or None where QuantLib drops the underlying's spread (B1-1)."""
+    """The case, or None where QuantLib drops the underlying's spread."""
     index = oic.make_index(spec["underlying"]["index"])
     start, end = ql.Date(spec["underlying"]["startDate"]), ql.Date(spec["underlying"]["endDate"])
     accrual_dates = [start + (end - start) // 2, end]

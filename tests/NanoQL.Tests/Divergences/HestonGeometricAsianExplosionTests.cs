@@ -8,17 +8,16 @@ using static NanoQL.Tests.Divergences.HestonGeometricAsianMarkets;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The Heston geometric Asian engine near the moment explosion (the S-bar plan's BR5 (xxxiv) (a)–(d), Revision 17,
-/// fixed under R8). QuantLib integrates its undamped form on (0, 100], so it neither finds where E[Gˢ] explodes nor
-/// needs to; the damped contour does, and a test of F's sign at each interval's end admits contours past the explosion
-/// and prices the ten-year call at K = 1.5 F_G (vol of vol 1, ρ −0.9) at 0, the call strip shrinks to nothing where s*
-/// nears 1 (no end under the cap), Phi(1, 0) is 0/0 for one fixing at 30 years and vol of vol 2 (s* − 1 = 0 in double;
-/// ZeroDivisionError), and QuantLib's Phi is 0/0 at κ = 0 (sinh(0)/0, NaN), all on the planner's route (BP52, BP53).
-/// nanoql takes the explosions by the closed-form first zero of the Riccati factors, runs the out-of-the-money option on
-/// its own strip or Lewis's middle strip, takes F_G exact where every fixing time is one, the forms' limits at γ = 0,
-/// and floors each price at its lower bound. Checks, at R7 on BR12's scale: QuantLib's <c>AnalyticHestonEngine</c> at
-/// 1e-15 at one fixing; QUADPACK on two strips elsewhere; κ = 0 against κ 1e-12; and spot 0.01 against spot 100
-/// scaled, never below its floor. Markets: r 5%, q 0, v₀ = θ 0.04, κ 0.5 unless given.
+/// The Heston geometric Asian engine near the moment explosion (fixed). QuantLib integrates its undamped form on (0,
+/// 100], so it neither finds where E[Gˢ] explodes nor needs to; the damped contour does, and a test of F's sign at each
+/// interval's end admits contours past the explosion and prices the ten-year call at K = 1.5 F_G (vol of vol 1, ρ −0.9)
+/// at 0, the call strip shrinks to nothing where s* nears 1 (no end under the cap), Phi(1, 0) is 0/0 for one fixing at
+/// 30 years and vol of vol 2 (s* − 1 = 0 in double; ZeroDivisionError), and QuantLib's Phi is 0/0 at κ = 0 (sinh(0)/0,
+/// NaN). nanoql takes the explosions by the closed-form first zero of the Riccati factors, runs the out-of-the-money
+/// option on its own strip or Lewis's middle strip, takes F_G exact where every fixing time is one, the forms' limits
+/// at γ = 0, and floors each price at its lower bound. Checks, at the tolerance on the engine's scale: QuantLib's
+/// <c>AnalyticHestonEngine</c> at 1e-15 at one fixing; QUADPACK on two strips elsewhere; κ = 0 against κ 1e-12; and
+/// spot 0.01 against spot 100 scaled, never below its floor. Markets: r 5%, q 0, v₀ = θ 0.04, κ 0.5 unless given.
 /// </summary>
 public class HestonGeometricAsianExplosionTests
 {
@@ -96,7 +95,7 @@ public class HestonGeometricAsianExplosionTests
         AssertR7(hundred * 1e-4, small, OptionType.Call, 0.010124234643185397, D(30), 0.010023994696223166);
 
         // a year of six fixings at variance 1e-4, the call at 1.2 × the spot's forward to the mean fixing time: the
-        // contour comes out −1.5e-16, within R7 and below the floor
+        // contour comes out −1.5e-16, within the tolerance and below the floor
         double strike = 0.01 * Math.Exp(0.05 * 210.0 / 365.0) * 1.2;
         Assert.Equal(0.0, Price(Today, Market(Today, 0.01, 1e-4, 2.0, 1e-4, 0.1, -0.5), OptionType.Call, strike, Days(6, 60), 360));
     }

@@ -26,8 +26,8 @@ namespace NanoQL.Experimental;
 /// <see cref="Subtract(Quantity, EvaluationContext)"/>, <see cref="Divide(Quantity, EvaluationContext)"/>,
 /// <see cref="Equals(Quantity, EvaluationContext)"/>, <see cref="LessThan"/>, <see cref="LessThanOrEqual"/>,
 /// <see cref="GreaterThan"/>, <see cref="GreaterThanOrEqual"/>, and <see cref="QuantityFunctions"/>' <c>Close</c> and
-/// <c>CloseEnough</c>. A converted quantity is rounded by its unit's rounding, which leaves it as it is (the S-xrt
-/// plan's XRR10, <see cref="UnitOfMeasure.Rounding"/>).
+/// <c>CloseEnough</c>. A converted quantity is rounded by its unit's rounding, which leaves it as it is (<see
+/// cref="UnitOfMeasure.Rounding"/>).
 /// </para>
 /// <para>
 /// <see cref="Equals(Quantity)"/> and <see cref="GetHashCode"/> compare the commodity type, the unit and the amount,

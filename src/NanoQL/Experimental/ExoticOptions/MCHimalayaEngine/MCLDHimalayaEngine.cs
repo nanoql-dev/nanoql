@@ -14,7 +14,7 @@ namespace NanoQL.Experimental;
 /// <summary>
 /// <see cref="MCHimalayaEngine"/> on low-discrepancy draws with QuantLib's default statistics: QuantLib-Python's
 /// <c>MCLDHimalayaEngine</c>, QuantLib's <c>MCHimalayaEngine&lt;LowDiscrepancy&gt;</c>, its calculations closed at
-/// <see cref="LowDiscrepancy"/> and <see cref="GeneralStatistics"/> (D12).
+/// <see cref="LowDiscrepancy"/> and <see cref="GeneralStatistics"/>.
 /// </summary>
 [Experimental("NQL0001")]
 public static class MCLDHimalayaEngine

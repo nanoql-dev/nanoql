@@ -70,7 +70,7 @@ Visual Studio's C++ tools with the Visual Studio Installer's folder on `PATH`.
   (`nql_CalibratedModelExtensions_Calibrate` takes any calibrated model); any other generic method doesn't cross. A
   closed generic type a crossing function takes or returns crosses as a type of its own, its members too, named by its
   definition and its arguments: `nql_CalibrationResults_Gsr_get_Model`. An engine's calculations generic in their
-  traits and statistics cross through its named classes, each a static class of them closed (D12): `MCPR<X>Engine`
+  traits and statistics cross through its named classes, each a static class of them closed: `MCPR<X>Engine`
   and `MCLD<X>Engine` at `PseudoRandom` or `LowDiscrepancy` and `GeneralStatistics`, QuantLib's default statistics,
   for the 19 engines QuantLib-Python names and the six it doesn't, named as their siblings are; and
   `Binomial<Tree>BarrierEngine` and `Binomial<Tree>DoubleBarrierEngine` for the seven trees on Derman and Kani's
@@ -314,13 +314,13 @@ too. Schema 1, its `"schema"` field raised on any change of meaning; one row a l
   facts replayed whole, each with calls, as the floor lists (the facts that reach only crossing members), at least its
   calls replayed, refusals matched, and the facts it names whole.
 - **Parity with QuantLib-Python:** `tools/bindings/wheelparity.py` reads the wheel's `QuantLib.py` (the release
-  `tools/vectors/requirements.txt` pins), `surface.json` and `bindings/wheel-routes.json`, and puts every class the wheel
-  constructs, and every module function that constructs one, in one group: it crosses with a maker (a constructor, a
-  factory, a preset lookup, an engine's calculation or `Bind`); a route the table names, with its reason, to a type the
-  surface makes, an enum it carries, a C function it has or a language form; a ruled exclusion (handles, observers and
-  settings, SWIG's containers, the stepping parts, the caller's own functions); or a gap. `--fail-on-gap` exits 1 on a
-  gap, and CI's bindings job runs it on Windows x64; `--report` writes the parity table. The table's notes keep the
-  differences a crossing class still has (`GlobalBootstrap`'s initial guess).
+  `tools/vectors/requirements.txt` pins), `surface.json` and `bindings/wheel-routes.json`, and puts every class the
+  wheel constructs, and every module function that constructs one, in one group: it crosses with a maker (a constructor,
+  a factory, a preset lookup, an engine's calculation or `Bind`); a route the table names, with its reason, to a type
+  the surface makes, an enum it carries, a C function it has or a language form; an exclusion with its reason (handles,
+  observers and settings, SWIG's containers, the stepping parts, the caller's own functions); or a gap. `--fail-on-gap`
+  exits 1 on a gap, and CI's bindings job runs it on Windows x64; `--report` writes the parity table. The table's notes
+  keep the differences a crossing class still has (`GlobalBootstrap`'s initial guess).
 
 ## Debugging into nanoql
 

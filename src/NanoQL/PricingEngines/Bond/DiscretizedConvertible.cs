@@ -29,13 +29,13 @@ namespace NanoQL.PricingEngines;
 /// </para>
 /// <para>
 /// <b>The American window</b> is bounded by its two times compared with <c>IsOnTime</c> as well, upstream's fix after
-/// v1.44 (#2878, the S-sr plan's SSR5): the grid's last time can be an ulp off the maturity the engine starts the asset
-/// at, where QuantLib 1.44's plain comparison skips the conversion at expiry or rejects a window ending there
+/// v1.44 (#2878): the grid's last time can be an ulp off the maturity the engine starts the asset at, where QuantLib
+/// 1.44's plain comparison skips the conversion at expiry or rejects a window ending there
 /// (<c>Divergences/AmericanBoundsOnTimeTests.cs</c>).
 /// </para>
 /// <para>
-/// Its conversion probabilities and blended rates are double-buffered, as its values are, so a rollback allocates none
-/// (the S-sr plan's SSD9); the underlying's grid is read into a buffer reserved at its widest step.
+/// Its conversion probabilities and blended rates are double-buffered, as its values are, so a rollback allocates none;
+/// the underlying's grid is read into a buffer reserved at its widest step.
 /// </para>
 /// </remarks>
 [WorkingType]

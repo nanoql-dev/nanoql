@@ -9,14 +9,13 @@ using NanoQL.Tests.Conventions;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The deflated caplets' deflator derivative (the S-mmp plan's MMPR4 (vi), fixed under R8). Caplet i pays
-/// (fᵢ − Kᵢ) aᵢ P(Tᵢ₊₁)/P(T₀), whose derivative with respect to fⱼ, j ≤ i, carries −τⱼ P(Tⱼ₊₁)/P(Tⱼ) times it, τⱼ the
-/// rate's own period; QuantLib multiplies by the caplet's accrual aⱼ (<c>pathwiseproductcaplet.cpp:233</c>), right only
-/// where the accruals are the periods. On six semi-annual rates with accruals 0.5 × 365/360, caplet 3 struck at 3.1% on
-/// the forwards: QuantLib's derivatives with respect to f₀, f₁ and f₂ are −4.7570e-4, −4.7547e-4 and −4.7524e-4, 365/360
-/// of the amount's own central differences (this run's <c>probes\c2_facts.cpp</c>; the planner's MPP9: deltas 3.2e-5
-/// from the undeflated caplet's on the same paths). nanoql multiplies by the period. Checks: the amount's central
-/// differences; QuantLib's bits where the accruals are the periods.
+/// The deflated caplets' deflator derivative (fixed). Caplet i pays (fᵢ − Kᵢ) aᵢ P(Tᵢ₊₁)/P(T₀), whose derivative with
+/// respect to fⱼ, j ≤ i, carries −τⱼ P(Tⱼ₊₁)/P(Tⱼ) times it, τⱼ the rate's own period; QuantLib multiplies by the
+/// caplet's accrual aⱼ (<c>pathwiseproductcaplet.cpp:233</c>), right only where the accruals are the periods. On six
+/// semi-annual rates with accruals 0.5 × 365/360, caplet 3 struck at 3.1% on the forwards: QuantLib's derivatives with
+/// respect to f₀, f₁ and f₂ are −4.7570e-4, −4.7547e-4 and −4.7524e-4, 365/360 of the amount's own central differences
+/// (deltas 3.2e-5 from the undeflated caplet's on the same paths). nanoql multiplies by the period. Checks: the
+/// amount's central differences; QuantLib's bits where the accruals are the periods.
 /// </summary>
 public class MarketModelPathwiseDeflatedCapletTests
 {
@@ -55,9 +54,9 @@ public class MarketModelPathwiseDeflatedCapletTests
     [Fact]
     public void ThroughThePathwiseEngineTheDeflatedDeltasAreTheUndeflated()
     {
-        // the engine-level check (the run's R2-3): the deflated and undeflated caplets on the same paths, 1,023 paths of
-        // the log-normal Euler evolver on FlatVol 20%, 3 factors, the Mersenne twister (seed 42), the money-market
-        // measure; QuantLib's deltas 2.06e-5 apart (this run's probes\c4_facts.cpp)
+        // the engine-level check: the deflated and undeflated caplets on the same paths, 1,023 paths of the log-normal
+        // Euler evolver on FlatVol 20%, 3 factors, the Mersenne twister (seed 42), the money-market measure; QuantLib's
+        // deltas 2.06e-5 apart
         double[] accruals = [.. Market.Accruals.Select(a => a * 365.0 / 360.0)];
         var evolution = new EvolutionDescription(Market.RateTimes, Market.RateTimes[..^1]);
         MarketModel model = Market.FlatVol(evolution, 3);

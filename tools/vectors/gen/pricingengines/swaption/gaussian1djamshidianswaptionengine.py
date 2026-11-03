@@ -11,10 +11,9 @@ two days after each period's end, whose delay the engine freezes into the nomina
 date. Each swaption's output is the NPV on each model ("gsr"). Amounts are compared at the nominal.
 
 Left out, each a documented divergence: short-dated swaptions away from the money, which QuantLib's fixed bracket for
-y*, [-8, 8], refuses (the S-g1d plan's G1R6 (xviii); tests/NanoQL.Tests/Divergences/JamshidianBracketTests.cs); a
-swaption with no fixed coupon starting after its exercise, where QuantLib reads past the fixed reset dates
-(JamshidianNoFixedCouponTests.cs); and, as in gaussian1dswaptionengine.py, curves on another clock and reversions
-between 0 and 1e-2.
+y*, [-8, 8], refuses (tests/NanoQL.Tests/Divergences/JamshidianBracketTests.cs); a swaption with no fixed coupon
+starting after its exercise, where QuantLib reads past the fixed reset dates (JamshidianNoFixedCouponTests.cs); and,
+as in gaussian1dswaptionengine.py, curves on another clock and reversions between 0 and 1e-2.
 
 The refusals: a cash swaption settled at the par yield curve; a Bermudan exercise ("exotic swaptions"); a floating
 spread; nominals that aren't constant; and each one checked first when several fail. The wheel's

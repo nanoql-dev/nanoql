@@ -7,8 +7,7 @@ forward; each structure's maximum date and strike range, and its volatility and 
 and at dates, at strikes from a third of the spot to three times it, extrapolating. Then QuantLib's refusals: a
 strike of 0 (Hagan's formula reads its logarithm) and a negative spot.
 
-No output is left out (the S-xeq plan's §2.8): the structure has no departure. Nothing is fitted, so no output is
-filtered.
+No output is left out: the structure has no departure. Nothing is fitted, so no output is filtered.
 
 The structure is tools/cxx/src/experimental/volatility/sabrvoltermstructure.cpp's. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Experimental/Volatility/SABRVolTermStructureCxxVectorTests.cs."""

@@ -1,12 +1,11 @@
 // SPDX-FileCopyrightText: 2026 The nanoql Authors
 // SPDX-License-Identifier: Apache-2.0
 
-// ql/experimental/commodities/energyfuture.hpp, .cpp: an energy future's calculation.
-// "EnergyFuture::calculate" takes (future): {"buySell", "quantity", "tradePrice", "index", "commodityType",
-// "secondaryCosts"}, the specs of commodityspec.hpp, the trade price a unit cost; the case's fixings are the Settings
-// call's. It returns {"NPV", "errors", "costs", "isExpired", "quantity"}, or {"throws": true}. The generator prices
-// on the base unit and currency at one lot, its quote a fixing on the evaluation date or the forward curve (the S-xrt
-// plan's XRR5 (vii), (xxxix) and (xl) leave the rest out).
+// ql/experimental/commodities/energyfuture.hpp, .cpp: an energy future's calculation. "EnergyFuture::calculate" takes
+// (future): {"buySell", "quantity", "tradePrice", "index", "commodityType", "secondaryCosts"}, the specs of
+// commodityspec.hpp, the trade price a unit cost; the case's fixings are the Settings call's. It returns {"NPV",
+// "errors", "costs", "isExpired", "quantity"}, or {"throws": true}. The generator prices on the base unit and
+// currency at one lot, its quote a fixing on the evaluation date or the forward curve (the rest is left out).
 
 #include "experimental/commodities/commodityspec.hpp"
 

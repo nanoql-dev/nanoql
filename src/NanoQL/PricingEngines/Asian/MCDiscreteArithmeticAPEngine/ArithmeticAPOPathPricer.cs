@@ -17,8 +17,8 @@ namespace NanoQL.PricingEngines;
 /// </summary>
 /// <remarks>
 /// QuantLib's: every node of the path a fixing but its start, which is one where the grid's first time is 0. The
-/// engine's own route weighs each node by the number of fixings on its time, so a fixing date given twice counts twice
-/// (the S-bar plan's BR5 (xxviii)), QuantLib's sum to the bit where each time holds one fixing.
+/// engine's own route weighs each node by the number of fixings on its time, so a fixing date given twice counts twice,
+/// QuantLib's sum to the bit where each time holds one fixing.
 /// </remarks>
 public sealed class ArithmeticAPOPathPricer : PathPricer<MonteCarloPath>
 {
@@ -41,7 +41,7 @@ public sealed class ArithmeticAPOPathPricer : PathPricer<MonteCarloPath>
     {
     }
 
-    // the engine's route: the number of fixings at each node of the grid (BR5 (xxviii))
+    // the engine's route: the number of fixings at each node of the grid
     internal ArithmeticAPOPathPricer(
         OptionType type, double strike, double discount, double runningSum, int pastFixings, ImmutableArray<int> multiplicities)
     {

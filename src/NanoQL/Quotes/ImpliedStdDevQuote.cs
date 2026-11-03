@@ -14,10 +14,10 @@ namespace NanoQL.Quotes;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Immutable: its value is solved once, at construction, from the guess given (§2.2's quote row; the S-core plan's CR1
-/// (d)), at a discount of 1 and no displacement. QuantLib's quote starts each solve after the first from the last one's
-/// result; here a new forward or price is a new quote, solved from its caller's guess, which may be the last quote's
-/// <see cref="Value"/>. A documented divergence: a second solve differs from QuantLib's within the accuracy.
+/// Immutable: its value is solved once, at construction, from the guess given (§2.2's quote row), at a discount of 1
+/// and no displacement. QuantLib's quote starts each solve after the first from the last one's result; here a new
+/// forward or price is a new quote, solved from its caller's guess, which may be the last quote's <see cref="Value"/>.
+/// A documented divergence: a second solve differs from QuantLib's within the accuracy.
 /// </para>
 /// <para>
 /// A solve that fails gives 0, by QuantLib's design (its <c>catch (Error&amp;)</c>, <c>impliedstddevquote.cpp:54-63</c>):

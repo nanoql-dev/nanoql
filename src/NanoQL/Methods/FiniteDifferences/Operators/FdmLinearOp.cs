@@ -13,8 +13,8 @@ namespace NanoQL.Methods;
 /// <summary>A linear operator of a multi-dimensional finite-difference problem.</summary>
 /// <remarks>
 /// <para>
-/// A working type (the S-eq plan's SEQR1): mutable, owned by one computation and not thread-safe. An extension point,
-/// as in QuantLib: later units derive their operators from it.
+/// A working type: mutable, owned by one computation and not thread-safe. An extension point, as in QuantLib: later
+/// units derive their operators from it.
 /// </para>
 /// <para>
 /// <see cref="Apply(ReadOnlySpan{double}, Span{double})"/> writes into the caller's span, where QuantLib returns a

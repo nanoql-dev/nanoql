@@ -225,7 +225,7 @@ public class RoughHestonModelTests
         // Testing that the rough Heston engine drops cached quadrature weights when the Hurst exponent moves...
 
         // QuantLib moves the model's parameters under an engine, whose update() drops its caches; here a model with
-        // other parameters is a new model, priced by an engine of its own (the S-hes plan's HR4 (i))
+        // other parameters is a new model, priced by an engine of its own
         YieldTermStructure rTS = new FlatForward(Today, 0.03, Dc);
         YieldTermStructure qTS = new FlatForward(Today, 0.01, Dc);
 
@@ -1041,7 +1041,7 @@ public class RoughHestonModelTests
 
     // QuantLib's three calibration cases: a synthetic surface from known parameters through the route's engine, the
     // model calibrated from deliberately wrong ones, each evaluation's helpers priced through one engine on the model
-    // the calibration hands them, as QuantLib's engine serves them (the S-hes plan's HR4 (i))
+    // the calibration hands them, as QuantLib's engine serves them
     private static void CheckCalibration(AnalyticRoughHestonEngineApproximation approximation, int nFactors)
     {
         Calendar calendar = new NullCalendar();

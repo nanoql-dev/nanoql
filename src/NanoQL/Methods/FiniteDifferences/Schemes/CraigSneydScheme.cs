@@ -15,9 +15,9 @@ namespace NanoQL.Methods;
 /// weighted by μ and a second round of implicit corrections.
 /// </summary>
 /// <remarks>
-/// A working type (the S-eq plan's SEQR1): <see cref="Step"/> steps the caller's values in place through buffers the
-/// scheme holds, so a step allocates nothing after the first. TR-BDF2 drives it as its trapezoidal sub-scheme, on an
-/// operator set over TR-BDF2's whole step (the S-eq plan's SEQR9).
+/// A working type: <see cref="Step"/> steps the caller's values in place through buffers the scheme holds, so a step
+/// allocates nothing after the first. TR-BDF2 drives it as its trapezoidal sub-scheme, on an operator set over
+/// TR-BDF2's whole step.
 /// </remarks>
 [WorkingType]
 public sealed class CraigSneydScheme : IFdmScheme, IFdmSetOperatorScheme

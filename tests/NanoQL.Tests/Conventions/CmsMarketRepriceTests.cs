@@ -11,9 +11,9 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// <see cref="CmsMarket.Reprice"/> (the S-cms plan's CMR3 (i)): QuantLib's <c>reprice</c> sets the market's pricers'
-/// volatility and reversion in place, so every leg holding those pricers reprices with it; nanoql's returns a new
-/// market priced on copies of the pricers, and the receiver, its pricers and its values stand.
+/// <see cref="CmsMarket.Reprice"/>: QuantLib's <c>reprice</c> sets the market's pricers' volatility and reversion in
+/// place, so every leg holding those pricers reprices with it; nanoql's returns a new market priced on copies of the
+/// pricers, and the receiver, its pricers and its values stand.
 /// </summary>
 public class CmsMarketRepriceTests
 {

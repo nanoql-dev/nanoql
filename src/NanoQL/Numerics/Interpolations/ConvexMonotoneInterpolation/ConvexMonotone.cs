@@ -10,11 +10,11 @@ namespace NanoQL.Numerics;
 
 /// <summary>The convex-monotone interpolation factory and traits: QuantLib's <c>ConvexMonotone</c>.</summary>
 /// <remarks>
-/// A configuration struct (D12): its zero value is QuantLib's default construction, a quadraticity of 0.3, a
-/// monotonicity of 0.7 and positivity forced. Global, it needs two points, and its data hold one value fewer than a
-/// local bootstrap's instruments (QuantLib's <c>dataSizeAdjustment</c>), the first node's value being ignored. A local
-/// interpolator (<see cref="ILocalInterpolator"/>): it builds the local bootstrap's curve a section at a time, each
-/// later interpolation keeping the earlier sections' helpers.
+/// A configuration struct: its zero value is QuantLib's default construction, a quadraticity of 0.3, a monotonicity of
+/// 0.7 and positivity forced. Global, it needs two points, and its data hold one value fewer than a local bootstrap's
+/// instruments (QuantLib's <c>dataSizeAdjustment</c>), the first node's value being ignored. A local interpolator (<see
+/// cref="ILocalInterpolator"/>): it builds the local bootstrap's curve a section at a time, each later interpolation
+/// keeping the earlier sections' helpers.
 /// </remarks>
 public readonly struct ConvexMonotone : ILocalInterpolator
 {

@@ -10,9 +10,9 @@ namespace NanoQL.Tests.Conventions;
 
 /// <summary>
 /// <see cref="ZeroCouponInflationSwap.FairRate"/> where the legs pay on different days reads the legs' end discounts
-/// from the engine's results (SIR5 (xviii)); with no results it is a <see cref="NanoQLException"/> with
-/// <c>fixedLegBPS</c>'s text, its subject the fair rate: "cannot calculate fairRate because end discount is not
-/// populated". On one payment day it reads no result, QuantLib's expression.
+/// from the engine's results; with no results it is a <see cref="NanoQLException"/> with <c>fixedLegBPS</c>'s text,
+/// its subject the fair rate: "cannot calculate fairRate because end discount is not populated". On one payment day it
+/// reads no result, QuantLib's expression.
 /// </summary>
 public class ZeroCouponInflationSwapRefusalTests
 {

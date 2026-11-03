@@ -301,8 +301,8 @@ public class OptionletStripperTests
         }
     }
 
-    // Adapted: the relinked curve (lines 925-926) is a new curve, with a new index and a new stripper on it (S7D6),
-    // since a stripper strips once; IborCoupon::Settings' at-par switch (line 897) is the context's.
+    // Adapted: the relinked curve (lines 925-926) is a new curve, with a new index and a new stripper on it, since a
+    // stripper strips once; IborCoupon::Settings' at-par switch (line 897) is the context's.
     [Fact]
     public void TestSwitchStrike()
     {

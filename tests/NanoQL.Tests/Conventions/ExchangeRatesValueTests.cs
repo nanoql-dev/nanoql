@@ -7,9 +7,9 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The exchange-rate registry is an immutable value (the S-rx plan's SRXR1): <see cref="ExchangeRates.Add"/> returns a
-/// new registry; two registries are equal, with equal hashes, when they hold the same pairs, each with equal entries in
-/// the same order; and <see cref="ExchangeRates.Clear"/> returns <see cref="ExchangeRates.Default"/>. The equality of
+/// The exchange-rate registry is an immutable value: <see cref="ExchangeRates.Add"/> returns a new registry; two
+/// registries are equal, with equal hashes, when they hold the same pairs, each with equal entries in the same order;
+/// and <see cref="ExchangeRates.Clear"/> returns <see cref="ExchangeRates.Default"/>. The equality of
 /// <see cref="ExchangeRate"/>, which nanoql adds, compares source, target, rate, type and chain.
 /// </summary>
 public class ExchangeRatesValueTests

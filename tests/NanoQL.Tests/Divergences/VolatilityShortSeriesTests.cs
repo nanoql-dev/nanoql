@@ -8,12 +8,11 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The volatility estimators on series too short for them (the S-bar plan's BR5 (xxxv), §2.2's undefined row, refused).
-/// QuantLib's <c>Garch11::calculate</c> on fewer than two points reads before the series' start
-/// (<c>garch.cpp:385-388</c>), <c>SimpleLocalEstimator</c> and the open-close Garman-Klass estimators increment an empty
-/// series' begin, and <c>ConstantEstimator</c> advances past the end when its window is longer than the series. nanoql
-/// refuses each before the read, with an <c>ArgumentException</c> naming the series. Check: each refusal's type,
-/// parameter and text.
+/// The volatility estimators on series too short for them (§2.2's undefined row, refused). QuantLib's
+/// <c>Garch11::calculate</c> on fewer than two points reads before the series' start (<c>garch.cpp:385-388</c>),
+/// <c>SimpleLocalEstimator</c> and the open-close Garman-Klass estimators increment an empty series' begin, and
+/// <c>ConstantEstimator</c> advances past the end when its window is longer than the series. nanoql refuses each before
+/// the read, with an <c>ArgumentException</c> naming the series. Check: each refusal's type, parameter and text.
 /// </summary>
 public class VolatilityShortSeriesTests
 {

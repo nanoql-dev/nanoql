@@ -19,7 +19,7 @@ namespace NanoQL.TermStructures;
 /// <para>
 /// An extension point. QuantLib's only constructor computes the reference date from settlement days and the evaluation
 /// date; here the derived class's <c>Create</c> computes it and passes it in, so every built structure has a fixed
-/// reference date (D15).
+/// reference date.
 /// </para>
 /// </remarks>
 public abstract class CPIVolatilitySurface : VolatilityTermStructure

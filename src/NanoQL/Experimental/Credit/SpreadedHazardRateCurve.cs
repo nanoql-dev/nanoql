@@ -17,12 +17,12 @@ namespace NanoQL.Experimental;
 /// values, a new curve for a new original or spread. The survival probability is the exact integral of the hazard rate
 /// the curve reports, the original's plus the spread: QuantLib's integrates it numerically with its base's 48-point
 /// rule, which misses the exact survival by 5.4e-6 to 5.4e-5 relative on flat originals at 1 to 10 years and by
-/// 1.05e-4 on a stepped one at four years, and which QuantLib warns derived classes to override (the S-xcr plan's XR3
-/// (b), XR8 (xiv); <c>Divergences/SpreadedHazardRateCurveTests.cs</c>). The original's rate is its own kind's: on the
-/// hazard kinds its survival's, jumps apart; on the survival and density kinds the density over the survival with its
-/// jumps; on the affine structures the deterministic part alone, the model's left out, as QuantLib's integral leaves
-/// it; so each kind integrates its rate in closed form (the S-xcr code review's C4 O1-2), and an original that gives
-/// none, a user's, is integrated numerically, as QuantLib does.
+/// 1.05e-4 on a stepped one at four years, and which QuantLib warns derived classes to override
+/// (<c>Divergences/SpreadedHazardRateCurveTests.cs</c>). The original's rate is its own kind's: on the hazard kinds
+/// its survival's, jumps apart; on the survival and density kinds the density over the survival with its jumps; on the
+/// affine structures the deterministic part alone, the model's left out, as QuantLib's integral leaves it; so each
+/// kind integrates its rate in closed form, and an original that gives none, a user's, is integrated numerically, as
+/// QuantLib does.
 /// </remarks>
 /// <param name="originalCurve">The original curve.</param>
 /// <param name="spread">The spread added to the hazard rate.</param>

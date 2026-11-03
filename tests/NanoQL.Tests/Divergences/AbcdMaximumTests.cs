@@ -6,10 +6,10 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The abcd function's maximum. Its location is QuantLib's master's (#2841, after the pin; the S-g1d plan's G1R5
-/// (iii)): QuantLib 1.44 returns the stationary point 1/c − a/b whatever b's sign, a minimum when b &lt; 0. Its value
-/// is the function at that location (G1R6 (ix)): QuantLib returns d whenever b = 0 or a ≤ 0. QuantLib's values are the
-/// wheel's; the check is QuantLib's own <c>operator()</c>.
+/// The abcd function's maximum. Its location is QuantLib's master's (#2841, after the pin): QuantLib 1.44 returns the
+/// stationary point 1/c − a/b whatever b's sign, a minimum when b &lt; 0. Its value is the function at that location:
+/// QuantLib returns d whenever b = 0 or a ≤ 0. QuantLib's values are the wheel's; the check is QuantLib's own
+/// <c>operator()</c>.
 /// </summary>
 public class AbcdMaximumTests
 {

@@ -11,15 +11,14 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The geometric running product outside double's range (the S-bar plan's BR5 (xli), fixed under R8). QuantLib's Monte
-/// Carlo geometric pricers guard the product against overflow only (<c>mc_discr_geom_av_price.cpp:45-57</c>), so 252
-/// daily fixings at spot 0.01 price 0 where the analytic engine gives 0.059 × the spot; and the all-past-fixings
-/// constructor multiplies the past fixings into the running product (<c>asianoption.cpp:95</c>), so 120 past fixings at
-/// 1,000 make the analytic and Monte Carlo engines price ∞ (the planner's BP30, BP35). nanoql flushes the product into
-/// the average where the next factor would underflow it, as where it would overflow, and carries the past fixings'
-/// log-sum beside QuantLib's product, its readers taking the log where the product isn't finite and normal. Check:
-/// homogeneity, the same contract with the market and the fixings scaled into range and the price scaled back (r 5%,
-/// q 0, σ 20%, Act/365 Fixed).
+/// The geometric running product outside double's range (fixed). QuantLib's Monte Carlo geometric pricers guard the
+/// product against overflow only (<c>mc_discr_geom_av_price.cpp:45-57</c>), so 252 daily fixings at spot 0.01 price 0
+/// where the analytic engine gives 0.059 × the spot; and the all-past-fixings constructor multiplies the past fixings
+/// into the running product (<c>asianoption.cpp:95</c>), so 120 past fixings at 1,000 make the analytic and Monte Carlo
+/// engines price ∞. nanoql flushes the product into the average where the next factor would underflow it, as where it
+/// would overflow, and carries the past fixings' log-sum beside QuantLib's product, its readers taking the log where
+/// the product isn't finite and normal. Check: homogeneity, the same contract with the market and the fixings scaled
+/// into range and the price scaled back (r 5%, q 0, σ 20%, Act/365 Fixed).
 /// </summary>
 public class GeometricAsianProductRangeTests
 {

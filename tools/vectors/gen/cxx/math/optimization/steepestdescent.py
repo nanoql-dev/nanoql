@@ -10,9 +10,8 @@ central-difference gradient; and the harness's rosenbrock, whose value is its va
 starts, under end criteria the method meets or a limit of 1,000 iterations, and under a limit of 5; the quadratic in a
 box. Each case records the point the line search last accepted and the Problem after minimize (function value, gradient
 norm, the evaluation counts) and the end criterion; QuantLib's own current value, the point before where it returns on
-the function tolerance or the iteration limit, is left out (the S-sr plan's SSR6 (xvii);
-tests/NanoQL.Tests/Divergences/LineSearchReturnTests.cs). The harness unit is
-tools/cxx/src/math/optimization/steepestdescent.cpp. Read back by
+the function tolerance or the iteration limit, is left out (tests/NanoQL.Tests/Divergences/LineSearchReturnTests.cs).
+The harness unit is tools/cxx/src/math/optimization/steepestdescent.cpp. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Numerics/Optimization/SteepestDescentCxxVectorTests.cs."""
 import os
 import sys

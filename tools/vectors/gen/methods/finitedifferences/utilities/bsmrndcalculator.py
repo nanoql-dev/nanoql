@@ -6,11 +6,10 @@ volatility, on flat and zero curves at 2% to 7.5%, with a constant volatility an
 month to five years: the density and distribution at log spots from 3 standard deviations below the log forward to 3
 above, the inverse at probabilities from 1e-4 to 0.9999.
 
-Left out (the S-van plan's §2.10): structures on another clock, which nanoql reads at the instants the risk-free curve's
-times denote and QuantLib at those times (VR4 (xxiii); tests/NanoQL.Tests/Divergences/LocalVolMismatchedTimesTests.cs):
-every structure here is dated 15 October 2026 on Actual/365 (Fixed). The process specs are
-tools/vectors/gen/processes/blackscholesprocess.py's. The wheel's calls, by QuantLib-SWIG 1.44:
-BSMRNDCalculator(process) and its pdf, cdf and invcdf. Read back by
+Left out: structures on another clock, which nanoql reads at the instants the risk-free curve's times denote and
+QuantLib at those times (tests/NanoQL.Tests/Divergences/LocalVolMismatchedTimesTests.cs): every structure here is dated
+15 October 2026 on Actual/365 (Fixed). The process specs are tools/vectors/gen/processes/blackscholesprocess.py's. The
+wheel's calls, by QuantLib-SWIG 1.44: BSMRNDCalculator(process) and its pdf, cdf and invcdf. Read back by
 tests/NanoQL.Tests/Vectors/Methods/FiniteDifferences/Utilities/BSMRNDCalculatorVectorTests.cs."""
 import importlib.util
 import math

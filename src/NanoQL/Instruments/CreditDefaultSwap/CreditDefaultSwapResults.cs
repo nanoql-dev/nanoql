@@ -14,9 +14,9 @@ namespace NanoQL.Instruments;
 /// </summary>
 /// <remarks>
 /// A result QuantLib leaves at <c>Null&lt;Real&gt;()</c>, whose accessor refuses it ("… not available"), is
-/// <see langword="null"/> (PR4): the fair spread where the coupon leg is worth nothing, the fair upfront where the
-/// upfront has occurred, the coupon-leg BPS for a zero running spread, the upfront BPS without an upfront. Equality is
-/// by value.
+/// <see langword="null"/>: the fair spread where the coupon leg is worth nothing, the fair upfront where the upfront
+/// has occurred, the coupon-leg BPS for a zero running spread, the upfront BPS without an upfront. Equality is by
+/// value.
 /// </remarks>
 public sealed record CreditDefaultSwapResults : InstrumentResults
 {

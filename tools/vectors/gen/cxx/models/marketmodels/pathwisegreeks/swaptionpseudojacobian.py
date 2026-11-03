@@ -9,10 +9,10 @@ FlatVol 20% on six semi-annual rates and five irregular ones, one and three fact
 time but the last; swaptions on every start and end, displacements 0 and 2%; caps on every start and end at the mean
 forward and 1% from it, displacement 0, and at the mean forward, displacement 2%.
 
-Left out (refused by nanoql where QuantLib sums whole steps past the expiry or reads the first displacement alone, the
-S-mmp plan's MMPR5 (b), and solved where QuantLib's bracket misses the cap's root, its MMPR4 (xviii);
-tests/NanoQL.Tests/Conventions/MarketModelGreeksTests.cs, Divergences/CapPseudoDerivativeBracketTests.cs): evolutions
-that don't stop at the expiry, unequal displacements, caps whose root QuantLib's bracket misses (it refuses them).
+Left out (refused by nanoql where QuantLib sums whole steps past the expiry or reads the first displacement alone, and
+solved where QuantLib's bracket misses the cap's root; tests/NanoQL.Tests/Conventions/MarketModelGreeksTests.cs,
+Divergences/CapPseudoDerivativeBracketTests.cs): evolutions that don't stop at the expiry, unequal displacements, caps
+whose root QuantLib's bracket misses (it refuses them).
 
 The harness unit is tools/cxx/src/models/marketmodels/pathwisegreeks/pathwisegreeks.cpp. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Models/MarketModels/SwaptionPseudoJacobianCxxVectorTests.cs."""

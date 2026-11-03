@@ -25,8 +25,8 @@ public class AmericanOptionTests
     // QL_EPSILON (qldefines.hpp): machine epsilon.
     private const double QL_EPSILON = 2.220446049250313e-16;
 
-    // testLargeDividendShoutNPV's moved value: the fixed engine's on the case's grid, 100 × 400 (the S-van plan's VR4
-    // (xxx)), QuantLib's 24.90999 recorded in Divergences/ShoutDividendStrikeTests.cs
+    // testLargeDividendShoutNPV's moved value: the fixed engine's on the case's grid, 100 × 400, QuantLib's 24.90999
+    // recorded in Divergences/ShoutDividendStrikeTests.cs
     private const double MovedLargeDividendShoutNPV = 20.116257458140247;
 
     // testQdAmericanEngines' random cases' reference values, QuantLib's PDE values
@@ -330,9 +330,8 @@ public class AmericanOptionTests
 
         // Moved: the check of line 1042 against a shout without dividends up to the dividend date, which prices the
         // residual option struck at the escrowed level as QuantLib's engine does, 24.90999 = 20 + 4.90999: the engine
-        // strikes it at the spot (the S-van plan's VR4 (xxx)), and the shout's value is the fixed engine's, checked
-        // against a shout at t0 and a binomial programme of the same stopping problem
-        // (Divergences/ShoutDividendStrikeTests.cs).
+        // strikes it at the spot, and the shout's value is the fixed engine's, checked against a shout at t0 and a
+        // binomial programme of the same stopping problem (Divergences/ShoutDividendStrikeTests.cs).
         const Real expected = MovedLargeDividendShoutNPV;
 
         const Real tol = 5e-2;
@@ -719,7 +718,7 @@ public class AmericanOptionTests
         }
     }
 
-    // Upstream: QuantLib's master's case for #2879 (the S-van plan's VR5 (iv)).
+    // Upstream: QuantLib's master's case for #2879.
     [Fact]
     public void TestBinomialTheta()
     {
@@ -794,7 +793,7 @@ public class AmericanOptionTests
         }
     }
 
-    // Upstream: QuantLib's master's case for #2879 (the S-van plan's VR5 (iv)).
+    // Upstream: QuantLib's master's case for #2879.
     [Fact]
     public void TestBinomialThetaNonFlatCurve()
     {
@@ -835,7 +834,7 @@ public class AmericanOptionTests
         }
     }
 
-    // Upstream: QuantLib's master's case for #2879 (the S-van plan's VR5 (iv)).
+    // Upstream: QuantLib's master's case for #2879.
     [Fact]
     public void TestBinomialThetaDeferredExercise()
     {
@@ -1042,7 +1041,7 @@ public class AmericanOptionTests
         }
     }
 
-    // Upstream: QuantLib's master adds the Bjerksund-Stensland engine to this case (#2854, the S-van plan's VR5 (ii)).
+    // Upstream: QuantLib's master adds the Bjerksund-Stensland engine to this case (#2854).
     [Fact]
     public void TestBaroneAdesiWhaleyAndJuAtLowVolatility()
     {
@@ -1133,7 +1132,7 @@ public class AmericanOptionTests
         }
     }
 
-    // Upstream: QuantLib's master's case for #2914 (the S-van plan's VR5 (v)).
+    // Upstream: QuantLib's master's case for #2914.
     [Fact]
     public void TestFdAmericanNotBelowExerciseValue()
     {
@@ -1204,7 +1203,7 @@ public class AmericanOptionTests
         Assert.True(deferredValue < intrinsic2 - 0.05, $"deferred exercise value {deferredValue}");
     }
 
-    // Upstream: QuantLib's master's case for #2906 (the S-van plan's VR5 (iii)).
+    // Upstream: QuantLib's master's case for #2906.
     [Fact]
     public void TestJuNotBelowEuropeanValue()
     {
@@ -1452,7 +1451,7 @@ public class AmericanOptionTests
                                 }
 
                                 // Moved: the check of line 2437 at the put of a year, r 0.2, q 0, v 0.1, s 99.9 and
-                                // 110, whose bumps straddle the edge of the S-van plan's VR9 region (bT + 2√v = 0 at
+                                // 110, whose bumps straddle the edge of the perpetual-boundary region (bT + 2√v = 0 at
                                 // v 0.1): the trigger is QuantLib's above it and the perpetual boundary below, and the
                                 // value jumps between the two (Divergences/BjerksundStenslandTriggerTests.cs).
                                 bool straddlesEdge = type == OptionType.Put && t == 365 && r == 0.2 && q == 0.0

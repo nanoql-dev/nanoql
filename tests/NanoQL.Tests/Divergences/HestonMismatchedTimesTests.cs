@@ -16,11 +16,10 @@ namespace NanoQL.Tests.Divergences;
 /// and a dividend curve dated today the variance accrues only from T+2, where the dividend accrues from today: a
 /// one-year put reads 7.816084368797552 against 7.863347278811837 on the market restated from today, the risk-free
 /// curve accruing nothing before T+2, and a put expiring before or on the curve's date throws "negative time" or reads
-/// 0/0. Its calibration helper and its optimal alpha's date form read the same time. nanoql's engine, helper and
-/// alpha run the model's time on the risk-free curve's day counter from the earliest curve date, each curve accruing
-/// nothing before its own (the user's rulings), and read the risk-free discount by date: QuantLib's engine, helper and
-/// alpha on the restated market. Where the dividend curve isn't dated before the risk-free curve, the time is
-/// QuantLib's.
+/// 0/0. Its calibration helper and its optimal alpha's date form read the same time. nanoql's engine, helper and alpha
+/// run the model's time on the risk-free curve's day counter from the earliest curve date, each curve accruing nothing
+/// before its own, and read the risk-free discount by date: QuantLib's engine, helper and alpha on the restated market.
+/// Where the dividend curve isn't dated before the risk-free curve, the time is QuantLib's.
 /// </summary>
 public class HestonMismatchedTimesTests
 {

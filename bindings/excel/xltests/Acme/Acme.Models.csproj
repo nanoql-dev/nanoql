@@ -3,7 +3,7 @@
   SPDX-License-Identifier: Apache-2.0
 -->
 <Project Sdk="Microsoft.NET.Sdk">
-  <!-- A user's assembly built on nanoql (XLR8): a curve of its own, which run.py builds into an add-in beside nanoql's
+  <!-- A user's assembly built on nanoql: a curve of its own, which run.py builds into an add-in beside nanoql's
        functions under the prefix acme, as a user would with `nanoql-bind excel build`. -->
   <PropertyGroup>
     <RootNamespace>Acme.Models</RootNamespace>

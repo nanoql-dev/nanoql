@@ -13,8 +13,8 @@ namespace NanoQL.Tests.Divergences;
 /// <summary>
 /// The two-asset correlation engine on a smile. QuantLib reads the second asset's volatility at the first strike X₁
 /// (<c>analytictwoassetcorrelationengine.cpp:54-56</c>), so on a smile it prices the flat-volatility value at X₁ (9.758
-/// on the plan's smile, where X₂'s volatility gives 4.239). nanoql reads it at X₂ (the S-exo plan's ER5 (xvii)):
-/// QuantLib's engine on a flat volatility equal to the smile's at X₂ is the check, bit for bit.
+/// on the test's smile, where X₂'s volatility gives 4.239). nanoql reads it at X₂: QuantLib's engine on a flat
+/// volatility equal to the smile's at X₂ is the check, bit for bit.
 /// </summary>
 public class TwoAssetCorrelationSmileTests
 {

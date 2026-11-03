@@ -12,10 +12,10 @@ vanilla part priced by the finite-difference vanilla engine with them), an expir
 the refusals: an American exercise, a spot beyond the barrier and a cash-or-nothing payoff.
 
 Every structure is on one day counter and the risk-free curve's reference date: on others QuantLib's engine takes its
-times from the risk-free curve and S-eq's operator reads the structures at them, where nanoql's takes them from the
-engine's clock and reads each structure at their instants (the S-rx plan's RP15;
-tests/NanoQL.Tests/Divergences/FdBarrierMismatchedTimesTests.cs and FdmMismatchedTimesTests.cs); no rebate is
-negative (SRXR3 (ii) moves only the analytic engine).
+times from the risk-free curve and the operator reads the structures at them, where nanoql's takes them from the
+engine's clock and reads each structure at their instants
+(tests/NanoQL.Tests/Divergences/FdBarrierMismatchedTimesTests.cs and FdmMismatchedTimesTests.cs); no rebate is negative
+(nanoql's fix there moves only the analytic engine).
 
 A pricing spec is {"process", "barrier", "payoff", "exercise", "dividends", "tGrid", "xGrid", "dampingSteps",
 "scheme", "localVol", "illegalLocalVolOverwrite"}: the process, payoff, exercise and barrier specs

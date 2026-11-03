@@ -62,7 +62,7 @@ public class CalibratedModelSideEffectTests
                 .SetPricingEngine<HullWhite>((s, c, m) => JamshidianSwaptionEngine.Calculate(s, c, m)));
         }
 
-        // The wheel's values, within the tolerance: Hull-White's B is QuantLib's master's form (the S-sr plan's SSR3).
+        // The wheel's values, within the tolerance: Hull-White's B is QuantLib's master's form.
         var first = (SwaptionHelper)helpers[0];
         Assert.True(Tolerance.Within(0.013060880278853937, first.ModelValue(model, context)));
 

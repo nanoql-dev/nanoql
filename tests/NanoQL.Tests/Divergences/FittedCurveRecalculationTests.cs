@@ -8,14 +8,15 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The fitted curve's recalculation path (the S-sr plan's SSD22). A fitted curve is always built afresh, fitted from the
-/// given guess. QuantLib's curve is a lazy object whose fit ends by keeping its solution as its guess
+/// The fitted curve's recalculation path. A fitted curve is always built afresh, fitted from the given guess.
+/// QuantLib's curve is a lazy object whose fit ends by keeping its solution as its guess
 /// (<c>fittedbonddiscountcurve.cpp:294-295</c>), which its L2 penalty reads (<c>:331-332</c>), so a curve recalculated
 /// after a quote moves starts from, and is penalized towards, its previous fit, though its header says the penalty
-/// applies "starting from the initial guess" (<c>fittedbonddiscountcurve.hpp:182-184</c>). On the wheel, a Nelson-Siegel
-/// fit with L2 penalties of 0.5 over ten bonds, from 16 June 2025, recalculated after the sixth bond's price moves by 0.5,
-/// discounts 0.664584692842777 at ten years after 395 evaluations, where a fresh curve on the moved prices from the same
-/// guess discounts 0.6644661886683543 after 427. nanoql's curve on the moved prices is QuantLib's fresh curve.
+/// applies "starting from the initial guess" (<c>fittedbonddiscountcurve.hpp:182-184</c>). On the wheel, a
+/// Nelson-Siegel fit with L2 penalties of 0.5 over ten bonds, from 16 June 2025, recalculated after the sixth bond's
+/// price moves by 0.5, discounts 0.664584692842777 at ten years after 395 evaluations, where a fresh curve on the moved
+/// prices from the same guess discounts 0.6644661886683543 after 427. nanoql's curve on the moved prices is QuantLib's
+/// fresh curve.
 /// </summary>
 public class FittedCurveRecalculationTests
 {

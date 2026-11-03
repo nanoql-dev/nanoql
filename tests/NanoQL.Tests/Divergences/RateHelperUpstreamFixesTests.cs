@@ -9,14 +9,14 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The fix QuantLib's master made to the rate helpers after the pin, which nanoql takes (R8, the upstream sweep): #2899
-/// (<c>46ef4b7b6</c>), the deposit's and the indexed FRA's implied quote forecast from the curve being bootstrapped,
-/// <c>forecastFixing</c>. QuantLib 1.44 reads <c>fixing(fixingDate, true)</c>, which takes a stored fixing for a fixing
-/// date before the evaluation date (<c>ratehelpers.cpp:210-215</c>, <c>:360-364</c>): on a weekend or holiday
-/// evaluation date the helpers' fixing date is the business day before it, so a bootstrap without that day's fixing
-/// throws, and one with it quotes the stored fixing in place of the curve's forecast. The C++ vectors' three deposits
-/// whose fixing precedes 15 January 2024, Martin Luther King Day on the US SOFR calendar, or a given Friday, leave
-/// their implied quotes out (the sweep's SWD14 and SWI3), two of them below.
+/// The fix QuantLib's master made to the rate helpers after the pin, which nanoql takes: #2899 (<c>46ef4b7b6</c>), the
+/// deposit's and the indexed FRA's implied quote forecast from the curve being bootstrapped, <c>forecastFixing</c>.
+/// QuantLib 1.44 reads <c>fixing(fixingDate, true)</c>, which takes a stored fixing for a fixing date before the
+/// evaluation date (<c>ratehelpers.cpp:210-215</c>, <c>:360-364</c>): on a weekend or holiday evaluation date the
+/// helpers' fixing date is the business day before it, so a bootstrap without that day's fixing throws, and one with it
+/// quotes the stored fixing in place of the curve's forecast. The C++ vectors' three deposits whose fixing precedes 15
+/// January 2024, Martin Luther King Day on the US SOFR calendar, or a given Friday, leave their implied quotes out, two
+/// of them below.
 /// </summary>
 public class RateHelperUpstreamFixesTests
 {

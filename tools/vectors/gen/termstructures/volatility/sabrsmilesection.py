@@ -25,11 +25,10 @@ A refused value is {"throws": true}. Each case's input "section" is {"type": "Sa
 tools/vectors/gen/indexes/interestrateindex.py: the spec tools/cxx/src/termstructures/volatility/smilesectionspec.hpp
 reads too. Fewer than four parameters, which QuantLib reads past (0xC0000005 for none), and a volatility type outside
 the enum, which QuantLib reads as lognormal for the volatility and as normal for the prices, are never cases. The
-wheel's SabrSmileSection is the proxy of the C++ class's two constructors (volatilities.i:795-814), positional only.
-The section functions here are shared by tools/vectors/gen/cxx/termstructures/volatility/spreadedsmilesection.py.
-The case's "skip" input lists the strikes whose
-normal volatility QuantLib's master's Bachelier inversion moves (#2924, taken ahead of the pin as the upstream sweep's
-SWD14 and SWI3 rule; tools/vectors/gen/pricingengines/blackformula.py's smile_normal_moved): QuantLib 1.44's 0, null in
+wheel's SabrSmileSection is the proxy of the C++ class's two constructors (volatilities.i:795-814), positional only. The
+section functions here are shared by tools/vectors/gen/cxx/termstructures/volatility/spreadedsmilesection.py. The case's
+"skip" input lists the strikes whose normal volatility QuantLib's master's Bachelier inversion moves (#2924, taken ahead
+of the pin; tools/vectors/gen/pricingengines/blackformula.py's smile_normal_moved): QuantLib 1.44's 0, null in
 "normalVolatility", which the reader nulls too. Read back by tests/NanoQL.Tests/Vectors/TermStructures/SabrSmileSectionVectorTests.cs."""
 import importlib.util
 import os

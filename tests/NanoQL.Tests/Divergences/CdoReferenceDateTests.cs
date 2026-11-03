@@ -10,13 +10,12 @@ using static NanoQL.Tests.Conventions.CreditPortfolioBuilders;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The CDO and the random models on default curves dated after the evaluation date (the S-xcr plan's XR8 (x)): a
-/// default probability before a curve's reference date is 0 and a random model counts its days from the evaluation
-/// date, so T+2 curves read as their restatement from the evaluation date. QuantLib's mid-point CDO on T+2 curves throws
-/// ("negative time (-0.00821918) given") and on the restated curves reads NPV −0.94756528135798312, fair premium
-/// 0.10656135275585535; its random model counts from each curve's date, reading P(≥ 1, a year) 0.1215 on the T+2 curves
-/// and throwing on the restated ones ("t &lt; 0", its day solver bracketing below 0 where the hazard is 0) (the S-xcr
-/// run's <c>c2_facts.cpp</c>).
+/// The CDO and the random models on default curves dated after the evaluation date: a default probability before a
+/// curve's reference date is 0 and a random model counts its days from the evaluation date, so T+2 curves read as their
+/// restatement from the evaluation date. QuantLib's mid-point CDO on T+2 curves throws ("negative time (-0.00821918)
+/// given") and on the restated curves reads NPV −0.94756528135798312, fair premium 0.10656135275585535; its random
+/// model counts from each curve's date, reading P(≥ 1, a year) 0.1215 on the T+2 curves and throwing on the restated
+/// ones ("t &lt; 0", its day solver bracketing below 0 where the hazard is 0).
 /// </summary>
 public class CdoReferenceDateTests
 {
@@ -49,8 +48,8 @@ public class CdoReferenceDateTests
         // before the curves' date, and on the curves restated from 1 August (hazard and rate 0 to the evaluation date)
         // reads mid-point premium 0.22158255409925076 and upfront 0.032 (NPV -0.90356602571233158 less the premium,
         // plus the protection 1.1571485798115824), integral NPV -0.8963331485521745 and fair upfront
-        // 0.2901041089225545 (the S-xcr run's c2_o12.cpp); its mid-point protection dates the first period's defaults
-        // from the restated discount curve's 1 August, where both engines date them from the evaluation date
+        // 0.2901041089225545; its mid-point protection dates the first period's defaults from the restated discount
+        // curve's 1 August, where both engines date them from the evaluation date
         var basket = new Basket(
             new Date(1, Month.January, 2006),
             Eight,

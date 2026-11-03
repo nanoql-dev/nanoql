@@ -14,7 +14,7 @@ namespace NanoQL.Tests.Vectors;
 /// <c>tests/vectors/pricingengines/barrier/analytictwoassetbarrierengine.json</c>: the four barrier types at two
 /// barriers each on the second asset, over two expiries on process pairs sharing a risk-free curve, at three
 /// correlations, calls and puts on the first at three strikes; an expired option and the refusals. Every value is within
-/// Drezner's accuracy of QuantLib's (the S-bar plan's BR4 (e)). The outputs nanoql fixes are left out of the file.
+/// Drezner's accuracy of QuantLib's. The outputs nanoql fixes are left out of the file.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class AnalyticTwoAssetBarrierEngineVectorTests

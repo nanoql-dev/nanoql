@@ -17,15 +17,14 @@ namespace NanoQL.PricingEngines;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A <see cref="BatesEngine"/>, as QuantLib's derives from it (the S-hes plan's HR1 (iv)), over its
-/// <see cref="BatesDetJumpModel"/>.
+/// A <see cref="BatesEngine"/>, as QuantLib's derives from it, over its <see cref="BatesDetJumpModel"/>.
 /// </para>
 /// <para>
 /// The intensity's average weights the constant-intensity term by (x − 1 + e^{−x})/x and (1 − e^{−x})/x, x = κ_λt,
 /// which QuantLib writes as differences that cancel as x falls: 1.2e-6 off the constant-intensity price at
 /// κ_λ = 1e-12 (<c>batesengine.cpp:80</c>, <c>:140</c>). Here, below x = 1e-2, the first is x·φ₂(−x),
 /// φ₂(u) = (eᵘ − 1 − u)/u² by its series, and the second −expm1(−x)/x; QuantLib's expressions and bits at and above
-/// it (the S-hes plan's HR7 (iv), <c>Divergences/BatesDetJumpSmallReversionTests.cs</c>).
+/// it (<c>Divergences/BatesDetJumpSmallReversionTests.cs</c>).
 /// </para>
 /// </remarks>
 public sealed class BatesDetJumpEngine : BatesEngine

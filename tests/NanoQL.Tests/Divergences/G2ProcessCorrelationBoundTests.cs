@@ -7,13 +7,13 @@ using NanoQL.Processes;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The G2 process's conditional correlation (the S-sr plan's SSR6 (xix), round 1's O1-13): QuantLib's step correlation
-/// is ρ times the ratio of the factors' kernels (<c>g2process.cpp:100-111</c>, <c>:223-234</c>), which at a = b and
-/// ρ = 1 rounds just above 1, so the standard deviation's √(1 − ρ²) is NaN: on the wheel, the half-year step's [1][1] at
-/// a = b = 0.1, σ = η = 0.01, ρ = 1 is NaN, its [1][0] 0.006897919322666819. At a zero step the ratio is 0/0, NaN, and
-/// so are the standard deviation's second row and the covariance's terms that read it. nanoql's correlation is
-/// ρ·f((a+b)Δt)/√(f(2aΔt)f(2bΔt)), f(x) = (1 − e^(−x))/x, held in [−1, 1] and ρ itself at a = b, its limit at Δt = 0.
-/// QuantLib's check: the bound, and the step's limit.
+/// The G2 process's conditional correlation: QuantLib's step correlation is ρ times the ratio of the factors' kernels
+/// (<c>g2process.cpp:100-111</c>, <c>:223-234</c>), which at a = b and ρ = 1 rounds just above 1, so the standard
+/// deviation's √(1 − ρ²) is NaN: on the wheel, the half-year step's [1][1] at a = b = 0.1, σ = η = 0.01, ρ = 1 is NaN,
+/// its [1][0] 0.006897919322666819. At a zero step the ratio is 0/0, NaN, and so are the standard deviation's second
+/// row and the covariance's terms that read it. nanoql's correlation is ρ·f((a+b)Δt)/√(f(2aΔt)f(2bΔt)), f(x) = (1 −
+/// e^(−x))/x, held in [−1, 1] and ρ itself at a = b, its limit at Δt = 0. QuantLib's check: the bound, and the step's
+/// limit.
 /// </summary>
 public class G2ProcessCorrelationBoundTests
 {

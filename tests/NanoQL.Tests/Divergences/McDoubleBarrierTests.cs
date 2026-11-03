@@ -13,12 +13,11 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The Monte Carlo double-barrier engine's clock and exercise (the S-xeq plan's XER5 (xxxiii), and the S-xeq run's
-/// R1-4, fixed under R8). QuantLib runs the paths and the discounts on the risk-free curve's time and reads each
-/// structure there on its own clock (<c>mcdoublebarrierengine.hpp:164-201</c>), and prices any exercise to its last
-/// date, never reading its type. nanoql runs them on S-bar's engine clock, each structure read at the instants its
-/// times denote, and refuses a non-European exercise as S-bar's barrier engine does. Checks: the market restated onto
-/// the risk-free curve's day counter; the refusal's text.
+/// The Monte Carlo double-barrier engine's clock and exercise (fixed). QuantLib runs the paths and the discounts on the
+/// risk-free curve's time and reads each structure there on its own clock (<c>mcdoublebarrierengine.hpp:164-201</c>),
+/// and prices any exercise to its last date, never reading its type. nanoql runs them on the barrier engines' clock,
+/// each structure read at the instants its times denote, and refuses a non-European exercise as the Monte Carlo barrier
+/// engine does. Checks: the market restated onto the risk-free curve's day counter; the refusal's text.
 /// </summary>
 public class McDoubleBarrierTests
 {

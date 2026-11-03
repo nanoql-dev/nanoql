@@ -2,16 +2,15 @@
 # SPDX-License-Identifier: Apache-2.0
 """Vectors for QuantLib's floating cat bond and its Monte Carlo engine (ql/experimental/catbonds/catbond.hpp,
 montecarlocatbondengine.hpp), which the wheel doesn't expose, each output computed by the C++ harness
-(tools/cxx/src/experimental/catbonds/catbond.cpp): QuantLib's test's bond (four years semiannual from 30 November
-2004 on the US government bond calendar, USD LIBOR 6M forecast flat at 2.5%, Actual/Actual (ISMA), one fixing day)
-with spreads and redemptions varied, under digital and proportional notional risks, on event sets of no event, a
-certain event, one event in ten years and a mid-life event, and on a beta risk of a thousand-year return period whose
-10,000 paths hold one event or none, so that QuantLib's draws are nanoql's (the S-xcr plan's XR8 (xlii); at five
-hundred years a path parts), discounted flat at 3% or 2.5% on QuantLib's test's 22 November 2004: the bond's cash
-flows' dates and amounts, and the engine's NPV, settlement value, clean price and loss statistics. A simulation of no
-path, where QuantLib 1.44 reads NaN and nanoql refuses with QuantLib's later fix (#2839;
-tests/NanoQL.Tests/Divergences/MonteCarloCatBondEngineTests.cs), isn't asked for. Read back by
-tests/NanoQL.Tests/Vectors/Cxx/Experimental/CatBonds/CatBondCxxVectorTests.cs."""
+(tools/cxx/src/experimental/catbonds/catbond.cpp): QuantLib's test's bond (four years semiannual from 30 November 2004
+on the US government bond calendar, USD LIBOR 6M forecast flat at 2.5%, Actual/Actual (ISMA), one fixing day) with
+spreads and redemptions varied, under digital and proportional notional risks, on event sets of no event, a certain
+event, one event in ten years and a mid-life event, and on a beta risk of a thousand-year return period whose 10,000
+paths hold one event or none, so that QuantLib's draws are nanoql's (at five hundred years a path parts), discounted
+flat at 3% or 2.5% on QuantLib's test's 22 November 2004: the bond's cash flows' dates and amounts, and the engine's
+NPV, settlement value, clean price and loss statistics. A simulation of no path, where QuantLib 1.44 reads NaN and
+nanoql refuses with QuantLib's later fix (#2839; tests/NanoQL.Tests/Divergences/MonteCarloCatBondEngineTests.cs),
+isn't asked for. Read back by tests/NanoQL.Tests/Vectors/Cxx/Experimental/CatBonds/CatBondCxxVectorTests.cs."""
 import importlib.util
 import os
 import sys

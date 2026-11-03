@@ -10,9 +10,9 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// GSR's numeraire time (the S-g1d plan's G1R1 (iv)): QuantLib's <c>Gsr::numeraireTime(T)</c> moves the model's process
-/// in place (<c>gsr.hpp:196-199</c>); here <c>WithNumeraireTime</c> returns a copy at the new time, through the
-/// process's <c>WithForwardMeasureTime</c>, and the receiver keeps its own.
+/// GSR's numeraire time: QuantLib's <c>Gsr::numeraireTime(T)</c> moves the model's process in place
+/// (<c>gsr.hpp:196-199</c>); here <c>WithNumeraireTime</c> returns a copy at the new time, through the process's
+/// <c>WithForwardMeasureTime</c>, and the receiver keeps its own.
 /// </summary>
 public class GsrNumeraireTimeTests
 {

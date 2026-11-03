@@ -11,7 +11,7 @@ namespace NanoQL.Experimental;
 
 /// <summary>
 /// The normal distribution as a random walk's radius, <c>std::normal_distribution&lt;Real&gt;(mean, sigma)</c> drawn as
-/// MSVC 14.44 draws it (the S-xrt plan's XRD4): the distribution of QuantLib's <c>GaussianWalk</c>.
+/// MSVC 14.44 draws it: the distribution of QuantLib's <c>GaussianWalk</c>.
 /// </summary>
 /// <remarks>
 /// Knuth's polar Algorithm P, its pairs' second value kept for the next draw, so the distribution is a working type:

@@ -14,7 +14,7 @@ index and end after it. Throws: a read below the index, an unset state, a set of
 the rates.
 
 Left out: a rate read at the number of rates, which QuantLib's index check admits, reading past its vectors (nanoql
-refuses it, the S-mm plan's MR3 (xx); tests/NanoQL.Tests/Divergences/MarketModelUndefinedReadsTests.cs).
+refuses it; tests/NanoQL.Tests/Divergences/MarketModelUndefinedReadsTests.cs).
 
 The wheel's calls, by QuantLib-SWIG 1.44: LMMCurveState(rateTimes), setOnForwardRates(rates, first),
 setOnDiscountRatios(ratios, first), and CurveState's members. Read back by

@@ -23,9 +23,8 @@ namespace NanoQL.PricingEngines;
 /// </summary>
 /// <remarks>
 /// European exercise only, as QuantLib's. The engine reports the value, delta, gamma and theta, on
-/// <see cref="FdHestonBarrierEngine"/>'s grids and <see cref="FdmHestonOp.Clock"/>'s times (the S-bar plan's BR2 (v), BR5
-/// (iv)). A spot beyond the barrier is refused before the solve ("barrier touched"), where QuantLib's grid interpolation
-/// fails outside its range (BR5 (xliv)).
+/// <see cref="FdHestonBarrierEngine"/>'s grids and <see cref="FdmHestonOp.Clock"/>'s times. A spot beyond the barrier
+/// is refused before the solve ("barrier touched"), where QuantLib's grid interpolation fails outside its range.
 /// </remarks>
 public static class FdHestonRebateEngine
 {
@@ -109,7 +108,7 @@ public static class FdHestonRebateEngine
             throw new NanoQLException("non-striked payoff given");
         }
 
-        // a spot beyond the barrier is refused before the solve (BR5 (xliv))
+        // a spot beyond the barrier is refused before the solve
         if (option.Triggered(model.Process.S0))
         {
             throw new NanoQLException("barrier touched");

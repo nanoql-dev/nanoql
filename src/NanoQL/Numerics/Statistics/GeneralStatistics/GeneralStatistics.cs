@@ -19,10 +19,10 @@ namespace NanoQL.Numerics;
 /// stores all samples, thus increasing the memory requirements.
 /// </para>
 /// <para>
-/// A working type (S2R2): <see cref="Add"/>, <see cref="Reset"/>, <see cref="Reserve"/> and the sorting members
-/// change it, where QuantLib's sorts through <c>mutable</c> members of a <c>const</c> object; it isn't thread-safe.
-/// QuantLib's <c>Statistics</c> and <c>RiskStatistics</c> typedefs name this class with its Gaussian and empirical risk
-/// measures, which <see cref="GaussianStatisticsExtensions"/> and <see cref="RiskStatisticsExtensions"/> give it.
+/// A working type: <see cref="Add"/>, <see cref="Reset"/>, <see cref="Reserve"/> and the sorting members change it,
+/// where QuantLib's sorts through <c>mutable</c> members of a <c>const</c> object; it isn't thread-safe. QuantLib's
+/// <c>Statistics</c> and <c>RiskStatistics</c> typedefs name this class with its Gaussian and empirical risk measures,
+/// which <see cref="GaussianStatisticsExtensions"/> and <see cref="RiskStatisticsExtensions"/> give it.
 /// </para>
 /// <para>
 /// Where every sample a member averages weighs 0, the member refuses, with the text QuantLib's percentile gives a set

@@ -9,9 +9,9 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The SABR cube's recalibration (the S-cms plan's CMR3 (ii)): QuantLib's <c>recalibration</c> overloads set a swap
-/// tenor's β guesses on the cube and refit its sections in place, and <c>updateAfterRecalibration</c> refits the dense
-/// grid; nanoql's each return a new cube with both applied, and the receiver's parameters and volatilities stand.
+/// The SABR cube's recalibration: QuantLib's <c>recalibration</c> overloads set a swap tenor's β guesses on the cube
+/// and refit its sections in place, and <c>updateAfterRecalibration</c> refits the dense grid; nanoql's each return a
+/// new cube with both applied, and the receiver's parameters and volatilities stand.
 /// </summary>
 public class XabrCubeRecalibrationTests
 {

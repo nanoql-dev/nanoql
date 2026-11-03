@@ -5,13 +5,13 @@
 output computed by the C++ harness.
 
 The specifier at offset 0, QuantLib's tested case (at other offsets QuantLib's in-between short rates reset at an
-earlier rate's index, the S-mm plan's MR3 (iii);
-tests/NanoQL.Tests/Divergences/VolatilityInterpolationSpecifierOffsetTests.cs): long rates on every 2nd and every 3rd of
-twelve and thirteen semi-annual short rate times, each long rate's PiecewiseConstantAbcdVariance on its own reset with
-abcd varying by rate; the last caplet's volatility left to the last long rate's (0) and given; and after
-setScalingFactors, setLastCapletVol or both. The reads: the period, offset and counts, and each interpolated and
-original variance's reads (piecewiseconstantabcdvariance.py's), an array of each read over the variances. Throws: long
-and short rates of mismatched counts, long rate times off the short ones, scales of the wrong count.
+earlier rate's index; tests/NanoQL.Tests/Divergences/VolatilityInterpolationSpecifierOffsetTests.cs): long rates on
+every 2nd and every 3rd of twelve and thirteen semi-annual short rate times, each long rate's
+PiecewiseConstantAbcdVariance on its own reset with abcd varying by rate; the last caplet's volatility left to the last
+long rate's (0) and given; and after setScalingFactors, setLastCapletVol or both. The reads: the period, offset and
+counts, and each interpolated and original variance's reads (piecewiseconstantabcdvariance.py's), an array of each read
+over the variances. Throws: long and short rates of mismatched counts, long rate times off the short ones, scales of the
+wrong count.
 
 The harness unit is tools/cxx/src/models/marketmodels/models/variances.cpp. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Models/MarketModels/VolatilityInterpolationSpecifierabcdCxxVectorTests.cs."""

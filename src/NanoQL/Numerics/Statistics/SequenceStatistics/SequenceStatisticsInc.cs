@@ -9,8 +9,8 @@ namespace NanoQL.Numerics;
 /// <summary>
 /// Statistics of N-dimensional samples, each component an <see cref="IncrementalStatistics"/>, which keeps running sums
 /// and no samples: QuantLib's <c>SequenceStatisticsInc</c>,
-/// <c>GenericSequenceStatistics&lt;IncrementalStatistics&gt;</c> (D12). The market-model accounting engines add their
-/// paths' values into it.
+/// <c>GenericSequenceStatistics&lt;IncrementalStatistics&gt;</c>. The market-model accounting engines add their paths'
+/// values into it.
 /// </summary>
 public sealed class SequenceStatisticsInc : GenericSequenceStatistics<IncrementalStatistics>
 {

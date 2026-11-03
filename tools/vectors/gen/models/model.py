@@ -4,15 +4,15 @@
 HullWhite and Vasicek to swaption helpers priced by JamshidianSwaptionEngine, and 11 refusals and edge cases.
 
 The helper sets are QuantLib's test-suite/shortratemodels.cpp's (five coterminal swaptions on the evaluation date 15
-February 2002, on Euribor 6M and on its twin with no fixing days) and models/shortrate/calibrationhelpers/
-swaptionhelper.py's second market's (six swaptions from 1Y x 5Y to 10Y x 5Y on Euribor 6M, with Black volatilities and
-the relative price error, normal volatilities and the implied-volatility error, or Black volatilities and the price
-error). The calibrations cover Levenberg-Marquardt (QuantLib's test-suite settings, its defaults, and with the cost
-function's Jacobian, whose central differences take the calibration function's step 1e-6) and Simplex; the test-suite's
-and tighter and shorter end criteria (one ending at its maximum iterations); weights; Hull-White's FixedReversion() and
-other fixed parameters (Vasicek's among them); and constraints added to the model's own (NoConstraint, which changes
-nothing, PositiveConstraint, and a BoundaryConstraint, from starts inside and outside it). Each calibration starts from
-a fresh model, so no case sees another's parameters (the plan's caveat 4).
+February 2002, on Euribor 6M and on its twin with no fixing days) and
+models/shortrate/calibrationhelpers/swaptionhelper.py's second market's (six swaptions from 1Y x 5Y to 10Y x 5Y on
+Euribor 6M, with Black volatilities and the relative price error, normal volatilities and the implied-volatility error,
+or Black volatilities and the price error). The calibrations cover Levenberg-Marquardt (QuantLib's test-suite settings,
+its defaults, and with the cost function's Jacobian, whose central differences take the calibration function's step
+1e-6) and Simplex; the test-suite's and tighter and shorter end criteria (one ending at its maximum iterations);
+weights; Hull-White's FixedReversion() and other fixed parameters (Vasicek's among them); and constraints added to the
+model's own (NoConstraint, which changes nothing, PositiveConstraint, and a BoundaryConstraint, from starts inside and
+outside it). Each calibration starts from a fresh model, so no case sees another's parameters.
 
 Each calibration's outputs are the calibrated parameters ("params"), the end criterion ("endCriteria", QuantLib's
 EndCriteria::Type), the problem values and the number of function evaluations, which counts the evaluation of the
@@ -22,15 +22,14 @@ the calibrated parameters and at two others ("value", "values"). The refusals an
 fixed-parameter specs of the wrong size, and both at once; every parameter fixed; a helper with no engine; value() at
 no parameters, too few and too many; and value() with no helpers, which is 0.
 
-The calibrations' outputs pass the master plan's S7R6 filter, which this generator first predated: each case is refit
-with every nonzero real input of its helpers and its model one ulp up, then down, and an output is written only where both
-refits leave it within 1e-12 x max(|a|, |b|, 1), an integer or an end criterion only where they leave it equal; each
-list element is its own output, named with its index ("params[0]", "calibrationErrors[3]"). On QuantLib 1.44 the
-filter keeps 166 of the 930 outputs: a calibration ends within its optimizer's tolerance, which a one-ulp move of the
-market moves. One stable output moves under nanoql's forms, QuantLib's master's (the S-sr plan's SSR3), beyond the
-tolerance and is left out (MOVED_BY_SSR3); the classes those forms move are documented divergences
-(tests/NanoQL.Tests/Divergences/CalibrationSmallReversionTests.cs). The generator prints "dropped n of m outputs" per
-calibration and for the file.
+The calibrations' outputs pass the stability filter: each case is refit with every nonzero real input of its helpers and
+its model one ulp up, then down, and an output is written only where both refits leave it within 1e-12 x max(|a|, |b|,
+1), an integer or an end criterion only where they leave it equal; each list element is its own output, named with its
+index ("params[0]", "calibrationErrors[3]"). On QuantLib 1.44 the filter keeps 166 of the 930 outputs: a calibration
+ends within its optimizer's tolerance, which a one-ulp move of the market moves. One stable output moves under nanoql's
+forms, QuantLib's master's, beyond the tolerance and is left out (MOVED_BY_SSR3); the classes those forms move are
+documented divergences (tests/NanoQL.Tests/Divergences/CalibrationSmallReversionTests.cs). The generator prints "dropped
+n of m outputs" per calibration and for the file.
 
 A case's inputs hold the helpers (swaptionhelper.py's specs, each priced by a JamshidianSwaptionEngine on the model,
 with the helper's term structure given for a Vasicek), the model ({"type": "HullWhite", "termStructure", "a",
@@ -102,11 +101,11 @@ EC_SIMPLEX = {"maxIterations": 400, "maxStationaryStateIterations": 100, "rootEp
               "gradientNormEpsilon": 1e-8}
 
 
-# The S7R6 filter: a calibrated output is kept only where every move of its inputs leaves it within this.
+# The stability filter: a calibrated output is kept only where every move of its inputs leaves it within this.
 STABLE = 1e-12
 
-# The one output the filter keeps that nanoql's forms, QuantLib's master's (the S-sr plan's SSR3), move beyond the
-# tolerance: a count of function evaluations, the optimizer taking one more step.
+# The one output the filter keeps that nanoql's forms, QuantLib's master's, move beyond the tolerance: a count of
+# function evaluations, the optimizer taking one more step.
 MOVED_BY_SSR3 = {("2002 / weights", "functionEvaluation")}
 
 
@@ -299,7 +298,7 @@ class Dropped:
 
 
 def calibration_case(dropped, name, set_name, model_spec, method, criteria, constraint, weights, fix):
-    """The case, its outputs passed through S7R6's filter, and all of them for check_rows."""
+    """The case, its outputs passed through the stability filter, and all of them for check_rows."""
     today, specs = HELPER_SETS[set_name]
     if model_spec["type"] in ON_CURVE:
         model_spec = dict(model_spec, termStructure=specs[0]["termStructure"])

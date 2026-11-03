@@ -11,9 +11,9 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The forward and forward-performance engines' inner engine (the S-exo plan's ER2 (iii)): a delegate called once per
-/// price, on the forward process (the spot, and the curves and volatility implied from the reset date) and on a vanilla
-/// option struck at the moneyness times the spot, of the payoff's type and the option's exercise.
+/// The forward and forward-performance engines' inner engine: a delegate called once per price, on the forward process
+/// (the spot, and the curves and volatility implied from the reset date) and on a vanilla option struck at the
+/// moneyness times the spot, of the payoff's type and the option's exercise.
 /// </summary>
 public class ForwardEngineDelegateTests
 {

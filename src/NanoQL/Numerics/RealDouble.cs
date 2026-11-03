@@ -5,7 +5,7 @@ namespace NanoQL.Numerics;
 
 /// <summary>
 /// A double as an <see cref="IRealArithmetic{T}"/>: each operation the IEEE double operation QuantLib's expression
-/// performs, so an expression evaluated here gives QuantLib's bits (the S-hes plan's HR6).
+/// performs, so an expression evaluated here gives QuantLib's bits.
 /// </summary>
 /// <param name="Value">The double.</param>
 internal readonly record struct RealDouble(double Value) : IRealArithmetic<RealDouble>

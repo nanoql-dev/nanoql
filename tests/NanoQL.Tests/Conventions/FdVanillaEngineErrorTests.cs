@@ -14,12 +14,12 @@ namespace NanoQL.Tests.Conventions;
 /// <summary>
 /// The exception type, message and parameter name of the finite-difference CEV, SABR and CIR engines' and the
 /// time-dependent boundary's refusals. QuantLib's "non-striked payoff given" (<c>testFdEnginesWithNonStrikedPayoff</c>,
-/// its Black-Scholes, Heston and CIR engines) is the type here: a vanilla option takes a striked payoff, so no engine can
-/// be given another, and each engine's check stands for QuantLib's. An exercise on or before the discount curve's date
-/// leaves the CEV and SABR engines no time on their curve's clock: QuantLib's throw there, in Boost's non-central
-/// chi-squared ("Non centrality parameter is inf") on the curve's date and in its incomplete gamma before it [executed:
-/// <c>scratchpad\c4\probe\fdcev_edges.cpp</c>], is nanoql's refusal of the option, as its other finite-difference engines
-/// refuse an exercise their clocks have no time for.
+/// its Black-Scholes, Heston and CIR engines) is the type here: a vanilla option takes a striked payoff, so no engine
+/// can be given another, and each engine's check stands for QuantLib's. An exercise on or before the discount curve's
+/// date leaves the CEV and SABR engines no time on their curve's clock: QuantLib's throw there, in Boost's non-central
+/// chi-squared ("Non centrality parameter is inf") on the curve's date and in its incomplete gamma before it (QuantLib
+/// 1.44), is nanoql's refusal of the option, as its other finite-difference engines refuse an exercise their clocks
+/// have no time for.
 /// </summary>
 public class FdVanillaEngineErrorTests
 {

@@ -20,10 +20,10 @@ namespace NanoQL.PricingEngines;
 /// Stateless. QuantLib evaluates Rubinstein's formula on the zero rates and the volatility at maturity, its times from
 /// the evaluation date, so it is exact only on flat markets; here the option is C(K, T) + D_q(t, T)·P(K·D_r(t, T) /
 /// D_q(t, T), t), put-call parity at the choosing date t, each priced by <see cref="AnalyticEuropeanEngine"/> on the
-/// process: exact under deterministic rates, dividends and volatility (the S-exo plan's ER4,
-/// <c>Divergences/SimpleChooserTermStructureTests.cs</c>), QuantLib's formula's value on a flat market within its last
+/// process: exact under deterministic rates, dividends and volatility
+/// (<c>Divergences/SimpleChooserTermStructureTests.cs</c>), QuantLib's formula's value on a flat market within its last
 /// bits. Each structure is read on its own times, so QuantLib's refusals of day counters that differ, which its
-/// formula's single time needed, don't apply (ER5 (xxiv)).
+/// formula's single time needed, don't apply.
 /// </para>
 /// <para>QuantLib's refusals of a spot, a strike or a volatility at maturity that isn't positive, and of a choosing date
 /// on or before the evaluation date, are kept.</para>
@@ -55,7 +55,7 @@ public static class AnalyticSimpleChooserEngine
         return option.FetchResults(new OneAssetOptionResults { NPV = Value(option, context, process) });
     }
 
-    // QuantLib's calculate(), ER4's form.
+    // QuantLib's calculate(), on discounts and variances by date.
     private static double Value(
         SimpleChooserOption option, EvaluationContext context, GeneralizedBlackScholesProcess process)
     {

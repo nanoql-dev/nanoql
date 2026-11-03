@@ -6,13 +6,13 @@ termstructures/volatility/optionlet/optionletstripper1.py and strippedoptionlet.
 the adapter QuantLib refuses (a stripper on a surface built on a fixed date, which has no settlement days).
 
 Each adapter is read at its fixing times and strikes, between them, before the first time and past the last (refused
-unless the call or the adapter extrapolates), outside the strikes (likewise) and by date, and its Black
-variance at the same points by time; once with extrapolation enabled. A refused value is {"throws": true}. Its own
-outputs are its reference date, maximum date and time, minimum and maximum strikes, volatility type, displacement, day
-counter's and calendar's names and business-day convention. The volatility by tenor and the smile sections, which the
-wheel doesn't bind, are the harness's. An input of another adapter QuantLib refuses only at its first volatility (one strike or one date) or reads
-past (no strikes) is left out here: nanoql refuses it when the adapter is built (S7R4), a convention and a divergence
-of their own.
+unless the call or the adapter extrapolates), outside the strikes (likewise) and by date, and its Black variance at the
+same points by time; once with extrapolation enabled. A refused value is {"throws": true}. Its own outputs are its
+reference date, maximum date and time, minimum and maximum strikes, volatility type, displacement, day counter's and
+calendar's names and business-day convention. The volatility by tenor and the smile sections, which the wheel doesn't
+bind, are the harness's. An input of another adapter QuantLib refuses only at its first volatility (one strike or one
+date) or reads past (no strikes) is left out here: nanoql refuses it when the adapter is built, a convention and a
+divergence of their own.
 
 A case's inputs are {"settings", "source" ({"kind": "stripper", ...optionletstripper1's case} or {"kind":
 "optionlet", "optionlet": ...strippedoptionlet's spec}), "enableExtrapolation", "byTime", "byDate"}; a point is [time,

@@ -23,8 +23,8 @@ namespace NanoQL.Experimental;
 /// <remarks>
 /// Bound to a basket, the model simulates the basket's live names on the latent model restricted to their rows, their
 /// recoveries kept, and tranches against the restated amounts: QuantLib's simulates the defaulted names too against
-/// the inception amounts (<c>randomdefaultlatentmodel.hpp:352-353</c>, <c>:927-936</c>; the S-xcr plan's XR8 (ii)).
-/// The simulation's rules are <see cref="RandomLM{TCopula, TInitTraits, TUsng}"/>'s.
+/// the inception amounts (<c>randomdefaultlatentmodel.hpp:352-353</c>, <c>:927-936</c>). The simulation's rules are
+/// <see cref="RandomLM{TCopula, TInitTraits, TUsng}"/>'s.
 /// </remarks>
 [Experimental("NQL0001")]
 public class RandomDefaultLM<TCopula, TInitTraits, TUsng> : RandomLM<TCopula, TInitTraits, TUsng>

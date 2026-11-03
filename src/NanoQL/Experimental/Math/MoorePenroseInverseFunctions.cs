@@ -24,8 +24,8 @@ public static class MoorePenroseInverseFunctions
     /// <remarks>
     /// A wide matrix, with fewer rows than columns, is inverted through its transpose, A⁺ = ((Aᵀ)⁺)ᵀ, Penrose's
     /// identity: QuantLib's reads its singular values past their end and then throws "matrices with different sizes
-    /// (3x2, 3x3) cannot be multiplied" on a 2 × 3 matrix (the S-xrt plan's XRR5 (xxxv);
-    /// <c>Divergences/MoorePenroseWideTests.cs</c>). A tall or square matrix is QuantLib's.
+    /// (3x2, 3x3) cannot be multiplied" on a 2 × 3 matrix (<c>Divergences/MoorePenroseWideTests.cs</c>). A tall or
+    /// square matrix is QuantLib's.
     /// </remarks>
     /// <param name="A">The m × n matrix.</param>
     /// <param name="tol">

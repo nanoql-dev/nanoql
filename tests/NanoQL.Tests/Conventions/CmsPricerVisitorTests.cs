@@ -11,11 +11,11 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The pricer visitor's CMS cases (<c>couponpricer.cpp:376-382</c>, <c>:392-398</c>; the S-cms plan's CMR1 (vi)): a CMS
-/// coupon, capped or not, takes a <see cref="CmsCouponPricer"/> and refuses any other pricer with "pricer not
-/// compatible with CMS coupon", and a <see cref="CappedFlooredCoupon"/> built over a CMS coupon refuses one with
-/// "pricer not compatible with CMS Coupon"; a CMS coupon without a pricer refuses its rate with QuantLib's "pricer not
-/// set". A capped leg is built of capped CMS coupons.
+/// The pricer visitor's CMS cases (<c>couponpricer.cpp:376-382</c>, <c>:392-398</c>): a CMS coupon, capped or not,
+/// takes a <see cref="CmsCouponPricer"/> and refuses any other pricer with "pricer not compatible with CMS coupon", and
+/// a <see cref="CappedFlooredCoupon"/> built over a CMS coupon refuses one with "pricer not compatible with CMS
+/// Coupon"; a CMS coupon without a pricer refuses its rate with QuantLib's "pricer not set". A capped leg is built of
+/// capped CMS coupons.
 /// </summary>
 public class CmsPricerVisitorTests
 {

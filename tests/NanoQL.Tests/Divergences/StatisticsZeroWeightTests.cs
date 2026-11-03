@@ -6,12 +6,12 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// Where the samples a member averages weigh 0 in all, the statistics refuse (the S-sr plan's SSR6 (ix)), where
-/// QuantLib divides 0 by 0 and returns NaN: <see cref="GeneralStatistics.ExpectationValue(Func{double, double}, Func{double, bool})"/>,
-/// which every empirical member reads, refuses with the text QuantLib's percentile gives a set of zero weight, "empty
-/// sample set" (generalstatistics.hpp:115-133, generalstatistics.cpp:94-95); and <see cref="IncrementalStatistics"/>'s
-/// skewness and kurtosis refuse as its mean does, "sampleWeight_= 0, unsufficient" (incrementalstatistics.cpp:42).
-/// QuantLib's check: its own refusals.
+/// Where the samples a member averages weigh 0 in all, the statistics refuse, where QuantLib divides 0 by 0 and returns
+/// NaN: <see cref="GeneralStatistics.ExpectationValue(Func{double, double}, Func{double, bool})"/>, which every
+/// empirical member reads, refuses with the text QuantLib's percentile gives a set of zero weight, "empty sample set"
+/// (generalstatistics.hpp:115-133, generalstatistics.cpp:94-95); and <see cref="IncrementalStatistics"/>'s skewness and
+/// kurtosis refuse as its mean does, "sampleWeight_= 0, unsufficient" (incrementalstatistics.cpp:42). QuantLib's check:
+/// its own refusals.
 /// </summary>
 public class StatisticsZeroWeightTests
 {

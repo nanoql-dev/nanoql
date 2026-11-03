@@ -11,12 +11,11 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The partial-time barrier engine's rebate (the S-bar plan's BR5 (xii), fixed under R8). The instrument takes a rebate
-/// and no formula of QuantLib's engine reads it: 11.116881 at rebates 0 and 5 (the planner's P2). nanoql prices a
-/// start-window knock-out's rebate, paid at the hit before the cover event, as QuantLib's analytic barrier engine
-/// prices a knock-out's rebate to the cover event; no formula covers the end windows' or the knock-ins' rebates, which
-/// are refused ("rebate not supported for this partial-time barrier"). Check: QuantLib's analytic barrier engine with
-/// the cover event as expiry.
+/// The partial-time barrier engine's rebate (fixed). The instrument takes a rebate and no formula of QuantLib's engine
+/// reads it: 11.116881 at rebates 0 and 5. nanoql prices a start-window knock-out's rebate, paid at the hit before the
+/// cover event, as QuantLib's analytic barrier engine prices a knock-out's rebate to the cover event; no formula covers
+/// the end windows' or the knock-ins' rebates, which are refused ("rebate not supported for this partial-time
+/// barrier"). Check: QuantLib's analytic barrier engine with the cover event as expiry.
 /// </summary>
 public class PartialTimeRebateTests
 {

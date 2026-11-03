@@ -16,8 +16,8 @@ namespace NanoQL.Tests.Divergences;
 /// on (−w, −K), reaches the method's own setting of one positive weight: on a two-asset spread at K = −10 the direct
 /// route is 0.08 to 0.09 above the identity's, the put at ρ 0.9 0.852254 against 0.766746 (Choi 0.766703, the Monte
 /// Carlo 0.7682 ± 0.0035). nanoql prices those inputs by the identity, and every other negative strike by QuantLib's
-/// branch, so <c>testDengLiZhouWithNegativeStrike</c> (two negative weights) keeps 3.34412 (the S-exo plan's ER5
-/// (xxxv)): QuantLib's engine on the flipped inputs, bit for bit, and Choi's engine are the checks.
+/// branch, so <c>testDengLiZhouWithNegativeStrike</c> (two negative weights) keeps 3.34412: QuantLib's engine on the
+/// flipped inputs, bit for bit, and Choi's engine are the checks.
 /// </summary>
 public class DengLiZhouNegativeStrikeTests
 {

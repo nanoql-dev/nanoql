@@ -5,8 +5,9 @@
 months and expiring in six months or a year, on analyticcompoundoptionengine.py's flat markets: the NPV.
 
 Flat markets only: on term structures QuantLib reads one constant rate, yield and volatility to expiry, nanoql prices
-the call and put by S-eq's European engine by date (tests/NanoQL.Tests/Divergences/SimpleChooserTermStructureTests.cs),
-and QuantLib refuses curves on different day counters (ExoticMismatchedTimesTests.cs).
+the call and put by the analytic European engine by date
+(tests/NanoQL.Tests/Divergences/SimpleChooserTermStructureTests.cs), and QuantLib refuses curves on different day
+counters (ExoticMismatchedTimesTests.cs).
 
 A case holds analyticcompoundoptionengine.py's process spec and an option {"choosingDate", "strike", "exercise"}. The
 wheel's calls, by QuantLib-SWIG 1.44's options.i: SimpleChooserOption(choosingDate, strike, exercise),

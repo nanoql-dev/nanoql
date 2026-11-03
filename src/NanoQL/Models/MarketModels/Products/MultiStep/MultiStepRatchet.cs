@@ -14,12 +14,11 @@ namespace NanoQL.Models;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A working type (the S-mmp plan's MMPR1 (i)). Fewer accruals or payment times than rates are refused, where QuantLib
-/// reads past them (MMPR4's refusals).
+/// A working type. Fewer accruals or payment times than rates are refused, where QuantLib reads past them.
 /// </para>
 /// <para>
-/// QuantLib's sign, kept and documented (MMPR4): a <c>payer</c> ratchet receives the coupon (its multiplier is +1),
-/// where QuantLib's swap and inverse floater pay theirs.
+/// QuantLib's sign, kept and documented: a <c>payer</c> ratchet receives the coupon (its multiplier is +1), where
+/// QuantLib's swap and inverse floater pay theirs.
 /// </para>
 /// </remarks>
 [WorkingType]

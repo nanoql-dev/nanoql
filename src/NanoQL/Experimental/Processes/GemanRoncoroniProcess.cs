@@ -16,18 +16,18 @@ namespace NanoQL.Experimental;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A working type, mutable and not thread-safe, as the generators are (the S-xrt plan's XRR3): the one-dimensional
-/// <see cref="Evolve(double, double, double, double)"/> draws its two jump uniforms from a Mersenne Twister it builds on
-/// its first call, seeded from that call's Gaussian draw as QuantLib's (<c>1234·dw + 56789</c>, as an unsigned 32-bit
-/// integer), and keeps for every later call; so a path's jumps depend on how often the process was evolved before, as
-/// QuantLib's. <see cref="Clone"/> returns a copy with its own, unseeded generator, for a second simulation or a second
-/// thread. The five-argument <see cref="Evolve(double, double, double, double, ReadOnlySpan{double})"/>, taking the jump
-/// uniforms, is stateless. A process array holding it is as thread-safe as its least safe member.
+/// A working type, mutable and not thread-safe, as the generators are: the one-dimensional
+/// <see cref="Evolve(double, double, double, double)"/> draws its two jump uniforms from a Mersenne Twister it builds
+/// on its first call, seeded from that call's Gaussian draw as QuantLib's (<c>1234·dw + 56789</c>, as an unsigned
+/// 32-bit integer), and keeps for every later call; so a path's jumps depend on how often the process was evolved
+/// before, as QuantLib's. <see cref="Clone"/> returns a copy with its own, unseeded generator, for a second simulation
+/// or a second thread. The five-argument <see cref="Evolve(double, double, double, double, ReadOnlySpan{double})"/>,
+/// taking the jump uniforms, is stateless. A process array holding it is as thread-safe as its least safe member.
 /// </para>
 /// <para>
 /// The standard deviation over a step, √(σ²(t)(1 − e^(−2θ₁Δt))/(2θ₁)), cancels in <c>1 − exp(−2θ₁Δt)</c> at small
 /// θ₁ and is NaN at θ₁ = 0 in QuantLib's: here below |2θ₁Δt| 1e-2 it is √(σ²(t)·(−expm1(−2θ₁Δt))/(2θ₁)), and σ(t)√Δt at
-/// θ₁ = 0, QuantLib's formula at and above (the S-xrt plan's XRR5 (xxv); <c>Divergences/GemanRoncoroniDeviationTests.cs</c>).
+/// θ₁ = 0, QuantLib's formula at and above (<c>Divergences/GemanRoncoroniDeviationTests.cs</c>).
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]
@@ -37,7 +37,7 @@ public sealed class GemanRoncoroniProcess : StochasticProcess1D
     private readonly double x0;
     private readonly double alpha, beta, gamma, delta, eps, zeta, d, k, tau, sig2, a, b, theta1, theta2, theta3, psi;
 
-    // The jump generator: built on the first one-dimensional evolve, then continued (XRR3).
+    // The jump generator: built on the first one-dimensional evolve, then continued.
     private MersenneTwisterUniformRng? urng;
 
     /// <summary>Initializes a new instance of the <see cref="GemanRoncoroniProcess"/> class.</summary>
@@ -131,7 +131,7 @@ public sealed class GemanRoncoroniProcess : StochasticProcess1D
     }
 
     /// <inheritdoc/>
-    /// <remarks>The mean-reverting step's exact deviation at the start's variance (XRR5 (xxv)).</remarks>
+    /// <remarks>The mean-reverting step's exact deviation at the start's variance.</remarks>
     public override double StdDeviation(double t0, double x0, double dt)
     {
         double c = Math.Cos((Math.PI * t0) + b);
@@ -148,7 +148,7 @@ public sealed class GemanRoncoroniProcess : StochasticProcess1D
     }
 
     /// <inheritdoc/>
-    /// <remarks>The jump uniforms from the process's generator, seeded on the first call from its draw (XRR3).</remarks>
+    /// <remarks>The jump uniforms from the process's generator, seeded on the first call from its draw.</remarks>
     public override double Evolve(double t0, double x0, double dt, double dw)
     {
         // random number generator for the jump part

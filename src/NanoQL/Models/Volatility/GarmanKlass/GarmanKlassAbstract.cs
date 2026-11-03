@@ -20,11 +20,11 @@ namespace NanoQL.Models;
 /// <c>GarmanKlassOpenClose&lt;T&gt;</c>, a template deriving its parameter, isn't a type here: the estimators that
 /// read the previous close and today's open (<see cref="GarmanKlassSigma1"/>, <see cref="GarmanKlassSigma3"/> and
 /// <see cref="GarmanKlassSigma6"/>) run its calculation through <see cref="OpenClose"/> on their base estimator's point
-/// function, QuantLib's arithmetic (the S-bar plan's BR3 (iii)).
+/// function, QuantLib's arithmetic.
 /// </para>
 /// <para>
-/// A documented divergence (BR5 (xxxv)): the open-close calculation refuses an empty series, where QuantLib increments
-/// its begin past its end.
+/// A documented divergence: the open-close calculation refuses an empty series, where QuantLib increments its begin
+/// past its end.
 /// </para>
 /// </remarks>
 public abstract class GarmanKlassAbstract : LocalVolatilityEstimator<IntervalPrice>

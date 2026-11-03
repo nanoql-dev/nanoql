@@ -23,7 +23,7 @@ namespace NanoQL.Tests.TestSuite;
 
 // QuantLib's options hold their engines and its quotes notify them; here each pricing passes the engine's arguments,
 // and a quote set anew is a process built at the new value. QuantLib's Monte Carlo builders default the seed to 0, a
-// seed from the clock; here a fixed seed (S2R4), which a low-discrepancy generator reads only past Sobol's tabulated
+// seed from the clock; here a fixed seed, which a low-discrepancy generator reads only past Sobol's tabulated
 // dimensions, so its sequence is QuantLib's.
 [Trait("Oracle", "QuantLib")]
 public class AsianOptionsTests
@@ -35,8 +35,8 @@ public class AsianOptionsTests
     private static readonly EvaluationContext RunnerContext = new() { EvaluationDate = new Date(16, September, 2015) };
 
     // testAnalyticDiscreteGeometricAverageStrike's moved value: the engine's times from the evaluation date, its first
-    // fixing 36 days on (the S-bar plan's BR5 (xxxiii)), QuantLib's 4.97109, which measures them from the first
-    // fixing and drops its dividend discount, recorded in Divergences/GeometricAverageStrikeForwardStartTests.cs
+    // fixing 36 days on, QuantLib's 4.97109, which measures them from the first fixing and drops its dividend discount,
+    // recorded in Divergences/GeometricAverageStrikeForwardStartTests.cs
     private const double MovedDiscreteGeometricAverageStrike = 4.956201596311162;
 
     [Fact]
@@ -265,8 +265,7 @@ public class AsianOptionsTests
 
         // Moved: the check of line 488 against 4.97109, QuantLib's value with its times from the first fixing: the
         // engine's times run from the evaluation date, so the average discounts the dividend to the first fixing,
-        // 4.97109 × e^(−0.03 × 36/360) (the S-bar plan's BR5 (xxxiii),
-        // Divergences/GeometricAverageStrikeForwardStartTests.cs)
+        // 4.97109 × e^(−0.03 × 36/360) (Divergences/GeometricAverageStrikeForwardStartTests.cs)
         double expected = MovedDiscreteGeometricAverageStrike;
         double tolerance = 1e-5;
         Assert.True(Math.Abs(calculated - expected) <= tolerance, $"value: expected {expected}, calculated {calculated}");
@@ -861,7 +860,7 @@ public class AsianOptionsTests
     }
 
     // Adapted: QuantLib catches detail::PastFixingsOnly, internal to nanoql; the refusal is a NanoQLException with its
-    // text (the S-bar plan's SD14). The curves float with the evaluation date, as QuantLib's do.
+    // text. The curves float with the evaluation date, as QuantLib's do.
     [Fact]
     public void TestAllFixingsInThePast()
     {
@@ -1836,7 +1835,7 @@ public class AsianOptionsTests
     private static int TimeToDays(double t, int daysPerYear = 360) =>
         (int)Math.Round(t * daysPerYear, MidpointRounding.AwayFromZero);
 
-    // QuantLib's master's case for #2926 (after v1.44; the S-xeq plan's XER4), a check of S-bar's landed Levy engine
+    // QuantLib's master's case for #2926 (after v1.44), a check of the Levy engine
     [Fact]
     public void TestLevyZeroVolatility()
     {
@@ -1884,7 +1883,7 @@ public class AsianOptionsTests
         }
     }
 
-    // QuantLib's master's case for #2926 (after v1.44; the S-xeq plan's XER4), a check of S-bar's landed Levy engine
+    // QuantLib's master's case for #2926 (after v1.44), a check of the Levy engine
     [Fact]
     public void TestLevyLowVolatilityContinuity()
     {
@@ -1923,7 +1922,7 @@ public class AsianOptionsTests
         }
     }
 
-    // QuantLib's master's case for #2926 (after v1.44; the S-xeq plan's XER4), a check of S-bar's landed Levy engine
+    // QuantLib's master's case for #2926 (after v1.44), a check of the Levy engine
     [Fact]
     public void TestLevyVarianceReference()
     {

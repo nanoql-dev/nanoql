@@ -8,9 +8,9 @@ using NanoQL.Tests.Divergences;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// <c>Garch11</c> is immutable (the S-bar plan's BR3 (ii)): a calibration returns a new model with the receiver's mode
-/// and leaves the receiver unchanged, where QuantLib's <c>calibrate</c> changes the object; every answer is a fresh
-/// object's, so two calibrations of one series agree.
+/// <c>Garch11</c> is immutable: a calibration returns a new model with the receiver's mode and leaves the receiver
+/// unchanged, where QuantLib's <c>calibrate</c> changes the object; every answer is a fresh object's, so two
+/// calibrations of one series agree.
 /// </summary>
 public class Garch11ImmutableTests
 {

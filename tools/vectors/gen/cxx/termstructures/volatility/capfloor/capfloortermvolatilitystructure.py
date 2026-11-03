@@ -2,8 +2,9 @@
 # SPDX-License-Identifier: Apache-2.0
 """Vectors for QuantLib's CapFloorTermVolatilityStructure (ql/termstructures/volatility/capfloor/
 capfloortermvolatilitystructure.hpp) and the members it inherits, each output computed by the C++ harness, on
-CapFloorTermVolSurface, the only concrete structure of S7's: 8 surfaces of tools/vectors/gen/termstructures/volatility/
-capfloor/capfloortermvolsurface.py, whose functions build their specs, on the evaluation date 15 January 2025.
+CapFloorTermVolSurface, the only concrete one ported: 8 surfaces of
+tools/vectors/gen/termstructures/volatility/capfloor/capfloortermvolsurface.py, whose functions build their specs, on
+the evaluation date 15 January 2025.
 
 Each surface's outputs are its settlement days, which the wheel doesn't bind (QuantLib's refusal for a fixed reference
 date, "settlement days not provided for this instance", which nanoql's null answers, written as null); its reference

@@ -261,8 +261,8 @@ public class DoubleBarrierOptionTests
             {
                 var barrierType = (DoubleBarrierType)j;
 
-                // the rows the ruled clock reads move past QuantLib's tolerance run on the case restated to Actual/365F,
-                // the engine's own clock (the user's ruling of 2026-10-28 at the S-xeq run's stop 1)
+                // the rows nanoql's clock reads move past QuantLib's tolerance run on the case restated to Actual/365F,
+                // the engine's own clock
                 bool restated = RestatedValues.TryGetValue(
                     (value.Type, value.Strike, value.T, barrierType), out (double SuoWang, double Analytic) quantLib);
                 DayCounter rowDc = restated ? new Actual365Fixed() : dc;
@@ -314,10 +314,10 @@ public class DoubleBarrierOptionTests
                     expected = bsVanillaPrice - value.Result;
                 }
 
-                // on the restated case, QuantLib's engine's own value there plus the domestic discount's own move
-                // (XER5 (viii), the S-xeq plan's XER3 (b) form): the change of the smile's vanilla from QuantLib's
-                // foreign discount in both places, scaled by the survival probability, an out option by −λ·Δ and an
-                // in option by +λ·Δ under adaptVanDelta (Divergences/VannaVolgaDoubleBarrierTests.cs)
+                // on the restated case, QuantLib's engine's own value there plus the domestic discount's own move: the
+                // change of the smile's vanilla from QuantLib's foreign discount in both places, scaled by the survival
+                // probability, an out option by −λ·Δ and an in option by +λ·Δ under adaptVanDelta
+                // (Divergences/VannaVolgaDoubleBarrierTests.cs)
                 if (restated)
                 {
                     expected = quantLib.SuoWang + DomesticDiscountMove(results, barrierType, value, qTS, rTS);
@@ -424,7 +424,7 @@ public class DoubleBarrierOptionTests
         Assert.False(diff > tolerance, $"Threshold exceeded: {diff}, analytical: {analytical}, Monte Carlo: {monteCarlo}");
     }
 
-    // QuantLib's master's case for #2878 (the S-xeq plan's XER5 (xii)), taken with its fix
+    // QuantLib's master's case for #2878, taken with its fix
     [Fact]
     public void TestBinomialExerciseAtMaturity()
     {
@@ -459,9 +459,8 @@ public class DoubleBarrierOptionTests
             $"Non-dividend-paying American double-barrier value {americanValue} differs from vanilla value {expected}");
     }
 
-    // QuantLib's engine's values on the rows the ruled clock reads move, on the case restated to Actual/365F, its
-    // Suo-Wang and analytic inner engines' (the S-xeq run's probe scratchpad\probes\cxx\xq_vvdb_dc.cpp at 365,
-    // out_vvdb_365.txt; the user's ruling at stop 1)
+    // QuantLib's engine's values on the rows nanoql's clock reads move, on the case restated to Actual/365F, its
+    // Suo-Wang and analytic inner engines' (QuantLib 1.44)
     private static readonly Dictionary<(OptionType Type, double Strike, double T, DoubleBarrierType BarrierType),
         (double SuoWang, double Analytic)> RestatedValues = new()
     {
@@ -483,7 +482,7 @@ public class DoubleBarrierOptionTests
         [(OptionType.Put, 1.56345, 2.0, DoubleBarrierType.KnockOut)] = (0.177883812638881, 0.177883812669461),
     };
 
-    // The domestic discount's move of a row (XER5 (viii)): the engine's own vanilla on the smile less the one QuantLib's
+    // The domestic discount's move of a row: the engine's own vanilla on the smile less the one QuantLib's
     // interpolation gives with the foreign discount in both places, times the survival probability, an out option's
     // −λ·Δ and an in option's +λ·Δ under adaptVanDelta
     private static double DomesticDiscountMove(

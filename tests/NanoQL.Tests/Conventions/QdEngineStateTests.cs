@@ -10,7 +10,7 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The QD engines' state (the S-van plan's VD7). QuantLib builds QD+'s exercise boundary inside each calculation
+/// The QD engines' state. QuantLib builds QD+'s exercise boundary inside each calculation
 /// (<c>qdplusamericanengine.cpp:350-374</c>), so an engine object keeps nothing between prices; nanoql's likewise, its
 /// boundary evaluator a working object per solve. The fixed-point engine's three named schemes are function statics in
 /// QuantLib (<c>qdfpamericanengine.cpp:411-427</c>); nanoql's are static singletons, immutable, so threads share them.

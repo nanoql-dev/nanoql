@@ -15,7 +15,7 @@ namespace NanoQL.Tests.Vectors;
 /// discount factors bootstrapped on a deposit and five swaps over the zero-spreaded file's six originals, on
 /// log-linear, log-cubic and log-mixed-linear-cubic interpolation; the curve's nodes, inspectors, discounts, zero rates
 /// and forward rates, and the discounts of the spread discount curve rebuilt from its nodes, but past a base that
-/// doesn't extrapolate (the S-sr plan's SSR6 (xxi)).
+/// doesn't extrapolate.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class PiecewiseSpreadYieldCurveVectorTests

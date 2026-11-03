@@ -7,16 +7,15 @@ indexes, Actual/360, forecasting on flat curves whose reference date is the eval
 The futures are compounded and averaged; monthly and quarterly; starting after the evaluation date, on it (today's
 fixing published or not) and before it (every past fixing stored, today's published or not); with a convexity
 adjustment; maturing on a holiday (Juneteenth); and one expired, its maturity before the evaluation date, worth 0. A
-stored fixing is 4.3% plus a basis point per business day from the value date (3.1% on ESTR), today's 7%. The
-refusals: a past fixing missing ("missing rate on"), an index with no forwarding curve, and a forwarding curve that
-starts after the evaluation date, compounded and averaged (QuantLib's master words the last two its #2897's way,
-nanoql's texts: the S-cms plan's CMR6).
+stored fixing is 4.3% plus a basis point per business day from the value date (3.1% on ESTR), today's 7%. The refusals:
+a past fixing missing ("missing rate on"), an index with no forwarding curve, and a forwarding curve that starts after
+the evaluation date, compounded and averaged (QuantLib's master words the last two its #2897's way, nanoql's texts).
 
 A future's outputs are its NPV, 100 times one less its rate plus the convexity adjustment, the adjustment, and whether
 it has expired. Generated and left out: the compounded futures whose value date is the evaluation date with today's
-fixing published, whose NPV QuantLib computes without that fixing, where the averaged future uses it (the S-cms
-plan's CMR5 (xxi); tests/NanoQL.Tests/Divergences/OvernightFutureTodayFixingTests.cs). The index, value date and
-maturity, which the wheel hides, are in tools/vectors/gen/cxx/instruments/overnightindexfuture.py.
+fixing published, whose NPV QuantLib computes without that fixing, where the averaged future uses it
+(tests/NanoQL.Tests/Divergences/OvernightFutureTodayFixingTests.cs). The index, value date and maturity, which the wheel
+hides, are in tools/vectors/gen/cxx/instruments/overnightindexfuture.py.
 
 A case's inputs hold its settings with the stored fixings, the index (an overnight spec of
 tools/vectors/gen/indexes/interestrateindex.py), the value and maturity dates, the averaging method and the convexity
@@ -109,7 +108,8 @@ def cases():
             f = ql.OvernightIndexFuture(index, value, maturity, ql.QuoteHandle(ql.SimpleQuote(convexity)), avg)
             expected = {"NPV": v.attempt(f.NPV), "convexityAdjustment": f.convexityAdjustment(),
                         "isExpired": f.isExpired()}
-            # QuantLib's compounded future on its value date reads no fixing for today: CMR5 (xxi)
+            # QuantLib's compounded future on its value date reads no fixing for today, where nanoql's does: the NPV is
+            # left out
             todays = fixings is not None and any(d == TODAY for _, pairs in fixings for d, _ in pairs)
             if avg == COMPOUND and value == TODAY and todays:
                 del expected["NPV"]

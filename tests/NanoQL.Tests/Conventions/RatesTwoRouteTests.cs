@@ -13,11 +13,11 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// C3's rate and process routes against the landed classes (the S-xrt plan's §2.5): generalized Hull-White at a constant
-/// reversion and volatility against Hull-White, its bond options within its numerical integrals' 4.6e-4 (QuantLib's
-/// design, kept) and its fitting parameter φ to rounding; its Ornstein-Uhlenbeck process against the landed one; the
-/// quanto pricer at zero correlation against the Black Ibor pricer; the stripped coupon against its capped coupon less
-/// the underlying; and the extended process on flat parameters against the Black-Scholes-Merton process.
+/// The experimental rates and processes against the classes they extend: generalized Hull-White at a constant reversion
+/// and volatility against Hull-White, its bond options within its numerical integrals' 4.6e-4 (QuantLib's design, kept)
+/// and its fitting parameter φ to rounding; its Ornstein-Uhlenbeck process against the core one; the quanto pricer at
+/// zero correlation against the Black Ibor pricer; the stripped coupon against its capped coupon less the underlying;
+/// and the extended process on flat parameters against the Black-Scholes-Merton process.
 /// </summary>
 public class RatesTwoRouteTests
 {

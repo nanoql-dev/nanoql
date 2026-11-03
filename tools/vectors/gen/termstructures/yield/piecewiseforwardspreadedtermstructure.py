@@ -18,12 +18,12 @@ time, and whether it allows extrapolation (the original's flag); and at the quer
 forward rate. A refused value is {"throws": true}. The query dates are the zero-spreaded generator's 30, those before
 the first spread's date left out, and that date itself when it follows the reference date.
 
-The later schedule's expected values (the S-sr plan's SSR6 (vii)) are QuantLib's own curve with the first spread
-prepended at the reference date: QuantLib integrates the spread from the first spread's time, leaving out the flat
-spread it applies before it, where nanoql integrates from the reference date, which that curve's integral does, bit
-for bit with one interpolated segment (tests/NanoQL.Tests/Divergences/ForwardSpreadFirstDateTests.cs). Its reads
-before the first spread's date, where QuantLib's prepended curve averages a flat spread by its primitive, s·t/t, and
-nanoql takes the spread itself, are left out.
+The later schedule's expected values are QuantLib's own curve with the first spread prepended at the reference date:
+QuantLib integrates the spread from the first spread's time, leaving out the flat spread it applies before it, where
+nanoql integrates from the reference date, which that curve's integral does, bit for bit with one interpolated segment
+(tests/NanoQL.Tests/Divergences/ForwardSpreadFirstDateTests.cs). Its reads before the first spread's date, where
+QuantLib's prepended curve averages a flat spread by its primitive, s·t/t, and nanoql takes the spread itself, are left
+out.
 
 Each case's inputs hold its settings, the "original" (the zero-spreaded generator's spec), the "spreads", the
 "spreadDates" (the curve's, without the prepended one), the "interpolator" ("Linear" or "BackwardFlat") and the

@@ -13,16 +13,16 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The tree cap engine on a seasoned cap (the S-sr plan's SSR6 (iv)): QuantLib's <c>DiscretizedCapFloor::mandatoryTimes</c>
-/// keeps the started caplets' negative start times (<c>discretizedcapfloor.cpp:46-51</c>), where the discretized swap's
-/// filters <c>t >= 0</c>, so the grid refuses them and the engine prices nothing: on the wheel, a 3-year semiannual cap
-/// at 3% on Euribor 6M, started on 15 July 2024, its fixings stored at 3.5% and 3.25%, notional 1,000,000, on
-/// Hull-White (0.05, 0.01) on a flat 3% curve on 15 January 2025, refuses "negative times not allowed" on the tree,
-/// where the analytic engine prices it 8,985.844563131719. nanoql keeps the non-negative times, as the discretized swap
-/// does, and pays a caplet fixed on or before the reference date its known amount. QuantLib's check: the analytic
-/// engine's price, which the tree converges to; both value a caplet still to be fixed at its fixing (the plan's B1-1,
-/// <c>CapletFixingExpiryTests</c>), where QuantLib's analytic price with those caplets on its five-argument bond option at
-/// their fixings is 8,956.86225257607 on the wheel.
+/// The tree cap engine on a seasoned cap: QuantLib's <c>DiscretizedCapFloor::mandatoryTimes</c> keeps the started
+/// caplets' negative start times (<c>discretizedcapfloor.cpp:46-51</c>), where the discretized swap's filters <c>t >=
+/// 0</c>, so the grid refuses them and the engine prices nothing: on the wheel, a 3-year semiannual cap at 3% on
+/// Euribor 6M, started on 15 July 2024, its fixings stored at 3.5% and 3.25%, notional 1,000,000, on Hull-White (0.05,
+/// 0.01) on a flat 3% curve on 15 January 2025, refuses "negative times not allowed" on the tree, where the analytic
+/// engine prices it 8,985.844563131719. nanoql keeps the non-negative times, as the discretized swap does, and pays a
+/// caplet fixed on or before the reference date its known amount. QuantLib's check: the analytic engine's price, which
+/// the tree converges to; both value a caplet still to be fixed at its fixing (<c>CapletFixingExpiryTests</c>), where
+/// QuantLib's analytic price with those caplets on its five-argument bond option at their fixings is 8,956.86225257607
+/// on the wheel.
 /// </summary>
 public class TreeCapFloorSeasonedTests
 {
@@ -63,9 +63,8 @@ public class TreeCapFloorSeasonedTests
     // QuantLib on the wheel, a 2-year semiannual cap at 3% in arrears on Euribor 6M from 15 October 2024, its first
     // caplet fixed on 11 April 2025, on Hull-White (0.1, 0.01) on a flat 4% curve on 15 January 2025, its coupons on a
     // Black pricer at 20%: the tree refuses "negative times not allowed", the first caplet's start, and the analytic
-    // engine "negative time (-0.252055) given". nanoql's tree values each in-arrears caplet at its fixing, its start unread
-    // (the plan's B2-1 and B3-1, CapletInArrearsTests), and converges to the cap's Gaussian integral, 20,582.494695037763
-    // (the S-sr run's b31_seasoned.py).
+    // engine "negative time (-0.252055) given". nanoql's tree values each in-arrears caplet at its fixing, its start
+    // unread (CapletInArrearsTests), and converges to the cap's Gaussian integral, 20,582.494695037763.
     [Fact]
     public void ASeasonedCapInArrearsConvergesToItsGaussianIntegral()
     {

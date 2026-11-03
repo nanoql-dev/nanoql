@@ -8,8 +8,8 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// C3's instruments' refusals (the S-exo plan's ED14; C3's review, B3-3): each check's exception type, QuantLib's text
-/// and the parameter it names, at construction or in validation, as QuantLib's arguments check them.
+/// The exotic instruments' refusals: each check's exception type, QuantLib's text and the parameter it names, at
+/// construction or in validation, as QuantLib's arguments check them.
 /// </summary>
 public class ExoticInstrumentErrorTests
 {

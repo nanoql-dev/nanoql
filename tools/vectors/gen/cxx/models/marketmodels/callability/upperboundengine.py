@@ -10,8 +10,8 @@ every rate time but the last with null rebates, on its naif trigger and on a Lon
 regression gives; a payer swap callable at every other rate time.
 
 Left out: hedges with a rebate of value (a Bermudan swaption's exercise value), whose exercise values QuantLib reads
-from an adapter done at its first exercise date, and hedges that end before the last exercise date (the S-mmp plan's
-MMPR4 (vii), option (1) with (a), tests/NanoQL.Tests/Divergences/UpperBoundEngineTests.cs).
+from an adapter done at its first exercise date, and hedges that end before the last exercise date
+(tests/NanoQL.Tests/Divergences/UpperBoundEngineTests.cs).
 
 The harness unit is tools/cxx/src/models/marketmodels/callability/callability.cpp (collectnodedata.py's helpers). Read
 back by tests/NanoQL.Tests/Vectors/Cxx/Models/MarketModels/UpperBoundEngineCxxVectorTests.cs."""

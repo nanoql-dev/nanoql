@@ -17,7 +17,7 @@ namespace NanoQL.Experimental;
 /// For particle i the window is [i − K, i + K], wrapping around, as the class documents, and a particle that is its
 /// window's best is its own social best: QuantLib's window runs from i − K − 1 to i + K − 1, and its search starts from
 /// particle i's value paired with particle 0's position, so a particle that is its window's best takes particle 0's
-/// position (the S-xrt plan's XRR5 (xxix); <c>Divergences/ParticleSwarmTopologyTests.cs</c>).
+/// position (<c>Divergences/ParticleSwarmTopologyTests.cs</c>).
 /// </remarks>
 [Experimental("NQL0001")]
 public sealed class KNeighbors : ParticleSwarmOptimizationTopology

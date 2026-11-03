@@ -7,10 +7,9 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// <see cref="MarketModel"/>'s covariance cache (the S-mm plan's SD3, the rule on QuantLib's speed caches): computed once
-/// from the model's own pseudo-roots, whichever is read first, under a lock, each read a copy, so every answer is a fresh
-/// model's on whichever thread: QuantLib's arithmetic, each step's pseudo-root times its transpose and their running
-/// sums.
+/// <see cref="MarketModel"/>'s covariance cache (the rule on QuantLib's speed caches): computed once from the model's
+/// own pseudo-roots, whichever is read first, under a lock, each read a copy, so every answer is a fresh model's on
+/// whichever thread: QuantLib's arithmetic, each step's pseudo-root times its transpose and their running sums.
 /// </summary>
 public class MarketModelCovarianceCacheTests
 {

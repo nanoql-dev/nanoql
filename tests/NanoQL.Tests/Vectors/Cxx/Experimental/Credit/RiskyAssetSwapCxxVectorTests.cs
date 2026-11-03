@@ -13,8 +13,7 @@ namespace NanoQL.Tests.Vectors;
 /// <summary>
 /// The C++ harness's risky asset swap vectors, <c>tests/vectors/cxx/experimental/credit/riskyassetswap.json</c>:
 /// <see cref="RiskyAssetSwap"/>'s NPV and fair spread where its schedules coincide at recovery 0, its float annuity on
-/// every case (the S-xcr plan's XR8 (xii), (xxi)), and a hazard-rate curve bootstrapped on
-/// <see cref="AssetSwapHelper"/>s.
+/// every case, and a hazard-rate curve bootstrapped on <see cref="AssetSwapHelper"/>s.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class RiskyAssetSwapCxxVectorTests

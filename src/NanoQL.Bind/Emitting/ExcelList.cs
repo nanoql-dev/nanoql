@@ -7,9 +7,9 @@ using NanoQL.Bind.Selecting;
 namespace NanoQL.Bind.Emitting;
 
 /// <summary>
-/// A list of the types Excel holds, by a desk's tasks (XLR5, XLD33): <c>{"version": 1, "types": [{"type": …, "task":
-/// …}, …]}</c>, each entry a type's full name (a generic type by its definition, for its family). nanoql's is
-/// <c>bindings/excel/list.json</c>, which the tool carries; a user's build may give its own (XLD35).
+/// A list of the types Excel holds, by a desk's tasks: <c>{"version": 1, "types": [{"type": …, "task": …}, …]}</c>,
+/// each entry a type's full name (a generic type by its definition, for its family). nanoql's is
+/// <c>bindings/excel/list.json</c>, which the tool carries; a user's build may give its own.
 /// </summary>
 /// <param name="Source">Where the list came from, for messages.</param>
 /// <param name="Entries">The entries: each type's full name and its task.</param>

@@ -6,8 +6,8 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The refusals of QuantLib's undefined paths in the pilot's members, by type, message and parameter (playbook §2):
-/// a value already stored is refused with <see cref="NanoQLException"/>, an argument with
+/// The refusals of QuantLib's undefined paths in the foundations' members, by type, message and parameter (playbook
+/// §2): a value already stored is refused with <see cref="NanoQLException"/>, an argument with
 /// <see cref="ArgumentException"/>. The fixed-rate leg's empty schedule, which QuantLib refuses with
 /// <c>std::length_error</c>, is <see cref="EmptyScheduleTests"/>'.
 /// </summary>

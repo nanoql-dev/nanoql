@@ -13,9 +13,9 @@ namespace NanoQL.Methods;
 /// reads the value, its derivatives and the theta at a point through a bicubic spline.
 /// </summary>
 /// <remarks>
-/// Computed at construction, where QuantLib's lazy object computes at the first read, as S-eq's one-dimensional solver
-/// is (the S-sr plan's SSD10), its spline built there; immutable after, its reads changing nothing. The theta comes
-/// from a snapshot of the values a short time before time 0.
+/// Computed at construction, where QuantLib's lazy object computes at the first read, as the one-dimensional solver is,
+/// its spline built there; immutable after, its reads changing nothing. The theta comes from a snapshot of the values a
+/// short time before time 0.
 /// </remarks>
 public sealed class Fdm2DimSolver
 {

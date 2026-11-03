@@ -18,8 +18,8 @@ namespace NanoQL.PricingEngines;
 /// <typeparam name="TRng">The random-number traits.</typeparam>
 /// <typeparam name="TStats">The statistics accumulator.</typeparam>
 /// <remarks>
-/// An immutable record (SEQR2): each setting returns a new builder. The seed is required (S2R4), where QuantLib's
-/// defaults to 0, a clock-derived seed.
+/// An immutable record: each setting returns a new builder. The seed is required, where QuantLib's defaults to 0, a
+/// clock-derived seed.
 /// </remarks>
 public sealed record MakeMCDiscreteArithmeticAPEngine<TRng, TStats>
     where TRng : IRngTraits

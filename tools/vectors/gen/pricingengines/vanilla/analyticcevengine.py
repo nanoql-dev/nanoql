@@ -6,12 +6,12 @@ expiring in 30 days to five years, for elasticities from 0.1 to 2 on both sides 
 volatility parameters α = σ·f0^(1 - β) at σ 10% and 30%, discounted on flat curves at 3%, 0 and -1%. Then an expired
 option and the refusal of an American exercise.
 
-The outputs nanoql fixes are left out (the S-van plan's §2.10): |β - 1| < 1e-3, where nanoql prices Black at Hagan's
-volatility (VR10, tests/NanoQL.Tests/Divergences/CevNearOneTests.cs), none of the grid's; and every option whose tail
-QuantLib takes as 1 - cdf (or gamma_p - cdf) is below 1.01e-3, where nanoql takes Boost's complement from 1e-3 (VR4
-(xxxiv), tests/NanoQL.Tests/Divergences/CevTailTests.cs). A put's tail is the wheel's CEVRNDCalculator.cdf at the
-strike, the same Boost expression; a call's comes from the NPV and that cdf, f0·tail = NPV/discount + K·(1 - cdf), whose
-rounding the margin covers. The wheel's calls, by QuantLib-SWIG 1.44: AnalyticCEVEngine(f0, alpha, beta, discountCurve),
+The outputs nanoql fixes are left out: |β - 1| < 1e-3, where nanoql prices Black at Hagan's volatility
+(tests/NanoQL.Tests/Divergences/CevNearOneTests.cs), none of the grid's; and every option whose tail QuantLib takes as 1
+- cdf (or gamma_p - cdf) is below 1.01e-3, where nanoql takes Boost's complement from 1e-3
+(tests/NanoQL.Tests/Divergences/CevTailTests.cs). A put's tail is the wheel's CEVRNDCalculator.cdf at the strike, the
+same Boost expression; a call's comes from the NPV and that cdf, f0·tail = NPV/discount + K·(1 - cdf), whose rounding
+the margin covers. The wheel's calls, by QuantLib-SWIG 1.44: AnalyticCEVEngine(f0, alpha, beta, discountCurve),
 CEVRNDCalculator(f0, alpha, beta).cdf(f, t), VanillaOption(payoff, exercise) and its NPV. Read back by
 tests/NanoQL.Tests/Vectors/PricingEngines/AnalyticCEVEngineVectorTests.cs."""
 import importlib.util

@@ -9,13 +9,12 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// An event settled at one recovery rate settles the seniority it names (the S-xcr plan's XR8 (iii)): QuantLib's
-/// single-rate settlement fills every other seniority with ISDA's conventional recovery (<c>defaultevent.cpp:63-75</c>),
-/// so a failure to pay settled for SubLT2 at 0.3 reads 0.65 for SecDom, where each seniority settles at its own auction
-/// (ISDA's 2008 Icelandic protocols). And a bankruptcy settled by a map settles the seniorities it holds, where QuantLib's
-/// refuses a map without all five (<c>defaultevent.cpp:210-213</c>). QuantLib's values are the S-xcr run's
-/// <c>c1_facts.cpp</c> and the plan review's <c>rv_events.cpp</c>; the check is QuantLib's map constructor holding the
-/// seniority alone, which reads <c>Null&lt;Real&gt;()</c> for the others.
+/// An event settled at one recovery rate settles the seniority it names: QuantLib's single-rate settlement fills every
+/// other seniority with ISDA's conventional recovery (<c>defaultevent.cpp:63-75</c>), so a failure to pay settled for
+/// SubLT2 at 0.3 reads 0.65 for SecDom, where each seniority settles at its own auction (ISDA's 2008 Icelandic
+/// protocols). And a bankruptcy settled by a map settles the seniorities it holds, where QuantLib's refuses a map
+/// without all five (<c>defaultevent.cpp:210-213</c>). QuantLib's values are recorded in the test; the check is
+/// QuantLib's map constructor holding the seniority alone, which reads <c>Null&lt;Real&gt;()</c> for the others.
 /// </summary>
 public class SingleSenioritySettlementTests
 {

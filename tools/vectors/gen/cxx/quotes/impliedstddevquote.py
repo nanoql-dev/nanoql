@@ -7,9 +7,9 @@ guess, 0 where the solve fails.
 Calls and puts at forwards of 4% and 5%, strikes of 3%, 4% and 6%, prices of half a basis point to 2%, guesses of 0.05,
 0.15 and 0.5, accuracies of 1e-6 and 1e-10, and 100 evaluations; and prices the formula can't reach (a call above its
 forward, a negative price), where the quote is 0. Each quote's first value; QuantLib's later values, which start from
-the last solve, are left out (the S-core plan's CR1 (d)). A case's inputs are the "optionType" (QuantLib's integer),
-"forward", "price", "strike", "guess", "accuracy" and "maxIterations". The harness unit is
-tools/cxx/src/quotes/impliedstddevquote.cpp. Read back by tests/NanoQL.Tests/Vectors/Cxx/Quotes/QuoteCxxVectorTests.cs."""
+the last solve, are left out. A case's inputs are the "optionType" (QuantLib's integer), "forward", "price", "strike",
+"guess", "accuracy" and "maxIterations". The harness unit is tools/cxx/src/quotes/impliedstddevquote.cpp. Read back by
+tests/NanoQL.Tests/Vectors/Cxx/Quotes/QuoteCxxVectorTests.cs."""
 import os
 import sys
 

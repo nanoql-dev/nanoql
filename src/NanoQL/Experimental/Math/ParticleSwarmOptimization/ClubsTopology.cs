@@ -18,23 +18,22 @@ namespace NanoQL.Experimental;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Fixes (the S-xrt plan's XRR5 (xxx) and the run's R4-2; <c>Divergences/ParticleSwarmTopologyTests.cs</c>): the
-/// initial clubs are drawn in [0, totalClubs − 1], where QuantLib's draws in [1, totalClubs] and reads one past each
-/// particle's clubs; a particle's social best is its best club's best particle, where QuantLib's takes the club's index
-/// for a particle; each club's worst is weighed over every member, where QuantLib's tests it only on a member that
-/// isn't the new best, so a club whose values fall in order names particle 0 its worst, a member or not; and a best
-/// particle leaves a club only above the minimum and a worst one joins only below the maximum, as the class documents,
-/// where QuantLib's never tests either, so a particle that stays best leaves every club and its social best is then the
-/// largest double (the run's R4-4). A club none of whose members passes QuantLib's comparisons, one with no members or
-/// whose personal bests are all NaN, has no best, and a particle reads only its clubs with a best, or its own personal
-/// best where none has one, where QuantLib's reads particle 0, a member or not, for such a club (the S-xrt code review's
-/// B4-1 and F4-5); a minimum below 1 is refused, as a particle in no club has no club-mates and so no social best, where
-/// QuantLib's best particle leaves every club and keeps particle 0's position at the largest double.
+/// Fixes (<c>Divergences/ParticleSwarmTopologyTests.cs</c>): the initial clubs are drawn in [0, totalClubs − 1], where
+/// QuantLib's draws in [1, totalClubs] and reads one past each particle's clubs; a particle's social best is its best
+/// club's best particle, where QuantLib's takes the club's index for a particle; each club's worst is weighed over
+/// every member, where QuantLib's tests it only on a member that isn't the new best, so a club whose values fall in
+/// order names particle 0 its worst, a member or not; and a best particle leaves a club only above the minimum and a
+/// worst one joins only below the maximum, as the class documents, where QuantLib's never tests either, so a particle
+/// that stays best leaves every club and its social best is then the largest double. A club none of whose members
+/// passes QuantLib's comparisons, one with no members or whose personal bests are all NaN, has no best, and a particle
+/// reads only its clubs with a best, or its own personal best where none has one, where QuantLib's reads particle 0, a
+/// member or not, for such a club; a minimum below 1 is refused, as a particle in no club has no club-mates and so no
+/// social best, where QuantLib's best particle leaves every club and keeps particle 0's position at the largest double.
 /// </para>
 /// <para>
 /// Its integers are <c>std::uniform_int_distribution</c>'s on a <c>std::mt19937</c> on the seed, drawn as MSVC draws
-/// them (the S-xrt plan's XRD4); the seed is required, QuantLib's default seeding from the clock (XRD3). Each
-/// minimization starts the generator from the seed and the iterations from 0.
+/// them; the seed is required, QuantLib's default seeding from the clock. Each minimization starts the generator from
+/// the seed and the iterations from 0.
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]
@@ -64,7 +63,7 @@ public sealed class ClubsTopology : ParticleSwarmOptimizationTopology
     /// </exception>
     public ClubsTopology(int defaultClubs, int totalClubs, int maxClubs, int minClubs, int resetIteration, long seed)
     {
-        // a particle in no club would have no social best (B4-1)
+        // a particle in no club would have no social best
         ArgumentOutOfRangeException.ThrowIfLessThan(minClubs, 1);
         ArgumentOutOfRangeException.ThrowIfNegative(resetIteration);
         this.totalClubs = totalClubs;
@@ -107,7 +106,7 @@ public sealed class ClubsTopology : ParticleSwarmOptimizationTopology
             clubs4particles = [.. Enumerable.Range(0, M).Select(_ => new bool[totalClubs])];
             particles4clubs = [.. Enumerable.Range(0, totalClubs).Select(_ => new bool[M])];
 
-            // assign particles to clubs randomly, among the clubs 0 to totalClubs − 1 (XRR5 (xxx))
+            // assign particles to clubs randomly, among the clubs 0 to totalClubs − 1
             for (int i = 0; i < M; i++)
             {
                 bool[] clubSet = clubs4particles[i];
@@ -144,8 +143,8 @@ public sealed class ClubsTopology : ParticleSwarmOptimizationTopology
             reset = true;
         }
 
-        // find best by current club, the worst weighed over every member (R4-2); a club where no member passes the
-        // comparisons, with no members or only NaN personal bests, has none, −1 (B4-1, F4-5)
+        // find best by current club, the worst weighed over every member; a club where no member passes the
+        // comparisons, with no members or only NaN personal bests, has none, −1
         for (int i = 0; i < totalClubs; i++)
         {
             double bestByClubF = NumericLimits.QL_MAX_REAL;
@@ -203,7 +202,7 @@ public sealed class ClubsTopology : ParticleSwarmOptimizationTopology
                 }
             }
 
-            // update clubs, within the minimum and the maximum (R4-4)
+            // update clubs, within the minimum and the maximum
             if (best)
             {
                 // leave random club
@@ -233,8 +232,8 @@ public sealed class ClubsTopology : ParticleSwarmOptimizationTopology
                 }
             }
 
-            // update global best: the best club's best particle (XRR5 (xxx)), over the clubs with a best (B4-1); where
-            // none has one, its clubs' personal bests all NaN, its own (F4-5)
+            // update global best: the best club's best particle, over the clubs with a best; where none has one, its
+            // clubs' personal bests all NaN, its own
             double bestNeighborF = NumericLimits.QL_MAX_REAL;
             int bestNeighborX = -1;
             for (int j = 0; j < totalClubs; j++)

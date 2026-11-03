@@ -28,8 +28,8 @@ namespace NanoQL.Experimental;
 /// <para>
 /// QuantLib's protected constructor without nodes, through which its piecewise curve derives, isn't ported:
 /// <see cref="PiecewiseYoYOptionletVolatilityCurve{TInterpolator, TBootstrap, TTraits}"/> implements
-/// <see cref="IInterpolatedCurve{TTraits, TInterpolator}"/> itself, as S-infl's piecewise year-on-year curve does. Its
-/// nodes come from its dates and data, QuantLib's master's (#2941), where 1.44's are a list only this constructor
+/// <see cref="IInterpolatedCurve{TTraits, TInterpolator}"/> itself, as the piecewise year-on-year inflation curve does.
+/// Its nodes come from its dates and data, QuantLib's master's (#2941), where 1.44's are a list only this constructor
 /// fills.
 /// </para>
 /// </remarks>

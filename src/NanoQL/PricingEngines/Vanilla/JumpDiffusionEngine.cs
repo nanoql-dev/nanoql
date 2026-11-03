@@ -28,14 +28,13 @@ namespace NanoQL.PricingEngines;
 /// <para>
 /// QuantLib builds each term's flat curve and constant volatility on the risk-free curve's reference date with the
 /// volatility's time from its own (<c>jumpdiffusionengine.cpp:62-67</c>, <c>:113-114</c>); here both are built on the
-/// volatility's reference date, so the time and the structures agree: QuantLib's where the two dates coincide (the
-/// S-van plan's VR4 (xiii), <c>Divergences/JumpDiffusionReferenceDateTests.cs</c>). The terms' curve runs over the
-/// volatility's time, so their rho is per unit of its rate; the engine's rho is per unit of the risk-free curve's own
-/// rate over its own time, and theta's risk-free term runs over that time, as the analytic European engine's (the
-/// mismatched-dates class): QuantLib's where the two times agree. With no diffusive volatility the
-/// no-jump term's vega weight √(variance/t)/v and its theta's jump term are 0/0 (<c>:110</c>, <c>:123-127</c>); here they
-/// are their limits, 1 and 0, the values they take at any positive volatility (VR4 (xxix),
-/// <c>Divergences/JumpDiffusionZeroVolatilityTests.cs</c>).
+/// volatility's reference date, so the time and the structures agree: QuantLib's where the two dates coincide
+/// (<c>Divergences/JumpDiffusionReferenceDateTests.cs</c>). The terms' curve runs over the volatility's time, so their
+/// rho is per unit of its rate; the engine's rho is per unit of the risk-free curve's own rate over its own time, and
+/// theta's risk-free term runs over that time, as the analytic European engine's: QuantLib's where the two times agree.
+/// With no diffusive volatility the no-jump term's vega weight √(variance/t)/v and its theta's jump term are 0/0
+/// (<c>:110</c>, <c>:123-127</c>); here they are their limits, 1 and 0, the values they take at any positive volatility
+/// (<c>Divergences/JumpDiffusionZeroVolatilityTests.cs</c>).
 /// </para>
 /// </remarks>
 public static class JumpDiffusionEngine
@@ -108,7 +107,7 @@ public static class JumpDiffusionEngine
             v = Math.Sqrt((variance + (i * jumpSquareVol)) / t);
             r = riskFreeRate - (process.JumpIntensity * k) + (i * muPlusHalfSquareVol / t);
 
-            // on the volatility's reference date, where QuantLib takes the risk-free curve's (VR4 (xiii))
+            // on the volatility's reference date, where QuantLib takes the risk-free curve's
             var bsProcess = new GeneralizedBlackScholesProcess(
                 process.StateVariable,
                 process.DividendYield,
@@ -129,7 +128,7 @@ public static class JumpDiffusionEngine
             delta += weight * baseDelta;
             gamma += weight * baseGamma;
 
-            // the no-jump term's weight is 1 at every positive volatility, and its limit at none (VR4 (xxix))
+            // the no-jump term's weight is 1 at every positive volatility, and its limit at none
             vega += weight * (i == 0 ? 1.0 : Math.Sqrt(variance / t) / v) * baseVega;
 
             // theta modified

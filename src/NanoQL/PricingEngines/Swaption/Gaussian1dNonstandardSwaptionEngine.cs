@@ -29,12 +29,12 @@ namespace NanoQL.PricingEngines;
 /// curve's day counter, discounts each flow from the exercise; the probabilities, an additional result, are QuantLib's.
 /// </para>
 /// <para>
-/// Immutable, a <see cref="BasketGeneratingEngine"/> (the S-g1d plan's G1D5): <see cref="Calculate(NonstandardSwaption,
-/// EvaluationContext)"/> prices with the engine's model and parameters, and the static <c>Calculate</c> builds the
-/// engine for one call. The model reads a discount curve on another clock by date at every instant QuantLib derives
-/// from a date (an exercise's numeraire and the Digital probabilities' discount; G1R6 (xvi)); flat payoff
-/// extrapolation's right tail reads the last node (G1R6 (xxi)); and the calibration basket's initial guess refuses
-/// fixed nominals that are positive but none above 1e-8, over whose count QuantLib's average divides (#2845's class).
+/// Immutable, a <see cref="BasketGeneratingEngine"/>: <see cref="Calculate(NonstandardSwaption, EvaluationContext)"/>
+/// prices with the engine's model and parameters, and the static <c>Calculate</c> builds the engine for one call. The
+/// model reads a discount curve on another clock by date at every instant QuantLib derives from a date (an exercise's
+/// numeraire and the Digital probabilities' discount); flat payoff extrapolation's right tail reads the last node; and
+/// the calibration basket's initial guess refuses fixed nominals that are positive but none above 1e-8, over whose
+/// count QuantLib's average divides (#2845's class).
 /// </para>
 /// </remarks>
 public sealed class Gaussian1dNonstandardSwaptionEngine : BasketGeneratingEngine
@@ -297,7 +297,7 @@ public sealed class Gaussian1dNonstandardSwaptionEngine : BasketGeneratingEngine
                         rebateSpreadDf = SpreadDiscount(expiry0, rebateDate);
                     }
 
-                    // the numeraire read at the exercise's date (G1R6 (xvi))
+                    // the numeraire read at the exercise's date
                     double exerciseValue = (((type == OptionType.Call ? 1.0 : -1.0) * (floatingLegNpv - fixedLegNpv))
                             + (rebate * model.Zerobond(rebateDate, expiry0, z[k], discountCurve, memo) * rebateSpreadDf))
                         / model.NumeraireCore(expiry0Time, expiry0, z[k], discountCurve, memo);

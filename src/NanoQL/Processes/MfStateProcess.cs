@@ -174,7 +174,7 @@ public sealed class MfStateProcess : StochasticProcess1D
     private static string Show(double x) => x.ToString(CultureInfo.InvariantCulture);
 
     // A step's variance, σ² ∫ e^{2as} ds over [start, end], of the given length: QuantLib's form at a = 0 and from
-    // 1e-2, the expm1 form between (the S-g1d plan's G1R4 (ii)).
+    // 1e-2, the expm1 form between.
     private double Step(double vol, double start, double length, double end)
     {
         if (reversionZero)

@@ -7,15 +7,15 @@ using static NanoQL.Bind.Tests.ExcelSurfaces;
 namespace NanoQL.Bind.Tests;
 
 /// <summary>
-/// The list (XLR5, XLD33): Excel holds the listed types' functions and no others; a listed type brings the instance
-/// members it inherits, each once from its nearest declaration, and the extension methods on it; Excel's filter still
-/// applies inside a listed type (XLR6, XLD20).
+/// The list: Excel holds the listed types' functions and no others; a listed type brings the instance members it
+/// inherits, each once from its nearest declaration, and the extension methods on it; Excel's filter still applies
+/// inside a listed type.
 /// </summary>
 public class ExcelListTests
 {
     /// <summary>
-    /// The seed's counts: 2,652 functions with the experimental API, 2,324 stable (XLP84's 2,575 and 2,253, the 71 of the
-    /// seven types the completeness check's least fixpoint showed missing, and DefaultType's 6, ruled on 2026-11-02); the
+    /// The seed's counts: 2,652 functions with the experimental API, 2,324 stable (the first list's 2,575 and 2,253,
+    /// the 71 of the seven types the completeness check's least fixpoint showed missing, and DefaultType's 6); the
     /// tests' builds 10,226 and 8,008.
     /// </summary>
     [Fact]
@@ -52,7 +52,8 @@ public class ExcelListTests
         Assert.DoesNotContain("fx_PlateMaker_Make", names);
     }
 
-    /// <summary>On nanoql's list: a swap's fixed rate and legs, a model's parameters and calibration, the inherited ones (XLP84, F11-1).</summary>
+    /// <summary>On nanoql's list: a swap's fixed rate and legs, a model's parameters and calibration, the inherited
+    /// ones.</summary>
     [Fact]
     public void NanoqlsListBringsWhatItsTypesInherit()
     {
@@ -74,15 +75,16 @@ public class ExcelListTests
         Assert.Equal("nqlBrent", NameOf(WholeExperimental, "nql_Brent_new"));
     }
 
-    /// <summary>Excel's filter inside listed types: equality and increment operators, results records' constructors and with, setters, XLD20's members and the engine hooks.</summary>
+    /// <summary>Excel's filter inside listed types: equality and increment operators, results records' constructors and
+    /// with, setters, the members that change state, write files or read the clock, and the engine hooks.</summary>
     [Fact]
     public void ExcelsFilterAppliesInsideTheList()
     {
         var skips = WholeExperimental.Selection.Skips;
         Assert.Equal(356, skips["equality operator"]);
-        Assert.Equal(15, skips["in-out (R15)"]);
-        Assert.Equal(69, skips["engine hook (XLD20)"]);
-        Assert.Equal(41, skips["state-changing (XLD20)"]);
+        Assert.Equal(15, skips["in-out"]);
+        Assert.Equal(69, skips["engine hook"]);
+        Assert.Equal(41, skips["state-changing"]);
         var names = WholeExperimental.Selection.Units.SelectMany(u => u.Functions).Select(f => f.CName).ToHashSet();
         Assert.DoesNotContain("nql_ConventionsXml_WriteDefaults", names);
         Assert.DoesNotContain("nql_Date_TodaysDate", names);

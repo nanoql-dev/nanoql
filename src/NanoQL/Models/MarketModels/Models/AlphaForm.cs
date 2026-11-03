@@ -11,9 +11,9 @@ namespace NanoQL.Models;
 /// chooses the member, <see cref="Evaluate"/> reads its value at a rate.
 /// </summary>
 /// <remarks>
-/// A working type (the S-mm plan's MR2 (b)): <see cref="SetAlpha"/> changes it, as QuantLib's <c>setAlpha</c> does,
-/// and it isn't thread-safe; <see cref="Clone"/> is deep, and the alpha calibration copies its form for each
-/// calibration. An extension point, as in QuantLib.
+/// A working type: <see cref="SetAlpha"/> changes it, as QuantLib's <c>setAlpha</c> does, and it isn't thread-safe;
+/// <see cref="Clone"/> is deep, and the alpha calibration copies its form for each calibration. An extension point,
+/// as in QuantLib.
 /// </remarks>
 [WorkingType]
 public abstract class AlphaForm

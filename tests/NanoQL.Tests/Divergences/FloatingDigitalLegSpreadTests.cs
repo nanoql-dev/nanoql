@@ -9,13 +9,13 @@ using NanoQL.Tests.Vectors;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The digital legs' zero-gearing period (the S-cms plan's CMR5 (vii)): QuantLib's <c>FloatingDigitalLeg</c> builds a
-/// period of zero gearing as a fixed coupon at the period's spread, read with a default of 1.0
-/// (<c>cashflowvectors.hpp:282-286</c>), where <c>FloatingLeg</c> reads 0.0, so with no spreads given the period pays
-/// 100%: on the C++ harness, a two-year semiannual digital Ibor leg from 17 January 2025 with gearings (0, 1) and no
-/// spreads pays its first coupon at a fixed 1.0, at 0.0 with a spread of 0 given and at 0.01 with 0.01. nanoql reads
-/// 0.0, as <c>FloatingLeg</c> does. QuantLib's check: its Ibor leg on the same schedule and gearings, whose first
-/// coupon is fixed at 0.0 with no spreads given (the wheel).
+/// The digital legs' zero-gearing period: QuantLib's <c>FloatingDigitalLeg</c> builds a period of zero gearing as a
+/// fixed coupon at the period's spread, read with a default of 1.0 (<c>cashflowvectors.hpp:282-286</c>), where
+/// <c>FloatingLeg</c> reads 0.0, so with no spreads given the period pays 100%: on the C++ harness, a two-year
+/// semiannual digital Ibor leg from 17 January 2025 with gearings (0, 1) and no spreads pays its first coupon at a
+/// fixed 1.0, at 0.0 with a spread of 0 given and at 0.01 with 0.01. nanoql reads 0.0, as <c>FloatingLeg</c> does.
+/// QuantLib's check: its Ibor leg on the same schedule and gearings, whose first coupon is fixed at 0.0 with no spreads
+/// given (the wheel).
 /// </summary>
 public class FloatingDigitalLegSpreadTests
 {

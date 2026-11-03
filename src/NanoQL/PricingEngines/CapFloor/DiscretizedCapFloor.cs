@@ -29,27 +29,25 @@ namespace NanoQL.PricingEngines;
 /// coupon does. The times are the given day counter's year fractions from the reference date.
 /// </para>
 /// <para>
-/// <b>The fixing time</b> (the S-sr plan's B1-1, ruled by the user on 2026-10-22): QuantLib exercises every caplet still
-/// to be fixed at its start (<c>discretizedcapfloor.cpp:53-55</c>), where the instrument fixes its rate and QuantLib's
-/// Monte Carlo engine reads it at the fixing date, so a caplet with a fixing lag is priced on the variance to its start;
-/// a divergence (<c>Divergences/CapletFixingExpiryTests.cs</c>). On a caplet fixed on its start, the fixing time is the
-/// start time and the value QuantLib's, bit for bit. A rollback must reach the earliest fixing time a caplet is valued at,
-/// which precedes the first start QuantLib's engine rolls back to (<see cref="EarliestFixingTime"/>).
+/// <b>The fixing time</b>: QuantLib exercises every caplet still to be fixed at its start
+/// (<c>discretizedcapfloor.cpp:53-55</c>), where the instrument fixes its rate and QuantLib's Monte Carlo engine reads
+/// it at the fixing date, so a caplet with a fixing lag is priced on the variance to its start; a divergence
+/// (<c>Divergences/CapletFixingExpiryTests.cs</c>). On a caplet fixed on its start, the fixing time is the start time
+/// and the value QuantLib's, bit for bit. A rollback must reach the earliest fixing time a caplet is valued at, which
+/// precedes the first start QuantLib's engine rolls back to (<see cref="EarliestFixingTime"/>).
 /// </para>
 /// <para>
-/// <b>An in-arrears caplet</b> (the S-sr plan's B2-1, ruled by the user on 2026-10-22, R8 as amended that day): QuantLib
-/// values it as the caplet in advance, at its start on its accrual period, reading neither its later fixing nor its
-/// index's period; a divergence (<c>Divergences/CapletInArrearsTests.cs</c>) with no QuantLib check, checked on Hull-White
-/// against each caplet's Gaussian integral at its fixing. Its fixing time and its index period's start and end are
-/// mandatory times, the end past the cap's last payment.
+/// <b>An in-arrears caplet</b>: QuantLib values it as the caplet in advance, at its start on its accrual period,
+/// reading neither its later fixing nor its index's period; a divergence (<c>Divergences/CapletInArrearsTests.cs</c>)
+/// with no QuantLib check, checked on Hull-White against each caplet's Gaussian integral at its fixing. Its fixing time
+/// and its index period's start and end are mandatory times, the end past the cap's last payment.
 /// </para>
 /// <para>
-/// <b>A seasoned cap</b> (the S-sr plan's SSR6 (iv), widened): its mandatory times are its non-negative start and
-/// payment times, as the discretized swap's are, then the fixing times of the caplets valued there, and a caplet is
-/// known by its fixing date: a divergence, QuantLib's
-/// keeping the started caplets' negative times, so its engine refuses "negative times not allowed", and knowing a caplet
-/// by its start, so between its fixing and its start it values the caplet as an option, ignoring its fixing
-/// (<c>discretizedcapfloor.cpp:55</c>, <c>:91</c>; <c>Divergences/TreeCapFloorSeasonedTests.cs</c>,
+/// <b>A seasoned cap</b> (widened): its mandatory times are its non-negative start and payment times, as the
+/// discretized swap's are, then the fixing times of the caplets valued there, and a caplet is known by its fixing date:
+/// a divergence, QuantLib's keeping the started caplets' negative times, so its engine refuses "negative times not
+/// allowed", and knowing a caplet by its start, so between its fixing and its start it values the caplet as an option,
+/// ignoring its fixing (<c>discretizedcapfloor.cpp:55</c>, <c>:91</c>; <c>Divergences/TreeCapFloorSeasonedTests.cs</c>,
 /// <c>Divergences/TreeKnownCouponTests.cs</c>). A caplet still to be fixed whose start is before the reference date can
 /// only be in arrears, and is valued at its fixing as any other, its start unread, where QuantLib's grid refuses its
 /// negative start time ("negative times not allowed").
@@ -121,9 +119,9 @@ public sealed class DiscretizedCapFloor : DiscretizedAsset
         }
 
         // a caplet fixed on or before the reference date and paid after it, or on it with today's cash flows: the
-        // discretized swap's rule for its known coupons; one still to be fixed before its start is valued at its fixing
-        // (B1-1), one fixed after its start, in arrears, at its fixing on its index's period, its start unread, so a
-        // past one too (B2-1, B3-1), one fixed on its start at its start
+        // discretized swap's rule for its known coupons; one still to be fixed before its start is valued at its
+        // fixing, one fixed after its start, in arrears, at its fixing on its index's period, its start unread, so a
+        // past one too, one fixed on its start at its start
         known = new bool[fixingTimes.Length];
         atFixing = new bool[fixingTimes.Length];
         inArrears = new bool[fixingTimes.Length];
@@ -378,8 +376,8 @@ public sealed class DiscretizedCapFloor : DiscretizedAsset
         }
     }
 
-    // An in-arrears optionlet's value at its fixing: the index's rate over its own period from the bonds to its start and
-    // end, paid at the payment, τ·P(pay)·max(L − K, 0) times the nominal and gearing (B2-1).
+    // An in-arrears optionlet's value at its fixing: the index's rate over its own period from the bonds to its start
+    // and end, paid at the payment, τ·P(pay)·max(L − K, 0) times the nominal and gearing.
     private void AddInArrearsOptionlet(int i)
     {
         double tenor = arguments.AccrualTimes[i];

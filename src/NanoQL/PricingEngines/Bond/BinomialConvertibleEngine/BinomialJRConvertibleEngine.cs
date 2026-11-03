@@ -15,7 +15,7 @@ namespace NanoQL.PricingEngines;
 
 /// <summary>
 /// The binomial convertible engine on the Jarrow-Rudd tree: QuantLib-Python's <c>BinomialJRConvertibleEngine</c>, QuantLib's
-/// <c>BinomialConvertibleEngine&lt;JarrowRudd&gt;</c> (D12).
+/// <c>BinomialConvertibleEngine&lt;JarrowRudd&gt;</c>.
 /// </summary>
 public static class BinomialJRConvertibleEngine
 {

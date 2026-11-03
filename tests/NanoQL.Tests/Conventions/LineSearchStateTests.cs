@@ -6,12 +6,12 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// A line search's state lives for one minimization (the S-sr plan's SSD5): QuantLib's
-/// <c>LineSearchBasedMethod</c> keeps one line search, whose Armijo step reads the gradient its last call left
-/// (<c>armijo.cpp:42</c>), across minimizations; <see cref="LineSearchBasedMethod"/> runs each on a new one, so a
-/// <see cref="ConjugateGradient"/> gives each problem the same result in either order, and its prototype line search is
-/// never changed. On the wheel, QuantLib's conjugate gradient minimizing x² + y² from (5, −3) in three iterations
-/// returns (0.0516, −0.0309) on a new method and (5, −3) on one that has minimized (x − 10)² + 50 (y + 10)² from 0.
+/// A line search's state lives for one minimization: QuantLib's <c>LineSearchBasedMethod</c> keeps one line search,
+/// whose Armijo step reads the gradient its last call left (<c>armijo.cpp:42</c>), across minimizations;
+/// <see cref="LineSearchBasedMethod"/> runs each on a new one, so a <see cref="ConjugateGradient"/> gives each problem
+/// the same result in either order, and its prototype line search is never changed. On the wheel, QuantLib's conjugate
+/// gradient minimizing x² + y² from (5, −3) in three iterations returns (0.0516, −0.0309) on a new method and (5, −3)
+/// on one that has minimized (x − 10)² + 50 (y + 10)² from 0.
 /// </summary>
 public class LineSearchStateTests
 {

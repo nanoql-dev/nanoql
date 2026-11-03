@@ -17,17 +17,17 @@ namespace NanoQL.Models;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A working type (the S-mmp plan's MMPR1 (i)): it holds the caller's outer and inner evolvers by reference, one engine
-/// at a time, and clones of the products, exercise values and strategy. An outer path allocates, as QuantLib's does: a
-/// curve-state copy a step and a callable clone an inner simulation (MMPR1 (v)).
+/// A working type: it holds the caller's outer and inner evolvers by reference, one engine at a time, and clones of the
+/// products, exercise values and strategy. An outer path allocates, as QuantLib's does: a curve-state copy a step and a
+/// callable clone an inner simulation.
 /// </para>
 /// <para>
-/// The exercise values (the S-mmp plan's MMPR4 (vii), option (1), ruled by the user, with Revision 4's (a), documented
-/// divergences): the two exercise-value parts are an internal adapter paying the exercise value at every exercise date,
-/// done at its last step, where QuantLib reads them from an <see cref="ExerciseAdapter"/> done at its first and relies
-/// on the composite stepping a finished part again; and no date after the step at which the hedge ends is an exercise
-/// date, no inner simulation and no exercise value, a hedge with no possible cash-flow times exempt, that date's inner
-/// evolver still taken in QuantLib's order. The end's own date stays one (<c>Divergences/UpperBoundEngineTests.cs</c>).
+/// The exercise values (documented divergences): the two exercise-value parts are an internal adapter paying the
+/// exercise value at every exercise date, done at its last step, where QuantLib reads them from an
+/// <see cref="ExerciseAdapter"/> done at its first and relies on the composite stepping a finished part again; and no
+/// date after the step at which the hedge ends is an exercise date, no inner simulation and no exercise value, a hedge
+/// with no possible cash-flow times exempt, that date's inner evolver still taken in QuantLib's order. The end's own
+/// date stays one (<c>Divergences/UpperBoundEngineTests.cs</c>).
 /// </para>
 /// <para>
 /// Refused, QuantLib reading past them: fewer inner evolvers than the exercise dates before the last step.
@@ -391,8 +391,8 @@ file sealed class DecoratedHedge : CallSpecifiedMultiProduct
     public void StopRecording() => recording = false;
 }
 
-// An exercise value as a product paying the exercise value at every exercise date, done at its last step: the
-// engine's exercise-value parts (the S-mmp plan's MMPR4 (vii), option (1)).
+// An exercise value as a product paying the exercise value at every exercise date, done at its last step: the engine's
+// exercise-value parts.
 file sealed class AllDatesExerciseAdapter : MultiProductMultiStep
 {
     private readonly MarketModelExerciseValue exercise;

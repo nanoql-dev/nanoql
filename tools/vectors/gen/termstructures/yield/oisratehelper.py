@@ -6,15 +6,15 @@ interface it inherits: 60 helpers, each built on the three evaluation dates of t
 holidays), 180 cases; then 13 curves bootstrapped on them, 13 cases.
 
 - 54 helpers from a tenor, the base 1 year on ESTR, 2 settlement days, an annual swap paid with no lag on Following:
-  tenors from 1 week to 30 years; settlement days 0, 1 and 3; payment lags, conventions, frequencies (Once among
-  them) and a payment calendar; forward starts, a negative one among them; a spread; the three pillar choices, a
-  custom pillar too late and none at all refused; simple averaging; end of month either way; a fixed-leg frequency,
-  calendar and day counter; an overnight calendar; lookback days with and without the observation shift, lockout
-  days and both; telescopic value dates, alone, with simple averaging, with lookback days and no shift (refused, as
-  QuantLib refuses telescopic dates with a lookback) and with a lockout and the shift; the averaging pricer with a
-  convexity adjustment and the compounding pricer; the forward and zero date-generation rules; the schedules'
-  conventions; a discounting curve; SOFR on the US calendars, with Good Friday a SOFR holiday but not a Federal Reserve
-  one; SONIA; and settlement days of int's maximum, which QuantLib reads as none (SC2), left out: nanoql refuses them.
+  tenors from 1 week to 30 years; settlement days 0, 1 and 3; payment lags, conventions, frequencies (Once among them)
+  and a payment calendar; forward starts, a negative one among them; a spread; the three pillar choices, a custom pillar
+  too late and none at all refused; simple averaging; end of month either way; a fixed-leg frequency, calendar and day
+  counter; an overnight calendar; lookback days with and without the observation shift, lockout days and both;
+  telescopic value dates, alone, with simple averaging, with lookback days and no shift (refused, as QuantLib refuses
+  telescopic dates with a lookback) and with a lockout and the shift; the averaging pricer with a convexity adjustment
+  and the compounding pricer; the forward and zero date-generation rules; the schedules' conventions; a discounting
+  curve; SOFR on the US calendars, with Good Friday a SOFR holiday but not a Federal Reserve one; SONIA; and settlement
+  days of int's maximum, which QuantLib reads as none, left out: nanoql refuses them.
 - 6 helpers between dates (built with forDates): a year, a short swap, a seasoned one, semiannual with a payment lag,
   a custom pillar, and reversed dates, which QuantLib refuses.
 - 12 curves, one per case: 4 helper sets (a 1-day deposit and OIS helpers from 1 week to 30 years on ESTR, compounded,
@@ -29,7 +29,7 @@ holidays), 180 cases; then 13 curves bootstrapped on them, 13 cases.
 A helper's outputs are whether it builds, QuantLib's refusals recorded as its throw, its five dates, and its swap's
 start and maturity dates and the payment dates of its fixed and overnight legs; a curve's are those of
 termstructures/yield/piecewiseyieldcurve.py's cases ("kind": "curves"). Helpers with telescopic value dates take
-QuantLib's values by S3R11's rule (termstructures/yield/ratehelpers.py's value_spec). Each case's inputs hold its
+QuantLib's values by the telescopic rule (termstructures/yield/ratehelpers.py's value_spec). Each case's inputs hold its
 settings and its "helper" (a spec of termstructures/yield/ratehelpers.py), or its "kind" and the curve case's inputs.
 Read back by tests/NanoQL.Tests/Vectors/TermStructures/Yield/OISRateHelperVectorTests.cs."""
 import importlib.util

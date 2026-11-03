@@ -15,8 +15,8 @@
 //                                                                           "variance"}, the section's at the strike
 //     CapletVarianceCurve::smileSection(Time)      (spec, time, strike)
 //
-// The members are OptionletVolatilityStructure's; smileSection takes extrapolate true, the section's volatility
-// type and shift left out (QuantLib's flat section drops the curve's, the S-g1d plan's G1R6 (xiii)).
+// The members are OptionletVolatilityStructure's; smileSection takes extrapolate true, the section's volatility type
+// and shift left out (QuantLib's flat section drops the curve's).
 
 #include "convert.hpp"
 

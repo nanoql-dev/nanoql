@@ -19,13 +19,13 @@ namespace NanoQL.Experimental;
 /// <para>
 /// An extension point. A model is an immutable configuration until it is bound: <see cref="SetBasket"/> copies it,
 /// restricts the copy to the basket's live names (<see cref="RestrictTo"/>), binds the copy to the basket and runs its
-/// <see cref="ResetModel"/> there, once (the S-xcr plan's XR1 (b), XR5). The copy is the model's own memberwise copy, so
-/// a derived model keeps its state in fields it writes only while it is built, restricted or reset, and never after.
+/// <see cref="ResetModel"/> there, once. The copy is the model's own memberwise copy, so a derived model keeps its
+/// state in fields it writes only while it is built, restricted or reset, and never after.
 /// </para>
 /// <para>
 /// QuantLib's model holds a relinkable handle to its basket and resets when another basket links it, so a model set on
 /// two baskets in turn can keep the first's precomputation (the recursive model's loss weights, the random models'
-/// simulations; XR8 (viii)). Each binding here is a fresh model's, bit for bit.
+/// simulations). Each binding here is a fresh model's, bit for bit.
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]
@@ -101,8 +101,7 @@ public abstract class DefaultLossModel : IDefaultLossModel
 
     /// <summary>
     /// Restricts the copy being bound to a basket's live names, in pool order, before <see cref="ResetModel"/>: a
-    /// model holding a latent model or per-name data restricts it to their rows (the S-xcr plan's XR2 (f)). By default,
-    /// nothing.
+    /// model holding a latent model or per-name data restricts it to their rows. By default, nothing.
     /// </summary>
     /// <param name="rows">The live names' positions in the basket's pool.</param>
     /// <param name="poolSize">The basket's number of names; <paramref name="rows"/> holds all of them where no name

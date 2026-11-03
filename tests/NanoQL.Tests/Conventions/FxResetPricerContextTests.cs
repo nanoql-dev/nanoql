@@ -10,10 +10,10 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The FX reset pricer reads its fixings from the evaluation context (the S-rx plan's SRXR1): a past reset's rate is
-/// the context's exchange-rate registry's on its fixing date, where QuantLib reads the global
-/// <c>ExchangeRateManager</c>, and today's is the registry's when the context enforces today's historic fixings, as
-/// QuantLib's <c>Settings</c> flag does.
+/// The FX reset pricer reads its fixings from the evaluation context: a past reset's rate is the context's
+/// exchange-rate registry's on its fixing date, where QuantLib reads the global <c>ExchangeRateManager</c>, and
+/// today's is the registry's when the context enforces today's historic fixings, as QuantLib's <c>Settings</c> flag
+/// does.
 /// </summary>
 public class FxResetPricerContextTests
 {

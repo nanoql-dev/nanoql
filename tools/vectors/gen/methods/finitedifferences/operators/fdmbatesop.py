@@ -12,9 +12,8 @@ helper. For each, at fdmhestonop.py's three (t1, t2): size, then on seeded vecto
 apply_direction in each direction, solve_splitting in each direction at s = -0.3 and 0.7, and preconditioner at
 s = 0.4; and to_sparse_matrix, which QuantLib refuses ("not implemented": the integral has no sparse form).
 
-Left out (the S-hes plan's §2.10): every structure is on the risk-free curve's day counter and reference date (on
-others QuantLib reads them at the risk-free curve's times, tests/NanoQL.Tests/Divergences/
-FdHestonMismatchedTimesTests.cs).
+Left out: every structure is on the risk-free curve's day counter and reference date (on others QuantLib reads them
+at the risk-free curve's times, tests/NanoQL.Tests/Divergences/FdHestonMismatchedTimesTests.cs).
 
 The specs are a "process" batesmodel.py's, a "mesher" fdmhestonop.py's, the "boundaries" [[valueOnBoundary,
 direction, side]] (side as tools/vectors/gen/methods/finitedifferences/utilities/fdmdirichletboundary.py writes it),

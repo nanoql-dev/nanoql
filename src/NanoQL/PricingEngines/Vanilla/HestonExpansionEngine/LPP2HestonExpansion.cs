@@ -11,13 +11,13 @@ namespace NanoQL.PricingEngines;
 /// <summary>Lorig, Pagliarani and Pascucci's expansion of order 2 for the Heston model's implied volatility.</summary>
 /// <remarks>
 /// <para>
-/// Its three coefficients are QuantLib's expressions, evaluated where κt calls for it in another arithmetic (the
-/// S-hes plan's HR6 and HR11): QuantLib's double, and so its bits, for κt from the coefficient's cut to its upper
-/// cut; double-double below the cut, where the double cancels; quad-double below its floor, where double-double
-/// cancels too, and below quad-double's floor the coefficient's cubic in κ through four quad-double values; and past
-/// the upper cut, where e^{κt}'s powers overflow, an extended-range double, each cut measured at the run against
-/// QuantLib's expressions in 50 to 250 digits. At a term of 0 each coefficient is its limit, the first three
-/// <see cref="FordeHestonExpansion"/>'s leading order (HR7 (xxxii)), where QuantLib's divide 0 by 0.
+/// Its three coefficients are QuantLib's expressions, evaluated where κt calls for it in another arithmetic: QuantLib's
+/// double, and so its bits, for κt from the coefficient's cut to its upper cut; double-double below the cut, where the
+/// double cancels; quad-double below its floor, where double-double cancels too, and below quad-double's floor the
+/// coefficient's cubic in κ through four quad-double values; and past the upper cut, where e^{κt}'s powers overflow, an
+/// extended-range double, each cut measured at the run against QuantLib's expressions in 50 to 250 digits. At a term of
+/// 0 each coefficient is its limit, the first three <see cref="FordeHestonExpansion"/>'s leading order, where
+/// QuantLib's divide 0 by 0.
 /// </para>
 /// <para>
 /// Reference: M. Lorig, S. Pagliarani, A. Pascucci, Explicit implied vols for multifactor local-stochastic vol models,
@@ -26,8 +26,7 @@ namespace NanoQL.PricingEngines;
 /// </remarks>
 public sealed class LPP2HestonExpansion : HestonExpansion
 {
-    // each coefficient's cut, double-double and quad-double floors and upper cut in kappa t, measured at the run (HR6,
-    // HR11; the quad-double floors the user's ruling of R2-1)
+    // each coefficient's cut, double-double and quad-double floors and upper cut in kappa t, measured at the run
     private const double Z0Cut = 0.5, Z0Floor = 2e-6, Z0QuadFloor = 1e-12, Z0Upper = 100.0;
     private const double Z1Cut = 0.2, Z1Floor = 5e-7, Z1QuadFloor = 1e-12, Z1Upper = 200.0;
     private const double Z2Cut = 0.5, Z2Floor = 2e-6, Z2QuadFloor = 1e-12, Z2Upper = 200.0;
@@ -46,7 +45,7 @@ public sealed class LPP2HestonExpansion : HestonExpansion
     {
         if (term == 0.0)
         {
-            // the coefficients' limits as the term falls to 0 (HR7 (xxxii))
+            // the coefficients' limits as the term falls to 0
             (double Sigma00, double Sigma01, double Sigma02) leading = FordeHestonExpansion.LeadingOrder(sigma, v0, rho);
             c0 = leading.Sigma00;
             c1 = leading.Sigma01;

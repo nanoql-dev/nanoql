@@ -14,8 +14,8 @@ namespace NanoQL.PricingEngines;
 /// average of the asset's values at the fixing indices and the past fixings.
 /// </summary>
 /// <remarks>
-/// QuantLib's. The engine gives an index once per fixing on its time, so a fixing date given twice counts twice (the
-/// S-bar plan's BR5 (xxviii)), where QuantLib's engine gives each time once.
+/// QuantLib's. The engine gives an index once per fixing on its time, so a fixing date given twice counts twice, where
+/// QuantLib's engine gives each time once.
 /// </remarks>
 public sealed class ArithmeticAPOHestonPathPricer : PathPricer<MultiPath>
 {

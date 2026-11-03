@@ -9,15 +9,15 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// Two derived curves drop the extrapolation flag (the S-sr plan's SSR6 (xxi), and its SSD20 for the piecewise spread
-/// curve). The spread discount curve reads its base without it (<c>spreaddiscountcurve.hpp:157</c>), and so does the
-/// ultimate-forward curve at its cut-off and before it (<c>ultimateforwardtermstructure.hpp:168</c>, <c>:173</c>),
-/// where the zero- and forward-spreaded, implied and composite curves pass it. On the wheel, asked for the discount at
-/// 11 years with extrapolation over a 2%–3% zero curve to 10 years from 15 January 2025 that doesn't extrapolate, the
-/// four siblings give 0.640328216626791 (both spreaded at 1%), 0.714823513455133 and 1.0, while the spread discount and
-/// ultimate-forward curves, and the piecewise spread curve bootstrapped over that base, throw "time (11.0055) is past max
-/// curve time (10.0055)". nanoql reads the base with extrapolation on, as the siblings do. QuantLib's check: the
-/// siblings' own reads, and the base's own extrapolated values.
+/// Two derived curves drop the extrapolation flag. The spread discount curve reads its base without it
+/// (<c>spreaddiscountcurve.hpp:157</c>), and so does the ultimate-forward curve at its cut-off and before it
+/// (<c>ultimateforwardtermstructure.hpp:168</c>, <c>:173</c>), where the zero- and forward-spreaded, implied and
+/// composite curves pass it. On the wheel, asked for the discount at 11 years with extrapolation over a 2%–3% zero
+/// curve to 10 years from 15 January 2025 that doesn't extrapolate, the four siblings give 0.640328216626791 (both
+/// spreaded at 1%), 0.714823513455133 and 1.0, while the spread discount and ultimate-forward curves, and the piecewise
+/// spread curve bootstrapped over that base, throw "time (11.0055) is past max curve time (10.0055)". nanoql reads the
+/// base with extrapolation on, as the siblings do. QuantLib's check: the siblings' own reads, and the base's own
+/// extrapolated values.
 /// </summary>
 public class DerivedCurveExtrapolationTests
 {

@@ -5,9 +5,8 @@ over AnalyticEuropeanEngine) through the C++ harness, which the wheel doesn't ex
 and puts at moneyness 0.9, 1 and 1.1, reset today, in three months or in six and expiring in six months, a year or
 two, on three flat markets under constant volatilities: the NPV, delta, gamma, theta, vega, rho and dividend rho.
 
-Left out (the S-exo plan's §2.10): volatilities off flat (tests/NanoQL.Tests/Divergences/
-ForwardVegaTermStructureTests.cs), non-plain payoffs (ForwardNonPlainPayoffTests.cs), and structures dated or counted
-apart (ExoticMismatchedTimesTests.cs).
+Left out: volatilities off flat (tests/NanoQL.Tests/Divergences/ForwardVegaTermStructureTests.cs), non-plain payoffs
+(ForwardNonPlainPayoffTests.cs), and structures dated or counted apart (ExoticMismatchedTimesTests.cs).
 
 A case holds the "process" ([spot, r, q, volatility], flat Act/365 (Fixed) forwards and a constant volatility from the
 evaluation date) and the "option" ([moneyness, resetDate, optionType, exerciseDate]). The harness's call:

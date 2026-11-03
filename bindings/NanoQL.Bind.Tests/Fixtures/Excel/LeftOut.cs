@@ -3,7 +3,7 @@
 
 namespace NanoQL.Bind.Tests.Fixtures.Excel;
 
-/// <summary>Objects an argument left out gives as none (XLR2): optional, or annotated nullable though required.</summary>
+/// <summary>Objects an argument left out gives as none: optional, or annotated nullable though required.</summary>
 public static class LeftOut
 {
     /// <summary>An optional handle and an optional generator's snapshot, each none when left out.</summary>

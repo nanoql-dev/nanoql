@@ -16,9 +16,8 @@ namespace NanoQL.Experimental;
 /// </summary>
 /// <remarks>
 /// <para>
-/// The direct transform keeps σ above 1e-6, |ρ| below 0.999999, a free b inside b(1+|ρ|) &lt; 4 and a free a inside
-/// a + bσ√(1−ρ²) &gt; 0. Two departures from QuantLib, each a fix of its defect (the S-rx plan's SRXR3 (x) and
-/// (xvii)).
+/// The direct transform keeps σ above 1e-6, |ρ| below 0.999999, a free b inside b(1+|ρ|) &lt; 4 and a free a inside a +
+/// bσ√(1−ρ²) &gt; 0. Two departures from QuantLib, each a fix of its defect.
 /// </para>
 /// <para>
 /// QuantLib's inverse doesn't clamp: a ρ beyond 0.999999 in size takes <c>asin</c> of a value beyond 1, a σ below 1e-6
@@ -172,8 +171,8 @@ internal readonly struct SviSpecs : IXabrSpecs<SviWrapper>
 
     private static bool BConstraint(double b, double rho) => b * (1.0 + Math.Abs(rho)) <= 4.0;
 
-    // SRXR3 (xvii): the free parameters moved onto the set CheckSviParameters admits, where a trial fails it. A NaN
-    // or an infinite trial is left to the check.
+    // The free parameters moved onto the set CheckSviParameters admits, where a trial fails it. A NaN or an infinite
+    // trial is left to the check.
     private static void MoveOntoAdmittedSet(Vector x, Vector y, ReadOnlySpan<bool> paramIsFixed)
     {
         bool aFixed = paramIsFixed[0], bFixed = paramIsFixed[1];

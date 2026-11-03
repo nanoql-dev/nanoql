@@ -9,9 +9,9 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The Rendistato calculator's unsolved swaps (a run-found R8 defect in the S-cms plan's C4): QuantLib's calculator
-/// stops at the first swap whose duration exceeds the basket's (<c>btp.cpp</c>, <c>performCalculations</c>), so the
-/// later swaps' rates and durations stay <c>Null&lt;Real&gt;()</c> and their yields the solver's starting guess,
+/// The Rendistato calculator's unsolved swaps (a defect found while porting it): QuantLib's calculator stops at the
+/// first swap whose duration exceeds the basket's (<c>btp.cpp</c>, <c>performCalculations</c>), so the later swaps'
+/// rates and durations stay <c>Null&lt;Real&gt;()</c> and their yields the solver's starting guess,
 /// <c>swapBondYields_(nSwaps_, 0.05)</c>: <c>swapYields()</c> reports a yield of 5% for a swap it never solved. On the
 /// harness, on three BTPs (3% 2029, 3.35% 2030, 3.1% 2031; outstandings 12, 18 and 6; clean prices 99.1, 101.4 and
 /// 99.8) on Euribor 6M on a flat 3.1% curve discounted on a flat 2.9% one on 15 January 2025, the basket's duration is

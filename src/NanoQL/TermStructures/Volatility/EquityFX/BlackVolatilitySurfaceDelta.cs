@@ -23,19 +23,19 @@ namespace NanoQL.TermStructures;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Immutable (the S-van plan's VD24); its smile is built at each query, as QuantLib builds it.
+/// Immutable; its smile is built at each query, as QuantLib builds it.
 /// </para>
 /// <para>
 /// Its curves are read at the instants its times denote, each on its own clock, where QuantLib reads them at the
 /// surface's own times (<c>blackvolsurfacedelta.cpp:96-97</c>, <c>:210</c>): curves on Actual/360 under a surface on
-/// Actual/365 (Fixed) gave the strikes of curves on Actual/365 (Fixed) (the S-van plan's VR4 (xxi)). Where the curves
-/// share the surface's day counter and reference date, QuantLib's bits stand.
+/// Actual/365 (Fixed) gave the strikes of curves on Actual/365 (Fixed). Where the curves share the surface's day
+/// counter and reference date, QuantLib's bits stand.
 /// </para>
 /// <para>
 /// Its smile section's at-the-money level is the surface's forward, <see cref="AtmLevel"/>, where QuantLib passes the
 /// at-the-money volatility, or 1 without an at-the-money quote (<c>blackvolsurfacedelta.cpp:118</c>, <c>:135</c>),
-/// which the section's option prices, vega, digital prices and density read as the forward (VR4 (xxxii)). Its
-/// volatilities are QuantLib's. A documented divergence.
+/// which the section's option prices, vega, digital prices and density read as the forward. Its volatilities are
+/// QuantLib's. A documented divergence.
 /// </para>
 /// </remarks>
 public sealed class BlackVolatilitySurfaceDelta : BlackVolatilityTermStructure
@@ -329,7 +329,7 @@ public sealed class BlackVolatilitySurfaceDelta : BlackVolatilityTermStructure
             return new FlatSmileSection(t, stdDevs[0] / sqrtT, DayCounter);
         }
 
-        // we have at least two strikes, the forward the section's at-the-money level (VR4 (xxxii))
+        // we have at least two strikes, the forward the section's at-the-money level
         double atmLevel = Forward(t);
         double[] ks = [.. strikes];
         return interpolationMethod switch
@@ -455,6 +455,6 @@ public sealed class BlackVolatilitySurfaceDelta : BlackVolatilityTermStructure
 
     private static bool Less(double a, double b) => !ComparisonFunctions.Close(a, b) && a < b;
 
-    // S·P_f/P_d at the instant a time denotes, each curve on its own clock (VR4 (xxi))
+    // S·P_f/P_d at the instant a time denotes, each curve on its own clock
     private double Forward(double t) => spot * foreignTS.DiscountAt(this, t) / domesticTS.DiscountAt(this, t);
 }

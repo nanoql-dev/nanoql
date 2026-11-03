@@ -12,15 +12,15 @@ namespace NanoQL.Tests.Divergences;
 /// A cubic spline on 2 points with a not-a-knot end condition: QuantLib 1.44's rows for that condition read
 /// <c>dx_[1]</c> and <c>dx_[n_-3]</c> (<c>cubicinterpolation.hpp:428-431,460-463</c>), past the end of <c>dx_</c>,
 /// whose one element is the only interval, a result C++ leaves undefined, and on 3 points two not-a-knot ends make the
-/// system singular. QuantLib's master refuses both at construction, a not-a-knot end needing 3 points and two needing
-/// 4 (#2888, <c>7b21b6145</c>), which nanoql takes (R8, the upstream sweep): an <see cref="ArgumentException"/> on
-/// <c>x</c> with QuantLib's text, as nanoql maps the constructor's Lagrange and Akima counts beside it, directly and
-/// through the log-cubic interpolation, which builds the same spline. Its place is master's, among the constructor's
-/// checks, so it comes before a Periodic end's "not implemented yet", which update raises. One departure from master
-/// (the sweep's ruling SWI3): the count applies under the spline alone, where master's applies under every scheme, as
-/// only the spline's rows read the conditions (<c>cubicinterpolation.hpp:425</c>, <c>:457</c>), so the local and
-/// overshooting schemes keep QuantLib 1.44's values on 2 and 3 points, which the C++ vectors check, where master
-/// refuses them; a refusal of inputs 1.44 prices right fixes no defect (the sweep's SWD10).
+/// system singular. QuantLib's master refuses both at construction, a not-a-knot end needing 3 points and two needing 4
+/// (#2888, <c>7b21b6145</c>), which nanoql takes: an <see cref="ArgumentException"/> on <c>x</c> with QuantLib's text,
+/// as nanoql maps the constructor's Lagrange and Akima counts beside it, directly and through the log-cubic
+/// interpolation, which builds the same spline. Its place is master's, among the constructor's checks, so it comes
+/// before a Periodic end's "not implemented yet", which update raises. One departure from master: the count applies
+/// under the spline alone, where master's applies under every scheme, as only the spline's rows read the conditions
+/// (<c>cubicinterpolation.hpp:425</c>, <c>:457</c>), so the local and overshooting schemes keep QuantLib 1.44's values
+/// on 2 and 3 points, which the C++ vectors check, where master refuses them; a refusal of inputs 1.44 prices right
+/// fixes no defect.
 /// </summary>
 public class CubicNotAKnotTwoPointsTests
 {

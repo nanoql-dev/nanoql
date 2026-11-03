@@ -15,13 +15,12 @@ namespace NanoQL.Tests.Divergences;
 /// expiry on the volatility's own date. QuantLib reads the smile at expiry through its density calculator, which
 /// refuses a smile with no variance ("non-positive at-the-money volatility", <c>gaussiancopulaspreadengine.cpp</c>,
 /// <c>smilesectionrndcalculator.cpp</c>), where Kirk's and the other spread engines price both; nanoql puts that asset
-/// at its forward (the S-exo plan's ER5 (xviii) at its boundary, and R8). The checks: Kirk's engine, exact at a zero
-/// second volatility, and Black's put on the second asset at a zero first volatility, each within the engine's
-/// quadrature (QuantLib's own copula cases hold 1e-3), and the engine's own value at a volatility of 1e-6, which
-/// QuantLib's prices too, within 1e-5; the deterministic value at both zero and at an expiry on the volatilities' date;
-/// Kirk's value at an expiry before it. A surface whose strikes stop below the forward prices QuantLib's bits: the
-/// test for no variance is the density calculator's own, at the forward on the smile section, which reads every strike
-/// with extrapolation.
+/// at its forward. The checks: Kirk's engine, exact at a zero second volatility, and Black's put on the second asset at
+/// a zero first volatility, each within the engine's quadrature (QuantLib's own copula cases hold 1e-3), and the
+/// engine's own value at a volatility of 1e-6, which QuantLib's prices too, within 1e-5; the deterministic value at
+/// both zero and at an expiry on the volatilities' date; Kirk's value at an expiry before it. A surface whose strikes
+/// stop below the forward prices QuantLib's bits: the test for no variance is the density calculator's own, at the
+/// forward on the smile section, which reads every strike with extrapolation.
 /// </summary>
 public class GaussianCopulaZeroVarianceTests
 {

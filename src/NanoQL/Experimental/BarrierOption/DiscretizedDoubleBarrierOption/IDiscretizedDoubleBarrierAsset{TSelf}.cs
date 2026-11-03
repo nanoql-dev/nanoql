@@ -12,7 +12,7 @@ namespace NanoQL.Experimental;
 /// <summary>
 /// A discretized double-barrier asset a binomial double-barrier engine builds: the constructor QuantLib's engine
 /// template calls, <c>D(arguments, process, grid)</c> (<c>binomialdoublebarrierengine.hpp:119</c>), as a static factory
-/// (the S-xeq plan's §2.0, S-bar's <c>IDiscretizedBarrierAsset</c> form).
+/// (<c>IDiscretizedBarrierAsset</c>'s form).
 /// </summary>
 /// <typeparam name="TSelf">The asset's own type.</typeparam>
 [Experimental("NQL0001")]

@@ -102,8 +102,8 @@ internal sealed class Selector
         functions.AddRange(binder.BindFunctions(classifier, typeNames.Of, set.PrefixOf, (s, why) => Skip(s.Id, s.Engine.FullName + ".Bind", why)));
         AddConstructions(functions);
 
-        // A generic base the first walk passed may cross as a closed construction (R14): each type's base is the nearest
-        // that crosses.
+        // A generic base the first walk passed may cross as a closed construction: each type's base is the nearest that
+        // crosses.
         var crossing = new HashSet<Type>(surface.Types.Select(r => r.Type));
         for (int i = 0; i < surface.Types.Count; i++)
         {
@@ -126,9 +126,9 @@ internal sealed class Selector
         return surface;
     }
 
-    // The closed generic types crossing functions take or return (R14), and the closed generic bases of crossing types
-    // that declare a static factory of their own (B2R11): each crosses as a type of its own, its members too, until no
-    // function or type names a new one.
+    // The closed generic types crossing functions take or return, and the closed generic bases of crossing types that
+    // declare a static factory of their own: each crosses as a type of its own, its members too, until no function or
+    // type names a new one.
     private void AddConstructions(List<CFunction> functions)
     {
         var seen = new HashSet<Type>(surface.Types.Select(r => r.Type));
@@ -155,7 +155,7 @@ internal sealed class Selector
     }
 
     // A type's closed generic bases that declare a public static returning themselves: a factory, which crosses under
-    // its declaring type alone (B2R11), so that type crosses too.
+    // its declaring type alone, so that type crosses too.
     private static IEnumerable<Type> FactoryBases(Type t)
     {
         for (Type? b = t.BaseType; b != null && b.IsConstructedGenericType && !b.ContainsGenericParameters; b = b.BaseType)
@@ -185,7 +185,7 @@ internal sealed class Selector
     }
 
     // The nearest base a type crosses with: a public class of ours that isn't generic, or a closed construction that
-    // crosses (R14).
+    // crosses.
     private string? BaseOf(Type t, HashSet<Type> crossing)
     {
         Type? b = t.BaseType;
@@ -272,7 +272,7 @@ internal sealed class Selector
             foreach (MemberInfo m in src.GetMembers(Declared).OrderBy(m => m.MetadataToken))
             {
                 // A base's static stays under its declaring type, unless this is a named class and the base is the
-                // closing it names (B2R11): a copy would build another type than its holder's name says.
+                // closing it names: a copy would build another type than its holder's name says.
                 if (src != t && IsStatic(m) && !(src == t.BaseType && IsNamedClass(t)))
                 {
                     continue;
@@ -285,7 +285,7 @@ internal sealed class Selector
             }
         }
 
-        // A struct's implicit parameterless constructor, default(T), which metadata doesn't hold (R16).
+        // A struct's implicit parameterless constructor, default(T), which metadata doesn't hold.
         if (t.IsValueType && !t.IsEnum && t != known.Date && t != known.Period && !presetTypes.Contains(t) && t.GetConstructor(Type.EmptyTypes) == null)
         {
             yield return new CFunction
@@ -306,8 +306,8 @@ internal sealed class Selector
     };
 
     /// <summary>
-    /// Whether a type is a named class (D12): a sealed, non-generic class whose direct base is a closed generic
-    /// construction, declaring no public instance member but its constructors and those returning itself (a generator's
+    /// Whether a type is a named class: a sealed, non-generic class whose direct base is a closed generic construction,
+    /// declaring no public instance member but its constructors and those returning itself (a generator's
     /// <c>Clone</c>), as a QuantLib typedef's or a QuantLib-SWIG <c>%template</c>'s name for its closing does.
     /// </summary>
     /// <param name="t">The type.</param>
@@ -489,9 +489,9 @@ internal sealed class Selector
             yield break;
         }
 
-        // Closed at its constraint (R14, R12's form made general): each type parameter has one class or interface
-        // constraint naming no type parameter, and no constructor or value-type constraint, so the constraint itself is
-        // a type argument it takes: Calibrate<TModel> where TModel : CalibratedModel takes any calibrated model.
+        // Closed at its constraint: each type parameter has one class or interface constraint naming no type parameter,
+        // and no constructor or value-type constraint, so the constraint itself is a type argument it takes:
+        // Calibrate<TModel> where TModel : CalibratedModel takes any calibrated model.
         const GenericParameterAttributes special = GenericParameterAttributes.DefaultConstructorConstraint | GenericParameterAttributes.NotNullableValueTypeConstraint;
         bool closable = args.All(a => a.GetGenericParameterConstraints() is [var c] && !c.IsTrait() && !c.ContainsGenericParameters
             && (c.IsClass || c.IsInterface) && (a.GenericParameterAttributes & special) == 0);
@@ -556,7 +556,7 @@ internal sealed class Selector
             CKind? k = classifier.Classify(p.ParameterType, p, false, d => binder.Shape(d, defType), out string? why);
             if (k == null && IsNullByDefault(p))
             {
-                // An optional parameter of a type that doesn't cross, null by default, is left at its default (B2R5):
+                // An optional parameter of a type that doesn't cross, null by default, is left at its default:
                 // Date.TodaysDate's clock, an optimizer's line search, the caller's functions.
                 f.Dropped.Add(i);
                 continue;
@@ -673,7 +673,7 @@ internal sealed class Selector
         m.Has(WellKnown.ExperimentalAttribute) || (m.DeclaringType != null && IsExperimental(m.DeclaringType)) || (m is Type t && InheritsExperimental(t));
 
     // A type over an experimental base or interface is experimental too, as a member whose signature names one is: a
-    // user's class over one of nanoql's experimental types (round 3's F3-1).
+    // user's class over one of nanoql's experimental types.
     private bool InheritsExperimental(Type t)
     {
         if (!inheritsExperimental.TryGetValue(t, out bool e))
@@ -713,7 +713,7 @@ internal sealed class Selector
             return true;
         }
 
-        // Experimental by its own attribute, its declaring type's, or an experimental base or interface's (F4-1).
+        // Experimental by its own attribute, its declaring type's, or an experimental base or interface's.
         return set.Ours(t) && IsExperimental(t.IsConstructedGenericType ? t.GetGenericTypeDefinition() : t);
     }
 

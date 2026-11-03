@@ -11,8 +11,8 @@ namespace NanoQL.TermStructures;
 
 /// <summary>A flat hazard-rate curve.</summary>
 /// <remarks>
-/// QuantLib's quote and rate constructors are one here, the quote form being the value form (PR6.8), and its
-/// settlement-days form is <see cref="Create"/>, which computes the reference date from the evaluation context (D15).
+/// QuantLib's quote and rate constructors are one here, the quote form being the value form, and its settlement-days
+/// form is <see cref="Create"/>, which computes the reference date from the evaluation context.
 /// </remarks>
 public sealed class FlatHazardRate : HazardRateStructure
 {
@@ -42,7 +42,7 @@ public sealed class FlatHazardRate : HazardRateStructure
 
     /// <summary>
     /// A flat hazard-rate curve whose reference date is the given number of business days after the context's
-    /// evaluation date: QuantLib's settlement-days constructor (D15).
+    /// evaluation date: QuantLib's settlement-days constructor.
     /// </summary>
     /// <param name="settlementDays">The business days from the evaluation date to the reference date.</param>
     /// <param name="calendar">The calendar the days are counted on.</param>

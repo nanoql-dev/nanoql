@@ -14,10 +14,10 @@ namespace NanoQL.Numerics;
 /// scramble seeded per group of four dimensions.
 /// </summary>
 /// <remarks>
-/// A working type (the S-mm plan's MR1 (ii), SD6): each draw changes it, it isn't thread-safe, and its draws are views
-/// of its own buffers, valid until its next draw, allocating nothing. Both seeds are explicit, in [1, 4294967295]
-/// (S2R4: QuantLib's defaults are 42 and 43); the scrambling seed feeds the Mersenne twister, where 0 would draw from
-/// the clock. Unlike <see cref="SobolRsg"/>, it takes two seeds, so it offers no <c>Create(dimension, seed)</c>.
+/// A working type: each draw changes it, it isn't thread-safe, and its draws are views of its own buffers, valid until
+/// its next draw, allocating nothing. Both seeds are explicit, in [1, 4294967295] (QuantLib's defaults are 42 and 43);
+/// the scrambling seed feeds the Mersenne twister, where 0 would draw from the clock. Unlike <see cref="SobolRsg"/>, it
+/// takes two seeds, so it offers no <c>Create(dimension, seed)</c>.
 /// </remarks>
 [WorkingType]
 public sealed class Burley2020SobolRsg : IRsg

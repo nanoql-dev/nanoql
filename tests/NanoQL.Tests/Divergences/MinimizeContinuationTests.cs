@@ -8,10 +8,10 @@ namespace NanoQL.Tests.Divergences;
 /// <summary>
 /// QuantLib's <c>minimize</c> changes the <c>Problem</c> it is given, so a second <c>minimize</c> on the same problem
 /// starts from the first's optimum, its current value then. nanoql's <see cref="Problem"/> is immutable, and
-/// <see cref="OptimizationMethod.Minimize(Problem, EndCriteria)"/> starts from the problem's initial value each time
-/// (S2R11). <see cref="OptimizationMethod.Minimize(ProblemState, EndCriteria)"/> is QuantLib's: a second minimization of
-/// one state continues from the first's optimum, as QuantLib's <c>HybridSimulatedAnnealing</c> runs its local
-/// optimizer on the same problem.
+/// <see cref="OptimizationMethod.Minimize(Problem, EndCriteria)"/> starts from the problem's initial value each time.
+/// <see cref="OptimizationMethod.Minimize(ProblemState, EndCriteria)"/> is QuantLib's: a second minimization of one
+/// state continues from the first's optimum, as QuantLib's <c>HybridSimulatedAnnealing</c> runs its local optimizer on
+/// the same problem.
 /// </summary>
 public class MinimizeContinuationTests
 {

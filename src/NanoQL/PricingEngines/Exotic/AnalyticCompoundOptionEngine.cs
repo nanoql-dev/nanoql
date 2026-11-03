@@ -23,22 +23,22 @@ namespace NanoQL.PricingEngines;
 /// Stateless. QuantLib solves its critical spot on the volatility at a date as far from the curves' start as the
 /// daughter's maturity from the mother's and on the discounts over that span, then reads the daughter's volatility at
 /// its maturity and the mother's at the mother's strike, so it is exact only on flat markets; here Geske's formula
-/// reads the variances to each maturity at the daughter's strike, the correlation √(V_M/V_D) and the discounts by
-/// date, and the critical spot solves the daughter's forward Black value over the mother's period (the S-exo plan's
-/// ER4, <c>Divergences/CompoundTermStructureTests.cs</c>, against the exact integral at the mother's maturity within
+/// reads the variances to each maturity at the daughter's strike, the correlation √(V_M/V_D) and the discounts by date,
+/// and the critical spot solves the daughter's forward Black value over the mother's period
+/// (<c>Divergences/CompoundTermStructureTests.cs</c>, against the exact integral at the mother's maturity within
 /// Brent's accuracy), with QuantLib's solver, bracket and accuracy. The Greeks are the form's: the delta and gamma with
 /// the critical spot held, the vega under a parallel shift of the volatilities, and the theta with each date's zero
 /// rate and volatility held as the times shorten, where QuantLib's take the vega on the daughter's volatility alone and
 /// discount the mother's strike at the daughter's rate in the theta. The bivariate normal is West's, QuantLib's
-/// default, where its engine reads Drezner's (ER7).
+/// default, where its engine reads Drezner's.
 /// </para>
 /// <para>
 /// Where the daughter is a put whose largest value, K_D·D(T_M, T_D), doesn't exceed the mother's strike, there is no
-/// critical spot and QuantLib's Brent refuses ("root not bracketed"); the mother is then never exercised (a call on
-/// the put is worth 0) or always (a put on the put is worth K_M·D(T_M) less the put), and those limits are priced (ER5
-/// (xxxviii), <c>Divergences/CompoundNoCriticalSpotTests.cs</c>). Every structure is read by date, accruing nothing
-/// before its own date (ER5 (xxiv), <c>Divergences/ExoticMismatchedTimesTests.cs</c>); a date before the process's
-/// clock keeps QuantLib's "negative time" refusal.
+/// critical spot and QuantLib's Brent refuses ("root not bracketed"); the mother is then never exercised (a call on the
+/// put is worth 0) or always (a put on the put is worth K_M·D(T_M) less the put), and those limits are priced
+/// (<c>Divergences/CompoundNoCriticalSpotTests.cs</c>). Every structure is read by date, accruing nothing before its
+/// own date (<c>Divergences/ExoticMismatchedTimesTests.cs</c>); a date before the process's clock keeps QuantLib's
+/// "negative time" refusal.
 /// </para>
 /// </remarks>
 public static class AnalyticCompoundOptionEngine
@@ -71,7 +71,7 @@ public static class AnalyticCompoundOptionEngine
         return option.FetchResults(Body(option, process));
     }
 
-    // QuantLib's calculate(), ER4's form.
+    // QuantLib's calculate(), on discounts and variances by date.
     private static OneAssetOptionResults Body(CompoundOption option, GeneralizedBlackScholesProcess process)
     {
         PlainVanillaPayoff payoffDaughter = option.DaughterPayoff as PlainVanillaPayoff
@@ -185,8 +185,8 @@ public static class AnalyticCompoundOptionEngine
         };
     }
 
-    // The limits without a critical spot (ER5 (xxxviii)): a call on the put never exercised, a put on the put always,
-    // worth the mother's discounted strike less the put; its Greeks the put's, negated, and the strike's decay.
+    // The limits without a critical spot: a call on the put never exercised, a put on the put always, worth the
+    // mother's discounted strike less the put; its Greeks the put's, negated, and the strike's decay.
     private static OneAssetOptionResults NoCriticalSpot(
         OptionType motherType,
         double s,

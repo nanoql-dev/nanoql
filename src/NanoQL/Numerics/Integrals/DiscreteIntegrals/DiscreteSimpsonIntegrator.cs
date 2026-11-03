@@ -12,10 +12,10 @@ namespace NanoQL.Numerics;
 /// </summary>
 /// <remarks>
 /// Immutable. Its accuracy is QuantLib's <c>Null&lt;Real&gt;()</c>: the rule runs its evaluations and reports no error.
-/// Fewer than two evaluations are refused, where QuantLib's count wraps below zero (<c>discreteintegrals.cpp:92</c>;
-/// the S-van plan's VR4 (xix)); at two, one interval, the trapezoid rule, where QuantLib's end correction counts f(a)
-/// a second time (2.52581 where its <see cref="DiscreteSimpsonIntegral"/> on the same two points gives the trapezoid's
-/// 1.85914; VR4 (xx)). From three evaluations, QuantLib's arithmetic.
+/// Fewer than two evaluations are refused, where QuantLib's count wraps below zero (<c>discreteintegrals.cpp:92</c>);
+/// at two, one interval, the trapezoid rule, where QuantLib's end correction counts f(a) a second time (2.52581 where
+/// its <see cref="DiscreteSimpsonIntegral"/> on the same two points gives the trapezoid's 1.85914). From three
+/// evaluations, QuantLib's arithmetic.
 /// </remarks>
 public sealed class DiscreteSimpsonIntegrator : Integrator
 {
@@ -37,7 +37,7 @@ public sealed class DiscreteSimpsonIntegrator : Integrator
         int n = MaxEvaluations - 1;
         double d = (b - a) / n, d2 = d * 2;
 
-        // one interval: the trapezoid (VR4 (xx))
+        // one interval: the trapezoid
         if (n == 1)
         {
             return new IntegrationResult(0.5 * d * (f(a) + f(b)), MaxEvaluations);

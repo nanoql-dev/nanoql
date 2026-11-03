@@ -20,19 +20,19 @@ namespace NanoQL.Experimental;
 /// <remarks>
 /// <para>
 /// A static class: <see cref="Calculate"/> takes the engine's inputs and returns the results, in place of QuantLib's
-/// engine object (D14). It reads the statistics through the swap's basket, which must be of the engine's evaluation
-/// date (the S-xcr plan's XR1 (c)). QuantLib's engine takes the basket as homogeneous, hard-coded: the recovery is read
-/// from the basket's first name for all, and its branch for unequal recoveries is never taken, so it isn't ported (XR8
-/// (xl)). Here the first live name's: once the first name has defaulted, QuantLib's on the restated basket, where a
-/// read of the first name would price every future default at its settled recovery (XR8 (ii)). The fair premium leaves the upfront out, QuantLib's CDS convention (XR8 (xxxix)).
+/// engine object. It reads the statistics through the swap's basket, which must be of the engine's evaluation date.
+/// QuantLib's engine takes the basket as homogeneous, hard-coded: the recovery is read from the basket's first name for
+/// all, and its branch for unequal recoveries is never taken, so it isn't ported. Here the first live name's: once the
+/// first name has defaulted, QuantLib's on the restated basket, where a read of the first name would price every future
+/// default at its settled recovery. The fair premium leaves the upfront out, QuantLib's CDS convention.
 /// </para>
 /// <para>
 /// The upfront is the swap's nominal times its rate. QuantLib's is the basket's remaining notional times the rate
-/// (<c>integralntdengine.cpp:157-163</c>), 5 for a 1,000 nominal on a 100 basket (XR8 (xi);
-/// <c>Divergences/NthToDefaultUpfrontTests.cs</c>); where the nominal is the basket's notional, QuantLib's. A discount
+/// (<c>integralntdengine.cpp:157-163</c>), 5 for a 1,000 nominal on a 100 basket
+/// (<c>Divergences/NthToDefaultUpfrontTests.cs</c>); where the nominal is the basket's notional, QuantLib's. A discount
 /// before the discount curve's reference date is 1, and a default probability before a default curve's 0, where
-/// QuantLib's reads refuse them ("negative time"; XR8 (x)). A realized default lowers the order the basket's
-/// probabilities read; once the realized defaults reach it, the contract is triggered (XR8 (ii)).
+/// QuantLib's reads refuse them ("negative time"). A realized default lowers the order the basket's probabilities read;
+/// once the realized defaults reach it, the contract is triggered.
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]

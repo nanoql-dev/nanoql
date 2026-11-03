@@ -6,13 +6,12 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The discrepancy statistics' lazy dimension and pairing (the S-core plan's CR7 (viii) and (ix)): QuantLib computes
-/// its constants for the dimension at construction, so a statistics of dimension 0, whose first sample sets it, keeps
-/// dimension 0's constants; and it pairs the components' stored samples by position, which a percentile read, sorting
-/// each component in place, breaks. nanoql fixes the constants with the dimension and keeps its own copy of the points.
-/// On 200 three-dimensional Sobol points (seed 1) QuantLib gives 0.005923430933947052 with the dimension given, 0.666
-/// with it lazy and 0.102 after a percentile read halfway (the plan's <c>misc1.cpp</c>, rerun in this run's
-/// <c>probes\misc1.cpp</c>); nanoql gives the first in all three.
+/// The discrepancy statistics' lazy dimension and pairing: QuantLib computes its constants for the dimension at
+/// construction, so a statistics of dimension 0, whose first sample sets it, keeps dimension 0's constants; and it
+/// pairs the components' stored samples by position, which a percentile read, sorting each component in place, breaks.
+/// nanoql fixes the constants with the dimension and keeps its own copy of the points. On 200 three-dimensional Sobol
+/// points (seed 1) QuantLib gives 0.005923430933947052 with the dimension given, 0.666 with it lazy and 0.102 after a
+/// percentile read halfway; nanoql gives the first in all three.
 /// </summary>
 public class DiscrepancyStatisticsTests
 {

@@ -9,7 +9,7 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The local volatility surfaces' modifiers return copies (PR6.4b; the S-van plan's VD22, VD23):
+/// The local volatility surfaces' modifiers return copies:
 /// <see cref="FixedLocalVolSurface.WithInterpolation{TInterpolator}"/>, QuantLib's <c>setInterpolation</c>, and
 /// <see cref="GridModelLocalVolSurface.WithParams"/>, QuantLib's <c>setParams</c> with its <c>generateArguments</c>,
 /// leave the receiver as it was, and the copy is the surface built afresh on the new interpolation or parameters.

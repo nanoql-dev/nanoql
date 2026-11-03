@@ -14,8 +14,8 @@ namespace NanoQL.Tests.Divergences;
 /// x ↦ x − 2(v·x)v, is the identity. Choi's basket engine reaches it at a zero volatility, where the reflection onto e₁
 /// of a vector already along e₁ is the zero vector, and its integration orders <c>lround(NaN)</c> then fail with
 /// <c>bad array new length</c> (<c>choibasketengine.cpp:136-167</c>), while Choi's price is continuous down to a
-/// volatility of 1e-16. nanoql's matrix of the zero vector is the identity (the S-exo plan's ER5 (iii)): QuantLib's own
-/// transformation of the zero vector, and Choi's limit, are the checks.
+/// volatility of 1e-16. nanoql's matrix of the zero vector is the identity: QuantLib's own transformation of the zero
+/// vector, and Choi's limit, are the checks.
 /// </summary>
 public class HouseholderZeroVectorTests
 {

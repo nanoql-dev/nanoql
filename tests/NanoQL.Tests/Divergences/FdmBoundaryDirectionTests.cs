@@ -6,10 +6,10 @@ using NanoQL.Methods;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// A boundary's direction outside the layout (the S-rx plan's SRXR3 (xiv)). QuantLib's <c>FdmIndicesOnBoundary</c>
-/// writes <c>newDim[direction]</c> (<c>fdmindicesonboundary.cpp:31-32</c>) and <c>FdmDirichletBoundary</c> reads
-/// <c>locations(direction)</c>, past their vectors' ends: undefined behaviour. Here both refuse the direction on entry
-/// with <see cref="ArgumentOutOfRangeException"/>, before any read; a direction in the layout is QuantLib's.
+/// A boundary's direction outside the layout. QuantLib's <c>FdmIndicesOnBoundary</c> writes <c>newDim[direction]</c>
+/// (<c>fdmindicesonboundary.cpp:31-32</c>) and <c>FdmDirichletBoundary</c> reads <c>locations(direction)</c>, past
+/// their vectors' ends: undefined behaviour. Here both refuse the direction on entry with
+/// <see cref="ArgumentOutOfRangeException"/>, before any read; a direction in the layout is QuantLib's.
 /// </summary>
 public class FdmBoundaryDirectionTests
 {

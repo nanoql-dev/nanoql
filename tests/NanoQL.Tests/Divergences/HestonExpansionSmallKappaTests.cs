@@ -12,18 +12,18 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The LPP2 and LPP3 expansions at small κt, from a small κ or a short term (the S-hes plan's HR7 (x), under R8, by
-/// HR6). QuantLib's coefficients (<c>hestonexpansionengine.cpp:128-720</c>) are expansions in e^{κt} that cancel in
-/// double as κt falls: LPP3's z₃ is −0.196 for 1.310 at κt = 5e-3 and 3.6e8 for 0.478 at a term of 52 minutes at
-/// κ 1.5, where its volatility three standard deviations up is 142, and its price at κ = 1e-4 is 9.7% below the
-/// analytic engine's; LPP2's z₁ is −73.1 for −0.189 at κt = 5e-7. nanoql evaluates each coefficient below its cut
-/// (LPP2's 0.5, 0.2 and 0.5, LPP3's 2, 1, 1 and 1), where QuantLib's double first departs from the expression's exact
-/// value by more than 1e-12 relative, in double-double, QuantLib's expression unchanged; below double-double's own
-/// floor (LPP2's 2e-6, 5e-7 and 2e-6, LPP3's 1e-3, 5e-4, 5e-5 and 5e-3) in quad-double; below quad-double's floor
-/// (LPP2's 1e-12 each, LPP3's 5e-10, 2e-10, 1e-12 and 5e-8) by the cubic in κ through four quad-double values there;
-/// and in QuantLib's double, and so its bits, from the cut up. The check: QuantLib's expressions in Boost's
-/// <c>cpp_bin_float</c> at 100 digits, and at 250 below the double-double floors [executed at the run], QuantLib's
-/// implied volatilities at the cuts, QuantLib's analytic engine, and at short terms QuantLib's Forde expansion.
+/// The LPP2 and LPP3 expansions at small κt, from a small κ or a short term. QuantLib's coefficients
+/// (<c>hestonexpansionengine.cpp:128-720</c>) are expansions in e^{κt} that cancel in double as κt falls: LPP3's z₃ is
+/// −0.196 for 1.310 at κt = 5e-3 and 3.6e8 for 0.478 at a term of 52 minutes at κ 1.5, where its volatility three
+/// standard deviations up is 142, and its price at κ = 1e-4 is 9.7% below the analytic engine's; LPP2's z₁ is −73.1 for
+/// −0.189 at κt = 5e-7. nanoql evaluates each coefficient below its cut (LPP2's 0.5, 0.2 and 0.5, LPP3's 2, 1, 1 and
+/// 1), where QuantLib's double first departs from the expression's exact value by more than 1e-12 relative, in
+/// double-double, QuantLib's expression unchanged; below double-double's own floor (LPP2's 2e-6, 5e-7 and 2e-6, LPP3's
+/// 1e-3, 5e-4, 5e-5 and 5e-3) in quad-double; below quad-double's floor (LPP2's 1e-12 each, LPP3's 5e-10, 2e-10, 1e-12
+/// and 5e-8) by the cubic in κ through four quad-double values there; and in QuantLib's double, and so its bits, from
+/// the cut up. The check: QuantLib's expressions in Boost's <c>cpp_bin_float</c> at 100 digits, and at 250 below the
+/// double-double floors, QuantLib's implied volatilities at the cuts, QuantLib's analytic engine, and at short terms
+/// QuantLib's Forde expansion.
 /// </summary>
 public class HestonExpansionSmallKappaTests
 {
@@ -34,7 +34,7 @@ public class HestonExpansionSmallKappaTests
     {
         // set 1: theta 0.04, sigma 0.3, v0 0.04, rho -0.5 at t = 1; set 2: theta 0.09, sigma 0.5, v0 0.0625, rho 0.3 at
         // t = 0.5; the reference values at kappa t, QuantLib 1.44's double beside each above the double-double floor
-        // [executed in the same probe, QuantLib's expressions in double], quad-double and the cubic below it
+        // (QuantLib's expressions in double), quad-double and the cubic below it
         AssertCoefficients(2, new[]
         {
             (0, 1, 0.2, 0.1809881274943440844515792), // QuantLib 0.18098812749433965
@@ -63,8 +63,8 @@ public class HestonExpansionSmallKappaTests
             (2, 2, 1e-12, 0.5166666666660692444355641),
         });
 
-        // QuantLib 1.44's LPP2 at kappa t 0.5 on set 1, each coefficient at or above its cut, at strikes 90, 100 and 110
-        // on a forward of 100 [executed through the harness's HestonExpansion::impliedVolatility]
+        // QuantLib 1.44's LPP2 at kappa t 0.5 on set 1, each coefficient at or above its cut, at strikes 90, 100 and
+        // 110 on a forward of 100 (the C++ harness's HestonExpansion::impliedVolatility)
         var expansion = new LPP2HestonExpansion(0.5, 0.04, 0.3, 0.04, -0.5, 1.0);
         Assert.Equal(0.20224835058738697, expansion.ImpliedVolatility(90.0, 100.0));
         Assert.Equal(0.18395521876579807, expansion.ImpliedVolatility(100.0, 100.0));
@@ -115,8 +115,8 @@ public class HestonExpansionSmallKappaTests
             (3, 2, 1e-9, -1.711999996597583962218656),
         });
 
-        // QuantLib 1.44's LPP3 at kappa t 2 on set 1, each coefficient at or above its cut [executed through the
-        // harness's HestonExpansion::impliedVolatility]
+        // QuantLib 1.44's LPP3 at kappa t 2 on set 1, each coefficient at or above its cut (the C++ harness's
+        // HestonExpansion::impliedVolatility)
         var expansion = new LPP3HestonExpansion(2.0, 0.04, 0.3, 0.04, -0.5, 1.0);
         Assert.Equal(0.2037715936007213, expansion.ImpliedVolatility(90.0, 100.0));
         Assert.Equal(0.19220590976755317, expansion.ImpliedVolatility(100.0, 100.0));
@@ -148,8 +148,8 @@ public class HestonExpansionSmallKappaTests
     {
         // a year's call at 100 on set 1, r = q = 3%: QuantLib 1.44's LPP3 prices 6.920815491486161, 6.918890259239631
         // and 6.231209669919503 at kappa 1e-2, 1e-3 and 1e-4, and its LPP2 6.909524082935676, 6.905010408240162 and
-        // 6.902563149041442 [executed through the harness's HestonExpansionEngine::results]. Both expansions here within
-        // their order of accuracy at kappa 1, where LPP2 is 2.9e-3 and LPP3 1.9e-3 below the analytic engine
+        // 6.902563149041442 (the C++ harness's HestonExpansionEngine::results). Both expansions here within their order
+        // of accuracy at kappa 1, where LPP2 is 2.9e-3 and LPP3 1.9e-3 below the analytic engine
         var context = new EvaluationContext { EvaluationDate = Today };
         var call = new VanillaOption(new PlainVanillaPayoff(OptionType.Call, 100.0), new EuropeanExercise(Today + 365));
         foreach ((double kappa, double analytic) in new[]
@@ -157,7 +157,7 @@ public class HestonExpansionSmallKappaTests
                      (1e-2, 6.907740487801554), (1e-3, 6.90245360436016), (1e-4, 6.901921862817677), (1e-5, 6.9018686579504145),
                  })
         {
-            // QuantLib 1.44's analytic engine at 192 points [executed on the wheel]
+            // QuantLib 1.44's analytic engine at 192 points (QuantLib-Python 1.44)
             HestonModel model = Model(kappa);
             Assert.Equal(analytic, AnalyticHestonEngine.Calculate(call, context, model, 192).NPV!.Value, 1e-13);
             foreach (HestonExpansionEngineHestonExpansionFormula formula in new[]
@@ -228,9 +228,9 @@ public class HestonExpansionSmallKappaTests
         }
 
         // the volatilities at three standard deviations either side of a forward of 100 against QuantLib's Forde
-        // expansion [executed through the harness's HestonExpansion::impliedVolatility]: LPP2 within 5e-6, the most
-        // QuantLib's own LPP2 and Forde differ by here, and LPP3 within that and its cubic term at a term of 0,
-        // ρ(8ρ² − 5)σ³/(96 v₀^{5/2}) x³; QuantLib 1.44's LPP3 at kappa 1.5 is 1e-8 and 141.99439171164155 at 52 minutes,
+        // expansion (the C++ harness's HestonExpansion::impliedVolatility): LPP2 within 5e-6, the most QuantLib's own
+        // LPP2 and Forde differ by here, and LPP3 within that and its cubic term at a term of 0, ρ(8ρ² − 5)σ³/(96
+        // v₀^{5/2}) x³; QuantLib 1.44's LPP3 at kappa 1.5 is 1e-8 and 141.99439171164155 at 52 minutes,
         // 0.2514534314842224 and 0.23844871717720223 at 8.8 hours
         double z3AtZero = Math.Abs(-0.5 * ((8.0 * 0.25) - 5.0) * 0.027 / (96.0 * Math.Pow(0.06, 2.5)));
         foreach ((double kappa, double t, double[] forde) in new[]

@@ -22,9 +22,8 @@ namespace NanoQL.Processes;
 /// A path generated on it satisfies r(tᵢ) = z₁ᵢ + z₂ᵢ, its expectation φ(tᵢ). The step's conditional correlation,
 /// QuantLib's ρση(1 − e^(−(a+b)Δt))/(a + b) over ½ση√((1 − e^(−2aΔt))(1 − e^(−2bΔt))/(ab)), is written as
 /// ρ·f((a+b)Δt)/√(f(2aΔt)·f(2bΔt)), f(x) = (1 − e^(−x))/x, and held in [−1, 1], ρ itself where a = b; φ's terms as
-/// G2's (the S-sr plan's SSR6 (iii) and (xix)): a divergence, QuantLib's √(1 − ρ²) of a correlation an ulp past ±1
-/// being NaN at ρ = ±1 with a = b (<c>Divergences/G2ProcessCorrelationBoundTests.cs</c>), and its terms cancelling at
-/// small reversion.
+/// G2's: a divergence, QuantLib's √(1 − ρ²) of a correlation an ulp past ±1 being NaN at ρ = ±1 with a = b
+/// (<c>Divergences/G2ProcessCorrelationBoundTests.cs</c>), and its terms cancelling at small reversion.
 /// </para>
 /// </remarks>
 public sealed class G2Process : StochasticProcess

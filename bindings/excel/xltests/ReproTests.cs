@@ -11,10 +11,11 @@ using Microsoft.Office.Interop.Excel;
 namespace NanoQL.Excel.XlTests;
 
 /// <summary>
-/// Repro export inside Excel (XLR14): the swap's cells exported in each format and run to the cell's bits (the vector
-/// replayed through the experimental tests' build, the C# compiled and run, the Python run); every committed vector whose
-/// functions the build holds exported again from its workbook, the committed bytes after XLD30's substitutions; the
-/// export's refusals; <c>"recordCalls": false</c>; and the package's stable add-in, from its zip, priced (X6).
+/// Repro export inside Excel: the swap's cells exported in each format and run to the cell's bits (the vector replayed
+/// through the experimental tests' build, the C# compiled and run, the Python run); every committed vector whose
+/// functions the build holds exported again from its workbook, the committed bytes, the generator's version and the
+/// checkout's own path aside; the export's refusals; <c>"recordCalls": false</c>; and the package's stable add-in, from
+/// its zip, priced.
 /// </summary>
 [ExcelTestSettings(OutOfProcess = true)]
 public partial class ReproTests : RunnerTest
@@ -57,9 +58,9 @@ public partial class ReproTests : RunnerTest
 
     /// <summary>
     /// Each committed vector whose functions the test build holds, exported again from its committed workbook after a full
-    /// recalculation: the committed bytes, the generator's version and the checkout's path aside (XLD30); a 1904
-    /// workbook's cell exported from a 1900 workbook's (XLP64). In an Excel of its own: the workbooks' objects go with
-    /// it, where in the runner's instance Excel releases them only later, under the next tests' counts of live objects.
+    /// recalculation: the committed bytes, the generator's version and the checkout's path aside; a 1904 workbook's
+    /// cell exported from a 1900 workbook's. In an Excel of its own: the workbooks' objects go with it, where in the
+    /// runner's instance Excel releases them only later, under the next tests' counts of live objects.
     /// </summary>
     [Fact]
     public void EachCommittedWorkbookExportsItsVector()
@@ -106,7 +107,7 @@ public partial class ReproTests : RunnerTest
 
     /// <summary>
     /// The export's refusals, each #VALUE! with nqlxlError's reason: a scaled cell, a cell edited to a constant, a tree
-    /// mixing a 1904 workbook's calls with a 1900 one's, and a cell reporting a read file's path (XLP55, XLP64, XLP72).
+    /// mixing a 1904 workbook's calls with a 1900 one's, and a cell reporting a read file's path.
     /// </summary>
     [ExcelFact(AddIn = AddIns.Test)]
     public void TheExportsRefusals()
@@ -153,7 +154,8 @@ public partial class ReproTests : RunnerTest
         });
     }
 
-    /// <summary>X6: the package's stable add-in, extracted from its zip, prices the swap to S-bind's bits; the experimental API isn't in it.</summary>
+    /// <summary>The package's stable add-in, extracted from its zip, prices the swap to the C ABI's bits; the
+    /// experimental API isn't in it.</summary>
     [Fact]
     public void ThePackagesStableAddInPrices()
         => OwnExcel.Run(AddIns.Package, app =>
@@ -229,7 +231,7 @@ public partial class ReproTests : RunnerTest
         }
     }
 
-    // The committed vectors whose functions the test build holds (XLD36), by name.
+    // The committed vectors whose functions the test build holds, by name.
     private static List<string> Held()
     {
         using JsonDocument m = AddIns.Manifest("test");
@@ -242,14 +244,14 @@ public partial class ReproTests : RunnerTest
 
     private static bool Conventions(string name) => File.ReadAllText(Path.Combine(Folder, name + ".json")).Contains("\"conventions\": ", StringComparison.Ordinal);
 
-    // XLD30: the generator's version and the checkout's own path, which a read file's path holds, left out.
+    // The generator's version and the checkout's own path, which a read file's path holds, left out.
     private static string Normal(string text)
     {
         string t = Generator().Replace(text, "\"generator\": \"nanoql-excel <version>\"");
         return Checkout().Replace(t, "\"<checkout>\\\\bindings\\\\excel\\\\tests\\\\repro\\\\");
     }
 
-    // The vector replayed through the experimental tests' build (X7's replayer), its report.
+    // The vector replayed through the experimental tests' build (its replayer), its report.
     private static string Replay(string vector)
     {
         string dir = AddIns.Scratch();

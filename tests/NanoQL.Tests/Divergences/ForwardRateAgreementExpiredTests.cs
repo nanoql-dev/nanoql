@@ -10,7 +10,7 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The FRA after its value date (the S-rx plan's SRXR3 (vii)). QuantLib's <c>setupExpired</c> computes the forward rate
+/// The FRA after its value date. QuantLib's <c>setupExpired</c> computes the forward rate
 /// (<c>forwardrateagreement.cpp:84-87</c>): under the par approximation it reads the curve at the value date, before a
 /// curve dated on the evaluation date, and throws "negative time (-0.00277778) given"; and <c>amount()</c> then returns
 /// <c>amount_</c>, which nothing computed (<c>:74-77</c>; the wheel read 0.0 for a FRA first priced after its value

@@ -17,7 +17,7 @@ namespace NanoQL.Experimental;
 /// </summary>
 /// <remarks>
 /// An extension point, as in QuantLib: a product derives it (or <see cref="AdaptedPathPayoff"/>). QuantLib's visitor
-/// isn't ported (master §2.2's visitor row).
+/// isn't ported (the playbook's visitor row).
 /// </remarks>
 [Experimental("NQL0001")]
 public abstract class PathPayoff

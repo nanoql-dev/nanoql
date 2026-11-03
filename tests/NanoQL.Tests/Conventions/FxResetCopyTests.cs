@@ -13,10 +13,10 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// Setting an FX reset pricer returns copies (the S-rx plan's SRXD10, PR6.4b): QuantLib's <c>setFxResetPricer</c> sets
-/// the pricer on the coupon or exchange it is given, and its leg function on each of the leg's flows; nanoql's return
-/// a coupon, an exchange or a leg holding the pricer and leave the receiver as it was. The MtM engine prices copies of
-/// the resettable leg with its own pricer, as QuantLib's 1.44 engine prices "local wrappers"
+/// Setting an FX reset pricer returns copies: QuantLib's <c>setFxResetPricer</c> sets the pricer on the coupon or
+/// exchange it is given, and its leg function on each of the leg's flows; nanoql's return a coupon, an exchange or a
+/// leg holding the pricer and leave the receiver as it was. The MtM engine prices copies of the resettable leg with its
+/// own pricer, as QuantLib's 1.44 engine prices "local wrappers"
 /// (<c>discountingmtmcrosscurrencybasisswapengine.cpp:160-175</c>), so the swap it prices keeps its pricer-less leg.
 /// </summary>
 public class FxResetCopyTests

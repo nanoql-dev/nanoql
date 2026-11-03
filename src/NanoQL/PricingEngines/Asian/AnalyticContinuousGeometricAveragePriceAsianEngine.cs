@@ -24,19 +24,19 @@ namespace NanoQL.PricingEngines;
 /// refuses it.
 /// </para>
 /// <para>
-/// Documented divergences (the S-bar plan's BR4 (a), BR5 (xxvi)). The average is priced exactly under deterministic
-/// term structures: ln G is normal with mean (1/T)∫[ln F(t) − V(t)/2]dt and variance (2/T²)∫V(t)(T − t)dt over the
-/// volatility's clock, F the forward and V the Black variance at the strike, where QuantLib reads one volatility and the
-/// zero rates at the exercise date, +39.4% and −19.2% off on shaped markets
-/// (<c>Divergences/GeometricAsianTermStructureTests.cs</c>). The integrals run on NanoQL's adaptive Kronrod rule, each
-/// at R7 on its own scale (SD24): the mean on ∫(|ln S| + |ln F/S| + V/2)dt, the variance and the Greeks' integrals on a
-/// first 15-point estimate. The Greeks are the form's: vega under a parallel shift of the volatilities, rho and dividend
-/// rho under parallel shifts of the curves, each on its own structure's clock; on a flat market they are QuantLib's.
+/// Documented divergences. The average is priced exactly under deterministic term structures: ln G is normal with mean
+/// (1/T)∫[ln F(t) − V(t)/2]dt and variance (2/T²)∫V(t)(T − t)dt over the volatility's clock, F the forward and V the
+/// Black variance at the strike, where QuantLib reads one volatility and the zero rates at the exercise date, +39.4%
+/// and −19.2% off on shaped markets (<c>Divergences/GeometricAsianTermStructureTests.cs</c>). The integrals run on
+/// NanoQL's adaptive Kronrod rule, each at the tolerance on its own scale: the mean on ∫(|ln S| + |ln F/S| + V/2)dt,
+/// the variance and the Greeks' integrals on a first 15-point estimate. The Greeks are the form's: vega under a
+/// parallel shift of the volatilities, rho and dividend rho under parallel shifts of the curves, each on its own
+/// structure's clock; on a flat market they are QuantLib's.
 /// </para>
 /// </remarks>
 public static class AnalyticContinuousGeometricAveragePriceAsianEngine
 {
-    // SD24's relative tolerance and the rule's safety cap
+    // The integration's relative tolerance and the rule's safety cap
     private const double Tolerance = 1e-12;
     private const int Cap = 100000;
 
@@ -161,7 +161,7 @@ public static class AnalyticContinuousGeometricAveragePriceAsianEngine
         };
     }
 
-    // ∫₀ᵗ f on a scale ∫₀ᵗ g ≥ 0 (SD24): f/scale at the relative tolerance, times the scale; 0 where the scale is 0
+    // ∫₀ᵗ f on a scale ∫₀ᵗ g ≥ 0: f/scale at the relative tolerance, times the scale; 0 where the scale is 0
     private static double IntegrateOnScale(Func<double, double> f, Func<double, double> scaleIntegrand, double t)
     {
         double scale = new GaussKronrodAdaptive(double.MaxValue, 15).Integrate(scaleIntegrand, 0.0, t);

@@ -13,24 +13,22 @@
 //
 // "CTSMMCapletOriginalCalibration.calibrate" takes (spec, alpha, lowestRoot, useFullApprox, factors, maxIterations,
 // tolerance, innerMaxIterations, innerTolerance); "CTSMMCapletAlphaFormCalibration.calibrate" (spec, alphaInitial,
-// alphaMax, alphaMin, maximizeHomogeneity, form, and the five); "CTSMMCapletMaxHomogeneityCalibration.calibrate"
-// (spec, caplet0Swaption1Priority, and the five). Each returns {"converged" (calibrate's value), "failures",
-// "capletRmsError", "capletMaxError", "swaptionRmsError", "swaptionMaxError", "mktCapletVols", "mdlCapletVols",
-// "mktSwaptionVols", "mdlSwaptionVols", "swapPseudoRoots", "timeDependentCalibratedSwaptionVols",
-// "timeDependentUnCalibratedSwaptionVols", "displacements"}, the alpha form's "alpha" too. The deformation size is left
-// out: the initializer's 987654321 for the alpha form and the original, null in nanoql (the S-mm plan's MR3 (xxi)), and
-// QuantLib's index for max homogeneity, the run's own find (tests/NanoQL.Tests/Divergences/
-// CTSMMCapletMaxHomogeneityDeformationTests.cs).
+// alphaMax, alphaMin, maximizeHomogeneity, form, and the five); "CTSMMCapletMaxHomogeneityCalibration.calibrate" (spec,
+// caplet0Swaption1Priority, and the five). Each returns {"converged" (calibrate's value), "failures", "capletRmsError",
+// "capletMaxError", "swaptionRmsError", "swaptionMaxError", "mktCapletVols", "mdlCapletVols", "mktSwaptionVols",
+// "mdlSwaptionVols", "swapPseudoRoots", "timeDependentCalibratedSwaptionVols", "timeDependentUnCalibratedSwaptionVols",
+// "displacements"}, the alpha form's "alpha" too. The deformation size is left out: the initializer's 987654321 for the
+// alpha form and the original, null in nanoql, and QuantLib's index for max homogeneity
+// (tests/NanoQL.Tests/Divergences/CTSMMCapletMaxHomogeneityDeformationTests.cs).
 //
 // The static functions: "CTSMMCapletOriginalCalibration::calibrationFunction" takes (spec, alpha, lowestRoot,
 // useFullApprox, factors) and returns {"failures", "swapCovariancePseudoRoots"};
 // "CTSMMCapletAlphaFormCalibration::capletAlphaFormCalibration" (spec, alphaInitial, alphaMax, alphaMin,
 // maximizeHomogeneity, form, factors, steps, tolerance) and adds "alpha", "a" and "b";
 // "CTSMMCapletMaxHomogeneityCalibration::capletMaxHomogeneityCalibration" (spec, caplet0Swaption1Priority, factors,
-// maxIterations, tolerance) and adds "totalSwaptionError". The periodic calibration (capletcoterminalperiodic.hpp)
-// has no call: each of its passes reads FwdPeriodAdapter's pseudo-roots, on QuantLib's Y matrix (the S-mm plan's MR3
-// (i)). "PseudoRootFacade" takes (pseudoRoots, rateTimes, initialRates, displacements) and returns the model's
-// reads (modelResults).
+// maxIterations, tolerance) and adds "totalSwaptionError". The periodic calibration (capletcoterminalperiodic.hpp) has
+// no call: each of its passes reads FwdPeriodAdapter's pseudo-roots, on QuantLib's Y matrix. "PseudoRootFacade" takes
+// (pseudoRoots, rateTimes, initialRates, displacements) and returns the model's reads (modelResults).
 
 #include "convert.hpp"
 #include "models/marketmodels/marketmodelspec.hpp"

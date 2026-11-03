@@ -15,12 +15,12 @@ namespace NanoQL.Tests.Divergences;
 /// <see cref="ZeroCouponInflationSwap.FairRate"/> where the legs pay on different days. QuantLib's fair rate is the
 /// inflation growth's rate, <c>growth^(1/T) - 1</c> (<c>zerocouponinflationswap.cpp:118-138</c>), whose comment reads
 /// "Always means that NPV is zero for _this_ instrument", which fails once the legs' conventions part their payment
-/// days (QuantLib's defect, R8). nanoql scales the growth's excess by the ratio of the legs' end discounts, read from
-/// the engine's results. On <see cref="InflationFixture"/>'s market, for a payer swap of 1,000,000 from
-/// 15 June 2024 to Saturday 31 May 2025, its fixed leg Following (paying 2 June) and its inflation leg Preceding
-/// (paying 30 May), QuantLib's fair rate is 0.03078176611785821 and the swap rebuilt at it is worth -9.332619118980801;
-/// the root of QuantLib's own NPV, found by QuantLib's <c>Brent</c> through the wheel, is 0.030791894092525723, and it
-/// is nanoql's fair rate.
+/// days (QuantLib's defect). nanoql scales the growth's excess by the ratio of the legs' end discounts, read from the
+/// engine's results. On <see cref="InflationFixture"/>'s market, for a payer swap of 1,000,000 from 15 June 2024 to
+/// Saturday 31 May 2025, its fixed leg Following (paying 2 June) and its inflation leg Preceding (paying 30 May),
+/// QuantLib's fair rate is 0.03078176611785821 and the swap rebuilt at it is worth -9.332619118980801; the root of
+/// QuantLib's own NPV, found by QuantLib's <c>Brent</c> through the wheel, is 0.030791894092525723, and it is nanoql's
+/// fair rate.
 /// </summary>
 public class ZeroCouponInflationSwapFairRateTests
 {

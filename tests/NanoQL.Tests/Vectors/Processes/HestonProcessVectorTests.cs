@@ -24,10 +24,10 @@ public class HestonProcessVectorTests
     public void BroadieKayaGaussLobattoPrice()
     {
         // the vector file holds this scheme's variance alone: QuantLib's price jumps among its solve's branches under
-        // last-bit moves, and the port's complex functions differ from the C runtime's in the last bits (SEQR6). At
-        // this input, the high volatility of variance on flat curves from (100, 0.04) over 0.05 with no draw,
-        // QuantLib's price (the wheel) moves 2.7e-10 under every one-ulp and 1e-12 relative move of the parameters, the
-        // state, the step and the draws: the port within 1e-9 of it
+        // last-bit moves, and the port's complex functions differ from the C runtime's in the last bits. At this input,
+        // the high volatility of variance on flat curves from (100, 0.04) over 0.05 with no draw, QuantLib's price (the
+        // wheel) moves 2.7e-10 under every one-ulp and 1e-12 relative move of the parameters, the state, the step and
+        // the draws: the port within 1e-9 of it
         var today = new Date(15, Month.October, 2026);
         var curve = new FlatForward(today, 0.04, new Actual365Fixed());
         var dividends = new FlatForward(today, 0.02, new Actual365Fixed());

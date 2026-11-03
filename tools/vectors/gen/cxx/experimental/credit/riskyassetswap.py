@@ -4,8 +4,8 @@
 the wheel doesn't expose, each output computed by the C++ harness (tools/cxx/src/experimental/credit/
 riskyassetswap.cpp).
 
-nanoql runs the fixed annuity over the fixed schedule and the recovery integral to each period's end (the S-xcr plan's
-XR8 (xii), (xxi); tests/NanoQL.Tests/Divergences/RiskyAssetSwapTests.cs), so:
+nanoql runs the fixed annuity over the fixed schedule and the recovery integral to each period's end
+(tests/NanoQL.Tests/Divergences/RiskyAssetSwapTests.cs), so:
 
 - "swap" cases read the NPV and the fair spread where the two schedules coincide at recovery 0, payer and receiver,
   at a given coupon or the par coupon, on flat and stepped curves, on TARGET and without a calendar; and the float

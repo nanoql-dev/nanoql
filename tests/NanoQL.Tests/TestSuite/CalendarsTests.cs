@@ -706,7 +706,7 @@ public class CalendarsTests
         CheckHolidays(c.HolidayList(new Date(1, January, 2004), new Date(31, December, 2007)), expectedHol);
     }
 
-    // Adapted: without the deprecated Exchange market's check (lines 806-808 and 811), which isn't ported (D5).
+    // Adapted: without the deprecated Exchange market's check (lines 806-808 and 811), which isn't ported.
     [Fact]
     public void TestItaly()
     {

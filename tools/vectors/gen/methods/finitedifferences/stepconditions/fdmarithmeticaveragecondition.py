@@ -8,7 +8,7 @@ spline in the log average.
 On a mesher of the log spot and the log average, each uniform over [ln 50, ln 200] (8 and 7 points, the spot first or
 second), a value function of both, the condition at averaging times of 0.25, 0.5 and 1.0 with no past fixing and with
 two, applied at an averaging time (0.5, 1.0) and at a time that isn't one (0.3): the values after. Fixing dates given
-twice are left out (the S-bar plan's §2.10: BR5 (xxviii)).
+twice are left out.
 
 The wheel's calls, by QuantLib-SWIG 1.44's fdm.i: Uniform1dMesher(start, end, size), FdmMesherComposite(m1, m2),
 FdmArithmeticAverageCondition(averageTimes, runningAverage, pastFixings, mesher, equityDirection) and its

@@ -7,13 +7,12 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The linear-flat interpolation's primitive outside its range, the flat value's integral (the S-xrt run's R3-1, fixed
-/// under R8). QuantLib's <c>LinearFlatInterpolationImpl::primitive</c> extends the end intervals' lines past the ends,
-/// where its value is flat, so its primitive's slope there isn't its value: on x 1, 2, 3 and y 1, 3, 2 its primitive at
-/// 0.5 is −0.25 for the flat value's −0.5, and at 4 it is 6 for 6.5; on a single point its primitive and derivative read
-/// before their arrays (<c>generalizedhullwhite.hpp</c>). nanoql's primitive is the flat value's integral outside the
-/// range, its derivative there the value's 0, and a single point's the flat value's; inside the range all three are
-/// QuantLib's.
+/// The linear-flat interpolation's primitive outside its range, the flat value's integral (fixed). QuantLib's
+/// <c>LinearFlatInterpolationImpl::primitive</c> extends the end intervals' lines past the ends, where its value is
+/// flat, so its primitive's slope there isn't its value: on x 1, 2, 3 and y 1, 3, 2 its primitive at 0.5 is −0.25 for
+/// the flat value's −0.5, and at 4 it is 6 for 6.5; on a single point its primitive and derivative read before their
+/// arrays (<c>generalizedhullwhite.hpp</c>). nanoql's primitive is the flat value's integral outside the range, its
+/// derivative there the value's 0, and a single point's the flat value's; inside the range all three are QuantLib's.
 /// </summary>
 public class LinearFlatPrimitiveTests
 {

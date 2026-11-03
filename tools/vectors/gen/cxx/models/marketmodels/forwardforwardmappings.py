@@ -8,9 +8,9 @@ LIBOR curve states on twelve semi-annual and eight quarterly rates, multipliers 
 multiplier: the restricted state's rate times, forward rates and discount ratios to its last bond. Throws: an offset
 not below the multiplier, a restriction with no long forward (the multiplier past the rates).
 
-Left out (the S-mm plan's MR3 (i); tests/NanoQL.Tests/Divergences/ForwardForwardMappingsTests.cs): the Jacobian and the
-Y matrix, which nanoql fixes; and an offset past the rates, where QuantLib's unsigned count wraps to an endless
-allocation, which nanoql refuses.
+Left out (tests/NanoQL.Tests/Divergences/ForwardForwardMappingsTests.cs): the Jacobian and the Y matrix, which nanoql
+fixes; and an offset past the rates, where QuantLib's unsigned count wraps to an endless allocation, which nanoql
+refuses.
 
 The harness unit is tools/cxx/src/models/marketmodels/forwardforwardmappings.cpp. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Models/MarketModels/ForwardForwardMappingsCxxVectorTests.cs."""

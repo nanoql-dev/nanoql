@@ -12,7 +12,7 @@ namespace NanoQL.Tests.Vectors;
 /// and to caplets, with Kahale's, SABR's or no smile pretreatment and the adjustments, the members of
 /// <see cref="MarkovFunctional"/> the wheel doesn't bind, its numeraire date and time, its arbitrage indices and its
 /// model outputs; and on the first with its arbitrage indices forced, its numeraire date and time, arbitrage indices,
-/// numeraire and zero bonds; each where stable (the S7 plan's S7R6).
+/// numeraire and zero bonds; each where stable under one-ulp moves of the inputs.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class MarkovFunctionalCxxVectorTests

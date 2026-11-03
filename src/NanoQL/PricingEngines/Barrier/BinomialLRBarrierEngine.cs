@@ -13,7 +13,7 @@ namespace NanoQL.PricingEngines;
 /// <summary>
 /// The binomial barrier engine on the Leisen-Reimer tree and Derman and Kani's discretized barrier option:
 /// QuantLib-Python's <c>BinomialLRBarrierEngine</c>, QuantLib's <c>BinomialBarrierEngine&lt;LeisenReimer,
-/// DiscretizedDermanKaniBarrierOption&gt;</c>, the wheel's closing (D12).
+/// DiscretizedDermanKaniBarrierOption&gt;</c>, the wheel's closing.
 /// </summary>
 public static class BinomialLRBarrierEngine
 {

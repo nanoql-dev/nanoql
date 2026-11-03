@@ -10,7 +10,7 @@ iterations), one and ten factors, displaced 1%, the caplets at 70% (failures), a
 calibration's results (calibrations.cpp). The pass function alone (capletMaxHomogeneityCalibration) on QuantLib's case
 and three varied ones: its failures, swaption error and pseudo-roots. Throws: a priority outside [0, 1].
 
-The deformation size is left out: QuantLib's sum adds the step index's change once per volatility, the run's own find
+The deformation size is left out: QuantLib's sum adds the step index's change once per volatility
 (tests/NanoQL.Tests/Divergences/CTSMMCapletMaxHomogeneityDeformationTests.cs).
 
 The harness unit is tools/cxx/src/models/marketmodels/models/calibrations.cpp. Read back by

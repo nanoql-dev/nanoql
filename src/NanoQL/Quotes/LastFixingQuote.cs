@@ -14,16 +14,16 @@ namespace NanoQL.Quotes;
 /// <remarks>
 /// <para>
 /// Immutable: its reference date and value are computed once, at construction, from the context's fixings and
-/// evaluation date (§2.2's quote row; the S-core plan's CR1 (b)). QuantLib's <c>isValid</c> isn't ported: an index with
-/// no stored fixing is refused at construction, with QuantLib's text.
+/// evaluation date (§2.2's quote row). QuantLib's <c>isValid</c> isn't ported: an index with no stored fixing is
+/// refused at construction, with QuantLib's text.
 /// </para>
 /// <para>
-/// The reference date is the last stored fixing's date on or before the evaluation date, where QuantLib's is the earlier
-/// of the last stored date and the evaluation date (<c>lastfixingquote.cpp:40-43</c>): on a store holding fixings
-/// after the evaluation date, as a backtest on one full history does, QuantLib's is the evaluation date itself, whose
-/// fixing is refused on a non-fixing day or forecast where it is missing. Where the store holds no fixing on or before
-/// the evaluation date, the reference date is QuantLib's, the evaluation date. A documented divergence (the plan's CR7
-/// (xxxv)); on a store that ends on or before the evaluation date the two agree.
+/// The reference date is the last stored fixing's date on or before the evaluation date, where QuantLib's is the
+/// earlier of the last stored date and the evaluation date (<c>lastfixingquote.cpp:40-43</c>): on a store holding
+/// fixings after the evaluation date, as a backtest on one full history does, QuantLib's is the evaluation date itself,
+/// whose fixing is refused on a non-fixing day or forecast where it is missing. Where the store holds no fixing on or
+/// before the evaluation date, the reference date is QuantLib's, the evaluation date. A documented divergence; on a
+/// store that ends on or before the evaluation date the two agree.
 /// </para>
 /// </remarks>
 public sealed class LastFixingQuote

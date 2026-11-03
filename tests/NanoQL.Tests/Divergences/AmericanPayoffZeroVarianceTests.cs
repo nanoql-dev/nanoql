@@ -11,14 +11,14 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The American digital payoffs below a variance of ε (the S-van plan's VR4 (ii), under R8). QuantLib divides by the
-/// variance there: the at-hit value is NaN out of the money (<c>americanpayoffathit.cpp:87-102</c>), and the at-expiry
-/// one takes the spot's side of the strike where the limit takes the forward's (<c>americanpayoffatexpiry.cpp:112-121</c>).
-/// On a cash of 10, S 100, q 0, r 5% and one year, QuantLib gives at σ = 0: at the hit at 102, NaN; at expiry at 102, 0;
-/// the knock-out at expiry at 102 (or 103), 9.512294245007139; and its own formula at σ = 1e-6 gives 9.80392156862745,
-/// 9.512294245007139 and 0 [executed on the wheel: <c>oracle_c1.py</c>]. nanoql's underlying follows its forward:
-/// paid at the hit when the forward path reaches the strike, at expiry if it did (knock-in) or didn't (knock-out).
-/// QuantLib's check: its own formula at σ = 1e-6, which nanoql's engine there computes.
+/// The American digital payoffs below a variance of ε. QuantLib divides by the variance there: the at-hit value is NaN
+/// out of the money (<c>americanpayoffathit.cpp:87-102</c>), and the at-expiry one takes the spot's side of the strike
+/// where the limit takes the forward's (<c>americanpayoffatexpiry.cpp:112-121</c>). On a cash of 10, S 100, q 0, r 5%
+/// and one year, QuantLib gives at σ = 0: at the hit at 102, NaN; at expiry at 102, 0; the knock-out at expiry at 102
+/// (or 103), 9.512294245007139; and its own formula at σ = 1e-6 gives 9.80392156862745, 9.512294245007139 and 0
+/// (QuantLib-Python 1.44). nanoql's underlying follows its forward: paid at the hit when the forward path reaches the
+/// strike, at expiry if it did (knock-in) or didn't (knock-out). QuantLib's check: its own formula at σ = 1e-6, which
+/// nanoql's engine there computes.
 /// </summary>
 public class AmericanPayoffZeroVarianceTests
 {

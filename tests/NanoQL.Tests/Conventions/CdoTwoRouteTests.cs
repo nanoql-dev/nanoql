@@ -8,9 +8,9 @@ using static NanoQL.Tests.Conventions.CreditPortfolioBuilders;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// C2's two routes to one value (the S-xcr plan's §2.6): the mid-point engine against the integral one; the
-/// homogeneous pool model against the inhomogeneous one on an equal pool; the latent model's quadrature against the
-/// random default model; and the LHP model's implied correlation recovering the correlation that priced the CDO.
+/// Two routes to one value for the CDOs: the mid-point engine against the integral one; the homogeneous pool model
+/// against the inhomogeneous one on an equal pool; the latent model's quadrature against the random default model; and
+/// the LHP model's implied correlation recovering the correlation that priced the CDO.
 /// </summary>
 public class CdoTwoRouteTests
 {

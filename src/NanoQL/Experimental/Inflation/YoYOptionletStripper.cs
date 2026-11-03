@@ -16,10 +16,9 @@ namespace NanoQL.Experimental;
 /// </summary>
 /// <remarks>
 /// <para>
-/// An extension point (U13): <see cref="InterpolatedYoYOptionletStripper{TInterpolator}"/> derives from it. QuantLib's
-/// <c>initialize</c> strips and stores the curves in the stripper, which then answers for its strikes and slices;
-/// here <see cref="Strip"/> returns them, an immutable <see cref="StrippedYoYOptionlets"/>, and the stripper holds
-/// nothing (the S-xrt plan's XRD8).
+/// An extension point: <see cref="InterpolatedYoYOptionletStripper{TInterpolator}"/> derives from it. QuantLib's
+/// <c>initialize</c> strips and stores the curves in the stripper, which then answers for its strikes and slices; here
+/// <see cref="Strip"/> returns them, an immutable <see cref="StrippedYoYOptionlets"/>, and the stripper holds nothing.
 /// </para>
 /// <para>
 /// The engine is a function of the instrument, the context and the trial volatility, the caller binding the index and

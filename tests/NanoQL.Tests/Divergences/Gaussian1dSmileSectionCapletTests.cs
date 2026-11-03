@@ -14,17 +14,16 @@ using static NanoQL.PricingEngines.BlackFormulaFunctions;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The Gaussian1d smile section on an Ibor index. Its caplet (the S-g1d plan's G1R6 (xxii)): QuantLib's starts on the
-/// fixing date (<c>gaussian1dsmilesection.cpp:61-62</c>, <c>:88-91</c>), so it fixes two business days before the
-/// date of the forward it is quoted against; nanoql's starts on the fixing's value date, so it fixes on the section's
-/// date. On a GSR model (a = 0.01, σ = 0.01) on a flat 2.7% and Euribor 6M fixing in a year, QuantLib's formula with
-/// its caplet (struck at the forward, which it would read) gives an at-the-money volatility of 0.3707922589726553, its
-/// caplet fixing on 13 January 2026; the caplet fixing on the section's date, 15 January, 0.37188265489834393, both on
-/// the wheel. And its constructor: QuantLib 1.44 refuses every Ibor section, with or without a forwarding curve,
-/// "cannot calculate ATM without a BlackCapFloorEngine or BachelierCapFloorEngine" [the harness], its
-/// <c>MakeCapFloor</c> without a strike asking for an engine that gives its curve; the annuity reads only the caplet's
-/// dates, so nanoql's builds it: its level on the index's curve or, without one, the model's, its prices on an index
-/// with a curve.
+/// The Gaussian1d smile section on an Ibor index. Its caplet: QuantLib's starts on the fixing date
+/// (<c>gaussian1dsmilesection.cpp:61-62</c>, <c>:88-91</c>), so it fixes two business days before the date of the
+/// forward it is quoted against; nanoql's starts on the fixing's value date, so it fixes on the section's date. On a
+/// GSR model (a = 0.01, σ = 0.01) on a flat 2.7% and Euribor 6M fixing in a year, QuantLib's formula with its caplet
+/// (struck at the forward, which it would read) gives an at-the-money volatility of 0.3707922589726553, its caplet
+/// fixing on 13 January 2026; the caplet fixing on the section's date, 15 January, 0.37188265489834393, both on the
+/// wheel. And its constructor: QuantLib 1.44 refuses every Ibor section, with or without a forwarding curve, "cannot
+/// calculate ATM without a BlackCapFloorEngine or BachelierCapFloorEngine" [the harness], its <c>MakeCapFloor</c>
+/// without a strike asking for an engine that gives its curve; the annuity reads only the caplet's dates, so nanoql's
+/// builds it: its level on the index's curve or, without one, the model's, its prices on an index with a curve.
 /// </summary>
 public class Gaussian1dSmileSectionCapletTests
 {

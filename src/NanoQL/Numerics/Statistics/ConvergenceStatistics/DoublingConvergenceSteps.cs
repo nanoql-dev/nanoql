@@ -10,7 +10,7 @@ namespace NanoQL.Numerics;
 /// <summary>
 /// The default sampling rule of <see cref="ConvergenceStatistics{TStats, TRule}"/>: the mean is stored at 1 sample,
 /// then at 2n + 1 after n, so at 1, 3, 7, 15, … (2ᵏ − 1) samples. QuantLib's comment says 2ⁿ⁻¹; its code, which its
-/// test asserts and this follows, gives 2ⁿ − 1. Its zero value is QuantLib's default construction (D12).
+/// test asserts and this follows, gives 2ⁿ − 1. Its zero value is QuantLib's default construction.
 /// </summary>
 public readonly struct DoublingConvergenceSteps : IConvergenceSteps
 {

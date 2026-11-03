@@ -9,25 +9,25 @@ using ExcelDna.Integration;
 
 namespace NanoQL.Excel;
 
-/// <summary>The store: each object keyed by its call (XLR3), built once per key, shown as its handle.</summary>
+/// <summary>The store: each object keyed by its call, built once per key, shown as its handle.</summary>
 public static partial class X
 {
     // By the key's whole hash; by the handle's text; a value call's elements under their parent's entry.
     private static readonly ConcurrentDictionary<string, Lazy<XlEntry>> ByKey = new(StringComparer.Ordinal);
     private static readonly ConcurrentDictionary<string, XlEntry> ByHandle = new(StringComparer.Ordinal);
 
-    // The call presenting its result, so an object inside it is keyed by the call and its place (XLD12).
+    // The call presenting its result, so an object inside it is keyed by the call and its place.
     [ThreadStatic]
     private static XlParent? parent;
 
-    // A tuple's or a map's slot, inside the call presenting it (F5-2).
+    // A tuple's or a map's slot, inside the call presenting it.
     [ThreadStatic]
     private static string? slotPath;
 
     /// <summary>Gets the effective convention provider's identity, part of every key: QuantLib's, a file's hash, or a failed load's.</summary>
     internal static string ProviderId { get; set; } = "QuantLib";
 
-    /// <summary>Gets or sets the key's hash: SHA-256, which a test replaces to force a collision of the shown digits (XLD23).</summary>
+    /// <summary>Gets or sets the key's hash: SHA-256, which a test replaces to force a collision of the shown digits.</summary>
     internal static Func<byte[], byte[]> Hash { get; set; } = SHA256.HashData;
 
     /// <summary>Gets the live handles: the objects the store holds, an array's elements included.</summary>
@@ -77,7 +77,7 @@ public static partial class X
         Dictionary<string, byte[]>? files = null;
         if (reads)
         {
-            // A reader's key holds the files' content beside the paths' text, so an edited file is a new object (XLR3).
+            // A reader's key holds the files' content beside the paths' text, so an edited file is a new object.
             using var ms = new MemoryStream();
             ms.Write(recipe);
             files = KeyFiles(args, ms);
@@ -110,7 +110,7 @@ public static partial class X
 
     /// <summary>
     /// A value call's result in Excel's form; one holding objects is kept as an entry of its own, so its elements live
-    /// while a cell shows it and go with it (XLD12).
+    /// while a cell shows it and go with it.
     /// </summary>
     /// <param name="fn">The worksheet function.</param>
     /// <param name="args">Its Excel arguments.</param>
@@ -142,7 +142,7 @@ public static partial class X
         return Host.Present(en);
     }
 
-    // The entry's handle: its type and the key's 16 hex digits, or 32 where another live entry's 16 meet them (XLD23).
+    // The entry's handle: its type and the key's 16 hex digits, or 32 where another live entry's 16 meet them.
     private static XlEntry Register(XlEntry en)
     {
         lock (ByHandle)
@@ -160,7 +160,7 @@ public static partial class X
         }
     }
 
-    /// <summary>Releases an entry its last holder let go, with the elements it holds (XLD12).</summary>
+    /// <summary>Releases an entry its last holder let go, with the elements it holds.</summary>
     /// <param name="en">The entry.</param>
     internal static void Release(XlEntry en)
     {
@@ -181,7 +181,7 @@ public static partial class X
     }
 
     // An object inside a returned collection: keyed by its parent call and its place, a row and a slot inside a tuple
-    // or a map, never by its identity (XLD12, F5-2); it lives with its parent's entry.
+    // or a map, never by its identity; it lives with its parent's entry.
     private static string Handle(object r, int position = -1)
     {
         XlParent p = parent ?? throw new InvalidOperationException("an object inside a result with no call presenting it has no key");
@@ -203,7 +203,7 @@ public static partial class X
         return en.Handle!;
     }
 
-    // A call's canonical bytes: its function, the provider, the date system and each argument (XLR3).
+    // A call's canonical bytes: its function, the provider, the date system and each argument.
     private static byte[] Recipe(string fn, object[] args)
     {
         using var ms = new MemoryStream();
@@ -257,7 +257,7 @@ public static partial class X
 
     private static string Hex(byte[] hash) => Convert.ToHexString(hash);
 
-    /// <summary>The workbook's date system's shift: 1,462 days in a 1904-system workbook, 0 in a 1900 one (XLD8).</summary>
+    /// <summary>The workbook's date system's shift: 1,462 days in a 1904-system workbook, 0 in a 1900 one.</summary>
     /// <returns>The shift.</returns>
     internal static int DateShift() => Host.DateShift();
 }

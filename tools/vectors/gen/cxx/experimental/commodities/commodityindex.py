@@ -5,9 +5,9 @@ expose, each output computed by the C++ harness (tools/cxx/src/experimental/comm
 index's fixings, last quote date and forward prices, on a curve in the index's own unit, with fixings stored and none,
 and through nearby contracts.
 
-The forward price converts the curve's price between units, which the S-xrt plan's XRR5 (i) fixes, so every curve is in
-its index's unit (a factor of 1, QuantLib's bits); an index with no fixings has no last quote date here, where QuantLib
-throws (XRR5 (vi)), so its case writes none. Nothing is fitted.
+The forward price converts the curve's price between units, which nanoql fixes, so every curve is in its index's unit (a
+factor of 1, QuantLib's bits); an index with no fixings has no last quote date here, where QuantLib throws, so its case
+writes none. Nothing is fitted.
 
 This module also holds the specs the commodities' generators share (tools/cxx/src/experimental/commodities/
 commodityspec.hpp's), which tests/NanoQL.Tests/Vectors/CommodityInputs.cs reads. Read back by

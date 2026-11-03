@@ -21,8 +21,8 @@ namespace NanoQL.Tests.TestSuite;
 [Trait("Oracle", "QuantLib")]
 public class McLongstaffSchwartzEngineTests
 {
-    // The calibration seed QuantLib's cases run on: its default, the narrowed Null<Size>() (the S-van plan's VR4 (v)),
-    // which nanoql's default replaces by the seed plus 1768237423; the cases keep their seeds (VD19).
+    // The calibration seed QuantLib's cases run on: its default, the narrowed Null<Size>(), which nanoql's default
+    // replaces by the seed plus 1768237423; the cases keep their seeds.
     private const long QuantLibsCalibrationSeed = 4294967295;
 
     [Fact]

@@ -12,7 +12,7 @@ using NanoQL.Time;
 namespace NanoQL.Excel;
 
 /// <summary>
-/// The conversions out (XLR2): a value as Excel shows it, a non-finite number #NUM! and none #N/A; arrays spilled down a
+/// The conversions out: a value as Excel shows it, a non-finite number #NUM! and none #N/A; arrays spilled down a
 /// column, a matrix by rows, a tuple across a row, a map as two columns, a jagged array padded with #N/A, a distribution
 /// under a header row; an object as its handle, one inside a collection keyed by the call and its place.
 /// </summary>
@@ -158,7 +158,7 @@ public static partial class X
         return false;
     }
 
-    // A loss distribution: six columns under a header row, normalized, as the bindings give it (BIR3).
+    // A loss distribution: six columns under a header row, normalized, as the bindings give it.
     private static object[,] DistributionTable(Distribution dist)
     {
         dist.Normalize();
@@ -219,7 +219,7 @@ public static partial class X
         return t;
     }
 
-    // A collection of tuples: a row per element and a column per item; a null element a row of #N/A (XLR17).
+    // A collection of tuples: a row per element and a column per item; a null element a row of #N/A.
     private static object TupleTable(System.Collections.IEnumerable tuples, int width)
     {
         var items = tuples.Cast<object>().ToList();
@@ -247,7 +247,7 @@ public static partial class X
         return t;
     }
 
-    // A map: two columns, keys and values, in the map's own order; an object value keyed by its key (F5-2).
+    // A map: two columns, keys and values, in the map's own order; an object value keyed by its key.
     private static object MapTable(System.Collections.IEnumerable map)
     {
         var pairs = map.Cast<object>().ToList();

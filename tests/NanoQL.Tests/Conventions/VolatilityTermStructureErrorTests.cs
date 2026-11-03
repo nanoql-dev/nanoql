@@ -11,8 +11,8 @@ namespace NanoQL.Tests.Conventions;
 /// The exception types of the volatility bases' refusals, which the vectors record only as throws: the strike check
 /// (<c>voltermstructure.cpp:40-46</c>), the range checks (<c>termstructure.cpp:54-72</c>) and the swaption structure's
 /// swap-tenor checks (<c>swaptionvolstructure.cpp:70-88</c>) refuse a value against the structure's domain with
-/// <see cref="NanoQLException"/>, as the pilot's <c>CheckRange</c> does, and so does the shift of a normal swaption
-/// structure, with QuantLib's texts in C#'s number formatting; the swap length refuses its own arguments with
+/// <see cref="NanoQLException"/>, as <c>CheckRange</c> does, and so does the shift of a normal swaption structure, with
+/// QuantLib's texts in C#'s number formatting; the swap length refuses its own arguments with
 /// <see cref="ArgumentException"/>; an unknown volatility type or convention throws
 /// <see cref="ArgumentOutOfRangeException"/> on its parameter, with the text of QuantLib's stream operator for the
 /// type; and a null argument <see cref="ArgumentNullException"/> on the caller's parameter.

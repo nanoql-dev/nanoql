@@ -24,36 +24,34 @@ namespace NanoQL.PricingEngines;
 /// <para>
 /// The engine reports the value, delta, gamma and theta, the theta <see langword="null"/> when the problem's first
 /// stopping time is time 0; the delta and gamma are central differences at a shift of 1% of the spot. Of the Hull-White
-/// process it reads the reversion and the volatility only, its short rate's curve the Heston process's risk-free curve
-/// (the S-hes plan's HD22). Its finite-difference working types are built inside each calculation and dropped after it
-/// (the S-eq plan's SEQR1).
+/// process it reads the reversion and the volatility only, its short rate's curve the Heston process's risk-free curve.
+/// Its finite-difference working types are built inside each calculation and dropped after it.
 /// </para>
 /// <para>
 /// Its times run on <see cref="FdmHestonOp.Clock"/>, from the earliest reference date of the Heston process's
-/// structures, each accruing nothing before its own date, where QuantLib's run from the risk-free curve's; where none is
-/// dated before the risk-free curve, they are QuantLib's (the S-hes plan's HR7 (xix),
-/// <c>Divergences/HestonHullWhiteMismatchedTimesTests.cs</c>).
+/// structures, each accruing nothing before its own date, where QuantLib's run from the risk-free curve's; where none
+/// is dated before the risk-free curve, they are QuantLib's
+/// (<c>Divergences/HestonHullWhiteMismatchedTimesTests.cs</c>).
 /// </para>
 /// <para>
 /// QuantLib sizes the equity mesher on a helper process whose curves its call binds in each other's places, as the
-/// finite-difference Heston engine's does (<see cref="FdHestonVanillaEngine"/>), so where the carry is large against the
-/// volatility its grid falls short of the distribution: a five-year call at 1.25 times the forward, volatility 0.1,
+/// finite-difference Heston engine's does (<see cref="FdHestonVanillaEngine"/>), so where the carry is large against
+/// the volatility its grid falls short of the distribution: a five-year call at 1.25 times the forward, volatility 0.1,
 /// priced −6.32 at carry −0.30 where the analytic Heston-Hull-White engine gives 0.392 and 0 at carry 0.30 for 1.760,
 /// and a year's put at 0.7 of the forward, carry −0.2, priced 0 for 0.0068. Here the mesher is QuantLib's wherever its
 /// range holds the true forwards' band and the strike's, at half this engine's scale factor of 1.5, and widened to the
-/// bands where it doesn't, and the multi-strike solve solves each strike alone where its grid doesn't hold the forwards'
-/// band at the points it is read at (D3-1 of the S-hes run record;
-/// <c>Divergences/FdHestonHullWhiteHighCarryTests.cs</c>).
+/// bands where it doesn't, and the multi-strike solve solves each strike alone where its grid doesn't hold the
+/// forwards' band at the points it is read at (<c>Divergences/FdHestonHullWhiteHighCarryTests.cs</c>).
 /// </para>
 /// <para>
 /// QuantLib's <c>enableMultipleStrikesCaching</c> serves later options at its strikes from one solve, each V(S·d)/d
-/// with d = K/Kᵢ, the strike a later call is served depending on which option solved first, which a cache under the rule
-/// on caches may not do (the master plan's Revision 79). Here <see cref="CalculateStrikes(VanillaOption,
-/// IEnumerable{double}, EvaluationContext, HestonModel, HullWhiteProcess, double, int, int, int, int, int, bool,
-/// FdmSchemeDesc?)"/> returns every strike's results from one solve on the given option, each QuantLib's cached value
-/// bit for bit (the S-hes plan's HR4 (ii)); after a reference whose payoff isn't a plain vanilla, whose scaled values
-/// aren't the strikes' prices, each strike's plain vanilla is solved alone, QuantLib's engine priced for that strike
-/// (HR7 (xxiv); <c>Divergences/FdHestonHullWhiteStrikesReferenceTests.cs</c>).
+/// with d = K/Kᵢ, the strike a later call is served depending on which option solved first, which a cache may not do
+/// here: a value doesn't depend on what was computed before it. Here
+/// <see cref="CalculateStrikes(VanillaOption, IEnumerable{double}, EvaluationContext, HestonModel, HullWhiteProcess, double, int, int, int, int, int, bool, FdmSchemeDesc?)"/>
+/// returns every strike's results from one solve on the given option, each QuantLib's cached value bit for bit; after a
+/// reference whose payoff isn't a plain vanilla, whose scaled values aren't the strikes' prices, each strike's plain
+/// vanilla is solved alone, QuantLib's engine priced for that strike
+/// (<c>Divergences/FdHestonHullWhiteStrikesReferenceTests.cs</c>).
 /// </para>
 /// </remarks>
 public static class FdHestonHullWhiteVanillaEngine
@@ -271,8 +269,9 @@ public static class FdHestonHullWhiteVanillaEngine
         if (option.Payoff is not PlainVanillaPayoff
             || !FdHestonVanillaEngine.MultiStrikeGridHolds(option, model, k, null, tGrid, vGrid, 1.0, FdmHestonOp.Clock(process)))
         {
-            // HR7 (xxiv)'s twin, and a multi-strike grid short of the true forwards' band (D3-1 of the S-hes run
-            // record): each strike's plain vanilla solved alone, QuantLib's engine priced for that strike
+            // As the finite-difference Heston engine, after a reference that isn't a plain vanilla, and on a
+            // multi-strike grid short of the true forwards' band: each strike's plain vanilla solved alone, QuantLib's
+            // engine priced for that strike
             foreach (double strike in k)
             {
                 var single = new VanillaOption(new PlainVanillaPayoff(payoff.OptionType, strike), option.Exercise);

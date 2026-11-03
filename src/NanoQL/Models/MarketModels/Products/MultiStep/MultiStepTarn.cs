@@ -14,12 +14,12 @@ namespace NanoQL.Models;
 /// pays what is left of the total and ends.
 /// </summary>
 /// <remarks>
-/// <para>A working type (the S-mmp plan's MMPR1 (i)).</para>
+/// <para>A working type.</para>
 /// <para>
-/// The floating coupons' payment times are the floating schedule's (MMPR4 (x), a documented divergence): QuantLib
-/// appends the fixed payment times again (<c>multisteptarn.cpp:50</c>, <c>paymentTimes[i]</c>), so the floating
-/// coupons are discounted at the fixed leg's times (<c>Divergences/MultiStepTarnPaymentTimesTests.cs</c>). Where the
-/// two schedules coincide, QuantLib's value.
+/// The floating coupons' payment times are the floating schedule's (a documented divergence): QuantLib appends the
+/// fixed payment times again (<c>multisteptarn.cpp:50</c>, <c>paymentTimes[i]</c>), so the floating coupons are
+/// discounted at the fixed leg's times (<c>Divergences/MultiStepTarnPaymentTimesTests.cs</c>). Where the two schedules
+/// coincide, QuantLib's value.
 /// </para>
 /// </remarks>
 [WorkingType]

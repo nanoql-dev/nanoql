@@ -10,14 +10,13 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// A compounded overnight-index future on its value date (the S-cms plan's CMR5 (xxi)): QuantLib's
-/// <c>compoundedRate</c> compounds the past fixings strictly before the evaluation date and forecasts from it, so on
-/// the value date today's published fixing is ignored, where the averaged future reads it
-/// (<c>overnightindexfuture.cpp</c>). On the wheel, a SOFR future from 23 October 2026 to 25 January 2027 on a flat 5%
-/// Actual/360 curve prices 94.96721860668744 compounded with or without a 7% fixing for today, where averaged it prices
-/// 94.99926113524772 without and 94.93546459731232 with it. nanoql's compounded future uses today's fixing once
-/// published. QuantLib's check: the same future the next business day (26 October), the value date's fixing then
-/// past, 94.90261063438486 compounded and 94.93546459731232 averaged.
+/// A compounded overnight-index future on its value date: QuantLib's <c>compoundedRate</c> compounds the past fixings
+/// strictly before the evaluation date and forecasts from it, so on the value date today's published fixing is ignored,
+/// where the averaged future reads it (<c>overnightindexfuture.cpp</c>). On the wheel, a SOFR future from 23 October
+/// 2026 to 25 January 2027 on a flat 5% Actual/360 curve prices 94.96721860668744 compounded with or without a 7%
+/// fixing for today, where averaged it prices 94.99926113524772 without and 94.93546459731232 with it. nanoql's
+/// compounded future uses today's fixing once published. QuantLib's check: the same future the next business day (26
+/// October), the value date's fixing then past, 94.90261063438486 compounded and 94.93546459731232 averaged.
 /// </summary>
 public class OvernightFutureTodayFixingTests
 {

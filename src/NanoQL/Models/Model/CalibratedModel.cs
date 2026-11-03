@@ -30,7 +30,7 @@ namespace NanoQL.Models;
 /// A model whose parameters are constrained together, beyond each argument's own constraint, gives that constraint
 /// through <see cref="ParametersConstraint"/>, which <see cref="Constraint"/> composes with the arguments', as
 /// QuantLib's <c>CompositeConstraint</c> composes two: the Cox-Ingersoll-Ross models' Feller condition, tested at each
-/// parameter vector's own values (the S-sr plan's SSR7), where QuantLib's tests σ against the constructor's.
+/// parameter vector's own values, where QuantLib's tests σ against the constructor's.
 /// </para>
 /// </remarks>
 public abstract class CalibratedModel : ICalibratedModel

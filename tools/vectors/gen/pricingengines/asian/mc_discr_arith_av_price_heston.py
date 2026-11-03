@@ -4,13 +4,12 @@
 (ql/pricingengines/asian/mc_discr_arith_av_price_heston.hpp, .cpp), on the evaluation date 15 October 2026: discrete
 arithmetic average-price Asian options by Monte Carlo on a Heston process.
 
-Arithmetic calls and puts at 90% and 110% of the spot, over six months and a year, with 4 and 12 fixings, unseasoned
-and with two past fixings, on the three parameter sets of tools/vectors/gen/processes/hestonprocess.py on flat curves
-(the quadratic-exponential martingale scheme), 511 pseudo-random samples at seeds 42 and 1234, on the fixing times
-alone, 24 steps and 20 steps a year: the NPV and the error estimate. Then the refusals of a payoff that isn't plain
-vanilla, an exercise that isn't European and every fixing in the past, and an expired option. The outputs nanoql fixes
-are left out (the S-bar plan's §2.10): the control variate, whose analytic value is the corrected Heston geometric
-engine's ((xxxiv), (xlix), (l)), and fixing dates given twice (BR5 (xxviii)).
+Arithmetic calls and puts at 90% and 110% of the spot, over six months and a year, with 4 and 12 fixings, unseasoned and
+with two past fixings, on the three parameter sets of tools/vectors/gen/processes/hestonprocess.py on flat curves (the
+quadratic-exponential martingale scheme), 511 pseudo-random samples at seeds 42 and 1234, on the fixing times alone, 24
+steps and 20 steps a year: the NPV and the error estimate. Then the refusals of a payoff that isn't plain vanilla, an
+exercise that isn't European and every fixing in the past, and an expired option. The outputs nanoql fixes are left out:
+the control variate, whose analytic value is the corrected Heston geometric engine's, and fixing dates given twice.
 
 The engine's settings go in as "engine". The wheel's calls, by QuantLib-SWIG 1.44's options.i:
 MCPRDiscreteArithmeticAPHestonEngine(process, antitheticVariate, requiredSamples, requiredTolerance, maxSamples, seed,

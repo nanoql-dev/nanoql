@@ -7,10 +7,9 @@ risk-free forward, no dividends and a constant volatility of 10% and 25% on Actu
 three Vasicek models of reversions 0.1 to 1 and correlations of -0.5, 0 and 0.5, on the evaluation date 15 October
 2026. Then the refusal of an American exercise.
 
-The outputs nanoql fixes are left out (the S-van plan's VR4 (xii)): a volatility that isn't flat, which QuantLib reads
-at time 0, and dividends, which it drops (tests/NanoQL.Tests/Divergences/BlackVasicekVolatilityTests.cs); so are the
-Vasicek bonds below a reversion of 0.1, where nanoql's bond is QuantLib's master's (the S-sr plan's SSR3,
-VasicekCancellationTests.cs). Read back by
+The outputs nanoql fixes are left out: a volatility that isn't flat, which QuantLib reads at time 0, and dividends,
+which it drops (tests/NanoQL.Tests/Divergences/BlackVasicekVolatilityTests.cs); so are the Vasicek bonds below a
+reversion of 0.1, where nanoql's bond is QuantLib's master's (VasicekCancellationTests.cs). Read back by
 tests/NanoQL.Tests/Vectors/Cxx/PricingEngines/AnalyticBlackVasicekEngineCxxVectorTests.cs."""
 import os
 import sys

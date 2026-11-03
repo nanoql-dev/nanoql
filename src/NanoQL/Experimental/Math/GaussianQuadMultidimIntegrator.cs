@@ -15,16 +15,15 @@ namespace NanoQL.Experimental;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Immutable; QuantLib's integration-variable buffer is a per-call buffer (PR6.9). The dimension runs from 1 to 15;
+/// Immutable; QuantLib's integration-variable buffer is a per-call buffer. The dimension runs from 1 to 15;
 /// QuantLib's entry points read <c>integrationEntries_[dimension - 1]</c>, so a dimension of 0 or above 15 reads
-/// outside its 15 entries (<c>multidimquadrature.hpp:193</c>), which nanoql refuses (the S-xcr plan's XR8 (xxx)).
+/// outside its 15 entries (<c>multidimquadrature.hpp:193</c>), which nanoql refuses.
 /// </para>
 /// <para>
 /// The vector integration weights every node: QuantLib's applies its first node's weight inside a
 /// <c>std::for_each</c> that discards the result (<c>multidimquadrature.hpp:61-64</c>), so node n − 1 enters
 /// unweighted, E[M²] reading 1.0000000116 where the scalar rule reads 0.99999999995. nanoql's equals the scalar rule
-/// per component, bit for bit. A documented divergence (the S-xcr plan's XR8 (v);
-/// <c>Divergences/VectorQuadratureWeightTests.cs</c>).
+/// per component, bit for bit. A documented divergence (<c>Divergences/VectorQuadratureWeightTests.cs</c>).
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]

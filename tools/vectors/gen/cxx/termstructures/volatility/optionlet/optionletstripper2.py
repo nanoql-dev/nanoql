@@ -16,10 +16,11 @@ stripper of one optionlet and a smile steep enough to give a negative base volat
 every date's strikes and volatilities with the at-the-money ones inserted, the fixing dates and times and the
 at-the-money rates.
 
-The S7R6 filter runs on the spreads and the inserted volatilities, which a Brent solve gives: the strip is redone with
-the curve's volatilities moved one ulp up and down, together and, on a curve of at most 32 volatilities, each alone, and
-an output is written only where every move leaves it within 1e-12 x max(|a|, |b|, 1); a dropped spread is null, its
-index in the case's "droppedSpreads". Read back by tests/NanoQL.Tests/Vectors/Cxx/TermStructures/OptionletStripper2CxxVectorTests.cs."""
+The stability filter runs on the spreads and the inserted volatilities, which a Brent solve gives: the strip is redone
+with the curve's volatilities moved one ulp up and down, together and, on a curve of at most 32 volatilities, each
+alone, and an output is written only where every move leaves it within 1e-12 x max(|a|, |b|, 1); a dropped spread is
+null, its index in the case's "droppedSpreads". Read back by
+tests/NanoQL.Tests/Vectors/Cxx/TermStructures/OptionletStripper2CxxVectorTests.cs."""
 import importlib.util
 import math
 import os

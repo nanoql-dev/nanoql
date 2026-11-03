@@ -24,13 +24,13 @@ namespace NanoQL.Numerics;
 /// gives QuantLib's results bit for bit.
 /// </para>
 /// <para>
-/// A working type (S2R2): <see cref="Add"/> and <see cref="Reset"/> change it; it isn't thread-safe.
-/// <see cref="Skewness"/> and <see cref="Kurtosis"/> refuse a set whose samples weigh 0 in all, with the text
-/// <see cref="Mean"/> refuses it with, where QuantLib's divide 0 by 0 and return NaN: a documented divergence. The
-/// weighted variance's recurrence resets the variance to 0 at a sample whose predecessors' weights vanish in the sum
-/// (they weigh 0, or less than its rounding), where Boost's divides 0 by 0, or x by 0, and leaves
-/// <see cref="Variance"/> NaN or infinite for good: a documented divergence, the variance then that of the samples
-/// that carry the weight, as <see cref="GeneralStatistics"/>' is.
+/// A working type: <see cref="Add"/> and <see cref="Reset"/> change it; it isn't thread-safe. <see cref="Skewness"/>
+/// and <see cref="Kurtosis"/> refuse a set whose samples weigh 0 in all, with the text <see cref="Mean"/> refuses it
+/// with, where QuantLib's divide 0 by 0 and return NaN: a documented divergence. The weighted variance's recurrence
+/// resets the variance to 0 at a sample whose predecessors' weights vanish in the sum (they weigh 0, or less than its
+/// rounding), where Boost's divides 0 by 0, or x by 0, and leaves <see cref="Variance"/> NaN or infinite for good: a
+/// documented divergence, the variance then that of the samples that carry the weight, as
+/// <see cref="GeneralStatistics"/>' is.
 /// </para>
 /// </remarks>
 [WorkingType]

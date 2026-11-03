@@ -11,19 +11,19 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The numeraire's read of a given curve (the S-g1d plan's G1R6 (i)): GSR's numeraire at t = 0 reads a curve it is
-/// given at the numeraire time without extrapolation (<c>gsr.cpp:216-220</c>), where it reads its own with it, so on a
-/// 30-year curve QuantLib's <c>numeraire(0, 0, yts)</c> throws "time (60) is past max curve time (30.0192)", and so
-/// does every Gaussian1d engine given that discount curve. nanoql reads it with extrapolation. QuantLib's check: its
-/// own route, the model built on that curve, whose numeraire at 0 is 0.1319979111949979, and at (1.5, 0.3)
-/// 0.1358278427215987, the value QuantLib's given-curve read gives there too. The Markov-functional model's numeraire
-/// reads a given curve so too, at t = 0 and in the ratio past it (<c>markovfunctional.cpp:775-785</c>): on a 10-year
-/// curve its numeraire time of 15 years throws "time (15.0192) is past max curve time (10.0055)"; QuantLib's check, the
-/// same curve with its extrapolation enabled. In the ratio past t = 0 the model's own curve is read too, without
-/// extrapolation, where the calibration reads it with (<c>:783-785</c>, <c>:797-799</c>, against <c>:467-469</c>): a
-/// model on a 10-year curve calibrated to 1y to 5y into 10y swaptions, its numeraire time 15.02, refuses every read with
-/// a given curve, "time (15.01917808219178) is past max curve time (10.005479452054795)"; nanoql reads its own curve
-/// with extrapolation there. QuantLib's check: its own curve given, where the ratio is 1, the prices without one.
+/// The numeraire's read of a given curve: GSR's numeraire at t = 0 reads a curve it is given at the numeraire time
+/// without extrapolation (<c>gsr.cpp:216-220</c>), where it reads its own with it, so on a 30-year curve QuantLib's
+/// <c>numeraire(0, 0, yts)</c> throws "time (60) is past max curve time (30.0192)", and so does every Gaussian1d engine
+/// given that discount curve. nanoql reads it with extrapolation. QuantLib's check: its own route, the model built on
+/// that curve, whose numeraire at 0 is 0.1319979111949979, and at (1.5, 0.3) 0.1358278427215987, the value QuantLib's
+/// given-curve read gives there too. The Markov-functional model's numeraire reads a given curve so too, at t = 0 and
+/// in the ratio past it (<c>markovfunctional.cpp:775-785</c>): on a 10-year curve its numeraire time of 15 years throws
+/// "time (15.0192) is past max curve time (10.0055)"; QuantLib's check, the same curve with its extrapolation enabled.
+/// In the ratio past t = 0 the model's own curve is read too, without extrapolation, where the calibration reads it
+/// with (<c>:783-785</c>, <c>:797-799</c>, against <c>:467-469</c>): a model on a 10-year curve calibrated to 1y to 5y
+/// into 10y swaptions, its numeraire time 15.02, refuses every read with a given curve, "time (15.01917808219178) is
+/// past max curve time (10.005479452054795)"; nanoql reads its own curve with extrapolation there. QuantLib's check:
+/// its own curve given, where the ratio is 1, the prices without one.
 /// </summary>
 public class Gaussian1dNumeraireExtrapolationTests
 {
@@ -60,7 +60,7 @@ public class Gaussian1dNumeraireExtrapolationTests
         Date[] dates = [today, today + new Period(1, TimeUnit.Years), today + new Period(5, TimeUnit.Years), today + new Period(10, TimeUnit.Years)];
         YieldTermStructure curve = new InterpolatedZeroCurve<Numerics.Linear>(dates, [0.03, 0.03, 0.031, 0.032], new Actual365Fixed());
 
-        // QuantLib's on the curve with its extrapolation enabled, on the wheel (G1R3's erf apart past t = 0).
+        // QuantLib's on the curve with its extrapolation enabled, on the wheel (the C runtime's erf apart past t = 0).
         Assert.True(Math.Abs((model.Numeraire(0.0, 0.0, curve) / 0.6122337677897788) - 1.0) <= 1e-15, $"{model.Numeraire(0.0, 0.0, curve)}");
         Assert.True(Math.Abs((model.Numeraire(1.5, 0.3, curve) / 0.6324605737550852) - 1.0) <= Tolerance.Relative, $"{model.Numeraire(1.5, 0.3, curve)}");
     }
@@ -80,8 +80,8 @@ public class Gaussian1dNumeraireExtrapolationTests
             [.. Enumerable.Repeat(new Period(10, TimeUnit.Years), 5)], new EuriborSwapIsdaFixA(new Period(1, TimeUnit.Years)), context);
         Assert.True(model.NumeraireTime > 15.0);
 
-        // QuantLib's without a given curve, on the wheel (G1R3's erf apart); with its own curve given, the same, the given
-        // curve's own reads within its range.
+        // QuantLib's without a given curve, on the wheel (the C runtime's erf apart); with its own curve given, the
+        // same, the given curve's own reads within its range.
         Assert.True(Math.Abs((model.Numeraire(1.5, 0.3) / 0.6320153637585068) - 1.0) <= Tolerance.Relative, $"{model.Numeraire(1.5, 0.3)}");
         Assert.True(Math.Abs((model.Zerobond(12.0, 1.5, 0.3) / 0.7032709143144397) - 1.0) <= Tolerance.Relative, $"{model.Zerobond(12.0, 1.5, 0.3)}");
         Assert.True(Math.Abs((model.Numeraire(1.5, 0.3, shortCurve) / model.Numeraire(1.5, 0.3)) - 1.0) <= 1e-15);

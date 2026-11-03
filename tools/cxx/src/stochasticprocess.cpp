@@ -8,10 +8,10 @@
 // "OrnsteinUhlenbeckProcess", "speed", "volatility", "x0", "level"}, or {"type": "LinearProcess", "x0", "a",
 // "sigma"}. An Array is a list of reals, a Matrix a list of its rows, a date its serial.
 //
-// QuantLib has no multi-dimensional process that keeps the base's evolve and apply and S2 ports, so the harness
-// defines one, which tests/NanoQL.Tests defines too: LinearProcess, n independent geometric drifts x_i' = a_i x_i
-// with a constant n x n diffusion sigma; its expectation is x0_i exp(a_i dt), its standard deviation sigma sqrt(dt)
-// and its covariance that times its transpose, each hard-coded, so it needs no discretization.
+// QuantLib has no multi-dimensional process that keeps the base's evolve and apply and that nanoql ports, so the
+// harness defines one, which tests/NanoQL.Tests defines too: LinearProcess, n independent geometric drifts x_i' =
+// a_i x_i with a constant n x n diffusion sigma; its expectation is x0_i exp(a_i dt), its standard deviation sigma
+// sqrt(dt) and its covariance that times its transpose, each hard-coded, so it needs no discretization.
 
 #include "convert.hpp"
 

@@ -8,11 +8,11 @@ using static NanoQL.Tests.Divergences.TwoAssetMarket;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The operator-splitting spread engine at a zero volatility of the second asset. QuantLib's corrections are 0·∞
-/// there (<c>operatorsplittingspreadengine.cpp:60-65</c>, <c>:138-139</c>), so the price is NaN, from a volatility of
-/// about 1e-200, where its variance underflows; above, its corrections tend to 0 and its price to Kirk's, exact there
-/// (9.9375389513, and 9.937538951281 at 1e-12 on the plan's market). nanoql takes the corrections' limit, 0 (the S-exo
-/// plan's ER5 (xi)): QuantLib's own price at a tiny volatility and Kirk's engine are the checks.
+/// The operator-splitting spread engine at a zero volatility of the second asset. QuantLib's corrections are 0·∞ there
+/// (<c>operatorsplittingspreadengine.cpp:60-65</c>, <c>:138-139</c>), so the price is NaN, from a volatility of about
+/// 1e-200, where its variance underflows; above, its corrections tend to 0 and its price to Kirk's, exact there
+/// (9.9375389513, and 9.937538951281 at 1e-12 on the test's market). nanoql takes the corrections' limit, 0: QuantLib's
+/// own price at a tiny volatility and Kirk's engine are the checks.
 /// </summary>
 public class OperatorSplittingZeroVolatilityTests
 {

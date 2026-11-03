@@ -13,13 +13,12 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// A negative rebate (the S-rx plan's SRXR3 (ii), fixed under R8). QuantLib's analytic barrier engine pays a rebate
-/// only where <c>rebate() &gt; 0</c> (<c>analyticbarrierengine.cpp:227</c>, <c>:244</c>), so a rebate of −3 prices as
-/// none: on a one-year call struck at 100 (spot 100, r 5%, q 2%, volatility 25%) its four barrier types are 2.0 to 2.1
-/// from QuantLib's finite-difference engine, which prices the rebate [executed on the wheel]. nanoql tests
-/// <c>rebate != 0</c>, which leaves zero and positive rebates on QuantLib's bits; the Vanna-Volga engine and the
-/// implied volatility, which price through the analytic engine, follow. QuantLib's checks: its finite-difference
-/// engine, and the price's linearity in the rebate.
+/// A negative rebate (fixed). QuantLib's analytic barrier engine pays a rebate only where <c>rebate() &gt; 0</c>
+/// (<c>analyticbarrierengine.cpp:227</c>, <c>:244</c>), so a rebate of −3 prices as none: on a one-year call struck at
+/// 100 (spot 100, r 5%, q 2%, volatility 25%) its four barrier types are 2.0 to 2.1 from QuantLib's finite-difference
+/// engine, which prices the rebate (QuantLib-Python 1.44). nanoql tests <c>rebate != 0</c>, which leaves zero and
+/// positive rebates on QuantLib's bits; the Vanna-Volga engine and the implied volatility, which price through the
+/// analytic engine, follow. QuantLib's checks: its finite-difference engine, and the price's linearity in the rebate.
 /// </summary>
 public class BarrierNegativeRebateTests
 {
@@ -67,7 +66,7 @@ public class BarrierNegativeRebateTests
         // Actual/360 rates on Actual/365 Fixed curves)
         double Npv(double rebate) => VannaVolga(BarrierType.UpOut, 1.40, 1.25, rebate);
 
-        // QuantLib: 0.007748770547317221, the rebate-free price, at −0.01 [executed on the wheel]
+        // QuantLib: 0.007748770547317221, the rebate-free price, at −0.01 (QuantLib-Python 1.44)
         Assert.Equal(0.007748770547317221, Npv(0.0), 1e-15);
         Assert.Equal(0.013413191989335214, Npv(0.01), 1e-15);
         Assert.Equal((2.0 * Npv(0.0)) - Npv(0.01), Npv(-0.01), 1e-15);

@@ -9,10 +9,10 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Extensions;
 
 /// <summary>
-/// Built objects back to records (CVD14): a value equal to a preset becomes an alias of it, any other its fields under
-/// its name, its parts that equal no preset under generated names; each through
+/// Built objects back to records: a value equal to a preset becomes an alias of it, any other its fields under its
+/// name, its parts that equal no preset under generated names; each through
 /// <see cref="ConventionRecords.Describe(string, Calendar, ConventionSet?)"/>, the writer, the reader and the set
-/// resolves to an object equal to the one described. A day counter carrying a trade's data is refused (CVD4).
+/// resolves to an object equal to the one described. A day counter carrying a trade's data is refused.
 /// </summary>
 public class ConventionRecordsTests
 {

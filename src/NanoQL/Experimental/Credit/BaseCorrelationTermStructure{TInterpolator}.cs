@@ -20,11 +20,11 @@ namespace NanoQL.Experimental;
 /// <typeparam name="TInterpolator">The 2-D interpolator over the tranche times and loss levels.</typeparam>
 /// <remarks>
 /// <para>
-/// Immutable: the quotes are values, read at construction (the S-xcr plan's XR5), and a structure whose reference date
-/// follows the evaluation date is built by <see cref="Create"/> from the context (D15). QuantLib specializes the
-/// interpolation for <c>BilinearInterpolation</c> and <c>BicubicSpline</c> alone; any 2-D interpolator builds it here,
-/// <see cref="Bilinear"/> and <see cref="Bicubic"/> among them. Some interpolators may take the correlation out of
-/// [−1, 1].
+/// Immutable: the quotes are values, read at construction, and a structure whose reference date follows the evaluation
+/// date is built by <see cref="Create"/> from the context. QuantLib specializes the interpolation for
+/// <c>BilinearInterpolation</c> and <c>BicubicSpline</c> alone; any 2-D interpolator builds it here,
+/// <see cref="Bilinear"/> and <see cref="Bicubic"/> among them. Some interpolators may take the correlation out of [−1,
+/// 1].
 /// </para>
 /// <para>
 /// The correlations hold a row per loss level and a column per tenor, the shape QuantLib's checks enforce, where its
@@ -33,8 +33,8 @@ namespace NanoQL.Experimental;
 /// </para>
 /// <para>
 /// The correlation is read from the interpolation with extrapolation always on, bilinear off the grid where the
-/// interpolator is, so off the grid it can leave [0, 1]; the <c>extrapolate</c> flag is QuantLib's and unread there too
-/// (the S-xcr plan's XR8 (xl)). The base-correlation model refuses a correlation outside [0, 1) (XR8 (xxxii)).
+/// interpolator is, so off the grid it can leave [0, 1]; the <c>extrapolate</c> flag is QuantLib's and unread there
+/// too. The base-correlation model refuses a correlation outside [0, 1).
 /// </para>
 /// <para>
 /// To be done, as in QuantLib: the relation to a given basket is to be made explicit for bespoke models; a matrix

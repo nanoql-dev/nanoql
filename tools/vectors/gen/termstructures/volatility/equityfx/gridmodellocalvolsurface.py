@@ -6,12 +6,11 @@ strike extrapolation on either side), each at its initial parameters (all 1) and
 setParams: the parameters, the maximum date and time, the strike range, and the local volatility at a grid of times
 and strikes, extrapolating. The parameter vectors' refusals: one too few and one too many.
 
-Left out (the S-van plan's §2.10): as in tools/vectors/gen/termstructures/volatility/equityfx/fixedlocalvolsurface.py,
-at a node time (or one the grid clamps onto) a strike outside the node's strikes on a side with the constant
-extrapolation (VR4 (xviii)). The grid's calibration isn't run here: QuantLib's cases calibrate it, and its outputs pass
-through the optimiser (the S-van plan's VD17). The wheel's calls, by QuantLib-SWIG 1.44:
-GridModelLocalVolSurface(referenceDate, dates, strikes, dayCounter, lower, upper), params, setParams and localVol.
-nanoql's WithParams returns a copy, which the test reads. Read back by
+Left out: as in tools/vectors/gen/termstructures/volatility/equityfx/fixedlocalvolsurface.py, at a node time (or one
+the grid clamps onto) a strike outside the node's strikes on a side with the constant extrapolation. The grid's
+calibration isn't run here: QuantLib's cases calibrate it, and its outputs pass through the optimiser. The wheel's
+calls, by QuantLib-SWIG 1.44: GridModelLocalVolSurface(referenceDate, dates, strikes, dayCounter, lower, upper),
+params, setParams and localVol. nanoql's WithParams returns a copy, which the test reads. Read back by
 tests/NanoQL.Tests/Vectors/TermStructures/GridModelLocalVolSurfaceVectorTests.cs."""
 import importlib.util
 import os

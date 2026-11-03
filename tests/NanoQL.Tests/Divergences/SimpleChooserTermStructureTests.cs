@@ -13,9 +13,9 @@ namespace NanoQL.Tests.Divergences;
 /// The simple chooser engine on term structures. QuantLib evaluates Rubinstein's formula on the zero rates and the
 /// volatility at maturity, its times from the evaluation date (<c>analyticsimplechooserengine.cpp:49-60</c>), so on a
 /// rising market it is +22% off; nanoql prices Rubinstein's decomposition at the choosing date,
-/// C(K, T) + D_q(t, T)·P(K·D_r(t, T)/D_q(t, T), t), each by the analytic European engine (the S-exo plan's ER4). The
-/// checks: the option's exact value at the choosing date, the larger of the call and the put there over the lognormal
-/// spot, within 1e-9; the European engine's two options, bit for bit; and QuantLib's value on a flat market.
+/// C(K, T) + D_q(t, T)·P(K·D_r(t, T)/D_q(t, T), t), each by the analytic European engine. The checks: the option's
+/// exact value at the choosing date, the larger of the call and the put there over the lognormal spot, within 1e-9; the
+/// European engine's two options, bit for bit; and QuantLib's value on a flat market.
 /// </summary>
 public class SimpleChooserTermStructureTests
 {

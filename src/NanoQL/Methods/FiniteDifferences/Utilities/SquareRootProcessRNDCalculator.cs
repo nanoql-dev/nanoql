@@ -16,7 +16,7 @@ namespace NanoQL.Methods;
 /// <remarks>
 /// Immutable. The stationary density is QuantLib's product β^α·v^{α−1}·e^{−βv − lnΓ(α)} wherever that product is
 /// finite, its bits; past α of about 170 the product overflows into NaN, and there it is the same density in logarithms,
-/// exp(α ln β + (α − 1) ln v − βv − lnΓ(α)) (the S-hes plan's HR7 (xiii)).
+/// exp(α ln β + (α − 1) ln v − βv − lnΓ(α)).
 /// </remarks>
 public sealed class SquareRootProcessRNDCalculator : RiskNeutralDensityCalculator
 {
@@ -70,7 +70,7 @@ public sealed class SquareRootProcessRNDCalculator : RiskNeutralDensityCalculato
             return density;
         }
 
-        // the product overflowed: the same density in logarithms (HR7 (xiii))
+        // the product overflowed: the same density in logarithms
         return Math.Exp((alpha * Math.Log(beta)) + ((alpha - 1) * Math.Log(v)) - (beta * v) - GammaFunctions.LGamma(alpha));
     }
 

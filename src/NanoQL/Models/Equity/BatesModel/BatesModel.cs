@@ -15,7 +15,7 @@ namespace NanoQL.Models;
 /// Its arguments are the Heston model's five, then ν (unconstrained), δ and λ (positive), in QuantLib's order; its
 /// process a <see cref="BatesProcess"/> on the model's parameters, with QuantLib's default discretization (full
 /// truncation), built at construction and on the copy <see cref="CalibratedModel.WithParams"/> returns. A
-/// <see cref="HestonModel"/>, as QuantLib's derives from it (the S-hes plan's HR1 (ii)), so the Heston engines and
+/// <see cref="HestonModel"/>, as QuantLib's derives from it, so the Heston engines and
 /// <see cref="HestonModelHelper"/> take it; a Heston-only engine prices its Heston part.
 /// </para>
 /// <para>

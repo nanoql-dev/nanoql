@@ -20,22 +20,20 @@ namespace NanoQL.Experimental;
 /// <remarks>
 /// <para>
 /// Immutable, its mapping function computed once, on the first call of <see cref="G"/>, as QuantLib's lazy object
-/// computes it. The collocation points are the Gauss nodes of the kernel's non-central χ² distribution
-/// (<see cref="GaussNonCentralChiSquaredPolynomial"/>, exact, XRR8), their range clamped by the pMin and pMax quantiles
-/// and rescaled by QuantLib's map a·x + (xMin − x.front()), a = (xMax − xMin)/(x.back() − x.front()); where only the top
+/// computes it. The collocation points are the Gauss nodes of the kernel's non-central χ² distribution (<see
+/// cref="GaussNonCentralChiSquaredPolynomial"/>, exact), their range clamped by the pMin and pMax quantiles and
+/// rescaled by QuantLib's map a·x + (xMin − x.front()), a = (xMax − xMin)/(x.back() − x.front()); where only the top
 /// bound clamps, as at every date of QuantLib's two cases, the points scale toward zero by a and the top one stops
-/// short of the pMax quantile, QuantLib's design, kept (the S-xrt plan's XRR14, ruled 2026-10-29). Where that map's
-/// lowest point falls below the pMin quantile, breaking the lower bound the method states, it is raised by the
-/// shortfall: QuantLib's map with its bits wherever its lowest point meets the bound, the affine map onto
-/// [xMin, xMax] where the low bound clamps (the S-xrt plan's XRR15, ruled 2026-10-29;
-/// <c>Divergences/SquareRootCLVRescaleTests.cs</c>).
+/// short of the pMax quantile, QuantLib's design, kept. Where that map's lowest point falls below the pMin quantile,
+/// breaking the lower bound the method states, it is raised by the shortfall: QuantLib's map with its bits wherever its
+/// lowest point meets the bound, the affine map onto [xMin, xMax] where the low bound clamps
+/// (<c>Divergences/SquareRootCLVRescaleTests.cs</c>).
 /// </para>
 /// <para>
 /// The non-centrality 4κe^(−κt)x₀/(σ²(1 − e^(−κt))) takes 1 − e^(−κt) as −expm1(−κt) below κt 1e-2, where QuantLib's
-/// cancels, and QuantLib's form from it (the S-xrt plan's XRR5 (xxiv);
-/// <c>Divergences/SquareRootCLVNonCentralityTests.cs</c>). The mapping interpolates linearly in time
-/// between the maturities; past the last one QuantLib's reads its map's end before its check, and here refuses with
-/// QuantLib's text (the S-xrt plan's XRR5 (xxiii); <c>Conventions/CLVModelTests.cs</c>).
+/// cancels, and QuantLib's form from it (<c>Divergences/SquareRootCLVNonCentralityTests.cs</c>). The mapping
+/// interpolates linearly in time between the maturities; past the last one QuantLib's reads its map's end before its
+/// check, and here refuses with QuantLib's text (<c>Conventions/CLVModelTests.cs</c>).
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]
@@ -106,7 +104,7 @@ public sealed class SquareRootCLVModel
         double b = xMin - x[0];
         double a = (xMax - xMin) / (x[^1] - x[0]);
 
-        // QuantLib's map, raised where its lowest point falls below the pMin quantile (XRR15)
+        // QuantLib's map, raised where its lowest point falls below the pMin quantile
         double raise = Max(0.0, qMin - ((a * x[0]) + b));
         var points = new Vector(x.Length);
         for (int i = 0; i < x.Length; ++i)
@@ -145,7 +143,7 @@ public sealed class SquareRootCLVModel
 
     private static double Min(double a, double b) => b < a ? b : a;
 
-    // The kernel's degrees of freedom and non-centrality at a date; 1 − e^(−κt) through expm1 below κt 1e-2 (xxiv).
+    // The kernel's degrees of freedom and non-centrality at a date; 1 − e^(−κt) through expm1 below κt 1e-2.
     private (double Df, double Ncp) NonCentralChiSquaredParams(Date d)
     {
         double t = bsProcess.Time(d);
@@ -194,7 +192,7 @@ public sealed class SquareRootCLVModel
                 ++ge;
             }
 
-            // QuantLib's reads the time at ge before it checks ge against the end (xxiii)
+            // QuantLib's reads the time at ge before it checks ge against the end
             if (ge == times.Length)
             {
                 throw new NanoQLException("extrapolation to large or small t is not allowed");

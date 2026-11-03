@@ -10,15 +10,14 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The market-model products' pin (the S-mmp plan's MMPR1 (v), SMD10): after a warm-up path, a path of the accounting
-/// engine (the evolver's steps, the product's steps, the discounting into numeraire bonds, the roll into the next
-/// numeraire and the accumulation into the statistics) allocates nothing, on the framework's products in a
-/// multi-product composite and in a single-product composite, in the terminal and the money-market measures; and on
-/// every product family: the multi-step swaps, options and structured products, the one-step products, and the
-/// pathwise products through the wrapper; and the call-specified product with each strategy, the swap-rate trigger,
-/// the Longstaff-Schwartz strategy and the parametric exercise adapter. And a path of the Greek engines allocates
-/// nothing: the pathwise delta engine, its two vega engines and the proxy Greek engine, the original's path and the
-/// constrained evolvers'.
+/// The market-model products' pin: after a warm-up path, a path of the accounting engine (the evolver's steps, the
+/// product's steps, the discounting into numeraire bonds, the roll into the next numeraire and the accumulation into
+/// the statistics) allocates nothing, on the framework's products in a multi-product composite and in a single-product
+/// composite, in the terminal and the money-market measures; and on every product family: the multi-step swaps, options
+/// and structured products, the one-step products, and the pathwise products through the wrapper; and the
+/// call-specified product with each strategy, the swap-rate trigger, the Longstaff-Schwartz strategy and the parametric
+/// exercise adapter. And a path of the Greek engines allocates nothing: the pathwise delta engine, its two vega engines
+/// and the proxy Greek engine, the original's path and the constrained evolvers'.
 /// </summary>
 public class MarketModelProductAllocationTests
 {

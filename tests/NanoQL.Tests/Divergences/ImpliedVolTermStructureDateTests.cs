@@ -8,17 +8,16 @@ namespace NanoQL.Tests.Divergences;
 
 /// <summary>
 /// The implied Black-volatility structure on a day counter whose year fractions don't add, and before its original's
-/// reference date (the S-van plan's VR4 (xxii)). QuantLib reads its original between the reference date's time on the
-/// original's clock and that time plus the query's (<c>impliedvoltermstructure.hpp:101-109</c>): on Thirty360, from 15
-/// October 2026 at 20% and implied at 31 January 2027, its variance at 28 February 2027 is 0.0031111111111111114, 3.70%
-/// above the original's forward variance by date, 0.0030000000000000009, and at 30 June 2027 0.67% above it; implied at
-/// 30 November 2026, its variance at 31 March 2027 is 0.83% below it [executed: QuantLib 1.44's C++,
-/// <c>scratchpad\c5\probe\implied_vol.cpp</c>]. nanoql reads a date by date where the sum misses the date's own time on
-/// the original's clock, and keeps QuantLib's bits elsewhere, as on every date of Actual/365 (Fixed). Implied at 15 July
-/// 2026, before the original's date, QuantLib's variance at 15 January 2027 is 0.02016438356164384, the original's
-/// variance read three months before its own date added; nanoql's accrues none before it, the original's
-/// 0.01008219178082192, and at 15 September 2026 none at all, where QuantLib refuses the negative time; on Thirty360
-/// from 31 August 2026, a date the sum misses is read by date from the original's own date.
+/// reference date. QuantLib reads its original between the reference date's time on the original's clock and that time
+/// plus the query's (<c>impliedvoltermstructure.hpp:101-109</c>): on Thirty360, from 15 October 2026 at 20% and implied
+/// at 31 January 2027, its variance at 28 February 2027 is 0.0031111111111111114, 3.70% above the original's forward
+/// variance by date, 0.0030000000000000009, and at 30 June 2027 0.67% above it; implied at 30 November 2026, its
+/// variance at 31 March 2027 is 0.83% below it (QuantLib 1.44). nanoql reads a date by date where the sum misses the
+/// date's own time on the original's clock, and keeps QuantLib's bits elsewhere, as on every date of Actual/365
+/// (Fixed). Implied at 15 July 2026, before the original's date, QuantLib's variance at 15 January 2027 is
+/// 0.02016438356164384, the original's variance read three months before its own date added; nanoql's accrues none
+/// before it, the original's 0.01008219178082192, and at 15 September 2026 none at all, where QuantLib refuses the
+/// negative time; on Thirty360 from 31 August 2026, a date the sum misses is read by date from the original's own date.
 /// </summary>
 public class ImpliedVolTermStructureDateTests
 {

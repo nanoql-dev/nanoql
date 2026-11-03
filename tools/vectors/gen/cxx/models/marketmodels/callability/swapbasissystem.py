@@ -11,7 +11,7 @@ This file holds the provider vectors' shared helper, which the swap-forward basi
 exercise's generators import.
 
 Left out: two exercises in the last rate period, where QuantLib counts 3 functions for the first and its values give 2
-(the S-mmp plan's MMPR4 (xv), tests/NanoQL.Tests/Divergences/BasisSystemFunctionCountTests.cs).
+(tests/NanoQL.Tests/Divergences/BasisSystemFunctionCountTests.cs).
 
 The harness unit is tools/cxx/src/models/marketmodels/callability/callability.cpp. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Models/MarketModels/SwapBasisSystemCxxVectorTests.cs."""
@@ -33,7 +33,7 @@ import vectors as v  # noqa: E402
 
 
 def provider_case(H, st, name, spec, forwards, counts_agree=True):
-    """A provider stepped on the states; its counts left out where QuantLib's differ from its values' (MMPR4 (xv))."""
+    """A provider stepped on the states; its counts left out where QuantLib's differ from its values'."""
     r = H.call("MarketModelNodeDataProvider.steps", spec, forwards)
     expected = {"numberOfExercises": r["numberOfExercises"], "evolutionTimes": r["evolutionTimes"],
                 "isExerciseTime": r["isExerciseTime"], "values": [v.enc(s) for s in r["steps"]]}

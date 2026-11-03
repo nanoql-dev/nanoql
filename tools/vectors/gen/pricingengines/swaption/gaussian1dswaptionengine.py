@@ -15,12 +15,12 @@ each model ("gsr", in the order of the inputs' list) and on the first model with
 32 integration points and 5 standard deviations; no payoff extrapolation; a discount curve given, a flat 2.5%. Amounts
 are compared at the nominal.
 
-Left out, each a documented divergence: a discount or forwarding curve on another clock than the model's (QuantLib
-reads it at the model's times; the S-g1d plan's G1R6 (xvi), tests/NanoQL.Tests/Divergences/Gaussian1dMismatchedTimesTests.cs),
-so every curve here is on Actual/365 (Fixed) from the evaluation date; flat payoff extrapolation, whose right tail
-QuantLib integrates at the second-last node (G1R6 (xxi), FlatPayoffExtrapolationTests.cs); reversions between 0 and
-1e-2 (G1R4 (i), GsrSmallReversionTests.cs). The engine's probabilities, an additional result the wheel doesn't bind,
-are the harness's (cxx/pricingengines/swaption/gaussian1dswaptionengine.py).
+Left out, each a documented divergence: a discount or forwarding curve on another clock than the model's (QuantLib reads
+it at the model's times; tests/NanoQL.Tests/Divergences/Gaussian1dMismatchedTimesTests.cs), so every curve here is on
+Actual/365 (Fixed) from the evaluation date; flat payoff extrapolation, whose right tail QuantLib integrates at the
+second-last node (FlatPayoffExtrapolationTests.cs); reversions between 0 and 1e-2 (GsrSmallReversionTests.cs). The
+engine's probabilities, an additional result the wheel doesn't bind, are the harness's
+(cxx/pricingengines/swaption/gaussian1dswaptionengine.py).
 
 The refusals: a cash swaption settled at the par yield curve, and nominals that aren't constant. The wheel's
 Gaussian1dSwaptionEngine(model, integrationPoints, stddevs, extrapolatePayoff, flatPayoffExtrapolation,

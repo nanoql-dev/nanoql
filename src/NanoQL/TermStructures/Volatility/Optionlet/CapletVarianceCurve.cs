@@ -14,9 +14,9 @@ namespace NanoQL.TermStructures;
 /// <see cref="BlackVarianceCurve"/> (not forced monotone), the same at every strike.
 /// </summary>
 /// <remarks>
-/// One of QuantLib's defects is fixed (the S-g1d plan's G1R6 (xiii)): QuantLib's smile sections are flat
-/// shifted-lognormal sections with no shift whatever the curve's type and displacement, so a normal curve's section
-/// prices as lognormal; here they carry the curve's <see cref="VolatilityType"/> and <see cref="Displacement"/>.
+/// One of QuantLib's defects is fixed: QuantLib's smile sections are flat shifted-lognormal sections with no shift
+/// whatever the curve's type and displacement, so a normal curve's section prices as lognormal; here they carry the
+/// curve's <see cref="VolatilityType"/> and <see cref="Displacement"/>.
 /// </remarks>
 public sealed class CapletVarianceCurve : OptionletVolatilityStructure
 {
@@ -65,7 +65,7 @@ public sealed class CapletVarianceCurve : OptionletVolatilityStructure
     public override double MaxStrike() => blackCurve.MaxStrike();
 
     /// <summary>A flat smile section at the option time, of the at-the-money volatility (QuantLib's dummy strike
-    /// 0.05), with the curve's type and displacement (G1R6 (xiii)).</summary>
+    /// 0.05), with the curve's type and displacement.</summary>
     /// <param name="optionTime">The option time.</param>
     /// <returns>The section.</returns>
     protected override SmileSection SmileSectionImpl(double optionTime)

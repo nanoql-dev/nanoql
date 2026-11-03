@@ -20,8 +20,8 @@ namespace NanoQL.Processes;
 /// The drift's and α's terms are written as <see cref="HullWhiteProcess"/>'s; B(t, T) = (1 − e^(−a(T − t)))/a as
 /// (T − t)·(1 − e^(−a(T − t)))/(a(T − t)); and M_T(s, t, T), QuantLib's σ²/a²[(1 − e^(−u)) − ½(e^(−v) − e^(−v−2u))],
 /// u = a(t − s), v = a(T − t), as σ²(t − s)f(u)[(T − t)f(v) + ½e^(−v)(t − s)f(u)], f(x) = (1 − e^(−x))/x, every term
-/// positive (the S-sr plan's SSR3 and SSR6 (ii)): a divergence, QuantLib's cutting at QL_EPSILON and cancelling to
-/// O(σ²) from terms of order σ²(t − s)/a above it, its half-year expectation −5.55e9 at a = 1e-15
+/// positive: a divergence, QuantLib's cutting at QL_EPSILON and cancelling to O(σ²) from terms of order σ²(t − s)/a
+/// above it, its half-year expectation −5.55e9 at a = 1e-15
 /// (<c>Divergences/HullWhiteForwardProcessSmallReversionTests.cs</c>).
 /// </para>
 /// <para>

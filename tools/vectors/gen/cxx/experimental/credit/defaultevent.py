@@ -10,14 +10,14 @@ by the C++ harness (tools/cxx/src/experimental/credit/defaultevent.cpp).
 - "keys": QuantLib's empty key, North American corporate keys (each restructuring type, currencies, seniorities,
   graces), keys of explicit event types, their summaries and sizes, equality on pairs (permuted types, other
   seniorities, currencies, sizes); a key with a repeated atomic type, refused.
-- "events": default, failure-to-pay and bankruptcy events, unsettled, settled by a map (its seniorities read; the
-  others null) or at one rate for NoSeniority (every seniority), and at one rate for a seniority, read at that
-  seniority alone, since QuantLib fills the others with ISDA's conventional recoveries where nanoql settles the
-  seniority named (the S-xcr plan's XR8 (iii), held in Divergences/SingleSenioritySettlementTests.cs); a bankruptcy's
-  map holding every ISDA seniority, its partial maps refused by QuantLib alone and so left out; their inspectors,
-  recovery reads (NoSeniority refused on a settled event), matches against types and keys at the evaluation date
-  (failure to pay's grace and amount), occurrence at dates and equality; the refused constructions (a settlement
-  before the event, a map without the event's seniority or with NoSeniority).
+- "events": default, failure-to-pay and bankruptcy events, unsettled, settled by a map (its seniorities read; the others
+  null) or at one rate for NoSeniority (every seniority), and at one rate for a seniority, read at that seniority alone,
+  since QuantLib fills the others with ISDA's conventional recoveries where nanoql settles the seniority named (held in
+  Divergences/SingleSenioritySettlementTests.cs); a bankruptcy's map holding every ISDA seniority, its partial maps
+  refused by QuantLib alone and so left out; their inspectors, recovery reads (NoSeniority refused on a settled event),
+  matches against types and keys at the evaluation date (failure to pay's grace and amount), occurrence at dates and
+  equality; the refused constructions (a settlement before the event, a map without the event's seniority or with
+  NoSeniority).
 
 This file also holds the credit portfolio generators' shared inputs, the specs of
 tools/cxx/src/experimental/credit/portfoliospec.hpp: currencies, types, keys, events, issuers, pools, baskets and loss

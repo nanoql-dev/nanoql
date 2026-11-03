@@ -4,14 +4,13 @@
 .cpp), on the evaluation date 15 October 2026: discrete arithmetic average-price Asian options by Monte Carlo, the
 geometric average optionally the control variate.
 
-Arithmetic calls and puts at 90%, 100% and 110% of the spot, over a year, with 4 and 12 fixings, the
-exercise on the last, unseasoned and with two past fixings, on the ten processes of
-tools/vectors/gen/processes/blackscholesprocess.py, 511 pseudo-random samples at seeds 42 and 1234, with and without the
-Brownian bridge and antithetic variates, and with the control variate on the flat markets: the NPV and the error
-estimate. Then the refusals of a payoff that isn't plain vanilla, an exercise that isn't European, every fixing in the
-past and one fixing left today, and an expired option. The outputs nanoql fixes are left out (the S-bar plan's §2.10):
-the control variate off flat markets (BR4 (a)) and with the exercise after the last fixing (BR5 (xxvii)), fixing dates
-given twice (BR5 (xxviii)) and a geometric product out of range (BR5 (xli)).
+Arithmetic calls and puts at 90%, 100% and 110% of the spot, over a year, with 4 and 12 fixings, the exercise on the
+last, unseasoned and with two past fixings, on the ten processes of tools/vectors/gen/processes/blackscholesprocess.py,
+511 pseudo-random samples at seeds 42 and 1234, with and without the Brownian bridge and antithetic variates, and with
+the control variate on the flat markets: the NPV and the error estimate. Then the refusals of a payoff that isn't plain
+vanilla, an exercise that isn't European, every fixing in the past and one fixing left today, and an expired option. The
+outputs nanoql fixes are left out: the control variate off flat markets and with the exercise after the last fixing,
+fixing dates given twice and a geometric product out of range.
 
 The engine's settings go in as "engine". The wheel's calls, by QuantLib-SWIG 1.44's options.i:
 MCPRDiscreteArithmeticAPEngine(process, brownianBridge, antitheticVariate, controlVariate, requiredSamples,
@@ -53,7 +52,7 @@ def mc_outputs(opt, engine):
 
 def arith_settings(pname):
     """Without a control variate everywhere; with it on the flat markets, where the analytic geometric control is
-    QuantLib's (BR4 (a)), the exercise on the last fixing (BR5 (xxvii))."""
+    QuantLib's, the exercise on the last fixing."""
     s = [{"brownianBridge": True, "antitheticVariate": False, "controlVariate": False, "seed": 42},
          {"brownianBridge": False, "antitheticVariate": True, "controlVariate": False, "seed": 1234}]
     if pname.endswith("flat, constant"):

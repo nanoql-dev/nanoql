@@ -8,12 +8,12 @@ using NanoQL.Extensions.Conventions;
 namespace NanoQL.Excel;
 
 /// <summary>
-/// The add-in's settings file (XLR9): <c>&lt;xll name&gt;.settings.json</c> beside the <c>.xll</c>, so each build reads
-/// its own (XLD28), with the keys <c>"conventions"</c> (a path, relative to the file's folder) and
-/// <c>"recordCalls"</c> (XLR14); <c>NANOQL_CONVENTIONS</c> overrides <c>"conventions"</c>, a relative path then
-/// resolving against the <c>.xll</c>'s folder. The named file loads as <see cref="ConventionProvider.Default"/>. A failed
-/// load (a missing or malformed file, an unknown key, a key in another case, a wrong type) never falls back to
-/// QuantLib's conventions: Default becomes the refusing provider, its every lookup refusing with the load's error.
+/// The add-in's settings file: <c>&lt;xll name&gt;.settings.json</c> beside the <c>.xll</c>, so each build reads its
+/// own, with the keys <c>"conventions"</c> (a path, relative to the file's folder) and <c>"recordCalls"</c>;
+/// <c>NANOQL_CONVENTIONS</c> overrides <c>"conventions"</c>, a relative path then resolving against the <c>.xll</c>'s
+/// folder. The named file loads as <see cref="ConventionProvider.Default"/>. A failed load (a missing or malformed
+/// file, an unknown key, a key in another case, a wrong type) never falls back to QuantLib's conventions: Default
+/// becomes the refusing provider, its every lookup refusing with the load's error.
 /// </summary>
 internal static class XlSettings
 {

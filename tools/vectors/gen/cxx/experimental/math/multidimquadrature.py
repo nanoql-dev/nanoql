@@ -6,8 +6,8 @@ output computed by the C++ harness (tools/cxx/src/experimental/math/multidimquad
 tools/cxx/src/experimental/math/latentmodelspec.hpp: the Gauss-Hermite rule's scalar integrals in one to three
 dimensions at orders 5 to 30 and two weight parameters, with its order; and the trapezoid rule's on boxes in one and
 two dimensions at two accuracies, its failures to converge where they come. The vector integration loses its first
-node's weight in QuantLib (the S-xcr plan's XR8 (v), held in Divergences/VectorQuadratureWeightTests.cs), so it isn't
-vectored; dimensions of 0 and above 15 read outside QuantLib's entries (XR8 (xxx)). Read back by
+node's weight in QuantLib (held in Divergences/VectorQuadratureWeightTests.cs), so it isn't vectored; dimensions of 0
+and above 15 read outside QuantLib's entries. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Experimental/Math/MultidimQuadratureCxxVectorTests.cs."""
 import os
 import sys

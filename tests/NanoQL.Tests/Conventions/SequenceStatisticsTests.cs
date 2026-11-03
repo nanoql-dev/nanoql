@@ -8,10 +8,10 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The sequence and convergence statistics' shape (the S-mmp plan's MMPR2): QuantLib's lazy dimension, set by the first
-/// sample of a statistics built without one; its refusals; the lifted members one value per component; the empirical
-/// risk members extension members constrained to statistics that keep their samples, and the incremental statistics'
-/// own downside members; and the convergence table, which a sample added through the held statistics bypasses.
+/// The sequence and convergence statistics' shape: QuantLib's lazy dimension, set by the first sample of a statistics
+/// built without one; its refusals; the lifted members one value per component; the empirical risk members extension
+/// members constrained to statistics that keep their samples, and the incremental statistics' own downside members; and
+/// the convergence table, which a sample added through the held statistics bypasses.
 /// </summary>
 public class SequenceStatisticsTests
 {

@@ -4,8 +4,8 @@
 wheel doesn't bind, each output computed by the C++ harness: regressions on one variable with intercepts of 1, 2.5 and 0
 (none), on two and three variables, and on named basis functions, each on noisy samples from a fixed random sample, the
 coefficients, residuals, errors, dimension and size, and the standard errors where the basis has two functions:
-QuantLib's take n - 2 degrees of freedom whatever the basis, which nanoql replaces by n - p (the S-van plan's VR4 (vi);
-tests/NanoQL.Tests/Divergences/LeastSquaresStandardErrorTests.cs). Then fewer samples than basis functions, which
+QuantLib's take n - 2 degrees of freedom whatever the basis, which nanoql replaces by n - p
+(tests/NanoQL.Tests/Divergences/LeastSquaresStandardErrorTests.cs). Then fewer samples than basis functions, which
 QuantLib refuses. Read back by tests/NanoQL.Tests/Vectors/Cxx/Numerics/LinearLeastSquaresRegressionCxxVectorTests.cs."""
 import math
 import os

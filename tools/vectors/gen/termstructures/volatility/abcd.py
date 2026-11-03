@@ -8,10 +8,10 @@ volatility and variance over four (tMin, tMax, T) intervals (one with tMin = tMa
 the maximum volatility where 1.44 agrees with nanoql; and the refusals: reversed integration bounds, tMax before tMin,
 and invalid coefficients, each as {"throws": true}.
 
-Left out, each a documented divergence: the maximum volatility where 1.44's maximumValue returns d or reads its
-b < 0 location (the S-g1d plan's G1R5 (iii), G1R6 (ix); AbcdMaximumTests); and small c, where QuantLib's primitive
-cancels (G1R6 (x); AbcdPrimitiveTests): every set's c is at least 0.3. Each case's input "abcd" is the four
-coefficients. Read back by tests/NanoQL.Tests/Vectors/TermStructures/AbcdVectorTests.cs."""
+Left out, each a documented divergence: the maximum volatility where 1.44's maximumValue returns d or reads its b < 0
+location (AbcdMaximumTests); and small c, where QuantLib's primitive cancels (AbcdPrimitiveTests): every set's c is at
+least 0.3. Each case's input "abcd" is the four coefficients. Read back by
+tests/NanoQL.Tests/Vectors/TermStructures/AbcdVectorTests.cs."""
 import os
 import sys
 

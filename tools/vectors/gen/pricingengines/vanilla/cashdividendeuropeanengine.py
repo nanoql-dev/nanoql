@@ -13,8 +13,7 @@ the evaluation date, between it and the expiry, and after it, which the engine s
 which the spot model adds to the strike; quarterly; dividends of zero, which the spot model skips): the NPV. Then an
 expired option, and the refusals: an American exercise ("not an European option") and a cash-or-nothing payoff
 ("non-striked payoff given"). Every structure is dated at the evaluation date and counts its days on Actual/365
-(Fixed); structures dated or day-counted apart are left out (the S-exo plan's §2.10), where nanoql reads them on the
-process's clock.
+(Fixed); structures dated or day-counted apart are left out, where nanoql reads them on the process's clock.
 
 A case holds one process, schedule, model, expiry and type, its outputs one per strike. The specs are
 tools/vectors/gen/pricingengines/vanilla/analyticdividendeuropeanengine.py's, with the model as the enum's integer. The

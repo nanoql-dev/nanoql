@@ -12,11 +12,11 @@ namespace NanoQL.Numerics;
 /// <summary>The Ali-Mikhail-Haq copula, C(x, y) = xy/(1 − θ(1 − x)(1 − y)).</summary>
 /// <remarks>
 /// Immutable. On the unit square's edges it returns the boundary values, C(u, 0) = C(0, v) = 0, C(u, 1) = u and C(1, v)
-/// = v, before its formula, as every copula here does (the S-core plan's CR7 (xxxiii)): QuantLib's is NaN at (0, 0) at
-/// θ 1. Where θ(1 − x)(1 − y) exceeds 1/2 the denominator is computed as (1 − θ) + θ(x + y − xy), which doesn't cancel
-/// as θ nears 1 and x and y near 0, where QuantLib's loses its digits (at θ 1, C(1e-14, 1e-14) 8e-4 off, and ∞ below
-/// about 1.1e-16); QuantLib's formula elsewhere, so its bits at θ in [−1, 1/2] (the plan's CR7 (xxi)). In the rewritten
-/// region, where xy is below the normal range, the product is formed last.
+/// = v, before its formula, as every copula here does: QuantLib's is NaN at (0, 0) at θ 1. Where θ(1 − x)(1 − y)
+/// exceeds 1/2 the denominator is computed as (1 − θ) + θ(x + y − xy), which doesn't cancel as θ nears 1 and x and y
+/// near 0, where QuantLib's loses its digits (at θ 1, C(1e-14, 1e-14) 8e-4 off, and ∞ below about 1.1e-16); QuantLib's
+/// formula elsewhere, so its bits at θ in [−1, 1/2]. In the rewritten region, where xy is below the normal range, the
+/// product is formed last.
 /// </remarks>
 public sealed class AliMikhailHaqCopula
 {

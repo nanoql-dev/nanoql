@@ -1,13 +1,12 @@
 // SPDX-FileCopyrightText: 2026 The nanoql Authors
 // SPDX-License-Identifier: Apache-2.0
 
-// ql/experimental/commodities/commoditycurve.hpp, .cpp: a curve's prices.
-// "CommodityCurve::prices" takes (curve, dates, contracts, nearbyOffset): a curve spec of commodityspec.hpp (with its
-// basis curve, on the same reference date, day counter and unit, the S-xrt plan's XRR5 (xi)), the dates priced, and
-// the contracts and offset of a nearby read. It returns {"nodes", "text", "times", "maxDate", "price", "basisOfPrice",
-// "nearby"}: the nodes [date, price], the curve as QuantLib's operator<< writes it, the node times, the last date,
-// each date's price(d, null, 0) and basisOfPrice(d), and each date's price through the nearby contract with its
-// underlyingPriceDate, [price, date], or {"throws": true}.
+// ql/experimental/commodities/commoditycurve.hpp, .cpp: a curve's prices. "CommodityCurve::prices" takes (curve,
+// dates, contracts, nearbyOffset): a curve spec of commodityspec.hpp (with its basis curve, on the same reference
+// date, day counter and unit), the dates priced, and the contracts and offset of a nearby read. It returns {"nodes",
+// "text", "times", "maxDate", "price", "basisOfPrice", "nearby"}: the nodes [date, price], the curve as QuantLib's
+// operator<< writes it, the node times, the last date, each date's price(d, null, 0) and basisOfPrice(d), and each
+// date's price through the nearby contract with its underlyingPriceDate, [price, date], or {"throws": true}.
 
 #include "experimental/commodities/commodityspec.hpp"
 

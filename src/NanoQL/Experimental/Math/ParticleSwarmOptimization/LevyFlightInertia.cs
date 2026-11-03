@@ -17,7 +17,7 @@ namespace NanoQL.Experimental;
 /// <remarks>
 /// The random factor's draws are a Mersenne Twister's and the flight an isotropic walk's on a <c>std::mt19937</c>, its
 /// sphere an ellipsoid over the problem's bounds, all on the seed, which is required: QuantLib's default seeds from the
-/// clock (the S-xrt plan's XRD3). Each minimization starts them from the seed.
+/// clock. Each minimization starts them from the seed.
 /// </remarks>
 [Experimental("NQL0001")]
 public sealed class LevyFlightInertia : ParticleSwarmOptimizationInertia

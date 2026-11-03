@@ -1,10 +1,10 @@
 # SPDX-FileCopyrightText: 2026 The nanoql Authors
 # SPDX-License-Identifier: Apache-2.0
 """Vectors for QuantLib's FastFourierTransform (ql/math/fastfouriertransform.hpp), which the wheel doesn't expose,
-each output computed by the C++ harness: the minimum order of sizes 1 to 70, the output size of orders 0 to 12, and
-the transform and inverse transform of complex and real inputs at orders 0 to 7, the inputs as many as the points or
-fewer (the rest of the output zero, as the harness's output starts). An input longer than the transform, which QuantLib
-writes past the output's end before refusing, is left out (the S-bar plan's §2.2 undefined row).
+each output computed by the C++ harness: the minimum order of sizes 1 to 70, the output size of orders 0 to 12, and the
+transform and inverse transform of complex and real inputs at orders 0 to 7, the inputs as many as the points or fewer
+(the rest of the output zero, as the harness's output starts). An input longer than the transform, which QuantLib writes
+past the output's end before refusing, is left out (the playbook's undefined-behaviour row).
 
 The harness unit is tools/cxx/src/math/fastfouriertransform.cpp. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Numerics/FastFourierTransformCxxVectorTests.cs."""

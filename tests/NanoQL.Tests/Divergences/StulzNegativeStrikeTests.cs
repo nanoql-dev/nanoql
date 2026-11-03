@@ -14,9 +14,8 @@ namespace NanoQL.Tests.Divergences;
 /// Stulz's engine at a negative strike. QuantLib's <c>log(forward1/strike)</c> (<c>stulzengine.cpp:62</c>) makes the
 /// minimum NaN and Black's check refuses the maximum ("strike + displacement (-10 + 0) must be non-negative"), where
 /// both payoffs are linear: the call is the call struck at zero less the discounted strike, the put worth nothing
-/// (96.0373 and 117.9873 at K = −10 on the plan's market, the Monte Carlo engine 96.067 and 118.007). nanoql prices
-/// those forms (the S-exo plan's ER5 (xxxiii)): QuantLib's own K = 0 values less K·D, and the Monte Carlo engine, are
-/// the checks.
+/// (96.0373 and 117.9873 at K = −10 on the test's market, the Monte Carlo engine 96.067 and 118.007). nanoql prices
+/// those forms: QuantLib's own K = 0 values less K·D, and the Monte Carlo engine, are the checks.
 /// </summary>
 public class StulzNegativeStrikeTests
 {

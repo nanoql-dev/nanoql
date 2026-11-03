@@ -12,9 +12,9 @@ touched"). Then each type, payoff and rebate on low-discrepancy paths ("ld"), pl
 traits give no error estimate. The path pricer: each type on three paths over a quarter, inside, through the lower
 barrier and through the upper.
 
-No output is left out (the S-xeq plan's §2.8): the process's structures share the evaluation date and Act/365, so the
-engine's clock is the risk-free curve's (XER5 (xxxiii)); every exercise is European (the S-xeq run's R1-4). The process
-and option are tools/cxx/src/experimental/barrieroption/mcdoublebarrierengine.cpp's. Read back by
+No output is left out: the process's structures share the evaluation date and Act/365, so the engine's clock is the
+risk-free curve's; every exercise is European. The process and option are
+tools/cxx/src/experimental/barrieroption/mcdoublebarrierengine.cpp's. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Experimental/BarrierOption/MCDoubleBarrierEngineCxxVectorTests.cs."""
 import os
 import sys

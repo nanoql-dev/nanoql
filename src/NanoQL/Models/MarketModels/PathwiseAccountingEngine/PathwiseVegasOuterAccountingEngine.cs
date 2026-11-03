@@ -22,14 +22,14 @@ namespace NanoQL.Models;
 /// error: theirs are written as 0, as in QuantLib.
 /// </para>
 /// <para>
-/// A working type (the S-mmp plan's MMPR1 (i)): it holds the caller's evolver and steps it, so an evolver serves one
-/// engine at a time; it holds its own clone of the product and copies of the pseudo-roots and bumps (MMPR1 (iv)). Its
-/// buffers are sized at construction, so its valuation allocates nothing after a warm-up (MMPR1 (v)), and it writes its
-/// means and errors into the caller's spans, QuantLib's caller vectors.
+/// A working type: it holds the caller's evolver and steps it, so an evolver serves one engine at a time; it holds its
+/// own clone of the product and copies of the pseudo-roots and bumps. Its buffers are sized at construction, so its
+/// valuation allocates nothing after a warm-up, and it writes its means and errors into the caller's spans, QuantLib's
+/// caller vectors.
 /// </para>
 /// <para>
-/// Departures from QuantLib: <see cref="PathwiseVegasAccountingEngine"/>'s (MMPR4 (i), (ii), (iv), (v), MMPR5 (a);
-/// <c>pathwiseaccountingengine.cpp:910-911</c>, <c>:913-914</c>, <c>:1043</c>), with
+/// Departures from QuantLib: <see cref="PathwiseVegasAccountingEngine"/>'s
+/// (<c>pathwiseaccountingengine.cpp:910-911</c>, <c>:913-914</c>, <c>:1043</c>), with
 /// <see cref="RatePseudoRootJacobianAllElements"/>'s derivative.
 /// </para>
 /// </remarks>
@@ -364,7 +364,7 @@ public sealed class PathwiseVegasOuterAccountingEngine
 
             for (int i = 0; i < numberRates; ++i)
             {
-                // the one-step discount factors at the step's start (MMPR4 (i), (v)), the rates displaced (MMPR4 (ii))
+                // the one-step discount factors at the step's start, the rates displaced
                 double x = 1.0 / (1.0 + (taus[i] * lastForwards[i]));
                 stepsDiscounts[i + 1] = x;
                 stepsDiscountsSquared[storeStep, i] = x * x;

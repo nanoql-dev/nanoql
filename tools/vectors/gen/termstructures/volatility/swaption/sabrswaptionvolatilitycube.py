@@ -15,25 +15,25 @@ dense spreads are the quoted ones.
 
 Each cube gives one case: its four matrices (sparseSabrParameters, denseSabrParameters where the cube has dense
 parameters, marketVolCube and volCubeAtmCalibrated), each as its elements row by row, and their shapes; the volatility
-at 72 points on the cube's grid and 72 off it, the option tenors 1Y, 10Y and 30Y on the swap tenors 2Y, 10Y and 30Y,
-and 2Y, 5Y and 20Y on 5Y, 15Y and 20Y, each at the at-the-money strike plus the five strike spreads and -1%, 1% and 3%,
-extrapolating (as the S7 plan's review measured the filter on this cube); the volatility by option time and swap
-length at 4 points and 3 strikes; and the smile section (a SabrSmileSection) by option and swap tenors at 8 points and
-by option time and swap length at 4, each as its alpha, beta, nu, rho, ATM level, exercise time, shift, volatility type
-and volatility at its ATM level and 1% on either side, past the cube's range only where the point extrapolates.
+at 72 points on the cube's grid and 72 off it, the option tenors 1Y, 10Y and 30Y on the swap tenors 2Y, 10Y and 30Y, and
+2Y, 5Y and 20Y on 5Y, 15Y and 20Y, each at the at-the-money strike plus the five strike spreads and -1%, 1% and 3%,
+extrapolating; the volatility by option time and swap length at 4 points and 3 strikes; and the smile section (a
+SabrSmileSection) by option and swap tenors at 8 points and by option time and swap length at 4, each as its alpha,
+beta, nu, rho, ATM level, exercise time, shift, volatility type and volatility at its ATM level and 1% on either side,
+past the cube's range only where the point extrapolates.
 
-testObservability's replacement (the S7 plan's S7D4): a cube built before the evaluation date moves follows the date
-in QuantLib and recalibrates, so QuantLib's case checks that it agrees with one built after the move, within 1e-14 at
-its 45 points; a nanoql cube is built for one context. So the SABR cube with every parameter free and the interpolated
-cube are each a case under 16 June 2025 and under 17 June 2025, the at-the-money matrix floating on the date and the
-curve on it, with their volatilities at the 45 points (the cube's option and swap tenors, at 3% plus each strike
-spread, not extrapolating). The generator checks QuantLib's agreement for each pair.
+testObservability's replacement: a cube built before the evaluation date moves follows the date in QuantLib and
+recalibrates, so QuantLib's case checks that it agrees with one built after the move, within 1e-14 at its 45 points; a
+nanoql cube is built for one context. So the SABR cube with every parameter free and the interpolated cube are each a
+case under 16 June 2025 and under 17 June 2025, the at-the-money matrix floating on the date and the curve on it, with
+their volatilities at the 45 points (the cube's option and swap tenors, at 3% plus each strike spread, not
+extrapolating). The generator checks QuantLib's agreement for each pair.
 
-The stability filter (the S7 plan's S7R6): each SABR case is refitted with every input volatility (the at-the-money
-matrix's and every spread) moved one ulp up, then down, and an output is written only where both refits leave it
-within 1e-12 x max(|a|, |b|, 1); the indexes of each output's dropped elements are in the case's inputs "dropped", and
-the generator prints the counts per output, per case and for the file. With every parameter free the fits are
-ill-conditioned and the filter drops much of what the dense cube interpolates; with beta fixed it keeps nearly all.
+The stability filter: each SABR case is refitted with every input volatility (the at-the-money matrix's and every
+spread) moved one ulp up, then down, and an output is written only where both refits leave it within 1e-12 x max(|a|,
+|b|, 1); the indexes of each output's dropped elements are in the case's inputs "dropped", and the generator prints the
+counts per output, per case and for the file. With every parameter free the fits are ill-conditioned and the filter
+drops much of what the dense cube interpolates; with beta fixed it keeps nearly all.
 
 A refused value is {"throws": true}. A case's inputs hold its settings, its "cube" spec (swaptionvolcube.py's) and
 "dropped". Read back by tests/NanoQL.Tests/Vectors/TermStructures/SabrSwaptionVolatilityCubeVectorTests.cs."""

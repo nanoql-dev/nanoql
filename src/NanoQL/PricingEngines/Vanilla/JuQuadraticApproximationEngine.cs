@@ -26,12 +26,11 @@ namespace NanoQL.PricingEngines;
 /// </para>
 /// <para>
 /// The value is floored at the European one, which bounds an American option from below, as QuantLib's master does
-/// since the pin (#2906; the S-van plan's VR5 (iii)): for short-dated, highly volatile options the correction can take
-/// it below. The critical price is <see cref="BaroneAdesiWhaleyApproximationEngine.CriticalPrice"/>, with its bracketed
-/// root where Newton leaves its range (VR4 (vii)). Each structure is read at the exercise date by date, nothing accrued
-/// before its own reference date; where early exercise is never optimal the theta's terms run over each structure's own
-/// time; an exercise window opening after the reference date is priced by <see cref="ApproximationWindow"/> (VR4
-/// (xxvi)).
+/// since the pin (#2906): for short-dated, highly volatile options the correction can take it below. The critical price
+/// is <see cref="BaroneAdesiWhaleyApproximationEngine.CriticalPrice"/>, with its bracketed root where Newton leaves its
+/// range. Each structure is read at the exercise date by date, nothing accrued before its own reference date; where
+/// early exercise is never optimal the theta's terms run over each structure's own time; an exercise window opening
+/// after the reference date is priced by <see cref="ApproximationWindow"/>.
 /// </para>
 /// </remarks>
 public static class JuQuadraticApproximationEngine

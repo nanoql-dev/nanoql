@@ -15,10 +15,9 @@ C++ harness (docs/porting-playbook.md §9.4), on the evaluation date 15 October 
   then the builder's refusals, their messages QuantLib's: steps after steps per year and the reverse, samples after a
   tolerance and the reverse, a tolerance under low-discrepancy numbers, and no steps.
 
-Left out (the S-hes plan's §2.10): steps whose a·dt falls below the hybrid's step cut, 0.1 (HR6, HR7 (xv)): a year in
-one step at the reversion 0.1, quarters at 0.5; structures off the process's reference date and day counter (HR7
-(xix)); a forward process on another curve (HR10); and a seed of 0, QuantLib's seed from the clock, which nanoql
-refuses (the master plan's S2R4): every case sets its seed first.
+Left out: steps whose a·dt falls below the hybrid's step cut, 0.1: a year in one step at the reversion 0.1, quarters at
+0.5; structures off the process's reference date and day counter; a forward process on another curve; and a seed of 0,
+QuantLib's seed from the clock, which nanoql refuses: every case sets its seed first.
 
 A path case holds the "process", "exerciseTime", "optionType", "strikes", "times" and "paths" (one list of values per
 asset, each of the grid's size); a builder case the "traits", the "process", the "optionType", "strike", "exerciseDate"

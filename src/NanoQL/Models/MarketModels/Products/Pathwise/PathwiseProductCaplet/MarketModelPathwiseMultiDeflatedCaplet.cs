@@ -13,12 +13,12 @@ namespace NanoQL.Models;
 /// money-market numeraire, where positive, with its derivatives with respect to each forward up to fᵢ.
 /// </summary>
 /// <remarks>
-/// <para>A working type (the S-mmp plan's MMPR1 (i)).</para>
+/// <para>A working type.</para>
 /// <para>
-/// <b>The deflator's derivative</b> (MMPR4 (vi), a documented divergence): the derivative of P(Tᵢ₊₁)/P(T₀) with respect
-/// to fⱼ is −τⱼ P(Tⱼ₊₁)/P(Tⱼ) times it, τⱼ the rate's own period. QuantLib multiplies by the caplet's accrual aⱼ
-/// (<c>pathwiseproductcaplet.cpp:233</c>), right only where the accruals are the rates' periods: with accruals of
-/// 0.5 × 365/360 its deltas differ from the undeflated caplet's by 3.2e-5 on the same paths
+/// <b>The deflator's derivative</b> (a documented divergence): the derivative of P(Tᵢ₊₁)/P(T₀) with respect to fⱼ is
+/// −τⱼ P(Tⱼ₊₁)/P(Tⱼ) times it, τⱼ the rate's own period. QuantLib multiplies by the caplet's accrual aⱼ
+/// (<c>pathwiseproductcaplet.cpp:233</c>), right only where the accruals are the rates' periods: with accruals of 0.5 ×
+/// 365/360 its deltas differ from the undeflated caplet's by 3.2e-5 on the same paths
 /// (<c>Divergences/MarketModelPathwiseDeflatedCapletTests.cs</c>). Where the accruals are the periods, QuantLib's
 /// amounts.
 /// </para>

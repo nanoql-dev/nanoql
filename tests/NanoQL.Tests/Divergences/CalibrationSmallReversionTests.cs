@@ -10,14 +10,14 @@ using NanoQL.Tests.Vectors;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// Hull-White calibrations that reach small mean reversion (the S-sr plan's SSR3, and the user's ruling of 2026-10-22
-/// on its premise): QuantLib 1.44's Vasicek B and A cut to their a = 0 forms below √ε and cancel above it
-/// (<c>vasicek.cpp:36-58</c>), and nanoql's are QuantLib's master's, free of the cancellation (#2882). Where a
-/// calibration's optimum lies near a = 0, QuantLib's optimizer reads the cancelling forms: its calibrated parameters and
-/// the cost it reports there are 1.44's arithmetic, not the model's, and a start that 1.44's cancellation turns away
-/// from a = 0 reaches the boundary there instead. The calibrations are <c>models/model.json</c>'s, on their inputs;
-/// that file keeps the outputs S7R6's filter finds stable. QuantLib's check: its cost where its forms hold, at an
-/// ordinary reversion, equal to nanoql's within the tolerance, and its own interior minimum, which nanoql's cost has too.
+/// Hull-White calibrations that reach small mean reversion: QuantLib 1.44's Vasicek B and A cut to their a = 0 forms
+/// below √ε and cancel above it (<c>vasicek.cpp:36-58</c>), and nanoql's are QuantLib's master's, free of the
+/// cancellation (#2882). Where a calibration's optimum lies near a = 0, QuantLib's optimizer reads the cancelling
+/// forms: its calibrated parameters and the cost it reports there are 1.44's arithmetic, not the model's, and a start
+/// that 1.44's cancellation turns away from a = 0 reaches the boundary there instead. The calibrations are
+/// <c>models/model.json</c>'s, on their inputs; that file keeps the outputs its stability filter finds stable.
+/// QuantLib's check: its cost where its forms hold, at an ordinary reversion, equal to nanoql's within the tolerance,
+/// and its own interior minimum, which nanoql's cost has too.
 /// </summary>
 public class CalibrationSmallReversionTests
 {

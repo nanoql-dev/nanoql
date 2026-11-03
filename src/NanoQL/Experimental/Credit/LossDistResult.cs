@@ -11,7 +11,7 @@ namespace NanoQL.Experimental;
 
 /// <summary>
 /// A homogeneous or binomial loss distribution with its by-products: the members QuantLib's
-/// <c>LossDistBinomial</c> and <c>LossDistHomogeneous</c> keep mutable and reset at each call (the S-xcr plan's XR5).
+/// <c>LossDistBinomial</c> and <c>LossDistHomogeneous</c> keep mutable and reset at each call.
 /// </summary>
 /// <param name="Distribution">The loss distribution.</param>
 /// <param name="Size">The number of names, QuantLib's <c>size()</c>.</param>

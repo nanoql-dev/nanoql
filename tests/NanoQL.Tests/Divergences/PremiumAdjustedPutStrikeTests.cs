@@ -8,15 +8,14 @@ using NanoQL.Quotes;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The premium-adjusted puts beyond the non-adjusted delta's range (the S-rx plan's SRXR3 (xi), fixed under R8).
-/// <c>deltaFromStrike</c> returns a premium-adjusted put delta whose size exceeds the foreign discount factor (spot) or
-/// 1 (forward), and <c>strikeFromDelta</c> refuses it through its non-adjusted guess
-/// (<c>blackdeltacalculator.cpp:102-111</c>,
+/// The premium-adjusted puts beyond the non-adjusted delta's range (fixed). <c>deltaFromStrike</c> returns a
+/// premium-adjusted put delta whose size exceeds the foreign discount factor (spot) or 1 (forward), and
+/// <c>strikeFromDelta</c> refuses it through its non-adjusted guess (<c>blackdeltacalculator.cpp:102-111</c>,
 /// <c>:143-147</c>): with spot 1, discount factors 0.99 and 0.97 and a standard deviation of 0.2, the strikes 1.4, 2.0
-/// and 3.0 give deltas QuantLib refuses as "Spot delta out of range." and "Forward delta out of range." [executed on
-/// the wheel]. nanoql starts QuantLib's Brent from the forward on QuantLib's own bracket, <c>[0, 100·spot]</c>
-/// (<c>:150</c>), where the guess is out of range. QuantLib's check: its own <c>deltaFromStrike</c> at the solved
-/// strike, and the strikes the deltas came from.
+/// and 3.0 give deltas QuantLib refuses as "Spot delta out of range." and "Forward delta out of range."
+/// (QuantLib-Python 1.44). nanoql starts QuantLib's Brent from the forward on QuantLib's own bracket, <c>[0,
+/// 100·spot]</c> (<c>:150</c>), where the guess is out of range. QuantLib's check: its own <c>deltaFromStrike</c> at
+/// the solved strike, and the strikes the deltas came from.
 /// </summary>
 public class PremiumAdjustedPutStrikeTests
 {

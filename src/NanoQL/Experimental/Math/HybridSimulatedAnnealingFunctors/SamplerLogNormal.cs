@@ -14,8 +14,8 @@ namespace NanoQL.Experimental;
 /// side of the real line only: QuantLib's <c>SamplerLogNormal</c>.
 /// </summary>
 /// <remarks>
-/// Its draws are <c>std::normal_distribution&lt;Real&gt;(0.0, 1.0)</c> on a <c>std::mt19937</c>, as MSVC draws them (the
-/// S-xrt plan's XRD4), on the seed, which is required: QuantLib's default seeds from the clock (XRD3). A working type.
+/// Its draws are <c>std::normal_distribution&lt;Real&gt;(0.0, 1.0)</c> on a <c>std::mt19937</c>, as MSVC draws them, on
+/// the seed, which is required: QuantLib's default seeds from the clock. A working type.
 /// </remarks>
 [Experimental("NQL0001")]
 [WorkingType]

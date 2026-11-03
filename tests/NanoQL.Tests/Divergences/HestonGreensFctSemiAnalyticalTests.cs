@@ -11,11 +11,11 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// <see cref="FdmHestonGreensFct"/>'s semi-analytical algorithm reads <see cref="HestonProcess.Pdf"/>, S-van's fixed
-/// density (the S-van plan's §2.8, <c>Divergences/HestonPdfTests.cs</c>), where QuantLib 1.44's returns NaN at every
-/// point: on the equity Heston process at 0.02 years, the plain and log transformations, QuantLib's Green's function is
-/// NaN at each of the nine points below (the harness, <c>FdmHestonGreensFct::get</c>); nanoql's is the density at each
-/// node, times v under the log transformation, positive and finite.
+/// <see cref="FdmHestonGreensFct"/>'s semi-analytical algorithm reads <see cref="HestonProcess.Pdf"/>, the fixed
+/// density (<c>Divergences/HestonPdfTests.cs</c>), where QuantLib 1.44's returns NaN at every point: on the equity
+/// Heston process at 0.02 years, the plain and log transformations, QuantLib's Green's function is NaN at each of the
+/// nine points below (the harness, <c>FdmHestonGreensFct::get</c>); nanoql's is the density at each node, times v under
+/// the log transformation, positive and finite.
 /// </summary>
 public class HestonGreensFctSemiAnalyticalTests
 {

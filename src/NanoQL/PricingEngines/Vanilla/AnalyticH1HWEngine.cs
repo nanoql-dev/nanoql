@@ -18,18 +18,18 @@ namespace NanoQL.PricingEngines;
 /// <remarks>
 /// <para>
 /// The approximation replaces √v_t in the equity-rate covariance by a fit E[√v_t] ≈ a + b·e^{−ct}, its term I₄ added to
-/// <see cref="AnalyticHestonHullWhiteEngine"/>'s. QuantLib's values are corrected where they're wrong (R8):
+/// <see cref="AnalyticHestonHullWhiteEngine"/>'s. QuantLib's values are corrected where they're wrong:
 /// </para>
 /// <list type="bullet">
-/// <item><description>Where the fit has no decaying exponential, the ratio (Λ − a)/b that gives c at or below 0, or
-/// b = 0, c is the limit c = +∞, the b terms dropped, and at or above 1 the limit c = 0, its b terms b·T and
-/// −b(1 − e^{−λT})/λ; QuantLib's c is NaN there, and so is its price, at ρ_Sr = 0 too, or the fit grows exponentially
-/// (the S-hes plan's HR7 (xxviii)). In between, QuantLib's fit and bits.</description></item>
+/// <item><description>Where the fit has no decaying exponential, the ratio (Λ − a)/b that gives c at or below 0, or b =
+/// 0, c is the limit c = +∞, the b terms dropped, and at or above 1 the limit c = 0, its b terms b·T and −b(1 −
+/// e^{−λT})/λ; QuantLib's c is NaN there, and so is its price, at ρ_Sr = 0 too, or the fit grows exponentially. In
+/// between, QuantLib's fit and bits.</description></item>
 /// <item><description>I₄'s last term is b·e^{−cT}·(−expm1((c − λ)T))/(c − λ), with its limit −b·T·e^{−cT} at c = λ,
 /// where QuantLib's b/(c − λ) is 0/0, and below λT = 2e-2, where I₄'s terms cancel to order λ and QuantLib's double
 /// departs from the expression's exact value by more than 1e-12 relative, I₄ is evaluated in double-double, below 1e-10
 /// in quad-double and below 1e-12 by the cubic through four quad-double values, the cut and floors measured against the
-/// expression in 120 digits (HR7 (xvi), HR6; D3-4 of the S-hes run record).</description></item>
+/// expression in 120 digits.</description></item>
 /// </list>
 /// <para>
 /// References: Lech A. Grzelak, Cornelis W. Oosterlee, On The Heston Model with Stochastic; Lech A. Grzelak, Equity and
@@ -38,9 +38,8 @@ namespace NanoQL.PricingEngines;
 /// </remarks>
 public sealed class AnalyticH1HWEngine : AnalyticHestonHullWhiteEngine
 {
-    // the lambda T below which I4 runs in double-double (HR7 (xvi)), where QuantLib's double departs from the expression's
-    // exact value by more than 1e-12 relative, its error about 2·eps/(lambda T)²; measured against 120 digits (D3-4 of the
-    // S-hes run record)
+    // the lambda T below which I4 runs in double-double, where QuantLib's double departs from the expression's exact
+    // value by more than 1e-12 relative, its error about 2·eps/(lambda T)²; measured against 120 digits
     private const double I4Cut = 2e-2;
 
     // the lambda T below which double-double departs by more than 1e-12 and quad-double takes over, and below which the
@@ -208,7 +207,7 @@ public sealed class AnalyticH1HWEngine : AnalyticHestonHullWhiteEngine
             }
         }
 
-        // where the fit's ratio puts it: a decaying exponential in (0, 1), QuantLib's; c's limits outside (HR7 (xxviii))
+        // where the fit's ratio puts it: a decaying exponential in (0, 1), QuantLib's; c's limits outside
         private static Fit FitOf(double ratio, double b) =>
             b == 0.0 || !(ratio > 0.0) ? Fit.NoExponential
             : ratio >= 1.0 ? Fit.Constant
@@ -257,7 +256,7 @@ public sealed class AnalyticH1HWEngine : AnalyticHestonHullWhiteEngine
         }
     }
 
-    // the fit E[sqrt(v_t)] = a + b e^{-ct}: QuantLib's decaying exponential, or c's limits (HR7 (xxviii))
+    // the fit E[sqrt(v_t)] = a + b e^{-ct}: QuantLib's decaying exponential, or c's limits
     private enum Fit
     {
         Decaying,
@@ -265,12 +264,12 @@ public sealed class AnalyticH1HWEngine : AnalyticHestonHullWhiteEngine
         Constant,
     }
 
-    // I4's real factor as a function of lambda, the Hull-White reversion; its last term b e^{-cT}(-expm1((c - lambda) T))/(c - lambda),
-    // -b T e^{-cT} at c = lambda (HR7 (xvi)). Each term runs in the arithmetic: aT against a/lambda (e^{-lambda T} - 1),
-    // and b/c (1 - e^{-cT}) against the last term, each pair cancels to order lambda, so a rounding in either is divided
-    // by lambda (D3-4 of the S-hes run record); in double the first three terms and their sum are QuantLib's operations
-    // in its order, not its bits: the last term is the expm1 form, and -1/lambda multiplies the sum where QuantLib
-    // multiplies (u^2, -/+u) by -1/lambda first
+    // I4's real factor as a function of lambda, the Hull-White reversion; its last term b e^{-cT}(-expm1((c - lambda)
+    // T))/(c - lambda), -b T e^{-cT} at c = lambda. Each term runs in the arithmetic: aT against a/lambda (e^{-lambda
+    // T} - 1), and b/c (1 - e^{-cT}) against the last term, each pair cancels to order lambda, so a rounding in either
+    // is divided by lambda; in double the first three terms and their sum are QuantLib's operations in its order, not
+    // its bits: the last term is the expm1 form, and -1/lambda multiplies the sum where QuantLib multiplies (u^2, -/+u)
+    // by -1/lambda first
     private readonly struct I4Factor(double a, double b, double c, double term, Fit fit) : IKappaTExpression
     {
         public T Evaluate<T>(T lambda)

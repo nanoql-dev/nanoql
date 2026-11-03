@@ -12,7 +12,7 @@ namespace NanoQL.PricingEngines;
 
 /// <summary>The European path pricer of a Heston-like multi-path: a plain vanilla payoff on the first asset's last value,
 /// discounted.</summary>
-/// <remarks>Immutable; its evaluation allocates nothing (the S-hes plan's HR2 (iii)).</remarks>
+/// <remarks>Immutable; its evaluation allocates nothing.</remarks>
 public sealed class EuropeanHestonPathPricer : PathPricer<MultiPath>
 {
     private readonly PlainVanillaPayoff payoff;

@@ -15,8 +15,8 @@ namespace NanoQL.Tests.Divergences;
 /// (<c>mcperformanceengine.hpp:141-149</c>) and the time grid merges a reset at time 0 into its start, so QuantLib's
 /// path pricer refuses on its count check ("discounts/options mismatch", <c>mcperformanceengine.cpp:33</c>), where the
 /// analytic engine prices 0.125531. nanoql's path pricer reads each reset's index from the grid, as QuantLib's Monte
-/// Carlo forward engines do (the S-exo plan's ER5 (xxxix)). The checks: the analytic engine (QuantLib's bits) within
-/// two of the Monte Carlo error estimates; with the first reset a day later, QuantLib's Monte Carlo value, bit for bit.
+/// Carlo forward engines do. The checks: the analytic engine (QuantLib's bits) within two of the Monte Carlo error
+/// estimates; with the first reset a day later, QuantLib's Monte Carlo value, bit for bit.
 /// </summary>
 public class McPerformanceResetTodayTests
 {

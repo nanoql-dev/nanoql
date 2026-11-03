@@ -17,9 +17,8 @@ namespace NanoQL.Instruments;
 /// <remarks>
 /// Immutable. The date times are sorted together, where QuantLib's Bermudan base sorts the dates and leaves the seconds
 /// in the order given, so that date times given out of order are paired wrongly; and a fixed step of a day or more
-/// moves as many days as it holds, where QuantLib's moves one, so that a two-day step exercises daily (run finds of the
-/// S-van plan's C4, under R8). In order, and at steps under a day, they are QuantLib's. Two equal date times are
-/// refused, with QuantLib's message.
+/// moves as many days as it holds, where QuantLib's moves one, so that a two-day step exercises daily. In order, and at
+/// steps under a day, they are QuantLib's. Two equal date times are refused, with QuantLib's message.
 /// </remarks>
 public sealed class SwingExercise : BermudanExercise
 {
@@ -135,7 +134,7 @@ public sealed class SwingExercise : BermudanExercise
     }
 
     // createDateTimes: from the start of from, a step at a time while the date is at most to; a step of a day or more
-    // passes as many dates as it holds days, where QuantLib's passes one (a run find, under R8)
+    // passes as many dates as it holds days, where QuantLib's passes one (a run find)
     private static (ImmutableArray<NanoQL.Time.Date> Dates, ImmutableArray<int> Seconds) CreateDateTimes(
         NanoQL.Time.Date from, NanoQL.Time.Date to, int stepSizeSecs)
     {

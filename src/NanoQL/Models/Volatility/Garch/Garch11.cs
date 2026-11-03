@@ -17,11 +17,11 @@ namespace NanoQL.Models;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Immutable (the S-bar plan's BR3 (ii)): a model built from a series is calibrated at construction, and each
-/// <c>Calibrate</c> returns a new model with the receiver's mode, where QuantLib's change the object. The statics are
-/// QuantLib's: <see cref="Calculate(TimeSeries{double}, double, double, double)"/>, <see cref="ToR2"/>,
-/// <see cref="CostFunction"/> and <c>CalibrateR2</c>'s six overloads, each returning the parameters and the
-/// minimization's results that QuantLib writes through its references and returns.
+/// Immutable: a model built from a series is calibrated at construction, and each <c>Calibrate</c> returns a new model
+/// with the receiver's mode, where QuantLib's change the object. The statics are QuantLib's:
+/// <see cref="Calculate(TimeSeries{double}, double, double, double)"/>, <see cref="ToR2"/>, <see cref="CostFunction"/>
+/// and <c>CalibrateR2</c>'s six overloads, each returning the parameters and the minimization's results that QuantLib
+/// writes through its references and returns.
 /// </para>
 /// <para>
 /// Documented divergences:
@@ -29,20 +29,19 @@ namespace NanoQL.Models;
 /// <list type="bullet">
 /// <item><description>A calibration whose minimizer doesn't converge is refused, "GARCH(1,1) calibration did not
 /// converge: optimizer stopped with end criterion …", which the mode-based calibrations catch and fall back to their
-/// initial guess: QuantLib's master (#2844), which 1.44 doesn't check (BR6 (vi),
-/// <c>Divergences/GarchConvergenceTests.cs</c>).</description></item>
-/// <item><description>The cost's gradient is the gradient of its value, the recursive ∂σ²ₜ/∂θ = (1, u²ₜ₋₁, σ²ₜ₋₁) +
-/// β ∂σ²ₜ₋₁/∂θ, where QuantLib's takes the direct term alone, 0.13 to 0.80 times the true gradient; QuantLib's own
-/// paths, the Simplex and the ACF fit, never read it (BR5 (xlii),
-/// <c>Divergences/GarchGradientTests.cs</c>).</description></item>
+/// initial guess: QuantLib's master (#2844), which 1.44 doesn't check
+/// (<c>Divergences/GarchConvergenceTests.cs</c>).</description></item>
+/// <item><description>The cost's gradient is the gradient of its value, the recursive ∂σ²ₜ/∂θ = (1, u²ₜ₋₁, σ²ₜ₋₁) + β
+/// ∂σ²ₜ₋₁/∂θ, where QuantLib's takes the direct term alone, 0.13 to 0.80 times the true gradient; QuantLib's own paths,
+/// the Simplex and the ACF fit, never read it (<c>Divergences/GarchGradientTests.cs</c>).</description></item>
 /// <item><description>The cost refuses a conditional variance that isn't positive, which only the overloads that
-/// subtract the mean from the squared returns can produce, where QuantLib takes its log, NaN (BR5 (xxxvi),
-/// <c>Divergences/GarchDemeanedVarianceTests.cs</c>).</description></item>
+/// subtract the mean from the squared returns can produce, where QuantLib takes its log, NaN
+/// (<c>Divergences/GarchDemeanedVarianceTests.cs</c>).</description></item>
 /// <item><description>A series of fewer than two points is refused by <see cref="Calculate(TimeSeries{double}, double,
-/// double, double)"/>, where QuantLib reads before its start (BR5 (xxxv)).</description></item>
+/// double, double)"/>, where QuantLib reads before its start.</description></item>
 /// <item><description>The mode-based initial guesses fit the autocorrelations by <see cref="NonLinearLeastSquare"/> on
-/// the conjugate gradient, whose returned point is the last one its line search accepted (the S-sr plan's SSR6 (xvii),
-/// <c>Divergences/LineSearchReturnTests.cs</c>), so the Simplex starts a hair from QuantLib's guess and the calibrated
+/// the conjugate gradient, whose returned point is the last one its line search accepted
+/// (<c>Divergences/LineSearchReturnTests.cs</c>), so the Simplex starts a hair from QuantLib's guess and the calibrated
 /// parameters end within its tolerance, 1e-8, of QuantLib's, the log-likelihood the same.</description></item>
 /// <item><description>The second initial guess (the ACF fit's, which <see cref="Garch11Mode.GammaGuess"/> and
 /// <see cref="Garch11Mode.BestOfTwo"/> take) sets α = γ − β, as the first does, where the fit fails or its guess misses
@@ -725,8 +724,8 @@ public sealed class Garch11 : VolatilityCompositor
         }
     }
 
-    // The negated log-likelihood on (ω, α, β) over the squared returns, its gradient the recursive one (BR5 (xlii)),
-    // and a conditional variance that isn't positive refused (BR5 (xxxvi))
+    // The negated log-likelihood on (ω, α, β) over the squared returns, its gradient the recursive one, and a
+    // conditional variance that isn't positive refused
     private sealed class Garch11CostFunction(double[] r2) : CostFunction
     {
         public override double Value(Vector x)

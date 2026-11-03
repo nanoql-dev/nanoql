@@ -10,10 +10,10 @@ using NanoQL.Tests.Vectors;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// Zero resets per coupon (the S-cms plan's CMR5 (xiv)): QuantLib's checks of the resets per coupon are themselves a
-/// modulo by them (<c>multipleresetscoupon.cpp:159</c>, <c>multipleresetsswap.cpp:57</c>), and the swap divides by them
-/// in its base constructor's arguments before (<c>multipleresetsswap.cpp:49</c>), so zero resets is an integer division
-/// by zero, undefined behaviour, which no check refuses. nanoql's leg and swap refuse zero resets first, naming them.
+/// Zero resets per coupon: QuantLib's checks of the resets per coupon are themselves a modulo by them
+/// (<c>multipleresetscoupon.cpp:159</c>, <c>multipleresetsswap.cpp:57</c>), and the swap divides by them in its base
+/// constructor's arguments before (<c>multipleresetsswap.cpp:49</c>), so zero resets is an integer division by zero,
+/// undefined behaviour, which no check refuses. nanoql's leg and swap refuse zero resets first, naming them.
 /// </summary>
 public class MultipleResetsZeroResetsTests
 {

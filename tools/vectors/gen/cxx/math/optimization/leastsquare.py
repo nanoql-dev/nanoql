@@ -5,8 +5,7 @@ each output computed by the C++ harness on its problem, the fit of a·exp(b·x) 
 values and gradient at points, and the non-linear least-squares fit by the default conjugate gradient from initial
 values at two accuracies and two iteration limits, its residual norm, last value and exit flag. The fit's results are
 generated and left out: the conjugate gradient's returned point is the last one its line search accepted
-(Divergences/LineSearchReturnTests.cs, the S-sr plan's SSR6 (xvii)), where QuantLib's is the point before; its cost,
-the residual norm, is the same.
+(Divergences/LineSearchReturnTests.cs), where QuantLib's is the point before; its cost, the residual norm, is the same.
 
 The harness unit is tools/cxx/src/math/optimization/leastsquare.cpp. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Numerics/Optimization/LeastSquare/LeastSquareCxxVectorTests.cs."""

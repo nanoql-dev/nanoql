@@ -15,10 +15,9 @@ namespace NanoQL.Experimental;
 /// </summary>
 /// <remarks>
 /// δ squares at each round's first walk from the second round, so the fireflies of round r walk at δ₀^(2^(r − 1)).
-/// QuantLib's counts its walks and restarts the count at 0 on the call that squares, itself the next round's first walk,
-/// so δ squares once every Mfa + 1 walks, at a drifting place within the round, and with one firefly every second round
-/// (the S-xrt code review's F4-2, fixed under R8; <c>Divergences/FireflyAlgorithmTests.cs</c>). Each minimization
-/// starts again from the given δ.
+/// QuantLib's counts its walks and restarts the count at 0 on the call that squares, itself the next round's first
+/// walk, so δ squares once every Mfa + 1 walks, at a drifting place within the round, and with one firefly every second
+/// round (<c>Divergences/FireflyAlgorithmTests.cs</c>). Each minimization starts again from the given δ.
 /// </remarks>
 [Experimental("NQL0001")]
 public sealed class DecreasingGaussianWalk : GaussianWalk
@@ -46,7 +45,7 @@ public sealed class DecreasingGaussianWalk : GaussianWalk
         iteration++;
         if (iteration > Mfa)
         {
-            // every time all the fireflies have been processed, this walk the next round's first (F4-2)
+            // every time all the fireflies have been processed, this walk the next round's first
             iteration = 1;
             Delta *= Delta;
         }

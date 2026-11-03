@@ -6,9 +6,9 @@ using NanoQL.Quotes;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The ATM quote's delta (the S-rx plan's SRXR3 (viii)). QuantLib's ATM constructor leaves <c>delta_</c> uninitialized
+/// The ATM quote's delta. QuantLib's ATM constructor leaves <c>delta_</c> uninitialized
 /// (<c>deltavolquote.cpp:32-37</c>), so its <c>delta()</c> reads whatever the memory held: on the wheel, after a
-/// 25-delta quote, 0.25 [executed on the wheel]. Here an ATM quote has no delta, <see langword="null"/> (R3); the
+/// 25-delta quote, 0.25 (QuantLib-Python 1.44). Here an ATM quote has no delta, <see langword="null"/>; the
 /// delta-and-volatility constructor's is the one given, as QuantLib's. QuantLib's check: that constructor, unchanged.
 /// </summary>
 public class DeltaVolQuoteAtmDeltaTests

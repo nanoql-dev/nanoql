@@ -9,9 +9,8 @@ Rate grids: six semi-annual rates and five irregular ones; a total coupon the pa
 reaches (paid up at the last rate), strikes and multipliers per rate, spreads; accruals off the rate taus.
 
 Left out: floating payment times other than the fixed ones, where QuantLib discounts the floating coupons at the fixed
-times (the S-mmp plan's MMPR4 (x), tests/NanoQL.Tests/Divergences/MultiStepTarnPaymentTimesTests.cs); and, nanoql
-refusing them, QuantLib reading past its inputs (tests/NanoQL.Tests/Conventions/MarketModelProductTests.cs), inputs
-not one a rate.
+times (tests/NanoQL.Tests/Divergences/MultiStepTarnPaymentTimesTests.cs); and, nanoql refusing them, QuantLib reading
+past its inputs (tests/NanoQL.Tests/Conventions/MarketModelProductTests.cs), inputs not one a rate.
 
 The harness units are tools/cxx/src/models/marketmodels/products/products.cpp and
 tools/cxx/src/models/marketmodels/accountingengine.cpp. Read back by

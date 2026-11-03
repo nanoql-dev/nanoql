@@ -10,7 +10,7 @@ in one currency and in two, under NoConversion, BaseCurrencyConversion (base EUR
 with EUR/USD and EUR/GBP rates in the registry (and a pair with no rate between them): the sum, the difference, the
 ratio, ==, !=, <, <=, > and >=; close and close_enough, which the wheel doesn't bind for Money, are QuantLib's
 testComparisons'. QuantLib's == and != throw on a currency mismatch under NoConversion, where nanoql's operators return
-false and true (U7; MoneyVectorTests maps the throws).
+false and true (MoneyVectorTests maps the throws).
 
 A single case holds {"money": {"currency" (a code, or null for the empty currency), "value"}, "factor"}; a pair case
 holds "m1" and "m2" and its settings' exchangeRates and moneySettings. A money output is two outputs, "<name>Currency"

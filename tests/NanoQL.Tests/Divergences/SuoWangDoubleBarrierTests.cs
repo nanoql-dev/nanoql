@@ -13,16 +13,15 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The Suo-Wang double-barrier engine's four classes (the S-xeq plan's XER5 (iii)–(vi), fixed under R8). QuantLib clips
-/// one strike limit only (<c>suowangdoublebarrierengine.cpp:54-55</c>, #2881's class), so a knock-out call struck
-/// above H prices −0.1694572673, a put struck below L −0.3467932631, and the knock-in call 0.9992298671 against the
-/// analytic engine's 0.8297725998; it sums ten terms from −5 to 4 (<c>:77</c>), 0.004975355507 on a narrow corridor
-/// over two years where 50 terms give −3.5e-13 and the binomial engine 1e-70; it ignores the rebate, 1.454185879 with a
-/// rebate of 5 as without where the binomial Derman-Kani engine gives 3.982 (knock-in 6.818712906 against 9.194); and
-/// its powers overflow to NaN at a volatility of 1e-4 and of 0 [executed: the planner's <c>xp_c1.cpp sw</c>,
-/// <c>out_xp_c1_sw.txt</c>]. nanoql clips both limits to the corridor, converges the series, prices the rebate as
-/// S-bar's analytic engine does and takes the analytic engine's knock-out where a term overflows. Checks: S-bar's
-/// analytic engine, QuantLib's binomial Derman-Kani values, the deterministic limit.
+/// The Suo-Wang double-barrier engine's four classes (fixed). QuantLib clips one strike limit only
+/// (<c>suowangdoublebarrierengine.cpp:54-55</c>, #2881's class), so a knock-out call struck above H prices
+/// −0.1694572673, a put struck below L −0.3467932631, and the knock-in call 0.9992298671 against the analytic engine's
+/// 0.8297725998; it sums ten terms from −5 to 4 (<c>:77</c>), 0.004975355507 on a narrow corridor over two years where
+/// 50 terms give −3.5e-13 and the binomial engine 1e-70; it ignores the rebate, 1.454185879 with a rebate of 5 as
+/// without where the binomial Derman-Kani engine gives 3.982 (knock-in 6.818712906 against 9.194); and its powers
+/// overflow to NaN at a volatility of 1e-4 and of 0 (QuantLib 1.44). nanoql clips both limits to the corridor,
+/// converges the series, prices the rebate as the analytic engine does and takes the analytic engine's knock-out where
+/// a term overflows. Checks: the analytic engine, QuantLib's binomial Derman-Kani values, the deterministic limit.
 /// </summary>
 public class SuoWangDoubleBarrierTests
 {
@@ -108,8 +107,8 @@ public class SuoWangDoubleBarrierTests
     [Fact]
     public void AtAVolatilityOfAFewPercentCancellingSumsGiveWayToTheAnalyticEngine()
     {
-        // the code review's O1-3: QuantLib's Suo-Wang and analytic engines both give 14.2213591215, its CRR binomial
-        // engine 13.6845, 13.6745 and 13.6674 at 2,000, 8,000 and 32,000 steps, converging on the analytic value
+        // QuantLib's Suo-Wang and analytic engines both give 14.2213591215, its CRR binomial engine 13.6845, 13.6745
+        // and 13.6674 at 2,000, 8,000 and 32,000 steps, converging on the analytic value
         DoubleBarrierOption option = Option(DoubleBarrierType.KnockOut, 80.0, 120.0, 0.0, OptionType.Call, 95.0, 1095);
         GeneralizedBlackScholesProcess process = Process(0.02);
 
@@ -131,7 +130,7 @@ public class SuoWangDoubleBarrierTests
     [InlineData(0.03, OptionType.Put, 105.0)]
     public void TheKnockOutIsTheAnalyticEnginesWithinTheSumsAgreement(double volatility, OptionType type, double strike)
     {
-        // the code review's sweep band, σ 1% to 3%, three years on [80, 120]: knock-outs and knock-ins
+        // a sweep band, σ 1% to 3%, three years on [80, 120]: knock-outs and knock-ins
         GeneralizedBlackScholesProcess process = Process(volatility);
         foreach (DoubleBarrierType barrierType in new[] { DoubleBarrierType.KnockOut, DoubleBarrierType.KnockIn })
         {
@@ -167,7 +166,7 @@ public class SuoWangDoubleBarrierTests
         DoubleBarrierType type, double lo, double hi, double rebate, OptionType optionType, double strike, int days) =>
         new(type, lo, hi, rebate, new PlainVanillaPayoff(optionType, strike), new EuropeanExercise(Today + days));
 
-    // the planner's market: S 100, q 0, r 0.05 on Actual/365F
+    // the market: S 100, q 0, r 0.05 on Actual/365F
     private static GeneralizedBlackScholesProcess Process(double volatility) =>
         new BlackScholesMertonProcess(
             100.0,

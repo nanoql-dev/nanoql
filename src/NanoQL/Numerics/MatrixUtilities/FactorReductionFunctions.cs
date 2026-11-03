@@ -17,14 +17,14 @@ namespace NanoQL.Numerics;
 /// <para>
 /// It assumes the reduction is possible: where the dependence isn't one factor's, loadings may exceed 1. QuantLib reads
 /// the loadings from the matrix's row at the largest eigenvalue's index, the input's first row, where its own
-/// commented-out eigenvectors belong: on a one-factor matrix with loadings (0.9, 0.7, 0.5, 0.3, 0.8) it returns
-/// (0.546, 0.63, 0.45, 0.27, 0.72). Here the loadings are the principal eigenvector, its sign the decomposition's (the
-/// first loading positive), times the root of its eigenvalue, on the diagonal patched with their squares, which
-/// returns the one-factor matrix's loadings exactly; the relative change that stops the iteration divides by the
-/// previous loading's magnitude, so a negative loading converges too, and a loading of exactly 0 counts its successor's
-/// magnitude, where 0/0 would stop the iteration at its first pass whenever the first loading is 0. And QuantLib refuses a reduction that converges
-/// on its last allowed pass; here only one that hasn't converged is refused (the S-core plan's CR7 (iv), a documented
-/// divergence). A matrix below 2 × 2, where QuantLib's initial guess divides by 0, is refused (CR7 (xxix)).
+/// commented-out eigenvectors belong: on a one-factor matrix with loadings (0.9, 0.7, 0.5, 0.3, 0.8) it returns (0.546,
+/// 0.63, 0.45, 0.27, 0.72). Here the loadings are the principal eigenvector, its sign the decomposition's (the first
+/// loading positive), times the root of its eigenvalue, on the diagonal patched with their squares, which returns the
+/// one-factor matrix's loadings exactly; the relative change that stops the iteration divides by the previous loading's
+/// magnitude, so a negative loading converges too, and a loading of exactly 0 counts its successor's magnitude, where
+/// 0/0 would stop the iteration at its first pass whenever the first loading is 0. And QuantLib refuses a reduction
+/// that converges on its last allowed pass; here only one that hasn't converged is refused (a documented divergence). A
+/// matrix below 2 × 2, where QuantLib's initial guess divides by 0, is refused.
 /// </para>
 /// </remarks>
 public static class FactorReductionFunctions

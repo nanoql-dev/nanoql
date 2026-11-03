@@ -17,16 +17,16 @@ lattice overload, its oracle); a BlackKarasinski (a = 0.1, sigma = 0.1) with 30 
 sigma = 0.009) with the discount curve given to the engine, with 50 steps; and a G2 (a = 0.07, sigma = 0.011, b = 0.3,
 eta = 0.008, rho = -0.6) with 10 steps, on its two-dimensional tree.
 
-Generated and left out: the instruments with two fixing days, each caplet fixed before its start, which QuantLib's
-tree exercises at its start and nanoql's at its fixing (the S-sr plan's B1-1, ruled by the user on 2026-10-22;
-tests/NanoQL.Tests/Divergences/CapletFixingExpiryTests.cs); the instruments whose first caplet is fixed on or before
-the evaluation date and starts after it (every instrument from the spot date), and the seasoned ones, whose earlier starts QuantLib's grid refuses ("negative
-times not allowed"), since nanoql's discretized cap knows a caplet by its fixing date and keeps only the non-negative
-times (the S-sr plan's SSR6 (iv), widened; tests/NanoQL.Tests/Divergences/TreeCapFloorSeasonedTests.cs,
-TreeKnownCouponTests.cs); and every price on the Cox-Ingersoll-Ross trees, which are QuantLib's before 1.23 (SSR7,
-K2). The wheel's TreeCapFloorEngine is the proxy of the C++ constructors, on a model and time steps or a TimeGrid,
-with an optional term structure (QuantLib-SWIG 1.44, SWIG/capfloor.i). Each case's inputs hold the instrument, the
-discount curve, the engines ({"model", the model's parameters, "steps" or "grid"}) and the grid's times. Read back by
+Generated and left out: the instruments with two fixing days, each caplet fixed before its start, which QuantLib's tree
+exercises at its start and nanoql's at its fixing (tests/NanoQL.Tests/Divergences/CapletFixingExpiryTests.cs); the
+instruments whose first caplet is fixed on or before the evaluation date and starts after it (every instrument from the
+spot date), and the seasoned ones, whose earlier starts QuantLib's grid refuses ("negative times not allowed"), since
+nanoql's discretized cap knows a caplet by its fixing date and keeps only the non-negative times (widened;
+tests/NanoQL.Tests/Divergences/TreeCapFloorSeasonedTests.cs, TreeKnownCouponTests.cs); and every price on the
+Cox-Ingersoll-Ross trees, which are QuantLib's before 1.23. The wheel's TreeCapFloorEngine is the proxy of the C++
+constructors, on a model and time steps or a TimeGrid, with an optional term structure (QuantLib-SWIG 1.44,
+SWIG/capfloor.i). Each case's inputs hold the instrument, the discount curve, the engines ({"model", the model's
+parameters, "steps" or "grid"}) and the grid's times. Read back by
 tests/NanoQL.Tests/Vectors/PricingEngines/TreeCapFloorEngineVectorTests.cs."""
 import importlib.util
 import os

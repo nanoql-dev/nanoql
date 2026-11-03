@@ -5,11 +5,11 @@ wheel doesn't expose, each output computed by the C++ harness
 (tools/cxx/src/experimental/commodities/commoditycurve.cpp): a curve's node times, last date and prices before, at,
 between and after its nodes, forward-flat, on a basis curve and on nearby contracts.
 
-QuantLib reads a basis curve at the outer curve's time (the S-xrt plan's XRR5 (xi)) and converts its price backward
-(XRR5 (i)), so every basis curve shares its curve's reference date, day counter and unit, where both readings agree;
-the curves are the constructor from dates, which the test also builds through CommodityCurve.Create and SetPrices on
-the same dates, from the evaluation date, where QuantLib's setPrices measures the node times from the first date
-(XRR5 (x)). Read back by tests/NanoQL.Tests/Vectors/Cxx/Experimental/Commodities/CommodityCurveCxxVectorTests.cs."""
+QuantLib reads a basis curve at the outer curve's time and converts its price backward, so every basis curve shares its
+curve's reference date, day counter and unit, where both readings agree; the curves are the constructor from dates,
+which the test also builds through CommodityCurve.Create and SetPrices on the same dates, from the evaluation date,
+where QuantLib's setPrices measures the node times from the first date. Read back by
+tests/NanoQL.Tests/Vectors/Cxx/Experimental/Commodities/CommodityCurveCxxVectorTests.cs."""
 import importlib.util
 import os
 import sys

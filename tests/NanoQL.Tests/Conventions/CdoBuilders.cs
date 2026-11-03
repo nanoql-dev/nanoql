@@ -10,8 +10,8 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The CDO facts' common inputs, the S-xcr run's <c>c2_facts.cpp</c>'s: eight names at hazards 1% to 3% and notional 10,
-/// an inhomogeneous pool model at correlation 0.3, the tests' discount curve and five-year schedule.
+/// The CDO facts' common inputs: eight names at hazards 1% to 3% and notional 10, an inhomogeneous pool model at
+/// correlation 0.3, the tests' discount curve and five-year schedule.
 /// </summary>
 internal static class CdoBuilders
 {

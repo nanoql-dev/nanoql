@@ -12,7 +12,7 @@ namespace NanoQL.Experimental;
 /// QuantLib's absorption table for the no-arbitrage SABR model, <c>sabrabsprob</c>: 1,209,600 counts of paths absorbed
 /// at zero out of 2,500,000 simulated on Doust's grid of expiries, initial volatilities, correlations, volatilities of
 /// volatility and betas, generated from the pin by <c>tools/tables/noarbsabrabsprobs.py</c> into the embedded
-/// <c>NoArbSabrAbsProbs.bin</c> and read once (the S-xeq plan's XED4).
+/// <c>NoArbSabrAbsProbs.bin</c> and read once.
 /// </summary>
 internal static class NoArbSabrAbsProbs
 {

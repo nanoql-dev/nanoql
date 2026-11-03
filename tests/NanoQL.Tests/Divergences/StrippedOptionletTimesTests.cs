@@ -15,7 +15,7 @@ namespace NanoQL.Tests.Divergences;
 /// times are 0.4958904109589041, 0.9945205479452055 and 1.4958904109589042 and its adapter gives 0.22 at the second date
 /// and 2%; with the evaluation date moved to 16 September the times stay, the adapter's reference date is 18 September,
 /// and it gives 0.2098901098901099 there; a stripped optionlet built on 16 September has the times 0.24383561643835616,
-/// 0.7424657534246575 and 1.2438356164383562 and gives 0.22. nanoql's objects have fixed dates (R1): an adapter is built
+/// 0.7424657534246575 and 1.2438356164383562 and gives 0.22. nanoql's objects have fixed dates: an adapter is built
 /// under a context. The stripped optionlet's times are frozen as QuantLib's are, so its adapter under the later context
 /// gives QuantLib's moved value, and the optionlet and adapter built under that context QuantLib's fresh one.
 /// </summary>

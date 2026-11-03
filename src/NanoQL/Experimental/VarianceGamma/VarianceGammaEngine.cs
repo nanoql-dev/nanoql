@@ -18,17 +18,16 @@ namespace NanoQL.Experimental;
 /// <remarks>
 /// <para>
 /// Each curve's discount is read by date, nothing accrued before its own date, and the time on the risk-free clock
-/// from its reference date, as QuantLib's (the S-xeq plan's XER5 (xxxiii)).
+/// from its reference date, as QuantLib's.
 /// </para>
 /// <para>
-/// Documented divergences (<c>Divergences/VarianceGammaEngineTests.cs</c>). The gamma density is computed in logs
-/// where QuantLib's denominator, Γ(t/ν)·ν^(t/ν), isn't finite and nonzero (t/ν past about 170, ν at most 0.005 at a
-/// year), where QuantLib's product of an overflow and an underflow makes the integrand NaN and the integration throws;
-/// elsewhere QuantLib's form stands (XER5 (xvi)); and where ν &lt; t/100 the integration's bound starts at t + 15√(νt),
-/// beyond the gamma time's mean, where QuantLib's 15√(νt) lies below it once ν &lt; t/225 and misses the whole mass
-/// (the S-xeq run's R2-4). Where 1 − θν − σ²ν/2 isn't positive the spot's mean is infinite and
-/// no risk-neutral price exists: the engine refuses, where QuantLib throws "forward (-nan(ind)) must be positive"
-/// (XER5 (xvii)).
+/// Documented divergences (<c>Divergences/VarianceGammaEngineTests.cs</c>). The gamma density is computed in logs where
+/// QuantLib's denominator, Γ(t/ν)·ν^(t/ν), isn't finite and nonzero (t/ν past about 170, ν at most 0.005 at a year),
+/// where QuantLib's product of an overflow and an underflow makes the integrand NaN and the integration throws;
+/// elsewhere QuantLib's form stands; and where ν &lt; t/100 the integration's bound starts at t + 15√(νt), beyond the
+/// gamma time's mean, where QuantLib's 15√(νt) lies below it once ν &lt; t/225 and misses the whole mass. Where 1 − θν
+/// − σ²ν/2 isn't positive the spot's mean is infinite and no risk-neutral price exists: the engine refuses, where
+/// QuantLib throws "forward (-nan(ind)) must be positive".
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]
@@ -65,7 +64,7 @@ public static class VarianceGammaEngine
         return option.FetchResults(new OneAssetOptionResults { NPV = Value(option, process, absoluteError) });
     }
 
-    // QuantLib's 1 − θν − σ²ν/2 > 0, the spot's first moment, without which no price exists (XER5 (xvii))
+    // QuantLib's 1 − θν − σ²ν/2 > 0, the spot's first moment, without which no price exists
     internal static void CheckMoment(double sigma, double nu, double theta)
     {
         if (!(1.0 - (theta * nu) - (sigma * sigma * nu / 2.0) > 0.0))
@@ -102,7 +101,7 @@ public static class VarianceGammaEngine
 
         double infinity = 15.0 * Math.Sqrt(process.Nu * t);
 
-        // beyond the gamma time's mean where QuantLib's start lies near or below it (R2-4)
+        // beyond the gamma time's mean where QuantLib's start lies near or below it
         if (process.Nu < t / 100.0)
         {
             infinity += t;
@@ -127,7 +126,7 @@ public static class VarianceGammaEngine
     }
 
     // QuantLib's integrand: the Black-Scholes price at the gamma time x times the gamma density, in logs where
-    // QuantLib's denominator isn't finite and nonzero (XER5 (xvi))
+    // QuantLib's denominator isn't finite and nonzero
     private sealed class Integrand
     {
         private readonly StrikedTypePayoff payoff;

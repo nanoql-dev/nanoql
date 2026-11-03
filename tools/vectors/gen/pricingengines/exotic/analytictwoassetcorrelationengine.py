@@ -4,13 +4,13 @@
 (ql/pricingengines/exotic/analytictwoassetcorrelationengine.hpp, .cpp), on the evaluation date 15 October 2026: the
 engine's NPV for European two-asset correlation calls and puts on two Black-Scholes processes, at first and second
 strikes above zero, at correlations from -0.75 to 0.75, on flat and zero curves, flat volatilities and a curve.
-QuantLib's engine reads Drezner's bivariate normal, nanoql's West's (the S-exo plan's ER7, ruled by the user on
-2026-10-25), so every value carries §3.3's override: Drezner's accuracy, |Dr78 − We04DP| ≤ 6e-7 times the bivariate
-terms' coefficients (EP39), relative to the value; 11 cases, 11 overridden outputs. Smiles are left out, where nanoql
-reads the second volatility at X₂ and QuantLib at X₁ (tests/NanoQL.Tests/Divergences/TwoAssetCorrelationSmileTests.cs),
-as are negative second strikes (TwoAssetCorrelationNegativeStrikeTests.cs). The specs: an option {"type", "strike1",
-"strike2", "exercise"} and kirkengine.py's engine. The wheel's calls, by QuantLib-SWIG 1.44's options.i and
-basketoptions.i: TwoAssetCorrelationOption(type, strike1, strike2, exercise); AnalyticTwoAssetCorrelationEngine(p1, p2,
+QuantLib's engine reads Drezner's bivariate normal, nanoql's West's, so every value carries an override
+(docs/porting-playbook.md §7.3): Drezner's accuracy, |Dr78 − We04DP| ≤ 6e-7 times the bivariate terms' coefficients,
+relative to the value; 11 cases, 11 overridden outputs. Smiles are left out, where nanoql reads the second volatility at
+X₂ and QuantLib at X₁ (tests/NanoQL.Tests/Divergences/TwoAssetCorrelationSmileTests.cs), as are negative second strikes
+(TwoAssetCorrelationNegativeStrikeTests.cs). The specs: an option {"type", "strike1", "strike2", "exercise"} and
+kirkengine.py's engine. The wheel's calls, by QuantLib-SWIG 1.44's options.i and basketoptions.i:
+TwoAssetCorrelationOption(type, strike1, strike2, exercise); AnalyticTwoAssetCorrelationEngine(p1, p2,
 QuoteHandle(SimpleQuote(correlation))); NPV. Read back by
 tests/NanoQL.Tests/Vectors/PricingEngines/Exotic/AnalyticTwoAssetCorrelationEngineVectorTests.cs."""
 import importlib.util
@@ -38,8 +38,8 @@ kirk = _load("kirkengine", "pricingengines/basket/kirkengine.py")
 bo, bsp = kirk.bo, kirk.bsp
 R = kirk.R
 CALL, PUT = kirk.CALL, kirk.PUT
-REASON = ("ER7: QuantLib's engine reads Drezner's bivariate normal, nanoql's West's; |Dr78 - We04DP| <= 6e-7 times the "
-          "bivariate terms' coefficients (EP39)")
+REASON = ("QuantLib's engine reads Drezner's bivariate normal, nanoql's West's; |Dr78 - We04DP| <= 6e-7 times the "
+          "bivariate terms' coefficients")
 
 PAIR = [bsp.process_spec("BlackScholesMertonProcess", 52.0, bsp.FLAT_R, bsp.CONSTANT, bsp.FLAT_Q),
         bsp.process_spec("BlackScholesMertonProcess", 65.0, bsp.FLAT_R, bsp.bvts.vol_spec_constant(R, 0.3),

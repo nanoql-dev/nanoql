@@ -11,15 +11,14 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The two-asset knock-in's vanilla (the S-bar plan's BR5 (viii), fixed under R8). QuantLib's <c>call()</c> and
-/// <c>put()</c> drop asset 1's dividend yield, S₁N(d₁) for S₁e^((b₁−r)T)N(d₁), so its knock-in breaks in-out parity: a
-/// down-and-in call at 100, barrier 90 on asset 2, prices 6.497953 and 6.961125 at q₁ of 3% and 8% where vanilla −
-/// knock-out is 4.785982 and 3.270239, above the vanilla itself at 8% (the planner's P2); an up-and-in put at barrier 110
-/// prices 1.466729 at 8% for 5.464209 (the S-bar run's <c>c1_ta_bb.py</c>). nanoql carries the dividends. Check: in-out
-/// parity against QuantLib's knock-out and its analytic European engine on process 1. At q₁ 3% QuantLib's put is NaN:
-/// its d₂ is −5.6e-17, where Drezner's 1978 algorithm returns NaN (the S-bar run's <c>c1_dr78_zero.py</c>), and nanoql's
-/// bivariate normal is We04DP (BR4 (e)). QuantLib's master makes the same fix after the pin (#2917,
-/// <c>48010e233</c>), its case below as a check of nanoql's.
+/// The two-asset knock-in's vanilla (fixed). QuantLib's <c>call()</c> and <c>put()</c> drop asset 1's dividend yield,
+/// S₁N(d₁) for S₁e^((b₁−r)T)N(d₁), so its knock-in breaks in-out parity: a down-and-in call at 100, barrier 90 on asset
+/// 2, prices 6.497953 and 6.961125 at q₁ of 3% and 8% where vanilla − knock-out is 4.785982 and 3.270239, above the
+/// vanilla itself at 8%; an up-and-in put at barrier 110 prices 1.466729 at 8% for 5.464209. nanoql carries the
+/// dividends. Check: in-out parity against QuantLib's knock-out and its analytic European engine on process 1. At q₁ 3%
+/// QuantLib's put is NaN: its d₂ is −5.6e-17, where Drezner's 1978 algorithm returns NaN, and nanoql's bivariate normal
+/// is We04DP. QuantLib's master makes the same fix after the pin (#2917, <c>48010e233</c>), its case below as a check
+/// of nanoql's.
 /// </summary>
 public class TwoAssetBarrierDividendTests
 {

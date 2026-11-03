@@ -16,12 +16,11 @@ namespace NanoQL.Numerics;
 /// Hansen, "The CMA Evolution Strategy: A Tutorial", 2016, arXiv:1604.00772.
 /// </para>
 /// <para>
-/// Immutable: each minimization draws from a new Mersenne Twister built from the seed, so a second minimization
-/// repeats the first's draws, where QuantLib's optimizer keeps its generator and continues its stream (the S-core
-/// plan's CR2 (c); <c>Divergences/CmaesTests.cs</c>). The samples are ranked by a stable sort of their costs, so equal
-/// costs keep QuantLib's order up to a population of 32 (MSVC's insertion sort) and their own beyond, where MSVC's
-/// introsort reorders them (CD5). A NaN cost is refused before the ranking, where QuantLib's sort reads it and breaks
-/// its ordering (CR7 (xxvi)).
+/// Immutable: each minimization draws from a new Mersenne Twister built from the seed, so a second minimization repeats
+/// the first's draws, where QuantLib's optimizer keeps its generator and continues its stream
+/// (<c>Divergences/CmaesTests.cs</c>). The samples are ranked by a stable sort of their costs, so equal costs keep
+/// QuantLib's order up to a population of 32 (MSVC's insertion sort) and their own beyond, where MSVC's introsort
+/// reorders them. A NaN cost is refused before the ranking, where QuantLib's sort reads it and breaks its ordering.
 /// </para>
 /// </remarks>
 public sealed class Cmaes : OptimizationMethod

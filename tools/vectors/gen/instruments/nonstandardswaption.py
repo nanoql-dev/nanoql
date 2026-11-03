@@ -10,11 +10,11 @@ and gamma) on a EuriborSwapIsdaFixA standard swap base forecast on the flat 3.1%
 constant 20% lognormal swaption volatility. Per helper: its swaption's expiry and maturity dates, nominal and strike,
 its volatility and its market value.
 
-**The stability filter** (the S7 plan's S7R6) runs on every output: each basket is generated again with the volatility,
-then the forecast curve's rate, moved one ulp up and down by math.nextafter; an output is written only where every
-regeneration leaves it within 1e-12 x max(|base|, |moved|, 1) (the dates where they agree), and the generator prints the
-outputs dropped per case. The wheel's NonstandardSwaption.calibrationBasket(swapIndex, swaptionVolatility, typeStr) is
-the C++ member's proxy, its helpers read through as_swaption_helper. Read back by
+**The stability filter** runs on every output: each basket is generated again with the volatility, then the forecast
+curve's rate, moved one ulp up and down by math.nextafter; an output is written only where every regeneration leaves it
+within 1e-12 x max(|base|, |moved|, 1) (the dates where they agree), and the generator prints the outputs dropped per
+case. The wheel's NonstandardSwaption.calibrationBasket(swapIndex, swaptionVolatility, typeStr) is the C++ member's
+proxy, its helpers read through as_swaption_helper. Read back by
 tests/NanoQL.Tests/Vectors/Instruments/NonstandardSwaptionVectorTests.cs."""
 import importlib.util
 import math

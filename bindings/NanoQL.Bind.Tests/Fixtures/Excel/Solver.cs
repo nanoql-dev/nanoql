@@ -5,7 +5,7 @@ using NanoQL.Numerics;
 
 namespace NanoQL.Bind.Tests.Fixtures.Excel;
 
-/// <summary>A user's function on a nanoql type off nanoql's list: withheld, printed with its remedy (XLD35, F11-3).</summary>
+/// <summary>A user's function on a nanoql type off nanoql's list: withheld, printed with its remedy.</summary>
 public static class Solver
 {
     /// <summary>The solver's accuracy, read through it.</summary>

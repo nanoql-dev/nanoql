@@ -13,8 +13,8 @@ namespace NanoQL.Tests.Conventions;
 /// <summary>
 /// The basis swap rate helpers follow the evaluation date, as QuantLib's relative-date helpers do: a bootstrap under a
 /// later evaluation date re-dates a copy of each, which rebuilds its swap from that date, so the curve and the implied
-/// quotes are those of helpers built on the later date (the S-rx plan's SRXD8; QuantLib's <c>initializeDates</c>, run
-/// by its helpers' <c>update()</c> when the evaluation date moves).
+/// quotes are those of helpers built on the later date (QuantLib's <c>initializeDates</c>, run by its helpers'
+/// <c>update()</c> when the evaluation date moves).
 /// </summary>
 public class BasisSwapRateHelperRedatingTests
 {

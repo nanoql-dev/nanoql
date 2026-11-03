@@ -15,7 +15,7 @@ namespace NanoQL.PricingEngines;
 
 /// <summary>
 /// The binomial engine on the Tian tree: QuantLib-Python's <c>BinomialTianVanillaEngine</c>, QuantLib's
-/// <c>BinomialVanillaEngine&lt;Tian&gt;</c> (D12).
+/// <c>BinomialVanillaEngine&lt;Tian&gt;</c>.
 /// </summary>
 public static class BinomialTianVanillaEngine
 {

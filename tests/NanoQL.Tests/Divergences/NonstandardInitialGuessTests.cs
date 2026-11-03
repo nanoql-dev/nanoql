@@ -12,8 +12,8 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The nonstandard engine's initial guess for a calibration basket (#2845's class; the S-g1d plan's G1R5 (iv)):
-/// QuantLib averages the fixed nominals by dividing their sum by the count of those above 1e-8
+/// The nonstandard engine's initial guess for a calibration basket (#2845's class): QuantLib averages the fixed
+/// nominals by dividing their sum by the count of those above 1e-8
 /// (<c>gaussian1dnonstandardswaptionengine.cpp:123-133</c>), a count that can be 0 while the sum is positive, where
 /// QuantLib's master refuses the float-float engine's like cases ("no leg 1 reset dates remain at calibration expiry").
 /// On the wheel, a Bermudan payer exercised in one, two and three years into a 5-year swap on fixed and floating

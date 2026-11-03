@@ -11,13 +11,12 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The all-past-fixings constructor's date order (the S-bar plan's BR5 (xl), fixed under R8). QuantLib sorts the
-/// first constructor's fixing dates and keeps the second's in the caller's order, then splits them at the evaluation
-/// date by counting, so reversed dates read the wrong dates as past and the engines integrate them backwards: on spot
-/// 100, q 3%, r 6%, σ 20% (Act/360), a call at 100 fixing 60 and 30 days ago at 95 and 105 and monthly over a year
-/// prices 6.156224656227607 by Turnbull-Wakeman and 6.605506555285245 by the FD engine on the dates reversed, where
-/// sorted they price 4.69672540647389 and 4.71727034815397 (the S-bar run's <c>c3_div_ql_a.py</c>). nanoql sorts both
-/// constructors' dates, stably. Check: the sorted dates' route, bit for bit.
+/// The all-past-fixings constructor's date order (fixed). QuantLib sorts the first constructor's fixing dates and keeps
+/// the second's in the caller's order, then splits them at the evaluation date by counting, so reversed dates read the
+/// wrong dates as past and the engines integrate them backwards: on spot 100, q 3%, r 6%, σ 20% (Act/360), a call at
+/// 100 fixing 60 and 30 days ago at 95 and 105 and monthly over a year prices 6.156224656227607 by Turnbull-Wakeman and
+/// 6.605506555285245 by the FD engine on the dates reversed, where sorted they price 4.69672540647389 and
+/// 4.71727034815397. nanoql sorts both constructors' dates, stably. Check: the sorted dates' route, bit for bit.
 /// </summary>
 public class AsianUnsortedDatesTests
 {

@@ -7,10 +7,10 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The multi-cubic spline is safe to read from many threads (the S-exo plan's ER3 (ii)): its evaluation computes
-/// QuantLib's coefficients in scratch of its own, where QuantLib's evaluates through <c>mutable</c> members, so one
-/// spline read concurrently gives a fresh spline's bits at every point; and it copies its grid's values, so changing
-/// the array it was built from changes nothing.
+/// The multi-cubic spline is safe to read from many threads: its evaluation computes QuantLib's coefficients in
+/// scratch of its own, where QuantLib's evaluates through <c>mutable</c> members, so one spline read concurrently
+/// gives a fresh spline's bits at every point; and it copies its grid's values, so changing the array it was built
+/// from changes nothing.
 /// </summary>
 public class MultiCubicSplineThreadTests
 {

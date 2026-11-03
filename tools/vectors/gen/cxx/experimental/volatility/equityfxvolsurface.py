@@ -6,8 +6,7 @@ time t of volatility v0 + slope·t, on the evaluation date 15 October 2026, Actu
 volatility and variance between consecutive dates and times, rising, flat and falling volatilities, each pair QuantLib
 refuses (out of order, or a variance that doesn't increase) a throw.
 
-No output is left out (the S-xeq plan's §2.8): the surface has no departure. Nothing is fitted, so no output is
-filtered.
+No output is left out: the surface has no departure. Nothing is fitted, so no output is filtered.
 
 The surface is tools/cxx/src/experimental/volatility/equityfxvolsurface.cpp's. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Experimental/Volatility/EquityFXVolSurfaceCxxVectorTests.cs, on its twin."""

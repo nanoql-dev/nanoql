@@ -9,9 +9,9 @@ using static NanoQL.Excel.Tests.Xl;
 namespace NanoQL.Excel.Tests;
 
 /// <summary>
-/// S-bind2's tuple forms (XLR17): a tuple from a row of its cells or a column, an array of tuples a row per element, each
-/// cell through its item's conversion; out, a collection of tuples a row per element, a null one a row of #N/A, an
-/// object inside keyed by its parent call, its row and its slot.
+/// The tuple forms: a tuple from a row of its cells or a column, an array of tuples a row per element, each cell
+/// through its item's conversion; out, a collection of tuples a row per element, a null one a row of #N/A, an object
+/// inside keyed by its parent call, its row and its slot.
 /// </summary>
 [Collection(TestSettings.Name)]
 public sealed class TupleTests
@@ -43,7 +43,7 @@ public sealed class TupleTests
         Assert.Throws<ArgumentException>(() => X.Tuples<int, int>(Col(1.0, 2.0), "p", X.Int, X.Int));
     }
 
-    /// <summary>A nullable item's empty cell is none; handles and names inside, a calendar by its name (XLR16).</summary>
+    /// <summary>A nullable item's empty cell is none; handles and names inside, a calendar by its name.</summary>
     [Fact]
     public void ItemsTakeTheirKindsForms()
     {

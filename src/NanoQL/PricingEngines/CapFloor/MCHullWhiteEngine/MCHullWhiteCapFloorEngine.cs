@@ -22,14 +22,14 @@ namespace NanoQL.PricingEngines;
 /// <remarks>
 /// <para>
 /// A static class: <c>Calculate</c> runs QuantLib's four steps (playbook §2.1) on the model, an argument where
-/// QuantLib's engine holds it, through <see cref="McSimulation{TPath, TStats}"/> (the S-sr plan's SSR1): a
+/// QuantLib's engine holds it, through <see cref="McSimulation{TPath, TStats}"/>: a
 /// <see cref="HullWhiteForwardProcess"/> on the model's curve and parameters at the last payment's time, on a grid of
 /// the fixings after the reference date and the last payment; the NPV is the samples' mean, and the error estimate is
-/// theirs where the random-number traits allow one. The type parameters, the traits and the accumulator, are
-/// QuantLib's template parameters, whose defaults are <see cref="PseudoRandom"/> and <see cref="GeneralStatistics"/>.
+/// theirs where the random-number traits allow one. The type parameters, the traits and the accumulator, are QuantLib's
+/// template parameters, whose defaults are <see cref="PseudoRandom"/> and <see cref="GeneralStatistics"/>.
 /// </para>
 /// <para>
-/// The seed is explicit (S2R4; SSR1 (iv)): QuantLib's 0, a seed from the clock, is refused.
+/// The seed is explicit: QuantLib's 0, a seed from the clock, is refused.
 /// </para>
 /// </remarks>
 public static class MCHullWhiteCapFloorEngine

@@ -12,8 +12,8 @@ namespace NanoQL.Methods;
 
 /// <summary>The step condition that keeps a copy of the values at one time, read after the rollback.</summary>
 /// <remarks>
-/// A working type (the S-eq plan's SEQR1): it copies the values into a buffer of its own, allocated at its first
-/// snapshot, where QuantLib assigns a new array.
+/// A working type: it copies the values into a buffer of its own, allocated at its first snapshot, where QuantLib
+/// assigns a new array.
 /// </remarks>
 [WorkingType]
 public sealed class FdmSnapshotCondition : StepCondition

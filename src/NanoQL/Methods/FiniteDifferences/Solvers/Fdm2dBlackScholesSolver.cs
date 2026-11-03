@@ -14,7 +14,7 @@ namespace NanoQL.Methods;
 /// </summary>
 /// <remarks>
 /// Immutable and safe to share across threads: the operator is built and the rollback runs in the constructor, where
-/// QuantLib's lazy object runs them at the first query (master §2.2's finite-difference row).
+/// QuantLib's lazy object runs them at the first query (the playbook's finite-difference row).
 /// </remarks>
 public sealed class Fdm2dBlackScholesSolver
 {

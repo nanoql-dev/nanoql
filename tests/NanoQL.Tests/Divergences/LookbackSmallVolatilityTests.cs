@@ -11,18 +11,17 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The analytic lookback engines at small, non-zero volatilities (the S-bar code review's B2-1, BR5 (xxiv)'s class,
-/// fixed under R8). λ = 2b/σ² grows as σ falls, so QuantLib's s^(−λ) overflows to +∞ while its normal or bivariate
-/// factor underflows to 0, and their product is NaN where the value is finite: on spot 100, r 5%, q 1% over a year, a
-/// fixed call struck at 105 with a running maximum of 110 is 4.75614712250357 at σ 0.3% and NaN in QuantLib, as is
-/// every engine from about σ 0.3% at a moneyness of 1.1 (σ² below 2|b ln s|/709). nanoql takes such a product in logs,
-/// exp(a ln s + ln P), ln P finite in the tails (<c>LookbackTails</c>), where QuantLib's isn't finite, QuantLib's
-/// product and bits elsewhere. Check: QuantLib's formulas at 80 digits, the bivariate normal by quadrature outward from
-/// its peak (the S-bar run's <c>c2_smallvol_refs2.py</c> and <c>c2_tiny_refs.py</c>; the reviewer's agree on the full
-/// engines), within 1e-12 of max(|value|, 1), and the values far below 1 to 1e-9 relative. The partial fixed call at
-/// 110 is the full one's to 20 digits, its window's opening, half a year in, unreached at these volatilities. The rows
-/// at σ 1e-4 and 1e-6 hold the bivariate normal's arguments of order 1e4 and 1e5, where its exponent's terms of order
-/// h² and h must cancel analytically.
+/// The analytic lookback engines at small, non-zero volatilities (fixed). λ = 2b/σ² grows as σ falls, so QuantLib's
+/// s^(−λ) overflows to +∞ while its normal or bivariate factor underflows to 0, and their product is NaN where the
+/// value is finite: on spot 100, r 5%, q 1% over a year, a fixed call struck at 105 with a running maximum of 110 is
+/// 4.75614712250357 at σ 0.3% and NaN in QuantLib, as is every engine from about σ 0.3% at a moneyness of 1.1 (σ² below
+/// 2|b ln s|/709). nanoql takes such a product in logs, exp(a ln s + ln P), ln P finite in the tails
+/// (<c>LookbackTails</c>), where QuantLib's isn't finite, QuantLib's product and bits elsewhere. Check: QuantLib's
+/// formulas at 80 digits, the bivariate normal by quadrature outward from its peak (two independent references,
+/// agreeing on the full engines), within 1e-12 of max(|value|, 1), and the values far below 1 to 1e-9 relative. The
+/// partial fixed call at 110 is the full one's to 20 digits, its window's opening, half a year in, unreached at these
+/// volatilities. The rows at σ 1e-4 and 1e-6 hold the bivariate normal's arguments of order 1e4 and 1e5, where its
+/// exponent's terms of order h² and h must cancel analytically.
 /// </summary>
 public class LookbackSmallVolatilityTests
 {

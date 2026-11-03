@@ -256,8 +256,8 @@ public static class FdndimBlackScholesVanillaEngine
 }
 
 // QuantLib's detail::FdmPCABasketInnerValue: the payoff at the assets' prices a point of the principal components
-// denotes at a time, each forward on its own process's curves (the S-exo plan's ER5 (xxxi)) read on the engine's
-// clock; QuantLib's cache of the discounts by time never fills and isn't ported.
+// denotes at a time, each forward on its own process's curves read on the engine's clock; QuantLib's cache of the
+// discounts by time never fills and isn't ported.
 file sealed class FdmPCABasketInnerValue : FdmInnerValueCalculator
 {
     private readonly int n;

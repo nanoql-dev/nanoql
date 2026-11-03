@@ -11,12 +11,11 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// Levy's engine at an effective strike at or below zero (the S-bar plan's BR5 (xxxi), fixed under R8). A seasoned
-/// option's effective strike is X = K − ((T − T₂)/T)·A; QuantLib takes log(X) and prices NaN wherever X ≤ 0 (the
-/// planner's BP17; the S-bar run's <c>c3_div_ql_a.py</c>: on spot 100, q 5%, r 10%, σ 15% (Act/360), averaging from 180
-/// days ago to 90 days on, the current average 300 or 285 with the call at 95 or 100, every value NaN). nanoql prices
-/// the certain exercise, the call Se − X·e^(−rT₂) and the put 0, the formula's own limit as X → 0⁺. Check: the formula
-/// at a tiny positive X, where N(d₁) and N(d₂) are 1 in double.
+/// Levy's engine at an effective strike at or below zero (fixed). A seasoned option's effective strike is X = K − ((T −
+/// T₂)/T)·A; QuantLib takes log(X) and prices NaN wherever X ≤ 0 (on spot 100, q 5%, r 10%, σ 15% (Act/360), averaging
+/// from 180 days ago to 90 days on, the current average 300 or 285 with the call at 95 or 100, every value NaN). nanoql
+/// prices the certain exercise, the call Se − X·e^(−rT₂) and the put 0, the formula's own limit as X → 0⁺. Check: the
+/// formula at a tiny positive X, where N(d₁) and N(d₂) are 1 in double.
 /// </summary>
 public class LevyEffectiveStrikeTests
 {

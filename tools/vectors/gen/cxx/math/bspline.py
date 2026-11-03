@@ -6,8 +6,8 @@ B-splines on uniform and uneven knots, testBSplines' knots among them, at 41 poi
 index; and the constructions and indices QuantLib refuses (p = 0, n = 0, p > n, a wrong number of knots, decreasing
 knots, an index past n).
 
-Left out (the S-sr plan's SSR6 (vi)): knots with a repeat, where QuantLib's recursion divides by a zero span and gives
-NaN, and nanoql reads the term as 0 (tests/NanoQL.Tests/Divergences/BSplineRepeatedKnotTests.cs).
+Left out: knots with a repeat, where QuantLib's recursion divides by a zero span and gives NaN, and nanoql reads the
+term as 0 (tests/NanoQL.Tests/Divergences/BSplineRepeatedKnotTests.cs).
 
 The harness's call is tools/cxx/src/math/bspline.cpp's. Each case's inputs hold its settings, "p", "n", "knots",
 "indices" and "x". Read back by tests/NanoQL.Tests/Vectors/Cxx/Numerics/BSplineCxxVectorTests.cs."""

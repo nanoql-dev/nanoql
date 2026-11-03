@@ -12,8 +12,7 @@
 //
 // "ProxyIbor::conventions" takes (referenceDate, rate, gearing, spread, pastFixing): a proxy "PX" of Euribor 6M; it
 // returns {"name", "fixingDate", "valueDate", "maturityDate", "pastFixing"}, the index's dates at the coupon's fixing
-// and its own fixing read back at a past date. Its forecast, gearing × proxied × spread in QuantLib, isn't among them
-// (the S-xrt plan's XRR5 (xxi)).
+// and its own fixing read back at a past date. Its forecast, gearing × proxied × spread in QuantLib, isn't among them.
 //
 // "StrippedCappedFlooredCoupon::rates" takes (referenceDate, rate, capletVol, cap, floor), cap and floor null for
 // none: a capped/floored Ibor coupon on QuantLib's Black pricer at a constant optionlet volatility; it returns

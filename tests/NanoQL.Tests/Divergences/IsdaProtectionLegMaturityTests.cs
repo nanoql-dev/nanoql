@@ -14,12 +14,12 @@ namespace NanoQL.Tests.Divergences;
 /// The ISDA engine's protection leg on curves that end before the maturity. QuantLib integrates over the union of the
 /// two curves' nodes, adds the maturity only when the union is empty (<c>isdacdsengine.cpp:150-156</c>), and stops at
 /// the maturity only on meeting a node past it (<c>:167-172</c>), so it drops the protection from the curves' last
-/// node to the maturity (QuantLib's defect, R8). nanoql adds the maturity to the nodes when their last one is before
-/// it. On 15 March 2024, a 10-year CDS buying protection on 10,000,000 at 1% from the next day (quarterly on
-/// WeekendsOnly under the CDS rule, Actual/360 with the last period inclusive) on a hazard rate flat at 2% and a
-/// discount curve continuously flat at 3%, Actual/365 (Fixed): on a log-linear discount curve with yearly nodes to
-/// 5 years, nanoql's default leg is 945,721.5990409853, QuantLib's own on the flat curve and on nodes to 15 years,
-/// where QuantLib's on nodes to 5 years is 531,134.1471852273; the coupon leg is -820,172.4119002547 on every curve.
+/// node to the maturity (QuantLib's defect). nanoql adds the maturity to the nodes when their last one is before it.
+/// On 15 March 2024, a 10-year CDS buying protection on 10,000,000 at 1% from the next day (quarterly on WeekendsOnly
+/// under the CDS rule, Actual/360 with the last period inclusive) on a hazard rate flat at 2% and a discount curve
+/// continuously flat at 3%, Actual/365 (Fixed): on a log-linear discount curve with yearly nodes to 5 years, nanoql's
+/// default leg is 945,721.5990409853, QuantLib's own on the flat curve and on nodes to 15 years, where QuantLib's on
+/// nodes to 5 years is 531,134.1471852273; the coupon leg is -820,172.4119002547 on every curve.
 /// </summary>
 public class IsdaProtectionLegMaturityTests
 {

@@ -14,12 +14,12 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The FD Heston-Hull-White engine with cash dividends (D3-3 of the S-hes run record): <c>FdmDividendHandler</c>'s
-/// three-dimensional defect (<c>Divergences/FdmDividendHandler3dTests.cs</c>) reaching the engine. QuantLib's handler moves,
-/// on the engine's grid of the log spot, the variance and the short rate, only the lines through the other directions'
-/// first points, so most of the grid misses each dividend: an American call with dividends of 2 and 3 is 8.768 at a
-/// vanishing short-rate volatility, where QuantLib's FD Heston engine gives 6.738 [executed: <c>scratchpad\c3\oracle_c3.py</c>].
-/// nanoql's handler moves every line, and the engine there is the FD Heston engine's price.
+/// The FD Heston-Hull-White engine with cash dividends: <c>FdmDividendHandler</c>'s three-dimensional defect
+/// (<c>Divergences/FdmDividendHandler3dTests.cs</c>) reaching the engine. QuantLib's handler moves, on the engine's
+/// grid of the log spot, the variance and the short rate, only the lines through the other directions' first points, so
+/// most of the grid misses each dividend: an American call with dividends of 2 and 3 is 8.768 at a vanishing short-rate
+/// volatility, where QuantLib's FD Heston engine gives 6.738 (QuantLib-Python 1.44). nanoql's handler moves every line,
+/// and the engine there is the FD Heston engine's price.
 /// </summary>
 public class FdHestonHullWhiteDividendsTests
 {

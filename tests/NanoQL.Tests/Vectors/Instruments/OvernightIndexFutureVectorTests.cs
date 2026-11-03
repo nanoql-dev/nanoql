@@ -33,7 +33,7 @@ public class OvernightIndexFutureVectorTests
                 (RateAveragingType)c.Int("averaging"));
 
             // overnightindexfuture.py leaves the NPV out where QuantLib's compounded future skips today's published
-            // fixing on its value date (the S-cms plan's CMR5 (xxi)).
+            // fixing on its value date.
             if (c.Expected.TryGetProperty("NPV", out _))
             {
                 check.Output(c, "NPV", () => future.Calculate(context).NPV);

@@ -14,8 +14,8 @@
   zero underlying nominal;
 - FxResetNotionalExchange: its amount with a previous reset, a current one or both (refused before a pricer is set),
   and its refusal of neither;
-- setFxResetPricer on a leg of coupons, exchanges and a plain cash flow, which it leaves alone.
-Left out (the S-rx plan's SRXR3 (xiii)): today's non-positive fixing, which QuantLib forecasts over and nanoql refuses
+- setFxResetPricer on a leg of coupons, exchanges and a plain cash flow, which it leaves alone. Left out: today's
+non-positive fixing, which QuantLib forecasts over and nanoql refuses
 (tests/NanoQL.Tests/Divergences/FxResetTodaysFixingTests.cs).
 
 Each case's inputs hold its settings (with the exchange rates its fixings are) and "kind" with the kind's spec: "reset"

@@ -11,12 +11,11 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The analytic digital American engine on structures dated differently (the mismatched-dates class of master
-/// Revision 58, the S-van plan's VR4). QuantLib's engine reads the dividend curve and the volatility at the exercise
-/// date through their own clocks (<c>analyticdigitalamericanengine.cpp:53-58</c>), so an expiry before a structure's
-/// reference date throws. nanoql reads each structure by date, nothing accrued before its own reference date. QuantLib's
-/// check: its engine on the market restated from the earliest date, every structure accruing from today exactly what
-/// the original accrues from its own date [executed on the wheel: <c>oracle_c1r1.py</c> in the run's scratchpad].
+/// The analytic digital American engine on structures dated differently. QuantLib's engine reads the dividend curve and
+/// the volatility at the exercise date through their own clocks (<c>analyticdigitalamericanengine.cpp:53-58</c>), so an
+/// expiry before a structure's reference date throws. nanoql reads each structure by date, nothing accrued before its
+/// own reference date. QuantLib's check: its engine on the market restated from the earliest date, every structure
+/// accruing from today exactly what the original accrues from its own date (QuantLib-Python 1.44).
 /// </summary>
 public class AnalyticDigitalAmericanMismatchedTimesTests
 {
@@ -55,7 +54,7 @@ public class AnalyticDigitalAmericanMismatchedTimesTests
     {
         // a 10-day down-and-in put at 90 with the dividend curve and the volatility at T+30, where QuantLib's reads
         // throw: no variance and no dividend accrue, so the underlying follows the risk-free forward, 100·e^(5%·10/365),
-        // and never reaches the strike (the zero-variance limit, VR4 (ii))
+        // and never reaches the strike (the zero-variance limit)
         OneAssetOptionResults results = Price(OptionType.Put, 90.0, false, Today + 10, Today + 30);
         Assert.Equal(0.0, results.NPV!.Value);
         Assert.Equal(0.0, results.Delta!.Value);

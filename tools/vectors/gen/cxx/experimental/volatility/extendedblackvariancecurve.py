@@ -9,7 +9,7 @@ reference date to past the last date (where QuantLib holds the last volatility f
 consecutive dates, extrapolating. Then QuantLib's refusals: a falling variance where monotone variance is forced, a first
 date on the reference date, dates out of order, and fewer volatilities than dates.
 
-No output is left out (the S-xeq plan's §2.8): the curve has no departure. Nothing is fitted, so no output is filtered.
+No output is left out: the curve has no departure. Nothing is fitted, so no output is filtered.
 
 The curve is tools/cxx/src/experimental/volatility/extendedblackvariancecurve.cpp's. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Experimental/Volatility/ExtendedBlackVarianceCurveCxxVectorTests.cs."""

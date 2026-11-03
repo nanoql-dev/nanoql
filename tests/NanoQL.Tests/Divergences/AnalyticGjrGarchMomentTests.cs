@@ -12,16 +12,15 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// <see cref="AnalyticGJRGARCHEngine"/>'s moments (C3-B1-1 and C3-B1-2 of the S-hes run record, the user's rulings
-/// (b)). Where two of the variance's growth factors m₁, m₂ and m₃, or one of them and 1, are equal, QuantLib's divided
-/// differences of their powers are 0/0 and its price NaN: at α = β = γ = 0, all three 0, and in the integrated GARCH
-/// β 0.9, α 0.1, γ 0, λ 0, where m₁ is 1. nanoql takes each divided difference at its limit, a polynomial in the factors,
-/// continuous with QuantLib's prices with the factors 1e-8 and 1e-10 apart (QuantLib-SWIG 1.44); elsewhere QuantLib's
-/// arithmetic. Two of QuantLib's defects are kept, documented on the engine: its fourth moment, whose kurtosis at the
-/// deterministic limit (α = γ = 0) is about 3 − Σh where the log return is normal, so a call prices above Black-Scholes
-/// at the same total variance; and its Edgeworth price, which leaves the no-arbitrage bounds where the skewness and
-/// kurtosis are large, as on QuantLib's own model at λ 0.2 and a year. Both are QuantLib's prices, here bit for bit or
-/// within the engine's last bits (the S-hes plan's G3 note on <c>pow</c>).
+/// <see cref="AnalyticGJRGARCHEngine"/>'s moments. Where two of the variance's growth factors m₁, m₂ and m₃, or one of
+/// them and 1, are equal, QuantLib's divided differences of their powers are 0/0 and its price NaN: at α = β = γ = 0,
+/// all three 0, and in the integrated GARCH β 0.9, α 0.1, γ 0, λ 0, where m₁ is 1. nanoql takes each divided difference
+/// at its limit, a polynomial in the factors, continuous with QuantLib's prices with the factors 1e-8 and 1e-10 apart
+/// (QuantLib-SWIG 1.44); elsewhere QuantLib's arithmetic. Two of QuantLib's defects are kept, documented on the engine:
+/// its fourth moment, whose kurtosis at the deterministic limit (α = γ = 0) is about 3 − Σh where the log return is
+/// normal, so a call prices above Black-Scholes at the same total variance; and its Edgeworth price, which leaves the
+/// no-arbitrage bounds where the skewness and kurtosis are large, as on QuantLib's own model at λ 0.2 and a year. Both
+/// are QuantLib's prices, here bit for bit or within the engine's last bits (the C runtime's <c>pow</c> apart).
 /// </summary>
 public class AnalyticGjrGarchMomentTests
 {

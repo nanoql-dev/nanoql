@@ -13,25 +13,23 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The Asian engines on a market whose structures settle after the evaluation date (the S-bar code review's B3-1, the
-/// lookbacks' B2-3 class, fixed under R8). The option splits its fixings by the evaluation date, and QuantLib's engines
-/// read each fixing to come on the process's time from the structures' date, so a fixing today or tomorrow has a
-/// negative time: on a market settling two days on (spot 100, r 5%, q 1%, σ 20%, Act/365 Fixed), a call at 100 fixing
-/// today, tomorrow and every 30 days to 360 days prices 5.541332629516704 by the analytic geometric engine and
-/// 5.490134556097302 ± 0.055 by its Monte Carlo, the average losing two of its fourteen fixings, 18% high, and
-/// 5.687334138697442 ± 0.057 by the arithmetic Monte Carlo, 17% high; Turnbull-Wakeman refuses it with "negative time
-/// (-0.00547945) given", Choi with "first fixing date is in the past" and the FD engine with "Fixing dates must not
-/// contain past date"; and Levy refuses an averaging from today with "current average required for seasoned option"
-/// (the S-bar run's <c>c3_late_settlement_ql.py</c>). nanoql takes such a fixing at the clock's origin, the spot with
-/// no variance and no discount accrued, so a past fixing at the spot, and Levy's span before the origin at the spot.
+/// The Asian engines on a market whose structures settle after the evaluation date (fixed). The option splits its
+/// fixings by the evaluation date, and QuantLib's engines read each fixing to come on the process's time from the
+/// structures' date, so a fixing today or tomorrow has a negative time: on a market settling two days on (spot 100, r
+/// 5%, q 1%, σ 20%, Act/365 Fixed), a call at 100 fixing today, tomorrow and every 30 days to 360 days prices
+/// 5.541332629516704 by the analytic geometric engine and 5.490134556097302 ± 0.055 by its Monte Carlo, the average
+/// losing two of its fourteen fixings, 18% high, and 5.687334138697442 ± 0.057 by the arithmetic Monte Carlo, 17% high;
+/// Turnbull-Wakeman refuses it with "negative time (-0.00547945) given", Choi with "first fixing date is in the past"
+/// and the FD engine with "Fixing dates must not contain past date"; and Levy refuses an averaging from today with
+/// "current average required for seasoned option". nanoql takes such a fixing at the clock's origin, the spot with no
+/// variance and no discount accrued, so a past fixing at the spot, and Levy's span before the origin at the spot.
 /// Check: the seasoned equivalent, the first two fixings past at the spot, which each engine prices as it, and which
 /// QuantLib prices 4.694309394952492, 4.6519094182914005, 4.874857833169246, 4.935628853043604, 4.921817927818181 and
-/// 4.954431596530007, and Levy with a current average at the spot 5.3936726841449385, each within R7. Where only the
-/// volatility, or only the curves, settle two days on (the S-bar code review's B3-2), Turnbull-Wakeman and Choi, which
-/// read each structure on its own, take the fixings before the latest structure's date at the spot, where QuantLib
-/// refuses them ("negative time", "first fixing date is in the past"); the check QuantLib's engines on the seasoned
-/// option, 4.945115990140009 and 4.9312430644836445, and 4.964671374839958 and 4.951052106848293
-/// (<c>c3_mixed_settlement_ql.py</c>).
+/// 4.954431596530007, and Levy with a current average at the spot 5.3936726841449385, each within the tolerance. Where
+/// only the volatility, or only the curves, settle two days on, Turnbull-Wakeman and Choi, which read each structure on
+/// its own, take the fixings before the latest structure's date at the spot, where QuantLib refuses them ("negative
+/// time", "first fixing date is in the past"); the check QuantLib's engines on the seasoned option, 4.945115990140009
+/// and 4.9312430644836445, and 4.964671374839958 and 4.951052106848293.
 /// </summary>
 public class AsianLateSettlementTests
 {

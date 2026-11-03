@@ -9,13 +9,12 @@ using NanoQL.Tests.Conventions;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The single composite's buffer (the S-mmp plan's MMPR4 (viii), fixed under R8). QuantLib's
+/// The single composite's buffer (fixed). QuantLib's
 /// <c>SingleProductComposite::maxNumberOfCashFlowsPerProductPerStep</c> sums its parts' maxima per product, ignoring
 /// their numbers of products (<c>singleproductcomposite.cpp:32</c>), so a part of several products paying at one step
 /// writes past the buffer the accounting engine sizes by it: a rebate of three products, each paying at every step,
-/// gives 1 for 3 cash flows a step (this run's <c>probes\c1_facts.cpp</c>), and the planner's coterminal swaps corrupt
-/// the heap (MPP11). nanoql counts each part's maximum times its products. Checks: the multi composite's products,
-/// summed.
+/// gives 1 for 3 cash flows a step, and coterminal swaps corrupt the heap. nanoql counts each part's maximum times its
+/// products. Checks: the multi composite's products, summed.
 /// </summary>
 public class SingleProductCompositeBufferTests
 {

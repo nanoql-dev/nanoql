@@ -7,11 +7,11 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The caplet variance curve's smile sections (the S-g1d plan's G1R6 (xiii)): QuantLib's is a
-/// <c>FlatSmileSection(t, atmVol, dayCounter())</c> (<c>capletvariancecurve.hpp:86-91</c>), shifted lognormal with
-/// shift 0 whatever the curve's type and displacement, so a normal curve's section prices its normal volatility as a
-/// lognormal one. nanoql's section carries the curve's type and displacement; the check is the curve's own
-/// <see cref="CapletVarianceCurve.VolatilityType"/> and <see cref="CapletVarianceCurve.Displacement"/>.
+/// The caplet variance curve's smile sections: QuantLib's is a <c>FlatSmileSection(t, atmVol, dayCounter())</c>
+/// (<c>capletvariancecurve.hpp:86-91</c>), shifted lognormal with shift 0 whatever the curve's type and displacement,
+/// so a normal curve's section prices its normal volatility as a lognormal one. nanoql's section carries the curve's
+/// type and displacement; the check is the curve's own <see cref="CapletVarianceCurve.VolatilityType"/> and
+/// <see cref="CapletVarianceCurve.Displacement"/>.
 /// </summary>
 public class CapletVarianceCurveSmileTests
 {

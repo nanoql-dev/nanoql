@@ -15,10 +15,10 @@ namespace NanoQL.Experimental;
 /// settlement date, whose fair spread on the curve under construction is the helper's quote.
 /// </summary>
 /// <remarks>
-/// On <see cref="CdsHelper"/>'s form (the S-xcr plan's XD6): the helper's dates follow the evaluation date, its
-/// settlement the settlement days after it on the calendar and its latest date the maturity adjusted to the fixed
-/// convention; a bound copy (<see cref="DefaultProbabilityHelperExtensions.SetTermStructure{T}"/>) builds its swap on
-/// the bound curve. The integration step is stored and unread, as QuantLib's is.
+/// On <see cref="CdsHelper"/>'s form: the helper's dates follow the evaluation date, its settlement the settlement
+/// days after it on the calendar and its latest date the maturity adjusted to the fixed convention; a bound copy
+/// (<see cref="DefaultProbabilityHelperExtensions.SetTermStructure{T}"/>) builds its swap on the bound curve. The
+/// integration step is stored and unread, as QuantLib's is.
 /// </remarks>
 [Experimental("NQL0001")]
 public sealed class AssetSwapHelper : RelativeDateBootstrapHelper<DefaultProbabilityTermStructure>

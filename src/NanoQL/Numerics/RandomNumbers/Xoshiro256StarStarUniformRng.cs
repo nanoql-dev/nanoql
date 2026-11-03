@@ -41,10 +41,10 @@ namespace NanoQL.Numerics;
 /// values is tested by checking them against the reference implementation in C.
 /// </para>
 /// <para>
-/// Its seed is QuantLib's 64-bit <c>std::uint64_t</c>, taken as a <see cref="long"/>'s 64 bits (the S-core plan's
-/// CR2 (a)): <c>unchecked((long)10108360646465513120UL)</c> draws QuantLib's sequence for that seed. It is the one
-/// generator whose seed isn't confined to [1, 4294967295]; seed 0, which QuantLib reads as a seed drawn from the clock,
-/// is refused, and so is the all-zero state, from which the generator draws 0 forever.
+/// Its seed is QuantLib's 64-bit <c>std::uint64_t</c>, taken as a <see cref="long"/>'s 64 bits:
+/// <c>unchecked((long)10108360646465513120UL)</c> draws QuantLib's sequence for that seed. It is the one generator
+/// whose seed isn't confined to [1, 4294967295]; seed 0, which QuantLib reads as a seed drawn from the clock, is
+/// refused, and so is the all-zero state, from which the generator draws 0 forever.
 /// </para>
 /// </remarks>
 [WorkingType]

@@ -15,7 +15,7 @@ namespace NanoQL.Tests.Vectors;
 /// harness's own derived process, mirrored here, over a geometric Brownian motion, a Heston process and an
 /// Ornstein-Uhlenbeck process with a cross-model correlation, with its default factors and with fewer: size, factors,
 /// initial values, drift, diffusion, numeraire, expectation, covariance, standard deviation, apply and evolve; and the
-/// refusal of more factors than the size (the S-hes plan's HD10).
+/// refusal of more factors than the size.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class JointStochasticProcessCxxVectorTests

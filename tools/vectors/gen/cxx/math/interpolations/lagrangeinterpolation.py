@@ -6,8 +6,8 @@ harness: tools/vectors/gen/math/interpolations/lagrangeinterpolation.py's node s
 values, read at its nodes, near them, between them and past its ends (value(y, x) checks no range); on the evaluation
 date 15 October 2026.
 
-The outputs nanoql fixes are left out (the S-van plan's VR4 (xxviii)): x = 0 where 0 is a node, which QuantLib's node
-test misses (tests/NanoQL.Tests/Divergences/LagrangeZeroNodeTests.cs). Read back by
+The outputs nanoql fixes are left out: x = 0 where 0 is a node, which QuantLib's node test misses
+(tests/NanoQL.Tests/Divergences/LagrangeZeroNodeTests.cs). Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Numerics/Interpolations/LagrangeInterpolationCxxVectorTests.cs."""
 import importlib.util
 import math

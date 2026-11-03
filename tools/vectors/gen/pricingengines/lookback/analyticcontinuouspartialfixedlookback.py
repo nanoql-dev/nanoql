@@ -9,10 +9,10 @@ of six months, a year and two years, and at expiry, on the ten processes of tool
 blackscholesprocess.py: the NPV, the engine's one result. Then an expired option and the refusal of a cash-or-nothing
 payoff ("Non-plain payoff given").
 
-The outputs nanoql fixes are left out (the S-bar plan's §2.10), as
+The outputs nanoql fixes are left out, as
 tools/vectors/gen/pricingengines/lookback/analyticcontinuousfloatinglookback.py leaves them out: one clock per
-process (BR5 (xix)), no output's carry within the small-carry cuts (BR5 (xxiii)) and no zero volatility (BR5 (xxiv));
-and no option nanoql's validation refuses where QuantLib's reads an exercise unchecked (BR5 (xxv)).
+process, no output's carry within the small-carry cuts and no zero volatility; and no option nanoql's validation
+refuses where QuantLib's reads an exercise unchecked.
 
 A case holds one process, exercise and lookback start, its outputs one per payoff. The wheel's calls, by QuantLib-SWIG
 1.44's options.i: ContinuousPartialFixedLookbackOption(lookbackPeriodStart, payoff, exercise),

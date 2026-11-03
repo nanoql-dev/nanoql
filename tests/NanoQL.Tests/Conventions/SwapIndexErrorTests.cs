@@ -56,7 +56,7 @@ public class SwapIndexErrorTests
     [Fact]
     public void TheSwapIndexesRefusals()
     {
-        // the undefined paths' refusals (SI1, SI2), .NET's text for a null argument
+        // the undefined paths' refusals, .NET's text for a null argument
         Assert.Equal(
             new ArgumentNullException("iborIndex").Message,
             AssertRefusal<ArgumentNullException>("iborIndex", () => Index(null!, exogenous: false)).Message);

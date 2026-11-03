@@ -26,7 +26,7 @@ namespace NanoQL.Experimental;
 /// its fixing date.
 /// </para>
 /// <para>
-/// Static (D14): QuantLib's engine object becomes the arguments of <see cref="Calculate"/>.
+/// Static: QuantLib's engine object becomes the arguments of <see cref="Calculate"/>.
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]
@@ -110,8 +110,7 @@ public static class DiscountingMtMCrossCurrencyBasisSwapEngine
             return s.FetchResults(body);
         }
 
-        // a leg compounding its spread daily gets its fair spread solved on the swap's pricing (the S-rx plan's C3
-        // review, B1-2)
+        // a leg compounding its spread daily gets its fair spread solved on the swap's pricing
         MtMCrossCurrencyBasisSwapResults results = Priced(swap);
         double Npv(CrossCurrencySwap copy) => Priced((MtMCrossCurrencyBasisSwap)copy).NPV!.Value;
         return results with

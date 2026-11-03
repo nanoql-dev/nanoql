@@ -7,16 +7,15 @@ fixed), on a rates smile with every parameter free but beta, and on floating str
 at-the-money volatility: each fit's alpha, beta, nu and rho, its errors and end criterion, its at-the-money level and
 strike range, and its volatilities at the strikes and between them.
 
-The outputs nanoql fixes are left out (the S-xeq plan's §2.8): every fit's trials stay at sigma_I sqrt(T) of at least
-0.1, where nanoql's integrals are QuantLib's (XER5 (xxvi)). QuantLib's case with nu and rho free is left out: its
-optimizer's trials pass below 0.1 whatever alpha's guess, and nanoql's split there moves the converged alpha by 4e-8,
-within the optimizer's tolerance (the S-xeq run's R3-3).
+The outputs nanoql fixes are left out: every fit's trials stay at sigma_I sqrt(T) of at least 0.1, where nanoql's
+integrals are QuantLib's. QuantLib's case with nu and rho free is left out: its optimizer's trials pass below 0.1
+whatever alpha's guess, and nanoql's split there moves the converged alpha by 4e-8, within the optimizer's tolerance.
 
-**The stability filter** (the S7 plan's S7R6): every fit is refitted with every input moved one ulp up, then down, by
-math.nextafter (the volatilities, the strikes, the forward, the at-the-money volatility and the guesses), together, and
-each volatility, the forward and each guess alone; an output is written only where every refit leaves it within 1e-12
-x max(|base|, |moved|, 1) (equal, for the end criterion), the others dropped by leaving their keys out (a volatility by
-leaving its strike out of "valueStrikes"); the generator prints the dropped outputs per case and for the file.
+**The stability filter**: every fit is refitted with every input moved one ulp up, then down, by math.nextafter (the
+volatilities, the strikes, the forward, the at-the-money volatility and the guesses), together, and each volatility, the
+forward and each guess alone; an output is written only where every refit leaves it within 1e-12 x max(|base|, |moved|,
+1) (equal, for the end criterion), the others dropped by leaving their keys out (a volatility by leaving its strike out
+of "valueStrikes"); the generator prints the dropped outputs per case and for the file.
 
 The specs: a fit {"optionDays", "forward", "strikes", "floating", "atmVolatility", "vols", "alpha", "beta", "nu",
 "rho", "fixed" [4], "vegaWeighted"}. The wheel's calls, by QuantLib-SWIG 1.44's volatilities.i:
@@ -80,8 +79,8 @@ def nudge(x, d):
 
 
 def moved_sets(spec):
-    """The refits' specs (S7R6): every input up, every one down (the volatilities, the strikes, the forward, the
-    at-the-money volatility and the guesses), then each volatility, the forward and each guess alone, up and down."""
+    """The refits' specs: every input up, every one down (the volatilities, the strikes, the forward, the at-the-money
+    volatility and the guesses), then each volatility, the forward and each guess alone, up and down."""
     def moved(change):
         s = dict(spec)
         s.update(change)
@@ -110,7 +109,7 @@ def stable(a, b):
 
 
 def filtered(spec, value_strikes, fitter=fit, outs=outputs, moved=moved_sets):
-    """The base fit's outputs left after S7R6's refits, and the count dropped of the count written before the filter."""
+    """The base fit's outputs left after the refits, and the count dropped of the count written before the filter."""
     base = outs(fitter(spec), value_strikes)
     keep = {k: True for k in base if k != "values"}
     keep_value = [True] * len(value_strikes)

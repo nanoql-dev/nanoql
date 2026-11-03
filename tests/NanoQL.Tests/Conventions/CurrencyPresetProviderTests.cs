@@ -9,7 +9,8 @@ namespace NanoQL.Tests.Conventions;
 
 /// <summary>
 /// Every currency preset reads its data through <see cref="ConventionProvider"/>, by its code: QuantLib's with nothing
-/// set, which each region's vector file checks (G3, unchanged), and a provider's otherwise, field by field.
+/// set, which each region's vector file checks (the vectors gate, unchanged), and a provider's otherwise, field by
+/// field.
 /// </summary>
 public class CurrencyPresetProviderTests
 {

@@ -73,7 +73,7 @@ public interface IDefaultProbabilityTraits : IBootstrapTraits<DefaultProbability
     static abstract Date MaxDate(ReadOnlySpan<Date> dates);
 
     /// <summary>The survival probability at a time of a curve kind whose curve takes a one-factor affine model of the
-    /// default intensity; by default refused, the kind taking no model (the S-xcr plan's XR3 (c)).</summary>
+    /// default intensity; by default refused, the kind taking no model.</summary>
     /// <param name="times">The nodes' times.</param>
     /// <param name="data">The nodes' data.</param>
     /// <param name="interpolation">The interpolation over the nodes.</param>

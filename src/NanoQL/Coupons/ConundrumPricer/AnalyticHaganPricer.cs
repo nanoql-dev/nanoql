@@ -17,13 +17,12 @@ namespace NanoQL.Coupons;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Hagan's forms presume G(R0) = P(Tp)/A0, the payment's discount over the annuity, which the numeric pricer doesn't
-/// need, since it divides by G(R0). QuantLib's shift models' G(R0) is P(T0)/A0, so their analytic convexity term is
-/// high by P(T0)/P(Tp) against the numeric twin; here it is QuantLib's term times P(Tp)/P(T0), both on the forwarding
-/// curve. On an index with an exogenous discounting curve, where the annuity and discount come from that curve and the
-/// g-function from the forwarding one, every model's convexity term is normalised as the numeric pricer normalises its
-/// integrand, discount·G′(R0)/G(R0) for annuity·G′(R0). The standard and exact-yield models on one curve keep
-/// QuantLib's bits (the S-cms plan's CMR5 (xxii)).
+/// Hagan's forms presume G = P(Tp)/A0, the payment's discount over the annuity, which the numeric pricer doesn't need,
+/// since it divides by G. QuantLib's shift models' G is P/A0, so their analytic convexity term is high by P/P(Tp)
+/// against the numeric twin; here it is QuantLib's term times P(Tp)/P, both on the forwarding curve. On an index with
+/// an exogenous discounting curve, where the annuity and discount come from that curve and the g-function from the
+/// forwarding one, every model's convexity term is normalised as the numeric pricer normalises its integrand,
+/// discount·G′/G for annuity·G′. The standard and exact-yield models on one curve keep QuantLib's bits.
 /// </para>
 /// <para>
 /// So an index given a discounting curve equal to its forwarding one prices its analytic term up to the model's own
@@ -138,8 +137,8 @@ public sealed class AnalyticHaganPricer : HaganPricer
         return forwarding.Discount(s.PaymentDate) / withShifts.DiscountAtStart;
     }
 
-    // discount·G′(R0)/G(R0), the convexity term's weight in place of annuity·G′(R0) on an exogenous discounting curve;
-    // null on one curve.
+    // discount·G′/G, the convexity term's weight in place of annuity·G′ on an exogenous discounting curve; null on one
+    // curve.
     private static double? Normalised(HaganPricerState s)
     {
         if (s.SwapIndex.DiscountingTermStructure is null)

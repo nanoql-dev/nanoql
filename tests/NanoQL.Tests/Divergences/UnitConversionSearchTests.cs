@@ -7,17 +7,16 @@ using static NanoQL.Tests.Conventions.CommodityMarkets;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The registry's chained search with its forbidden list passed down (the S-xrt run's R1-1, fixed under R8 with
-/// Revision 69). QuantLib's <c>smartLookup</c> forbids each unit it starts from to the searches below it, "in order to
-/// avoid cycles", but drops the list when it recurses (<c>unitofmeasureconversionmanager.cpp:190</c>), so a search
-/// whose first candidate leads back recurses without end: its known factors' first entry pairs thousand-barrels and
-/// barrels, so every chained search from either overflows the stack. On QuantLib 1.44 (the run's
-/// <c>probes\xi_smart.cpp</c>, each lookup in its own process) barrels to metric tonnes overflows (exit 127) with and
+/// The registry's chained search with its forbidden list passed down (fixed). QuantLib's <c>smartLookup</c> forbids
+/// each unit it starts from to the searches below it, "in order to avoid cycles", but drops the list when it recurses
+/// (<c>unitofmeasureconversionmanager.cpp:190</c>), so a search whose first candidate leads back recurses without end:
+/// its known factors' first entry pairs thousand-barrels and barrels, so every chained search from either overflows the
+/// stack. On QuantLib 1.44 (each lookup in its own process) barrels to metric tonnes overflows (exit 127) with and
 /// without a user's metric-tonne-to-gallon factor of 300, as gallons to metric tonnes does, through barrels; metric
 /// tonnes to barrels returns 7.14286, its first candidate the user's factor. nanoql passes the list down, as QuantLib's
 /// <c>ExchangeRateManager</c> passes its own; wherever QuantLib's search returns it never revisits a unit above it, so
-/// the answer is QuantLib's. Checks: the chains against the hand value through gallons, the refusal where no chain exists,
-/// and QuantLib's 7.14286.
+/// the answer is QuantLib's. Checks: the chains against the hand value through gallons, the refusal where no chain
+/// exists, and QuantLib's 7.14286.
 /// </summary>
 public class UnitConversionSearchTests
 {

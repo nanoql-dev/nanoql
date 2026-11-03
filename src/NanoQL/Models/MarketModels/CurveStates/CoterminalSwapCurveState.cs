@@ -16,9 +16,9 @@ namespace NanoQL.Models;
 /// The curve state of coterminal swap market models: set on coterminal swap rates, from a first valid index on.
 /// </summary>
 /// <remarks>
-/// A working type (the S-mm plan's MR1 (ii)). The forwards and the constant-maturity swap rates are computed at each
-/// read into the state's own buffers, as QuantLib's are. A rate read at the number of rates, which QuantLib's index
-/// check admits and reads past its vectors, is refused with QuantLib's text (MR3 (xx)).
+/// A working type. The forwards and the constant-maturity swap rates are computed at each read into the state's own
+/// buffers, as QuantLib's are. A rate read at the number of rates, which QuantLib's index check admits and reads past
+/// its vectors, is refused with QuantLib's text.
 /// </remarks>
 [WorkingType]
 public sealed class CoterminalSwapCurveState : CurveState

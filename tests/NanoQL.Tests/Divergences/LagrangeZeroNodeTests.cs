@@ -6,13 +6,11 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The Lagrange interpolation at its nodes (the S-van plan's VR4 (xxviii), and the run's own find on descending nodes).
-/// QuantLib finds the node by a binary search for the first x not below x − 10ε|x| and returns its y when that x is
-/// less than 10ε|x| above (<c>lagrangeinterpolation.hpp:114-120</c>): at x = 0 the band is empty, so a node at zero falls
-/// through to the barycentric sum, which divides by zero (NaN); and on descending x values the search never lands on a
-/// node, so every node's value is NaN [executed on the wheel: <c>scratchpad\c2\oracle_c2.py</c>, section lagrange].
-/// nanoql scans the nodes in order with the band closed. QuantLib's check: the node's y, and its own values beside the
-/// nodes.
+/// The Lagrange interpolation at its nodes. QuantLib finds the node by a binary search for the first x not below x −
+/// 10ε|x| and returns its y when that x is less than 10ε|x| above (<c>lagrangeinterpolation.hpp:114-120</c>): at x = 0
+/// the band is empty, so a node at zero falls through to the barycentric sum, which divides by zero (NaN); and on
+/// descending x values the search never lands on a node, so every node's value is NaN (QuantLib-Python 1.44). nanoql
+/// scans the nodes in order with the band closed. QuantLib's check: the node's y, and its own values beside the nodes.
 /// </summary>
 public class LagrangeZeroNodeTests
 {

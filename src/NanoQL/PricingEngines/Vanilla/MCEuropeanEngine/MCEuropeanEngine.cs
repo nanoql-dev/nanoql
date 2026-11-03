@@ -16,18 +16,18 @@ namespace NanoQL.PricingEngines;
 /// <summary>The European option pricing engine by Monte Carlo simulation.</summary>
 /// <remarks>
 /// <para>
-/// A static class over <see cref="MCVanillaEngine{TMc, TPath, TStats}"/> (the S-van plan's VR1): <c>Calculate</c>
-/// builds the simulation for the call, with QuantLib's checks, and returns the samples' mean as the NPV and, where the
-/// random-number traits allow one, their error estimate. The type parameters, the traits and the accumulator, are
-/// QuantLib's template parameters, whose defaults are <see cref="PseudoRandom"/> and <see cref="GeneralStatistics"/>
-/// (QuantLib's <c>Statistics</c>). The payoff must be plain vanilla.
+/// A static class over <see cref="MCVanillaEngine{TMc, TPath, TStats}"/>: <c>Calculate</c> builds the simulation for
+/// the call, with QuantLib's checks, and returns the samples' mean as the NPV and, where the random-number traits allow
+/// one, their error estimate. The type parameters, the traits and the accumulator, are QuantLib's template parameters,
+/// whose defaults are <see cref="PseudoRandom"/> and <see cref="GeneralStatistics"/> (QuantLib's <c>Statistics</c>).
+/// The payoff must be plain vanilla.
 /// </para>
 /// <para>
 /// The paths run on the engine's clock, from the earliest reference date of the process's structures on the risk-free
 /// curve's day counter, each structure read at the instants the grid's times denote and the payoff discounted there
-/// (the S-van plan's VR1 (v), <c>Divergences/McMismatchedTimesTests.cs</c>); QuantLib's grid runs from the risk-free
-/// curve's date, reading the other structures at its times. Where every structure shares the risk-free curve's clock,
-/// the bits are QuantLib's. The seed is explicit (S2R4): QuantLib's default, 0, a seed from the clock, is refused.
+/// (<c>Divergences/McMismatchedTimesTests.cs</c>); QuantLib's grid runs from the risk-free curve's date, reading the
+/// other structures at its times. Where every structure shares the risk-free curve's clock, the bits are QuantLib's.
+/// The seed is explicit: QuantLib's default, 0, a seed from the clock, is refused.
 /// </para>
 /// </remarks>
 public static class MCEuropeanEngine

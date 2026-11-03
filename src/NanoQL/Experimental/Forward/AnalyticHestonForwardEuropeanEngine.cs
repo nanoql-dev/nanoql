@@ -22,35 +22,34 @@ namespace NanoQL.Experimental;
 /// </summary>
 /// <remarks>
 /// <para>
-/// An unsealed, immutable object holding the process and the integration order, its public members QuantLib's
-/// (<see cref="Propagator"/>, <see cref="ForwardChF"/>), with a static <c>Calculate</c> as D14's form (the S-xeq plan's
-/// §2.0, SEQR5's form). QuantLib's nested integrations: 128 Gauss-Legendre points over the variance at the reset, 128
-/// over the characteristic function's argument; within 1e-3 of the reset, the vanilla's integral alone. The value, with
-/// QuantLib's additional results ("dcf", "qf", "expiryRatio", "resetRatio", "moneyness", "s0", "fwd", "resetTime",
-/// "expiryTime", "P1Hat", "P2Hat", "phiRightLimit", "nuRightLimit").
+/// An unsealed, immutable object holding the process and the integration order, its public members QuantLib's (<see
+/// cref="Propagator"/>, <see cref="ForwardChF"/>), with a static <c>Calculate</c> in the engines' form. QuantLib's
+/// nested integrations: 128 Gauss-Legendre points over the variance at the reset, 128 over the characteristic
+/// function's argument; within 1e-3 of the reset, the vanilla's integral alone. The value, with QuantLib's additional
+/// results ("dcf", "qf", "expiryRatio", "resetRatio", "moneyness", "s0", "fwd", "resetTime", "expiryTime", "P1Hat",
+/// "P2Hat", "phiRightLimit", "nuRightLimit").
 /// </para>
 /// <para>
 /// Documented divergences (<c>Divergences/HestonForwardEngineTests.cs</c>), each leaving QuantLib's bits where it
 /// doesn't apply. The propagator's product e^(−(Bν + Λ)/2) · I_(R/2−1)(√(ΛBν)) underflows times overflows to NaN for
 /// resets just above the 1e-3 cut, where it is taken as e^(−(Bν + Λ)/2 + x) · Iₑ(x), x = √(ΛBν), QuantLib's own
-/// exponentially weighted Bessel function, wherever QuantLib's product isn't finite and nonzero (XER5 (xiii)). At κ̂ =
-/// κ − ρσ = 0 QuantLib's B is 0/0 and R 0·∞: below |κ̂t| of 1e-2, B = 4 r(κ̂t)/(σ²t) with r(x) = x/(−expm1(−x)), and R
-/// = 4κθ/σ² where κ̂ = 0 (XER5 (xiv), S-g1d's G1R4 cut). QuantLib's outer integral, 128 nodes over [0, max(2, ...)] in
-/// the reset variance, can't resolve the propagator at short resets, where it is narrow, nor where 2κθ &lt; σ², where
-/// it is singular at 0: at a vol of vol of 0.2 a one-day reset prices 10.376 against Monte Carlo's 8.662 ± 0.019, at
-/// 0.5 a 182-day reset 5.100 against 5.177 ± 0.014. Where QuantLib's nodes miss the propagator's unit mass by more than
-/// 1e-6 the expectation is taken in closed form: QuantLib's characteristic function from the reset is affine in the
-/// reset variance, so its expectation over the propagator is the CIR transition's moment-generating function, and each
-/// probability is one Fourier integral on the half-line, adaptively, where QuantLib's inner integral stops at a fixed
-/// limit that small reset variances outrun (the user's rulings at the S-xeq run's stops 2 and 4). That limit also fails
-/// short tenors, where the return's distribution is narrow: at a reset today a one-day call at the money prices 0.297
-/// against the vanilla's 0.420 and calls out of the money below 0. QuantLib's probabilities stand on its reset-today
-/// route and on its outer integral only where each is within 1e-7 of the resolved route's, the same half-line integral
-/// at v₀ or the closed form, the resolved route elsewhere (the ruling at stop 7); the resolved integral runs on
+/// exponentially weighted Bessel function, wherever QuantLib's product isn't finite and nonzero. At κ̂ = κ − ρσ = 0
+/// QuantLib's B is 0/0 and R 0·∞: below |κ̂t| of 1e-2, B = 4 r(κ̂t)/(σ²t) with r(x) = x/(−expm1(−x)), and R = 4κθ/σ²
+/// where κ̂ = 0. QuantLib's outer integral, 128 nodes over [0, max(2, ...)] in the reset variance, can't resolve the
+/// propagator at short resets, where it is narrow, nor where 2κθ &lt; σ², where it is singular at 0: at a vol of vol of
+/// 0.2 a one-day reset prices 10.376 against Monte Carlo's 8.662 ± 0.019, at 0.5 a 182-day reset 5.100 against 5.177 ±
+/// 0.014. Where QuantLib's nodes miss the propagator's unit mass by more than 1e-6 the expectation is taken in closed
+/// form: QuantLib's characteristic function from the reset is affine in the reset variance, so its expectation over the
+/// propagator is the CIR transition's moment-generating function, and each probability is one Fourier integral on the
+/// half-line, adaptively, where QuantLib's inner integral stops at a fixed limit that small reset variances outrun.
+/// That limit also fails short tenors, where the return's distribution is narrow: at a reset today a one-day call at
+/// the money prices 0.297 against the vanilla's 0.420 and calls out of the money below 0. QuantLib's probabilities
+/// stand on its reset-today route and on its outer integral only where each is within 1e-7 of the resolved route's, the
+/// same half-line integral at v₀ or the closed form, the resolved route elsewhere; the resolved integral runs on
 /// Gauss-Legendre pieces whose width doubles from 1 to at most min(8, π/|log K|), half the strike factor's period,
-/// until three pieces in a row contribute at most 1e-17 (the code review's O2-1). Times run on the
-/// model's clock, <see cref="HestonProcess"/>'s model time from the earliest reference date of its curves, each
-/// discount read at its instants, none accrued before its curve's own date (XER5 (xxxiii), (xxxiv); S-hes's HR7).
+/// until three pieces in a row contribute at most 1e-17. Times run on the model's clock, <see cref="HestonProcess"/>'s
+/// model time from the earliest reference date of its curves, each discount read at its instants, none accrued before
+/// its curve's own date.
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]
@@ -59,12 +58,12 @@ public class AnalyticHestonForwardEuropeanEngine
     // QuantLib's switch to the vanilla's integral, near the reset
     private const double ResetCut = 1e-3;
 
-    // the cut below which B is taken through r(x) = x/(−expm1(−x)) (XER5 (xiv))
+    // the cut below which B is taken through r(x) = x/(−expm1(−x))
     private const double SmallKappaHat = 1e-2;
 
-    // the propagator's mass QuantLib's nodes must carry for its outer integral to stand (the user's ruling at the S-xeq
-    // run's stop 2); the resolved integral's widest piece, its quiet piece's size and the end past which its integrand's
-    // tail refuses (the rulings at stops 4 and 7); the agreement of QuantLib's probabilities with it (stop 7)
+    // the propagator's mass QuantLib's nodes must carry for its outer integral to stand; the resolved integral's widest
+    // piece, its quiet piece's size and the end past which its integrand's tail refuses; the agreement of QuantLib's
+    // probabilities with it
     private const double MassTolerance = 1e-6;
     private const double MaxPieceWidth = 8.0;
     private const double PieceQuiet = 1e-17;
@@ -102,7 +101,7 @@ public class AnalyticHestonForwardEuropeanEngine
         kappaHat = process.Kappa - (process.Rho * process.Sigma);
         thetaHat = process.Kappa * process.Theta / kappaHat;
 
-        // R = 4κθ/σ² where κ̂ = 0, QuantLib's 0·∞ (XER5 (xiv))
+        // R = 4κθ/σ² where κ̂ = 0, QuantLib's 0·∞
         r = kappaHat == 0.0
             ? 4 * process.Kappa * process.Theta / (process.Sigma * process.Sigma)
             : 4 * kappaHat * thetaHat / (process.Sigma * process.Sigma);
@@ -173,7 +172,7 @@ public class AnalyticHestonForwardEuropeanEngine
             return product;
         }
 
-        // the scaled form where QuantLib's product underflows times overflows (XER5 (xiii))
+        // the scaled form where QuantLib's product underflows times overflows
         double scaled = Math.Exp((-0.5 * ((b * varReset) + lambda)) + x) * b / 2;
         return scaled * term2 * ModifiedBesselFunctions.ModifiedBesselFunction_i_exponentiallyWeighted((r / 2) - 1, x);
     }
@@ -230,7 +229,7 @@ public class AnalyticHestonForwardEuropeanEngine
             throw new NanoQLException("non plain vanilla payoff given");
         }
 
-        // the model's clock (HR7): its time from the earliest reference date of the curves, each discount at its instant
+        // the model's clock: its time from the earliest reference date of the curves, each discount at its instant
         TermStructure clock = Process.ModelClock();
         double resetTime = Process.ModelTime(option.ResetDate);
         double expiryTime = Process.ModelTime(option.Exercise.LastDate());
@@ -252,9 +251,9 @@ public class AnalyticHestonForwardEuropeanEngine
             2.0,
             10.0 * (1 + Math.Max(0.0, Process.Rho)) * Process.Sigma * Math.Sqrt(resetTime * Math.Max(Process.V0, Process.Theta)));
 
-        // do the 2D integral calculation. For very short times, we just fall back on the standard
-        // calculation, both for accuracy and because tStar==0 causes some numerical issues...
-        // QuantLib's probabilities where they agree with the resolved route's (the user's ruling at the S-xeq run's stop 7)
+        // do the 2D integral calculation. For very short times, we just fall back on the standard calculation, both for
+        // accuracy and because tStar==0 causes some numerical issues... QuantLib's probabilities where they agree with
+        // the resolved route's
         (double P1, double P2) p1HatP2Hat = resetTime <= ResetCut
             ? Agreed(
                 CalculateP1P2(tenor, s0, moneyness * s0, expiryRatio, phiRightLimit),
@@ -314,7 +313,7 @@ public class AnalyticHestonForwardEuropeanEngine
             return propagator * (0.5 + (p1Integral / Math.PI));
         }
 
-        // QuantLib's nodes where they carry the propagator's unit mass (the user's ruling at the S-xeq run's stop 2)
+        // QuantLib's nodes where they carry the propagator's unit mass
         double mass = 0.5 * nuRightLimit * Integrator.Evaluate(
             nu => Propagator(resetTime, nuRightLimit * ((0.5 * nu) + 0.5 + 1e-8)));
         if (Math.Abs(mass - 1.0) <= MassTolerance)
@@ -322,19 +321,19 @@ public class AnalyticHestonForwardEuropeanEngine
             double p1HatIntegral = 0.5 * nuRightLimit * Integrator.Evaluate(nu => P12Hat(true, nu));
             double p2HatIntegral = 0.5 * nuRightLimit * Integrator.Evaluate(nu => P12Hat(false, nu));
 
-            // QuantLib's where they agree with the closed form (the ruling at stop 7)
+            // QuantLib's where they agree with the closed form
             return Agreed((p1HatIntegral, p2HatIntegral), () => AffineP1P2Hat(tenor, resetTime, logMoneyness));
         }
 
         return AffineP1P2Hat(tenor, resetTime, logMoneyness);
     }
 
-    // The forward-start probabilities where QuantLib's nodes miss the propagator's mass (the user's ruling at the S-xeq
-    // run's stop 4): QuantLib's characteristic function from the reset is exp(a(z) + νb(z)), affine in the reset variance
-    // (LnChF), so its expectation over the propagator, the CIR transition under κ̂ and θ̂ (Bν noncentral χ² with R
-    // degrees of freedom and noncentrality Λ), is exp(a) M(b), M(z) = (1 − 2z/B)^(−R/2) exp((Λ/B) z/(1 − 2z/B)), its
-    // moment-generating function; each probability then the resolved half-line integral, where QuantLib integrates each
-    // variance's on 128 nodes to a fixed limit and the outer integral over the variance
+    // The forward-start probabilities where QuantLib's nodes miss the propagator's mass: QuantLib's characteristic
+    // function from the reset is exp(a(z) + νb(z)), affine in the reset variance (LnChF), so its expectation over the
+    // propagator, the CIR transition under κ̂ and θ̂ (Bν noncentral χ² with R degrees of freedom and noncentrality Λ),
+    // is exp(a) M(b), M(z) = (1 − 2z/B)^(−R/2) exp((Λ/B) z/(1 − 2z/B)), its moment-generating function; each
+    // probability then the resolved half-line integral, where QuantLib integrates each variance's on 128 nodes to a
+    // fixed limit and the outer integral over the variance
     private (double P1, double P2) AffineP1P2Hat(double tenor, double resetTime, double logMoneyness)
     {
         (double b, double lambda) = TransitionParameters(resetTime);
@@ -352,7 +351,7 @@ public class AnalyticHestonForwardEuropeanEngine
     }
 
     // The reset-today probabilities resolved: QuantLib's characteristic function at the spot's variance v₀ on the
-    // resolved half-line integral, the vanilla's (the ruling at stop 7)
+    // resolved half-line integral, the vanilla's
     private (double P1, double P2) VanillaP1P2(double tenor, double logK)
     {
         double kappa = Process.Kappa, theta = Process.Theta, sigma = Process.Sigma, rho = Process.Rho, v0 = Process.V0;
@@ -366,9 +365,9 @@ public class AnalyticHestonForwardEuropeanEngine
         return ResolvedP1P2(ChF, logK);
     }
 
-    // QuantLib's probabilities where each is within 1e-7 of the resolved route's, the resolved route's elsewhere (the
-    // ruling at stop 7): its inner integral, 128 nodes to φ = 100, is off by about 1e-8 at a year's tenor and by 1e-6 and
-    // more at a month's and less, where the return's distribution is narrow and the integrand hasn't decayed by 100
+    // QuantLib's probabilities where each is within 1e-7 of the resolved route's, the resolved route's elsewhere: its
+    // inner integral, 128 nodes to φ = 100, is off by about 1e-8 at a year's tenor and by 1e-6 and more at a month's
+    // and less, where the return's distribution is narrow and the integrand hasn't decayed by 100
     private static (double P1, double P2) Agreed((double P1, double P2) quantLib, Func<(double P1, double P2)> resolved)
     {
         (double p1, double p2) = resolved();
@@ -379,7 +378,7 @@ public class AnalyticHestonForwardEuropeanEngine
 
     // Both probabilities from an expected characteristic function: QuantLib's P12 integrand on the half-line, on
     // Gauss-Legendre pieces from 0 whose width doubles from 1 to at most min(8, π/|log K|), half the strike factor's
-    // period, until three pieces in a row contribute at most 1e-17 (the code review's O2-1)
+    // period, until three pieces in a row contribute at most 1e-17
     private static (double P1, double P2) ResolvedP1P2(Func<Complex, Complex> expected, double logK)
     {
         double widest = logK == 0.0 ? MaxPieceWidth : Math.Min(MaxPieceWidth, Math.PI / Math.Abs(logK));

@@ -12,10 +12,9 @@ namespace NanoQL.PricingEngines;
 
 /// <summary>The forward-start European option pricing engine by Monte Carlo simulation on a Black-Scholes process.</summary>
 /// <remarks>
-/// A static class over <see cref="MCForwardVanillaEngine{TMc, TPath, TStats}"/> (the S-exo plan's ER2 (v)): the paths
-/// run on the process's clock (<see cref="FdmBlackScholesOp.Clock"/>), the reset read at its index on the grid and the
-/// payoff discounted at expiry there (the plan's ER5 (xxiv)); on structures dated alike, QuantLib's bits. The payoff
-/// must be plain vanilla; the seed is explicit (S2R4).
+/// A static class over <see cref="MCForwardVanillaEngine{TMc, TPath, TStats}"/>: the paths run on the process's clock
+/// (<see cref="FdmBlackScholesOp.Clock"/>), the reset read at its index on the grid and the payoff discounted at expiry
+/// there; on structures dated alike, QuantLib's bits. The payoff must be plain vanilla; the seed is explicit.
 /// </remarks>
 public static class MCForwardEuropeanBSEngine
 {

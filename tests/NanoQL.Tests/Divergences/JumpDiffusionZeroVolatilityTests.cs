@@ -10,11 +10,11 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The jump-diffusion engine's vega and theta at zero diffusive volatility (the S-van plan's VR4 (xxix)). For the no-jump
-/// term v₀ = 0, so its vega weight √(variance/t)/v₀ and its theta's jump term i·jumpSquareVol/(2v₀t²) are 0/0
-/// (<c>jumpdiffusionengine.cpp:110</c>, <c>:123-127</c>): QuantLib's vega and theta are NaN at σ = 0 [executed through
-/// the harness]. nanoql takes their limits, 1 and 0, the values they take at any positive volatility. QuantLib's check:
-/// its own Greeks at σ = 1e-12, the sum taken to 1e-12, and the limit they approach from σ = 1e-8.
+/// The jump-diffusion engine's vega and theta at zero diffusive volatility. For the no-jump term v₀ = 0, so its vega
+/// weight √(variance/t)/v₀ and its theta's jump term i·jumpSquareVol/(2v₀t²) are 0/0
+/// (<c>jumpdiffusionengine.cpp:110</c>, <c>:123-127</c>): QuantLib's vega and theta are NaN at σ = 0 (the C++ harness).
+/// nanoql takes their limits, 1 and 0, the values they take at any positive volatility. QuantLib's check: its own
+/// Greeks at σ = 1e-12, the sum taken to 1e-12, and the limit they approach from σ = 1e-8.
 /// </summary>
 public class JumpDiffusionZeroVolatilityTests
 {

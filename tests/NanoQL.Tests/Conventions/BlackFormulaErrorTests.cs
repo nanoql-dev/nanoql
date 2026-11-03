@@ -191,7 +191,7 @@ public class BlackFormulaErrorTests
         Assert.Equal("maxIterations", Assert.Throws<ArgumentOutOfRangeException>(() => BlackFormulaFunctions.BlackFormulaImpliedStdDevLiRS(
             Call, 0.03, 0.05, 0.03, 1.0, 0.0, null, 1.0, 1e-6, -1)).ParamName);
 
-        // A null payoff (BF1): ArgumentNullException naming it, with .NET's text.
+        // A null payoff: ArgumentNullException naming it, with .NET's text.
         ArgumentNullException n = Assert.Throws<ArgumentNullException>(() => BlackFormulaFunctions.BlackFormulaImpliedStdDev(
             (PlainVanillaPayoff)null!, 0.05, 0.03));
         Assert.Equal("payoff", n.ParamName);

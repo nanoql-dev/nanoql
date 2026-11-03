@@ -13,7 +13,8 @@ namespace NanoQL.Tests.Vectors;
 /// The C++ harness's abcd curve vectors, <c>tests/vectors/cxx/experimental/volatility/abcdatmvolcurve.json</c>:
 /// <see cref="AbcdAtmVolCurve"/>'s fit after its first calculation, its factors, option times, maximum date and strike
 /// range, its volatility, variance and factor at times inside its fitted tenors, and its volatility and variance at its
-/// fitted tenors and at dates, the outputs S7R6's one-ulp refits leave stable; QuantLib's refusals. The curve as <c>tools/cxx/src/experimental/volatility/abcdatmvolcurve.cpp</c> builds it.
+/// fitted tenors and at dates, the outputs one-ulp refits leave stable; QuantLib's refusals. The curve as
+/// <c>tools/cxx/src/experimental/volatility/abcdatmvolcurve.cpp</c> builds it.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class AbcdAtmVolCurveCxxVectorTests

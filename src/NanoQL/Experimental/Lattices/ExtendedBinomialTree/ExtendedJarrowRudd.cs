@@ -16,7 +16,7 @@ namespace NanoQL.Experimental;
 /// The time-dependent Jarrow-Rudd (multiplicative) equal-probabilities binomial tree: its up move one standard deviation
 /// of a step at the step's time: QuantLib's <c>ExtendedJarrowRudd</c>.
 /// </summary>
-/// <remarks>Immutable; exact on constant parameters (<see cref="ExtendedBinomialTree{T}"/>, XRR6).</remarks>
+/// <remarks>Immutable; exact on constant parameters (<see cref="ExtendedBinomialTree{T}"/>).</remarks>
 [Experimental("NQL0001")]
 public sealed class ExtendedJarrowRudd
     : ExtendedEqualProbabilitiesBinomialTree<ExtendedJarrowRudd>, IBinomialTree<ExtendedJarrowRudd>

@@ -14,15 +14,13 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The Gaussian1d cap/floor engine's discount curve (the S-g1d plan's G1R6 (ii)): QuantLib's engine discounts the
-/// floating leg on the discount curve but the strike's leg on the model curve
-/// (<c>gaussian1dcapfloorengine.cpp:86-89</c>,
-/// <c>:158-161</c>), where its swaption engine discounts both on the discount curve. On the wheel, on a GSR model (a =
-/// σ = 0.01) on a flat 3% Actual/365 (Fixed) curve, a caplet at 3% on 1,000,000 of Euribor 6M fixing in a year is worth
-/// 1934.325172314739 with a 2% discount curve, where QuantLib's swaption engine gives the one-period swaption into the
-/// same coupon against 3% 1898.5255274075153; without the discount curve the caplet's 1870.0808332724143 is the
-/// swaption's. nanoql discounts the strike's leg on the discount curve. QuantLib's check: its swaption engine on the
-/// one-period swaption.
+/// The Gaussian1d cap/floor engine's discount curve: QuantLib's engine discounts the floating leg on the discount curve
+/// but the strike's leg on the model curve (<c>gaussian1dcapfloorengine.cpp:86-89</c>, <c>:158-161</c>), where its
+/// swaption engine discounts both on the discount curve. On the wheel, on a GSR model (a = σ = 0.01) on a flat 3%
+/// Actual/365 (Fixed) curve, a caplet at 3% on 1,000,000 of Euribor 6M fixing in a year is worth 1934.325172314739 with
+/// a 2% discount curve, where QuantLib's swaption engine gives the one-period swaption into the same coupon against 3%
+/// 1898.5255274075153; without the discount curve the caplet's 1870.0808332724143 is the swaption's. nanoql discounts
+/// the strike's leg on the discount curve. QuantLib's check: its swaption engine on the one-period swaption.
 /// </summary>
 public class Gaussian1dCapFloorDiscountTests
 {

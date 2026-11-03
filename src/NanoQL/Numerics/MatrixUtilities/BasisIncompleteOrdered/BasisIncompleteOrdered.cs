@@ -10,8 +10,7 @@ namespace NanoQL.Numerics;
 /// An orthonormal basis built by Gram-Schmidt from vectors added in order, each kept where it is independent of those
 /// before it.
 /// </summary>
-/// <remarks>A working type (the S-mm plan's MR1 (ii)): each added vector changes it, and it isn't
-/// thread-safe.</remarks>
+/// <remarks>A working type: each added vector changes it, and it isn't thread-safe.</remarks>
 [WorkingType]
 public sealed class BasisIncompleteOrdered
 {

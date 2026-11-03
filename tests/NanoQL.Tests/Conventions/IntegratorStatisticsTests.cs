@@ -6,9 +6,9 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The integrators are immutable (the S-eq plan's SEQR4). QuantLib's <c>Integrator</c> keeps the last call's number of
-/// evaluations in a mutable member, read by <c>numberOfEvaluations()</c> after the call, and its setters change the
-/// integrator (<c>integral.hpp:30-70</c>); nanoql returns each call's count with its value through
+/// The integrators are immutable. QuantLib's <c>Integrator</c> keeps the last call's number of evaluations in a mutable
+/// member, read by <c>numberOfEvaluations()</c> after the call, and its setters change the integrator
+/// (<c>integral.hpp:30-70</c>); nanoql returns each call's count with its value through
 /// <see cref="Integrator.IntegrateWithStatistics"/>, and <see cref="Integrator.SetAbsoluteAccuracy"/> and
 /// <see cref="Integrator.SetMaxEvaluations"/> return a changed copy. QuantLib's values are the vectors' (the wheel's
 /// counts after each call, and the C++ harness's <c>integral</c> file for the settings).

@@ -3,12 +3,12 @@
 """Vectors for QuantLib's Black CDS-option engine (ql/experimental/credit/blackcdsoptionengine.hpp), through the
 wheel's BlackCdsOptionEngine on CdsOption.
 
-Each case is an option exercising 3, 9 or 12 months out on a swap starting a month after the exercise and running
-five years, quarterly (TARGET, following, Actual/360): payer (buying protection) and receiver, knocking out or (the
-payer) not, struck at the money, 20% below and 20% above, at volatilities 0, 10%, 25% and 60%, on a flat hazard
-rate of 1% with a flat discount rate of 2% and one of 3% with 5%, recovery 40%, evaluated today and a month later; and
-one expired option. Its outputs: the engine's NPV and risky annuity, the underlying swap priced by the mid-point engine on the
-same curves, as the engine's delegate does (the S-xcr plan's XD4).
+Each case is an option exercising 3, 9 or 12 months out on a swap starting a month after the exercise and running five
+years, quarterly (TARGET, following, Actual/360): payer (buying protection) and receiver, knocking out or (the payer)
+not, struck at the money, 20% below and 20% above, at volatilities 0, 10%, 25% and 60%, on a flat hazard rate of 1% with
+a flat discount rate of 2% and one of 3% with 5%, recovery 40%, evaluated today and a month later; and one expired
+option. Its outputs: the engine's NPV and risky annuity, the underlying swap priced by the mid-point engine on the same
+curves, as the engine's delegate does.
 
 A case's inputs hold its settings, the swap spec of tools/vectors/gen/instruments/creditdefaultswap.py, the exercise
 date, "knocksOut", the volatility, the curve specs and the recovery. Read back by

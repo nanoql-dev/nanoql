@@ -7,10 +7,10 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// Documented divergence of <see cref="KlugeExtOUProcess.Diffusion"/> (the S-xeq plan's XER5 (xxviii)): QuantLib writes
-/// the gas row at row <c>size()</c> and column <c>factors()</c>, one past each end of its <c>size() × factors()</c>
-/// matrix, so its gas row is 0 (and the writes corrupt the heap); here the gas row is the last, ρσ_u in the first column
-/// and √(1 − ρ²)σ_u in the last, so the diffusion's square is the covariance of the power and gas Brownian motions.
+/// Documented divergence of <see cref="KlugeExtOUProcess.Diffusion"/>: QuantLib writes the gas row at row <c>size()</c>
+/// and column <c>factors()</c>, one past each end of its <c>size() × factors()</c> matrix, so its gas row is 0 (and the
+/// writes corrupt the heap); here the gas row is the last, ρσ_u in the first column and √(1 − ρ²)σ_u in the last, so
+/// the diffusion's square is the covariance of the power and gas Brownian motions.
 /// </summary>
 public class KlugeExtOUDiffusionTests
 {

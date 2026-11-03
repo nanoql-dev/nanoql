@@ -11,10 +11,10 @@ nanoql taking QuantLib's reading where the store holds nothing on or before it, 
 forecast on a flat 3% curve (with no forecasting curve the value is refused, and so is nanoql's quote, which computes
 its value at construction); on evaluation dates of Wednesday 15 January 2025 and Friday 31 January 2025; and an empty
 store, whose value and reference date QuantLib refuses. A store holding later fixings but none at the evaluation date is
-left out: there QuantLib's reference date is the evaluation date and nanoql's the stored date before it (the S-core
-plan's CR7 (xxxv); tests/NanoQL.Tests/Divergences/LastFixingQuoteTests.cs). Each quote's value and reference date. A
-case's inputs are the "index" (a spec of indexes/interestrateindex.py, with no curve but on the forecast cases), its
-fixings in the settings. Read back by tests/NanoQL.Tests/Vectors/Quotes/IndexQuoteVectorTests.cs."""
+left out: there QuantLib's reference date is the evaluation date and nanoql's the stored date before it
+(tests/NanoQL.Tests/Divergences/LastFixingQuoteTests.cs). Each quote's value and reference date. A case's inputs are the
+"index" (a spec of indexes/interestrateindex.py, with no curve but on the forecast cases), its fixings in the settings.
+Read back by tests/NanoQL.Tests/Vectors/Quotes/IndexQuoteVectorTests.cs."""
 import importlib.util
 import os
 import sys

@@ -7,9 +7,9 @@ using Microsoft.Office.Interop.Excel;
 namespace NanoQL.Excel.XlTests;
 
 /// <summary>
-/// The tuple forms through listed functions (XLR17, XLD36): an issuer's pairs of keys and curves in, and back out with
-/// their handles; another width refused; a conventions snapshot's root elements out; cash flows' NPV and BPS as one
-/// tuple across a row.
+/// The tuple forms through listed functions: an issuer's pairs of keys and curves in, and back out with their handles;
+/// another width refused; a conventions snapshot's root elements out; cash flows' NPV and BPS as one tuple across a
+/// row.
 /// </summary>
 [ExcelTestSettings(OutOfProcess = true)]
 public class TupleTests : RunnerTest

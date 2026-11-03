@@ -7,12 +7,12 @@ points between them, and at points past its ends: the value and derivative, with
 the range except at the two farthest points, where QuantLib refuses to extrapolate; and the primitive and second
 derivative, which QuantLib doesn't implement, at one point.
 
-The outputs nanoql fixes are left out (the S-van plan's VR4 (xxviii)): the value and derivative at x = 0 where 0 is a
-node, which QuantLib's node test misses, dividing by zero (tests/NanoQL.Tests/Divergences/LagrangeZeroNodeTests.cs);
-and descending node sets, where QuantLib's binary search never finds a node (the same file). The wheel's
-LagrangeInterpolation is SWIG's SafeInterpolation<QuantLib::LagrangeInterpolation> (interpolation.i), which copies the
-two arrays and forwards each call to the C++ class with its flag. Its value(y, x), which the wheel doesn't expose, is
-vectored through the C++ harness (tools/vectors/gen/cxx/math/interpolations/lagrangeinterpolation.py). Read back by
+The outputs nanoql fixes are left out: the value and derivative at x = 0 where 0 is a node, which QuantLib's node test
+misses, dividing by zero (tests/NanoQL.Tests/Divergences/LagrangeZeroNodeTests.cs); and descending node sets, where
+QuantLib's binary search never finds a node (the same file). The wheel's LagrangeInterpolation is SWIG's
+SafeInterpolation<QuantLib::LagrangeInterpolation> (interpolation.i), which copies the two arrays and forwards each call
+to the C++ class with its flag. Its value(y, x), which the wheel doesn't expose, is vectored through the C++ harness
+(tools/vectors/gen/cxx/math/interpolations/lagrangeinterpolation.py). Read back by
 tests/NanoQL.Tests/Vectors/Numerics/Interpolations/LagrangeInterpolationVectorTests.cs."""
 import math
 import os

@@ -11,8 +11,8 @@ start outside the box, and by central differences; each through the constraint's
 explicit ones, under QuantLib's test's end criteria and under a limit of 3 iterations. Each case records the Problem
 after minimize (current value, function value, gradient norm, the evaluation counts) and the end criterion; where the
 end criterion is the stationary function value, the gradient norm is left out: on the relative reduction stop nanoql
-reports the projected gradient at the point returned, QuantLib the previous iterate's (the S-core plan's CR7 (xviii);
-tests/NanoQL.Tests/Divergences/LBFGSBTests.cs). The harness unit is tools/cxx/src/math/optimization/lbfgsb.cpp. Read
+reports the projected gradient at the point returned, QuantLib the previous iterate's
+(tests/NanoQL.Tests/Divergences/LBFGSBTests.cs). The harness unit is tools/cxx/src/math/optimization/lbfgsb.cpp. Read
 back by tests/NanoQL.Tests/Vectors/Cxx/Numerics/Optimization/LBFGSBCxxVectorTests.cs."""
 import os
 import sys

@@ -16,20 +16,19 @@ namespace NanoQL.PricingEngines;
 /// <summary>The Monte Carlo engine for European options under a Heston-like process.</summary>
 /// <remarks>
 /// <para>
-/// A static class over <see cref="MCVanillaEngine{TMc, TPath, TStats}"/> on multi-variate paths (the S-hes plan's
-/// HR2 (iv), the S-van plan's VD6 form): <c>Calculate</c> builds the simulation for the call and returns the samples'
-/// mean as the NPV and, where the random-number traits allow one, their error estimate. The process is a
-/// <see cref="HestonProcess"/>, a <see cref="BatesProcess"/> among them, whose jumps the paths then carry, or a
-/// <see cref="HestonSLVProcess"/>, QuantLib's template parameter <c>P</c>; the paths step in place, allocating nothing per sample after the first (HR2 (i),
-/// (iii)). The payoff must be plain vanilla.
+/// A static class over <see cref="MCVanillaEngine{TMc, TPath, TStats}"/> on multi-variate paths: <c>Calculate</c>
+/// builds the simulation for the call and returns the samples' mean as the NPV and, where the random-number traits
+/// allow one, their error estimate. The process is a <see cref="HestonProcess"/>, a <see cref="BatesProcess"/> among
+/// them, whose jumps the paths then carry, or a <see cref="HestonSLVProcess"/>, QuantLib's template parameter <c>P</c>;
+/// the paths step in place, allocating nothing per sample after the first. The payoff must be plain vanilla.
 /// </para>
 /// <para>
-/// QuantLib's grid runs from the risk-free curve's reference date (<c>process-&gt;time</c>) and discounts at the
-/// grid's last time on it (<c>mceuropeanhestonengine.hpp:121-129</c>). Here the paths run on the model's clock, from
-/// the earliest reference date of the process's curves on the risk-free curve's day counter, each curve read at the
-/// instants the grid's times denote and the payoff discounted there (HR7 (vi), the S-van plan's VR1 (v),
-/// <c>Divergences/McHestonMismatchedTimesTests.cs</c>); where the dividend curve isn't dated before the risk-free curve,
-/// the bits are QuantLib's. The seed is explicit (S2R4): QuantLib's default, 0, a seed from the clock, is refused.
+/// QuantLib's grid runs from the risk-free curve's reference date (<c>process-&gt;time</c>) and discounts at the grid's
+/// last time on it (<c>mceuropeanhestonengine.hpp:121-129</c>). Here the paths run on the model's clock, from the
+/// earliest reference date of the process's curves on the risk-free curve's day counter, each curve read at the
+/// instants the grid's times denote and the payoff discounted there
+/// (<c>Divergences/McHestonMismatchedTimesTests.cs</c>); where the dividend curve isn't dated before the risk-free
+/// curve, the bits are QuantLib's. The seed is explicit: QuantLib's default, 0, a seed from the clock, is refused.
 /// </para>
 /// </remarks>
 public static class MCEuropeanHestonEngine

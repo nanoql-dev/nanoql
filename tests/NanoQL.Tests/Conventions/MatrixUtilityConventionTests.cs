@@ -6,12 +6,11 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The matrix utilities' conventions (the S-core plan's C4): the factor reduction below 2 × 2 and TAP's rank 0, size 0
-/// and unchecked angle reads refused (CR7 (xxix)); the sparse ILU's refusals of a row whose elimination never ends and of
-/// a vector not of its size; Pascal's rows beyond 67 refused (CD8); QuantLib's checks and texts. And §2.6's two routes:
-/// the ILU's factors against ILU(k)'s defining identity, (LU)ᵢⱼ = Aᵢⱼ on the kept pattern; <c>Expm</c> against the
-/// eigendecomposition. QuantLib's values beside the refusals are its own (this run's <c>probes\c4_facts.cpp</c>,
-/// <c>c4_facts.out</c>).
+/// The matrix utilities' conventions: the factor reduction below 2 × 2 and TAP's rank 0, size 0 and unchecked angle
+/// reads refused; the sparse ILU's refusals of a row whose elimination never ends and of a vector not of its size;
+/// Pascal's rows beyond 67 refused; QuantLib's checks and texts. And §2.6's two routes: the ILU's factors against
+/// ILU(k)'s defining identity, (LU)ᵢⱼ = Aᵢⱼ on the kept pattern; <c>Expm</c> against the eigendecomposition. QuantLib's
+/// values beside the refusals are its own.
 /// </summary>
 public class MatrixUtilityConventionTests
 {
@@ -66,7 +65,7 @@ public class MatrixUtilityConventionTests
         Assert.Throws<ArgumentOutOfRangeException>(() => TapCorrelationsFunctions.TriangularAnglesParametrization(new Vector(2), 3, 5));
         Assert.Throws<ArgumentOutOfRangeException>(() => TapCorrelationsFunctions.TriangularAnglesParametrization(new Vector(5), 4, 6));
 
-        // rank size + 1, whose count and loops are rank size's: QuantLib's rank-size matrix (the code review's C4-O4)
+        // rank size + 1, whose count and loops are rank size's: QuantLib's rank-size matrix
         var angles = new Vector([0.4, 1.1, 2.3]);
         Assert.Equal(
             MatrixVectorRows(TapCorrelationsFunctions.TriangularAnglesParametrization(angles, 3, 3)),

@@ -10,21 +10,20 @@ first and last tenors its smile section's at-the-money level, exercise date and 
 0.5% and 1% on either side, and its at-the-money volatility. Then QuantLib's refusals: one strike spread, and
 non-increasing strike spreads.
 
-The outputs nanoql fixes are left out (the S-xeq plan's §2.8): each time's date, ⌊365t⌋ days after the reference date,
-is a TARGET business day, where QuantLib's fixing read completes and nanoql's adjusted read is the identity (the S-xeq
-run's XER5 (xxiv)); no time lies before the curve's first tenor or past its last, where the abcd curve's factor refuses
-in both (R3-1); the option dates are the surface's own, the index's in both, not its at-the-money curve's by period
-((xxv)).
+The outputs nanoql fixes are left out: each time's date, ⌊365t⌋ days after the reference date, is a TARGET business day,
+where QuantLib's fixing read completes and nanoql's adjusted read is the identity; no time lies before the curve's first
+tenor or past its last, where the abcd curve's factor refuses in both; the option dates are the surface's own, the
+index's in both, not its at-the-money curve's by period.
 
-**The stability filter** (the S7 plan's S7R6): every surface is refitted with every input moved one ulp up, then down,
-by math.nextafter, together and each alone (the rate, each at-the-money volatility and each volatility spread); an
-output's element (a time's level, exercise date, at-the-money volatility or row of section volatilities, a date's row
-of spreads, an option date) is written only where every refit leaves it within 1e-12 x max(|base|, |moved|, 1) (equal,
-for the dates), the indexes of each output's dropped elements in the case's inputs "dropped", as the swaption cube
-files have them; the generator prints the counts per case and for the file. The section fits, four free parameters on
-five strikes, move about 1e-9 under a one-ulp refit at nearly every time, and the abcd curve's fit under them moves
-its at-the-money volatility as much, so the filter drops nearly every fitted volatility, as it drops the free fits of
-the SABR cube's file.
+**The stability filter**: every surface is refitted with every input moved one ulp up, then down, by math.nextafter,
+together and each alone (the rate, each at-the-money volatility and each volatility spread); an output's element (a
+time's level, exercise date, at-the-money volatility or row of section volatilities, a date's row of spreads, an option
+date) is written only where every refit leaves it within 1e-12 x max(|base|, |moved|, 1) (equal, for the dates), the
+indexes of each output's dropped elements in the case's inputs "dropped", as the swaption cube files have them; the
+generator prints the counts per case and for the file. The section fits, four free parameters on five strikes, move
+about 1e-9 under a one-ulp refit at nearly every time, and the abcd curve's fit under them moves its at-the-money
+volatility as much, so the filter drops nearly every fitted volatility, as it drops the free fits of the SABR cube's
+file.
 
 The surface is tools/cxx/src/experimental/volatility/sabrvolsurface.cpp's. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Experimental/Volatility/SabrVolSurfaceCxxVectorTests.cs."""

@@ -16,7 +16,7 @@ namespace NanoQL.PricingEngines;
 /// <summary>
 /// The binomial engine on the additive equal-probabilities tree: QuantLib-Python's <c>BinomialEQPVanillaEngine</c>,
 /// QuantLib's
-/// <c>BinomialVanillaEngine&lt;AdditiveEQPBinomialTree&gt;</c> (D12).
+/// <c>BinomialVanillaEngine&lt;AdditiveEQPBinomialTree&gt;</c>.
 /// </summary>
 public static class BinomialEQPVanillaEngine
 {

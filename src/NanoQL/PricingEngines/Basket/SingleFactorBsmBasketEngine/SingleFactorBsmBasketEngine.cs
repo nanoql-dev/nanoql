@@ -114,7 +114,7 @@ public static class SingleFactorBsmBasketEngine
     // The engine's formula from the extractor's values: QuantLib's arithmetic from fwdBasket on, the price and the
     // root's d. Where every deviation is close to 0 the price is the intrinsic value and d its limit, +∞ above the
     // strike, −∞ below and 0 at it, which QuantLib doesn't set (Intrinsic). Choi's engine prices each of its nodes
-    // through it, on the node's forwards and signed deviations (the S-exo plan's ED16), and reads d at every node.
+    // through it, on the node's forwards and signed deviations, and reads d at every node.
     internal static (double Value, double D, bool Intrinsic) Price(
         PlainVanillaPayoff payoff,
         ReadOnlySpan<double> weights,

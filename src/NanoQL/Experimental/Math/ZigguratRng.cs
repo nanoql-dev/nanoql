@@ -23,7 +23,7 @@ namespace NanoQL.Experimental;
 /// </para>
 /// <para>
 /// A working type, as the generators are: each draw changes it, and it is not thread-safe. The seed is required:
-/// QuantLib's default, 0, seeds the twister from the clock (the S-xrt plan's XRD3).
+/// QuantLib's default, 0, seeds the twister from the clock.
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]

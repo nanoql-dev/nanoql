@@ -67,9 +67,9 @@ public class FdCirTests
         var cirProcess = new CoxIngersollRossProcess(newSpeed, cirSigma, initialRate, newLevel);
 
         // Moved: QuantLib's 4.275 is its operator's on its rate grid, a rate with twice the CIR variance; the engine
-        // prices the CIR generator on a rate grid from zero (the S-van plan's VR4 (xv), VR8), its six schemes within
-        // 2e-4 of 4.2717 on the case's grid, against Black's formula at the mean path's rate and a Monte Carlo of the
-        // CIR rate (Divergences/FdCirModelTests.cs)
+        // prices the CIR generator on a rate grid from zero, its six schemes within 2e-4 of 4.2717 on the case's
+        // grid, against Black's formula at the mean path's rate and a Monte Carlo of the CIR rate
+        // (Divergences/FdCirModelTests.cs)
         const Real expected = 4.2717;
         const Real tolerance = 0.0003;
 

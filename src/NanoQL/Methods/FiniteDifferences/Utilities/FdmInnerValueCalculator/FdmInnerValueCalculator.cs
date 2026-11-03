@@ -11,8 +11,8 @@ namespace NanoQL.Methods;
 /// <summary>The inner value of an instrument at a grid point: its payoff there, or the payoff's average over the
 /// point's cell.</summary>
 /// <remarks>
-/// A working type (the S-eq plan's SEQR1): a calculator may fill a cache on its first call, as QuantLib's cell
-/// averages do. An extension point, as in QuantLib: later units derive their calculators from it.
+/// A working type: a calculator may fill a cache on its first call, as QuantLib's cell averages do. An extension point,
+/// as in QuantLib: later units derive their calculators from it.
 /// </remarks>
 [WorkingType]
 public abstract class FdmInnerValueCalculator

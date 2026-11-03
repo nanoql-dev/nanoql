@@ -12,11 +12,10 @@ and checkCompatibility on each measure and on altered numeraires (a step's numer
 step's numeraire maturing inside its step). Throws: refused times, a last evolution time past the last fixing time,
 relevance rates of the wrong size, an offset past the last bond.
 
-Left out (each undefined in QuantLib and refused by nanoql, the S-mm plan's MR3 (xx);
+Left out (each undefined in QuantLib and refused by nanoql;
 tests/NanoQL.Tests/Divergences/MarketModelUndefinedReadsTests.cs): checkCompatibility with a numeraire past the rate
 times before the last step, isInTerminalMeasure on no numeraires, the money-market tests on fewer numeraires than
-steps. The refusal's text of a last evolution time past the last fixing time differs (MR3 (xv)), and only the throw is
-recorded.
+steps. The refusal's text of a last evolution time past the last fixing time differs, and only the throw is recorded.
 
 The wheel's calls, by QuantLib-SWIG 1.44: EvolutionDescription(rateTimes, evolutionTimes, relevanceRates) and its
 members, and the module's functions of the same names. Read back by

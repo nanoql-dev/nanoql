@@ -10,10 +10,9 @@ On Actual/365 (Fixed), Actual/360 and Actual/Actual (ISDA), at four implied refe
 surface's last, at five strikes inside and outside the surface's: its variance and volatility, extrapolating, and its
 forward variance between consecutive dates; at six times from 0 to past the last date, its variance and volatility.
 
-Left out (the S-van plan's §2.10): a day counter whose year fractions don't add (Thirty360), where nanoql reads a date
-by date and QuantLib by its sum of times (VR4 (xxii)), and an implied reference date before the original's, which
-accrues nothing before the original's in nanoql and QuantLib's variance at a negative time
-(tests/NanoQL.Tests/Divergences/ImpliedVolTermStructureDateTests.cs).
+Left out: a day counter whose year fractions don't add (Thirty360), where nanoql reads a date by date and QuantLib by
+its sum of times, and an implied reference date before the original's, which accrues nothing before the original's in
+nanoql and QuantLib's variance at a negative time (tests/NanoQL.Tests/Divergences/ImpliedVolTermStructureDateTests.cs).
 
 Each case's inputs hold its settings, "originalReference", "dayCounter", "dates", "strikes", "vols" ([strike][date]),
 "referenceDate", "queryDates", "queryTimes" and "queryStrikes". Read back by

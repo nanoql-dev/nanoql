@@ -1,17 +1,17 @@
 # SPDX-FileCopyrightText: 2026 The nanoql Authors
 # SPDX-License-Identifier: Apache-2.0
 """Vectors for QuantLib's ConstNotionalCrossCurrencyBasisSwap (ql/instruments/constnotionalcrosscurrencybasisswap.hpp):
-swaps on the evaluation date 15 January 2025 of two floating legs in two currencies, each with its notional
-exchanged: Euribor 3M against USD LIBOR 3M, with spreads and gearings, payment lags on the coupons alone and on the
-notional exchanges too, indexed coupons, interpolated and closest stub indexes on a broken front period (and the
-refusal of one on at-par coupons, "stub index conventions require indexed coupons"), SONIA compounded with a
-lookback, a lockout and an observation shift against SOFR with a lookback compounding its spread, SOFR averaged against
-ESTR, a seasoned swap reading stored fixings, and a swap that has expired. Left out: legs whose BPS is zero, whose fair
-spread QuantLib gives as an infinity (the S-rx plan's SRXR3 (xviii)); telescopic value dates, which nanoql builds in
-full (tests/NanoQL.Tests/Divergences/TelescopicValueDatesTests.cs); a spread compounded daily where the telescopic
-formula applies, which QuantLib drops (the C3 review's B1-1; the SOFR leg's lookback keeps it off the formula); and
-the fair spread of a leg compounding its spread, which nanoql solves on the swap's pricing where QuantLib's BPS route
-is inexact (B1-2; tests/NanoQL.Tests/Divergences/CrossCurrencySwapCompoundedSpreadFairSpreadTests.cs).
+swaps on the evaluation date 15 January 2025 of two floating legs in two currencies, each with its notional exchanged:
+Euribor 3M against USD LIBOR 3M, with spreads and gearings, payment lags on the coupons alone and on the notional
+exchanges too, indexed coupons, interpolated and closest stub indexes on a broken front period (and the refusal of one
+on at-par coupons, "stub index conventions require indexed coupons"), SONIA compounded with a lookback, a lockout and
+an observation shift against SOFR with a lookback compounding its spread, SOFR averaged against ESTR, a seasoned swap
+reading stored fixings, and a swap that has expired. Left out: legs whose BPS is zero, whose fair spread QuantLib gives
+as an infinity; telescopic value dates, which nanoql builds in full
+(tests/NanoQL.Tests/Divergences/TelescopicValueDatesTests.cs); a spread compounded daily where the telescopic formula
+applies, which QuantLib drops (the SOFR leg's lookback keeps it off the formula); and the fair spread of a leg
+compounding its spread, which nanoql solves on the swap's pricing where QuantLib's BPS route is inexact
+(tests/NanoQL.Tests/Divergences/CrossCurrencySwapCompoundedSpreadFairSpreadTests.cs).
 
 Each case's outputs are whether the swap builds, QuantLib's refusal recorded as its throw; then the swap's inspectors
 (each leg's nominal, currency code, spread and gearing, its index's name and its schedule's dates), each leg's payment
@@ -172,7 +172,7 @@ def cases():
                 sw.setPricingEngine(xcs.make_engine(engine_spec))
                 expected.update(xcs.results(sw, scale, 2))
                 if "calculate" not in expected:
-                    # a leg compounding its spread: its fair spread left out (B1-2)
+                    # a leg compounding its spread: its fair spread left out
                     for prefix, fair in (("pay", sw.fairPaySpread), ("rec", sw.fairRecSpread)):
                         if not spec[prefix + "CompoundSpread"]:
                             expected["fair" + prefix.capitalize() + "Spread"] = v.result(fair)

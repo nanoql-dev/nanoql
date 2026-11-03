@@ -6,7 +6,7 @@ output computed by the C++ harness: European and Bermudan swaptions of gen/prici
 gaussian1dswaptionengine.py's kind, payers and receivers, on its three GSR models, with the Naive and the Digital
 probabilities, on the model's curve and with a discount curve on the same clock (a flat 2.5%). Each case's outputs are
 the NPV and the probabilities, one per exercise alive and the last the probability of no exercise. A curve on another
-clock is left out, as in the wheel's file (the S-g1d plan's G1R6 (xvi)).
+clock is left out, as in the wheel's file.
 tests/NanoQL.Tests/Vectors/Cxx/PricingEngines/Gaussian1dSwaptionEngineCxxVectorTests.cs reads it back."""
 import importlib.util
 import os

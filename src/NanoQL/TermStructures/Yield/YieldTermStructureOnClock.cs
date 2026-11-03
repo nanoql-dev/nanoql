@@ -8,9 +8,8 @@ namespace NanoQL.TermStructures;
 /// <summary>
 /// A yield curve restated on another structure's clock: dated at the clock's reference date, on its day counter, its
 /// discount at a time the curve's discount accrued by the instant the time denotes, 1 before the curve's own reference
-/// date (<see cref="YieldTermStructure.DiscountAt"/>). For the units whose Hull-White parts read their curve by time
-/// (the S-hes plan's HR7 (xix)): built on it, they read the curve on the model's clock as QuantLib reads a curve that
-/// shares the clock's times.
+/// date (<see cref="YieldTermStructure.DiscountAt"/>). For the units whose Hull-White parts read their curve by time:
+/// built on it, they read the curve on the model's clock as QuantLib reads a curve that shares the clock's times.
 /// </summary>
 internal sealed class YieldTermStructureOnClock : YieldTermStructure
 {

@@ -91,7 +91,7 @@ internal sealed class ShimWriter(Surface surface)
 
     private void Call(StringBuilder sb, CFunction f)
     {
-        // A Matrix or Vector the member writes into (R15): built in a local, copied back into the caller's after the call.
+        // A Matrix or Vector the member writes into: built in a local, copied back into the caller's after the call.
         CParam[] inOut = [.. f.Params.Where(p => p.Kind.Name is "vector&" or "matrix&")];
         foreach (CParam p in inOut)
         {
@@ -115,7 +115,7 @@ internal sealed class ShimWriter(Surface surface)
         switch (f.Kind)
         {
             case "new" when f.Member == null:
-                // A struct's implicit parameterless constructor (R16).
+                // A struct's implicit parameterless constructor.
                 call = $"default({CsNames.Of(f.Type)})";
                 break;
             case "new":
@@ -233,7 +233,7 @@ internal sealed class ShimWriter(Surface surface)
             case "enum?": return $"({n} == null ? ({cs})null : ({CsNames.Of(k.Type.NullableOf()!)})(*{n}))";
             case "complex?": return $"({n} == null ? ({cs})null : {n}->ToComplex())";
             case "handle": return $"{Rt}.Get<{cs}>({n}, {pn})";
-            // NULL for an optional struct is its default, what C# passes for the omitted argument (R16).
+            // NULL for an optional struct is its default, what C# passes for the omitted argument.
             case "boxed" when p.Optional: return $"({n} == 0 ? default({cs}) : {Rt}.Unbox<{cs}>({n}, {pn}))";
             case "boxed": return $"{Rt}.Unbox<{cs}>({n}, {pn})";
             case "boxed?": return $"({n} == 0 ? ({cs})null : {Rt}.Unbox<{CsNames.Of(k.Type.NullableOf()!)}>({n}, {pn}))";
@@ -247,7 +247,7 @@ internal sealed class ShimWriter(Surface surface)
                 return "(" + string.Join(", ", k.Items.Select((item, i) => Arg(new CParam(CForms.ItemParam(p.Name, k, i), item, false, null), f))) + ")";
             case "array" when k.Element!.Name == "tuple":
             {
-                // The tuples from their elements' arrays in step (B2R3).
+                // The tuples from their elements' arrays in step.
                 CKind tk = k.Element;
                 var arrays = tk.Items.Select((item, i) =>
                 {
@@ -376,7 +376,7 @@ internal sealed class ShimWriter(Surface surface)
                 return;
             case "array" when k.Element!.Name is "tuple" or "tuple?":
             {
-                // An array per element, a null tuple's flag cleared and its elements zero (B2R10).
+                // An array per element, a null tuple's flag cleared and its elements zero.
                 CKind te = k.Element;
                 bool nullable = te.Name == "tuple?";
                 sb.Append($"{ind}{{ var a_ = {ToArray(k.Type, v)}; ");
@@ -537,7 +537,7 @@ internal sealed class ShimWriter(Surface surface)
             string given = p.Kind.Name is "handle" or "boxed?" or "snapshot" ? $"{n} != 0" : p.Kind.Name is "date" or "date?" ? $"{n} != 0" : $"{n} != null";
             if (p.Kind.Name == "array" && p.Kind.Element?.Name == "tuple")
             {
-                // A collection of tuples is open when its first element's array is NULL (B2R3).
+                // A collection of tuples is open when its first element's array is NULL.
                 given = $"@{CForms.ItemParam(p.Name, p.Kind.Element, 0, true)} != null";
             }
             string value = p.Kind.Name switch

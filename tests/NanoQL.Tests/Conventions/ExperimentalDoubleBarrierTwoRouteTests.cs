@@ -14,8 +14,8 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// C1's two routes to one value (the S-xeq plan's §2.5): the binomial, Suo-Wang and Monte Carlo double barriers against
-/// S-bar's analytic engine, and the quanto double barrier at zero correlation against the double barrier. The
+/// Two routes to one value for the experimental double barriers: the binomial, Suo-Wang and Monte Carlo double barriers
+/// against the analytic engine, and the quanto double barrier at zero correlation against the double barrier. The
 /// perturbative, Vanna-Volga, Heston forward and Asian Heston engines' routes sit with their divergence facts.
 /// </summary>
 public class ExperimentalDoubleBarrierTwoRouteTests

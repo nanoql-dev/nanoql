@@ -12,10 +12,10 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The FD Heston barrier, double-barrier and rebate engines refuse a spot beyond a barrier before the solve (the S-bar
-/// plan's BR5 (xliv)), with the texts and the triggers of the family's analytic engines: "barrier touched" beyond a
-/// single barrier, and "barrier(s) already touched" on or beyond either of a corridor, where QuantLib's engines build a
-/// grid that ends at the barrier and fail interpolating the spot outside it.
+/// The FD Heston barrier, double-barrier and rebate engines refuse a spot beyond a barrier before the solve, with the
+/// texts and the triggers of the family's analytic engines: "barrier touched" beyond a single barrier, and "barrier(s)
+/// already touched" on or beyond either of a corridor, where QuantLib's engines build a grid that ends at the barrier
+/// and fail interpolating the spot outside it.
 /// </summary>
 public class FdHestonBarrierTouchedTests
 {

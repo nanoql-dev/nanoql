@@ -11,20 +11,20 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The analytic barrier engine on structures that measure time differently (the S-rx plan's SRXR3 (iii), fixed under
-/// R8). QuantLib reads every structure by the exercise date (<c>analyticbarrierengine.cpp:128-170</c>), each rate over
-/// its own curve's time and the variance over the volatility's, and combines them as though they shared a clock: on a
-/// 5% Actual/360 risk-free curve a one-year down-and-out call at 90, strike 100, rebate 2, is 9.489629845557584 against
-/// 9.494843368487192 on the Actual/365 Fixed curve with the same discount factors, and in-out parity fails by 3.7e-5;
-/// on a risk-free curve settling two days later, or beside a dividend curve and volatility dated later, it is off its
-/// own engine on the market restated from the earliest date by up to 2.6e-3; and an exercise before the risk-free
-/// curve's date throws "negative time" [executed on the wheel]. nanoql reads each rate on the volatility's clock, the
-/// curve's zero rate times its own accrual time to the exercise over the volatility's, and each discount and the
-/// variance as accrued, nothing before a structure's own date (the mismatched-dates row of the master plan's §2.2): a
-/// factor of 1.0, and QuantLib's bits, where the clocks agree; the curve's own rate where the volatility accrues
-/// nothing, an option expiring on the evaluation date. QuantLib's check: its own engine on the market restated from
-/// the earliest date, each restated structure on Actual/365 Fixed (a curve dated later a discount curve at 1 up to its
-/// date, a volatility dated later a variance curve at 0 up to its date), and its master's value at expiry.
+/// The analytic barrier engine on structures that measure time differently (fixed). QuantLib reads every structure by
+/// the exercise date (<c>analyticbarrierengine.cpp:128-170</c>), each rate over its own curve's time and the variance
+/// over the volatility's, and combines them as though they shared a clock: on a 5% Actual/360 risk-free curve a
+/// one-year down-and-out call at 90, strike 100, rebate 2, is 9.489629845557584 against 9.494843368487192 on the
+/// Actual/365 Fixed curve with the same discount factors, and in-out parity fails by 3.7e-5; on a risk-free curve
+/// settling two days later, or beside a dividend curve and volatility dated later, it is off its own engine on the
+/// market restated from the earliest date by up to 2.6e-3; and an exercise before the risk-free curve's date throws
+/// "negative time" (QuantLib-Python 1.44). nanoql reads each rate on the volatility's clock, the curve's zero rate
+/// times its own accrual time to the exercise over the volatility's, and each discount and the variance as accrued,
+/// nothing before a structure's own date (the playbook's row for structures on another clock): a factor of 1.0, and
+/// QuantLib's bits, where the clocks agree; the curve's own rate where the volatility accrues nothing, an option
+/// expiring on the evaluation date. QuantLib's check: its own engine on the market restated from the earliest date,
+/// each restated structure on Actual/365 Fixed (a curve dated later a discount curve at 1 up to its date, a volatility
+/// dated later a variance curve at 0 up to its date), and its master's value at expiry.
 /// </summary>
 public class BarrierMismatchedTimesTests
 {
@@ -39,7 +39,7 @@ public class BarrierMismatchedTimesTests
     {
         GeneralizedBlackScholesProcess act360 = Process(new FlatForward(Today, 0.05, new Actual360()));
 
-        // QuantLib on the equivalent Actual/365 Fixed curve [executed on the wheel]; on the Actual/360 curve it gives
+        // QuantLib on the equivalent Actual/365 Fixed curve (QuantLib-Python 1.44); on the Actual/360 curve it gives
         // 9.489629845557584, 1.4491375197740932, 3.616252220429545 and 11.660195264208374
         (BarrierType Type, double Barrier, double Expected)[] cases =
         [

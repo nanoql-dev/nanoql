@@ -20,16 +20,16 @@ namespace NanoQL.PricingEngines;
 /// <remarks>
 /// <para>
 /// Stateless. The grid's times are the instrument's day counter's from the evaluation date, and each curve is read at
-/// the instants they denote, on its own clock, nothing accruing before its date (the S-exo plan's ER5 (xxix),
-/// <c>Divergences/PerpetualFuturesMismatchedTimesTests.cs</c>), where QuantLib reads the curves at the grid's times
+/// the instants they denote, on its own clock, nothing accruing before its date
+/// (<c>Divergences/PerpetualFuturesMismatchedTimesTests.cs</c>), where QuantLib reads the curves at the grid's times
 /// themselves; on curves counted and dated as the grid, QuantLib's reads.
 /// </para>
 /// <para>
 /// The tail past the horizon converges only where the last funding rate k and the curves' last forward rates r_f and
 /// r_d give k + r_f − r_d &gt; 0 (continuous funding) or (1 + k)·e^{Δt(r_f − r_d)} &gt; 1 with 1 + k &gt; 0 (discrete
 /// funding); elsewhere it is refused, where QuantLib refuses only k ≤ 0 and returns the divergent series' analytic
-/// continuation below (ER8, <c>Divergences/PerpetualFuturesDivergentTailTests.cs</c>). A non-positive last funding
-/// rate on a convergent tail is priced.
+/// continuation below (<c>Divergences/PerpetualFuturesDivergentTailTests.cs</c>). A non-positive last funding rate on a
+/// convergent tail is priced.
 /// </para>
 /// </remarks>
 public static class DiscountingPerpetualFuturesEngine
@@ -258,7 +258,7 @@ public static class DiscountingPerpetualFuturesEngine
                     + "Because the last rates are flatly extrapolated, the sum diverges.");
             }
 
-            // the funding discounts' product, each period's division in QuantLib's order (ED20)
+            // the funding discounts' product, each period's division in QuantLib's order
             double sum = 0.0;
             double product = 1.0;
             for (int i = 0; i < n - 1; ++i)

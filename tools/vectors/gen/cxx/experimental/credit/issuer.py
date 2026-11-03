@@ -6,11 +6,10 @@ tools/vectors/gen/cxx/experimental/credit/defaultevent.py's specs.
 
 Three issuers under 31 August 2006: one of two keys on two flat curves with past and programmed events (a failure to
 pay, a bankruptcy, a restructuring, each on its own date: QuantLib's event set keeps one event per date, which nanoql
-doesn't, the S-xcr plan's XR8 (iv), held in Divergences/IssuerEventsOnOneDateTests.cs), one of no event, one of no
-curve. For each: the default probability on each key's curve at a sample of dates, and on a key it doesn't hold,
-refused; the events matching each key between pairs of dates, the first (defaultedBetween) and all (defaultsBetween),
-with and without the reference date's events. Read back by
-tests/NanoQL.Tests/Vectors/Cxx/Experimental/Credit/IssuerCxxVectorTests.cs."""
+doesn't, held in Divergences/IssuerEventsOnOneDateTests.cs), one of no event, one of no curve. For each: the default
+probability on each key's curve at a sample of dates, and on a key it doesn't hold, refused; the events matching each
+key between pairs of dates, the first (defaultedBetween) and all (defaultsBetween), with and without the reference
+date's events. Read back by tests/NanoQL.Tests/Vectors/Cxx/Experimental/Credit/IssuerCxxVectorTests.cs."""
 import importlib.util
 import os
 import sys

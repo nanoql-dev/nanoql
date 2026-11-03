@@ -10,10 +10,10 @@ using static NanoQL.Excel.Tests.Xl;
 namespace NanoQL.Excel.Tests;
 
 /// <summary>
-/// The committed repro vectors (<c>bindings/excel/tests/repro/</c>, XLR14): a vector's calls made again on the test host
-/// through the experimental tests' build, each call in a cell of its own as its workbook held it, with the vector's date
-/// system, its conventions through the settings file and its read files in this checkout; and XLD30's two substitutions,
-/// which leave the generator's version and the checkout's own path out of a comparison.
+/// The committed repro vectors (<c>bindings/excel/tests/repro/</c>): a vector's calls made again on the test host
+/// through the experimental tests' build, each call in a cell of its own as its workbook held it, with the vector's
+/// date system, its conventions through the settings file and its read files in this checkout; and the two
+/// substitutions that leave the generator's version and the checkout's own path out of a comparison.
 /// </summary>
 internal static partial class Vectors
 {
@@ -32,7 +32,7 @@ internal static partial class Vectors
     public static List<(string Name, string Text)> All()
         => [.. Directory.GetFiles(Folder, "*.json").Order(StringComparer.Ordinal).Select(p => (Path.GetFileNameWithoutExtension(p), File.ReadAllText(p)))];
 
-    /// <summary>A vector's text with its generator's version and the checkout it was exported in replaced (XLD30).</summary>
+    /// <summary>A vector's text with its generator's version and the checkout it was exported in replaced.</summary>
     /// <param name="text">The vector.</param>
     /// <returns>The text compared.</returns>
     public static string Normal(string text)

@@ -11,8 +11,7 @@ an adapter of a Bermudan swaption's exercise value; triggers at the forwards' me
 
 Left out: an underlying with no cash-flow times (QuantLib's MultiStepNothing), which nanoql doesn't end while an
 exercise time remains, and exercise, strategy or rebate times off the underlying's, where QuantLib writes no counts at
-an idle step (the S-mmp plan's MMPR4 (vii), option (1), and (xvi); tests/NanoQL.Tests/Divergences/
-CallSpecifiedEndTests.cs, CallSpecifiedIdleStepTests.cs).
+an idle step (tests/NanoQL.Tests/Divergences/CallSpecifiedEndTests.cs, CallSpecifiedIdleStepTests.cs).
 
 The harness units are tools/cxx/src/models/marketmodels/products/products.cpp and
 tools/cxx/src/models/marketmodels/accountingengine.cpp. Read back by

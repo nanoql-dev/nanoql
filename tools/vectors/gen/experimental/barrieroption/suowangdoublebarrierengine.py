@@ -11,13 +11,13 @@ three strikes (90, 100 and 110% of the spot): the NPV at QuantLib's default five
 and the refusals: a cash-or-nothing payoff, a spot on a barrier and outside the corridor ("barrier touched"), the KIKO
 and KOKI types, and an American exercise, which the engine's analytic European refuses.
 
-The outputs nanoql fixes are left out (the S-xeq plan's §2.8): every process has positive volatilities and one day
-counter and reference date, so none reads structures timed apart (XER5 (vii)) or a vanishing variance (XER5 (vi)); every
-rebate is 0, which QuantLib's engine never reads (XER5 (v)); every strike is inside the corridor, where QuantLib's
-one-sided limits are the clipped ones (XER5 (iii)); and an output whose knock-out on QuantLib's ten terms isn't within
-5e-13 of its value at 50 a side, on max(|value|, 1), is left out of its case: nanoql keeps QuantLib's terms only where
-they agree with its converged series within 1e-12 on that scale (XER5 (iv)), the knock-in being the European less the
-knock-out, and the margin keeps a case clear of that switch. A case holds the payoffs left, and none is empty.
+The outputs nanoql fixes are left out: every process has positive volatilities and one day counter and reference date,
+so none reads structures timed apart or a vanishing variance; every rebate is 0, which QuantLib's engine never reads;
+every strike is inside the corridor, where QuantLib's one-sided limits are the clipped ones; and an output whose
+knock-out on QuantLib's ten terms isn't within 5e-13 of its value at 50 a side, on max(|value|, 1), is left out of its
+case: nanoql keeps QuantLib's terms only where they agree with its converged series within 1e-12 on that scale, the
+knock-in being the European less the knock-out, and the margin keeps a case clear of that switch. A case holds the
+payoffs left, and none is empty.
 
 A case's inputs are the analytic double-barrier generator's. The wheel's calls, by QuantLib-SWIG 1.44's
 barrieroptions.i: DoubleBarrierOption(barrierType, barrierLo, barrierHi, rebate, payoff, exercise),

@@ -10,7 +10,7 @@ namespace NanoQL.Excel;
 /// The runtime the generated worksheet functions call (docs/excel.md): each call runs through <see cref="Run"/>, which
 /// keys an object-returning call and presents its handle, or <see cref="RunVal"/>, which returns a value; their
 /// arguments convert through this class's readers, a range where a function takes one value looping over its elements.
-/// A failure becomes Excel's error for its code (XLR4), its message kept by the calling cell for <c>nqlxlError</c>.
+/// A failure becomes Excel's error for its code, its message kept by the calling cell for <c>nqlxlError</c>.
 /// </summary>
 public static partial class X
 {
@@ -61,8 +61,8 @@ public static partial class X
         $"handles {ByHandle.Count} calls {Interlocked.Read(ref calls)} builds {Interlocked.Read(ref builds)} hits {Interlocked.Read(ref hits)} lifted {Interlocked.Read(ref liftedCalls)}/{Interlocked.Read(ref liftedElements)} named {Interlocked.Read(ref namedBuilds)}");
 
     /// <summary>
-    /// BIR4's code for an exception: the runtime's own kinds first (an unknown handle 9, though it derives from
-    /// <see cref="ArgumentException"/>; a failed settings load, a family's refusal 2), then the code the member
+    /// The C ABI's error code for an exception: the runtime's own kinds first (an unknown handle 9, though it derives
+    /// from <see cref="ArgumentException"/>; a failed settings load, a family's refusal 2), then the code the member
     /// documents, then the runtime's copy of the C ABI's table.
     /// </summary>
     /// <param name="e">The exception.</param>
@@ -84,7 +84,7 @@ public static partial class X
         return d != 0 ? d : CopyOfRtCode(e);
     }
 
-    /// <summary>The C ABI's code for an exception, as the native host's table gives it (BIR4); a test checks the copy.</summary>
+    /// <summary>The C ABI's code for an exception, as the native host's table gives it; a test checks the copy.</summary>
     /// <param name="e">The exception.</param>
     /// <returns>The code.</returns>
     internal static int CopyOfRtCode(Exception e) => e switch
@@ -104,10 +104,11 @@ public static partial class X
     };
 
     /// <summary>
-    /// XLR4's Excel error for a code: #VALUE! for refused arguments, kinds, casts, names, files and features; #REF! for a
-    /// handle this session doesn't hold; #NUM! for QuantLib's own checks, failed calculations, memory and anything else.
+    /// The Excel error for a code: #VALUE! for refused arguments, kinds, casts, names, files and features; #REF! for a
+    /// handle this session doesn't hold; #NUM! for QuantLib's own checks, failed calculations, memory and anything
+    /// else.
     /// </summary>
-    /// <param name="code">BIR4's code.</param>
+    /// <param name="code">The C ABI's error code.</param>
     /// <returns>The error.</returns>
     public static ExcelError ExcelOf(int code) => code switch
     {

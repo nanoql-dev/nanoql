@@ -15,16 +15,16 @@ namespace NanoQL.Models;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A working type (the S-mm plan's MR1 (ii)), copying each step's pseudo-root and covariance at construction (MR1
-/// (iv)); one step allocates nothing after a path's warm-up (MR1 (v)).
+/// A working type, copying each step's pseudo-root and covariance at construction; one step allocates nothing after a
+/// path's warm-up.
 /// </para>
 /// <para>
 /// The geometric mean is of the displaced forwards at the step's start and end, √((f_end + d)(f_start + d)) − d, where
 /// QuantLib's is √(f_end f₀) of the undisplaced forwards with the model's time-zero forward at every step, so the
 /// scheme doesn't converge to the model as its steps refine (caplets 5.9 standard errors from Black at eight steps a
-/// period) and is NaN once a displaced forward goes below 0 (the S-mm plan's MR3 (xix), fixed with an independent
-/// check, <c>lognormalfwdrateballand.cpp:127</c>; <c>Divergences/BallandGeometricMeanTests.cs</c>). On one step from
-/// time 0 undisplaced, QuantLib's case, it is QuantLib's arithmetic bit for bit.
+/// period) and is NaN once a displaced forward goes below 0 (fixed with an independent check,
+/// <c>lognormalfwdrateballand.cpp:127</c>; <c>Divergences/BallandGeometricMeanTests.cs</c>). On one step from time 0
+/// undisplaced, QuantLib's case, it is QuantLib's arithmetic bit for bit.
 /// </para>
 /// </remarks>
 [WorkingType]
@@ -139,7 +139,7 @@ public sealed class LogNormalFwdRateBalland : MarketModelEvolver
     {
         // we're going from T1 to T2:
 
-        // a) compute drifts D1 at T1, and keep the step's start forwards (MR3 (xix))
+        // a) compute drifts D1 at T1, and keep the step's start forwards
         int aliveRate = alive[currentStep];
         if (currentStep > initialStep)
         {
@@ -171,7 +171,7 @@ public sealed class LogNormalFwdRateBalland : MarketModelEvolver
         }
 
         // the geometric mean of the displaced forwards at the step's start and end, where QuantLib's is
-        // sqrt(forwards_[i]*initialRates[i]) (MR3 (xix))
+        // sqrt(forwards_[i]*initialRates[i])
         for (int i = aliveRate; i < numberOfRates; ++i)
         {
             forwards[i] = Math.Sqrt((forwards[i] + displacements[i]) * (startForwards[i] + displacements[i])) - displacements[i];

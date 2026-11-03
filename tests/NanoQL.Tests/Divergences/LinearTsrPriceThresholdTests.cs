@@ -10,14 +10,14 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The linear TSR pricer's price-threshold strategy (the S-cms plan's CMR5 (ii)): QuantLib's <c>strikeFromPrice</c>
-/// starts Brent at the swap rate, the bracket's end (<c>lineartsrpricer.cpp:263</c>), which Brent refuses
-/// (<c>solver1d.hpp:203-206</c>), and the refusal is swallowed, and the threshold it passes is the vega ratio's member
-/// (<c>:310</c>): every threshold falls back to the default bounds, so on the wheel, on a flat 3% curve and a 20%
-/// volatility, a 1-year coupon fixing in 10 years prices 0.032367510616761526 at every threshold, the default rate
-/// bound's price. nanoql searches with the threshold from the bracket's midpoint, as the vega-ratio search does.
-/// QuantLib's check: its rate-bound strategy on the bounds the search finds, and the out-of-the-money price at each
-/// bound the threshold, within the search's accuracy.
+/// The linear TSR pricer's price-threshold strategy: QuantLib's <c>strikeFromPrice</c> starts Brent at the swap rate,
+/// the bracket's end (<c>lineartsrpricer.cpp:263</c>), which Brent refuses (<c>solver1d.hpp:203-206</c>), and the
+/// refusal is swallowed, and the threshold it passes is the vega ratio's member (<c>:310</c>): every threshold falls
+/// back to the default bounds, so on the wheel, on a flat 3% curve and a 20% volatility, a 1-year coupon fixing in 10
+/// years prices 0.032367510616761526 at every threshold, the default rate bound's price. nanoql searches with the
+/// threshold from the bracket's midpoint, as the vega-ratio search does. QuantLib's check: its rate-bound strategy on
+/// the bounds the search finds, and the out-of-the-money price at each bound the threshold, within the search's
+/// accuracy.
 /// </summary>
 public class LinearTsrPriceThresholdTests
 {

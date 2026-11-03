@@ -5,10 +5,10 @@ on the evaluation date 15 October 2026: Dupire's local volatility over four Blac
 butterfly arbitrage where the local variance turns negative or the total variance falls, with overwrites of 0.2 and
 0.35: its strike range and maximum date, and the local volatility at a grid of times and strikes, extrapolating, the
 overwrite wherever LocalVolSurface refuses. Left out: the points near which QuantLib's Black variance, extrapolated in
-strike, is negative, where nanoql's BlackVarianceSurface floors it at zero and its local volatility comes out 0
-(S-eq's divergence, tests/NanoQL.Tests/Divergences/BlackVarianceSurfaceFloorTests.cs); the generator prints how many.
+strike, is negative, where nanoql's BlackVarianceSurface floors it at zero and its local volatility comes out 0 (a
+documented divergence, tests/NanoQL.Tests/Divergences/BlackVarianceSurfaceFloorTests.cs); the generator prints how many.
 
-Every structure is dated 15 October 2026 on Actual/365 (Fixed): the curves' clock, which S-eq's LocalVolSurface reads
+Every structure is dated 15 October 2026 on Actual/365 (Fixed): the curves' clock, which nanoql's LocalVolSurface reads
 at the instants its times denote, is the surface's. The process specs are
 tools/vectors/gen/processes/blackscholesprocess.py's. The wheel's call, by QuantLib-SWIG 1.44:
 NoExceptLocalVolSurface(blackTS, riskFreeTS, dividendTS, underlying, illegalLocalVolOverwrite), the number form, and

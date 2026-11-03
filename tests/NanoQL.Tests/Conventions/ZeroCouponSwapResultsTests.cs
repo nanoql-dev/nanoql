@@ -7,9 +7,9 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The zero-coupon swap's results record (the S-cms plan's CMD7) compares by value, which QuantLib's results classes
-/// don't define: <see cref="ZeroCouponSwapResults"/> adds the fair payment to <see cref="SwapResults"/>'s written-out
-/// equality, and never equals a record of another type; its accessors read the per-leg arrays, the fixed leg first.
+/// The zero-coupon swap's results record compares by value, which QuantLib's results classes don't define:
+/// <see cref="ZeroCouponSwapResults"/> adds the fair payment to <see cref="SwapResults"/>'s written-out equality, and
+/// never equals a record of another type; its accessors read the per-leg arrays, the fixed leg first.
 /// </summary>
 public class ZeroCouponSwapResultsTests
 {

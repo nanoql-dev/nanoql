@@ -8,7 +8,7 @@ namespace NanoQL.Models;
 
 /// <summary>
 /// A swaption whose implied volatility <see cref="VolatilityBumpInstrumentJacobian"/> bumps: on the swap from the start
-/// index to the end index. QuantLib's nested <c>VolatilityBumpInstrumentJacobian::Swaption</c> (R2's top-level name).
+/// index to the end index. QuantLib's nested <c>VolatilityBumpInstrumentJacobian::Swaption</c>, made top-level.
 /// </summary>
 /// <param name="StartIndex">The swap's first rate.</param>
 /// <param name="EndIndex">The swap's end, after its last rate.</param>

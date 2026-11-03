@@ -9,7 +9,7 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// <see cref="MakeYoYInflationCapFloor"/> (SID24): an explicit strike after an at-the-money one, or the reverse, is a
+/// <see cref="MakeYoYInflationCapFloor"/>: an explicit strike after an at-the-money one, or the reverse, is a
 /// <see cref="NanoQLException"/> with QuantLib's "ATM strike already given" and "explicit strike already given". The
 /// builder is immutable: each setter returns a modified copy, so a builder kept and reused never changes, and
 /// <see cref="MakeYoYInflationCapFloor.WithPricingEngine"/>, which sets nothing the instrument holds, returns it

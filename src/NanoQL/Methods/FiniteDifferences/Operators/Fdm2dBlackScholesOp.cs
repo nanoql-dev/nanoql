@@ -17,7 +17,7 @@ namespace NanoQL.Methods;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A working type (master §2.2's finite-difference row): mutable, owned by one rollback and not thread-safe. Its time
+/// A working type (the playbook's finite-difference row): mutable, owned by one rollback and not thread-safe. Its time
 /// step rewrites its operators in place, so a step on Hundsdorfer's scheme, the engine's default, allocates nothing.
 /// </para>
 /// <para>

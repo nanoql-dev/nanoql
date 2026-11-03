@@ -23,33 +23,32 @@ namespace NanoQL.Experimental;
 /// </summary>
 /// <remarks>
 /// <para>
-/// QuantLib's template on its double-barrier engine as D14's delegate (the S-xeq plan's §2.0): the engine given, such
-/// as <c>AnalyticDoubleBarrierEngine.Calculate</c> or <c>SuoWangDoubleBarrierEngine.Calculate</c>, is called on the
-/// option's knock-out at each of QuantLib's quote shifts, built as QuantLib builds it, on a Black-Scholes process at
-/// the at-the-money volatility dated by the evaluation date on Actual/365F, with QuantLib's number of series terms. Its
-/// shifts for the barrier's vega, volga and vanna are replayed on local values in QuantLib's order (each shift and
-/// set-back made on the value the quote holds, since <c>a + s − s</c> need not be <c>a</c>). Its additional results
-/// carry QuantLib's tags: "VanillaPrice", "BarrierInPrice", "BarrierOutPrice" and, inside the barriers, "lambda".
+/// QuantLib's template on its double-barrier engine as a delegate of the engines' <c>Calculate</c> form: the engine
+/// given, such as <c>AnalyticDoubleBarrierEngine.Calculate</c> or <c>SuoWangDoubleBarrierEngine.Calculate</c>, is
+/// called on the option's knock-out at each of QuantLib's quote shifts, built as QuantLib builds it, on a Black-Scholes
+/// process at the at-the-money volatility dated by the evaluation date on Actual/365F, with QuantLib's number of series
+/// terms. Its shifts for the barrier's vega, volga and vanna are replayed on local values in QuantLib's order (each
+/// shift and set-back made on the value the quote holds, since <c>a + s − s</c> need not be <c>a</c>). Its additional
+/// results carry QuantLib's tags: "VanillaPrice", "BarrierInPrice", "BarrierOutPrice" and, inside the barriers,
+/// "lambda".
 /// </para>
 /// <para>
 /// Documented divergences, each leaving QuantLib's bits where it doesn't apply
 /// (<c>Divergences/VannaVolgaDoubleBarrierTests.cs</c>). The Vanna-Volga smile's interpolation takes the domestic
 /// discount first, as its constructor's order and QuantLib's single-barrier engine take it, where QuantLib passes the
-/// foreign discount twice (XER5 (viii)): the vanilla on the smile moves by up to 1.4e-4 at QuantLib's rates. The engine
-/// reads each curve at the instant the quotes' time denotes on the volatility's clock, nothing accrued before the
-/// curve's own date, where QuantLib reads each at that time on its own clock: its discount factors and the survival
-/// probability's zero rates (S-rx's SRXR3 (xx), XER5 (ix)). The already-out and already-in tests include a spot on a
-/// barrier, as the option's own <see cref="DoubleBarrierOption.Triggered"/>, where QuantLib's strict tests send it to
-/// the inner engine's "barrier touched". And a rebate is priced as each option pays it (SRXR3 (xvi)): an out option's
-/// price with its rebate is QuantLib's, but where QuantLib's bounds bind its rebate-free price, the bound plus the
-/// rebate's value at the hit; an in option is QuantLib's rebate-free in price plus the inner engine's value of the
-/// rebate paid at expiry; on or beyond a barrier an out option is its rebate, due now. At a zero rebate every added
-/// term is 0. The inner engine's own fixes stand: S-bar's analytic engine and Suo-Wang price a rebate and converge
-/// their series.
+/// foreign discount twice: the vanilla on the smile moves by up to 1.4e-4 at QuantLib's rates. The engine reads each
+/// curve at the instant the quotes' time denotes on the volatility's clock, nothing accrued before the curve's own
+/// date, where QuantLib reads each at that time on its own clock: its discount factors and the survival probability's
+/// zero rates. The already-out and already-in tests include a spot on a barrier, as the option's own
+/// <see cref="DoubleBarrierOption.Triggered"/>, where QuantLib's strict tests send it to the inner engine's "barrier
+/// touched". And a rebate is priced as each option pays it: an out option's price with its rebate is QuantLib's, but
+/// where QuantLib's bounds bind its rebate-free price, the bound plus the rebate's value at the hit; an in option is
+/// QuantLib's rebate-free in price plus the inner engine's value of the rebate paid at expiry; on or beyond a barrier
+/// an out option is its rebate, due now. At a zero rebate every added term is 0. The inner engine's own fixes stand:
+/// the analytic engine and Suo-Wang price a rebate and converge their series.
 /// </para>
 /// <para>
-/// The method's equivalent-constant reads stand, QuantLib's (S-bar's BR4 (d), XER5 (vii)): one volatility and the zero
-/// rates to the quotes' time.
+/// The method's equivalent-constant reads stand, QuantLib's: one volatility and the zero rates to the quotes' time.
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]
@@ -201,7 +200,7 @@ public static class VannaVolgaDoubleBarrierEngine
                 OptionType.Call, vol25Call.DeltaType, x0, dDiscount, fDiscount, call25Vol * sqrtT);
             double call25Strike = blackDeltaCalculatorCall25.StrikeFromDelta(0.25);
 
-            // here use vanna volga interpolated smile to price vanilla, the domestic discount first (XER5 (viii))
+            // here use vanna volga interpolated smile to price vanilla, the domestic discount first
             double[] strikes = [put25Strike, atmStrike, call25Strike];
             double[] vols = [put25Vol, atmVol.Value, call25Vol];
             Interpolation interpolation = new VannaVolga(x0, dDiscount, fDiscount, t).Interpolate(strikes, vols);
@@ -398,9 +397,9 @@ public static class VannaVolgaDoubleBarrierEngine
             return new OneAssetOptionResults { NPV = value, AdditionalResults = additional.ToImmutable() };
         }
 
-        // QuantLib's double no-touch probability, its series from −series to series − 1, where it agrees within 1e-12 on
-        // the value's scale with the series converged: from −series to series, then pairs while the next exceeds machine
-        // epsilon of the sum (XER5 (iv)'s class, S-bar's BR5 (xliii); the code review's O1-5)
+        // QuantLib's double no-touch probability, its series from −series to series − 1, where it agrees within 1e-12
+        // on the value's scale with the series converged: from −series to series, then pairs while the next exceeds
+        // machine epsilon of the sum
         private static double DoubleNoTouch(double thetaTiltMinus, double h, double l, int series)
         {
             var cnd = new CumulativeNormalDistribution();

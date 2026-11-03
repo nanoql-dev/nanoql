@@ -191,7 +191,7 @@ public class KindTests
     public void ATypesBaseIsTheNearestThatCrossesAClosedConstructionIncluded()
     {
         // CdsHelper's own base, RelativeDateBootstrapHelper<DefaultProbabilityTermStructure>, doesn't cross; its base
-        // crosses as a closed construction (R14), so a CdsHelper goes wherever that class is taken.
+        // crosses as a closed construction, so a CdsHelper goes wherever that class is taken.
         TypeRow cds = Surfaces.Nanoql.Surface.Types.Single(t => t.CName == "CdsHelper");
         TypeRow helper = Surfaces.Nanoql.Surface.Types.Single(t => t.CName == "BootstrapHelper_DefaultProbabilityTermStructure");
         Assert.Equal(helper.Type.FullName, cds.Base);

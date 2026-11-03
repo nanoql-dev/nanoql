@@ -19,7 +19,7 @@ namespace NanoQL.Tests.Vectors;
 /// <see cref="FdHestonHullWhiteVanillaEngine.CalculateStrikes(VanillaOption, IEnumerable{double}, EvaluationContext,
 /// HestonModel, HullWhiteProcess, double, int, int, int, int, int, bool, FdmSchemeDesc?)"/> against the results QuantLib's
 /// engine caches for each strike, the reference strike at the spot and away from it, calls and puts, with and without the
-/// control variate (the S-hes plan's HR4 (ii)).
+/// control variate.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class FdHestonHullWhiteVanillaEngineCxxVectorTests

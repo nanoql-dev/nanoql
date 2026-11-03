@@ -38,7 +38,7 @@ def easter_sunday(y):
 
 
 def skipped(market, c):
-    """The dates SCR3 (vi) changes, in the settlement calendar: QuantLib's May 10th and 21st, and Ascension and Whit
+    """The dates the fix changes, in the settlement calendar: QuantLib's May 10th and 21st, and Ascension and Whit
     Monday (Easter Monday plus 38 and 49 days), every year; the exchange calendar is unchanged."""
     if market != int(ql.France.Settlement):
         return []

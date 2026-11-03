@@ -6,10 +6,9 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// L-BFGS-B's gradient norm on its relative function-reduction stop (the S-core plan's CR7 (xviii)): QuantLib's
-/// minimization breaks there after moving to the new point, so the problem keeps the projected gradient's norm of the
-/// iterate before (<c>lbfgsb.cpp:528</c>, <c>:638-646</c>); nanoql's reports the norm at the point it returns. QuantLib's
-/// values are its own class's, from this run's <c>probes\c2_facts.cpp</c> (<c>c2_facts.out</c>).
+/// L-BFGS-B's gradient norm on its relative function-reduction stop: QuantLib's minimization breaks there after moving
+/// to the new point, so the problem keeps the projected gradient's norm of the iterate before (<c>lbfgsb.cpp:528</c>,
+/// <c>:638-646</c>); nanoql's reports the norm at the point it returns. QuantLib's values are its own class's.
 /// </summary>
 public class LBFGSBTests
 {

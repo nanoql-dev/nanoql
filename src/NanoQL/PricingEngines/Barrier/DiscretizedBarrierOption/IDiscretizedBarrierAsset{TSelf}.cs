@@ -10,8 +10,7 @@ namespace NanoQL.PricingEngines;
 
 /// <summary>
 /// A discretized barrier asset a binomial barrier engine builds: the constructor QuantLib's engine template calls,
-/// <c>D(arguments, process, grid)</c> (<c>binomialbarrierengine.hpp:161</c>), as a static factory (the S-bar plan's
-/// BR2 (iv), S2R7's form).
+/// <c>D(arguments, process, grid)</c> (<c>binomialbarrierengine.hpp:161</c>), as a static factory.
 /// </summary>
 /// <typeparam name="TSelf">The asset's own type.</typeparam>
 public interface IDiscretizedBarrierAsset<TSelf>

@@ -7,12 +7,11 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The coterminal swap market model's drifts on a curve state set from the step's first alive rate (the S-mm plan's
-/// MR3 (xvi), fixed under R8). QuantLib's <c>SMMDriftCalculator::compute</c> reads every annuity from the first rate
-/// (<c>smmdriftcalculator.cpp:86-89</c>), so a state set from its first alive rate on, all the drifts read, is refused
-/// ("invalid index"; the planner's MP24, and this run's <c>probes\c1_facts.cpp</c>). nanoql reads them from the first
-/// alive rate. Check: the drifts on the same curve set from the first rate, QuantLib's arithmetic (its vectors), bit
-/// for bit, and QuantLib's own numbers there.
+/// The coterminal swap market model's drifts on a curve state set from the step's first alive rate (fixed). QuantLib's
+/// <c>SMMDriftCalculator::compute</c> reads every annuity from the first rate (<c>smmdriftcalculator.cpp:86-89</c>),
+/// so a state set from its first alive rate on, all the drifts read, is refused ("invalid index"). nanoql reads them
+/// from the first alive rate. Check: the drifts on the same curve set from the first rate, QuantLib's arithmetic (its
+/// vectors), bit for bit, and QuantLib's own numbers there.
 /// </summary>
 public class SmmDriftAliveTests
 {
@@ -40,7 +39,7 @@ public class SmmDriftAliveTests
 
         Assert.Equal(fromFirst, fromAlive);
 
-        // QuantLib's drifts on the curve set from the first rate (this run's probes\c1_facts.cpp)
+        // QuantLib's drifts on the curve set from the first rate
         Assert.Equal([0.0, 0.0, -0.001160309682994728, -0.00058998512642538439, 0.0], fromFirst);
     }
 }

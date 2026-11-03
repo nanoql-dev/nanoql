@@ -11,13 +11,13 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The analytic barrier engine at zero volatility (the S-rx plan's SRXR3 (i), taken from QuantLib's master ahead of the
-/// pin). QuantLib 1.44 divides by the zero standard deviation (<c>analyticbarrierengine.cpp:181-238</c>): a one-year
-/// up-and-out put at 107, strike 105, rebate 4, prices NaN [executed on the wheel]. QuantLib's master fixed it after
-/// the pin (#2853, <c>e29c64126</c>, merged as <c>2768fafdc</c> on 2026-10-14): with a variance below machine epsilon
-/// the underlying follows its forward, a spot on the barrier counts as a hit, a knock-in pays the vanilla payoff or the
-/// rebate at maturity, and a knock-out its rebate at the hit or the vanilla payoff. This is master's
-/// <c>testZeroVolatility</c>, until the pin moves to a release that carries it, as SBR7's case is.
+/// The analytic barrier engine at zero volatility (taken from QuantLib's master ahead of the pin). QuantLib 1.44
+/// divides by the zero standard deviation (<c>analyticbarrierengine.cpp:181-238</c>): a one-year up-and-out put at 107,
+/// strike 105, rebate 4, prices NaN (QuantLib-Python 1.44). QuantLib's master fixed it after the pin (#2853,
+/// <c>e29c64126</c>, merged as <c>2768fafdc</c> on 2026-10-14): with a variance below machine epsilon the underlying
+/// follows its forward, a spot on the barrier counts as a hit, a knock-in pays the vanilla payoff or the rebate at
+/// maturity, and a knock-out its rebate at the hit or the vanilla payoff. This is master's <c>testZeroVolatility</c>,
+/// until the pin moves to a release that carries it.
 /// </summary>
 public class BarrierZeroVolatilityTests
 {

@@ -16,11 +16,11 @@ A case is one original under one setting. Its outputs are the curve's reference 
 date to a hundred years after it its discount, Actual/365 (Fixed) continuous zero rate, semiannual forward rate over the
 six months after the date and instantaneous continuous forward rate. A refused value is {"throws": true}.
 
-Left out: α = 0 (the S-sr plan's SSR6 (xviii)), where QuantLib's kernel (1 − e^(−αx))/(αx) is 0/0 and nanoql's is its
-limit (tests/NanoQL.Tests/Divergences/UfrSmallAlphaTests.cs); and every read past an original that doesn't
-extrapolate (SSR6 (xxi)), where QuantLib reads it without the extrapolation flag and nanoql with
+Left out: α = 0, where QuantLib's kernel (1 − e^(−αx))/(αx) is 0/0 and nanoql's is its limit
+(tests/NanoQL.Tests/Divergences/UfrSmallAlphaTests.cs); and every read past an original that doesn't extrapolate, where
+QuantLib reads it without the extrapolation flag and nanoql with
 (tests/NanoQL.Tests/Divergences/DerivedCurveExtrapolationTests.cs). The kernel is upstream's after the pin,
-−expm1(−αx)/(αx), so the values agree within R7, not bit for bit.
+−expm1(−αx)/(αx), so the values agree within the tolerance, not bit for bit.
 
 Each case's inputs hold its settings, the "original" (the zero-spreaded generator's spec), the "llfr", "ufr",
 "firstSmoothingPoint" ([length, units]), "alpha", "roundingDigits" (null for none), "compounding" and "frequency" as

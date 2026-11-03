@@ -6,7 +6,7 @@ priced by pseudo-random numbers (plain, antithetic, with a Brownian bridge) and 
 fixed number of samples, and by pseudo-random numbers to an absolute tolerance: the NPV, and the error estimate where
 the numbers give one.
 
-Left out (the S-exo plan's §2.10): a cliquet with a reset on the evaluation date, which QuantLib's path pricer refuses
+Left out: a cliquet with a reset on the evaluation date, which QuantLib's path pricer refuses
 (tests/NanoQL.Tests/Divergences/McPerformanceResetTodayTests.cs).
 
 A case holds analyticcliquetengine.py's option and process specs and an engine {"traits" ("PseudoRandom" |

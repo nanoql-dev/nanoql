@@ -21,8 +21,7 @@ namespace NanoQL.PricingEngines;
 /// place of QuantLib's conversion to a pricing engine. A builder has no value equality.
 /// </para>
 /// <para>
-/// The seed is a constructor argument (S2R4; the S-sr plan's SSR1 (iv)): QuantLib's default, 0, a seed from the clock,
-/// is refused.
+/// The seed is a constructor argument: QuantLib's default, 0, a seed from the clock, is refused.
 /// </para>
 /// </remarks>
 public sealed record MakeMCHullWhiteCapFloorEngine<TRng, TStats>

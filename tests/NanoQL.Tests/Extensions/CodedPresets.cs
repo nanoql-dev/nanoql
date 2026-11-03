@@ -89,7 +89,7 @@ internal static class CodedPresets
     public static IReadOnlyDictionary<string, Func<YoYInflationIndex>> YoYInflationIndexes { get; } =
         Presets<YoYInflationIndex>([typeof(YoYInflationTermStructure)]);
 
-    /// <summary>Gets the regions, batch 7's generic region among them.</summary>
+    /// <summary>Gets the regions, the experimental generic region among them.</summary>
     public static IReadOnlyDictionary<string, Func<Region>> Regions { get; } = typeof(Region).Assembly.GetTypes()
         .Where(t => t.IsPublic && t.IsSealed && typeof(Region).IsAssignableFrom(t) && t.GetConstructor(Type.EmptyTypes) is not null)
         .ToDictionary(t => t.Name, t => (Func<Region>)(() => (Region)Activator.CreateInstance(t)!), StringComparer.Ordinal);

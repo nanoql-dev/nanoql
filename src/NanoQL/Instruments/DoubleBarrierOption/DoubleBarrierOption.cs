@@ -15,10 +15,9 @@ namespace NanoQL.Instruments;
 /// </summary>
 /// <remarks>
 /// An extension point, as in QuantLib: the quanto double-barrier option derives from it, and the experimental
-/// double-barrier engines price it (the S-bar plan's BR2 (i)). Immutable. A knock-out's rebate is paid at the first
-/// touch of either barrier, a knock-in's at expiry if neither was touched (BR5 (xlvi), as the analytic and binary
-/// engines price it; the binary engine refuses a KIKO's or KOKI's); QuantLib's analytic and binary engines read no
-/// rebate.
+/// double-barrier engines price it. Immutable. A knock-out's rebate is paid at the first touch of either barrier, a
+/// knock-in's at expiry if neither was touched (as the analytic and binary engines price it; the binary engine refuses
+/// a KIKO's or KOKI's); QuantLib's analytic and binary engines read no rebate.
 /// </remarks>
 public class DoubleBarrierOption : OneAssetOption
 {

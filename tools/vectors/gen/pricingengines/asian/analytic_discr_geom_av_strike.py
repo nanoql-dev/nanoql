@@ -8,8 +8,7 @@ Geometric average-strike calls and puts over six months, a year and two years, w
 unseasoned and with two past fixings, on the flat, constant-volatility processes of
 tools/vectors/gen/instruments/asianoption.py: the NPV, the engine's one result. Then the refusals of an arithmetic
 average, a payoff that isn't plain vanilla and an exercise that isn't European, and an expired option. The outputs a
-forward-starting average with dividends and markets off flat move are left out (the S-bar plan's §2.10: BR5 (xxxiii),
-BR4 (a)).
+forward-starting average with dividends and markets off flat move are left out.
 
 The wheel's calls, by QuantLib-SWIG 1.44's options.i: AnalyticDiscreteGeometricAverageStrikeAsianEngine(process) and
 the option's NPV. Read back by

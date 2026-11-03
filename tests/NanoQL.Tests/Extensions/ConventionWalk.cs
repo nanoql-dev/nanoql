@@ -11,10 +11,10 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Extensions;
 
 /// <summary>
-/// The no-bypass walk (CVD34): a set whose every calendar carries a marker holiday, whose every currency a marker
-/// symbol and whose every unit of measure a marker name, and a walk over everything an object reaches, by reflection
-/// over its fields, that names each calendar, day counter, currency and unit the set didn't give. The allowlist is the technical <see cref="NullCalendar"/> and the
-/// <see cref="Actual365Fixed"/> an engine or term structure builds for itself.
+/// The no-bypass walk: a set whose every calendar carries a marker holiday, whose every currency a marker symbol and
+/// whose every unit of measure a marker name, and a walk over everything an object reaches, by reflection over its
+/// fields, that names each calendar, day counter, currency and unit the set didn't give. The allowlist is the technical
+/// <see cref="NullCalendar"/> and the <see cref="Actual365Fixed"/> an engine or term structure builds for itself.
 /// </summary>
 internal static class ConventionWalk
 {

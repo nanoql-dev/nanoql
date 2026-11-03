@@ -22,19 +22,18 @@ namespace NanoQL.Models;
 /// discretely compounding money-market account.
 /// </para>
 /// <para>
-/// A working type (the S-mmp plan's MMPR1 (i)): it holds the caller's evolver and steps it, so an evolver serves one
-/// engine at a time; it holds its own clone of the product and copies of the pseudo-roots and bumps (MMPR1 (iv)). Its
-/// buffers are sized at construction, so its valuation allocates nothing after a warm-up (MMPR1 (v)), and it writes its
-/// means and errors into the caller's spans, QuantLib's caller vectors.
+/// A working type: it holds the caller's evolver and steps it, so an evolver serves one engine at a time; it holds its
+/// own clone of the product and copies of the pseudo-roots and bumps. Its buffers are sized at construction, so its
+/// valuation allocates nothing after a warm-up, and it writes its means and errors into the caller's spans, QuantLib's
+/// caller vectors.
 /// </para>
 /// <para>
-/// Departures from QuantLib (MMPR4 (i), (ii), (iv), (v), documented divergences; <c>Divergences/PathwiseVegaTests.cs</c>):
-/// the delta engine's recursion (<see cref="PathwiseAccountingEngine"/>); <see cref="RatePseudoRootJacobian"/>'s
-/// derivative; and the Jacobian takes the one-step discount factors at the step's start, where QuantLib's hands it the
-/// step's end (<c>pathwiseaccountingengine.cpp:494</c>) and its own test the start (<c>marketmodel.cpp:2899-2900</c>).
-/// The prices are QuantLib's. Refused (MMPR5 (a)): an evolver not in the money-market measure; and, where QuantLib
-/// reads past its buffers, a product whose rates or evolution aren't the model's, a product not finished at the
-/// evolver's last step.
+/// Departures from QuantLib (documented divergences; <c>Divergences/PathwiseVegaTests.cs</c>): the delta engine's
+/// recursion (<see cref="PathwiseAccountingEngine"/>); <see cref="RatePseudoRootJacobian"/>'s derivative; and the
+/// Jacobian takes the one-step discount factors at the step's start, where QuantLib's hands it the step's end
+/// (<c>pathwiseaccountingengine.cpp:494</c>) and its own test the start (<c>marketmodel.cpp:2899-2900</c>). The prices
+/// are QuantLib's. Refused: an evolver not in the money-market measure; and, where QuantLib reads past its buffers, a
+/// product whose rates or evolution aren't the model's, a product not finished at the evolver's last step.
 /// </para>
 /// </remarks>
 [WorkingType]
@@ -280,7 +279,7 @@ public sealed class PathwiseVegasAccountingEngine
 
             for (int i = 0; i < numberRates; ++i)
             {
-                // the one-step discount factors at the step's start (MMPR4 (i), (v)), the rates displaced (MMPR4 (ii))
+                // the one-step discount factors at the step's start, the rates displaced
                 double x = 1.0 / (1.0 + (taus[i] * lastForwards[i]));
                 stepsDiscounts[i + 1] = x;
                 stepsDiscountsSquared[storeStep, i] = x * x;

@@ -48,7 +48,7 @@ final class Rp {
     long refusals;
     long shown = 20;
     // Off the reference platform, a double within this relative difference, or else within this absolute one, is a
-    // match, each kind tallied with its widest (R19, R26).
+    // match, each kind tallied with its widest.
     static double tolerance;
     static double absTolerance;
     static long nearDoubles;
@@ -260,12 +260,12 @@ final class Rp {
         return x;
     }
 
-    /** A tuple argument, which the trace writes as its elements in order (B2R3): a Tuple2 or a Tuple3. */
+    /** A tuple argument, which the trace writes as its elements in order: a Tuple2 or a Tuple3. */
     Object tuple(Jv a, int i, String[] kinds, Class<?>[] classes) {
         return tupleOf(arg(a, i), kinds, classes);
     }
 
-    /** A collection of tuples, each written as its elements in order (B2R3). */
+    /** A collection of tuples, each written as its elements in order. */
     @SuppressWarnings({"rawtypes", "unchecked"})
     List tuples(Jv a, int i, String[] kinds, Class<?>[] classes) {
         Jv v = arg(a, i);
@@ -696,7 +696,7 @@ final class Rp {
         }
     }
 
-    /** Closes every registered object: the run's end. */
+    /** Closes every registered object when the run ends. */
     void closeAll() {
         for (NanoObject o : objs) {
             if (o != null) {

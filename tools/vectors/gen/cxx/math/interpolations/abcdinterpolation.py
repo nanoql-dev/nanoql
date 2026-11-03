@@ -11,13 +11,12 @@ the interpolator factory Abcd's traits, global and requiredPoints; and the refus
 with c negative, and set 2, whose fit QuantLib refuses. And AbcdSquared, the instantaneous covariance of two abcd rates
 fixing at T and S, for two parameter sets and three (T, S) pairs at four times.
 
-**The stability filter** (the S7 plan's S7R6) runs on the fits' outputs, as abcdcalibration.py's does: each fit is rerun
-with every volatility moved one ulp up, then down, together, then each alone; an output is written only where every
-refit leaves it within 1e-12 x max(|base|, |moved|, 1), and the generator prints "dropped n of m outputs" per case. Left
-out, a documented divergence: a fixed with d free (tests/NanoQL.Tests/Divergences/AbcdCalibrationFixedATests.cs). A
-refused value is {"throws": true}. Each case's input "fit" is the spec
-tools/cxx/src/termstructures/volatility/abcdspec.hpp reads;
-tests/NanoQL.Tests/Vectors/Cxx/Numerics/Interpolations/AbcdInterpolationCxxVectorTests.cs reads it back."""
+**The stability filter** runs on the fits' outputs, as abcdcalibration.py's does: each fit is rerun with every
+volatility moved one ulp up, then down, together, then each alone; an output is written only where every refit leaves it
+within 1e-12 x max(|base|, |moved|, 1), and the generator prints "dropped n of m outputs" per case. Left out, a
+documented divergence: a fixed with d free (tests/NanoQL.Tests/Divergences/AbcdCalibrationFixedATests.cs). A refused
+value is {"throws": true}. Each case's input "fit" is the spec tools/cxx/src/termstructures/volatility/abcdspec.hpp
+reads; tests/NanoQL.Tests/Vectors/Cxx/Numerics/Interpolations/AbcdInterpolationCxxVectorTests.cs reads it back."""
 import importlib.util
 import math
 import os

@@ -9,8 +9,8 @@ namespace NanoQL.Tests.Conventions;
 
 /// <summary>
 /// <see cref="BlackDeltaCalculator"/> is immutable: QuantLib's <c>setDeltaType</c> and <c>setOptionType</c>, which
-/// write the calculator, return a copy holding the new convention or type, and leave the receiver as it was (the S-rx
-/// plan's SRXD15, PR6.4b). Each copy computes what a calculator built with its arguments does, bit for bit.
+/// write the calculator, return a copy holding the new convention or type, and leave the receiver as it was. Each copy
+/// computes what a calculator built with its arguments does, bit for bit.
 /// </summary>
 public class BlackDeltaCalculatorCopyTests
 {

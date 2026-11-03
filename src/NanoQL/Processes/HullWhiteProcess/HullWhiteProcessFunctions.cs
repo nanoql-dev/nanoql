@@ -10,8 +10,8 @@ using NanoQL.Numerics;
 namespace NanoQL.Processes;
 
 /// <summary>
-/// The Hull-White processes' kernel, in the cancellation-free form of QuantLib's master's Vasicek (#2882), which the
-/// S-sr plan's SSR6 (ii) writes their members in.
+/// The Hull-White processes' kernel, in the cancellation-free form of QuantLib's master's Vasicek (#2882), in which
+/// their members are written.
 /// </summary>
 internal static class HullWhiteProcessFunctions
 {

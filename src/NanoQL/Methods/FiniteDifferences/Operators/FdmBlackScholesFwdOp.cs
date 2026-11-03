@@ -18,12 +18,12 @@ namespace NanoQL.Methods;
 /// a time step, the variance the Black forward variance or, on request, the local variance at each point.
 /// </summary>
 /// <remarks>
-/// A working type (the S-van plan's VD11): <see cref="SetTime"/> rewrites the operator's bands in place, through
-/// buffers it holds, by QuantLib's arithmetic in QuantLib's order, so a time step allocates nothing. Its times and
-/// reads are <see cref="FdmBlackScholesOp"/>'s: each structure read at the instants the step's times denote on
+/// A working type: <see cref="SetTime"/> rewrites the operator's bands in place, through buffers it holds, by
+/// QuantLib's arithmetic in QuantLib's order, so a time step allocates nothing. Its times and reads are
+/// <see cref="FdmBlackScholesOp"/>'s: each structure read at the instants the step's times denote on
 /// <see cref="FdmBlackScholesOp.Clock"/>, on its own clock, where QuantLib reads them at the risk-free curve's times
-/// (the S-van plan's VR4 (xxiii), the mismatched-dates class); structures that share the risk-free curve's times keep
-/// QuantLib's bits. A documented divergence.
+/// (the mismatched-dates class); structures that share the risk-free curve's times keep QuantLib's bits. A documented
+/// divergence.
 /// </remarks>
 [WorkingType]
 public sealed class FdmBlackScholesFwdOp : FdmLinearOpComposite

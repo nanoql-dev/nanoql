@@ -26,14 +26,13 @@ mixed quote and value forms, which the wheel doesn't wrap.
   price a quote and the convexity adjustment a value or the other way round.
 
 Each case's inputs hold its settings, "helper" (a helper spec of termstructures/yield/ratehelpers.py, with a
-"couponPricer" spec of cashflows/couponspec.hpp for the six pricer cases, and "quotes" for the mixed futures forms)
-and "curves" (the flat forward spec and {"type":
-"DiscountCurve", "dates", "discounts", "dayCounter"}). A case's "skip" input, where it has one, lists the outputs
-QuantLib's master moves (#2899, taken ahead of the pin as the upstream sweep's SWD14 and SWI3 rule): a deposit's or an
-indexed FRA's implied quote and quote error where QuantLib 1.44 reads a fixing before the evaluation date that the
-store doesn't hold and refuses it, and master forecasts the quote from the curve; each is null, and the reader nulls
-the same outputs (tests/NanoQL.Tests/Divergences/RateHelperUpstreamFixesTests.cs checks the forecast). Read back by tests/NanoQL.Tests/Vectors/Cxx/TermStructures/Yield/
-RateHelpersCxxVectorTests.cs."""
+"couponPricer" spec of cashflows/couponspec.hpp for the six pricer cases, and "quotes" for the mixed futures forms) and
+"curves" (the flat forward spec and {"type": "DiscountCurve", "dates", "discounts", "dayCounter"}). A case's "skip"
+input, where it has one, lists the outputs QuantLib's master moves (#2899, taken ahead of the pin): a deposit's or an
+indexed FRA's implied quote and quote error where QuantLib 1.44 reads a fixing before the evaluation date that the store
+doesn't hold and refuses it, and master forecasts the quote from the curve; each is null, and the reader nulls the same
+outputs (tests/NanoQL.Tests/Divergences/RateHelperUpstreamFixesTests.cs checks the forecast). Read back by
+tests/NanoQL.Tests/Vectors/Cxx/TermStructures/Yield/RateHelpersCxxVectorTests.cs."""
 import importlib.util
 import math
 import os

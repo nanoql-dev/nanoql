@@ -10,13 +10,13 @@ the strike range and the maximum swap tenor; the volatility by option tenor and 
 tenor, and by option time and swap length, at two strikes; and the smile sections by date and tenor and by time and
 length (the latter's date found by the structure's Newton solve), their exercise date and time and their level.
 
-**The stability filter** (the S7 plan's S7R6) runs on the volatilities, each implied from a price by
-blackFormulaImpliedStdDev's solve: each structure is rebuilt with every model volatility and reversion and every curve's
-rate moved one ulp up, then down, by math.nextafter, together; then each alone, up and down; a volatility is written
-only where every rebuild leaves it within 1e-12 x max(|base|, |moved|, 1), a query's whole array otherwise left out, and
-the generator prints "dropped n of m outputs" per case. The prices go through the C runtime's erf (the S-g1d plan's
-G1R3), so the levels' last bits differ, within R7. A refused value is {"throws": true}. Each case's input "volatility"
-is the spec tools/cxx/src/termstructures/volatility/swaption/gaussian1dswaptionvolatility.cpp reads;
+**The stability filter** runs on the volatilities, each implied from a price by blackFormulaImpliedStdDev's solve: each
+structure is rebuilt with every model volatility and reversion and every curve's rate moved one ulp up, then down, by
+math.nextafter, together; then each alone, up and down; a volatility is written only where every rebuild leaves it
+within 1e-12 x max(|base|, |moved|, 1), a query's whole array otherwise left out, and the generator prints "dropped n of
+m outputs" per case. The prices go through the C runtime's erf, so the levels' last bits differ, within the tolerance. A
+refused value is {"throws": true}. Each case's input "volatility" is the spec
+tools/cxx/src/termstructures/volatility/swaption/gaussian1dswaptionvolatility.cpp reads;
 tests/NanoQL.Tests/Vectors/Cxx/TermStructures/Gaussian1dSwaptionVolatilityCxxVectorTests.cs reads it back."""
 import copy
 import importlib.util

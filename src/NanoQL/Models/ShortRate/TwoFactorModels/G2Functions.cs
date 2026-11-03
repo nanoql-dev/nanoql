@@ -12,7 +12,7 @@ namespace NanoQL.Models;
 
 /// <summary>
 /// G2's mean-reversion kernels: QuantLib's master's after the pin (#2885, <c>g2.cpp</c>'s <c>expDecayRatio</c> and
-/// <c>varianceKernel</c>) and the forms the S-sr plan's SSR6 (iii) writes beside them, which G2 and its processes read.
+/// <c>varianceKernel</c>) and the forms written beside them, which G2 and its processes read.
 /// </summary>
 internal static class G2Functions
 {

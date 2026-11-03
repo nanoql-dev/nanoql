@@ -8,10 +8,9 @@ three parameter sets (their sigma/kappa at most 1) on flat curves and the second
 grid; then on the second set: QuantLib's default grid (100 x 100 x 50, Hundsdorfer), damping steps, every named scheme
 description, a cash-or-nothing put, cash dividends, and an expired option.
 
-Left out (the S-hes plan's §2.10): every structure is on the risk-free curve's day counter and reference date (on
-others QuantLib reads them at the risk-free curve's times, tests/NanoQL.Tests/Divergences/
-FdHestonMismatchedTimesTests.cs); no case has a sigma over kappa above 2 (HR9) or a variance distribution on which the
-variance mesher's quantile grid falls back (HR8).
+Left out: every structure is on the risk-free curve's day counter and reference date (on others QuantLib reads them at
+the risk-free curve's times, tests/NanoQL.Tests/Divergences/FdHestonMismatchedTimesTests.cs); no case has a sigma over
+kappa above 2 or a variance distribution on which the variance mesher's quantile grid falls back.
 
 The specs are a pricing {"process", "payoff", "exercise", "dividends", "tGrid", "xGrid", "vGrid", "dampingSteps",
 "scheme"}: the process batesmodel.py's, the exercise and the scheme

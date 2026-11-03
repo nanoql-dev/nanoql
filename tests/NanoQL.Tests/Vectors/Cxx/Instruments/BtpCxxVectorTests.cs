@@ -94,8 +94,8 @@ public class BtpCxxVectorTests
                     check.Output(c, "swapLengths", r.SwapLengths);
                     check.Output(c, "swapRates", r.SwapRates);
 
-                    // btp.py leaves out QuantLib's starting guess for the swaps the calculator never solves (the
-                    // run-found R8): their yields are null here
+                    // btp.py leaves out QuantLib's starting guess for the swaps the calculator never solves: their
+                    // yields are null here
                     check.Output(c, "solvedSwapYields", r.SwapYields.Where(y => y is not null));
                     check.Output(c, "swapDurations", r.SwapDurations);
                     check.Output(c, "equivalentSwapRate", r.EquivalentSwapRate);

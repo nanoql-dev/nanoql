@@ -15,16 +15,15 @@ namespace NanoQL.Models;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A working type (the S-mm plan's MR1 (ii)), copying each step's pseudo-root and covariance at construction (MR1
-/// (iv)); one step allocates nothing after a path's warm-up, where QuantLib allocates its vector of drift terms at
-/// every step (MR1 (v); <c>lognormalfwdrateiballand.cpp:110</c>).
+/// A working type, copying each step's pseudo-root and covariance at construction; one step allocates nothing after a
+/// path's warm-up, where QuantLib allocates its vector of drift terms at every step
+/// (<c>lognormalfwdrateiballand.cpp:110</c>).
 /// </para>
 /// <para>
 /// The geometric mean is of the displaced forwards at the step's start and end, √((f_end + d)(f_start + d)) − d, where
-/// QuantLib's is √(f₀ f_end) of the undisplaced forwards with the model's time-zero forward at every step (the S-mm
-/// plan's MR3 (xix), fixed with an independent check, <c>:119</c>, <c>:135</c>;
-/// <c>Divergences/BallandGeometricMeanTests.cs</c>). On one step from time 0 undisplaced, QuantLib's case, it is
-/// QuantLib's arithmetic bit for bit.
+/// QuantLib's is √(f₀ f_end) of the undisplaced forwards with the model's time-zero forward at every step (fixed with
+/// an independent check, <c>:119</c>, <c>:135</c>; <c>Divergences/BallandGeometricMeanTests.cs</c>). On one step from
+/// time 0 undisplaced, QuantLib's case, it is QuantLib's arithmetic bit for bit.
 /// </para>
 /// </remarks>
 [WorkingType]
@@ -151,7 +150,7 @@ public sealed class LogNormalFwdRateiBalland : MarketModelEvolver
 
         int aliveRate = alive[currentStep];
 
-        // the step's start forwards (MR3 (xix))
+        // the step's start forwards
         (currentStep > initialStep ? forwards : initialForwards).AsSpan(aliveRate).CopyTo(startForwards.AsSpan(aliveRate));
 
         int i = numberOfRates - 1;
@@ -201,7 +200,7 @@ public sealed class LogNormalFwdRateiBalland : MarketModelEvolver
     }
 
     // the geometric mean of the displaced forwards at the step's start and end, where QuantLib's is
-    // sqrt(initialRates[i]*forwards_[i]) (MR3 (xix))
+    // sqrt(initialRates[i]*forwards_[i])
     private double GeometricMean(int i) =>
         Math.Sqrt((startForwards[i] + displacements[i]) * (forwards[i] + displacements[i])) - displacements[i];
 

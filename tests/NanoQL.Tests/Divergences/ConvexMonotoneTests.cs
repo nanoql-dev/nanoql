@@ -8,17 +8,16 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The convex-monotone interpolation's sections (the S-core plan's CR7 (i)–(iii)). Hagan and West's method defines a
-/// section's forwards by two properties: the section averages its value, and the forwards are continuous at the nodes.
-/// QuantLib's split of a section's quadratic to keep it non-negative breaks both where it splits a quadratic that never
-/// dips below 0 inside the section (i); its averages' discriminant, 0 in exact arithmetic beside a floored end forward,
-/// rounds a hair below 0, and the unsplit quadratic dips below 0 (ii); and positivity forced on negative averages floors
-/// their sections and end forwards at 0, breaking the averages (iii). nanoql splits only where the quadratic dips,
-/// takes a discriminant within 1e-12 bAv² of 0 as 0, and forces no positivity on a section of negative average or the
-/// end forward beside one. QuantLib's values are its own class's, from this run's <c>probes\c1_facts.cpp</c>
-/// (<c>c1_facts.out</c>); each section is read through its own helper, as QuantLib's lookup takes the next section's
-/// helper at the node itself: its average by its primitive just before its right end, and its forward there as the
-/// limit of two readings before it.
+/// The convex-monotone interpolation's sections. Hagan and West's method defines a section's forwards by two
+/// properties: the section averages its value, and the forwards are continuous at the nodes. QuantLib's split of a
+/// section's quadratic to keep it non-negative breaks both where it splits a quadratic that never dips below 0 inside
+/// the section; its averages' discriminant, 0 in exact arithmetic beside a floored end forward, rounds a hair below 0,
+/// and the unsplit quadratic dips below 0; and positivity forced on negative averages floors their sections and end
+/// forwards at 0, breaking the averages. nanoql splits only where the quadratic dips, takes a discriminant within 1e-12
+/// bAv² of 0 as 0, and forces no positivity on a section of negative average or the end forward beside one. QuantLib's
+/// values are its own class's; each section is read through its own helper, as QuantLib's lookup takes the next
+/// section's helper at the node itself: its average by its primitive just before its right end, and its forward there
+/// as the limit of two readings before it.
 /// </summary>
 public class ConvexMonotoneTests
 {
@@ -72,8 +71,8 @@ public class ConvexMonotoneTests
     public void EverySectionKeepsItsAverageAndTheForwardsTheirContinuity()
     {
         // 100 random positive curves of 8 sections at quadraticity 0 with positivity forced, where QuantLib misses a
-        // section's average on 261 of 400 and jumps at a node on 190 (the planner's convexmono5.cpp): nanoql's sections
-        // each average their value, and the forwards meet at every node, the gap read at its limit
+        // section's average on 261 of 400 and jumps at a node on 190: nanoql's sections each average their value, and
+        // the forwards meet at every node, the gap read at its limit
         var random = new Random(20261027);
         for (int curve = 0; curve < 100; curve++)
         {
@@ -139,8 +138,8 @@ public class ConvexMonotoneTests
     public void ANegativeRateCurveReadsNoSpuriousForward()
     {
         // QuantLib's PiecewiseConvexMonotoneForward on deposits at -0.5% to 0% on 25 September 2019 reprices them
-        // (quote errors 9.98e-14) but reads a one-day forward of -12.05% 30 days out (c1_facts.out; the planner's
-        // CP11): nanoql's reprices them and its one-day forwards stay within the deposits' range
+        // (quote errors 9.98e-14) but reads a one-day forward of -12.05% 30 days out: nanoql's reprices them and its
+        // one-day forwards stay within the deposits' range
         var today = new Date(25, Month.September, 2019);
         var context = new EvaluationContext { EvaluationDate = today };
         double[] rates = [-0.005, -0.004, -0.003, -0.002, -0.001, 0.0];

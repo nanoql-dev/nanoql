@@ -17,7 +17,7 @@
 #define NANOQL_ALLOW_DEPRECATED_END_
 #endif
 
-// ---- errors: one exception class per refusal kind (BIR21) ----
+// ---- errors: one exception class per refusal kind ----
 
 // A refusal: its status code, the parameter as .NET names it, and the .NET exception's type.
 class error : public std::runtime_error {

@@ -13,7 +13,7 @@ internal static class CaseSettings
 {
     /// <summary>Sets QLNet's settings for a case and returns them as its <c>inputs.settings</c>.</summary>
     /// <param name="evaluationDate">The evaluation date.</param>
-    /// <param name="includeReferenceDateEvents">Whether events on the reference date count as occurred.</param>
+    /// <param name="includeReferenceDateEvents">Whether events on the reference date count as not yet occurred.</param>
     /// <param name="includeTodaysCashFlows">
     /// Whether today's cash flows count, or <see langword="null"/> for unset.
     /// </param>

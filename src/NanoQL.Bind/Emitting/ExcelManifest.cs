@@ -8,11 +8,11 @@ using NanoQL.Bind.Model;
 namespace NanoQL.Bind.Emitting;
 
 /// <summary>
-/// An Excel build's surface as <c>functions.json</c> (XLD22): each worksheet function's Excel name, C name, kind,
-/// category, experimental mark, arguments and their kinds, result, loop mask (XLR15), and a family's key and its
-/// constructions, each marked (XLD29); the add-in's own functions; and the functions the completeness check withholds,
-/// with what each lacks (XLD34). nanoql's experimental build's is checked in as <c>bindings/excel/functions.json</c>,
-/// which <c>excel check</c> diffs (X1); one function a line, so a change shows in review.
+/// An Excel build's surface as <c>functions.json</c>: each worksheet function's Excel name, C name, kind, category,
+/// experimental mark, arguments and their kinds, result, loop mask, and a family's key and its constructions, each
+/// marked; the add-in's own functions; and the functions the completeness check withholds, with what each lacks.
+/// nanoql's experimental build's is checked in as <c>bindings/excel/functions.json</c>, which <c>excel check</c> diffs;
+/// one function a line, so a change shows in review.
 /// </summary>
 internal static class ExcelManifest
 {
@@ -63,7 +63,7 @@ internal static class ExcelManifest
             return $"{{\"excel\": {Js(u.Name)}, \"c\": {Js(f.CName)}, \"kind\": {Js(f.Kind)}, \"category\": {Js(category)}, \"experimental\": {Bool(u.Experimental)}, \"args\": [{string.Join(", ", args)}], \"returns\": {returns}{mask}}}";
         }
 
-        // A family's entry: its key, a stable construction's C name where it has one (round 4's F4-4), each construction marked.
+        // A family's entry: its key, a stable construction's C name where it has one, each construction marked.
         string c = (u.Family.FirstOrDefault(m => !m.Experimental) ?? u.Family[0]).CName;
         string constructions = string.Join(", ", u.Family.Concat(u.Refused).OrderBy(m => m.CName, StringComparer.Ordinal).Select(m =>
             $"{{\"args\": {Js(string.Join("/", m.Type.GetGenericArguments().Select(ExcelSelection.ArgName)))}, \"c\": {Js(m.CName)}, \"experimental\": {Bool(m.Experimental)}}}"));

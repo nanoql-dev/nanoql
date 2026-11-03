@@ -11,9 +11,8 @@ semi-annual rates (three factors) with the log-normal Euler and predictor-correc
 Mersenne twister and Sobol, in the terminal measure and in the next bond at each step (QuantLib's money-market
 plus one).
 
-Left out (nanoql's composites and discounter differ there, the S-mmp plan's MMPR4 (vii) and (ix); multiproduct
-composite.py and discounter.py say where): products paid strictly inside a period but the last, and composites whose
-parts finish before the last step.
+Left out (nanoql's composites and discounter differ there; multiproductcomposite.py and discounter.py say where):
+products paid strictly inside a period but the last, and composites whose parts finish before the last step.
 
 The harness unit is tools/cxx/src/models/marketmodels/accountingengine.cpp. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Models/MarketModels/AccountingEngineCxxVectorTests.cs."""

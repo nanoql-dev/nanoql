@@ -8,12 +8,11 @@ using static NanoQL.Tests.Conventions.CommodityMarkets;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// A daily schedule's periods counting both their ends (the S-xrt plan's XRR5 (iv), fixed under R8). QuantLib's
-/// <c>createPricingPeriods</c> gives a period <c>[start, start + 1M − 1]</c> the quantity <c>perDay × (end −
-/// start)</c>, one day short: 10 barrels a day from January to March 2025 makes 300, 270 and 300 barrels where the
-/// months have 31, 28 and 31 days (the S-xrt planner's <c>xp_c1.cpp</c>). nanoql's is the daily quantity times the
-/// period's days, FpML's <c>PerCalendarDay</c> ("the Quantity or Notional Quantity is deemed to apply once per Calendar
-/// Day"): 310, 280 and 310. Check: each period's quantity is the sum of its days' quantities.
+/// A daily schedule's periods counting both their ends (fixed). QuantLib's <c>createPricingPeriods</c> gives a period
+/// <c>[start, start + 1M − 1]</c> the quantity <c>perDay × (end − start)</c>, one day short: 10 barrels a day from
+/// January to March 2025 makes 300, 270 and 300 barrels where the months have 31, 28 and 31 days. nanoql's is the daily
+/// quantity times the period's days, FpML's <c>PerCalendarDay</c> ("the Quantity or Notional Quantity is deemed to
+/// apply once per Calendar Day"): 310, 280 and 310. Check: each period's quantity is the sum of its days' quantities.
 /// </summary>
 public class PricingPeriodTests
 {

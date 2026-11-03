@@ -10,9 +10,9 @@ using static NanoQL.Tests.Conventions.CreditPortfolioBuilders;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The analytic loss models against each other on one basket (the S-xcr plan's §2.6): the recursive model exact, the
-/// binomial and the inhomogeneous pool within their approximations; and the base-correlation model as its LHP
-/// sub-models at the surface's nodes, exactly.
+/// The analytic loss models against each other on one basket: the recursive model exact, the binomial and the
+/// inhomogeneous pool within their approximations; and the base-correlation model as its LHP sub-models at the
+/// surface's nodes, exactly.
 /// </summary>
 public class AnalyticLossModelTwoRouteTests
 {
@@ -28,7 +28,7 @@ public class AnalyticLossModelTwoRouteTests
         double binomial = Basket(a, d).SetLossModel(new GaussianBinomialLossModel(Latent())).ExpectedTrancheLoss(D5);
         double pool = Basket(a, d).SetLossModel(new IHGaussPoolLossModel(Latent(), 200)).ExpectedTrancheLoss(D5);
 
-        // the adjusted binomial matches two moments; the pool's buckets read left edges, about 3% high (XR8 (xxxv))
+        // the adjusted binomial matches two moments; the pool's buckets read left edges, about 3% high
         Assert.Equal(exact, binomial, 0.05 * exact);
         Assert.Equal(exact, pool, 0.05 * exact);
     }

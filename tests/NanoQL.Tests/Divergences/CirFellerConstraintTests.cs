@@ -11,15 +11,15 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The Cox-Ingersoll-Ross model's Feller constraint (the S-sr plan's SSR7, K1): QuantLib's is σ's own
-/// <c>VolatilityConstraint</c>, built at the constructor's k and θ (<c>coxingersollross.cpp:26-40</c>, <c>:52</c>), so
-/// a calibration that moves k or θ tests σ against values the model no longer has, and can end outside the Feller
-/// region: on the wheel, from (r0, θ, k, σ) = (0.03, 0.035, 0.3, 0.05), Levenberg-Marquardt on the six swaption
-/// helpers of <c>tools/vectors/gen/models/model.py</c>'s 2025 set ends at θ = 536.3132523984605,
-/// k = 5.407661646569119e-07, σ = 0.033099933008455235, r0 = 0.02927429342689504, where σ² = 1.10e-3 exceeds
-/// 2kθ = 5.80e-4. nanoql tests σ² &lt; 2kθ on each trial vector's own k and θ, through the model's parameter constraint.
-/// QuantLib's check: the test equals QuantLib's constraint built at each vector's k and θ; and a calibration with k and
-/// θ fixed, where the two tests agree at every trial, is QuantLib's to the last bit.
+/// The Cox-Ingersoll-Ross model's Feller constraint (K1): QuantLib's is σ's own <c>VolatilityConstraint</c>, built at
+/// the constructor's k and θ (<c>coxingersollross.cpp:26-40</c>, <c>:52</c>), so a calibration that moves k or θ tests
+/// σ against values the model no longer has, and can end outside the Feller region: on the wheel, from (r0, θ, k, σ) =
+/// (0.03, 0.035, 0.3, 0.05), Levenberg-Marquardt on the six swaption helpers of
+/// <c>tools/vectors/gen/models/model.py</c>'s 2025 set ends at θ = 536.3132523984605, k = 5.407661646569119e-07, σ =
+/// 0.033099933008455235, r0 = 0.02927429342689504, where σ² = 1.10e-3 exceeds 2kθ = 5.80e-4. nanoql tests σ² &lt; 2kθ
+/// on each trial vector's own k and θ, through the model's parameter constraint. QuantLib's check: the test equals
+/// QuantLib's constraint built at each vector's k and θ; and a calibration with k and θ fixed, where the two tests
+/// agree at every trial, is QuantLib's to the last bit.
 /// </summary>
 public class CirFellerConstraintTests
 {

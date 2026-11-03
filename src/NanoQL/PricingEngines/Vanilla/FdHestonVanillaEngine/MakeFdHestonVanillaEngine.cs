@@ -21,10 +21,10 @@ namespace NanoQL.PricingEngines;
 
 /// <summary>A builder of the finite-difference Heston engine, with QuantLib's defaults.</summary>
 /// <remarks>
-/// An immutable builder (SEQR2): each method returns a modified copy, so a builder kept and reused never changes under
-/// its holder. <see cref="ToEngine"/> returns the engine as a function of the option and the context, its settings
-/// bound, in place of QuantLib's conversion to a pricing engine, with the default mixing factor, QuantLib's. A builder
-/// has no value equality.
+/// An immutable builder: each method returns a modified copy, so a builder kept and reused never changes under its
+/// holder. <see cref="ToEngine"/> returns the engine as a function of the option and the context, its settings bound,
+/// in place of QuantLib's conversion to a pricing engine, with the default mixing factor, QuantLib's. A builder has no
+/// value equality.
 /// </remarks>
 public sealed record MakeFdHestonVanillaEngine
 {

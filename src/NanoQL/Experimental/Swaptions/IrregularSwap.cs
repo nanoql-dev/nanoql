@@ -31,7 +31,7 @@ namespace NanoQL.Experimental;
 /// The fair rate and the fair spread are an engine's own results only, null on a swap engine's: QuantLib's
 /// <c>fetchResults</c> sets both to a debug 0 there (<c>// Debug: legs_[0]->fixedRate_ - …</c>), 0 where the vanilla
 /// swap's fair rate is 0.0305, and an irregular swap has no single fixed rate or spread to solve for; null is QuantLib's
-/// own "result not available" on reading it (the S-xrt plan's XRR5 (xx); <c>Conventions/IrregularSwapTests.cs</c>).
+/// own "result not available" on reading it (<c>Conventions/IrregularSwapTests.cs</c>).
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]
@@ -69,7 +69,7 @@ public sealed class IrregularSwap : Swap
     /// <inheritdoc/>
     /// <remarks>
     /// The fair rate and the fair spread an irregular-swap engine's results give, and null otherwise, where QuantLib's
-    /// sets a debug 0 for each leg with a basis-point sensitivity (XRR5 (xx)).
+    /// sets a debug 0 for each leg with a basis-point sensitivity.
     /// </remarks>
     public override IrregularSwapResults FetchResults(InstrumentResults results)
     {

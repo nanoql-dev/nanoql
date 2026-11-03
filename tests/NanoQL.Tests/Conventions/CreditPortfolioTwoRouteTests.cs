@@ -13,16 +13,16 @@ using static NanoQL.Tests.Conventions.CreditPortfolioBuilders;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The credit portfolio's two routes to one value (the S-xcr plan's §2.6): the Student t policy against the Gaussian at
-/// a high order, the convolved t against a simulation of its sum, the latent model's Gauss-Hermite integration against
-/// its trapezoids, and the n-th-to-default on one name against a credit default swap on it.
+/// The credit portfolio's two routes to one value: the Student t policy against the Gaussian at a high order, the
+/// convolved t against a simulation of its sum, the latent model's Gauss-Hermite integration against its trapezoids,
+/// and the n-th-to-default on one name against a credit default swap on it.
 /// </summary>
 public class CreditPortfolioTwoRouteTests
 {
     [Fact]
     public void TheStudentTPolicyTendsToTheGaussian()
     {
-        // the planner's xp_latent.cpp: at order 171, cumulativeY(-2) 0.022841385023 against the normal's 0.022750131948
+        // QuantLib 1.44: at order 171, cumulativeY(-2) 0.022841385023 against the normal's 0.022750131948
         var t = new TDefProbLM(0.3, 3, LatentModelIntegrationType.GaussianQuadrature, new TCopulaPolicyInitTraits([171, 171]));
         var g = new GaussianDefProbLM(0.3, 3, LatentModelIntegrationType.GaussianQuadrature);
         Basket basket = Three();
@@ -38,8 +38,8 @@ public class CreditPortfolioTwoRouteTests
     [Fact]
     public void TheConvolvedStudentTIsItsSumsDistribution()
     {
-        // 400,000 sums of two t's of order 5 on the T policy's normalized weights at correlation 0.3 (the planner's
-        // xp_latent.cpp ran the same check on its own weights: 0.795562 against a simulation's 0.795340, +-0.000638)
+        // 400,000 sums of two t's of order 5 on the T policy's normalized weights at correlation 0.3 (QuantLib's own
+        // weights give 0.795562 against a simulation's 0.795340, +-0.000638)
         double vf = Math.Sqrt(3.0 / 5.0);
         double a = Math.Sqrt(0.3) * vf, b = Math.Sqrt(0.7) * vf;
         var c = new CumulativeBehrensFisher([5, 5], [a, b]);
@@ -71,8 +71,8 @@ public class CreditPortfolioTwoRouteTests
     [Fact]
     public void AnNthToDefaultOnOneNameIsACreditDefaultSwap()
     {
-        // the planner's xp_engines.cpp: NTD(1 name) 0.0119097655252, the CDS's fair spread on the integral engine
-        // 0.0119097655041, both at daily steps on a 5% Actual/360 discount curve and a hazard of 0.02
+        // QuantLib 1.44: NTD(1 name) 0.0119097655252, the CDS's fair spread on the integral engine 0.0119097655041,
+        // both at daily steps on a 5% Actual/360 discount curve and a hazard of 0.02
         var discount = new FlatForward(Today, 0.05, new Actual360());
         Schedule s = new MakeSchedule().From(Today).To(new Date(31, Month.August, 2011))
             .WithTenor(new Period(3, TimeUnit.Months)).WithCalendar(new TARGET()).ToSchedule();

@@ -12,11 +12,11 @@ namespace NanoQL.Experimental;
 
 /// <summary>A bankruptcy: a default event stronger than every other, which matches every contract event type.</summary>
 /// <remarks>
-/// A settlement settles the seniorities it holds, or the one its single rate names, as any event's does (the S-xcr
-/// plan's XR8 (iii)): QuantLib's map constructor refuses a settlement that doesn't hold all five ISDA seniorities
-/// ("Bankruptcy event should have settled for all seniorities.", <c>defaultevent.cpp:210-213</c>), while its single-rate
-/// constructor fills the others with ISDA's conventional recoveries, so the two forms disagree. A documented
-/// divergence (<c>Divergences/SingleSenioritySettlementTests.cs</c>); no QuantLib code or test builds one.
+/// A settlement settles the seniorities it holds, or the one its single rate names, as any event's does: QuantLib's map
+/// constructor refuses a settlement that doesn't hold all five ISDA seniorities ("Bankruptcy event should have settled
+/// for all seniorities.", <c>defaultevent.cpp:210-213</c>), while its single-rate constructor fills the others with
+/// ISDA's conventional recoveries, so the two forms disagree. A documented divergence
+/// (<c>Divergences/SingleSenioritySettlementTests.cs</c>); no QuantLib code or test builds one.
 /// </remarks>
 [Experimental("NQL0001")]
 public sealed class BankruptcyEvent : DefaultEvent

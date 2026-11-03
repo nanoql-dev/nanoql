@@ -8,11 +8,11 @@ namespace NanoQL.Tests.Conventions;
 
 /// <summary>
 /// The internal double-double normal cumulative distribution the full lookback engines evaluate below their small-carry
-/// cut (the S-bar plan's BR5 (xxiii), the user's ruling (b) of 2026-10-26): against mpmath's 50-digit values at the
-/// double arguments, each given as its nearest double and the remainder's, within 2^-96 relative where N is at least
-/// 1/2 or comes from the continued fraction (x ≤ −3√2), the worst 2.2e-30 at x = −36, where the exponential and the
-/// last products round, and within 2^-104 absolute on the series' tail side, where erfc is 1 − erf; beyond z = 26 (x ≈
-/// −36.8) the value is 0, as double's range ends. Read through reflection, the type being internal.
+/// cut: against mpmath's 50-digit values at the double arguments, each given as its nearest double and the remainder's,
+/// within 2^-96 relative where N is at least 1/2 or comes from the continued fraction (x ≤ −3√2), the worst 2.2e-30 at
+/// x = −36, where the exponential and the last products round, and within 2^-104 absolute on the series' tail side,
+/// where erfc is 1 − erf; beyond z = 26 (x ≈ −36.8) the value is 0, as double's range ends. Read through reflection,
+/// the type being internal.
 /// </summary>
 public class DoubleDoubleNormalTests
 {

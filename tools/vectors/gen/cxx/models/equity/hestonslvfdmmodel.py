@@ -9,10 +9,10 @@ volatility of 25%, to 73 days, on 51 x 51 points and at most 200 steps a year, u
 zero-correlation Green's function and modified Craig-Sneyd: the log's number of entries, and its first, second, eleventh
 and last entries' times, densities and meshers.
 
-Filtered (S7R6, the master plan's §3.2): the case is refit with every input moved one ulp up, then down (the Heston
-parameters and spot, the rates, the local volatility), and each Heston parameter and the spot alone; an entry's time,
-density or mesher is written only where every refit leaves each of its values within 1e-12 x max(|a|, |b|, 1). The
-dropped count is printed.
+Filtered by the stability filter: the case is refit with every input moved one ulp up, then down (the Heston parameters
+and spot, the rates, the local volatility), and each Heston parameter and the spot alone; an entry's time, density or
+mesher is written only where every refit leaves each of its values within 1e-12 x max(|a|, |b|, 1). The dropped count is
+printed.
 
 The harness's call is tools/cxx/src/models/equity/hestonslvfdmmodel.cpp's. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Models/Equity/HestonSLVFDMModelCxxVectorTests.cs."""

@@ -6,12 +6,11 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The bivariate Student t-distribution beside the line h = ρk at |ρ| = 1 (found under R8): QuantLib's x(m, h, k)
-/// returns 0 wherever its denominator is below 1e-8, which flips x from 1 to 0 within about 1e-4 of the line, so its
-/// value there is off by up to 1.9e-5 and can be negative; nanoql takes the limit only at an exact 0/0. The references
-/// are the distribution's limits at ρ = ±1, F(min(h, k)) at ρ 1 and max(0, F(h) − F(−k)) at −1 (QuantLib's own boundary
-/// test's formulas), here ½ and 0; QuantLib's values are its own (this run's <c>probes\c3r2_facts.cpp</c>,
-/// <c>c3r3_facts.cpp</c>, their <c>.out</c>).
+/// The bivariate Student t-distribution beside the line h = ρk at |ρ| = 1: QuantLib's x(m, h, k) returns 0 wherever its
+/// denominator is below 1e-8, which flips x from 1 to 0 within about 1e-4 of the line, so its value there is off by up
+/// to 1.9e-5 and can be negative; nanoql takes the limit only at an exact 0/0. The references are the distribution's
+/// limits at ρ = ±1, F(min(h, k)) at ρ 1 and max(0, F(h) − F(−k)) at −1 (QuantLib's own boundary test's formulas), here
+/// ½ and 0; QuantLib's values are its own.
 /// </summary>
 public class BivariateStudentTests
 {

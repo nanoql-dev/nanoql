@@ -9,8 +9,8 @@ namespace NanoQL.Tests.Conventions;
 
 /// <summary>
 /// The no-except local volatility surface answers its overwrite where Dupire's surface refuses its reads with a
-/// <see cref="NanoQLException"/>, QuantLib's <c>Error</c> (the S-van plan's VD21), and is Dupire's value elsewhere; the
-/// structure's own range check, before the read, isn't caught.
+/// <see cref="NanoQLException"/>, QuantLib's <c>Error</c>, and is Dupire's value elsewhere; the structure's own range
+/// check, before the read, isn't caught.
 /// </summary>
 public class NoExceptLocalVolOverwriteTests
 {

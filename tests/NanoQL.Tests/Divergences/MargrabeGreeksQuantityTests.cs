@@ -13,12 +13,12 @@ namespace NanoQL.Tests.Divergences;
 /// The European Margrabe engine's Greeks at quantities other than 1. QuantLib's gammas drop the quantities and its
 /// theta takes them squared (<c>analyticeuropeanmargrabeengine.cpp:101-104</c>): a first gamma of 0.01154 against
 /// 0.02307 bumped at Q₁ = 2, a second of 0.02136 against 0.06409 at Q₂ = 3, and a theta of −8.361 against −9.013 by a
-/// date bump, on the plan's market; QuantLib's own case pins the spreadsheet's values, which reproduce its formulas
-/// (<c>margrabeoption.cpp:250</c>, <c>:259</c>, <c>:268</c>, moved here). nanoql takes each quantity once (the S-exo
-/// plan's ER5 (xvi)): QuantLib's own prices bumped are the check, and its bits at quantities of 1. QuantLib's master
-/// makes the same fix after the pin (#2918, <c>17a720edf</c>), upstream's three expressions token for token, and
-/// restates the spreadsheet rows' gammas and theta, the rows above them with each spot divided by its quantity: its
-/// rows are below, as a check of the fix.
+/// date bump, on the test's market; QuantLib's own case pins the spreadsheet's values, which reproduce its formulas
+/// (<c>margrabeoption.cpp:250</c>, <c>:259</c>, <c>:268</c>, moved here). nanoql takes each quantity once: QuantLib's
+/// own prices bumped are the check, and its bits at quantities of 1. QuantLib's master makes the same fix after the
+/// pin (#2918, <c>17a720edf</c>), upstream's three expressions token for token, and restates the spreadsheet rows'
+/// gammas and theta, the rows above them with each spot divided by its quantity: its rows are below, as a check of
+/// the fix.
 /// </summary>
 public class MargrabeGreeksQuantityTests
 {

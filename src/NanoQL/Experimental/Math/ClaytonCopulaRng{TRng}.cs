@@ -23,9 +23,9 @@ namespace NanoQL.Experimental;
 /// </para>
 /// <para>
 /// Below |θ| 1e-2 the conditional inverse u₂ = (u₁^(−θ) (v₂^(−θ/(θ+1)) − 1) + 1)^(−1/θ) is drawn in its
-/// <c>log1p</c>/<c>expm1</c> form, exp(−log1p(u₁^(−θ) expm1(−θ/(θ+1) · ln v₂))/θ), where QuantLib's cancels: 5e-5 off at
-/// θ 1e-12 and 1.8e-7 at 1e-10; at and above 1e-2, QuantLib's formula (the S-xrt plan's XRR5 (xxxiv);
-/// <c>Divergences/CopulaRngNearIndependenceTests.cs</c>).
+/// <c>log1p</c>/<c>expm1</c> form, exp(−log1p(u₁^(−θ) expm1(−θ/(θ+1) · ln v₂))/θ), where QuantLib's cancels: 5e-5 off
+/// at θ 1e-12 and 1.8e-7 at 1e-10; at and above 1e-2, QuantLib's formula
+/// (<c>Divergences/CopulaRngNearIndependenceTests.cs</c>).
 /// </para>
 /// </remarks>
 /// <typeparam name="TRng">The uniform generator.</typeparam>

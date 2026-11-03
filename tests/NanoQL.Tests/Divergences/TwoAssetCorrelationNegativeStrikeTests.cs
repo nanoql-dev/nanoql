@@ -11,9 +11,9 @@ namespace NanoQL.Tests.Divergences;
 /// The two-asset correlation engine at a negative second strike. QuantLib checks the first strike but not the second
 /// (<c>analytictwoassetcorrelationengine.cpp:45</c>), whose <c>log(s2/X2)</c> is NaN and reaches Drezner's "case not
 /// handled", where the call, (S₂ − X₂)·1{S₁ &gt; X₁}, is s₂e^{(b₂−r)T}N(y₁ + ρσ₂√T) − X₂e^{−rT}N(y₁) (57.670585 at X₂ =
-/// −10 on the plan's market; QuantLib's X₂ = 0 value is the same form, 52.851193) and the put worth nothing. nanoql
-/// prices those forms (the S-exo plan's ER5 (xxxiv)): a quadrature over the joint lognormal (Revision 69,
-/// <see cref="TwoAssetCorrelationQuadrature"/>) and QuantLib's X₂ = 0 value are the checks.
+/// −10 on the test's market; QuantLib's X₂ = 0 value is the same form, 52.851193) and the put worth nothing. nanoql
+/// prices those forms: a quadrature over the joint lognormal (<see cref="TwoAssetCorrelationQuadrature"/>) and
+/// QuantLib's X₂ = 0 value are the checks.
 /// </summary>
 public class TwoAssetCorrelationNegativeStrikeTests
 {

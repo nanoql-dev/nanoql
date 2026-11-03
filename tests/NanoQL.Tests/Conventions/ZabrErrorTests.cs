@@ -150,7 +150,7 @@ public class ZabrErrorTests
 
     // A cube that isn't at-the-money calibrated fits its sparse smiles at construction, which don't read the shift, and
     // builds a section at each query: on the wheel the shifted cube serves its 9 × 11 sparse parameters and refuses its
-    // first query (the S7 plan's cube survey, zabr_shifted_atm).
+    // first query.
     [Fact]
     public void AShiftedCubeThatIsntAtmCalibratedRefusesAtItsFirstQuery()
     {

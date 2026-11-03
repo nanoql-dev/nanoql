@@ -22,9 +22,9 @@ namespace NanoQL.Quotes;
 /// (fixed BPS / 1bp).
 /// </para>
 /// <para>
-/// Immutable: the dates and value are computed once, at construction, under the context (§2.2's quote row; the S-core
-/// plan's CR1 (c)). QuantLib's quote rebuilds its swap when the evaluation date moves; here a new date is a new quote.
-/// QuantLib's <c>isValid</c> isn't ported: a swap that can't be priced is refused at construction.
+/// Immutable: the dates and value are computed once, at construction, under the context (§2.2's quote row). QuantLib's
+/// quote rebuilds its swap when the evaluation date moves; here a new date is a new quote. QuantLib's <c>isValid</c>
+/// isn't ported: a swap that can't be priced is refused at construction.
 /// </para>
 /// </remarks>
 public sealed class ForwardSwapQuote

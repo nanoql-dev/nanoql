@@ -13,13 +13,12 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The FD Heston-Hull-White engine's multiple strikes after a reference whose payoff isn't a plain vanilla (the S-hes plan's
-/// HR7 (xxiv), the FD Heston engine's twin; <c>fdhestonhullwhitevanillaengine.cpp:78-95</c>, <c>:175-188</c>). QuantLib's
-/// cache stores the reference payoff's scaled values V(S·d)/d under plain vanilla keys and serves them to later plain
-/// vanillas: after a cash-or-nothing call (100, cash 10) the plain calls at 80, 100 and 120 are served 6.848, 5.968 and
-/// 1.616 where their direct prices are 23.033, 8.076 and 1.106 [executed: <c>scratchpad\cxxprobe\src\c3oracle.cpp</c>].
-/// nanoql's <c>CalculateStrikes</c> solves each strike's plain vanilla alone after such a reference, QuantLib's engine
-/// priced for that strike.
+/// The FD Heston-Hull-White engine's multiple strikes after a reference whose payoff isn't a plain vanilla (the FD
+/// Heston engine's twin; <c>fdhestonhullwhitevanillaengine.cpp:78-95</c>, <c>:175-188</c>). QuantLib's cache stores the
+/// reference payoff's scaled values V(S·d)/d under plain vanilla keys and serves them to later plain vanillas: after a
+/// cash-or-nothing call (100, cash 10) the plain calls at 80, 100 and 120 are served 6.848, 5.968 and 1.616 where their
+/// direct prices are 23.033, 8.076 and 1.106 (QuantLib 1.44). nanoql's <c>CalculateStrikes</c> solves each strike's
+/// plain vanilla alone after such a reference, QuantLib's engine priced for that strike.
 /// </summary>
 public class FdHestonHullWhiteStrikesReferenceTests
 {

@@ -25,8 +25,8 @@ public static class UtilitiesFunctions
     /// QuantLib's <c>mergeTimes</c> appends the merged times to the caller's vector and sizes each set's presence to
     /// the times before their duplicates are removed, its tail read past the merged ones; here the result is the merged
     /// times alone and each presence their size, which changes no value QuantLib's readers see, since they read it only
-    /// below the merged count (the S-mm plan's SD7). QuantLib's sort of a NaN and its binary search of an unsorted set
-    /// are undefined, and refused (<c>Divergences/MarketModelUndefinedReadsTests.cs</c>).
+    /// below the merged count. QuantLib's sort of a NaN and its binary search of an unsorted set are undefined, and
+    /// refused (<c>Divergences/MarketModelUndefinedReadsTests.cs</c>).
     /// </remarks>
     public static MergedTimes MergeTimes(ReadOnlySpan<ImmutableArray<double>> times)
     {

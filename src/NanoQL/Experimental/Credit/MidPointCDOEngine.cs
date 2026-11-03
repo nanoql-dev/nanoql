@@ -14,30 +14,31 @@ using NanoQL.Time;
 
 namespace NanoQL.Experimental;
 
+// The outstanding notional under realized defaults is the Open Source Risk Engine's (ORE) form.
 /// <summary>
 /// The mid-point engine for synthetic CDOs: each premium period's loss taken at its midpoint, the premium paid on the
 /// tranche's notional less the expected loss at the period's end.
 /// </summary>
 /// <remarks>
 /// <para>
-/// A static class: <see cref="Calculate"/> takes the engine's inputs and returns the results (D14). It reads the
-/// statistics through the CDO's basket, which must be of the engine's evaluation date (the S-xcr plan's XR1 (c)).
-/// Premium accrual on default isn't paid, as in QuantLib's.
+/// A static class: <see cref="Calculate"/> takes the engine's inputs and returns the results. It reads the statistics
+/// through the CDO's basket, which must be of the engine's evaluation date. Premium accrual on default isn't paid, as
+/// in QuantLib's.
 /// </para>
 /// <para>
 /// The legs and the upfront are levered by the CDO's leverage factor, and the fair premium and fair upfront are the
 /// unlevered rates: QuantLib's levers the premium leg alone, so a tranche at twice its notional reads half its fair
 /// premium, 0.02268 for 0.04535; and its additional "fairPremium" is −(protection + upfront)·rate/premium, −0.04535
-/// where the instrument's is 0.04535 (XR8 (ix); <c>Divergences/CdoLeverageTests.cs</c>). The fair upfront is the
-/// side-invariant rate that zeroes the value, over the first accrual's discount: QuantLib's reads −0.2000 for a buyer
-/// where the seller's is 0.2000, and a forward start's value at it −0.22.
+/// where the instrument's is 0.04535 (<c>Divergences/CdoLeverageTests.cs</c>). The fair upfront is the side-invariant
+/// rate that zeroes the value, over the first accrual's discount: QuantLib's reads −0.2000 for a buyer where the
+/// seller's is 0.2000, and a forward start's value at it −0.22.
 /// </para>
 /// <para>
 /// A basket with realized defaults is priced on the tranche's outstanding notional, its inception notional less the
-/// realized tranche loss and the amortized recovery (ORE's): the premium leg pays on it less the live names' expected
-/// loss, the upfront is due on it, and a paid first coupon starts the losses from the realized tranche loss (XR8 (ii)).
-/// A discount before the discount curve's reference date is 1, and a default probability before a default curve's 0,
-/// where QuantLib's reads refuse a seasoned CDO and curves dated T+2 ("negative time"; XR8 (x)).
+/// realized tranche loss and the amortized recovery: the premium leg pays on it less the live names' expected loss, the
+/// upfront is due on it, and a paid first coupon starts the losses from the realized tranche loss. A discount before
+/// the discount curve's reference date is 1, and a default probability before a default curve's 0, where QuantLib's
+/// reads refuse a seasoned CDO and curves dated T+2 ("negative time").
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]

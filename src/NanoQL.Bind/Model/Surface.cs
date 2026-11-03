@@ -39,7 +39,7 @@ internal sealed class Surface
     /// <summary>Gets the roles table's entries, for the coverage report.</summary>
     public List<(string Member, int Argument, string[] Parameters)> Roles { get; } = [];
 
-    /// <summary>Gets the functions' <c>Matrix</c> and <c>Vector</c> parameters their members write into (B1-1).</summary>
+    /// <summary>Gets the functions' <c>Matrix</c> and <c>Vector</c> parameters their members write into.</summary>
     public List<(CFunction Function, CParam Parameter)> Written { get; } = [];
 
     /// <summary>

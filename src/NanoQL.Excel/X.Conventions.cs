@@ -7,7 +7,7 @@ using NanoQL.Time;
 
 namespace NanoQL.Excel;
 
-/// <summary>The convention set at the cell (XLR9) and the names of calendars and day counters in it (XLR16).</summary>
+/// <summary>The convention set at the cell and the names of calendars and day counters in it.</summary>
 public static partial class X
 {
     // Each name built once per provider: the objects are immutable, and the provider's identity is in every key.
@@ -39,7 +39,7 @@ public static partial class X
                 : throw new InvalidOperationException("the current convention provider is not a convention set: it has no names to look up; pass a set"));
     }
 
-    // A calendar or a day counter by its name in the current set, as an empty set argument reads it (XLR16).
+    // A calendar or a day counter by its name in the current set, as an empty set argument reads it.
     private static object ByName(Type t, string name, string p)
     {
         bool calendar = t == typeof(Calendar);

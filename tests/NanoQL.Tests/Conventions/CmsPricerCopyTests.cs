@@ -10,10 +10,10 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The CMS pricers' setters (the S-cms plan's CMR1 (iii)): QuantLib's <c>setMeanReversion</c> and
-/// <c>setSwaptionVolatility</c> change the pricer in place; <see cref="IMeanRevertingPricer.WithMeanReversion"/> and
-/// <see cref="CmsCouponPricer.WithSwaptionVolatility"/> return a copy of the pricer's own type, and the receiver is
-/// unchanged. The linear TSR pricer keeps its settings, integrator and coupon discounting curve.
+/// The CMS pricers' setters: QuantLib's <c>setMeanReversion</c> and <c>setSwaptionVolatility</c> change the pricer in
+/// place; <see cref="IMeanRevertingPricer.WithMeanReversion"/> and <see cref="CmsCouponPricer.WithSwaptionVolatility"/>
+/// return a copy of the pricer's own type, and the receiver is unchanged. The linear TSR pricer keeps its settings,
+/// integrator and coupon discounting curve.
 /// </summary>
 public class CmsPricerCopyTests
 {

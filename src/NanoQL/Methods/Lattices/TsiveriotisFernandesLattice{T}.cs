@@ -22,7 +22,7 @@ namespace NanoQL.Methods;
 /// It rolls back a <see cref="DiscretizedConvertible"/> only, as QuantLib's does; another asset is refused. Its step
 /// back is QuantLib's, the tree's first-node probabilities applied to every node:
 /// <c>pd·v[j]/(1 + r[j]·dt) + pu·v[j + 1]/(1 + r[j + 1]·dt)</c>, the probabilities and rates of the step stepped back
-/// likewise, into the asset's spare buffers (the S-sr plan's SSD9).
+/// likewise, into the asset's spare buffers.
 /// </para>
 /// <para>
 /// The volatility and the dividend yield, which QuantLib's constructor takes and doesn't read, are kept in the

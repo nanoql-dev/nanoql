@@ -18,14 +18,14 @@ namespace NanoQL.Methods;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Immutable: the forward equation is solved at construction (master §2.2's <c>LazyObject</c> row, the S-van plan's
-/// VD10), where QuantLib solves it at the first query, and its meshers and density interpolations are held read-only.
-/// Its argument x is ln(S) and its times are the local volatility's.
+/// Immutable: the forward equation is solved at construction (the playbook's <c>LazyObject</c> row), where QuantLib
+/// solves it at the first query, and its meshers and density interpolations are held read-only. Its argument x is ln(S)
+/// and its times are the local volatility's.
 /// </para>
 /// <para>
 /// The risk-free and dividend curves are read at the instants the local volatility's times denote, each on its own
-/// clock, where QuantLib reads them at those times (the S-van plan's VR4 (xxiii), the mismatched-dates class); curves
-/// that share the local volatility's times keep QuantLib's bits. A documented divergence.
+/// clock, where QuantLib reads them at those times (the mismatched-dates class); curves that share the local
+/// volatility's times keep QuantLib's bits. A documented divergence.
 /// </para>
 /// </remarks>
 public sealed class LocalVolRNDCalculator : RiskNeutralDensityCalculator
@@ -442,7 +442,7 @@ public sealed class LocalVolRNDCalculator : RiskNeutralDensityCalculator
         return m;
     }
 
-    // a curve's discount at the instant a time on the local volatility's clock denotes (VR4 (xxiii))
+    // a curve's discount at the instant a time on the local volatility's clock denotes
     private double Discount(YieldTermStructure curve, double t) => curve.DiscountAt(localVol, t);
 
     // the forward operator on the local volatility's clock

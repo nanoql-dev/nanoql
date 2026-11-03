@@ -12,7 +12,7 @@ namespace NanoQL.Tests.Vectors;
 /// The C++ harness's spreaded hazard-rate curve vectors,
 /// <c>tests/vectors/cxx/experimental/credit/spreadedhazardratecurve.json</c>: <see cref="SpreadedHazardRateCurve"/> and
 /// <see cref="FactorSpreadedHazardRateCurve"/> on flat and interpolated originals, their dates, maximum time and hazard
-/// rates (their survival, exact here, is the S-xcr plan's XR3 (b)).
+/// rates (their survival, exact here, is in the Divergences record).
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class SpreadedHazardRateCurveCxxVectorTests

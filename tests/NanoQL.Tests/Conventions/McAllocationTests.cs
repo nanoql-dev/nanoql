@@ -8,12 +8,12 @@ using NanoQL.Processes;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The one-dimensional Monte Carlo loop allocates nothing per sample after its first batch (the S-sr plan's SSR1 (v),
-/// S3's closing ruling): <see cref="MonteCarloModel{TPath, TStats}.AddSamples"/> draws a path that is a view of the
-/// generator's buffer, prices it and adds the price, its accumulator reserved once per batch. Measured on an
-/// Ornstein-Uhlenbeck path, plain and antithetic: into an <see cref="IncrementalStatistics"/>, which keeps no sample, a
-/// batch allocates nothing (<see cref="AllocationAssert"/>); into a <see cref="GeneralStatistics"/>, a batch allocates
-/// its reservation, one array of the samples it then holds, and nothing per sample.
+/// The one-dimensional Monte Carlo loop allocates nothing per sample after its first batch:
+/// <see cref="MonteCarloModel{TPath, TStats}.AddSamples"/> draws a path that is a view of the generator's buffer,
+/// prices it and adds the price, its accumulator reserved once per batch. Measured on an Ornstein-Uhlenbeck path, plain
+/// and antithetic: into an <see cref="IncrementalStatistics"/>, which keeps no sample, a batch allocates nothing (<see
+/// cref="AllocationAssert"/>); into a <see cref="GeneralStatistics"/>, a batch allocates its reservation, one array of
+/// the samples it then holds, and nothing per sample.
 /// </summary>
 public class McAllocationTests
 {

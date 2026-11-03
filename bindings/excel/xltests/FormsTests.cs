@@ -7,14 +7,14 @@ using Microsoft.Office.Interop.Excel;
 namespace NanoQL.Excel.XlTests;
 
 /// <summary>
-/// C1's kinds' forms in real ranges, where a listed function has them (XLR2, XLP40): a complex number as Excel's text,
-/// in and out; a vector in and a matrix out; a map in from two columns; jagged rows in and out; a range of optional
-/// numbers with an empty cell inside; draws from a snapshot and the next snapshot's, and a sequence's rows.
+/// The binding kinds' forms in real ranges, where a listed function has them: a complex number as Excel's text, in and
+/// out; a vector in and a matrix out; a map in from two columns; jagged rows in and out; a range of optional numbers
+/// with an empty cell inside; draws from a snapshot and the next snapshot's, and a sequence's rows.
 /// </summary>
 [ExcelTestSettings(OutOfProcess = true)]
 public class FormsTests : RunnerTest
 {
-    /// <summary>Ten Mersenne Twister draws from seed 42, as C# draws them (XLP40).</summary>
+    /// <summary>Ten Mersenne Twister draws from seed 42, as C# draws them.</summary>
     private static readonly string[] Mt10 =
     [
         "3FD7F87719A00000", "3FE97D47B6700000", "3FEE6C406B900000", "3FC77ACA87400000", "3FE76C7E8D500000",
@@ -58,8 +58,8 @@ public class FormsTests : RunnerTest
     }
 
     /// <summary>
-    /// A map in from two columns (XLP40): a default event's recovery rates by seniority, a trailing empty row trimmed,
-    /// each rate read back; a duplicate key refused.
+    /// A map in from two columns: a default event's recovery rates by seniority, a trailing empty row trimmed, each
+    /// rate read back; a duplicate key refused.
     /// </summary>
     [ExcelFact(AddIn = AddIns.Test)]
     public void AMapFromTwoColumns()
@@ -107,8 +107,8 @@ public class FormsTests : RunnerTest
     }
 
     /// <summary>
-    /// A range of optional numbers with an empty cell inside (XLP40): that element none, so the leg's second coupon is a
-    /// plain floating one between two capped ones; text inside the range refused.
+    /// A range of optional numbers with an empty cell inside: that element none, so the leg's second coupon is a plain
+    /// floating one between two capped ones; text inside the range refused.
     /// </summary>
     [ExcelFact(AddIn = AddIns.Test)]
     public void OptionalNumbersWithAnEmptyCell()
@@ -159,7 +159,7 @@ public class FormsTests : RunnerTest
         Assert.All(h, r => Assert.Equal(3, r.Length));
     }
 
-    // A Heston process on the swap's sheet's curves (B1), its model (B2) and analytic engine (B3).
+    // A Heston process on the swap's sheet's curves, its model and analytic engine.
     private Worksheet Heston()
     {
         Worksheet ws = NewSheet();

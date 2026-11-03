@@ -26,7 +26,7 @@ namespace NanoQL.Experimental;
 /// construction's data whatever it was given: <c>UnitOfMeasure("Barrels", "B2", Mass)</c> after
 /// <c>("Barrels", "BBL", Volume)</c> has code BBL and type Volume (<c>unitofmeasure.cpp:37-49</c>). There is no
 /// registry here, so every unit holds the data it is given, a documented divergence
-/// (<c>Divergences/CommodityRegistryTests.cs</c>; the S-xrt plan's XRR1).
+/// (<c>Divergences/CommodityRegistryTests.cs</c>).
 /// </para>
 /// <para>
 /// Two units are equal when their codes are, compared ordinally, whatever their other data, as QuantLib's
@@ -37,8 +37,7 @@ namespace NanoQL.Experimental;
 /// Every unit's rounding is QuantLib's default <c>Rounding()</c>, which leaves an amount as it is, where QuantLib's is
 /// <c>Rounding(0)</c>, to the closest whole unit, which its public constructor can't change
 /// (<c>unitofmeasure.hpp:82-86</c>), so its automated conversions round a thousand-barrel quantity to thousands of
-/// barrels: 2 MB plus 1,500 BBL is 4 MB there, 3.5 MB here (the S-xrt plan's XRR10;
-/// <c>Divergences/QuantityRoundingTests.cs</c>).
+/// barrels: 2 MB plus 1,500 BBL is 4 MB there, 3.5 MB here (<c>Divergences/QuantityRoundingTests.cs</c>).
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]

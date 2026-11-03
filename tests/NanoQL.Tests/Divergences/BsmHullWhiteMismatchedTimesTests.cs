@@ -11,13 +11,13 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The BSM-Hull-White engine's variance offset on structures counted differently (the S-van plan's VR4 (xi)). QuantLib
-/// takes the Hull-White terms over the risk-free curve's time and the equity volatility in the covariance as its own
-/// structure quotes it (<c>analyticbsmhullwhiteengine.cpp:86-102</c>), so a volatility on Act/360 beside a curve on
-/// Act/365 enters the covariance at a rate its variance doesn't run at. nanoql takes the equity volatility as its
-/// variance per unit of the risk-free curve's time. QuantLib's check: its own engine on the market restated on one day
-/// counter, the volatility scaled by √(365/360) [executed on the wheel: <c>scratchpad\c2\oracle_c2.py</c>, section
-/// bsmhw]. Where the structures share their counts, QuantLib's bits (the engine's vectors).
+/// The BSM-Hull-White engine's variance offset on structures counted differently. QuantLib takes the Hull-White terms
+/// over the risk-free curve's time and the equity volatility in the covariance as its own structure quotes it
+/// (<c>analyticbsmhullwhiteengine.cpp:86-102</c>), so a volatility on Act/360 beside a curve on Act/365 enters the
+/// covariance at a rate its variance doesn't run at. nanoql takes the equity volatility as its variance per unit of the
+/// risk-free curve's time. QuantLib's check: its own engine on the market restated on one day counter, the volatility
+/// scaled by √(365/360) (QuantLib-Python 1.44). Where the structures share their counts, QuantLib's bits (the engine's
+/// vectors).
 /// </summary>
 public class BsmHullWhiteMismatchedTimesTests
 {

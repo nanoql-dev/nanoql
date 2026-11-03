@@ -11,15 +11,14 @@ using static NanoQL.Tests.Divergences.Fd2dMismatchedTimesTests;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// Choi's and the n-dimensional finite-difference basket engines where every volatility is 0. QuantLib's fails on
-/// paths it doesn't intend: Choi's single-factor nodes take their intrinsic branch, which sets no root
+/// Choi's and the n-dimensional finite-difference basket engines where every volatility is 0. QuantLib's fails on paths
+/// it doesn't intend: Choi's single-factor nodes take their intrinsic branch, which sets no root
 /// (<c>singlefactorbsmbasketengine.cpp:186</c>), and its read of the node's "d" throws "invalid map&lt;K, T&gt; key"
 /// (<c>choibasketengine.cpp:217</c>); the n-dimensional engine meshes every principal direction at √0
 /// (<c>fdndimblackscholesvanillaengine.cpp:155-165</c>) and fails with "vector too long". At volatilities of 1e-8 both
 /// give the deterministic value, the discounted payoff at the forward basket. Here Choi's nodes take the root's limit,
-/// ±∞ by the side of the strike the forward basket is on, and the n-dimensional mesh is floored at QL_EPSILON² (the
-/// S-exo plan's ER5 (iii) and (vi) at their own boundary, R8, round 1's B1-2): the deterministic value, the
-/// single-factor engine's intrinsic and QuantLib's engines at 1e-8 are the checks.
+/// ±∞ by the side of the strike the forward basket is on, and the n-dimensional mesh is floored at QL_EPSILON²: the
+/// deterministic value, the single-factor engine's intrinsic and QuantLib's engines at 1e-8 are the checks.
 /// </summary>
 public class BasketZeroVolatilitiesTests
 {

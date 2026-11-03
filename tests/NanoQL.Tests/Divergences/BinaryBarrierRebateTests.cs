@@ -11,15 +11,14 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The binary barrier engine's rebate (fixed under R8; the S-bar run's own find). The option takes a rebate and
-/// QuantLib's engine never reads it: a down-and-out cash-or-nothing call, cash 10, strike 100, barrier 90 at r 5%, q 1%,
-/// σ 20% over a year prices 3.678406488567 at rebates 0 and 5. nanoql prices it by the analytic barrier engine's rebate
-/// terms, a knock-out's paid at the hit and a knock-in's at expiry if never hit. Checks: QuantLib's routes for the same
-/// payments, a one-touch at the hit by its analytic digital American engine (2.786734823341 below 90, 3.267438031090
-/// above 110 for 5) and a strike-0 cash-or-nothing knock-out by this engine (2.060934934335 and 1.600028420441) (the
-/// S-bar run's <c>c1_ta_bb.py</c>). A knock-out already hit is worth its rebate, paid now, where QuantLib's engine prices
-/// 0 (the S-bar code review's B1-1): its check QuantLib's one-touch at the same spot, 5.000000000000 on and beyond the
-/// barrier, and the engine's own value a hair inside, 5.000015883 at 90.0001.
+/// The binary barrier engine's rebate (fixed). The option takes a rebate and QuantLib's engine never reads it: a
+/// down-and-out cash-or-nothing call, cash 10, strike 100, barrier 90 at r 5%, q 1%, σ 20% over a year prices
+/// 3.678406488567 at rebates 0 and 5. nanoql prices it by the analytic barrier engine's rebate terms, a knock-out's
+/// paid at the hit and a knock-in's at expiry if never hit. Checks: QuantLib's routes for the same payments, a
+/// one-touch at the hit by its analytic digital American engine (2.786734823341 below 90, 3.267438031090 above 110 for
+/// 5) and a strike-0 cash-or-nothing knock-out by this engine (2.060934934335 and 1.600028420441). A knock-out already
+/// hit is worth its rebate, paid now, where QuantLib's engine prices 0: its check QuantLib's one-touch at the same
+/// spot, 5.000000000000 on and beyond the barrier, and the engine's own value a hair inside, 5.000015883 at 90.0001.
 /// </summary>
 public class BinaryBarrierRebateTests
 {

@@ -21,12 +21,11 @@ namespace NanoQL.Numerics;
 /// and <see cref="S"/> return copies.
 /// </para>
 /// <para>
-/// A matrix with a NaN or infinite entry is refused on entry, where QuantLib's main loop, which has no test for too many
-/// iterations, never ends; and so is a finite matrix whose decomposition leaves the range of doubles, a singular value
-/// beyond it (entries near 1e307), refused at the main loop's first non-finite singular value or superdiagonal entry,
-/// where QuantLib's loop never ends either. Documented divergences (the S-van plan's VR7, and the user's ruling of
-/// 2026-10-24 extending it; <c>Divergences/SvdNonFiniteRefusalTests.cs</c>). Every matrix QuantLib decomposes keeps its
-/// arithmetic.
+/// A matrix with a NaN or infinite entry is refused on entry, where QuantLib's main loop, which has no test for too
+/// many iterations, never ends; and so is a finite matrix whose decomposition leaves the range of doubles, a singular
+/// value beyond it (entries near 1e307), refused at the main loop's first non-finite singular value or superdiagonal
+/// entry, where QuantLib's loop never ends either. Documented divergences
+/// (<c>Divergences/SvdNonFiniteRefusalTests.cs</c>). Every matrix QuantLib decomposes keeps its arithmetic.
 /// </para>
 /// </remarks>
 public sealed class SVD
@@ -347,7 +346,6 @@ public sealed class SVD
             // Here is where a test for too many iterations would go.
 
             // a non-finite singular value or superdiagonal entry refused, since from it QuantLib's loop never ends
-            // (the user's ruling of 2026-10-24, extending the S-van plan's VR7)
             for (int z = 0; z < p; z++)
             {
                 if (!double.IsFinite(s[z]) || (z < p - 1 && !double.IsFinite(e[z])))

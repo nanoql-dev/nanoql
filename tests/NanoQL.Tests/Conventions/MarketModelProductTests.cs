@@ -9,11 +9,10 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The market-model products' shape (the S-mmp plan's MMPR1): a product writes each step's counts and cash flows into
-/// the caller's buffers; a holder (a composite, the accounting engine) steps a clone of the product it is given, never
-/// the caller's; <c>Clone</c> copies a product's state, so a clone taken mid-path goes on as the original; QuantLib's
-/// texts for a composite stepped before it is finalized or added to after; and the refusals of inputs QuantLib reads
-/// past (MMPR4's refusals).
+/// The market-model products' shape: a product writes each step's counts and cash flows into the caller's buffers; a
+/// holder (a composite, the accounting engine) steps a clone of the product it is given, never the caller's;
+/// <c>Clone</c> copies a product's state, so a clone taken mid-path goes on as the original; QuantLib's texts for a
+/// composite stepped before it is finalized or added to after; and the refusals of inputs QuantLib reads past.
 /// </summary>
 public class MarketModelProductTests
 {

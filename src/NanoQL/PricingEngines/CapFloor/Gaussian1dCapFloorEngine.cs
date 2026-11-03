@@ -29,20 +29,19 @@ namespace NanoQL.PricingEngines;
 /// at-the-money forward, the coupon's (<c>optionletsPrice</c>, <c>optionletsAtmForward</c>).
 /// </para>
 /// <para>
-/// Seven of QuantLib's defects are fixed (the S-g1d plan's G1R6). The strike's leg is discounted on the discount curve,
-/// as the floating leg and the swaption engine's are, where QuantLib's reads the model curve (<c>:86-89</c>,
-/// <c>:158-161</c>; (ii)); the at-the-money forwards are the coupons', where QuantLib's are left 0 ((iii)); a caplet
-/// fixed before today is the known payoff discounted to its payment, where QuantLib's is undiscounted ((iv)); a curve
-/// on another clock is read at a caplet's fixing date ((xvi)); a CMS coupon's rate is the model's swap rate at its
-/// fixing, and a CMS spread coupon's the geared spread of its two indexes' swap rates, the float-float engine's
-/// estimates, where QuantLib's prices the coupon period's simple forward ((xix)); flat
-/// payoff extrapolation's right tail reads the last node ((xxi)). And a compounded overnight coupon, which QuantLib
-/// prices on its last day's rate times the whole accrual ((xx)), is a Black call on its window's compounding factor on
-/// GSR: each daily factor is a zero bond affine in the state, so the factor is lognormal given the state at the
-/// window's start, exactly for plain compounding and an observation shift and to second order for a lookback without
-/// the shift and a lockout, its log-variance the discrete sum's over the fixing dates; fixings already made come from
-/// the index's history, and a payment after the window's end is handled statically, the window end's forward deflated
-/// by the payment date's bond. On a Markov-functional model, which defines no short rate, such a coupon is refused.
+/// Seven of QuantLib's defects are fixed. The strike's leg is discounted on the discount curve, as the floating leg and
+/// the swaption engine's are, where QuantLib's reads the model curve (<c>:86-89</c>, <c>:158-161</c>); the at-the-money
+/// forwards are the coupons', where QuantLib's are left 0; a caplet fixed before today is the known payoff discounted
+/// to its payment, where QuantLib's is undiscounted; a curve on another clock is read at a caplet's fixing date; a CMS
+/// coupon's rate is the model's swap rate at its fixing, and a CMS spread coupon's the geared spread of its two
+/// indexes' swap rates, the float-float engine's estimates, where QuantLib's prices the coupon period's simple forward;
+/// flat payoff extrapolation's right tail reads the last node. And a compounded overnight coupon, which QuantLib prices
+/// on its last day's rate times the whole accrual, is a Black call on its window's compounding factor on GSR: each
+/// daily factor is a zero bond affine in the state, so the factor is lognormal given the state at the window's start,
+/// exactly for plain compounding and an observation shift and to second order for a lookback without the shift and a
+/// lockout, its log-variance the discrete sum's over the fixing dates; fixings already made come from the index's
+/// history, and a payment after the window's end is handled statically, the window end's forward deflated by the
+/// payment date's bond. On a Markov-functional model, which defines no short rate, such a coupon is refused.
 /// </para>
 /// </remarks>
 public static class Gaussian1dCapFloorEngine
@@ -124,7 +123,7 @@ public static class Gaussian1dCapFloorEngine
             InterestRateIndex index = arguments.Indexes[i];
             var overnight = capFloor.FloatingLeg[i] as OvernightIndexedCoupon;
 
-            // QuantLib's simple forward of an index of another kind (G1R6 (xix)): refused
+            // QuantLib's simple forward of an index of another kind: refused
             if (index is not (IborIndex or SwapIndex or SwapSpreadIndex))
             {
                 throw new NanoQLException($"Gaussian1dCapFloorEngine prices Ibor, overnight, CMS and CMS spread coupons only, not {index.Name}'s");
@@ -167,7 +166,7 @@ public static class Gaussian1dCapFloorEngine
         var additionalResults = ImmutableSortedDictionary.CreateBuilder<string, object>();
         additionalResults["optionletsPrice"] = ImmutableArray.Create(values);
 
-        // the coupons' forwards, as Black's engine gives them, where QuantLib's are left 0 (G1R6 (iii))
+        // the coupons' forwards, as Black's engine gives them, where QuantLib's are left 0
         additionalResults["optionletsAtmForward"] = arguments.Forwards;
         return new InstrumentResults { NPV = value, AdditionalResults = additionalResults.ToImmutable() };
     }
@@ -198,7 +197,7 @@ public static class Gaussian1dCapFloorEngine
         double sign = optionType == OptionType.Call ? 1.0 : -1.0;
         double accrual = arguments.AccrualTimes[i];
 
-        // the caplet's state date: its window's start for a compounded overnight coupon (G1R6 (xx))
+        // the caplet's state date: its window's start for a compounded overnight coupon
         Date stateDate = fixingDate;
         CompoundingWindow? window = null;
         if (overnight is not null)
@@ -209,7 +208,7 @@ public static class Gaussian1dCapFloorEngine
 
         if (window is null && fixingDate <= settlement)
         {
-            // the known payoff, discounted to the payment (G1R6 (iv))
+            // the known payoff, discounted to the payment
             double forward = arguments.Forwards[i] ?? throw new NanoQLException("no forward for a caplet paid before the evaluation date");
             return Math.Max(sign * (forward - strike), 0.0) * f * accrual * model.Zerobond(paymentDate, null, 0.0, discountCurve, memo);
         }
@@ -229,7 +228,7 @@ public static class Gaussian1dCapFloorEngine
                 double floatingLegNpv;
                 if (index is SwapIndex swapIndex)
                 {
-                    // the model's swap rate at the fixing, the float-float engine's estimate (G1R6 (xix))
+                    // the model's swap rate at the fixing, the float-float engine's estimate
                     floatingLegNpv = accrual * model.SwapRate(fixingDate, swapIndex.Tenor, context, fixingDate, y, swapIndex, memo)
                         * model.Zerobond(paymentDate, fixingDate, y, discountCurve, memo);
                 }
@@ -248,12 +247,12 @@ public static class Gaussian1dCapFloorEngine
                         * model.Zerobond(paymentDate, fixingDate, y, discountCurve, memo);
                 }
 
-                // the strike's leg on the discount curve, as the floating leg's (G1R6 (ii))
+                // the strike's leg on the discount curve, as the floating leg's
                 double fixedLegNpv = strike * accrual * model.Zerobond(paymentDate, fixingDate, y, discountCurve, memo);
                 payoff = Math.Max(sign * (floatingLegNpv - fixedLegNpv), 0.0);
             }
 
-            // the numeraire read at the fixing's date (G1R6 (xvi))
+            // the numeraire read at the fixing's date
             p[j] = payoff / model.NumeraireCore(stateTime, stateDate, y, discountCurve, memo);
         }
 
@@ -269,7 +268,7 @@ public static class Gaussian1dCapFloorEngine
         {
             if (flatPayoffExtrapolation)
             {
-                // the right tail at the last node's value, where QuantLib's takes the second-last's (G1R6 (xxi))
+                // the right tail at the last node's value, where QuantLib's takes the second-last's
                 price += Gaussian1dModel.GaussianShiftedPolynomialIntegral(0.0, 0.0, 0.0, 0.0, p[z.Size - 1], z[z.Size - 2], z[z.Size - 1], 100.0);
                 price += Gaussian1dModel.GaussianShiftedPolynomialIntegral(0.0, 0.0, 0.0, 0.0, p[0], z[0], -100.0, z[0]);
             }
@@ -295,9 +294,9 @@ public static class Gaussian1dCapFloorEngine
         return price * model.NumeraireCore(0.0, null, 0.0, discountCurve, memo) * f;
     }
 
-    // A compounded overnight coupon's observation window on GSR (G1R6 (xx)): the fixings already made, from the index's
-    // history; and per future fixing its rate's period and its weight in the compounding, and the factor's
-    // log-variance given the state at the window's start.
+    // A compounded overnight coupon's observation window on GSR: the fixings already made, from the index's history;
+    // and per future fixing its rate's period and its weight in the compounding, and the factor's log-variance given
+    // the state at the window's start.
     private sealed class CompoundingWindow
     {
         private readonly Gaussian1dModel model;

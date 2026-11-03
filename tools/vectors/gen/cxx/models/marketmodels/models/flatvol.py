@@ -49,7 +49,7 @@ def correlations(H, times):
     fix = times[:-1]
     finer = sorted(set(fix) | {(a + b) / 2 for a, b in zip([0.0] + fix[:-1], fix)})
     if len(fix) == 1:
-        # QuantLib's exponential correlation refuses one rate (the S-mm plan's MR3 (xiv))
+        # QuantLib's exponential correlation refuses one rate
         yield "time-homogeneous", {"type": "TimeHomogeneous", "rateTimes": times, "fwdCorrelation": [[1.0]]}
         return
     yield "exponential", {"type": "Exponential", "rateTimes": times, "longTermCorr": 0.5, "beta": 0.2, "gamma": 1.0,

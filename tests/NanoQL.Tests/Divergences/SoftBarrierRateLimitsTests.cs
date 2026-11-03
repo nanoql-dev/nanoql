@@ -11,11 +11,11 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The soft barrier's rate limits (the S-bar plan's BR8 (d), a refusal lifted under the user's rule of 2026-10-20).
-/// QuantLib refuses "Interest rate must be between -5% and 100%" and "Dividend yield must be between -10% and 100%"
-/// (<c>analyticsoftbarrierengine.cpp:174-175</c>), limits no formula needs. nanoql doesn't port them: every rate takes
-/// the engine's routes, here the band average, Haug's form being NaN at b + σ² = 2.5e-3 and σ 1.0. Check: the band
-/// average by Simpson's rule (<see cref="SoftBarrierBandAverage"/>), and the reviewer's r2a, 3.761756955001.
+/// The soft barrier's rate limits (a refusal lifted). QuantLib refuses "Interest rate must be between -5% and 100%" and
+/// "Dividend yield must be between -10% and 100%" (<c>analyticsoftbarrierengine.cpp:174-175</c>), limits no formula
+/// needs. nanoql doesn't port them: every rate takes the engine's routes, here the band average, Haug's form being NaN
+/// at b + σ² = 2.5e-3 and σ 1.0. Check: the band average by Simpson's rule (<see cref="SoftBarrierBandAverage"/>), and
+/// an independent value, 3.761756955001.
 /// </summary>
 public class SoftBarrierRateLimitsTests
 {

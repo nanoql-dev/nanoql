@@ -12,14 +12,13 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The tenor swaption structure's swaps at the swap length in whole months (the S-xrt plan's XRR5 (xv), fixed under
-/// R8). QuantLib casts the swap length to whole years before it multiplies by twelve
-/// (<c>((BigInteger)swapLength * 12.0)</c>, <c>tenorswaptionvts.cpp</c>), so an 18-month tenor builds 12-month swaps:
-/// on QuantLib 1.44 (the run's <c>c2\probes\xd_c2.py</c> through the harness: test-suite/basismodels.cpp's markets on
-/// 15 June 2026, Euribor 6M volatilities to a true Euribor 3M) the at-the-money level at a 1-year option on an
-/// 18-month swap is −0.00018491732414727124, the 12-month swap's, and at a 5-year option 0.010348353529043619. nanoql's
-/// 18-month level is the fair rate of the 18-month target swap, the vanilla swap on the 18-month schedule; whole-year
-/// tenors are QuantLib's, the 12-month level QuantLib's to the last bits.
+/// The tenor swaption structure's swaps at the swap length in whole months (fixed). QuantLib casts the swap length to
+/// whole years before it multiplies by twelve (<c>((BigInteger)swapLength * 12.0)</c>, <c>tenorswaptionvts.cpp</c>), so
+/// an 18-month tenor builds 12-month swaps: on QuantLib 1.44 (through the C++ harness: test-suite/basismodels.cpp's
+/// markets on 15 June 2026, Euribor 6M volatilities to a true Euribor 3M) the at-the-money level at a 1-year option on
+/// an 18-month swap is −0.00018491732414727124, the 12-month swap's, and at a 5-year option 0.010348353529043619.
+/// nanoql's 18-month level is the fair rate of the 18-month target swap, the vanilla swap on the 18-month schedule;
+/// whole-year tenors are QuantLib's, the 12-month level QuantLib's to the last bits.
 /// </summary>
 public class TenorSwaptionLengthTests
 {

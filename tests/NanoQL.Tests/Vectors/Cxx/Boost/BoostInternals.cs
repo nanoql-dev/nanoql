@@ -7,7 +7,7 @@ using NanoQL.Instruments;
 namespace NanoQL.Tests.Vectors;
 
 /// <summary>
-/// nanoql's Boost ports are internal types (D19), so the Boost harness vectors' readers bind their functions through
+/// nanoql's Boost ports are internal types, so the Boost harness vectors' readers bind their functions through
 /// reflection, as <c>LowDiscrepancySequencesTests</c> reads its table: each a delegate to an internal static method of
 /// <c>NanoQL.Numerics</c>, found by its parameter types.
 /// </summary>

@@ -13,9 +13,9 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// Upstream's fix after v1.44 the discretized double-barrier assets take (the S-xeq plan's XER5 (xii), R8 master
-/// first): #2878 (QuantLib's master <c>eaeac5651</c>), the American window's bounds compared with <c>isOnTime</c> as
-/// well (<c>discretizeddoublebarrieroption.cpp:61-66</c>), where QuantLib 1.44's plain comparison skips the exercise at
+/// Upstream's fix after v1.44 the discretized double-barrier assets take (master first): #2878 (QuantLib's master
+/// <c>eaeac5651</c>), the American window's bounds compared with <c>isOnTime</c> as well
+/// (<c>discretizeddoublebarrieroption.cpp:61-66</c>), where QuantLib 1.44's plain comparison skips the exercise at
 /// expiry when the grid's last time rounds below maturity. QuantLib's own case,
 /// <c>DoubleBarrierOptionTests.TestBinomialExerciseAtMaturity</c>, checks the plain asset; here the Derman-Kani asset,
 /// which reads the plain one's check, on that case's market, until the pin moves to a release that carries the fix.

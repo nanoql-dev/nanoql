@@ -10,12 +10,12 @@ put at the spot expiring in a year, on a 40 x 50 x 25 grid; then on the first se
 50), damping steps, the Douglas and modified Craig-Sneyd schemes, cash dividends, a constant leverage function and a
 mixing factor of 0.8 on the knock-outs, and an expired option.
 
-The outputs nanoql fixes are left out (the S-bar plan's §2.10): every structure is on the risk-free curve's day counter
-and reference date (BR5 (iv), tests/NanoQL.Tests/Divergences/FdHestonBarrierMismatchedTimesTests.cs); no knock-in has
-a leverage function or a mixing factor, whose vanilla and rebate legs QuantLib prices on pure Heston (BR5 (xviii),
-FdHestonKnockInLeverageTests.cs); no spot is beyond its barrier, where QuantLib's interpolation fails and nanoql refuses
-"barrier touched" (BR5 (xliv), tests/NanoQL.Tests/Conventions/FdHestonBarrierTouchedTests.cs); and the parameter sets
-are tools/vectors/gen/pricingengines/vanilla/fdhestonvanillaengine.py's, clear of the S-hes plan's HR8 and HR9.
+The outputs nanoql fixes are left out: every structure is on the risk-free curve's day counter and reference date
+(tests/NanoQL.Tests/Divergences/FdHestonBarrierMismatchedTimesTests.cs); no knock-in has a leverage function or a mixing
+factor, whose vanilla and rebate legs QuantLib prices on pure Heston (FdHestonKnockInLeverageTests.cs); no spot is
+beyond its barrier, where QuantLib's interpolation fails and nanoql refuses "barrier touched"
+(tests/NanoQL.Tests/Conventions/FdHestonBarrierTouchedTests.cs); and the parameter sets are
+tools/vectors/gen/pricingengines/vanilla/fdhestonvanillaengine.py's, clear of the regions nanoql's Heston fixes reach.
 
 The specs are a pricing {"process", "payoff", "exercise", "barrier", "dividends", "tGrid", "xGrid", "vGrid",
 "dampingSteps", "scheme", "leverage", "mixingFactor"}: fdhestonvanillaengine.py's, the exercise

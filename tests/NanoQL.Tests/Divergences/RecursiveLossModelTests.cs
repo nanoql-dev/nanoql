@@ -12,14 +12,13 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The recursive model's percentile and loss distribution (the S-xcr plan's XR8 (vii)), a model set on two baskets
-/// (XR8 (viii)) and a basket with a realized default (XR8 (ii)). QuantLib's percentile at 0 and 1 returns the
-/// distribution's probability, 0.66930409955890324 and 1.0000000003070473 on five names at five years; on two names of
-/// notionals 10 and 30 it labels the attainable losses 0, 6, 18 and 24 as 0, 6, 12 and 18, their cumulatives
-/// 0.79243383385445709, 0.86063723644644652, 0.9729912416586074 and 1.0000000003070473; a model set on a basket of
-/// notionals 10, 20, 30 and then on one of 30, 20, 15 at hazard 0.05 reads 11.950518324119658 where a fresh model reads
-/// 7.9670122160797714 (the S-xcr run's <c>c3_facts.cpp</c>). The cumulatives integrate a vector over the factor, where
-/// QuantLib's quadrature leaves its last node unweighted (XR8 (v)), so they agree to that node's weight.
+/// The recursive model's percentile and loss distribution, a model set on two baskets and a basket with a realized
+/// default. QuantLib's percentile at 0 and 1 returns the distribution's probability, 0.66930409955890324 and
+/// 1.0000000003070473 on five names at five years; on two names of notionals 10 and 30 it labels the attainable losses
+/// 0, 6, 18 and 24 as 0, 6, 12 and 18, their cumulatives 0.79243383385445709, 0.86063723644644652, 0.9729912416586074
+/// and 1.0000000003070473; a model set on a basket of notionals 10, 20, 30 and then on one of 30, 20, 15 at hazard 0.05
+/// reads 11.950518324119658 where a fresh model reads 7.9670122160797714. The cumulatives integrate a vector over the
+/// factor, where QuantLib's quadrature leaves its last node unweighted, so they agree to that node's weight.
 /// </summary>
 public class RecursiveLossModelTests
 {
@@ -88,7 +87,7 @@ public class RecursiveLossModelTests
     public void ThePercentileAtOneIsATrancheLoss(double a, double d, double width)
     {
         // QuantLib's recursive model reads 1.0000000003070473 at 1, its binomial the pool's 29.999999999976612; just
-        // below 1, the tranche's width (the S-xcr code review's C3 O1-1)
+        // below 1, the tranche's width
         Basket basket = FiveNames(a, d).SetLossModel(new RecursiveGaussLossModel(Latent04()));
         Assert.Equal(width, basket.Percentile(D5, 1.0), 1e-12);
         Assert.Equal(width, basket.Percentile(D5, 0.999999), 1e-9);

@@ -8,8 +8,8 @@ namespace NanoQL.Tests.Conventions;
 /// <summary>
 /// <see cref="CostFunction.Jacobian"/>'s central differences hold the values at x + ε while they move x to x − ε.
 /// QuantLib's <c>values</c> returns an <c>Array</c> by value, so what it holds is its own; a C# <c>Values</c> may return
-/// its argument (QuantLib's <c>return x;</c>) or a buffer it reuses, so the default copies what it holds (S2R1). The
-/// Jacobian is then the same whichever <c>Values</c> returns.
+/// its argument (QuantLib's <c>return x;</c>) or a buffer it reuses, so the default copies what it holds. The Jacobian
+/// is then the same whichever <c>Values</c> returns.
 /// </summary>
 public class CostFunctionJacobianTests
 {

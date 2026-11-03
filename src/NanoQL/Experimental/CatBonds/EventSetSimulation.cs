@@ -17,8 +17,7 @@ namespace NanoQL.Experimental;
 /// </summary>
 /// <remarks>
 /// A period starting or ending on 29 February in a year without one takes 28 February, QuantLib's own clamp for a date
-/// plus years, where QuantLib's constructor throws ("day outside month") (the S-xcr plan's XR8 (xvii);
-/// <c>Divergences/EventSetTests.cs</c>).
+/// plus years, where QuantLib's constructor throws ("day outside month") (<c>Divergences/EventSetTests.cs</c>).
 /// </remarks>
 [Experimental("NQL0001")]
 public sealed class EventSetSimulation : CatSimulation
@@ -104,7 +103,7 @@ public sealed class EventSetSimulation : CatSimulation
         return true;
     }
 
-    // A date from its day, month and year, 28 February for 29 February in a year without one (XR8 (xvii)).
+    // A date from its day, month and year, 28 February for 29 February in a year without one.
     private static Date DateIn(int day, Month month, int year)
     {
         Date last = Date.EndOfMonth(new Date(1, month, year));

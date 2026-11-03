@@ -11,15 +11,15 @@ using static NanoQL.Tests.Divergences.TwoAssetMarket;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The exception type, message and parameter name of the refusals of C2's closed-form and copula engines, its
-/// instruments and the bivariate normals, each QuantLib's text (the S-exo plan's ED14): the spread engines' (a
-/// non-European exercise, a payoff that isn't a spread, a base payoff that isn't plain), the Gaussian copula engine's
-/// (its correlation's range, and the shared risk-free curve checked by reference, QuantLib's handle identity, so two
-/// equal curves are refused), Stulz's, both Margrabe engines' and the option's, the two-asset correlation engine's, the
-/// cash-dividend engine's, Deng, Li and Zhou's, and the bivariate normals'. QuantLib's checks that can't fire here
-/// stand as the guards before them: an option type outside Call and Put is refused by the payoff, a Margrabe option's
-/// payoff is a null payoff by its type, and Stulz's, Margrabe's and the American Margrabe engine's second exercise
-/// checks follow the first's on the exercise's type.
+/// The exception type, message and parameter name of the refusals of the two-asset closed-form and copula engines,
+/// their instruments and the bivariate normals, each QuantLib's text: the spread engines' (a non-European exercise, a
+/// payoff that isn't a spread, a base payoff that isn't plain), the Gaussian copula engine's (its correlation's range,
+/// and the shared risk-free curve checked by reference, QuantLib's handle identity, so two equal curves are refused),
+/// Stulz's, both Margrabe engines' and the option's, the two-asset correlation engine's, the cash-dividend engine's,
+/// Deng, Li and Zhou's, and the bivariate normals'. QuantLib's checks that can't fire here stand as the guards before
+/// them: an option type outside Call and Put is refused by the payoff, a Margrabe option's payoff is a null payoff by
+/// its type, and Stulz's, Margrabe's and the American Margrabe engine's second exercise checks follow the first's on
+/// the exercise's type.
 /// </summary>
 public class TwoAssetEngineErrorTests
 {

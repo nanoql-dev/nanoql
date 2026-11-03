@@ -3,7 +3,7 @@
 
 namespace NanoQL.Excel;
 
-/// <summary>A looped call's spill: its anchor, its result, and each failed element's message by its place (XLR15).</summary>
+/// <summary>A looped call's spill: its anchor, its result, and each failed element's message by its place.</summary>
 /// <param name="SheetId">The anchor's sheet.</param>
 /// <param name="Row">The anchor's row.</param>
 /// <param name="Column">The anchor's column.</param>

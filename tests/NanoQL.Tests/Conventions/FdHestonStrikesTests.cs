@@ -14,13 +14,12 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// QuantLib's multiple-strikes caching as a call (the S-hes plan's HR4 (ii)):
-/// <see cref="FdHestonVanillaEngine.CalculateStrikes(VanillaOption, IEnumerable{double}, EvaluationContext, HestonModel, int,
-/// int, int, int, FdmSchemeDesc?, LocalVolTermStructure?, double)"/> solves once on QuantLib's multi-strike mesher and
-/// returns each strike's results in the strikes' order: the value V(S·d)/d, delta, gamma·d and theta/d at d = K/Kᵢ, K
-/// the reference option's strike, bit for bit the solver's on the problem QuantLib's <c>getSolverDesc</c> builds with
-/// the strikes, the reference strike's own result at d = 1; and QuantLib's refusals, of discrete dividends and of no
-/// strikes.
+/// QuantLib's multiple-strikes caching as a call:
+/// <see cref="FdHestonVanillaEngine.CalculateStrikes(VanillaOption, IEnumerable{double}, EvaluationContext, HestonModel, int, int, int, int, FdmSchemeDesc?, LocalVolTermStructure?, double)"/>
+/// solves once on QuantLib's multi-strike mesher and returns each strike's results in the strikes' order: the value
+/// V(S·d)/d, delta, gamma·d and theta/d at d = K/Kᵢ, K the reference option's strike, bit for bit the solver's on the
+/// problem QuantLib's <c>getSolverDesc</c> builds with the strikes, the reference strike's own result at d = 1; and
+/// QuantLib's refusals, of discrete dividends and of no strikes.
 /// </summary>
 public class FdHestonStrikesTests
 {

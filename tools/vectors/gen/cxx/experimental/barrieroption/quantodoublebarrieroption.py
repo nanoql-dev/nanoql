@@ -8,12 +8,12 @@ Knock-ins and knock-outs on [80, 120] and [70, 140], calls and puts at 90, 100 a
 1%, a domestic rate of 5% and a volatility of 25%, a foreign rate of 3% and an exchange-rate volatility of 20%, at
 correlations of −0.5, 0 and 0.5, over six months and a year: the NPV. Then an expired option.
 
-The outputs nanoql fixes are left out (the S-xeq plan's §2.8, §2.10): every structure shares the evaluation date and
-Act/365, every rebate is 0, every strike is inside the corridor and the volatility isn't low, where S-bar's fixes of
-the analytic engine leave QuantLib's values; and an output whose inner knock-out at five terms isn't within 5e-13 of
-its value at 50 on max(|value|, 1), computed on the wheel's analytic engine at the quanto dividend yield, is left out,
-the engine keeping QuantLib's five terms only within 1e-12 of its converged series (S-bar's BR5 (xliii)). The process
-and option are tools/cxx/src/experimental/barrieroption/quantodoublebarrieroption.cpp's. Read back by
+The outputs nanoql fixes are left out: every structure shares the evaluation date and Act/365, every rebate is 0, every
+strike is inside the corridor and the volatility isn't low, where nanoql's fixes of the analytic engine leave
+QuantLib's values; and an output whose inner knock-out at five terms isn't within 5e-13 of its value at 50 on
+max(|value|, 1), computed on the wheel's analytic engine at the quanto dividend yield, is left out, the engine keeping
+QuantLib's five terms only within 1e-12 of its converged series. The process and option are
+tools/cxx/src/experimental/barrieroption/quantodoublebarrieroption.cpp's. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Experimental/BarrierOption/QuantoDoubleBarrierOptionCxxVectorTests.cs."""
 import os
 import sys

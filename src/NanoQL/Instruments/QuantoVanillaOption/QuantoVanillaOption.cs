@@ -10,8 +10,7 @@ namespace NanoQL.Instruments;
 /// <summary>A quanto vanilla option: a vanilla option on an asset in a foreign currency, paid in the domestic one.</summary>
 /// <remarks>
 /// Immutable. As in QuantLib it derives <see cref="OneAssetOption"/>, not <see cref="VanillaOption"/>, so a plain
-/// engine can't price it; <c>QuantoEngine</c> prices it through a vanilla engine on its terms (the S-exo plan's
-/// ER2 (ii)).
+/// engine can't price it; <c>QuantoEngine</c> prices it through a vanilla engine on its terms.
 /// </remarks>
 public sealed class QuantoVanillaOption : OneAssetOption
 {

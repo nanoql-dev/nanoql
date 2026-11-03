@@ -11,8 +11,8 @@ namespace NanoQL;
 /// to the series.
 /// </summary>
 /// <remarks>
-/// An extension point, as in QuantLib: each model derives from it. Immutable (the S-bar plan's BR3 (i)): QuantLib's
-/// <c>calibrate</c> changes the object, where <see cref="Calibrate"/> returns the calibrated model and changes nothing.
+/// An extension point, as in QuantLib: each model derives from it. Immutable: QuantLib's <c>calibrate</c> changes the
+/// object, where <see cref="Calibrate"/> returns the calibrated model and changes nothing.
 /// </remarks>
 public abstract class VolatilityCompositor
 {

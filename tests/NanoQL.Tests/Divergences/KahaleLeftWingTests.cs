@@ -6,16 +6,16 @@ using NanoQL.TermStructures;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// Kahale's left wing on a shifted source (the S-g1d plan's G1R6 (xvii)): after fitting the wing, QuantLib's section
-/// checks a digital at (k₁ − shift)/2 (<c>kahalesmilesection.cpp:109-110</c>), k₁ the wing's shifted end, the midpoint
-/// of [0, k₁ − shift] where the wing spans [−shift, k₁ − shift]; once the core's left strike is negative unshifted the
-/// point lies in the core, the check fails and the core moves right, the wing replacing the source's prices below it.
-/// nanoql checks at the wing's midpoint, (k₁ − 2·shift)/2, QuantLib's expression at a shift of 0. QuantLib's check: its
-/// own section on the smile restated unshifted (the forward and the strikes plus the shift, no shift), whose prices at
-/// K + shift a shifted section's at K equal. On the wheel, over a SABR smile at a forward of 1% shifted by 3%, QuantLib's
-/// shifted section's call at -1% is 0.020066641655499824 where its section restated unshifted gives 0.02015567637929827
-/// at 2%; with interpolation, on a SABR smile at an exercise time of 1 that QuantLib's interpolation fits soundly once
-/// restated unshifted, its shifted section's call at 0% is 0.010484248860552634 against 0.015632415044761726 at 3%.
+/// Kahale's left wing on a shifted source: after fitting the wing, QuantLib's section checks a digital at (k₁ −
+/// shift)/2 (<c>kahalesmilesection.cpp:109-110</c>), k₁ the wing's shifted end, the midpoint of [0, k₁ − shift] where
+/// the wing spans [−shift, k₁ − shift]; once the core's left strike is negative unshifted the point lies in the core,
+/// the check fails and the core moves right, the wing replacing the source's prices below it. nanoql checks at the
+/// wing's midpoint, (k₁ − 2·shift)/2, QuantLib's expression at a shift of 0. QuantLib's check: its own section on the
+/// smile restated unshifted (the forward and the strikes plus the shift, no shift), whose prices at K + shift a shifted
+/// section's at K equal. On the wheel, over a SABR smile at a forward of 1% shifted by 3%, QuantLib's shifted section's
+/// call at -1% is 0.020066641655499824 where its section restated unshifted gives 0.02015567637929827 at 2%; with
+/// interpolation, on a SABR smile at an exercise time of 1 that QuantLib's interpolation fits soundly once restated
+/// unshifted, its shifted section's call at 0% is 0.010484248860552634 against 0.015632415044761726 at 3%.
 /// </summary>
 public class KahaleLeftWingTests
 {

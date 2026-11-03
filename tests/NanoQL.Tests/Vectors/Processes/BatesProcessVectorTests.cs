@@ -11,9 +11,8 @@ namespace NanoQL.Tests.Vectors;
 
 /// <summary>
 /// The BatesProcess vectors, <c>tests/vectors/processes/batesprocess.json</c>: two jump sets on two Heston parameter
-/// sets on flat and zero curves, under QuantLib's default discretization, full truncation: size, factors, initial values,
-/// drift, diffusion and evolve, the in-place initial values and evolve read against the same outputs (the S-hes plan's
-/// HR2).
+/// sets on flat and zero curves, under QuantLib's default discretization, full truncation: size, factors, initial
+/// values, drift, diffusion and evolve, the in-place initial values and evolve read against the same outputs.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class BatesProcessVectorTests

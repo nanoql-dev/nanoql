@@ -3,8 +3,8 @@
 """Vectors for QuantLib's OneFactorGaussianCopula (ql/experimental/credit/onefactorgaussiancopula.hpp), which the
 wheel doesn't expose, each output computed by the C++ harness (tools/cxx/src/experimental/credit/onefactorcopula.cpp):
 the densities, the distributions of Z and Y and Y's inverse, the conditional probabilities, the integrals of a
-probability, and the test integral of Y's distribution, at correlations from 0 to 1 (XR8 (xlviii)'s comonotonic step
-among them) and on the factor grid's default and given ends. Read back by
+probability, and the test integral of Y's distribution, at correlations from 0 to 1 (the comonotonic step among them)
+and on the factor grid's default and given ends. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Experimental/Credit/OneFactorGaussianCopulaCxxVectorTests.cs."""
 import os
 import sys

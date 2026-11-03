@@ -8,7 +8,7 @@ namespace NanoQL.Bind.Tests;
 
 /// <summary>
 /// The Python back end: PEP 8's names, the kinds' tokens, and the overload rule, that no two forms of a group can take
-/// one call exactly (BIR12, §2.2).
+/// one call exactly (§2.2).
 /// </summary>
 public class PythonTests
 {
@@ -92,7 +92,7 @@ public class PythonTests
             string experimental = File.ReadAllText(Path.Combine(dir, "experimental", "__init__.py"));
             Assert.Contains("_attach(_g.", experimental, StringComparison.Ordinal);
 
-            // No module-level loop binds a name a module alias may take (round 5's F5-1).
+            // No module-level loop binds a name a module alias may take.
             Assert.DoesNotContain("for _n", experimental, StringComparison.Ordinal);
             Assert.DoesNotContain("for _n", stable, StringComparison.Ordinal);
         }
@@ -115,14 +115,14 @@ public class PythonTests
             Assert.DoesNotMatch("\"fx_[A-Z]", nanoql);
             Assert.Contains("class UserCalibratedCurve(*_bases(_n.YieldTermStructure, _n.ICalibratedModel)):", fx, StringComparison.Ordinal);
 
-            // A user's class named like one of nanoql's (B2-1): its own key, and nanoql's kinds still name nanoql's.
+            // A user's class named like one of nanoql's: its own key, and nanoql's kinds still name nanoql's.
             Assert.Contains("class Calendar(*_bases(Object)):\n    __slots__ = ()\n    _type = \"NanoQL.Bind.Tests.Fixtures.Calendar\"\n    _key = \"fx.Calendar\"", fx, StringComparison.Ordinal);
             Assert.Contains("\"handle@fx.Calendar\"", fx, StringComparison.Ordinal);
             Assert.Contains("\"handle@nql.Calendar\"", fx, StringComparison.Ordinal);
             Assert.DoesNotContain("\"handle@Calendar\"", nanoql, StringComparison.Ordinal);
             Assert.Contains("def holds(calendar: _n.Calendar | None, d: datetime.date) -> bool:", fx, StringComparison.Ordinal);
 
-            // A user's class over nanoql's experimental interface is experimental (F3-1): in its package's experimental
+            // A user's class over nanoql's experimental interface is experimental: in its package's experimental
             // module, which imports nanoql's, and not in its stable one, which doesn't.
             string fxExperimental = File.ReadAllText(Path.Combine(root, "fx", "experimental", "__init__.py"));
             Assert.DoesNotContain("class Walk(", fx, StringComparison.Ordinal);
@@ -130,7 +130,7 @@ public class PythonTests
             Assert.Contains("class Walk(*_bases(_nx.IRandomWalkDistribution)):", fxExperimental, StringComparison.Ordinal);
             Assert.Contains("import nanoql.experimental as _nx", fxExperimental, StringComparison.Ordinal);
 
-            // A stable class's member returning that class is experimental too (F4-1): added to the class on the opt-in.
+            // A stable class's member returning that class is experimental too: added to the class on the opt-in.
             Assert.DoesNotContain("def make_walk", fx, StringComparison.Ordinal);
             Assert.Contains("def make_walk() -> Walk | None:", fxExperimental, StringComparison.Ordinal);
             Assert.Contains("from nanoql._generated import *", fx, StringComparison.Ordinal);

@@ -4,9 +4,8 @@
 wheel doesn't expose, each output computed by the C++ harness: the model's sigma, nu and theta and its params on the
 variance gamma generator's four processes (tools/vectors/gen/experimental/variancegamma/variancegammaengine.py).
 
-No output is left out (the S-xeq plan's §2.8). The process and model are
-tools/cxx/src/experimental/variancegamma/variancegammamodel.cpp's. Read back by
-tests/NanoQL.Tests/Vectors/Cxx/Experimental/VarianceGamma/VarianceGammaModelCxxVectorTests.cs."""
+No output is left out. The process and model are tools/cxx/src/experimental/variancegamma/variancegammamodel.cpp's.
+Read back by tests/NanoQL.Tests/Vectors/Cxx/Experimental/VarianceGamma/VarianceGammaModelCxxVectorTests.cs."""
 import importlib.util
 import os
 import sys

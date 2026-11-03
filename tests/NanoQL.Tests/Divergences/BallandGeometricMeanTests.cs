@@ -8,22 +8,19 @@ using NanoQL.PricingEngines;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// Balland's and the iterative Balland's geometric mean (the S-mm plan's MR3 (xix), fixed under R8). Both evolvers take
-/// <c>sqrt(f·f₀)</c> with f₀ the model's time-0 forward at every step, undisplaced
-/// (<c>lognormalfwdrateballand.cpp:127</c>,
+/// Balland's and the iterative Balland's geometric mean (fixed). Both evolvers take <c>sqrt(f·f₀)</c> with f₀ the
+/// model's time-0 forward at every step, undisplaced (<c>lognormalfwdrateballand.cpp:127</c>,
 /// <c>lognormalfwdrateiballand.cpp:119</c>, <c>:135</c>), not the step's start, so the scheme doesn't converge to the
 /// model as the steps refine: on a flat 30% model of ten semi-annual rates its caplets sit 6.25 standard errors from
-/// Black at a million paths (the planner's MP21), and on this run's model at 4% its caplets are 0.15% to 0.97% above
-/// the predictor-corrector's on the same paths at four steps a period, 0.03% to 0.87% at one (QuantLib's form
-/// emulated in this run's measurement, 65,536 paths); and the undisplaced product is negative once a displaced forward
-/// goes below 0, so the forward is NaN: 1,450 of 2,000 paths at displacement 2%, forwards 0.2%, volatility 30% (this
-/// run's
-/// <c>probes\c2_facts.cpp</c>). nanoql takes the geometric mean of the displaced forwards at the step's start and end,
-/// sqrt((f_end + d)(f_start + d)) − d. Checks: on an evolution of one step from time 0, undisplaced, QuantLib's
-/// arithmetic (the vectors), bit for bit; on multi-step evolutions the caplets within 4 standard errors of Black,
-/// within 0.05% of the predictor-corrector's at four steps a period (the fix 0.010% at most), and converging to them as
-/// the steps refine; no NaN path displaced; and a set initial state, whose forwards QuantLib's mean ignores, the
-/// evolution of a model starting there, bit for bit.
+/// Black at a million paths, and on a model at 4% its caplets are 0.15% to 0.97% above the predictor-corrector's on the
+/// same paths at four steps a period, 0.03% to 0.87% at one (QuantLib's form emulated, 65,536 paths); and the
+/// undisplaced product is negative once a displaced forward goes below 0, so the forward is NaN: 1,450 of 2,000 paths
+/// at displacement 2%, forwards 0.2%, volatility 30%. nanoql takes the geometric mean of the displaced forwards at the
+/// step's start and end, sqrt((f_end + d)(f_start + d)) − d. Checks: on an evolution of one step from time 0,
+/// undisplaced, QuantLib's arithmetic (the vectors), bit for bit; on multi-step evolutions the caplets within 4
+/// standard errors of Black, within 0.05% of the predictor-corrector's at four steps a period (the fix 0.010% at most),
+/// and converging to them as the steps refine; no NaN path displaced; and a set initial state, whose forwards
+/// QuantLib's mean ignores, the evolution of a model starting there, bit for bit.
 /// </summary>
 public class BallandGeometricMeanTests
 {

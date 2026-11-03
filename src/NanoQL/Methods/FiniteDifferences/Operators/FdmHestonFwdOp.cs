@@ -22,14 +22,13 @@ namespace NanoQL.Methods;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A working type (the S-hes plan's HD8): built at construction; <see cref="SetTime"/> rewrites the equity part in
-/// place, the leverage composition written straight into its bands by QuantLib's arithmetic in its order, and the
-/// apply, splitting solves and preconditioner write into the caller's spans through buffers it holds, so a step
-/// allocates nothing.
+/// A working type: built at construction; <see cref="SetTime"/> rewrites the equity part in place, the leverage
+/// composition written straight into its bands by QuantLib's arithmetic in its order, and the apply, splitting solves
+/// and preconditioner write into the caller's spans through buffers it holds, so a step allocates nothing.
 /// </para>
 /// <para>
 /// The curves and the leverage function are read on a clock, each at the instants its times denote: QuantLib reads the
-/// dividend curve and the leverage at the risk-free curve's times (HR7 (xxi)). The public constructor's clock is
+/// dividend curve and the leverage at the risk-free curve's times. The public constructor's clock is
 /// <see cref="FdmHestonOp.Clock"/>'s, the risk-free curve itself where no structure is dated before it, QuantLib's
 /// reads.
 /// </para>

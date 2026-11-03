@@ -8,8 +8,8 @@ using NanoQL.Time;
 namespace NanoQL.Excel;
 
 /// <summary>
-/// The forms beyond a cell's value (XLR2, XLR17): complex numbers as Excel's text, nullable elements keeping a range's
-/// shape, jagged rows, maps as two columns, tuples across a row, generators' snapshots and the bound engine.
+/// The forms beyond a cell's value: complex numbers as Excel's text, nullable elements keeping a range's shape, jagged
+/// rows, maps as two columns, tuples across a row, generators' snapshots and the bound engine.
 /// </summary>
 public static partial class X
 {
@@ -60,7 +60,7 @@ public static partial class X
         return c.Real == 0 ? im + "i" : R(c.Real) + (c.Imaginary > 0 ? "+" : string.Empty) + im + "i";
     }
 
-    /// <summary>Nullable numbers keeping the range's shape: an empty cell is none, nothing trimmed (XLR2).</summary>
+    /// <summary>Nullable numbers keeping the range's shape: an empty cell is none, nothing trimmed.</summary>
     /// <param name="a">The Excel value.</param>
     /// <param name="p">The argument's name.</param>
     /// <returns>The numbers.</returns>
@@ -157,7 +157,7 @@ public static partial class X
         return d;
     }
 
-    /// <summary>A pair: a row of its two cells, or a column, each through its item's conversion (XLR17).</summary>
+    /// <summary>A pair: a row of its two cells, or a column, each through its item's conversion.</summary>
     /// <typeparam name="T1">The first item's type.</typeparam>
     /// <typeparam name="T2">The second item's type.</typeparam>
     /// <param name="a">The Excel value.</param>
@@ -211,7 +211,7 @@ public static partial class X
     public static (T1, T2, T3)[] Tuples<T1, T2, T3>(object a, string p, Func<object, string, T1> c1, Func<object, string, T2> c2, Func<object, string, T3> c3)
         => TupleRows(a, p, 3).Select((r, i) => (c1(r[0], RowItem(p, i, 1)), c2(r[1], RowItem(p, i, 2)), c3(r[2], RowItem(p, i, 3)))).ToArray();
 
-    /// <summary>A generator by its snapshot's handle; a member taking one gets a copy, the snapshot never drawn from (BIR3's R3).</summary>
+    /// <summary>A generator by its snapshot's handle; a member taking one gets a copy, the snapshot never drawn from.</summary>
     /// <typeparam name="T">The generator's type.</typeparam>
     /// <param name="a">The Excel value.</param>
     /// <param name="p">The argument's name.</param>
@@ -291,7 +291,7 @@ public static partial class X
         return true;
     }
 
-    // A range of nullable elements: its shape is the array, an empty cell none, nothing trimmed (XLR2).
+    // A range of nullable elements: its shape is the array, an empty cell none, nothing trimmed.
     private static IEnumerable<object> Shape(object a, string p)
     {
         if (a is object[,] m)

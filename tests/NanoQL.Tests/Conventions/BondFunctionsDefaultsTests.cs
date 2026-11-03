@@ -8,10 +8,10 @@ using NanoQL.PricingEngines;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// QuantLib's defaults are kept (S3R8): the bond functions' yield and Z-spread solve to 1e-10 in 100 iterations, the
-/// yield from a 0.05 guess and the Z-spread from 0.0, where the bond's own yield solves to 1e-8 from 0.05, on the clean
-/// price for an engine's results (<c>bondfunctions.hpp</c>, <c>bond.hpp:207-221</c>). The vectors pass every argument,
-/// so the defaults are read here from the members' declarations.
+/// QuantLib's defaults are kept: the bond functions' yield and Z-spread solve to 1e-10 in 100 iterations, the yield
+/// from a 0.05 guess and the Z-spread from 0.0, where the bond's own yield solves to 1e-8 from 0.05, on the clean price
+/// for an engine's results (<c>bondfunctions.hpp</c>, <c>bond.hpp:207-221</c>). The vectors pass every argument, so the
+/// defaults are read here from the members' declarations.
 /// </summary>
 public class BondFunctionsDefaultsTests
 {

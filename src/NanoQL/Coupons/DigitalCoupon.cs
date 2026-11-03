@@ -25,7 +25,7 @@ namespace NanoQL.Coupons;
 /// pricer's state once, as QuantLib's coupons each initialize it. A fixed rate (a fixing before the evaluation date, or
 /// on it when the context enforces today's historic fixings or the index holds it) pays the digital's payoff directly.
 /// The coupon keeps its underlying's ex-coupon date and fixing convention, which QuantLib's drops to their defaults, no
-/// ex-coupon date and Preceding (R8, the S-cms plan's CMR5 (ix)), so its fixing date is its underlying's.
+/// ex-coupon date and Preceding, so its fixing date is its underlying's.
 /// </para>
 /// <para>
 /// Unsealed, as in QuantLib, where the digital CMS, Ibor and CMS spread coupons derive from it. A copy with another

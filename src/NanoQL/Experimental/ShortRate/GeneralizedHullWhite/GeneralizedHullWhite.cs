@@ -40,7 +40,7 @@ namespace NanoQL.Experimental;
 /// gives Hull-White's at α(0) and σ(0), with the analytical fitting parameter φ(t) = f(t) + ½[σ(1 − e^(−αt))/α]², f the
 /// instantaneous forward. Below |α| 1e-2 φ is in its cancellation-free form through expm1, σt at α = 0: QuantLib cuts
 /// to σt below α √ε, which jumps there and cancels just above, and takes that cut for every negative α (φ(5) 3.6e-4 low
-/// at −0.05) (the S-xrt plan's XRR5 (xix); <c>Divergences/GeneralizedHullWhiteSmallReversionTests.cs</c>).
+/// at −0.05) (<c>Divergences/GeneralizedHullWhiteSmallReversionTests.cs</c>).
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]
@@ -447,7 +447,7 @@ public sealed class GeneralizedHullWhite : OneFactorAffineModel, ITermStructureC
                 // ForwardRate(t, t, Continuous)'s rate without its InterestRate
                 double forwardRate = termStructure.ContinuousForwardRate(t, t);
 
-                // the expm1 form below |a| 1e-2, sigma*t at 0, QuantLib's from 1e-2 and past -1e-2 (XRR5 (xix))
+                // the expm1 form below |a| 1e-2, sigma*t at 0, QuantLib's from 1e-2 and past -1e-2
                 double temp;
                 if (a == 0.0)
                 {

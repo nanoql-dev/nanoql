@@ -17,11 +17,11 @@ namespace NanoQL.Processes;
 /// instantaneous forward.
 /// </summary>
 /// <remarks>
-/// The drift's σ²(1 − e^(−2at))/(2a) and α's σ(1 − e^(−at))/a are written as σ²t·(1 − e^(−2at))/(2at) and
-/// σt·(1 − e^(−at))/(at), the cancellation-free forms of QuantLib's master's Vasicek (the S-sr plan's SSR3 and
-/// SSR6 (ii)): a divergence, QuantLib's drift NaN at a = 0, which the constructor accepts, and cancelling below, its α
-/// cut at QL_EPSILON (<c>Divergences/HullWhiteProcessSmallReversionTests.cs</c>). The drift's derivative of the forward
-/// is QuantLib's forward difference over 0.0001.
+/// The drift's σ²(1 − e^(−2at))/(2a) and α's σ(1 − e^(−at))/a are written as σ²t·(1 − e^(−2at))/(2at) and σt·(1 −
+/// e^(−at))/(at), the cancellation-free forms of QuantLib's master's Vasicek: a divergence, QuantLib's drift NaN at a =
+/// 0, which the constructor accepts, and cancelling below, its α cut at QL_EPSILON
+/// (<c>Divergences/HullWhiteProcessSmallReversionTests.cs</c>). The drift's derivative of the forward is QuantLib's
+/// forward difference over 0.0001.
 /// </remarks>
 public sealed class HullWhiteProcess : StochasticProcess1D
 {

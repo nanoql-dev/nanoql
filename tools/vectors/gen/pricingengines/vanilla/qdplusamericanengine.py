@@ -12,8 +12,8 @@ date, an expired one, and the refusals of a European exercise, a payoff at expir
 The engine's exercise boundary members, putExerciseBoundaryAtTau, getPutExerciseBoundary and xMax, which the wheel
 doesn't expose, are vectored through the C++ harness (tools/vectors/gen/cxx/pricingengines/vanilla/
 qdplusamericanengine.py). Every structure is dated on the evaluation date and counts on Actual/365 (Fixed), and no
-window opens after it, so neither the mismatched-dates class (the S-van plan's VR4 (ix),
-tests/NanoQL.Tests/Divergences/QdMismatchedTimesTests.cs) nor the window (ApproximationWindowTests.cs) reaches the
+window opens after it, so neither the mismatched-dates class
+(tests/NanoQL.Tests/Divergences/QdMismatchedTimesTests.cs) nor the window (ApproximationWindowTests.cs) reaches the
 file.
 
 An engine spec is {"interpolationPoints", "solverType" (QuantLib's SolverType as an integer), "eps", "maxIter" (null

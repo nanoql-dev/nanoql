@@ -10,15 +10,15 @@ and its values at the strikes, between them and outside them (allowExtrapolation
 interpolation on the smile. Then QuantLib's refusals: an expiry past 30 years, and fewer volatilities than strikes
 (the harness's, as QuantLib reads them unchecked) left out.
 
-The outputs nanoql fixes are left out (the S-xeq plan's §2.8): every expiry is 5 years or more, so every trial point's
-sigmaI sqrt(T) is above 0.1 (the transformation keeps sigmaI in [0.05, 1]), where nanoql's integrals are QuantLib's
-single intervals (the S-xeq run's XER5 (xxvi), which reaches the fits' trial points below it, R3-3).
+The outputs nanoql fixes are left out: every expiry is 5 years or more, so every trial point's sigmaI sqrt(T) is above
+0.1 (the transformation keeps sigmaI in [0.05, 1]), where nanoql's integrals are QuantLib's single intervals; nanoql's
+split at the peak reaches the fits' trial points below it.
 
-**The stability filter** (the S7 plan's S7R6): every fit is refitted with every input volatility moved one ulp up, then
-down, by math.nextafter, together and each alone; a scalar output is written only where every refit leaves it within
-1e-12 x max(|base|, |moved|, 1) (an end criterion where every refit gives the same), an array's element likewise, the
-indexes of each array's dropped elements in the case's inputs "dropped"; the generator prints the counts per case and
-for the file. Expiry, forward and the weights, which no fit computes, aren't filtered.
+**The stability filter**: every fit is refitted with every input volatility moved one ulp up, then down, by
+math.nextafter, together and each alone; a scalar output is written only where every refit leaves it within 1e-12 x
+max(|base|, |moved|, 1) (an end criterion where every refit gives the same), an array's element likewise, the indexes
+of each array's dropped elements in the case's inputs "dropped"; the generator prints the counts per case and for the
+file. Expiry, forward and the weights, which no fit computes, aren't filtered.
 
 The specs are tools/cxx/src/experimental/volatility/noarbsabrinterpolation.cpp's. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Experimental/Volatility/NoArbSabrInterpolationCxxVectorTests.cs."""

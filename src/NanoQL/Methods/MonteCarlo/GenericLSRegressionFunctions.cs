@@ -22,13 +22,13 @@ public static class GenericLSRegressionFunctions
     /// <para>
     /// The data are QuantLib's: n exercises give n + 1 rows, row 0 each path's cash flows before the first exercise and
     /// row i + 1 its data at exercise i. The cash flows of every row before the last are changed in place, as QuantLib
-    /// changes them (the S-mmp plan's SMD6).
+    /// changes them.
     /// </para>
     /// <para>
-    /// The number of basis functions is the first valid path's (the S-mmp plan's MMPR4 (xix), a documented
-    /// divergence): QuantLib takes path 0's, valid or not, and a path ended before an exercise has none, so the valid
-    /// paths' values are copied past a one-entry buffer (<c>genericlsregression.cpp:39</c>). An exercise no path
-    /// reaches is refused, with the parametric optimisation's text.
+    /// The number of basis functions is the first valid path's (a documented divergence): QuantLib takes path 0's,
+    /// valid or not, and a path ended before an exercise has none, so the valid paths' values are copied past a
+    /// one-entry buffer (<c>genericlsregression.cpp:39</c>). An exercise no path reaches is refused, with the
+    /// parametric optimisation's text.
     /// </para>
     /// </remarks>
     /// <param name="simulationData">The node data, an exercise a row and a path a column, changed in place.</param>

@@ -9,8 +9,7 @@ namespace NanoQL.Tests.Divergences;
 /// West's bivariate normal at an infinite bound. QuantLib's integrand meets ∞ − ∞ there
 /// (<c>bivariatenormaldistribution.cpp:166-176</c>, <c>eqn3</c>'s exponent, and <c>eqn6</c>'s beyond |ρ| = 0.925): NaN
 /// at +∞ for ρ &gt; 0 and at −∞ for ρ &lt; 0, and wherever the other bound is 0, where Drezner's returns Φ(b) or 0.
-/// nanoql returns the other bound's Φ at +∞ and 0 at −∞, in either argument (the S-exo plan's ER5 (xiv)): QuantLib's
-/// own value at ±40 is the check.
+/// nanoql returns the other bound's Φ at +∞ and 0 at −∞, in either argument: QuantLib's own value at ±40 is the check.
 /// </summary>
 public class BivariateInfiniteArgumentTests
 {

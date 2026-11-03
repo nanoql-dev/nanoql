@@ -7,9 +7,9 @@ using NanoQL.Processes;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The simple-process mesher of no point (the S-sr plan's SSR6 (xi)): QuantLib builds its locations by reading the
-/// first of an empty array (<c>fdmsimpleprocess1dmesher.cpp</c>, undefined behaviour, master §2.2's undefined-path
-/// row); nanoql refuses a size of 0 before reading anything.
+/// The simple-process mesher of no point: QuantLib builds its locations by reading the first of an empty array
+/// (<c>fdmsimpleprocess1dmesher.cpp</c>, undefined behaviour, the playbook's undefined-behaviour row); nanoql
+/// refuses a size of 0 before reading anything.
 /// </summary>
 public class SimpleProcessMesherSizeTests
 {

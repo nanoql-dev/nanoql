@@ -10,8 +10,7 @@ wheel doesn't bind, each output computed by the C++ harness (tools/cxx/src/exper
   B), the analytical fitting parameter φ at three times, and the tree on a ten-step grid to five years, its columns'
   node discounts; and the linear form, the template constructor on Linear interpolations, on the flat curve. Each
   model's dynamics() throws, and the linear-flat form gives LinearFlat's traits. Every reversion is at least 1e-2, where
-  φ is QuantLib's formula (below, nanoql's expm1 form; the S-xrt plan's XRR5 (xix)); a fifth constant case at 0.005
-  reads no φ.
+  φ is QuantLib's formula (below, nanoql's expm1 form); a fifth constant case at 0.005 reads no φ.
 - "process" cases: the process at constant speeds 0.1, 0.02 and 0.01 and volatility 0.01, its drift, diffusion,
   expectation, deviation and variance at two points, where QuantLib's variance formula holds (|a| ≥ 1e-2), and its
   speed and volatility at those times and its level.

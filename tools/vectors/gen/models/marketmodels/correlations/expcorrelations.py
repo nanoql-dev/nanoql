@@ -10,10 +10,10 @@ times(), rateTimes(), numberOfRates(), correlations() and correlation(i) at the 
 times, a last correlation time after the last rate time, a long-term correlation, decay or exponent outside its range,
 decreasing rate times.
 
-Left out (the S-mm plan's MR3 and MR4; tests/NanoQL.Tests/Divergences/ExponentialCorrelationTests.cs): one rate, which
-QuantLib refuses as "at least two values" and nanoql accepts; correlation times skipping a rate time at an exponent
-other than 1, which nanoql refuses, QuantLib's own FIXME's check, and QuantLib prices with a dead rate's period. The
-refusal's text of a last correlation time past the last rate time differs (MR3 (xv)), and only the throw is recorded.
+Left out (tests/NanoQL.Tests/Divergences/ExponentialCorrelationTests.cs): one rate, which QuantLib refuses as "at least
+two values" and nanoql accepts; correlation times skipping a rate time at an exponent other than 1, which nanoql
+refuses, QuantLib's own FIXME's check, and QuantLib prices with a dead rate's period. The refusal's text of a last
+correlation time past the last rate time differs, and only the throw is recorded.
 
 The wheel's calls, by QuantLib-SWIG 1.44: ExponentialForwardCorrelation(rateTimes, longTermCorr, beta, gamma, times)
 and PiecewiseConstantCorrelation's members. Read back by

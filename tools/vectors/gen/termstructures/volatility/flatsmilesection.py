@@ -16,17 +16,17 @@ nanoql builds by FlatSmileSection.Create from the context) and 18 by time; both 
 - "refusals" cases: the sections QuantLib refuses to build, an exercise date before the reference date (by date and
   floating) and a negative or NaN exercise time.
 
-A refused value is {"throws": true}. Each case's input "section" is the spec tools/cxx/src/termstructures/volatility/
-smilesectionspec.hpp reads: {"type": "FlatSmileSection", "form" ("date", "floating" or "time"), "exerciseDate" and
-"referenceDate", or "exerciseDate", or "exerciseTime", "volatility", "dayCounter", "atmLevel", "volatilityType",
-"shift"}, the day counter as in tools/vectors/gen/indexes/interestrateindex.py, the ATM level null for none. The
-wheel's FlatSmileSection is the proxy of the C++ class's constructors (volatilities.i), positional only, so a type or
-shift without an ATM level passes QuantLib's Null<Real>() for it, as the default does. The section functions here are
-shared by the harness generators of cxx/termstructures/volatility/, which import this file. The case's "skip" input lists the strikes whose
-normal volatility QuantLib's master's Bachelier inversion moves (#2924, taken ahead of the pin as the upstream sweep's
-SWD14 and SWI3 rule; tools/vectors/gen/pricingengines/blackformula.py's smile_normal_moved): QuantLib 1.44's 0, null in
-"normalVolatility", which the reader nulls too. Read back by
-tests/NanoQL.Tests/Vectors/TermStructures/FlatSmileSectionVectorTests.cs."""
+A refused value is {"throws": true}. Each case's input "section" is the spec
+tools/cxx/src/termstructures/volatility/smilesectionspec.hpp reads: {"type": "FlatSmileSection", "form" ("date",
+"floating" or "time"), "exerciseDate" and "referenceDate", or "exerciseDate", or "exerciseTime", "volatility",
+"dayCounter", "atmLevel", "volatilityType", "shift"}, the day counter as in
+tools/vectors/gen/indexes/interestrateindex.py, the ATM level null for none. The wheel's FlatSmileSection is the proxy
+of the C++ class's constructors (volatilities.i), positional only, so a type or shift without an ATM level passes
+QuantLib's Null<Real>() for it, as the default does. The section functions here are shared by the harness generators of
+cxx/termstructures/volatility/, which import this file. The case's "skip" input lists the strikes whose normal
+volatility QuantLib's master's Bachelier inversion moves (#2924, taken ahead of the pin;
+tools/vectors/gen/pricingengines/blackformula.py's smile_normal_moved): QuantLib 1.44's 0, null in "normalVolatility",
+which the reader nulls too. Read back by tests/NanoQL.Tests/Vectors/TermStructures/FlatSmileSectionVectorTests.cs."""
 import importlib.util
 import os
 import sys

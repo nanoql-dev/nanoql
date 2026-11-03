@@ -1,8 +1,8 @@
 // SPDX-FileCopyrightText: 2026 The nanoql Authors
 // SPDX-License-Identifier: Apache-2.0
 
-// ql/processes/jointstochasticprocess.hpp, .cpp: the joint process's members, through the harness's own derived process,
-// since QuantLib derives none the harness could reach (the S-hes plan's HD10); tests/NanoQL.Tests/Vectors/Cxx/Processes/
+// ql/processes/jointstochasticprocess.hpp, .cpp: the joint process's members, through the harness's own derived
+// process, since QuantLib derives none the harness could reach; tests/NanoQL.Tests/Vectors/Cxx/Processes/
 // JointStochasticProcessCxxVectorTests.cs mirrors it.
 //
 // A process is {"gbm", "heston", "ou", "correlation", "stateDependent", "factors"}: the joint process of a

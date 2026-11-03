@@ -6,20 +6,18 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The Student t density at large degrees of freedom and the cumulative function at large ν (the S-core plan's CR7
-/// (xxii) and (xxiii)): QuantLib takes each gamma function as the exponential of its logarithm, which overflows from n
-/// 342 (0 there, NaN from 343), and its denominator's product overflows earlier at large x (0 at n 330, x 30); nanoql
-/// takes the gammas' ratio as Boost's tgamma_delta_ratio and the power by log1p wherever a factor overflows, to
-/// n = 2³¹ − 1. QuantLib's cumulative
+/// The Student t density at large degrees of freedom and the cumulative function at large ν: QuantLib takes each gamma
+/// function as the exponential of its logarithm, which overflows from n 342 (0 there, NaN from 343), and its
+/// denominator's product overflows earlier at large x (0 at n 330, x 30); nanoql takes the gammas' ratio as Boost's
+/// tgamma_delta_ratio and the power by log1p wherever a factor overflows, to n = 2³¹ − 1. QuantLib's cumulative
 /// function takes the incomplete beta's complement at 1 − n/(n + x²), which loses the argument's digits as n grows
 /// (6.4e-10 relative at 1e6, 4.6e-9 at 1e8); nanoql takes the complementary argument x²/(n + x²) directly where n/(n +
 /// x²) exceeds ½. Below the centre QuantLib's ½ − ½·(1 − I) cancels as the probability falls (1.3e-6 relative at n 10,
 /// x −30, and 0 for 3.1e-24 at n 30); nanoql takes ½·I directly. Both through Boost's incomplete beta, as QuantLib's
 /// own loses digits in its log-gamma prefactor as n grows; at n 1 below the centre, ½·(1 − I), as Boost's complement
-/// there rounds 1 − z. And the quantile at n 4 and 6, whose Boost forms cancel near ½ (±0 within 1e-9 of it), takes
-/// one Newton step on the cumulative function there. The references are 50-digit evaluations of the definitions
-/// (this run's <c>c3work\student_refs.py</c>, <c>refs_c3r2.py</c>, their <c>.out</c>); QuantLib's values beside them
-/// are its own (<c>probes\c3_facts.cpp</c>, <c>c3r2_facts.cpp</c>, their <c>.out</c>).
+/// there rounds 1 − z. And the quantile at n 4 and 6, whose Boost forms cancel near ½ (±0 within 1e-9 of it), takes one
+/// Newton step on the cumulative function there. The references are 50-digit evaluations of the definitions; QuantLib's
+/// values beside them are its own.
 /// </summary>
 public class StudentDistributionTests
 {

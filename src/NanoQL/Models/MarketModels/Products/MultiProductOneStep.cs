@@ -12,7 +12,7 @@ namespace NanoQL.Models;
 /// A market-model product evaluated in one step (Rebonato's very long jump): its evolution steps once, at the last
 /// rate's reset, every rate relevant.
 /// </summary>
-/// <remarks>An extension point (U13): a working type, as every product (the S-mmp plan's MMPR1 (i)).</remarks>
+/// <remarks>An extension point: a working type, as every product.</remarks>
 [WorkingType]
 public abstract class MultiProductOneStep : MarketModelMultiProduct
 {

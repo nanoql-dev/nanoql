@@ -8,9 +8,9 @@ using ExcelDna.Integration;
 namespace NanoQL.Excel;
 
 /// <summary>
-/// Looping over a range (XLR15) and each failure's message by its cell (XLR4, XLD3): a range where a function takes one
-/// value is looped over, element by element, the ranges paired by Excel's rule, each element the scalar call keyed as it
-/// is; a failed element shows its error in its place and its message by its own cell of the spill.
+/// Looping over a range and each failure's message by its cell: a range where a function takes one value is looped
+/// over, element by element, the ranges paired by Excel's rule, each element the scalar call keyed as it is; a failed
+/// element shows its error in its place and its message by its own cell of the spill.
 /// </summary>
 public static partial class X
 {
@@ -28,9 +28,9 @@ public static partial class X
     private static long liftedElements;
 
     /// <summary>
-    /// A cell's message (round 8's F8-1), Excel's own state deciding a spill: a cell Excel doesn't show as a spilled cell
-    /// gives its own call's message; a spilled cell gives its element's when the spill shows the looped call's result
-    /// element by element, and otherwise the formula's message, which names the first failed element and its place.
+    /// A cell's message, Excel's own state deciding a spill: a cell Excel doesn't show as a spilled cell gives its own
+    /// call's message; a spilled cell gives its element's when the spill shows the looped call's result element by
+    /// element, and otherwise the formula's message, which names the first failed element and its place.
     /// </summary>
     /// <param name="r">The cell.</param>
     /// <returns>The message, or empty text.</returns>
@@ -71,7 +71,7 @@ public static partial class X
     /// <returns>The message, or empty text.</returns>
     internal static string ErrorAt(ExcelReference r) => Errors.TryGetValue(KeyOf(r), out string? m) ? m : string.Empty;
 
-    // A 1 x 1 range where the mask loops is its value, as in the single call's key (round 7's note).
+    // A 1 x 1 range where the mask loops is its value, as in the single call's key.
     private static object[] Cells1(object[] args, string lift)
     {
         object[]? copy = null;
@@ -175,7 +175,7 @@ public static partial class X
         }
 
         // The formula's cell gets the first failed element's message with its place, whether the looped call is the
-        // formula's value or nested in it (F7-1); a looped call with no failed element leaves the cell's message (F9-1).
+        // formula's value or nested in it; a looped call with no failed element leaves the cell's message.
         if (Host.Caller() is ExcelReference anchor)
         {
             string key = KeyOf(anchor);

@@ -70,7 +70,7 @@ public class OvernightIndexedCouponRefusalTests
         e = Assert.Throws<NanoQLException>(() => leg.WithNotionals(1e6).WithPaymentDates([Today]).ToLeg());
         Assert.Equal("empty schedule", e.Message);
 
-        // A one-date schedule stays QuantLib's: an empty leg (D12).
+        // A one-date schedule stays QuantLib's: an empty leg.
         Assert.Empty(new OvernightLeg(new Schedule([Today], new TARGET()), Sofr()).WithNotionals(1e6).ToLeg());
     }
 
@@ -124,9 +124,9 @@ public class OvernightIndexedCouponRefusalTests
         Assert.Equal(0, new OvernightIndexedCoupon(end, 1e6, start, end, Sofr(), lookbackDays: 0).FixingDays);
     }
 
-    // SD27, D22: QuantLib's Null<Natural>() is INT_MAX, so a lookback of 2147483647 days means none and the coupon
-    // takes the index's fixing days (overnightindexedcoupon.hpp:71, floatingratecoupon.cpp:49). Here it is a value:
-    // the coupon advances its value dates back by it, which Date's range refuses.
+    // QuantLib's Null<Natural>() is INT_MAX, so a lookback of 2147483647 days means none and the coupon takes the
+    // index's fixing days (overnightindexedcoupon.hpp:71, floatingratecoupon.cpp:49). Here it is a value: the coupon
+    // advances its value dates back by it, which Date's range refuses.
     [Fact]
     public void ALookbackOfIntMaxValueIsAValue()
     {

@@ -9,16 +9,15 @@ using static NanoQL.Tests.Conventions.CommodityMarkets;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The commodity curve's node times from its reference date, and its basis curve read by date (the S-xrt plan's XRR5
-/// (x) and (xi), fixed under R8). QuantLib's moving-date curve follows the evaluation date, and its <c>setPrices</c>
-/// times the nodes from the first price's date (<c>commoditycurve.cpp:68-87</c>): with prices 1, 2 and 3 at ten, forty
-/// and seventy days it prices 2 at 35 and 39 days and 3 at 65 and 69, the next node's, where its constructor from the
-/// same dates prices 1 and 2 (the run's <c>probes\xi_c1.cpp</c>). And it reads a basis curve at its own time, on its own
-/// reference date and day counter (<c>commoditycurve.hpp:205-219</c>): a basis dated thirty days later on Actual/360,
-/// at 1, 2 and 3 from thirty, sixty and 120 days, adds 2 at 45 and 59 days and 3 at 119, where the basis curve's own
-/// price there is 1, 1 and 2. nanoql times the nodes from the reference date (<see cref="CommodityCurve.Create"/>, a copy
-/// from <see cref="CommodityCurve.SetPrices"/>) and reads a basis at the date on its own clock; where the curves share
-/// their reference date and day counter both readings are QuantLib's.
+/// The commodity curve's node times from its reference date, and its basis curve read by date (fixed). QuantLib's
+/// moving-date curve follows the evaluation date, and its <c>setPrices</c> times the nodes from the first price's date
+/// (<c>commoditycurve.cpp:68-87</c>): with prices 1, 2 and 3 at ten, forty and seventy days it prices 2 at 35 and 39
+/// days and 3 at 65 and 69, the next node's, where its constructor from the same dates prices 1 and 2. And it reads a
+/// basis curve at its own time, on its own reference date and day counter (<c>commoditycurve.hpp:205-219</c>): a basis
+/// dated thirty days later on Actual/360, at 1, 2 and 3 from thirty, sixty and 120 days, adds 2 at 45 and 59 days and 3
+/// at 119, where the basis curve's own price there is 1, 1 and 2. nanoql times the nodes from the reference date (<see
+/// cref="CommodityCurve.Create"/>, a copy from <see cref="CommodityCurve.SetPrices"/>) and reads a basis at the date on
+/// its own clock; where the curves share their reference date and day counter both readings are QuantLib's.
 /// </summary>
 public class CommodityCurveTests
 {

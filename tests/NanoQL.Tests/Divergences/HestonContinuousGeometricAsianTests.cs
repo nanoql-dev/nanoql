@@ -12,15 +12,14 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The continuous geometric Asian Heston engine's <c>Phi</c> and start date (the S-xeq plan's XER5 (xv), fixed under
-/// R8). QuantLib's coefficient of w, <c>a4_ = logS0*qdcf/dcf − ρv₀/σ + ρκθτ/σ</c>
-/// (<c>analytic_cont_geom_av_price_heston.cpp:245</c>), multiplies the log spot by the carry factor where log S_T's
-/// constant adds log(D_q/D_r), and adds ρκθτ/σ where that constant, as QuantLib's own a3 for the average, subtracts it:
-/// its <c>Phi(0, 1)</c>, the expected terminal spot, reads 81.92 against the forward 103.05 [executed: the planner's
-/// <c>xp_c1.cpp asian</c>]. The prices read w = 0 only, so they are QuantLib's. And QuantLib's engine prices an option
-/// with a start date as unseasoned from today, where QuantLib's Black-Scholes continuous engine refuses one; nanoql
-/// refuses it with that engine's text. Checks: the forward; at a vanishing vol of vol, Black-Scholes's moments of the
-/// average and the spot.
+/// The continuous geometric Asian Heston engine's <c>Phi</c> and start date (fixed). QuantLib's coefficient of w,
+/// <c>a4_ = logS0*qdcf/dcf − ρv₀/σ + ρκθτ/σ</c> (<c>analytic_cont_geom_av_price_heston.cpp:245</c>), multiplies the log
+/// spot by the carry factor where log S_T's constant adds log(D_q/D_r), and adds ρκθτ/σ where that constant, as
+/// QuantLib's own a3 for the average, subtracts it: its <c>Phi(0, 1)</c>, the expected terminal spot, reads 81.92
+/// against the forward 103.05 (QuantLib 1.44). The prices read w = 0 only, so they are QuantLib's. And QuantLib's
+/// engine prices an option with a start date as unseasoned from today, where QuantLib's Black-Scholes continuous engine
+/// refuses one; nanoql refuses it with that engine's text. Checks: the forward; at a vanishing vol of vol,
+/// Black-Scholes's moments of the average and the spot.
 /// </summary>
 public class HestonContinuousGeometricAsianTests
 {
@@ -52,7 +51,7 @@ public class HestonContinuousGeometricAsianTests
     [Fact]
     public void ThePricesAreQuantLibs()
     {
-        // QuantLib's 6.9101224984 (the planner's xp_c1.cpp asian)
+        // QuantLib's 6.9101224984
         Assert.Equal(6.9101224984, Engine(0.09, 1.15, 0.09, 0.39, -0.64).Calculate(Option(null), Context).NPV!.Value, 1e-10);
     }
 
@@ -69,12 +68,12 @@ public class HestonContinuousGeometricAsianTests
     [Fact]
     public void AnAverageStartingTodayIsTheUnseasonedOne()
     {
-        // the code review's O1-6: on curves dated today a start today is the model's time 0, QuantLib's own average
+        // On curves dated today a start today is the model's time 0, QuantLib's own average
         AnalyticContinuousGeometricAveragePriceAsianHestonEngine engine = Engine(0.09, 1.15, 0.09, 0.39, -0.64);
         Assert.Equal(engine.Calculate(Option(null), Context).NPV!.Value, engine.Calculate(Option(Today), Context).NPV!.Value);
     }
 
-    // the planner's market: S 100, r 0.05, q 0.02 on Actual/365F
+    // the market: S 100, r 0.05, q 0.02 on Actual/365F
     private static AnalyticContinuousGeometricAveragePriceAsianHestonEngine Engine(
         double v0, double kappa, double theta, double sigma, double rho) =>
         new(new HestonProcess(

@@ -14,8 +14,8 @@ namespace NanoQL.Experimental;
 /// <c>SimpleRandomInertia</c>.
 /// </summary>
 /// <remarks>
-/// The draws are a Mersenne Twister's on the seed, which is required: QuantLib's default seeds from the clock (the
-/// S-xrt plan's XRD3). Each minimization starts them from the seed.
+/// The draws are a Mersenne Twister's on the seed, which is required: QuantLib's default seeds from the clock. Each
+/// minimization starts them from the seed.
 /// </remarks>
 [Experimental("NQL0001")]
 public sealed class SimpleRandomInertia : ParticleSwarmOptimizationInertia

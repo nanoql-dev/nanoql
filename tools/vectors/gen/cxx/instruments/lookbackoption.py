@@ -8,10 +8,10 @@ each option European in a year: the floating and fixed options with a running ex
 or equal to 1 for puts"), the lookback ending 180 and 365 days on, and 366 ("lookback start date must be earlier than
 exercise date"); and the partial fixed option's lookback starting 0, 180, 365 and 366 days on.
 
-Left out (the S-bar plan's §2.10, BR5 (xxv)): QuantLib's partial validation dereferences a European exercise and a
-floating payoff unchecked, where nanoql refuses before the read; and the null extremum, the harness's alone, nanoql's
-extremum a double the constructor takes. The arguments are tools/cxx/src/instruments/lookbackoption.cpp's. Read back
-by tests/NanoQL.Tests/Vectors/Cxx/Instruments/LookbackOptionCxxVectorTests.cs."""
+Left out: QuantLib's partial validation dereferences a European exercise and a floating payoff unchecked, where nanoql
+refuses before the read; and the null extremum, the harness's alone, nanoql's extremum a double the constructor takes.
+The arguments are tools/cxx/src/instruments/lookbackoption.cpp's. Read back by
+tests/NanoQL.Tests/Vectors/Cxx/Instruments/LookbackOptionCxxVectorTests.cs."""
 import os
 import sys
 

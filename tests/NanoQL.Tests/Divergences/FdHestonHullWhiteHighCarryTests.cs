@@ -13,16 +13,15 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The FD Heston-Hull-White engine where the carry is large against the volatility, or a strike far from the forwards (D3-1
-/// of the S-hes run record, the FD Heston engine's B1-1 swept). QuantLib sizes the equity mesher on a helper whose curves
-/// its call binds in each other's places (<c>fdhestonhullwhitevanillaengine.cpp:115-131</c>), so the grid walks the
-/// forward's mirror: a five-year call at 1.25 times the forward, carry 0.30 and volatility 0.1, priced 0 where the analytic
-/// Heston-Hull-White engine gives 1.7595, on the default grid and on twice its points; and a year's put at 0.7 of the
-/// forward, carry −0.2, priced 0 for 0.0068, its strike beyond QuantLib's grid [executed: <c>scratchpad\c3\oracle_c3b.py</c>].
-/// nanoql's mesher is QuantLib's wherever its range holds the true forwards' band and the strike's, at half the mesher's
-/// margin, and is widened to the bands where it doesn't; its multi-strike solve solves each strike alone where its grid
-/// doesn't hold the forwards' band at its read points. Checked against the analytic engine, at no equity-rate
-/// correlation, under refinement.
+/// The FD Heston-Hull-White engine where the carry is large against the volatility, or a strike far from the forwards.
+/// QuantLib sizes the equity mesher on a helper whose curves its call binds in each other's places
+/// (<c>fdhestonhullwhitevanillaengine.cpp:115-131</c>), so the grid walks the forward's mirror: a five-year call at
+/// 1.25 times the forward, carry 0.30 and volatility 0.1, priced 0 where the analytic Heston-Hull-White engine gives
+/// 1.7595, on the default grid and on twice its points; and a year's put at 0.7 of the forward, carry −0.2, priced 0
+/// for 0.0068, its strike beyond QuantLib's grid (QuantLib-Python 1.44). nanoql's mesher is QuantLib's wherever its
+/// range holds the true forwards' band and the strike's, at half the mesher's margin, and is widened to the bands where
+/// it doesn't; its multi-strike solve solves each strike alone where its grid doesn't hold the forwards' band at its
+/// read points. Checked against the analytic engine, at no equity-rate correlation, under refinement.
 /// </summary>
 public class FdHestonHullWhiteHighCarryTests
 {

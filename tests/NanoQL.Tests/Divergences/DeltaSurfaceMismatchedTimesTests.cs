@@ -9,18 +9,18 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The delta-quoted volatility surface's curves on another clock (the S-van plan's VR4 (xxi), the mismatched-dates
-/// class). QuantLib reads its domestic and foreign curves at the surface's own times (<c>blackvolsurfacedelta.cpp:96-97</c>,
-/// <c>:210</c>), so curves on another day counter, or dated otherwise, are read at other instants: under a surface on
-/// Actual/365 (Fixed) from 15 October 2026, curves at 4% and 1% on Actual/360 give a one-year forward of
-/// 1.2159363500651499 where the same curves restated on Actual/365 (Fixed), each rate times 365/360 and so the same
-/// discount at every date, give 1.2164430957757022; and QuantLib's own cases' curves, floating from 1 January 2010, a
-/// TARGET holiday, and so dated 4 January, are read three days on: their one-month at-the-money volatility is
-/// 0.13010360399762275, where the curves restated on the surface's clock give 0.13008061079668704 [executed: the wheel,
-/// <c>scratchpad\c5\probe_delta_ql.py</c>]. nanoql reads each curve at the instant a time denotes, on its own clock;
-/// QuantLib's check, its surface on the curves restated on the surface's clock, gives nanoql's values. Where the curves
-/// share the surface's day counter and reference date, QuantLib's bits stand. QuantLib's cases on the floating curves
-/// are moved to the fixed surface's values (<c>TestSuite/BlackVolSurfaceDeltaTests.cs</c>).
+/// The delta-quoted volatility surface's curves on another clock (the mismatched-dates class). QuantLib reads its
+/// domestic and foreign curves at the surface's own times (<c>blackvolsurfacedelta.cpp:96-97</c>, <c>:210</c>), so
+/// curves on another day counter, or dated otherwise, are read at other instants: under a surface on Actual/365 (Fixed)
+/// from 15 October 2026, curves at 4% and 1% on Actual/360 give a one-year forward of 1.2159363500651499 where the same
+/// curves restated on Actual/365 (Fixed), each rate times 365/360 and so the same discount at every date, give
+/// 1.2164430957757022; and QuantLib's own cases' curves, floating from 1 January 2010, a TARGET holiday, and so dated 4
+/// January, are read three days on: their one-month at-the-money volatility is 0.13010360399762275, where the curves
+/// restated on the surface's clock give 0.13008061079668704 (QuantLib-Python 1.44). nanoql reads each curve at the
+/// instant a time denotes, on its own clock; QuantLib's check, its surface on the curves restated on the surface's
+/// clock, gives nanoql's values. Where the curves share the surface's day counter and reference date, QuantLib's bits
+/// stand. QuantLib's cases on the floating curves are moved to the fixed surface's values
+/// (<c>TestSuite/BlackVolSurfaceDeltaTests.cs</c>).
 /// </summary>
 public class DeltaSurfaceMismatchedTimesTests
 {

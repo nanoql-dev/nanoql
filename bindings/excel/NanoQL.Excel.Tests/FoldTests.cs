@@ -8,10 +8,10 @@ using static NanoQL.Excel.Tests.Xl;
 namespace NanoQL.Excel.Tests;
 
 /// <summary>
-/// The fold (XLR5, XLD29): a generic type's constructions as one worksheet function, its type arguments by name in any
-/// case, each a piece of the construction's C name; another construction's object, and a combination no construction
-/// has, refused; the stable build's family holding its stable constructions, an experimental one refused naming the
-/// experimental build (XLP54, XLP62).
+/// The fold: a generic type's constructions as one worksheet function, its type arguments by name in any case, each a
+/// piece of the construction's C name; another construction's object, and a combination no construction has, refused;
+/// the stable build's family holding its stable constructions, an experimental one refused naming the experimental
+/// build.
 /// </summary>
 [Collection(TestSettings.Name)]
 public sealed class FoldTests
@@ -19,7 +19,8 @@ public sealed class FoldTests
     /// <summary>Initializes a new instance of the <see cref="FoldTests"/> class, on a clean runtime.</summary>
     public FoldTests() => Reset();
 
-    /// <summary>XLP54's six checks: a folded constructor, a member shared by two constructions, the refusals, the count.</summary>
+    /// <summary>The fold's six checks: a folded constructor, a member shared by two constructions, the refusals, the
+    /// count.</summary>
     [Fact]
     public void AFamilyTakesItsTypeArgumentsByName()
     {
@@ -40,11 +41,12 @@ public sealed class FoldTests
         Assert.InRange(piecewise, 1, 29);
     }
 
-    /// <summary>XLP62's nine SABR cube checks in the experimental build: every construction reaches its code.</summary>
+    /// <summary>The nine SABR cube checks in the experimental build: every construction reaches its code.</summary>
     [Fact]
     public void TheCubesFamiliesInTheExperimentalBuild() => Cube(Xl.Experimental, stable: false);
 
-    /// <summary>XLP62's nine in the stable build: the NoArb construction refused, naming the experimental build.</summary>
+    /// <summary>The nine SABR cube checks in the stable build: the NoArb construction refused, naming the experimental
+    /// build.</summary>
     [Fact]
     public void TheCubesFamiliesInTheStableBuild() => Cube(Xl.Stable, stable: true);
 

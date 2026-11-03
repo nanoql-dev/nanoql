@@ -24,7 +24,7 @@ MARKETS = [("Settlement", 0), ("KRX", 1)]
 
 
 def skipped(market, c):
-    """The date SCR3 (vii) changes: the 2025 presidential election day, which QuantLib's master adds (#2894)."""
+    """The date the fix changes: the 2025 presidential election day, which QuantLib's master adds (#2894)."""
     return [ql.Date(3, ql.June, 2025)]
 
 

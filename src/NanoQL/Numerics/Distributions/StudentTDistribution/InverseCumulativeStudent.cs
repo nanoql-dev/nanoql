@@ -14,11 +14,10 @@ namespace NanoQL.Numerics;
 /// </summary>
 /// <remarks>
 /// Immutable. QuantLib's deprecated constructor taking a solver's accuracy and iterations, which it ignores, isn't
-/// ported. At 4 and 6 degrees of freedom Boost takes Shaw's exact form and polynomial, which cancel near ½: within
-/// 1e-9 of ½ they return ±0 for ±2.67e-9 (58% off at ½ − 1e-8 at n 4). There, where |p − ½| is below 0.05, nanoql
-/// takes one Newton step on its cumulative function, within the quantile's conditioning, ε/(2|p − ½|) (a documented
-/// divergence, found under R8; <c>Divergences/StudentDistributionTests.cs</c>); Boost's value, QuantLib's, bit for
-/// bit, elsewhere.
+/// ported. At 4 and 6 degrees of freedom Boost takes Shaw's exact form and polynomial, which cancel near ½: within 1e-9
+/// of ½ they return ±0 for ±2.67e-9 (58% off at ½ − 1e-8 at n 4). There, where |p − ½| is below 0.05, nanoql takes one
+/// Newton step on its cumulative function, within the quantile's conditioning, ε/(2|p − ½|) (a documented divergence;
+/// <c>Divergences/StudentDistributionTests.cs</c>); Boost's value, QuantLib's, bit for bit, elsewhere.
 /// </remarks>
 public sealed class InverseCumulativeStudent
 {

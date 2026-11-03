@@ -12,15 +12,14 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The two-asset barrier's read of asset 2's volatility (the S-bar plan's BR5 (ix), fixed under R8; the S-exo plan's
-/// ER5 class). QuantLib reads it at asset 1's strike, a level on another price scale: asset 2 at 5,000 on a smile, the
-/// barrier at 4,500, a down-and-out call at strikes 90, 100 and 110 prices 6.054081, 4.647889 and 2.965222 on volatilities
-/// read at 90 to 110, where the smile's volatility at the barrier is 34.37% (the planner's P2). nanoql reads it at the
-/// barrier, asset 2's own level; the read is a choice inside a constant-volatility formula, so its check is that it reads
-/// one level consistently (Revision 69). Checks: QuantLib's values on flat volatilities, 5.893116254296, 4.038304931649
-/// and 2.557384709654 on QuantLib's Dr78 (the S-bar run's <c>c1_ta_bb.py</c>), to its six decimal places on the
-/// formula's terms of weight 100 (BR4 (e)); and on the smile, the engine equals itself with asset 2's volatility flat at
-/// its barrier level.
+/// The two-asset barrier's read of asset 2's volatility (fixed). QuantLib reads it at asset 1's strike, a level on
+/// another price scale: asset 2 at 5,000 on a smile, the barrier at 4,500, a down-and-out call at strikes 90, 100 and
+/// 110 prices 6.054081, 4.647889 and 2.965222 on volatilities read at 90 to 110, where the smile's volatility at the
+/// barrier is 34.37%. nanoql reads it at the barrier, asset 2's own level; the read is a choice inside a
+/// constant-volatility formula, so its check is that it reads one level consistently. Checks: QuantLib's values on flat
+/// volatilities, 5.893116254296, 4.038304931649 and 2.557384709654 on QuantLib's Dr78, to its six decimal places on the
+/// formula's terms of weight 100; and on the smile, the engine equals itself with asset 2's volatility flat at its
+/// barrier level.
 /// </summary>
 public class TwoAssetBarrierSmileTests
 {

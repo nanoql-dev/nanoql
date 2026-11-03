@@ -20,8 +20,8 @@ namespace NanoQL.Models;
 /// coefficients zero.
 /// </summary>
 /// <remarks>
-/// Immutable (the S-mm plan's MR1 (i)): its matrices are computed at construction, and a read returns a copy. A
-/// forward correlation with fewer times than matrices, whose times QuantLib reads past, is refused (MR3 (xx)).
+/// Immutable: its matrices are computed at construction, and a read returns a copy. A forward correlation with fewer
+/// times than matrices, whose times QuantLib reads past, is refused.
 /// </remarks>
 public sealed class CotSwapFromFwdCorrelation : PiecewiseConstantCorrelation
 {

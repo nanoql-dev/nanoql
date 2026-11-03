@@ -8,14 +8,14 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// GARCH's cost gradient (the S-bar plan's BR5 (xlii), fixed under R8). QuantLib's <c>Garch11CostFunction::gradient</c>
-/// and <c>valueAndGradient</c> take ∂σ²ₜ/∂θ as its direct term (1, u²ₜ₋₁, σ²ₜ₋₁), dropping β·∂σ²ₜ₋₁/∂θ
-/// (<c>garch.cpp:95-138</c>), so against central differences of its own value it runs at 0.13 to 0.80 times the true
-/// gradient and a gradient method stops short of the optimum: L-BFGS-B from QuantLib's start at cost 0.46017717 where
-/// the exact gradient reaches Nelder-Mead's optimum, 0.46008564 (the planner's BP30). QuantLib's own paths, the Simplex
-/// and the ACF fit, never read it, so its cases don't move. nanoql's gradient is the recursive one, ∂σ²ₜ/∂θ = (1,
-/// u²ₜ₋₁, σ²ₜ₋₁) + β ∂σ²ₜ₋₁/∂θ. Checks, on QuantLib's own calibration series: the conjugate gradient from
-/// (ω, α, β) = (0.2, 0.2, 0.2) ends where the cost's central differences vanish, and at the Simplex's optimum.
+/// GARCH's cost gradient (fixed). QuantLib's <c>Garch11CostFunction::gradient</c> and <c>valueAndGradient</c> take
+/// ∂σ²ₜ/∂θ as its direct term (1, u²ₜ₋₁, σ²ₜ₋₁), dropping β·∂σ²ₜ₋₁/∂θ (<c>garch.cpp:95-138</c>), so against central
+/// differences of its own value it runs at 0.13 to 0.80 times the true gradient and a gradient method stops short of
+/// the optimum: L-BFGS-B from QuantLib's start at cost 0.46017717 where the exact gradient reaches Nelder-Mead's
+/// optimum, 0.46008564. QuantLib's own paths, the Simplex and the ACF fit, never read it, so its cases don't move.
+/// nanoql's gradient is the recursive one, ∂σ²ₜ/∂θ = (1, u²ₜ₋₁, σ²ₜ₋₁) + β ∂σ²ₜ₋₁/∂θ. Checks, on QuantLib's own
+/// calibration series: the conjugate gradient from (ω, α, β) = (0.2, 0.2, 0.2) ends where the cost's central
+/// differences vanish, and at the Simplex's optimum.
 /// </summary>
 public class GarchGradientTests
 {

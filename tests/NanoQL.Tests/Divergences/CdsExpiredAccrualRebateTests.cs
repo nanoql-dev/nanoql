@@ -11,7 +11,7 @@ namespace NanoQL.Tests.Divergences;
 /// An expired credit default swap's accrual-rebate NPV. QuantLib's <c>setupExpired</c> zeroes seven results and leaves
 /// the accrual rebate's NPV unset (<c>creditdefaultswap.cpp:215-220</c>), so it reads an uninitialized member: on the
 /// wheel, for <see cref="CreditFixture"/>'s expired swap priced by the mid-point engine, 7.565977700541159e-307 in one
-/// fresh process and 1.9925540477164e-311 in another (QuantLib's defect, R8). nanoql's expired results are all 0, the
+/// fresh process and 1.9925540477164e-311 in another (QuantLib's defect). nanoql's expired results are all 0, the
 /// accrual rebate's NPV included.
 /// </summary>
 public class CdsExpiredAccrualRebateTests

@@ -10,7 +10,7 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The forward rate's end date (QuantLib's #2848, taken ahead of the pin; the S-g1d plan's G1R5 (i)): QuantLib 1.44's
+/// The forward rate's end date (QuantLib's #2848, taken ahead of the pin): QuantLib 1.44's
 /// <c>Gaussian1dModel::forwardRate</c> ends the period by advancing the value date by the index's tenor on its fixing
 /// calendar (<c>gaussian1dmodel.cpp:44-46</c>); QuantLib's master after the pin ends it at the index's
 /// <c>maturityDate</c>, which an index of its own overrides. For EURLibor 6M fixed on 20 February 2025, the value date

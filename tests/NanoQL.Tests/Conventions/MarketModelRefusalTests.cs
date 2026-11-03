@@ -10,7 +10,7 @@ namespace NanoQL.Tests.Conventions;
 /// <summary>
 /// The market-model framework's refusals: each one's exception type, text and parameter, QuantLib's texts where
 /// QuantLib refuses (the vectors record only that it throws), nanoql's where it refuses QuantLib's undefined paths
-/// (<c>Divergences/MarketModelUndefinedReadsTests.cs</c>) and the inputs the user ruled refused (the S-mm plan's MR4).
+/// (<c>Divergences/MarketModelUndefinedReadsTests.cs</c>) and the inputs nanoql refuses outright.
 /// </summary>
 public class MarketModelRefusalTests
 {

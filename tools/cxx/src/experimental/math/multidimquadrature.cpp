@@ -9,7 +9,7 @@
 //                                                integral on TrapezoidIntegral<Default>(accuracy, maxIterations) per
 //                                                dimension over [a, b]^dimension
 //
-// The vector integration isn't vectored: its first node's weight is lost (the S-xcr plan's XR8 (v)).
+// The vector integration isn't vectored: its first node's weight is lost.
 
 #include "experimental/math/latentmodelspec.hpp"
 

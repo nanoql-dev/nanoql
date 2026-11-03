@@ -21,7 +21,7 @@ namespace NanoQL.PricingEngines;
 /// Immutable. The state is the underlying divided by the strike where the payoff is striked, for the regression's
 /// numerical stability. The Legendre and first-kind Chebyshev bases are refused, as QuantLib refuses them; the
 /// second-kind Chebyshev basis is NaN above 1, so a call's regression, on its in-the-money paths, is refused by the
-/// singular value decomposition (the S-van plan's VR7).
+/// singular value decomposition.
 /// </remarks>
 public sealed class AmericanPathPricer : IEarlyExercisePathPricer<MonteCarloPath, double>
 {

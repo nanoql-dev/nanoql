@@ -10,15 +10,14 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// A CPI price surface's put-call fills compounded over the maturity in years (the S-xrt run's R2-1, fixed under R8).
-/// QuantLib's surface compounds the at-the-money rate and the strike over <c>mat.length()</c>, the maturity's length in
-/// its own unit (<c>cpicapfloortermpricesurface.hpp:248-252</c>), so a maturity in months compounds over its month
-/// count. On QuantLib 1.44 (the run's <c>c2\probes\xb_cpimonths.cpp</c> and <c>xb_cpiyears.cpp</c>:
-/// test-suite/inflationcpicapfloor.cpp's case with its maturities written as 36 to 360 months), the 36-month cap filled
-/// at the floor strike of −1% is 2.137020233466961, where the same surface on 3 to 30 years fills 0.11890267275321309;
-/// QuantLib's case passes either way, reading only the quoted strikes. nanoql compounds over QuantLib's own
-/// <c>years</c> of the period: 36 months price as 3 years, QuantLib's bits, and a maturity in weeks or days, which has no
-/// length in years, is refused.
+/// A CPI price surface's put-call fills compounded over the maturity in years (fixed). QuantLib's surface compounds the
+/// at-the-money rate and the strike over <c>mat.length()</c>, the maturity's length in its own unit
+/// (<c>cpicapfloortermpricesurface.hpp:248-252</c>), so a maturity in months compounds over its month count. On
+/// QuantLib 1.44 (test-suite/inflationcpicapfloor.cpp's case with its maturities written as 36 to 360 months), the
+/// 36-month cap filled at the floor strike of −1% is 2.137020233466961, where the same surface on 3 to 30 years fills
+/// 0.11890267275321309; QuantLib's case passes either way, reading only the quoted strikes. nanoql compounds over
+/// QuantLib's own <c>years</c> of the period: 36 months price as 3 years, QuantLib's bits, and a maturity in weeks or
+/// days, which has no length in years, is refused.
 /// </summary>
 public class CPICapFloorPriceSurfaceTests
 {

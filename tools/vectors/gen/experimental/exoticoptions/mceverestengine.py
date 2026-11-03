@@ -7,10 +7,10 @@ pseudo-random and low-discrepancy, on fixed seeds and sample counts, by time ste
 antithetic paths and with a Brownian bridge; then an expired option and a zero notional, which the option refuses.
 
 The expired option's error estimate is left out: QuantLib's MultiAssetOption leaves it unset on expiry, so reading it
-throws, where nanoql's multi-asset results carry the 0 of an instrument's expired results (the S-xeq run's R2-6).
+throws, where nanoql's multi-asset results carry the 0 of an instrument's expired results.
 
 Every structure is on Act/365 (Fixed) from the evaluation date and every process shares one risk-free curve, so the
-engine's clock is every structure's own (the S-xeq plan's §2.8): the processes are the MC European basket generator's
+engine's clock is every structure's own: the processes are the MC European basket generator's
 (tools/vectors/gen/pricingengines/basket/mceuropeanbasketengine.py). The specs: an option {"notional", "guarantee",
 "exercise"} with tools/vectors/gen/instruments/basketoption.py's exercise, and an engine {"processes", "correlation",
 "traits" ("pr" | "ld"), "timeSteps", "timeStepsPerYear", "brownianBridge", "antitheticVariate", "requiredSamples",

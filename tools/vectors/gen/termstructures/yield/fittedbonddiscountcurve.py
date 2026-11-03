@@ -16,15 +16,14 @@ Under the evaluation date Monday 16 June 2025, on Actual/365 (Fixed):
   maximum date and number of bonds, the method's weights (the bonds' normalized inverse durations), solution, number of
   iterations and cost, and the curve's discount at 12 dates.
 
-Filtered (the S7R6 rule of the S7 plan, which the S-sr plan's SSD13 applies to the fitted parameters): each fit is
-refitted on the wheel with every clean price one ulp up, then down, by math.nextafter, together, then each alone, up
-and down; an output is written only if every refit leaves it within 1e-12 × max(|a|, |b|, 1), and the dropped outputs
-are counted in the case's inputs. The polynomial's powers are std::pow's, which agree with .NET's within R7, not bit for
-bit.
+Filtered (the stability filter, applied to the fitted parameters too): each fit is refitted on the wheel with every
+clean price one ulp up, then down, by math.nextafter, together, then each alone, up and down; an output is written only
+if every refit leaves it within 1e-12 × max(|a|, |b|, 1), and the dropped outputs are counted in the case's inputs. The
+polynomial's powers are std::pow's, which agree with .NET's within the tolerance, not bit for bit.
 
-Left out: the spread method over a discounting curve on another clock (the S-sr plan's SSR6 (xiv),
-tests/NanoQL.Tests/Divergences/SpreadFittingClockTests.cs), and exponential splines with a fixed κ (SSR6 (v),
-tests/NanoQL.Tests/Divergences/ExponentialSplinesFixedKappaTests.cs).
+Left out: the spread method over a discounting curve on another clock
+(tests/NanoQL.Tests/Divergences/SpreadFittingClockTests.cs), and exponential splines with a fixed κ
+(tests/NanoQL.Tests/Divergences/ExponentialSplinesFixedKappaTests.cs).
 
 Each case's inputs hold its settings, its "kind" ("evaluator" or "fit"), the "method"
 (tools/vectors/gen/termstructures/yield/nonlinearfittingmethods.py's spec) and, for an evaluator, the "parameters",

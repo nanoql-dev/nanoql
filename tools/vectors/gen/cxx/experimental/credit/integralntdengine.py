@@ -9,11 +9,11 @@ QuantLib's test market (ten names at hazard 0.01, recovery 0.4, a 5% continuous 
 schedule from 1 September 2006) and a smaller heterogeneous one, on constant-loss models (Gaussian at correlations 0,
 0.3 and 0.6; Student t of orders 5, 5 at 0.3; Gaussian by factor weights): swaps of every order, both sides, with and
 without the premium accrued at default, at weekly and monthly integration steps; upfronts only where the swap's nominal
-is the basket's notional (QuantLib's upfront is the basket's remaining notional times the rate, the S-xcr plan's XR8
-(xi), held in Divergences/NthToDefaultUpfrontTests.cs); a swap that expired; and the inspectors. No swap started before
-the discount curve's date and before its first payment, whose upfront QuantLib discounts before the curve (XR8 (x),
-held in Divergences/NthToDefaultReferenceDateTests.cs). And the refused swaps (an order above the basket's size, a
-basket born after the schedule's start). Read back by
+is the basket's notional (QuantLib's upfront is the basket's remaining notional times the rate, held in
+Divergences/NthToDefaultUpfrontTests.cs); a swap that expired; and the inspectors. No swap started before the discount
+curve's date and before its first payment, whose upfront QuantLib discounts before the curve (held in
+Divergences/NthToDefaultReferenceDateTests.cs). And the refused swaps (an order above the basket's size, a basket born
+after the schedule's start). Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Experimental/Credit/IntegralNtdEngineCxxVectorTests.cs."""
 import importlib.util
 import os

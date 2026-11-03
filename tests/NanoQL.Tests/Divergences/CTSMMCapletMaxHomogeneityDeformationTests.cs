@@ -9,12 +9,11 @@ namespace NanoQL.Tests.Divergences;
 /// The calibrations' deformation size. QuantLib's maximally homogeneous calibration sums, for each caplet i, the
 /// squared change of the step index's own volatility once per moved volatility, <c>(theseNewVols[i] −
 /// secondRateVols[i])²</c> for each <c>j &lt; i + 2</c> (<c>capletcoterminalmaxhomogeneity.cpp:370-371</c>), where its
-/// loop runs over j: nanoql sums each moved volatility's own squared change (fixed under R8, the run's own find;
-/// QuantLib's tests only print it). And QuantLib's alpha-form and original calibrations never compute it, returning the
-/// initializer's 987654321 (<c>ctsmmcapletcalibration.cpp:131</c>, <c>:199</c>), nor its periodic calibration (the S-mm
-/// plan's MR3 (xxi)): nanoql's is null there. Checks: the deformation rebuilt from the results' calibrated and given
-/// volatilities, each step's volatility times the root of its length; QuantLib's sum restated on the same volatilities,
-/// 0.00177 on QuantLib's case (the planner's MP4).
+/// loop runs over j: nanoql sums each moved volatility's own squared change (fixed; QuantLib's tests only print it).
+/// And QuantLib's alpha-form and original calibrations never compute it, returning the initializer's 987654321
+/// (<c>ctsmmcapletcalibration.cpp:131</c>, <c>:199</c>), nor its periodic calibration: nanoql's is null there. Checks:
+/// the deformation rebuilt from the results' calibrated and given volatilities, each step's volatility times the root
+/// of its length; QuantLib's sum restated on the same volatilities, 0.00177 on QuantLib's case.
 /// </summary>
 public class CTSMMCapletMaxHomogeneityDeformationTests
 {

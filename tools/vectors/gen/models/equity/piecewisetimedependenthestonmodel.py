@@ -3,15 +3,15 @@
 """Vectors for QuantLib's PiecewiseTimeDependentHestonModel (ql/models/equity/piecewisetimedependenthestonmodel.hpp,
 .cpp), on the evaluation date 15 October 2026: the Heston model with piecewise constant parameters on a time grid.
 
-tools/vectors/gen/pricingengines/vanilla/analyticptdhestonengine.py's three models on flat and linear zero curves: θ,
-κ, σ and ρ at eight times across and past their steps, v₀, s₀, the time grid's times and the flat parameter vector.
-And a calibration of the every-parameter-piecewise model, its 13 parameters, to twenty Heston helpers (five strikes at
-four maturities, one or two in each of the grid's steps, implied volatilities from the analytic Heston engine on known
-parameters) by Levenberg-Marquardt through
-AnalyticPTDHestonEngine at Gauss-Laguerre order 144, from parameters moved off the known ones: the calibrated
-parameters and the helpers' errors, under the S7 plan's S7R6 filter: the calibration rerun with each market volatility
-moved one ulp, up and down, and each output written only where every rerun leaves it within 1e-10 x max(|a|, |b|, 1),
-a dropped one null and its index in the case's input "dropped"; the generator prints "dropped n of m outputs".
+tools/vectors/gen/pricingengines/vanilla/analyticptdhestonengine.py's three models on flat and linear zero curves: θ, κ,
+σ and ρ at eight times across and past their steps, v₀, s₀, the time grid's times and the flat parameter vector. And a
+calibration of the every-parameter-piecewise model, its 13 parameters, to twenty Heston helpers (five strikes at four
+maturities, one or two in each of the grid's steps, implied volatilities from the analytic Heston engine on known
+parameters) by Levenberg-Marquardt through AnalyticPTDHestonEngine at Gauss-Laguerre order 144, from parameters moved
+off the known ones: the calibrated parameters and the helpers' errors, under the stability filter: the calibration rerun
+with each market volatility moved one ulp, up and down, and each output written only where every rerun leaves it within
+1e-10 x max(|a|, |b|, 1), a dropped one null and its index in the case's input "dropped"; the generator prints "dropped
+n of m outputs".
 
 A case holds one model (analyticptdhestonengine.py's spec) and, for the calibration, its helpers {"maturities" (days),
 "strikes", "vols"} and the start. The wheel's calls, by QuantLib-SWIG 1.44's calibratedmodel.i: the model's theta,
@@ -88,7 +88,7 @@ def calibrate(spec, vols):
 
 
 def reruns(spec, vols):
-    """The calibration with each market volatility moved one ulp, up and down (S7R6); None where a rerun fails."""
+    """The calibration with each market volatility moved one ulp, up and down; None where a rerun fails."""
     for i in range(len(vols)):
         for d in (math.inf, -math.inf):
             moved = list(vols)

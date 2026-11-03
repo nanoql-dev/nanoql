@@ -21,17 +21,16 @@ the resettable coupons' FX rates and notionals. NPVs and amounts are compared at
 
 Each case's inputs hold its settings (with the past FX fixings the case reads), "swap" ({"type", "fxBaseNominal",
 "fxBaseCurrency", "fxBaseSchedule", "fxBaseIndex", "fxBaseSpread", "fxBaseGearing", the same six for "fxQuote",
-"isFxBaseCurrencyLegResettable", "fxResetFixingDays", "fxResetFixingCalendar", "fxBasePaymentLag",
-"fxQuotePaymentLag", "fxBasePaymentConvention", "fxQuotePaymentConvention", "fxBaseCompoundSpread",
-"fxBaseLookbackDays", "fxBaseObservationShift", "fxBaseLockoutDays", "fxBaseAveragingMethod", the same five for
-"fxQuote", "useIndexedCoupons", "fxBaseStubIndexSelection", "fxQuoteStubIndexSelection"}, a null calendar QuantLib's
-empty one, a null lookback or coupon choice QuantLib's default) and "engine", in
-instruments/constnotionalcrosscurrencyswap.py's specs. The wheel's constructor takes the arguments after the
-resettable flag by name. Left out: telescopic value dates, which nanoql builds in full
-(tests/NanoQL.Tests/Divergences/TelescopicValueDatesTests.cs); and the fair spreads of a leg compounding its spread
-(its fair base or quote spread and its fair pay or receive spread), which nanoql solves on the swap's pricing where
-QuantLib's BPS route is inexact (the S-rx plan's C3 review, B1-2;
-tests/NanoQL.Tests/Divergences/CrossCurrencySwapCompoundedSpreadFairSpreadTests.cs). Read back by
+"isFxBaseCurrencyLegResettable", "fxResetFixingDays", "fxResetFixingCalendar", "fxBasePaymentLag", "fxQuotePaymentLag",
+"fxBasePaymentConvention", "fxQuotePaymentConvention", "fxBaseCompoundSpread", "fxBaseLookbackDays",
+"fxBaseObservationShift", "fxBaseLockoutDays", "fxBaseAveragingMethod", the same five for "fxQuote",
+"useIndexedCoupons", "fxBaseStubIndexSelection", "fxQuoteStubIndexSelection"}, a null calendar QuantLib's empty one, a
+null lookback or coupon choice QuantLib's default) and "engine", in instruments/constnotionalcrosscurrencyswap.py's
+specs. The wheel's constructor takes the arguments after the resettable flag by name. Left out: telescopic value dates,
+which nanoql builds in full (tests/NanoQL.Tests/Divergences/TelescopicValueDatesTests.cs); and the fair spreads of a leg
+compounding its spread (its fair base or quote spread and its fair pay or receive spread), which nanoql solves on the
+swap's pricing where QuantLib's BPS route is inexact
+(tests/NanoQL.Tests/Divergences/CrossCurrencySwapCompoundedSpreadFairSpreadTests.cs). Read back by
 tests/NanoQL.Tests/Vectors/Experimental/FX/MtMCrossCurrencyBasisSwapVectorTests.cs."""
 import importlib.util
 import os

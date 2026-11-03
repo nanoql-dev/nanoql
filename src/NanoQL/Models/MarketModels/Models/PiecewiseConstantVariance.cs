@@ -13,7 +13,7 @@ namespace NanoQL.Models;
 /// A rate's variance, piecewise constant over the steps between its rate times: each step's variance and volatility,
 /// and their totals from time zero.
 /// </summary>
-/// <remarks>Immutable (the S-mm plan's MR1 (i)). An extension point, as in QuantLib.</remarks>
+/// <remarks>Immutable. An extension point, as in QuantLib.</remarks>
 public abstract class PiecewiseConstantVariance
 {
     /// <summary>Initializes a new instance of the <see cref="PiecewiseConstantVariance"/> class.</summary>
@@ -77,7 +77,7 @@ public abstract class PiecewiseConstantVariance
     {
         double total = TotalVariance(i);
 
-        // QuantLib reads the rate time unchecked, past an extension's rate times (MR3 (xx)).
+        // QuantLib reads the rate time unchecked, past an extension's rate times.
         ImmutableArray<double> rateTimes = RateTimes;
         CheckStep(i, rateTimes.Length);
         return Math.Sqrt(total / rateTimes[i]);

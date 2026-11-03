@@ -5,7 +5,7 @@
 American average, spread, minimum and maximum basket options on one, two and three Black-Scholes processes, on one grid
 size scaled by the eigenvalues and on a grid size per direction, under Douglas's scheme (QuantLib's C++ default, given
 explicitly: the wheel's default is Hundsdorfer's), Hundsdorfer's, and implicit Euler and TR-BDF2, whose Krylov solves
-are measured, not pinned (the S-exo plan's ED9).
+are measured, not pinned.
 
 Every structure is on Act/365 (Fixed) from the evaluation date and every process shares one risk-free curve; each
 covariance is positive definite: on structures dated or day-counted apart QuantLib reads them at the first process's

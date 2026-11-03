@@ -12,12 +12,11 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The base-correlation model after a default (the S-xcr plan's XR8 (xvi)): its equity baskets hold the live names,
-/// their notionals and recoveries, where QuantLib's take the live notionals on the whole pool and its basket refuses
-/// ("unmatched data entry sizes in basket"). A (10) defaulted in June 2006 and settled at 0.25, B (20) and C (30) alive,
-/// [10%, 50%] from 1 January 2006, recoveries 0.3, 0.5, 0.6, the Gaussian LHP base on a flat surface of 0.3: QuantLib's
-/// model on the basket of the live names (B and C over [0, 45%]) reads 2.2611633149989752 at five years (the S-xcr
-/// run's <c>c3_facts.cpp</c>).
+/// The base-correlation model after a default: its equity baskets hold the live names, their notionals and recoveries,
+/// where QuantLib's take the live notionals on the whole pool and its basket refuses ("unmatched data entry sizes in
+/// basket"). A (10) defaulted in June 2006 and settled at 0.25, B (20) and C (30) alive, [10%, 50%] from 1 January
+/// 2006, recoveries 0.3, 0.5, 0.6, the Gaussian LHP base on a flat surface of 0.3: QuantLib's model on the basket of
+/// the live names (B and C over [0, 45%]) reads 2.2611633149989752 at five years.
 /// </summary>
 public class BaseCorrelationLossModelTests
 {
@@ -40,7 +39,7 @@ public class BaseCorrelationLossModelTests
     public void AnEquityTranchesAttachmentLegIsZero()
     {
         // levels 3% and 7% at 0.1 and 0.3: the surface reads -0.05 at level 0, where QuantLib's LHP base throws; the
-        // model is its base at the detachment's correlation (the S-xcr code review's C3 O1-5)
+        // model is its base at the detachment's correlation
         BaseCorrelationTermStructure<Bilinear> surface = BaseCorrelationTermStructure<Bilinear>.Create(
             0, new TARGET(), BusinessDayConvention.Following, [new Period(1, TimeUnit.Years), new Period(10, TimeUnit.Years)],
             [0.03, 0.07], [[0.1, 0.1], [0.3, 0.3]], new Actual365Fixed(), Context);

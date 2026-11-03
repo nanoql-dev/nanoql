@@ -23,9 +23,9 @@ namespace NanoQL.Numerics;
 /// </para>
 /// <para>
 /// Two of QuantLib's defects are fixed. <see cref="MaximumLocation"/> is QuantLib's master's (#2841, after the pin),
-/// where 1.44 returns the stationary point unconditionally, a minimum when b &lt; 0 (the S-g1d plan's G1R5 (iii)); and
-/// <see cref="MaximumValue"/> is the function at that location, where QuantLib returns d whenever b = 0 or a ≤ 0, so
-/// 0.17 for <c>AbcdFunction()</c>'s defaults whose maximum is 0.2657 (G1R6 (ix)).
+/// where 1.44 returns the stationary point unconditionally, a minimum when b &lt; 0; and <see cref="MaximumValue"/> is
+/// the function at that location, where QuantLib returns d whenever b = 0 or a ≤ 0, so 0.17 for <c>AbcdFunction()</c>'s
+/// defaults whose maximum is 0.2657.
 /// </para>
 /// </remarks>
 public class AbcdMathFunction
@@ -209,7 +209,7 @@ public class AbcdMathFunction
         }
     }
 
-    /// <summary>The function's maximum: its value at <see cref="MaximumLocation"/>, d at +∞ (G1R6 (ix)).</summary>
+    /// <summary>The function's maximum: its value at <see cref="MaximumLocation"/>, d at +∞.</summary>
     /// <returns>The maximum.</returns>
     public double MaximumValue()
     {

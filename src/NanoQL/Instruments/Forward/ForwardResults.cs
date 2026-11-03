@@ -11,8 +11,8 @@ namespace NanoQL.Instruments;
 /// forward value discounted from the maturity date, and the underlying's spot value and income and the forward value.
 /// </summary>
 /// <remarks>QuantLib's mutable <c>underlyingSpotValue_</c> and <c>underlyingIncome_</c>, which its calculation sets,
-/// and its <c>forwardValue()</c>, which calculates on reading, are results here (the S-cms plan's CMD5). A result that
-/// can't be computed is <see langword="null"/>: an expired forward's.</remarks>
+/// and its <c>forwardValue()</c>, which calculates on reading, are results here. A result that can't be computed is
+/// <see langword="null"/>: an expired forward's.</remarks>
 public sealed record ForwardResults : InstrumentResults
 {
     /// <summary>Gets the underlying's spot value.</summary>

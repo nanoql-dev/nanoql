@@ -31,19 +31,19 @@ namespace NanoQL.Experimental;
 /// 10.8.4.
 /// </para>
 /// <para>
-/// Documented divergences (<c>Divergences/PerturbativeBarrierEngineTests.cs</c>), each leaving QuantLib's bits where
-/// it doesn't apply, order 0's among them. Three lines of QuantLib's TVPACK port are Genz's (the S-xeq plan's XER5
-/// (i)): Plackett's integrand squares <c>BA − R·BB</c> where QuantLib 1.44 takes its square root (upstream's own fix
-/// after v1.44, #2935); its Student branch belongs to the degrees-of-freedom test, where QuantLib's attaches it to the
-/// normal integrand's cut, so a normal integrand past the cut returns 0, not QuantLib's 0.5 or NaN; and the bivariate
-/// normal's |ρ| ≥ 0.925 branch takes √(1 − x²), where QuantLib's takes (1 − x²)². QuantLib's first 12-point weight,
-/// short of Genz's in the last digits, stands. The second-order term's derivative helpers are their functions'
-/// derivatives in a, term by term from the identity ∂Φ₂(h, k; ρ)/∂h = φ(h) Φ((k − ρh)/√(1 − ρ²)) their own terms
-/// apply (XER5 (ii)): the F helper's factor at <c>tt − s</c>, its function's, where QuantLib's reads <c>tt − p</c>; and
-/// the E helper's limits √(τ(p − s)/(2ps)) and √(τ(p − s)/(2(τ − p)(τ − s))) with the sign of its derivative through
-/// the first limit, where QuantLib's are mistranscribed. The rate, carry and variance integrals run on the engine's
-/// clock, <see cref="FdmBlackScholesOp.Clock"/>, each structure read at the instants its times denote on its own clock
-/// (XER5 (xxxiii)); where every structure shares the risk-free curve's times, QuantLib's.
+/// Documented divergences (<c>Divergences/PerturbativeBarrierEngineTests.cs</c>), each leaving QuantLib's bits where it
+/// doesn't apply, order 0's among them. Three lines of QuantLib's TVPACK port are Genz's: Plackett's integrand squares
+/// <c>BA − R·BB</c> where QuantLib 1.44 takes its square root (upstream's own fix after v1.44, #2935); its Student
+/// branch belongs to the degrees-of-freedom test, where QuantLib's attaches it to the normal integrand's cut, so a
+/// normal integrand past the cut returns 0, not QuantLib's 0.5 or NaN; and the bivariate normal's |ρ| ≥ 0.925 branch
+/// takes √(1 − x²), where QuantLib's takes (1 − x²)². QuantLib's first 12-point weight, short of Genz's in the last
+/// digits, stands. The second-order term's derivative helpers are their functions' derivatives in a, term by term from
+/// the identity ∂Φ₂(h, k; ρ)/∂h = φ(h) Φ((k − ρh)/√(1 − ρ²)) their own terms apply: the F helper's factor at <c>tt −
+/// s</c>, its function's, where QuantLib's reads <c>tt − p</c>; and the E helper's limits √(τ(p − s)/(2ps)) and √(τ(p −
+/// s)/(2(τ − p)(τ − s))) with the sign of its derivative through the first limit, where QuantLib's are mistranscribed.
+/// The rate, carry and variance integrals run on the engine's clock, <see cref="FdmBlackScholesOp.Clock"/>, each
+/// structure read at the instants its times denote on its own clock; where every structure shares the risk-free curve's
+/// times, QuantLib's.
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]
@@ -127,7 +127,7 @@ public static class PerturbativeBarrierOptionEngine
         double kprice = payoff.Strike;
         double hbarr = option.Barrier;
 
-        // the engine's clock (XER5 (xxxiii)): each structure read at the instants its times denote on its own clock
+        // the engine's clock: each structure read at the instants its times denote on its own clock
         TermStructure clock = FdmBlackScholesOp.Clock(process);
         var market = new Market(process, clock);
 
@@ -520,7 +520,7 @@ public static class PerturbativeBarrierOptionEngine
     }
 
     // Derivative with respect to a of the function D_F(s,p,tt,a,b,gm): QuantLib's terms, its factor at tt − s, the
-    // function's (XER5 (ii)), where QuantLib's reads tt − p
+    // function's, where QuantLib's reads tt − p
     internal static double Ddff(double s, double p, double tt, double a, double b, double gm)
     {
         double xx = (a - (b * (tt - p))) / Math.Sqrt(2.0 * (tt - p));
@@ -622,8 +622,8 @@ public static class PerturbativeBarrierOptionEngine
 
     // Derivative with respect to a of the function D_E(s,p,tt,a,b,gm): QuantLib's terms, each normal's limit
     // (y − ρx)/√(1 − ρ²) as the identity gives it, ∓b√((p − s)/(2ps)) and a√((p − s)/(2(τ − p)(τ − s))), and the
-    // E term's x-derivative negative, d/dx [Φ₂(x, y) − Φ(x)] = −φ(x) Φ(−(y − ρx)/√(1 − ρ²)) (XER5 (ii)), where QuantLib's
-    // limits read √((p − s)/√(2ps)) and √((p − s)/√(2(τ − p)(τ − s))) and that term is positive
+    // E term's x-derivative negative, d/dx [Φ₂(x, y) − Φ(x)] = −φ(x) Φ(−(y − ρx)/√(1 − ρ²)), where QuantLib's limits
+    // read √((p − s)/√(2ps)) and √((p − s)/√(2(τ − p)(τ − s))) and that term is positive
     internal static double Ddvv(double s, double p, double tt, double a, double b, double gm)
     {
         double aa = ((a * p) + (b * (tt - p))) / Math.Sqrt(2.0 * p * tt * (tt - p));
@@ -1065,8 +1065,8 @@ public static class PerturbativeBarrierOptionEngine
     }
 
     // Computes Plackett formula integrand: Genz's PNTGND, its quadratic form squared (#2935) and its Student branch
-    // under the degrees-of-freedom test (XER5 (i)), where QuantLib 1.44 takes a square root and attaches the branch to
-    // the normal integrand's cut
+    // under the degrees-of-freedom test, where QuantLib 1.44 takes a square root and attaches the branch to the normal
+    // integrand's cut
     private static double Pntgnd(int nuc, double ba, double bb, double bc, double ra, double rb, double r, double rr)
     {
         double result = 0.0;
@@ -1099,7 +1099,7 @@ public static class PerturbativeBarrierOptionEngine
     // Bivariate normal probabilities P(X > DH, Y > DK), so that P(X < DH, Y < DK) = ND2(-DH, -DK, R): Drezner and
     // Wesolowsky's method ("On the computation of the bivariate normal integral", Journal of Statist. Comput. Simul. 35
     // (1989) 101-107) with Genz's modifications for double precision and |R| close to 1, as Recchioni ported it; its
-    // |R| >= 0.925 branch Genz's BVND, √(1 − XS) (XER5 (i)), where QuantLib's port takes (1 − XS)²
+    // |R| >= 0.925 branch Genz's BVND, √(1 − XS), where QuantLib's port takes (1 − XS)²
     internal static double Nd2(double a, double b, double rho)
     {
         ReadOnlySpan<double> xl =
@@ -1282,8 +1282,8 @@ public static class PerturbativeBarrierOptionEngine
     }
 
     // QuantLib's adapters of the process: the integrated rate, the integrated carry and variance, the instantaneous
-    // carry and variance, each structure read at the instants the clock's times denote (XER5 (xxxiii)); QuantLib's reads
-    // where a structure shares the clock's times.
+    // carry and variance, each structure read at the instants the clock's times denote; QuantLib's reads where a
+    // structure shares the clock's times.
     private sealed class Market(GeneralizedBlackScholesProcess process, TermStructure clock)
     {
         private readonly YieldTermStructure r = process.RiskFreeRate;

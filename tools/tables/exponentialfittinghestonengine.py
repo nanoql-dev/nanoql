@@ -1,8 +1,7 @@
 # SPDX-FileCopyrightText: 2026 The nanoql Authors
 # SPDX-License-Identifier: Apache-2.0
 """Generates the node table QuantLib's exponentially fitted Gauss-Laguerre Heston engine reads, from
-ql/pricingengines/vanilla/exponentialfittinghestonengine.cpp at the pin (docs/porting-playbook.md §1, generated tables;
-the S-hes plan's HD15).
+ql/pricingengines/vanilla/exponentialfittinghestonengine.cpp at the pin (docs/porting-playbook.md §1, generated tables).
 
 Usage: .venv\\Scripts\\python -I tools/tables/exponentialfittinghestonengine.py <QuantLib v1.44 worktree> [<output root>]
 
@@ -10,7 +9,7 @@ It writes src/NanoQL/PricingEngines/Vanilla/ExponentialFittingHestonEngine/Expon
 under the output root (by default the repository): QuantLib's array values4, 147 rows of 129 doubles (each row's
 moneyness, its 64 nodes and its 64 weights), row by row, as little-endian IEEE 754 doubles, each literal parsed to the
 double C++ rounds it to. The loader, ExponentialFittingHestonEngineValues.cs beside it, reads it back.
-tools/check-upstream.py (G4 (6)) regenerates it into a temporary folder and compares the bytes with the committed file.
+tools/check-upstream.py regenerates it into a temporary folder and compares the bytes with the committed file.
 """
 import os
 import re

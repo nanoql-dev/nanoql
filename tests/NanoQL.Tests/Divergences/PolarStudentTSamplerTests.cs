@@ -8,13 +8,12 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The polar Student t factor sampler draws its factors from one uniform stream in turn, each scaled to unit variance
-/// (the S-xcr plan's XR8 (xix)): QuantLib's gives each t generator its own copy of one uniform generator, so the systemic
-/// draw k equals the idiosyncratic stream's draw k, and leaves its draws raw, of variance ν/(ν − 2)
-/// (<c>latentmodel.hpp:779-794</c>, <c>polarstudenttrng.hpp:86</c>). QuantLib's values are the plan review's
-/// <c>rv_basket.cpp polar</c> (ν 5, 5, weight √0.3, 200,000 paths at seed 42) and the planner's <c>xp_latent.cpp</c>
-/// (D17); the checks, which QuantLib's sampler fails, are each factor's sample variance within three standard errors of
-/// 1, the simulated default frequency against the model's probability and the inversion sampler's, and the systemic
+/// The polar Student t factor sampler draws its factors from one uniform stream in turn, each scaled to unit variance:
+/// QuantLib's gives each t generator its own copy of one uniform generator, so the systemic draw k equals the
+/// idiosyncratic stream's draw k, and leaves its draws raw, of variance ν/(ν − 2) (<c>latentmodel.hpp:779-794</c>,
+/// <c>polarstudenttrng.hpp:86</c>). QuantLib's values are recorded in the test (ν 5, 5, weight √0.3, 200,000 paths at
+/// seed 42); the checks, which QuantLib's sampler fails, are each factor's sample variance within three standard errors
+/// of 1, the simulated default frequency against the model's probability and the inversion sampler's, and the systemic
 /// draws against the idiosyncratic stream's.
 /// </summary>
 public class PolarStudentTSamplerTests

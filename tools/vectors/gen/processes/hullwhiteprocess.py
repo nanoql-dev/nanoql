@@ -3,17 +3,16 @@
 """Vectors for QuantLib's HullWhiteProcess and HullWhiteForwardProcess (ql/processes/hullwhiteprocess.hpp, .cpp),
 through the members the wheel binds.
 
-Eighteen processes: six reversion and volatility pairs (a from 1e-3 to 2, sigma from 0.005 to 0.02) on three curves
-of tools/vectors/gen/models/shortrate/onefactormodels/hullwhite.py (a flat 4% on Actual/365 (Fixed), a flat 3%
-compounded annually on Actual/360, and a bootstrapped log-linear discount curve on its fixture rate helpers). For the
-process: x0(), drift and diffusion at eight (t, x) points, expectation, stdDeviation and variance at eight (t0, x0, dt)
-steps (a zero step among them), evolve at six (t0, x0, dt, dw) points and apply at three. For the forward process, at
-forward measure times 2, 10 and 30, each set on a fresh process with setForwardMeasureTime: the same outputs, its
-expectation less M_T(t0, t0 + dt, T) and its drift less B(t, T) sigma^2; and, on the process at T = 10, alpha(t) at
-six times, B(t, T) at six points and M_T(s, t, T) at six. The reversions stay at a >= 1e-3, where QuantLib 1.44's
-forms and nanoql's cancellation-free ones (the S-sr plan's SSR3 and SSR6 (ii)) agree within the tolerance; below it
-they part (tests/NanoQL.Tests/Divergences/HullWhiteProcessSmallReversionTests.cs,
-HullWhiteForwardProcessSmallReversionTests.cs).
+Eighteen processes: six reversion and volatility pairs (a from 1e-3 to 2, sigma from 0.005 to 0.02) on three curves of
+tools/vectors/gen/models/shortrate/onefactormodels/hullwhite.py (a flat 4% on Actual/365 (Fixed), a flat 3% compounded
+annually on Actual/360, and a bootstrapped log-linear discount curve on its fixture rate helpers). For the process:
+x0(), drift and diffusion at eight (t, x) points, expectation, stdDeviation and variance at eight (t0, x0, dt) steps (a
+zero step among them), evolve at six (t0, x0, dt, dw) points and apply at three. For the forward process, at forward
+measure times 2, 10 and 30, each set on a fresh process with setForwardMeasureTime: the same outputs, its expectation
+less M_T(t0, t0 + dt, T) and its drift less B(t, T) sigma^2; and, on the process at T = 10, alpha(t) at six times, B(t,
+T) at six points and M_T(s, t, T) at six. The reversions stay at a >= 1e-3, where QuantLib 1.44's forms and nanoql's
+cancellation-free ones agree within the tolerance; below it they part
+(tests/NanoQL.Tests/Divergences/HullWhiteProcessSmallReversionTests.cs, HullWhiteForwardProcessSmallReversionTests.cs).
 
 The wheel's calls, by QuantLib-SWIG's stochasticprocess.i: ql.HullWhiteProcess(YieldTermStructureHandle, a, sigma)
 and ql.HullWhiteForwardProcess(YieldTermStructureHandle, a, sigma), x0, drift, diffusion, expectation, stdDeviation,

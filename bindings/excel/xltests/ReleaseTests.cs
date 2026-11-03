@@ -9,10 +9,10 @@ using Microsoft.Office.Interop.Excel;
 namespace NanoQL.Excel.XlTests;
 
 /// <summary>
-/// Handles and their release (XLR2, XLR15, XLP78), read through the test build's <c>nqlxlStats</c> (XLD25): two cells
-/// making the same call share one handle; 300 handle cells cleared release their objects; a spilled leg's coupons go
-/// with the leg's cell; a looped cell's objects go when it is cleared, shrunk, or one element's input changes. The tests
-/// counting live objects run in an Excel of their own.
+/// Handles and their release, read through the test build's <c>nqlxlStats</c>: two cells making the same call share one
+/// handle; 300 handle cells cleared release their objects; a spilled leg's coupons go with the leg's cell; a looped
+/// cell's objects go when it is cleared, shrunk, or one element's input changes. The tests counting live objects run in
+/// an Excel of their own.
 /// </summary>
 [ExcelTestSettings(OutOfProcess = true)]
 public partial class ReleaseTests : RunnerTest
@@ -58,7 +58,8 @@ public partial class ReleaseTests : RunnerTest
         Assert.Equal(h0, Settle(ws, h0));
     });
 
-    /// <summary>A looped cell's objects (XLP78, F7-3): three deposits from one formula; the cell cleared, entered again, shrunk to two, one element's input changed.</summary>
+    /// <summary>A looped cell's objects: three deposits from one formula; the cell cleared, entered again, shrunk to
+    /// two, one element's input changed.</summary>
     [Fact]
     public void ALoopedCellsObjectsAreReleased() => Alone(ws =>
     {

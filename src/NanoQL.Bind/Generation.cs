@@ -127,8 +127,8 @@ internal sealed class Generation
         }
     }
 
-    // The Matrix and Vector parameters each function's member writes into, from IL; each crosses in and out (R15):
-    // vector& and matrix&, double* with its counts, the shim copying the C# array back after the call.
+    // The Matrix and Vector parameters each function's member writes into, from IL; each crosses in and out: vector&
+    // and matrix&, double* with its counts, the shim copying the C# array back after the call.
     private static void FindWritten(MetadataSet set, Surface surface, ExceptionDocs docs)
     {
         using var writes = new ParameterWrites(set, set.CoreType("NanoQL.Numerics.Matrix"), set.CoreType("NanoQL.Numerics.Vector"), docs);

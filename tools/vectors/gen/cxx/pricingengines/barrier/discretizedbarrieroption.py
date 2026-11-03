@@ -10,8 +10,8 @@ at 100, European in a year, American over the year and Bermudan at its quarters,
 the plain asset at the grid's step 0, 25 and 50 for each type, on values 1 to n over the lattice's n nodes there,
 European in a year, a rebate of 3 and a call struck at 100, and at step 25 for the American and the Bermudan.
 
-The outputs nanoql fixes are left out (the S-bar plan's §2.10): the lattice's grid is the asset's own regular grid, its
-last time the maturity the asset starts at, so the American window is QuantLib 1.44's under #2878's comparison too
+The outputs nanoql fixes are left out: the lattice's grid is the asset's own regular grid, its last time the maturity
+the asset starts at, so the American window is QuantLib 1.44's under #2878's comparison too
 (tests/NanoQL.Tests/Divergences/BarrierUpstreamFixesTests.cs). The option and lattice are
 tools/cxx/src/pricingengines/barrier/discretizedbarrieroption.cpp's. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/PricingEngines/Barrier/DiscretizedBarrierOptionCxxVectorTests.cs."""

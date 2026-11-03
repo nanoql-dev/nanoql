@@ -1,11 +1,11 @@
 # SPDX-FileCopyrightText: 2026 The nanoql Authors
 # SPDX-License-Identifier: Apache-2.0
-"""Batch 7's presets, which the wheel doesn't bind, written from the C++ harness: the generic region and its two
+"""The commodity presets, which the wheel doesn't bind, written from the C++ harness: the generic region and its two
 indexes, QuantLib's eight units of measure, its seven known conversion factors and the commodity and quantity settings'
 defaults. Each value is QuantLib's source's, the line named, and checked on the harness's existing methods where they
 show it: the generic indexes' family and region, their frequency, revised flag, lag and currency their constructor's
-arguments; each unit's code, which the harness's units are; and each known factor with its direction, found by a
-direct lookup. Two known factors are nanoql's, stored the right way round (the S-xrt plan's XRR4, docs/divergences.md,
+arguments; each unit's code, which the harness's units are; and each known factor with its direction, found by a direct
+lookup. Two known factors are nanoql's, stored the right way round (docs/divergences.md,
 Divergences/CommodityKnownFactorsTests.cs): the harness's QuantLib stores them backward, which the generator asserts.
 ConventionSet.QuantLib reads the file; Vectors/Conventions/CommodityPresetTests.cs checks each record against its coded
 class."""
@@ -39,7 +39,7 @@ UNITS = [
 CODES = {cls: code for cls, _, code, _, _ in UNITS}
 
 # unitofmeasureconversionmanager.cpp:106-133, addKnownConversionFactors, in its order: (source, target, factor) as
-# nanoql stores them, and whether QuantLib stores the pair the other way round (XRR4)
+# nanoql stores them, and whether QuantLib stores the pair the other way round
 KNOWN = [
     ("MBUnitOfMeasure", "BarrelUnitOfMeasure", 1000, False),
     ("BarrelUnitOfMeasure", "GallonUnitOfMeasure", 42, False),
@@ -85,7 +85,7 @@ def unit_records():
 
 def conversion_records(H):
     """Each known factor by a direct lookup on QuantLib's null commodity type after clear(): its factor, and its
-    direction, the reverse of nanoql's for XRR4's two."""
+    direction, the reverse of nanoql's for the two QuantLib stores reversed."""
     queries = [["<NULL>", CODES[s], CODES[t], DIRECT] for s, t, _, _ in KNOWN]
     found = H.call("UnitOfMeasureConversionManager::lookups", [], queries)["lookups"]
     out = []

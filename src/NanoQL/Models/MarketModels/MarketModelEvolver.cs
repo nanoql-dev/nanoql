@@ -13,10 +13,10 @@ namespace NanoQL.Models;
 /// A market-model evolver: the gritty work of evolving the rates from one evolution time to the next, path by path.
 /// </summary>
 /// <remarks>
-/// A working type (the S-mm plan's MR1 (ii)): it keeps its state between steps, owned by one computation, and isn't
-/// thread-safe. Its <see cref="CurrentState"/> is its own curve state, read only by contract and valid until its next
-/// step, as QuantLib's <c>const CurveState&amp;</c> is; a caller that keeps it calls <see cref="CurveState.Clone"/>.
-/// An extension point, as in QuantLib.
+/// A working type: it keeps its state between steps, owned by one computation, and isn't thread-safe. Its
+/// <see cref="CurrentState"/> is its own curve state, read only by contract and valid until its next step, as
+/// QuantLib's <c>const CurveState&amp;</c> is; a caller that keeps it calls <see cref="CurveState.Clone"/>. An
+/// extension point, as in QuantLib.
 /// </remarks>
 [WorkingType]
 public abstract class MarketModelEvolver

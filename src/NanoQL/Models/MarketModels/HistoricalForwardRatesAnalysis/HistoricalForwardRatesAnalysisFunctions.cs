@@ -29,17 +29,17 @@ public static class HistoricalForwardRatesAnalysisFunctions
     /// <remarks>
     /// <para>
     /// The statistics are reset to the number of forwards and filled in place; the dates skipped and failed, their
-    /// messages and the fixing periods are returned (the S-mmp plan's SMD6). Each date is evaluated in a copy of the
-    /// given context on that date with <see cref="EvaluationContext.EnforcesTodaysHistoricFixings"/> true, QuantLib's
-    /// <c>SavedSettings</c> and global settings (SMD9).
+    /// messages and the fixing periods are returned. Each date is evaluated in a copy of the given context on that date
+    /// with <see cref="EvaluationContext.EnforcesTodaysHistoricFixings"/> true, QuantLib's <c>SavedSettings</c> and
+    /// global settings.
     /// </para>
     /// <para>
-    /// The curve is bootstrapped afresh on each date (S5R1, a documented divergence): QuantLib's single curve restarts
-    /// each date's bootstrap from the last date's solution, so its forwards differ within the curve's accuracy.
-    /// QuantLib's <c>catch (std::exception&amp;)</c> catches the <see cref="NanoQLException"/> and
-    /// <see cref="ArgumentException"/> QuantLib's errors map to. A step of no length, on which QuantLib's loop over the
-    /// dates never ends, is refused, as is a forward index of no tenor where the first forward is within the horizon,
-    /// on which its loop over the fixing periods never ends.
+    /// The curve is bootstrapped afresh on each date (a documented divergence): QuantLib's single curve restarts each
+    /// date's bootstrap from the last date's solution, so its forwards differ within the curve's accuracy. QuantLib's
+    /// <c>catch (std::exception&amp;)</c> catches the <see cref="NanoQLException"/> and <see cref="ArgumentException"/>
+    /// QuantLib's errors map to. A step of no length, on which QuantLib's loop over the dates never ends, is refused,
+    /// as is a forward index of no tenor where the first forward is within the horizon, on which its loop over the
+    /// fixing periods never ends.
     /// </para>
     /// </remarks>
     /// <typeparam name="TTraits">The curve's bootstrap traits.</typeparam>

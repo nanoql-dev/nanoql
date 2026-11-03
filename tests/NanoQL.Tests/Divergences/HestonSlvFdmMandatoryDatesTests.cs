@@ -13,13 +13,13 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The finite-difference SLV model's mandatory dates (the S-hes plan's HR7 (xx)). QuantLib appends their times to its
-/// exponential grid unsorted and builds the leverage surface on that list (<c>hestonslvfdmmodel.cpp:325-330</c>,
-/// <c>:412</c>): a mandatory date inside the period refuses ("dates must be sorted unique!"), one at the end date
-/// ("need strikes for every time step"), and one on the grid's own time ("dates must be sorted unique!"), each on
-/// QuantLib-SWIG 1.44. nanoql runs the surface and the loop on the grid's times, sorted and made unique: a date at the
-/// end or on the grid's own time is QuantLib's calibration without it, bit for bit, and one inside the period prices
-/// the local volatility's options as the calibration without it does, QuantLib's own measure of a calibration.
+/// The finite-difference SLV model's mandatory dates. QuantLib appends their times to its exponential grid unsorted and
+/// builds the leverage surface on that list (<c>hestonslvfdmmodel.cpp:325-330</c>, <c>:412</c>): a mandatory date
+/// inside the period refuses ("dates must be sorted unique!"), one at the end date ("need strikes for every time
+/// step"), and one on the grid's own time ("dates must be sorted unique!"), each on QuantLib-SWIG 1.44. nanoql runs the
+/// surface and the loop on the grid's times, sorted and made unique: a date at the end or on the grid's own time is
+/// QuantLib's calibration without it, bit for bit, and one inside the period prices the local volatility's options as
+/// the calibration without it does, QuantLib's own measure of a calibration.
 /// </summary>
 public class HestonSlvFdmMandatoryDatesTests
 {

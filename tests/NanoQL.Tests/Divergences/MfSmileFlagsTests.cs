@@ -7,10 +7,10 @@ using static NanoQL.Models.MarkovFunctionalModelSettingsAdjustments;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The Markov-functional model's smile pretreatments (the S-g1d plan's G1R6 (vii)): QuantLib's settings refuse only all
-/// three of Kahale's, SABR's and a custom smile, though the refusal's text says "Only one … can be specified"
-/// (<c>markovfunctional.hpp:162-167</c>), so on the wheel Kahale's smile with SABR's validates, and the model then
-/// pretreats with Kahale's and ignores SABR's. nanoql refuses any two, as QuantLib's master does after 1.44 (#2912,
+/// The Markov-functional model's smile pretreatments: QuantLib's settings refuse only all three of Kahale's, SABR's and
+/// a custom smile, though the refusal's text says "Only one … can be specified" (<c>markovfunctional.hpp:162-167</c>),
+/// so on the wheel Kahale's smile with SABR's validates, and the model then pretreats with Kahale's and ignores SABR's.
+/// nanoql refuses any two, as QuantLib's master does after 1.44 (#2912,
 /// <c>Divergences/MarkovFunctionalUpstreamFixesTests.cs</c>), with the master's text, "At most one of …". QuantLib's
 /// check: the master's own cases.
 /// </summary>

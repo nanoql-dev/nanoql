@@ -7,20 +7,20 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The square-root volatility process's step where its scheme degenerates or leaves its domain (R8). QuantLib's
-/// quadratic form takes b² = 2ψ⁻¹ − 1 + √(2ψ⁻¹(2ψ⁻¹ − 1)) (<c>squarerootandersen.cpp:102-103</c>), NaN where the
-/// conditional variance is 0 (no vol of variance: ψ = 0, a = 0, v = 0·∞), where the variance and its mean are both 0
-/// (an absorbed 0 at θ = 0: ψ = 0/0), and where ψ is below about 1.5e-154 (the product overflows): from v₀ 0.09, θ
-/// 0.04, κ 4000 on times 1, 1.0002 and 1.0006, QuantLib's states are finite at vol of variance 3e-76 and NaN at 1e-76
-/// and below (the C++ harness's <c>SquareRootAndersen.paths</c>, this run's probe; at κ 1 every state is NaN at 0).
-/// nanoql takes the form's limit there, the conditional mean. And QuantLib chooses its form by ψ against any cut point
-/// (<c>:100</c>), where the quadratic form holds for ψ ≤ 2 only and the exponential one for ψ ≥ 1: a cut below 1 gives
-/// ψ below 1 the exponential form, its p no probability, the mean 3.38% low and the variance 12.6% high at ψ 0.5 and
-/// cut 0.4 (64 standard errors at 2 million draws), and a cut above 2 gives ψ above 2 the quadratic form's square root
-/// of a negative, NaN. nanoql clamps the cut to [1, 2]. Checks: QuantLib's states at the NaN band's edge bit for bit;
-/// the conditional mean below it and CIR's deterministic path at 0; an absorbed 0 stays 0; every cut outside [1, 2]
-/// QuantLib's own value at 1 or 2 (the vectors hold cuts 1 and 2), bit for bit; the moments restored at cut 0.4; and an
-/// invalid process's negative or NaN conditional variance (κθ below 0) still QuantLib's NaN.
+/// The square-root volatility process's step where its scheme degenerates or leaves its domain. QuantLib's quadratic
+/// form takes b² = 2ψ⁻¹ − 1 + √(2ψ⁻¹(2ψ⁻¹ − 1)) (<c>squarerootandersen.cpp:102-103</c>), NaN where the conditional
+/// variance is 0 (no vol of variance: ψ = 0, a = 0, v = 0·∞), where the variance and its mean are both 0 (an absorbed 0
+/// at θ = 0: ψ = 0/0), and where ψ is below about 1.5e-154 (the product overflows): from v₀ 0.09, θ 0.04, κ 4000 on
+/// times 1, 1.0002 and 1.0006, QuantLib's states are finite at vol of variance 3e-76 and NaN at 1e-76 and below (the
+/// C++ harness's <c>SquareRootAndersen.paths</c>; at κ 1 every state is NaN at 0). nanoql takes the form's limit there,
+/// the conditional mean. And QuantLib chooses its form by ψ against any cut point (<c>:100</c>), where the quadratic
+/// form holds for ψ ≤ 2 only and the exponential one for ψ ≥ 1: a cut below 1 gives ψ below 1 the exponential form, its
+/// p no probability, the mean 3.38% low and the variance 12.6% high at ψ 0.5 and cut 0.4 (64 standard errors at 2
+/// million draws), and a cut above 2 gives ψ above 2 the quadratic form's square root of a negative, NaN. nanoql clamps
+/// the cut to [1, 2]. Checks: QuantLib's states at the NaN band's edge bit for bit; the conditional mean below it and
+/// CIR's deterministic path at 0; an absorbed 0 stays 0; every cut outside [1, 2] QuantLib's own value at 1 or 2 (the
+/// vectors hold cuts 1 and 2), bit for bit; the moments restored at cut 0.4; and an invalid process's negative or NaN
+/// conditional variance (κθ below 0) still QuantLib's NaN.
 /// </summary>
 public class SquareRootAndersenDegenerateStepTests
 {

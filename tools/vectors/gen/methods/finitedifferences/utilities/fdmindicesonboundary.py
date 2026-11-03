@@ -4,8 +4,8 @@
 .cpp): the indices of a layout's points on one side of one direction.
 
 Layouts of one to four dimensions, each direction on its lower and upper side and on no side (no index). A direction
-outside the layout, where QuantLib writes past its vector's end, is left out (the S-rx plan's SRXR3 (xiv);
-tests/NanoQL.Tests/Divergences/FdmBoundaryDirectionTests.cs).
+outside the layout, where QuantLib writes past its vector's end, is left out
+(tests/NanoQL.Tests/Divergences/FdmBoundaryDirectionTests.cs).
 
 A case's inputs are the layout's "dim", the "direction" and the "side" (QuantLib's FdmDirichletBoundary::Side: NoSide
 0, Upper 1, Lower 2); its output the "indices". The wheel's calls, by QuantLib-SWIG 1.44's fdm.i:

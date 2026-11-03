@@ -9,7 +9,7 @@ using static NanoQL.Tests.Vectors.EquityInputs;
 namespace NanoQL.Tests.Vectors;
 
 /// <summary>
-/// The single-asset exotics' specs the S-exo vectors share: cliquets
+/// The single-asset exotics' specs their vectors share: cliquets
 /// (<c>tools/vectors/gen/pricingengines/cliquet/analyticcliquetengine.py</c>) and forward-start options
 /// (<c>tools/vectors/gen/pricingengines/forward/forwardengine.py</c>).
 /// </summary>

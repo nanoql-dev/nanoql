@@ -11,13 +11,13 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The float-float engine's rebate (the S-g1d plan's G1R6 (v)): QuantLib values it at y = 0 on the model curve, where
-/// the nonstandard engine values it on the grid from its payment date. On a Bermudan payer exercised yearly from a year
-/// out into a 5-year swap of 1,000,000, its first leg fixed at 3% in all but name (a zero gearing on Euribor 1Y,
-/// 30/360) against Euribor 6M, on GSR (a = 0.01, σ = 0.01) on a flat 2.7%, with rebates of 10,000, −5,000, 25,000 and 0
-/// paid 252 TARGET days after each exercise, the rebates add 8481.523651884276 on the wheel's float-float engine and
-/// 8226.793645308986 on its nonstandard engine for the same swap and exercise, 3.1% apart. nanoql's float-float engine
-/// values the rebate as the nonstandard engine does; the check is that engine, the two engines' rebates within 1e-4.
+/// The float-float engine's rebate: QuantLib values it at y = 0 on the model curve, where the nonstandard engine values
+/// it on the grid from its payment date. On a Bermudan payer exercised yearly from a year out into a 5-year swap of
+/// 1,000,000, its first leg fixed at 3% in all but name (a zero gearing on Euribor 1Y, 30/360) against Euribor 6M, on
+/// GSR (a = 0.01, σ = 0.01) on a flat 2.7%, with rebates of 10,000, −5,000, 25,000 and 0 paid 252 TARGET days after
+/// each exercise, the rebates add 8481.523651884276 on the wheel's float-float engine and 8226.793645308986 on its
+/// nonstandard engine for the same swap and exercise, 3.1% apart. nanoql's float-float engine values the rebate as the
+/// nonstandard engine does; the check is that engine, the two engines' rebates within 1e-4.
 /// </summary>
 public class FloatFloatRebateTests
 {

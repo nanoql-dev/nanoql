@@ -71,10 +71,10 @@ public class LowDiscrepancySequencesTests
     // dimension's sum over the draws divided by their number, as its mean() is for weights of 1; and the van der Corput
     // block's SobolRsg(dimensionality) (line 247), QuantLib's default seed 0, takes seed 1, since nanoql refuses 0
     // (Divergences/SeedZeroTests.cs): one dimension lies in every table, where the seed isn't read.
-    // Adapted (the S-core plan's CD11): QuantLib's clock seeds become explicit, seed 1: RandomizedLDS(PPMT_MAX_DIM)
-    // (line 95), its sequences' ldsSeed and prsSeed, the unused MersenneTwisterUniformRng t0 (line 100), SobolRsg
-    // t1(PPMT_MAX_DIM) (line 101), RandomSequenceGenerator t2(PPMT_MAX_DIM) (line 102), and the pseudo-random generator
-    // RandomizedLDS(t1) builds (line 108); the case asserts nothing about the numbers.
+    // Adapted: QuantLib's clock seeds become explicit, seed 1: RandomizedLDS(PPMT_MAX_DIM) (line 95), its sequences'
+    // ldsSeed and prsSeed, the unused MersenneTwisterUniformRng t0 (line 100), SobolRsg t1(PPMT_MAX_DIM) (line 101),
+    // RandomSequenceGenerator t2(PPMT_MAX_DIM) (line 102), and the pseudo-random generator RandomizedLDS(t1) builds
+    // (line 108); the case asserts nothing about the numbers.
     [Fact]
     public void TestRandomizedLowDiscrepancySequence()
     {

@@ -9,7 +9,7 @@
 namespace NanoQL.Methods;
 
 /// <summary>The cell-averaged inner value of a payoff on a grid in the logarithm of the underlying.</summary>
-/// <remarks>A working type, as its base is (the S-eq plan's SEQR1).</remarks>
+/// <remarks>A working type, as its base is.</remarks>
 [WorkingType]
 public sealed class FdmLogInnerValue : FdmCellAveragingInnerValue
 {

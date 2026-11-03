@@ -8,7 +8,7 @@ namespace NanoQL.Tests.Divergences;
 /// <summary>
 /// The minimum and maximum basket payoffs on no prices. QuantLib dereferences <c>std::min_element</c> and
 /// <c>std::max_element</c> of the empty range, its end (<c>basketoption.hpp:56-58</c>, <c>:65-67</c>), undefined.
-/// nanoql refuses an empty basket (master §2.2's undefined-path row).
+/// nanoql refuses an empty basket (the playbook's undefined-behaviour row).
 /// </summary>
 public class BasketPayoffEmptyTests
 {

@@ -19,10 +19,10 @@ namespace NanoQL.Models;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Immutable (the S-mm plan's MR2 (a)): it holds the inputs, a copy of the curve state given, and
-/// <see cref="Calibrate"/> returns the results, where QuantLib's calibration changes itself; QuantLib's "not
-/// successfully calibrated yet" has no state to guard. Each pass's fit is the derived calibration's
-/// <see cref="CalibrationImpl"/>, QuantLib's <c>calibrationImpl_</c>. An extension point, as in QuantLib.
+/// Immutable: it holds the inputs, a copy of the curve state given, and <see cref="Calibrate"/> returns the results,
+/// where QuantLib's calibration changes itself; QuantLib's "not successfully calibrated yet" has no state to guard.
+/// Each pass's fit is the derived calibration's <see cref="CalibrationImpl"/>, QuantLib's <c>calibrationImpl_</c>. An
+/// extension point, as in QuantLib.
 /// </para>
 /// <para>
 /// A count below zero, which QuantLib's unsigned <c>Natural</c> wraps, is refused.
@@ -88,7 +88,7 @@ public abstract class CTSMMCapletCalibration
     /// Checks a calibration's inputs: the evolution's times the correlation's and the rate times but the last, its
     /// rate times the curve state's, a variance, a correlation rate and a caplet volatility per rate, and the last
     /// caplet volatility the last swaption's; and each variance holding its rate's steps, which QuantLib's calibrations
-    /// read unchecked (the S-mm plan's MR3 (xx)).
+    /// read unchecked.
     /// </summary>
     /// <param name="evolution">The evolution.</param>
     /// <param name="corr">The swap rates' correlation.</param>
@@ -179,7 +179,7 @@ public abstract class CTSMMCapletCalibration
                 nameof(mktCapletVols));
         }
 
-        // the calibrations read each rate's variances to its own step, unchecked (MR3 (xx))
+        // the calibrations read each rate's variances to its own step, unchecked
         for (int i = 0; i < numberOfRates; ++i)
         {
             int length = displacedSwapVariances[i].Variances.Length;

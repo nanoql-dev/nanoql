@@ -16,15 +16,14 @@ namespace NanoQL.Models;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A working type (the S-mmp plan's MMPR1 (i)): it steps its own clones of the underlying, the strategy and the rebate.
+/// A working type: it steps its own clones of the underlying, the strategy and the rebate.
 /// </para>
 /// <para>
-/// Its end and counts are <see cref="CallSpecifiedMultiProduct"/>'s (the S-mmp plan's MMPR4 (vii), option (1), with
-/// Revision 4's (b), and (xvi), documented divergences): QuantLib's end with its underlying, but on an underlying with no
-/// possible cash-flow times while an exercise time remains; a finished underlying not stepped again; ended for good
-/// once ended with its underlying; and every count zeroed at each step's start
-/// (<c>pathwiseproductcallspecified.cpp:136-153</c>). A rebate of more products than the underlying, which writes past
-/// the buffers QuantLib sizes by the underlying's, is refused.
+/// Its end and counts are <see cref="CallSpecifiedMultiProduct"/>'s (documented divergences): QuantLib's end with its
+/// underlying, but on an underlying with no possible cash-flow times while an exercise time remains; a finished
+/// underlying not stepped again; ended for good once ended with its underlying; and every count zeroed at each step's
+/// start (<c>pathwiseproductcallspecified.cpp:136-153</c>). A rebate of more products than the underlying, which writes
+/// past the buffers QuantLib sizes by the underlying's, is refused.
 /// </para>
 /// </remarks>
 [WorkingType]

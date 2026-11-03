@@ -14,9 +14,9 @@ namespace NanoQL.Methods;
 /// used, rolled back by the two-dimensional solver, read at a spot and a second coordinate.
 /// </summary>
 /// <remarks>
-/// A working type built per call (the S-van plan's VD11): computed at construction, where QuantLib's lazy object computes
-/// at the first read, and immutable after. The second coordinate is read at its logarithm, as QuantLib reads it: a
-/// value at 1 is the value at the second direction's location 0.
+/// A working type built per call: computed at construction, where QuantLib's lazy object computes at the first read,
+/// and immutable after. The second coordinate is read at its logarithm, as QuantLib reads it: a value at 1 is the value
+/// at the second direction's location 0.
 /// </remarks>
 [WorkingType]
 public sealed class FdmSimple2dBSSolver

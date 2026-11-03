@@ -14,10 +14,10 @@ namespace NanoQL.Numerics;
 /// Immutable. QuantLib takes each gamma function as the exponential of its logarithm, which overflows from n about 342
 /// (0 at 342, NaN from 343), and its denominator's product overflows earlier at large x (0 at n 330, x 30, for about
 /// 1e-95). Where any of QuantLib's factors overflows, nanoql takes the gammas' ratio as Boost's
-/// <c>tgamma_delta_ratio</c> and the power as exp(−(n + 1)/2 · log1p(x²/n)) (the S-core plan's CR7 (xxii);
-/// <c>Divergences/StudentDistributionTests.cs</c>): within 1.1e-13 of a 60-digit evaluation for n from 342 to
-/// 2³¹ − 1, where the difference of the gammas' logarithms keeps their rounding (8.5e-7 at 1e9). QuantLib's formula,
-/// bit for bit, wherever its factors are finite.
+/// <c>tgamma_delta_ratio</c> and the power as exp(−(n + 1)/2 · log1p(x²/n))
+/// (<c>Divergences/StudentDistributionTests.cs</c>): within 1.1e-13 of a 60-digit evaluation for n from 342 to 2³¹ −
+/// 1, where the difference of the gammas' logarithms keeps their rounding (8.5e-7 at 1e9). QuantLib's formula, bit for
+/// bit, wherever its factors are finite.
 /// </remarks>
 public sealed class StudentDistribution
 {

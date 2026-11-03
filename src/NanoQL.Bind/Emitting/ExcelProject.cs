@@ -8,17 +8,17 @@ using NanoQL.Bind.Reading;
 namespace NanoQL.Bind.Emitting;
 
 /// <summary>
-/// The Excel-DNA project an Excel build generates (XLR8, XLD17): <c>NanoQL.Excel.Functions</c>, the generated functions
-/// its only source, referencing the runtime package <c>NanoQL.Excel</c> at the tool's version and the assemblies it
-/// binds by path; its <c>.dna</c> lists the runtime and the functions as external libraries, explicit exports, packed and
-/// loaded from bytes, and the bound assemblies packed beside them, their PDBs apart (XLR12).
+/// The Excel-DNA project an Excel build generates: <c>NanoQL.Excel.Functions</c>, the generated functions its only
+/// source, referencing the runtime package <c>NanoQL.Excel</c> at the tool's version and the assemblies it binds by
+/// path; its <c>.dna</c> lists the runtime and the functions as external libraries, explicit exports, packed and loaded
+/// from bytes, and the bound assemblies packed beside them, their PDBs apart.
 /// </summary>
 internal static class ExcelProject
 {
     /// <summary>The project's name, and its assembly's.</summary>
     public const string Name = "NanoQL.Excel.Functions";
 
-    /// <summary>The Excel-DNA version the add-in builds on (XLR7).</summary>
+    /// <summary>The Excel-DNA version the add-in builds on.</summary>
     public const string ExcelDna = "1.9.0";
 
     /// <summary>The add-in's file name before Excel-DNA's <c>64.xll</c>: nanoql's builds' own, or a user's build's.</summary>
@@ -94,7 +94,7 @@ internal static class ExcelProject
                 <PackageReference Include="ExcelDna.AddIn" Version="{ExcelDna}" />
                 <PackageReference Include="NanoQL.Excel" Version="{Versions.Text}" />
             {refs}    <Compile Include="gen\*.g.cs" />
-                <!-- The repro templates and the adapters' source, which nqlxlRepro renders a cell's calls from (XLR14). -->
+                <!-- The repro templates and the adapters' source, which nqlxlRepro renders a cell's calls from. -->
                 <EmbeddedResource Include="xl-templates.json" LogicalName="NanoQL.Excel.templates.json" />
                 <EmbeddedResource Include="gen\XlAdapters.g.cs" LogicalName="NanoQL.Excel.adapters.cs" />
               </ItemGroup>
@@ -117,7 +117,7 @@ internal static class ExcelProject
         File.WriteAllText(Path.Combine(dir, "Directory.Build.targets"), "<Project />\n");
     }
 
-    /// <summary>Writes the notices a build's add-in redistributes beside it: nanoql's, which a user's build carries too (XLD21).</summary>
+    /// <summary>Writes the notices a build's add-in redistributes beside it: nanoql's, which a user's build carries too.</summary>
     /// <param name="dir">The folder.</param>
     public static void WriteNotices(string dir)
     {

@@ -9,7 +9,7 @@ through the wheel's YoYOptionletHelper.
   and the earliest, latest, pillar, maturity and latest relevant dates.
 
 Left out: helpers observed linearly, whose optionlets nanoql's engines price on each coupon's own fixing where
-QuantLib's read the index's curve at the period's start (S-infl's documented divergence,
+QuantLib's read the index's curve at the period's start (a documented divergence,
 src/NanoQL/PricingEngines/Inflation/InflationCapFloorEngines/YoYInflationCapFloorEngine{TFormula}.cs); QuantLib's
 stripper observes its helpers flat.
 

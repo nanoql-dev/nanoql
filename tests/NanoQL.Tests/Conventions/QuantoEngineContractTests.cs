@@ -11,10 +11,10 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The quanto engine's contract (the S-exo plan's ER2 (i), ED30): a quanto instrument refuses a plain engine's results
-/// with QuantLib's text; the generic core runs on any one-asset instrument through an engine on its terms, a test-side
-/// one here; an expired quanto option's quanto sensitivities are 0; and the forward overload strikes its underlying at
-/// the moneyness times the spot, the forward engine's strike, after refusing a payoff that isn't plain vanilla.
+/// The quanto engine's contract: a quanto instrument refuses a plain engine's results with QuantLib's text; the generic
+/// core runs on any one-asset instrument through an engine on its terms, a test-side one here; an expired quanto
+/// option's quanto sensitivities are 0; and the forward overload strikes its underlying at the moneyness times the
+/// spot, the forward engine's strike, after refusing a payoff that isn't plain vanilla.
 /// </summary>
 public class QuantoEngineContractTests
 {

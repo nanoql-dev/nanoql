@@ -5,9 +5,9 @@ on the evaluation date 15 October 2026: performance options on analyticcliqueten
 moneyness 0.9, 1 and 1.1, three reset schedules, two flat markets and one of zero curves under a flat volatility): the
 NPV, delta, gamma, theta, vega, rho and dividend rho.
 
-The outputs nanoql fixes are left out (the S-exo plan's §2.10): the theta on the zero curves, where QuantLib reads each
-period's risk-free rate over the period after its reset and nanoql the rate to it
-(tests/NanoQL.Tests/Divergences/CliquetThetaTests.cs); volatilities off flat (ForwardVegaTermStructureTests.cs).
+The outputs nanoql fixes are left out: the theta on the zero curves, where QuantLib reads each period's risk-free rate
+over the period after its reset and nanoql the rate to it (tests/NanoQL.Tests/Divergences/CliquetThetaTests.cs);
+volatilities off flat (ForwardVegaTermStructureTests.cs).
 
 The specs are analyticcliquetengine.py's. The wheel's calls, by QuantLib-SWIG 1.44's options.i:
 CliquetOption(payoff, exercise, resetDates), AnalyticPerformanceEngine(process), and the option's NPV and Greeks.

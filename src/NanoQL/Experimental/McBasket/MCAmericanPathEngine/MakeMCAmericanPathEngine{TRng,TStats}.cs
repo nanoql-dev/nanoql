@@ -16,12 +16,11 @@ namespace NanoQL.Experimental;
 /// <typeparam name="TStats">The statistics accumulator.</typeparam>
 /// <remarks>
 /// <para>
-/// An immutable builder (SEQR2): each method returns a modified copy. <see cref="ToEngine"/> returns the engine as a
-/// function of the option and the context, its settings bound, in place of QuantLib's conversion to a pricing engine,
-/// with QuantLib's checks on the steps. A builder has no value equality.
+/// An immutable builder: each method returns a modified copy. <see cref="ToEngine"/> returns the engine as a function
+/// of the option and the context, its settings bound, in place of QuantLib's conversion to a pricing engine, with
+/// QuantLib's checks on the steps. A builder has no value equality.
 /// </para>
-/// <para>The seed is a constructor argument (S2R4; the S-xeq plan's XED3): QuantLib's default, 0, a seed from the clock,
-/// is refused.</para>
+/// <para>The seed is a constructor argument: QuantLib's default, 0, a seed from the clock, is refused.</para>
 /// </remarks>
 [Experimental("NQL0001")]
 public sealed record MakeMCAmericanPathEngine<TRng, TStats>

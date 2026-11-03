@@ -33,16 +33,15 @@ namespace NanoQL.Experimental;
 /// With unequal shifts, the integrand branches on the displaced strike k + g₁s₁ + g₂s₂, and its negative branch shifts
 /// the second rate by its own shift, as QuantLib's master does after 1.44 (#2874); QuantLib 1.44 branches on the strike
 /// and shifts the second rate by the first's, which prices NaN caplets and floorlets at strikes 0.008 and 0.002 on
-/// #2874's set-up and breaks put-call parity by 2.03e-2 at others (the S-xrt plan's XRR2 and XRR5 (xvii);
-/// <c>Divergences/CmsSpreadUnequalShiftsTests.cs</c>). Equal shifts take the same branch either way.
+/// #2874's set-up and breaks put-call parity by 2.03e-2 at others (<c>Divergences/CmsSpreadUnequalShiftsTests.cs</c>).
+/// Equal shifts take the same branch either way.
 /// </para>
 /// <para>
-/// Without a coupon discount curve, each coupon is discounted on its own first swap index's curve, its discounting curve
-/// when exogenous and its forwarding curve otherwise; QuantLib's pricer keeps the first coupon's curve for every later
-/// coupon, so one pricer serving coupons on different indexes discounts them all on the first's (the S-xrt plan's XRR5
-/// (xviii); <c>Divergences/CmsSpreadCouponDiscountCurveTests.cs</c>). A pricer is stateless here, as every nanoql pricer
-/// (S-cms's contract): what QuantLib's <c>initialize</c> stores is computed per call, one state serving a capped coupon's
-/// three rates.
+/// Without a coupon discount curve, each coupon is discounted on its own first swap index's curve, its discounting
+/// curve when exogenous and its forwarding curve otherwise; QuantLib's pricer keeps the first coupon's curve for every
+/// later coupon, so one pricer serving coupons on different indexes discounts them all on the first's
+/// (<c>Divergences/CmsSpreadCouponDiscountCurveTests.cs</c>). A pricer is stateless here, as every nanoql pricer: what
+/// QuantLib's <c>initialize</c> stores is computed per call, one state serving a capped coupon's three rates.
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]
@@ -298,11 +297,10 @@ public sealed class LognormalCmsSpreadPricer : CmsSpreadCouponPricer
             AccrualPeriod = c.AccrualPeriod(),
         };
 
-        // if no coupon discount curve is given just use the discounting curve from the coupon's first swap index (the
-        // S-xrt plan's XRR5 (xviii): QuantLib's keeps the first coupon's). for rate calculation this curve cancels out
-        // in the computation, so e.g. the discounting swap engine will produce correct results, even if the
-        // couponDiscountCurve is not set here. only the price member function in this class will be dependent on the
-        // coupon discount curve.
+        // if no coupon discount curve is given just use the discounting curve from the coupon's first swap index
+        // (QuantLib's keeps the first coupon's). for rate calculation this curve cancels out in the computation, so
+        // e.g. the discounting swap engine will produce correct results, even if the couponDiscountCurve is not set
+        // here. only the price member function in this class will be dependent on the coupon discount curve.
         s.Today = context.EvaluationDate;
         YieldTermStructure curve = couponDiscountCurve
             ?? (index.SwapIndex1.ExogenousDiscount ? index.SwapIndex1.DiscountingTermStructure : index.SwapIndex1.ForwardingTermStructure)

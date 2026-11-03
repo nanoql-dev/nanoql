@@ -18,8 +18,8 @@ namespace NanoQL.Coupons;
 /// <para>
 /// The coupon holds its pricer, set at construction by a leg builder or by
 /// <see cref="InflationCouponExtensions.SetPricer"/>, which returns a copy; each kind of coupon accepts only its kind
-/// of pricer. Pricers are stateless functions of the coupon and the context (S3R4). The rate is computed on each call,
-/// where QuantLib caches it.
+/// of pricer. Pricers are stateless functions of the coupon and the context. The rate is computed on each call, where
+/// QuantLib caches it.
 /// </para>
 /// <para>
 /// The coupon has no gearing or spread: those belong to year-on-year coupons, not zero-inflation ones. Inflation

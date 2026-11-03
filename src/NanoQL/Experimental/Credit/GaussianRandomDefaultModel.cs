@@ -20,8 +20,8 @@ namespace NanoQL.Experimental;
 /// probability Φ(y): Brent's solver on [0, tmax] from tmax/2, bisection where it fails.
 /// </para>
 /// <para>
-/// The seed is explicit, in [1, 4294967295] (the S-xcr plan's XR4 (a)): QuantLib reads 0 as a seed drawn from the
-/// clock, and its <c>long</c> seed is a 32-bit value on MSVC.
+/// The seed is explicit, in [1, 4294967295]: QuantLib reads 0 as a seed drawn from the clock, and its <c>long</c> seed
+/// is a 32-bit value on MSVC.
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]

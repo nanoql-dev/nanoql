@@ -7,11 +7,10 @@ it, over discounts, dividend discounts and variances from markets of negative to
 to 60% over a quarter to three years, a random draw of 400 of them. Then the refusals of a spot, a discount or a
 dividend discount that isn't positive, and of a negative variance.
 
-The inputs nanoql fixes are left out: below a variance of ε, where QuantLib takes the spot's side of the strike (the
-S-van plan's VR4 (ii), tests/NanoQL.Tests/Divergences/AmericanPayoffZeroVarianceTests.cs); and where QuantLib's
-master after the pin changes the value (#2855, taken under VR5 (i)): where N(D₂), computed from the formula, underflows
-or the power (H/S)^2μ overflows, both judged here with a margin. A payoff is a spec of
-tools/cxx/src/instruments/payoffspec.hpp. Read back by
+The inputs nanoql fixes are left out: below a variance of ε, where QuantLib takes the spot's side of the strike
+(tests/NanoQL.Tests/Divergences/AmericanPayoffZeroVarianceTests.cs); and where QuantLib's master after the pin changes
+the value (#2855, taken as a fix): where N(D₂), computed from the formula, underflows or the power (H/S)^2μ overflows,
+both judged here with a margin. A payoff is a spec of tools/cxx/src/instruments/payoffspec.hpp. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/PricingEngines/AmericanPayoffAtExpiryCxxVectorTests.cs."""
 import math
 import os

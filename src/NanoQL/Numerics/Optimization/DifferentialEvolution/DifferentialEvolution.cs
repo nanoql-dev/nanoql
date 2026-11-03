@@ -15,12 +15,12 @@ namespace NanoQL.Numerics;
 /// Publishers, 1997, Vol. 11, pp. 341 - 359.
 /// </para>
 /// <para>
-/// Immutable: each minimization draws from a new Mersenne Twister built from the seed, so a second minimization
-/// repeats the first's draws, where QuantLib's optimizer keeps its generator and continues its stream (the S-core
-/// plan's CR2 (c); <c>Divergences/DifferentialEvolutionTests.cs</c>); its working population and adaptive weights live
-/// in the call. The best member is moved to the front as MSVC's <c>std::partial_sort(first, first + 1, last)</c>
-/// moves it, a scan swapping each member that costs less than the front's into the front (CD5), so the population's
-/// order, which the next generation's shuffles read, is QuantLib's.
+/// Immutable: each minimization draws from a new Mersenne Twister built from the seed, so a second minimization repeats
+/// the first's draws, where QuantLib's optimizer keeps its generator and continues its stream
+/// (<c>Divergences/DifferentialEvolutionTests.cs</c>); its working population and adaptive weights live in the call.
+/// The best member is moved to the front as MSVC's <c>std::partial_sort(first, first + 1, last)</c> moves it, a scan
+/// swapping each member that costs less than the front's into the front, so the population's order, which the next
+/// generation's shuffles read, is QuantLib's.
 /// </para>
 /// </remarks>
 public sealed class DifferentialEvolution : OptimizationMethod

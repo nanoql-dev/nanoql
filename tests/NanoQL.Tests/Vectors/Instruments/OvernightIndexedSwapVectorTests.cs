@@ -10,11 +10,11 @@ namespace NanoQL.Tests.Vectors;
 
 /// <summary>
 /// The overnight-indexed swap vectors, <c>tests/vectors/instruments/overnightindexedswap.json</c>: QuantLib's four
-/// constructors over the conventions the swap passes to its overnight leg, telescopic swaps among them by the plan's
-/// telescopic rule and the refusals QuantLib makes (a telescopic lookback without the shift, 17 places of rounding),
-/// with the swap's inspectors, each leg's payment dates and amounts, and its results; a one-date overnight schedule;
-/// and QuantLib's testNotifications swap, priced on one forecasting curve and rebuilt on another, the rebuild that
-/// replaces QuantLib's relink.
+/// constructors over the conventions the swap passes to its overnight leg, telescopic swaps among them and the
+/// refusals QuantLib makes (a telescopic lookback without the shift, 17 places of rounding), with the swap's
+/// inspectors, each leg's payment dates and amounts, and its results; a one-date overnight schedule; and QuantLib's
+/// testNotifications swap, priced on one forecasting curve and rebuilt on another, the rebuild that replaces
+/// QuantLib's relink.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class OvernightIndexedSwapVectorTests

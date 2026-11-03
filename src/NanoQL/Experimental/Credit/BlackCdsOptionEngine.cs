@@ -19,11 +19,12 @@ namespace NanoQL.Experimental;
 /// </summary>
 /// <remarks>
 /// The engine assumes, as QuantLib's warns, that the exercise date equals the start date of the swap. The swap is
-/// priced by its engine, D14's delegate, where QuantLib's reads the swap's attached engine (the S-xcr plan's XD4). The
-/// time to the exercise is floored at 0: an exercise between the evaluation date and the discount curve's reference
-/// date gives QuantLib a negative time and a NaN standard deviation, here the intrinsic value (XR8 (xv);
-/// <c>Divergences/BlackCdsOptionEngineTests.cs</c>); there a payer that doesn't knock out reads its front-end protection
-/// with a default probability of 0 and a discount of 1 before each curve's date, as XR8 (x) reads them.
+/// priced by its engine, a delegate, where QuantLib's reads the swap's attached engine. The time to the exercise is
+/// floored at 0: an exercise between the evaluation date and the discount curve's reference date gives QuantLib a
+/// negative time and a NaN standard deviation, here the intrinsic value
+/// (<c>Divergences/BlackCdsOptionEngineTests.cs</c>); there a payer that doesn't knock out reads its front-end
+/// protection with a default probability of 0 and a discount of 1 before each curve's date, as the other credit engines
+/// read them.
 /// </remarks>
 [Experimental("NQL0001")]
 public static class BlackCdsOptionEngine
@@ -107,8 +108,7 @@ public static class BlackCdsOptionEngine
         {
             DefaultProbabilityTermStructure curve = probability ?? throw new NanoQLException("empty Handle cannot be dereferenced");
 
-            // between the evaluation date and a curve's later date, a default probability of 0 and a discount of 1 (XR8
-            // (x); the S-xcr code review's C4 O1-3)
+            // between the evaluation date and a curve's later date, a default probability of 0 and a discount of 1
             Date today = context.EvaluationDate;
             double defaultProbability = exerciseDate >= today && exerciseDate < curve.ReferenceDate
                 ? 0.0

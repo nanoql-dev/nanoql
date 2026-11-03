@@ -7,9 +7,9 @@ using Microsoft.Office.Interop.Excel;
 namespace NanoQL.Excel.XlTests;
 
 /// <summary>
-/// Errors and their messages (XLR4, XLP6): an unknown handle #REF!, text for a number #VALUE!, QuantLib's own check
-/// #NUM!, an unknown day counter and an object of the wrong type #VALUE!, an Excel error passed through; nqlxlError
-/// giving each failed cell's message and nothing for a value.
+/// Errors and their messages: an unknown handle #REF!, text for a number #VALUE!, QuantLib's own check #NUM!, an
+/// unknown day counter and an object of the wrong type #VALUE!, an Excel error passed through; nqlxlError giving
+/// each failed cell's message and nothing for a value.
 /// </summary>
 [ExcelTestSettings(OutOfProcess = true)]
 public class ErrorTests : RunnerTest

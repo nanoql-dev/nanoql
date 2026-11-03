@@ -12,8 +12,8 @@ namespace NanoQL.Tests.Divergences;
 /// cash-or-nothing, asset-or-nothing and gap payoffs, which its value and Greeks never read
 /// (<c>bacheliercalculator.cpp:137-185</c>), so each prices 3.03, the vanilla's, at K 100, F 100, σ√T 8, where the
 /// payoffs are worth 4.75 (cash 10), 50.53 and 7.78 (second strike 90). nanoql values each by Bachelier's closed form
-/// and takes the Greeks as its derivatives (the S-exo plan's ER5 (xxvii)). The checks: the closed forms under a normal
-/// forward, F_T ~ N(F, σ²), and their bumps (forward, deviation and strike by 1e-5 each way, the gamma's by 1e-3).
+/// and takes the Greeks as its derivatives. The checks: the closed forms under a normal forward, F_T ~ N(F, σ²), and
+/// their bumps (forward, deviation and strike by 1e-5 each way, the gamma's by 1e-3).
 /// </summary>
 public class BachelierPayoffTests
 {

@@ -13,8 +13,8 @@
 //         proportional one ["Proportional", attachment, exhaustion], with no payment offset, writes from the events:
 //         its notional rate at each date and its loss
 //
-// BetaRisk's events arrive by fresh draws where nanoql cumulates them (the S-xcr plan's XR8 (xlii)), so its generator
-// reads the paths up to the first where the two part.
+// BetaRisk's events arrive by fresh draws where nanoql cumulates them, so its generator reads the paths up to the
+// first where the two part.
 
 #include "convert.hpp"
 

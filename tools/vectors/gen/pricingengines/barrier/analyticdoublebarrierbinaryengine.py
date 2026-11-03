@@ -18,16 +18,15 @@ degenerate branches, where QuantLib also sets the Greeks: a knock-out, KIKO and 
 barrier: the NPV, delta, gamma, vega and rho. Then an expired option and the refusals: a European KIKO, an American
 knock-out, a plain-vanilla payoff and barriers out of order.
 
-The outputs nanoql fixes are left out (the S-bar plan's §2.10): every process here has one day counter and reference
-date (BR5 (i), tests/NanoQL.Tests/Divergences/BarrierClosedFormMismatchedTimesTests.cs); every rebate is 0, which
-QuantLib's engine never reads (BR5 (xlvi), DoubleBinaryRebateTests.cs); no knock-in is already in,
-where QuantLib pays the cash undiscounted (BR5 (vi), DoubleBinaryKnockedInTests.cs); every knock-out pays over the
-whole corridor (a call struck at or below L, a put at or above U) and every knock-in is QuantLib's strike-0 call, where
-QuantLib's value stands (BR5 (xxxviii), DoubleBinaryStrikeTests.cs); and every value is a decade inside the port's
-switches, by their replicas below: Hui's series converged, its sine-free tail bound within 1e-12 of its sum (the port
-takes it within 1e-11; (xlviii), DoubleBinaryHuiCheckTests.cs; where QuantLib refuses, BR8 (c),
+The outputs nanoql fixes are left out: every process here has one day counter and reference date
+(tests/NanoQL.Tests/Divergences/BarrierClosedFormMismatchedTimesTests.cs); every rebate is 0, which QuantLib's engine
+never reads (DoubleBinaryRebateTests.cs); no knock-in is already in, where QuantLib pays the cash undiscounted
+(DoubleBinaryKnockedInTests.cs); every knock-out pays over the whole corridor (a call struck at or below L, a put at or
+above U) and every knock-in is QuantLib's strike-0 call, where QuantLib's value stands (DoubleBinaryStrikeTests.cs); and
+every value is a decade inside the port's switches, by their replicas below: Hui's series converged, its sine-free tail
+bound within 1e-12 of its sum (the port takes it within 1e-11; DoubleBinaryHuiCheckTests.cs; where QuantLib refuses,
 DoubleBinarySmallVarianceTests.cs), and the KIKO and KOKI sums under Abel's bound within 1e-12 of theirs (1e-11;
-(xlvii), DoubleBinaryKikoTests.cs); a case whose value is outside either is left out.
+DoubleBinaryKikoTests.cs); a case whose value is outside either is left out.
 
 A case holds one process, exercise, double barrier and payoff, the specs
 tools/vectors/gen/pricingengines/barrier/analyticdoublebarrierengine.py's. The wheel's calls, by QuantLib-SWIG 1.44's

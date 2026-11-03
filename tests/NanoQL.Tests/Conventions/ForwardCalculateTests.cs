@@ -9,11 +9,10 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The forward's calculation (the S-cms plan's CMD5): <see cref="BondForward.Calculate"/> computes under the context it
-/// is given at every call, its spot value and income the results' by-products where QuantLib's
-/// <c>underlyingSpotValue_</c> and <c>underlyingIncome_</c> are mutable members; and its spot value is the bond's dirty
-/// price on the engine it is given, as QuantLib's <c>spotValue()</c> reads the bond's own engine
-/// (<c>bond_-&gt;dirtyPrice()</c>).
+/// The forward's calculation: <see cref="BondForward.Calculate"/> computes under the context it is given at every call,
+/// its spot value and income the results' by-products where QuantLib's <c>underlyingSpotValue_</c> and
+/// <c>underlyingIncome_</c> are mutable members; and its spot value is the bond's dirty price on the engine it is
+/// given, as QuantLib's <c>spotValue()</c> reads the bond's own engine (<c>bond_-&gt;dirtyPrice()</c>).
 /// </summary>
 public class ForwardCalculateTests
 {

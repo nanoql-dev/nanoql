@@ -15,20 +15,19 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// A caplet's expiry on the analytic and tree cap engines (the S-sr plan's B1-1, ruled by the user on 2026-10-22):
-/// QuantLib's analytic engine values a caplet still to be fixed as a bond option expiring at its accrual start
-/// (<c>analyticcapfloorengine.cpp:94-112</c>) and its tree exercises it there (<c>discretizedcapfloor.cpp:53-55</c>),
-/// where the instrument fixes its rate, QuantLib's Monte Carlo engine reads it and its Black engine takes the
-/// volatility, at the fixing date, so a caplet with a fixing lag is priced on the variance to its start. On the wheel,
-/// a 1-year semiannual cap at 4% on Euribor 6M from six months after the spot date, two fixing days, notional
-/// 1,000,000, on Hull-White (0.1, 0.01) on a flat 4% Actual/365 (Fixed) curve on 15 January 2025, the analytic engine
-/// prices 3,024.081283636271 and the tree (200 steps) 3,019.994708839063; QuantLib's own five-argument bond option
-/// (<c>hullwhite.cpp:108-131</c>), the option at the fixing on the bond from the start, which its Jamshidian engine
-/// uses, gives 3,005.838255466084. nanoql's tree values each caplet still to be fixed before its start at its fixing,
-/// on every model, from its two discount bonds rolled back there, and its analytic engine on Hull-White takes the
-/// five-argument option; Vasicek's, CIR's and G2's analytic options keep QuantLib's expiry at the start, since QuantLib
-/// has no such option for them. A caplet fixed on its start is QuantLib's on both engines. QuantLib's check: its
-/// five-argument bond option, its Monte Carlo engine, and the tree converging to both.
+/// A caplet's expiry on the analytic and tree cap engines: QuantLib's analytic engine values a caplet still to be fixed
+/// as a bond option expiring at its accrual start (<c>analyticcapfloorengine.cpp:94-112</c>) and its tree exercises it
+/// there (<c>discretizedcapfloor.cpp:53-55</c>), where the instrument fixes its rate, QuantLib's Monte Carlo engine
+/// reads it and its Black engine takes the volatility, at the fixing date, so a caplet with a fixing lag is priced on
+/// the variance to its start. On the wheel, a 1-year semiannual cap at 4% on Euribor 6M from six months after the spot
+/// date, two fixing days, notional 1,000,000, on Hull-White (0.1, 0.01) on a flat 4% Actual/365 (Fixed) curve on 15
+/// January 2025, the analytic engine prices 3,024.081283636271 and the tree (200 steps) 3,019.994708839063; QuantLib's
+/// own five-argument bond option (<c>hullwhite.cpp:108-131</c>), the option at the fixing on the bond from the start,
+/// which its Jamshidian engine uses, gives 3,005.838255466084. nanoql's tree values each caplet still to be fixed
+/// before its start at its fixing, on every model, from its two discount bonds rolled back there, and its analytic
+/// engine on Hull-White takes the five-argument option; Vasicek's, CIR's and G2's analytic options keep QuantLib's
+/// expiry at the start, since QuantLib has no such option for them. A caplet fixed on its start is QuantLib's on both
+/// engines. QuantLib's check: its five-argument bond option, its Monte Carlo engine, and the tree converging to both.
 /// </summary>
 public class CapletFixingExpiryTests
 {

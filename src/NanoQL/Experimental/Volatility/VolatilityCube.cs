@@ -15,7 +15,7 @@ namespace NanoQL.Experimental;
 /// </summary>
 /// <remarks>
 /// Immutable. QuantLib's <c>minIndexTenor()</c> and <c>maxIndexTenor()</c> are declared and never defined, so they
-/// aren't ported (the S-xeq plan's XER5 (xxxv)).
+/// aren't ported.
 /// </remarks>
 [Experimental("NQL0001")]
 public sealed class VolatilityCube

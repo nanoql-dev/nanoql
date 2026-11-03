@@ -50,15 +50,15 @@ def run(binary: str, *args: str) -> None:
 
 
 def jextract(binary: str, header: pathlib.Path, out: pathlib.Path) -> None:
-    """jextract's layer: org.nanoql.ffi.nanoql_h over nanoql.h, the experimental API included (BIR7, BIR13)."""
+    """jextract's layer: org.nanoql.ffi.nanoql_h over nanoql.h, the experimental API included."""
     run(binary, "--output", str(out), "-t", "org.nanoql.ffi", "--header-class-name", "nanoql_h", "-D", "NANOQL_EXPERIMENTAL",
         "-I", str(header.parent), str(header))
 
 
 def jextract_user(binary: str, header: pathlib.Path, out: pathlib.Path) -> None:
-    """A user prefix's jextract layer (BIR9): <prefix>.ffi.<prefix>_h over its header, which includes nanoql.h, holding
-    the prefix's own functions, the structs and typedefs any may take, and its header's constants; nanoql's functions
-    stay in nanoql's jar."""
+    """A user prefix's jextract layer: <prefix>.ffi.<prefix>_h over its header, which includes nanoql.h, holding the
+    prefix's own functions, the structs and typedefs any may take, and its header's constants; nanoql's functions stay
+    in nanoql's jar."""
     prefix = header.stem
     with tempfile.TemporaryDirectory() as tmp:
         dump = pathlib.Path(tmp) / "all.txt"

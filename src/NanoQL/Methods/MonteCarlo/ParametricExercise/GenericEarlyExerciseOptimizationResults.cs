@@ -10,7 +10,7 @@ namespace NanoQL.Methods;
 
 /// <summary>
 /// The results of an early-exercise optimisation: the biased estimate of the value it obtains while optimising, and
-/// each exercise's optimal parameters, which QuantLib writes into the caller's vector (the S-mmp plan's SMD6).
+/// each exercise's optimal parameters, which QuantLib writes into the caller's vector.
 /// </summary>
 /// <param name="BiasedEstimate">The value estimated on the optimisation's own paths, biased high.</param>
 /// <param name="Parameters">Each exercise's parameters.</param>

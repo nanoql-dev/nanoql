@@ -25,19 +25,19 @@ namespace NanoQL.PricingEngines;
 /// <para>
 /// QuantLib's settlement date is the risk-free curve's reference date. Here it is the earliest reference date of the
 /// process's structures, each discounting nothing before its own, so a dividend paid between the evaluation date and a
-/// later risk-free curve's reference date is the option's, as on the market restated from the evaluation date; where
-/// no structure is dated before the risk-free curve, it is QuantLib's. The theta's and rho's times are the risk-free
+/// later risk-free curve's reference date is the option's, as on the market restated from the evaluation date; where no
+/// structure is dated before the risk-free curve, it is QuantLib's. The theta's and rho's times are the risk-free
 /// curve's own, as QuantLib's, so a dividend before its reference date adds to neither. The theta reads each curve's
 /// zero rate per the risk-free curve's time and the rho reads the dividend curve by date, where QuantLib reads the rate
-/// per the curve's own day counter's year and the curve at the risk-free curve's time. A documented divergence (the
-/// S-eq plan's rulings of 2026-10-20 and 2026-10-21, <c>Divergences/DividendMismatchedTimesTests.cs</c>).
+/// per the curve's own day counter's year and the curve at the risk-free curve's time. A documented divergence
+/// (<c>Divergences/DividendMismatchedTimesTests.cs</c>).
 /// </para>
 /// <para>
 /// QuantLib divides the theta's terms by the risk-free curve's time; here each runs over its own structure's, the
 /// discount's, the dividend curve's and the variance's, on the risk-free curve's day counter, as QuantLib's
 /// <c>blackScholesTheta</c> reads them. An exercise before a structure's reference date sees nothing accrue on it,
 /// where QuantLib's reads throw. Where the structures share their times, every value is QuantLib's. A documented
-/// divergence (the S-eq plan's ruling of 2026-10-21, <c>Divergences/AnalyticThetaMismatchedTimesTests.cs</c>,
+/// divergence (<c>Divergences/AnalyticThetaMismatchedTimesTests.cs</c>,
 /// <c>Divergences/ExerciseBeforeReferenceDateTests.cs</c>).
 /// </para>
 /// </remarks>
@@ -118,8 +118,7 @@ public static class AnalyticDividendEuropeanEngine
         }
 
         // the dividends and times from the earliest reference date of the structures, each structure discounting
-        // nothing before its own (the user's rulings of 2026-10-21 on the S-eq plan, C4R2-O2 (i) and C4R3-O2 (a)):
-        // QuantLib's settlement date, the risk-free curve's, where none is dated before it
+        // nothing before its own: QuantLib's settlement date, the risk-free curve's, where none is dated before it
         Date lastDate = option.Exercise.LastDate();
         Date settlementDate = process.EarliestReferenceDate();
         double riskless = 0.0;
@@ -174,8 +173,7 @@ public static class AnalyticDividendEuropeanEngine
 
                 // the risk-free curve's own time to the dividend, none before its reference date, where the dividend's
                 // value has no risk-free discount; QuantLib reads the dividend curve at that time, here by date, as the
-                // value reads it (the S-eq plan's ruling of 2026-10-20), which is QuantLib's read where the two curves
-                // share their times
+                // value reads it, which is QuantLib's read where the two curves share their times
                 double ti = process.RiskFreeRate.AccrualTimeTo(d);
                 deltaRho += dividends[i].Amount(context) * ti
                     * process.RiskFreeRate.AccruedDiscount(d)
@@ -184,8 +182,8 @@ public static class AnalyticDividendEuropeanEngine
         }
 
         // the theta's and rho's times the risk-free curve's own, as QuantLib's; QuantLib divides the theta's terms by
-        // that time, and here each by its own structure's, on the risk-free curve's day counter (the S-eq plan's ruling
-        // of 2026-10-21, under R8), QuantLib's where they agree
+        // that time, and here each by its own structure's, on the risk-free curve's day counter, QuantLib's where they
+        // agree
         t = process.RiskFreeRate.AccrualTimeTo(lastDate);
         double? theta;
         try

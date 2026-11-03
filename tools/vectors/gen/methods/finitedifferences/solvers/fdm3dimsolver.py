@@ -9,8 +9,8 @@ tools/vectors/gen/methods/finitedifferences/solvers/fdmhestonhullwhitesolver.py'
 at the eighteen points of that file, in the mesher's coordinates (the log spot, the variance and the short rate's
 state), and thetaAt at those of them where the theta doesn't cancel, by that file's rule.
 
-Left out (the S-hes plan's §2.10): every structure is on the risk-free curve's day counter and reference date; and
-cash dividends (fdmhestonhullwhitesolver.py's reason).
+Left out: every structure is on the risk-free curve's day counter and reference date; and cash dividends
+(fdmhestonhullwhitesolver.py's reason).
 
 A case holds fdmhestonhullwhitesolver.py's set-up, scheme and points, in the mesher's coordinates. The wheel's calls,
 by QuantLib-SWIG 1.44's fdm.i: FdmHestonHullWhiteOp(mesher, hestonProcess, hwProcess, correlation), the set-up's

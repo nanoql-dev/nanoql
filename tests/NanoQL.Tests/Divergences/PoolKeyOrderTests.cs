@@ -9,11 +9,11 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// A pool's default keys, read in the pool's order with each name's own key (the S-xcr plan's XR8 (i)): QuantLib's
-/// <c>defaultKeys()</c> lists them in name order (<c>pool.cpp:77-82</c>), so names C and A entering with keys KA and KB
-/// read C's probability on KB's curve; and its <c>clear()</c> keeps the cleared names' keys (<c>pool.cpp:34-38</c>), so a
-/// name added after it reads a cleared name's key. QuantLib's values are the planner's <c>xp_basket.cpp</c> and the plan
-/// review's <c>rv_basket.cpp clear</c>; the checks are QuantLib on the pool added in name order, and on a fresh pool.
+/// A pool's default keys, read in the pool's order with each name's own key: QuantLib's <c>defaultKeys()</c> lists them
+/// in name order (<c>pool.cpp:77-82</c>), so names C and A entering with keys KA and KB read C's probability on KB's
+/// curve; and its <c>clear()</c> keeps the cleared names' keys (<c>pool.cpp:34-38</c>), so a name added after it reads
+/// a cleared name's key. QuantLib's values are recorded in the test; the checks are QuantLib on the pool added in name
+/// order, and on a fresh pool.
 /// </summary>
 public class PoolKeyOrderTests
 {

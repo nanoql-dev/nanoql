@@ -7,11 +7,11 @@ against USD LIBOR 3M and GBP fixed against Euribor 6M, a spread, payment convent
 coupons, an interpolated stub index on a broken front period, SOFR compounded with a lookback, a lockout and its
 spread, SOFR averaged (and its refusal of a lookback, "Cannot price an overnight coupon with simple averaging with
 lookback or lockout."), a seasoned swap reading a stored fixing, and a swap that has expired. Left out: legs whose BPS
-is zero, whose fair rate or spread QuantLib gives as an infinity (the S-rx plan's SRXR3 (xviii)); telescopic value
-dates, which nanoql builds in full (tests/NanoQL.Tests/Divergences/TelescopicValueDatesTests.cs); QuantLib's empty
-payment calendars, which the wheel can't build; and the fair spread of a floating leg compounding its spread, which
-nanoql solves on the swap's pricing where QuantLib's BPS route is inexact (the C3 review's B1-2;
-tests/NanoQL.Tests/Divergences/CrossCurrencySwapCompoundedSpreadFairSpreadTests.cs).
+is zero, whose fair rate or spread QuantLib gives as an infinity; telescopic value dates, which nanoql builds in full
+(tests/NanoQL.Tests/Divergences/TelescopicValueDatesTests.cs); QuantLib's empty payment calendars, which the wheel
+can't build; and the fair spread of a floating leg compounding its spread, which nanoql solves on the swap's pricing
+where QuantLib's BPS route is inexact
+(tests/NanoQL.Tests/Divergences/CrossCurrencySwapCompoundedSpreadFairSpreadTests.cs).
 
 Each case's outputs are whether the swap builds, QuantLib's refusal recorded as its throw; then the swap's inspectors
 (type; the fixed leg's nominal, currency code, rate, day counter and payment convention, lag and calendar; the floating
@@ -170,7 +170,7 @@ def cases():
                 if "calculate" not in expected:
                     expected["fairRate"] = v.result(sw.fairRate)
                     if not spec["floatCompoundSpread"]:
-                        expected["fairSpread"] = v.result(sw.fairSpread)  # left out when compounded (B1-2)
+                        expected["fairSpread"] = v.result(sw.fairSpread)  # left out when compounded
             out.append({"name": name, "inputs": {"settings": st, "swap": spec, "engine": engine_spec},
                         "expected": expected})
     return out

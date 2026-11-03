@@ -16,7 +16,7 @@ namespace NanoQL.PricingEngines;
 /// <summary>
 /// A builder of <see cref="FdCIRVanillaEngine"/>: QuantLib's defaults, 10 time steps, 100 points of the log spot and
 /// 100 of the short rate, no damping steps, no dividends and no quanto helper, but the scheme Hundsdorfer's, where
-/// QuantLib's is modified Hundsdorfer (the S-van plan's VR8).
+/// QuantLib's is modified Hundsdorfer.
 /// </summary>
 /// <remarks>
 /// Immutable: each <c>With</c> method returns a new builder, where QuantLib's returns itself changed;

@@ -26,8 +26,8 @@ internal static class OverloadNamer
         var kept = new List<CFunction>();
         foreach (IGrouping<string, CFunction> same in group.GroupBy(CSignature))
         {
-            // A member the type declares with `new` hides its base's of the same signature, as C#'s lookup binds it (B2R1:
-            // a named class's own Create over its closed generic's); then the overload taking a ReadOnlySpan, else an
+            // A member the type declares with `new` hides its base's of the same signature, as C#'s lookup binds it (a
+            // named class's own Create over its closed generic's); then the overload taking a ReadOnlySpan, else an
             // ImmutableArray, else the first in metadata order.
             CFunction best = same.OrderBy(f => Hides(f) ? 0 : 1).ThenBy(Preference).ThenBy(f => f.Member?.MetadataToken ?? 0).First();
             kept.Add(best);

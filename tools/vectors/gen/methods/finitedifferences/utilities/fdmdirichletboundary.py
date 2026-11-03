@@ -7,8 +7,7 @@ On the composite meshers of tools/vectors/gen/methods/finitedifferences/meshers/
 on its lower and upper side at boundary values 0.25 and -1.5: the array after applyAfterApplying and after
 applyAfterSolving, and the scalar applyAfterApplying(x, value) at the direction's first and last locations, between
 them and beyond each. A boundary on no side is QuantLib's refusal ("internal error"). A direction outside the layout,
-where QuantLib reads past its vector's end, is left out (the S-rx plan's SRXR3 (xiv);
-tests/NanoQL.Tests/Divergences/FdmBoundaryDirectionTests.cs).
+where QuantLib reads past its vector's end, is left out (tests/NanoQL.Tests/Divergences/FdmBoundaryDirectionTests.cs).
 
 A case's inputs are the "mesher" (that generator's composite spec), the "valueOnBoundary", the "direction", the "side"
 (QuantLib's FdmDirichletBoundary::Side: NoSide 0, Upper 1, Lower 2), the "values" the arrays start from and the

@@ -49,7 +49,7 @@ def orthodox_easter_sunday(y):
 
 
 def skipped(market, c):
-    """The dates SCR3 (v) changes: the Western and the Orthodox Good Friday and Easter Monday, every year."""
+    """The dates the fix changes: the Western and the Orthodox Good Friday and Easter Monday, every year."""
     out = []
     for y in range(1901, 2200):
         for easter in (easter_sunday(y), orthodox_easter_sunday(y)):

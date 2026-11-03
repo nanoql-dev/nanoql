@@ -11,9 +11,9 @@ namespace NanoQL.Tests.Divergences;
 /// <summary>
 /// The tolerance loop of <see cref="McSimulation{TPath, TStats}.Value"/> refuses what QuantLib skips or leaves
 /// undefined (mcsimulation.hpp:118-134): a NaN error estimate, which QuantLib's comparison with the tolerance skips,
-/// returning the mean (the S-sr plan's SSD17, after playbook §2's NaN row for <c>std::max_element</c>); and a
-/// next-batch estimate past <c>Size</c>'s range, which QuantLib converts to <c>Size</c>, undefined there (the
-/// undefined-path row): a tolerance of 0 makes the estimate infinite.
+/// returning the mean (after playbook §2's NaN row for <c>std::max_element</c>); and a next-batch estimate past
+/// <c>Size</c>'s range, which QuantLib converts to <c>Size</c>, undefined there (the undefined-path row): a
+/// tolerance of 0 makes the estimate infinite.
 /// </summary>
 public class McSimulationUndefinedTests
 {

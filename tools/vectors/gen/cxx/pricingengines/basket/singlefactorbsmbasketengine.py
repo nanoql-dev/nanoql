@@ -9,9 +9,9 @@ root solver's value and derivatives at points, its roots by its four strategies 
 their function, derivative and second-derivative call counts, and its two refusals (a·σ negative, a non-positive strike
 where every a is positive).
 
-Each case solves, the engine's root by Brent's solver and the root solver's by its strategy, so S7R6 applies (the S-exo
-plan's ED12): every case is refitted with each input moved one ulp up and down, and an output that moves by more than
-1e-12 relative (the counts: at all) in any refit is dropped, QuantLib's own cases covering the solve.
+Each case solves, the engine's root by Brent's solver and the root solver's by its strategy, so the stability filter
+applies: every case is refitted with each input moved one ulp up and down, and an output that moves by more than 1e-12
+relative (the counts: at all) in any refit is dropped, QuantLib's own cases covering the solve.
 
 The harness's calls are tools/cxx/src/pricingengines/basket/singlefactorbsmbasketengine.cpp's. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/PricingEngines/Basket/SingleFactorBsmBasketEngineCxxVectorTests.cs."""
@@ -53,7 +53,7 @@ def moved(values):
 
 
 def filtered(base, refits):
-    """S7R6: the outputs of base stable across every refit, a refit QuantLib refuses (None) moving them all."""
+    """The outputs of base stable across every refit, a refit QuantLib refuses (None) moving them all."""
     return {k: x for k, x in base.items() if all(r is not None and stable(x, r[k]) for r in refits)}
 
 

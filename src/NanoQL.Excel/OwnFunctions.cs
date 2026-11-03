@@ -7,8 +7,8 @@ using ExcelDna.Integration;
 namespace NanoQL.Excel;
 
 /// <summary>
-/// The add-in's own worksheet functions, under their own prefix, <c>nqlxl</c> (XLR13), registered from the runtime's
-/// assembly beside the generated ones. <c>nqlxlStats</c> is generated into test builds alone (XLD25).
+/// The add-in's own worksheet functions, under their own prefix, <c>nqlxl</c>, registered from the runtime's assembly
+/// beside the generated ones. <c>nqlxlStats</c> is generated into test builds alone.
 /// </summary>
 public static class OwnFunctions
 {
@@ -20,7 +20,7 @@ public static class OwnFunctions
         => cell is ExcelReference r && X.Host.ValueOf(r) is ExcelError ? X.ErrorOf(r) : string.Empty;
 
     /// <summary>
-    /// The calls behind a cell (XLR14), a line a row: a vector the Excel replayer reads, or the C# or the Python that runs
+    /// The calls behind a cell, a line a row: a vector the Excel replayer reads, or the C# or the Python that runs
     /// them. An export refused (a cell whose value isn't its call's own outcome, an Excel error argument, a tree mixing date
     /// systems or reporting a read file's path) is #VALUE!, nqlxlError giving why.
     /// </summary>

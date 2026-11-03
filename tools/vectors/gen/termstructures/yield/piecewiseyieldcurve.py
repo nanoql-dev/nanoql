@@ -57,11 +57,11 @@ case on its BMA swap helpers, re-dated.
   linear simple-zero curve, which QuantLib refuses, its maximum date its last pillar, and the log-linear discount
   curve, which builds (DS12); and 3 curves built 15 TARGET days after the evaluation date their FRA and FX swap
   helpers were built on, which re-date them.
-- Then, appended last, 5 cases of convex-monotone curves (ql/math/interpolations/convexmonotoneinterpolation.hpp) on
-  the fixture's helpers, one per evaluation date and one more: forward rates and zero rates on QuantLib's default
+- Then, appended last, 5 cases of convex-monotone curves (ql/math/interpolations/convexmonotoneinterpolation.hpp) on the
+  fixture's helpers, one per evaluation date and one more: forward rates and zero rates on QuantLib's default
   ConvexMonotone, and forward rates at quadraticities of 1 and 0.5 (monotonicity 0.9), and of 0 without forcing
-  positivity, the fixture's rates positive, so that no section reaches the S-core plan's CR7 (i)-(iii) fixes; and the
-  wheel's four named convex-monotone curves (PiecewiseConvexMonotoneForward, PiecewiseConvexMonotoneZero,
+  positivity, the fixture's rates positive, so that no section reaches nanoql's fixes; and the wheel's four named
+  convex-monotone curves (PiecewiseConvexMonotoneForward, PiecewiseConvexMonotoneZero,
   GlobalPiecewiseConvexMonotoneForward, GlobalPiecewiseConvexMonotoneZero) on the fixture's helpers on the first
   evaluation date, with a fixed reference date and on 2 TARGET settlement days, each built through its class by nanoql,
   the global ones on QuantLib's default GlobalBootstrap.

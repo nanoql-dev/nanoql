@@ -212,8 +212,8 @@ public sealed class SwaptionHelper : BlackCalibrationHelper
     /// </summary>
     /// <typeparam name="TModel">The model type the engine prices with.</typeparam>
     /// <param name="engine">
-    /// The engine: the swaption, the context and the model being calibrated, in D14's order; <see langword="null"/>
-    /// for none.
+    /// The engine: the swaption, the context and the model being calibrated, in the engines' order;
+    /// <see langword="null"/> for none.
     /// </param>
     /// <returns>The copy; the receiver doesn't change.</returns>
     /// <remarks>

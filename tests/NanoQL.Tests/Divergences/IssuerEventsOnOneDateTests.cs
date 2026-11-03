@@ -10,10 +10,10 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// An issuer keeps every event, two on one date in the order given (the S-xcr plan's XR8 (iv)): QuantLib's event set
-/// orders by date alone (<c>issuer.hpp:36-38</c>), so it keeps the first event of a date and drops the second, where its
-/// own documentation lets several events take place on one date. QuantLib's values are the S-xcr run's
-/// <c>c1_facts.cpp</c>; the check is QuantLib's issuer with each event alone.
+/// An issuer keeps every event, two on one date in the order given: QuantLib's event set orders by date alone
+/// (<c>issuer.hpp:36-38</c>), so it keeps the first event of a date and drops the second, where its own documentation
+/// lets several events take place on one date. QuantLib's values are recorded in the test; the check is QuantLib's
+/// issuer with each event alone.
 /// </summary>
 public class IssuerEventsOnOneDateTests
 {

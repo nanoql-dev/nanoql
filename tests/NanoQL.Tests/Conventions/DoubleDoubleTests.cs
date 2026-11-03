@@ -9,11 +9,11 @@ using Big = System.Numerics.BigInteger;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The internal double-double arithmetic the Heston expansions and COS cumulants evaluate below their cuts (the S-hes
-/// plan's HR6): a value is an unevaluated sum Hi + Lo of two doubles, about 31 digits. The sum and product are
-/// error-free transformations, Hi + Lo exactly the exact sum or product of two doubles; division, the square root and
-/// the exponential are within 2^-100 relative of the exact or 50-digit values; a non-finite input propagates. Read
-/// through reflection, the type being internal.
+/// The internal double-double arithmetic the Heston expansions and COS cumulants evaluate below their cuts: a value is
+/// an unevaluated sum Hi + Lo of two doubles, about 31 digits. The sum and product are error-free transformations, Hi +
+/// Lo exactly the exact sum or product of two doubles; division, the square root and the exponential are within 2^-100
+/// relative of the exact or 50-digit values; a non-finite input propagates. Read through reflection, the type being
+/// internal.
 /// </summary>
 public class DoubleDoubleTests
 {

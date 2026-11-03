@@ -3,9 +3,9 @@
 """Vectors for QuantLib's non-central chi-squared polynomial
 (ql/experimental/math/gaussiannoncentralchisquaredpolynomial.hpp, .cpp), from the C++ harness's multi-precision oracle
 (tools/cxx/src/experimental/math/gaussiannoncentralchisquaredpolynomial.cpp): QuantLib's moment recursion template at
-cpp_bin_float_50 on the cumulant moments in that type, its recurrence rounded once to double (the S-xrt plan's XRR8).
-QuantLib's own double polynomial is wrong at its own CLV cases by up to 0.61 (Divergences/NonCentralChiSquared
-PolynomialTests.cs), so it isn't the oracle.
+cpp_bin_float_50 on the cumulant moments in that type, its recurrence rounded once to double. QuantLib's own double
+polynomial is wrong at its own CLV cases by up to 0.61 (Divergences/NonCentralChiSquared PolynomialTests.cs), so it
+isn't the oracle.
 
 - "values" cases: ν and λ of QuantLib's quadrature cases (4 and 1, 1 and 1), of its CLV cases (6 and 31.7, 9 and 31.7)
   and one at λ 75, where QuantLib's double rule refuses; their first n recurrence coefficients, and the n-point rule's

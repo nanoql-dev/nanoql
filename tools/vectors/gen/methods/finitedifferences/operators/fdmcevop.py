@@ -4,14 +4,14 @@
 backward operator, its diffusion 1/2 alpha^2 f^(2 beta) and its discounting at the curve's forward rate, on the
 evaluation date 15 October 2026.
 
-Three CEV processes (testFdmCevOp's f0 2.1, alpha 0.75 at beta 0.45 and -0.5, and beta 1.45 on a forward of 100) on
-flat curves at 15%, 3% and -1% Actual/365 (Fixed), on the engine's mesher (FdmCEV1dMesher, its spec
+Three CEV processes (testFdmCevOp's f0 2.1, alpha 0.75 at beta 0.45 and -0.5, and beta 1.45 on a forward of 100) on flat
+curves at 15%, 3% and -1% Actual/365 (Fixed), on the engine's mesher (FdmCEV1dMesher, its spec
 tools/vectors/gen/methods/finitedifferences/meshers/fdmcev1dmesher.py's) and on that mesher in the first direction of
 two, a uniform one second. For each, at three (t1, t2): size, then on seeded vectors apply, apply_mixed (zero),
 apply_direction in each direction, solve_splitting in each direction at s = -0.3 and 0.7, and preconditioner at s = 0.4,
 tools/vectors/gen/methods/finitedifferences/operators/fdmg2op.py's outputs. The operator in a direction other than 0,
-where QuantLib's differentiates along direction 0 and nanoql's along the direction given (the S-van plan's VR4 (xiv),
-tests/NanoQL.Tests/Divergences/FdmCevOpDirectionTests.cs), is left out.
+where QuantLib's differentiates along direction 0 and nanoql's along the direction given
+(tests/NanoQL.Tests/Divergences/FdmCevOpDirectionTests.cs), is left out.
 
 The wheel's calls, by QuantLib-SWIG 1.44's fdm.i: FdmCEVOp(mesher, rTS, f0, alpha, beta, direction), the C++
 constructor, and its members, the Arrays built from lists. Read back by

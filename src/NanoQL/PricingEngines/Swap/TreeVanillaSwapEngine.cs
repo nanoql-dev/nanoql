@@ -20,7 +20,7 @@ namespace NanoQL.PricingEngines;
 /// QuantLib's engine holds it, on a lattice built through the swap's mandatory times with the given number of steps,
 /// or on a time grid, or on a lattice already built. The swap is initialized at its last mandatory time and rolled back
 /// to 0; only its NPV is computed. A floating coupon fixed on or before the reference date is its amount
-/// (<see cref="DiscretizedSwap"/>'s public constructor, the S-sr plan's SSR6 (xvi)).
+/// (<see cref="DiscretizedSwap"/>'s public constructor).
 /// </para>
 /// <para>
 /// The term structure is needed only when the model can't provide one: a model that is an

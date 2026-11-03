@@ -12,11 +12,11 @@ using static NanoQL.Tests.Vectors.EquityInputs;
 namespace NanoQL.Tests.Vectors;
 
 /// <summary>
-/// The BatesModel vectors, <c>tests/vectors/models/equity/batesmodel.json</c>: three processes' eight parameters through
-/// the model's accessors, the parameters set to other values on the new model
+/// The BatesModel vectors, <c>tests/vectors/models/equity/batesmodel.json</c>: three processes' eight parameters
+/// through the model's accessors, the parameters set to other values on the new model
 /// <see cref="CalibratedModelExtensions.SetParams{TModel}"/> returns, its process a Bates process on them, the
 /// constructor's refusals, and two calibrations to nine helpers priced by the Bates engine, compared on the outputs the
-/// S7R6 filter keeps.
+/// stability filter keeps.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class BatesModelVectorTests

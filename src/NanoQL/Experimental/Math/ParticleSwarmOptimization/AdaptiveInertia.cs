@@ -16,9 +16,9 @@ namespace NanoQL.Experimental;
 /// <c>AdaptiveInertia</c>.
 /// </summary>
 /// <remarks>
-/// The counter of improvements less stalls is signed: QuantLib's is unsigned, so its first improvement wraps it to
-/// 2⁶⁴ − 1 and halves the inertia as if the swarm had stalled (the S-xrt plan's XRR5 (xxxi);
-/// <c>Divergences/ParticleSwarmInertiaTests.cs</c>). The first iteration leaves the inertia unchanged.
+/// The counter of improvements less stalls is signed: QuantLib's is unsigned, so its first improvement wraps it to 2⁶⁴
+/// − 1 and halves the inertia as if the swarm had stalled (<c>Divergences/ParticleSwarmInertiaTests.cs</c>). The first
+/// iteration leaves the inertia unchanged.
 /// </remarks>
 [Experimental("NQL0001")]
 public sealed class AdaptiveInertia : ParticleSwarmOptimizationInertia

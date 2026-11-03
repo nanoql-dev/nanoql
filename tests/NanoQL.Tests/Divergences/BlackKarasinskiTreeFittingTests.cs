@@ -13,13 +13,13 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// Black-Karasinski's trees on one model (the S-sr plan's SSR6 (i)): QuantLib's <c>BlackKarasinski::tree</c> writes the
-/// model's one fitting parameter <c>phi_</c> (<c>blackkarasinski.cpp:64</c>, <c>:79-81</c>), so building a second tree
-/// on another grid rewrites the first's fitting: on the wheel, a grid engine's swaption, exercised on its swap's start
-/// date, which the discretized swaption's snapping leaves alone (the S-cms plan's CMR4), prices 0.007389451726576681
-/// alone and 0.007389042124133561 once a second grid engine has built its tree on the same model. nanoql's tree owns
-/// its fitting, as S-bond's Hull-White tree does, so a lattice prices the same whatever is built after it. QuantLib's
-/// check: a fresh model's tree on the first grid, 0.007389451726576681.
+/// Black-Karasinski's trees on one model: QuantLib's <c>BlackKarasinski::tree</c> writes the model's one fitting
+/// parameter <c>phi_</c> (<c>blackkarasinski.cpp:64</c>, <c>:79-81</c>), so building a second tree on another grid
+/// rewrites the first's fitting: on the wheel, a grid engine's swaption, exercised on its swap's start date, which the
+/// discretized swaption's snapping leaves alone, prices 0.007389451726576681 alone and 0.007389042124133561 once a
+/// second grid engine has built its tree on the same model. nanoql's tree owns its fitting, as the Hull-White tree
+/// does, so a lattice prices the same whatever is built after it. QuantLib's check: a fresh model's tree on the first
+/// grid, 0.007389451726576681.
 /// </summary>
 public class BlackKarasinskiTreeFittingTests
 {

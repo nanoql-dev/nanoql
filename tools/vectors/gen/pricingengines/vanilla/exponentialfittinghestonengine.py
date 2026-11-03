@@ -7,8 +7,8 @@ Gauss-Laguerre rule of 64 nodes on the analytic engine's control variate.
 tools/vectors/gen/processes/hestonprocess.py's three Heston parameter sets on flat and linear zero curves: the NPV of
 calls and puts at seven strikes, from deep in to deep out of the money, and three maturities, by the optimal control
 variate (QuantLib's default), Andersen and Piterbarg's, the asymptotic characteristic function's and the angled
-contour's, and the optimal one at a scaling of 0.5 and at a damping exponent of -0.3. Every market's κt is at least
-0.2, above the vAvg branch at κt = 1e-2 (the S-hes plan's HR7 (xxv)).
+contour's, and the optimal one at a scaling of 0.5 and at a damping exponent of -0.3. Every market's κt is at least 0.2,
+above the vAvg branch at κt = 1e-2.
 
 A case holds one process {"riskFree", "dividend", "s0", "v0", "kappa", "theta", "sigma", "rho"}, the curves
 tools/vectors/gen/processes/blackscholesprocess.py's specs, and an engine {"cv" (AnalyticHestonEngine's

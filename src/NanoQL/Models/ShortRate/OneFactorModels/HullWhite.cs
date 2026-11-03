@@ -34,8 +34,8 @@ namespace NanoQL.Models;
 /// <para>
 /// B(t, T) is Vasicek's, in QuantLib's master's form after the pin (#2882); the members QuantLib 1.44 cuts at small
 /// α, the bond options, the analytical fitting parameter and the convexity bias, are written in the same
-/// cancellation-free forms, exact in the limit α → 0 (the S-sr plan's SSR3 and SSR6 (iii)), so their last bits differ
-/// from 1.44's at every α (<c>Divergences/SmallReversionTests.cs</c>).
+/// cancellation-free forms, exact in the limit α → 0, so their last bits differ from 1.44's at every α
+/// (<c>Divergences/SmallReversionTests.cs</c>).
 /// </para>
 /// </remarks>
 public sealed class HullWhite : Vasicek, ITermStructureConsistentModel
@@ -263,7 +263,7 @@ public sealed class HullWhite : Vasicek, ITermStructureConsistentModel
             public override double Value(ImmutableArray<double> parameters, double t)
             {
                 // ForwardRate(t, t, Continuous)'s rate without its InterestRate, so a finite-difference step allocates
-                // nothing (the S-sr plan's SSD10)
+                // nothing
                 double forwardRate = termStructure.ContinuousForwardRate(t, t);
                 double temp = sigma * t * OneMinusExpOverX(a * t);
                 return forwardRate + (0.5 * temp * temp);

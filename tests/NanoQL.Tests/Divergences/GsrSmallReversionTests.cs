@@ -12,22 +12,21 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// GSR's process core at small reversions (the S-g1d plan's G1R4 (i)): QuantLib switches to its zero-reversion formulas
-/// below |a| &lt; 1e-4 (<c>gsrprocesscore.cpp:72-75</c>), so its outputs jump at the cut, and just above it its two
-/// terms over a² cancel to second order. On the wheel, a European 5Y into 10Y payer at 3% on a flat 3% curve with
-/// σ = 0.01 is worth 0.06892731403656928 at a = 1e-4·(1 − 1e-6) and 0.068867423550291 at a = 1e-4·(1 + 1e-6), a jump
-/// of 8.7e-4. nanoql computes each term below |a| &lt; 1e-2 in a form continuous in a (<c>expm1</c> and
-/// φ₂(u) = (eᵘ − 1 − u)/u²), QuantLib's zero-reversion formulas at a = 0 exactly, and QuantLib's formulas and bits at
-/// and above 1e-2. QuantLib's checks: its own formulas at the switch, which the forms meet at the process's members, on
-/// a process with step dates as without: the measured gaps, 1.3e-12 on one piece and 2e-12 on the stepped process
-/// here, are the switch's own step of a acting on the expectation's cancelling parts; each side, at its own reversion,
-/// is within about 2e-13 of exact; and its own zero-reversion formulas, the forms' limit, which the process meets as
-/// a → 0, each term moving in proportion to a. A price answers a change of its inputs at the 1e-12 level by about as
-/// much on this swaption, and by up to 2e-9 on 10-year expiries, on either side of the switch, through the engine's
-/// grid and spline, so the price fact at the switch (1.1e-12 measured) checks the engine at one point on each side, not
-/// the formulas. nanoql's prices here differ from
-/// QuantLib's in their last places only by the C runtime's <c>erf</c> (the plan's G1R3): with it, QuantLib's bits at
-/// a = 0 and a = 1e-2.
+/// GSR's process core at small reversions: QuantLib switches to its zero-reversion formulas below |a| &lt; 1e-4
+/// (<c>gsrprocesscore.cpp:72-75</c>), so its outputs jump at the cut, and just above it its two terms over a² cancel to
+/// second order. On the wheel, a European 5Y into 10Y payer at 3% on a flat 3% curve with σ = 0.01 is worth
+/// 0.06892731403656928 at a = 1e-4·(1 − 1e-6) and 0.068867423550291 at a = 1e-4·(1 + 1e-6), a jump of 8.7e-4. nanoql
+/// computes each term below |a| &lt; 1e-2 in a form continuous in a (<c>expm1</c> and φ₂(u) = (eᵘ − 1 − u)/u²),
+/// QuantLib's zero-reversion formulas at a = 0 exactly, and QuantLib's formulas and bits at and above 1e-2. QuantLib's
+/// checks: its own formulas at the switch, which the forms meet at the process's members, on a process with step dates
+/// as without: the measured gaps, 1.3e-12 on one piece and 2e-12 on the stepped process here, are the switch's own step
+/// of a acting on the expectation's cancelling parts; each side, at its own reversion, is within about 2e-13 of exact;
+/// and its own zero-reversion formulas, the forms' limit, which the process meets as a → 0, each term moving in
+/// proportion to a. A price answers a change of its inputs at the 1e-12 level by about as much on this swaption, and by
+/// up to 2e-9 on 10-year expiries, on either side of the switch, through the engine's grid and spline, so the price
+/// fact at the switch (1.1e-12 measured) checks the engine at one point on each side, not the formulas. nanoql's prices
+/// here differ from QuantLib's in their last places only by the C runtime's <c>erf</c>: with it, QuantLib's bits at a =
+/// 0 and a = 1e-2.
 /// </summary>
 public class GsrSmallReversionTests
 {

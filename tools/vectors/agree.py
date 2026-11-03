@@ -8,10 +8,10 @@ Usage: python -I tools/vectors/agree.py [<cxx path> ...]
 A path is a harness vector's path under tests/vectors, without ".json" (for example cxx/interestrate); with none,
 every twin on TWINS. A twin is listed, never inferred from its path: other harness vectors share paths with unrelated
 wheel files. Two files agree when they have the same case names and inputs, in order, and the same outputs, each
-under R7 (|a - b| <= 1e-10 x max(|a|, |b|, scale), with the output's own scale), with the same kind (boolean,
-integer, real, string, null, throws) and each {value, scale}'s scale exactly. Prints, per twin, the outputs agreeing
-M/M and how many are bit-identical; exits 1 on any disagreement, or on a listed twin whose file is missing. It needs
-no QuantLib.
+under the tolerance (|a - b| <= 1e-10 x max(|a|, |b|, scale), with the output's own scale), with the same kind
+(boolean, integer, real, string, null, throws) and each {value, scale}'s scale exactly. Prints, per twin, the outputs
+agreeing M/M and how many are bit-identical; exits 1 on any disagreement, or on a listed twin whose file is missing.
+It needs no QuantLib.
 """
 import json
 import math
@@ -130,8 +130,8 @@ def agree(rel):
         print(f"MISMATCH {rel}: {m}")
     if len(t.mismatches) > MAX_REPORTED:
         print(f"... and {len(t.mismatches) - MAX_REPORTED} more")
-    print(f"{rel} against {wheel_rel}: {len(wc)} cases; outputs agreeing within R7 {t.agreeing}/{t.outputs}, "
-          f"bit-identical {t.identical}")
+    print(f"{rel} against {wheel_rel}: {len(wc)} cases; outputs agreeing within the tolerance "
+          f"{t.agreeing}/{t.outputs}, bit-identical {t.identical}")
     return t.agreeing == t.outputs and not t.mismatches
 
 

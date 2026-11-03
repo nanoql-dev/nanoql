@@ -22,9 +22,9 @@ namespace NanoQL.TermStructures;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Immutable, calibrated at construction (master §2.2's <c>LazyObject</c> row), where QuantLib calibrates on first use.
-/// Its local-volatility and price slices at a time are memoised by that time, as QuantLib caches them, in thread-safe
-/// maps inside the object (the S-van plan's VR2, a named departure from PR6.9): each slice is computed from the
+/// Immutable, calibrated at construction (the playbook's <c>LazyObject</c> row), where QuantLib calibrates on first
+/// use. Its local-volatility and price slices at a time are memoised by that time, as QuantLib caches them, in
+/// thread-safe maps inside the object (a named departure from the stateless rule): each slice is computed from the
 /// calibration by QuantLib's arithmetic, so its bits are the same whichever thread computes it first, and every query
 /// returns what a fresh object returns. Without them an engine reading the surface at every grid point and step would
 /// recompute a slice per read, about 130 times QuantLib's cost.
@@ -32,9 +32,9 @@ namespace NanoQL.TermStructures;
 /// <para>
 /// The call-put calibration's error picks a put's error for a strike below the forward and a call's above it, where
 /// QuantLib compares the forward with the j-th grid point rather than the j-th strike, and so always takes the puts'
-/// (<c>andreasenhugevolatilityinterpl.cpp:418</c>; the S-van plan's VR4 (xvii)). The dividend curve is read at the
-/// instants the risk-free curve's times denote, on its own clock, where QuantLib reads it at those times (VR4 (xxiii),
-/// the mismatched-dates class); curves that share a clock keep QuantLib's bits. Documented divergences.
+/// (<c>andreasenhugevolatilityinterpl.cpp:418</c>). The dividend curve is read at the instants the risk-free curve's
+/// times denote, on its own clock, where QuantLib reads it at those times (the mismatched-dates class); curves that
+/// share a clock keep QuantLib's bits. Documented divergences.
 /// </para>
 /// </remarks>
 public sealed class AndreasenHugeVolatilityInterpl
@@ -61,7 +61,7 @@ public sealed class AndreasenHugeVolatilityInterpl
     private readonly Vector gridInFwd;
     private readonly ImmutableArray<SingleStepCalibrationResult> calibrationResults;
 
-    // VR2: the slices by time, computed once from the immutable calibration
+    // The slices by time, computed once from the immutable calibration
     private readonly ConcurrentDictionary<double, Slice> localVolCache = new();
     private readonly ConcurrentDictionary<double, Slice> priceCache = new();
 
@@ -245,7 +245,7 @@ public sealed class AndreasenHugeVolatilityInterpl
 
                     double fwd = spot * qTS.DiscountAt(rTS, expiryTimes[i]) / rTS.Discount(expiryTimes[i]);
 
-                    // by strike against the forward (VR4 (xvii))
+                    // by strike against the forward
                     ImmutableArray<double> expiryStrikes = CalibratedStrikes(i);
                     vegaDiffs = new Vector(sig.Size);
                     for (int j = 0; j < vegaDiffs.Size; ++j)
@@ -535,7 +535,7 @@ public sealed class AndreasenHugeVolatilityInterpl
     /// </summary>
     /// <remarks>
     /// Immutable: each step builds its operator, where QuantLib's mutates a member, so that the slices can be computed on
-    /// any thread (VR2); the arithmetic is QuantLib's.
+    /// any thread; the arithmetic is QuantLib's.
     /// </remarks>
     private sealed class AndreasenHugeCostFunction : CostFunction
     {

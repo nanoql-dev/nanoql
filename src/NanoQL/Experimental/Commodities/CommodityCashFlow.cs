@@ -15,7 +15,7 @@ namespace NanoQL.Experimental;
 /// <see cref="Amount"/> is the undiscounted amount, as <see cref="CashFlow.Amount"/> is documented ("the actual amount
 /// paid at the cash flow date", <c>cashflow.hpp:62-66</c>); QuantLib's <c>amount()</c> returns the discounted one
 /// (<c>commoditycashflow.hpp:56</c>), so a consumer reading these as cash flows discounts them twice. The discounted
-/// amount is <see cref="DiscountedAmount"/> (the S-xrt plan's XRR9; <c>Divergences/CommodityCashFlowAmountTests.cs</c>).
+/// amount is <see cref="DiscountedAmount"/> (<c>Divergences/CommodityCashFlowAmountTests.cs</c>).
 /// </remarks>
 [Experimental("NQL0001")]
 public sealed class CommodityCashFlow : CashFlow

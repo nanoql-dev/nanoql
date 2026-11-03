@@ -25,7 +25,7 @@ namespace NanoQL.Numerics;
 /// </para>
 /// <para>
 /// A coordinate whose sum is exactly 1.0 wraps to 0.0 here, so every point lies in [0, 1)^N; QuantLib's test is
-/// <c>x &gt; 1.0</c>, which leaves it at 1.0 (the S-core plan's CR7 (xiii); <c>Divergences/RandomizedLdsTests.cs</c>).
+/// <c>x &gt; 1.0</c>, which leaves it at 1.0 (<c>Divergences/RandomizedLdsTests.cs</c>).
 /// </para>
 /// </remarks>
 /// <typeparam name="TLds">The low-discrepancy sequence generator.</typeparam>

@@ -7,14 +7,13 @@ two variance surfaces (one bilinear, one bicubic with constant strike extrapolat
 times from a quarter to four years: the density and distribution at strikes from 0.5 to 2 times the forward, the inverse
 at probabilities from 1e-3 to 0.999.
 
-**The stability filter** (the S7 plan's S7R6, the S-van plan's VD17) on the inverse, which QuantLib solves with Brent:
-each is solved again with its probability moved one ulp up and one down (math.nextafter), and a point is written only
-where both solves give its strike within 1e-10 × max(1, |base|, |moved|), Brent's own accuracy. The generator prints the
-points dropped.
+**The stability filter** on the inverse, which QuantLib solves with Brent: each is solved again with its probability
+moved one ulp up and one down (math.nextafter), and a point is written only where both solves give its strike within
+1e-10 × max(1, |base|, |moved|), Brent's own accuracy. The generator prints the points dropped.
 
-Left out (the S-van plan's §2.10): structures on another clock, which nanoql reads at the instants the risk-free curve's
-times denote and QuantLib at those times (VR4 (xxiii); tests/NanoQL.Tests/Divergences/LocalVolMismatchedTimesTests.cs):
-every structure here is dated 15 October 2026 on Actual/365 (Fixed). The process and structure specs are
+Left out: structures on another clock, which nanoql reads at the instants the risk-free curve's times denote and
+QuantLib at those times (tests/NanoQL.Tests/Divergences/LocalVolMismatchedTimesTests.cs): every structure here is dated
+15 October 2026 on Actual/365 (Fixed). The process and structure specs are
 tools/vectors/gen/processes/blackscholesprocess.py's; "extrapolate" enables the surface's extrapolation. The wheel's
 calls, by QuantLib-SWIG 1.44: GBSMRNDCalculator(process) and its pdf, cdf and invcdf. Read back by
 tests/NanoQL.Tests/Vectors/Methods/FiniteDifferences/Utilities/GBSMRNDCalculatorVectorTests.cs."""

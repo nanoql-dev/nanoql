@@ -21,20 +21,19 @@ namespace NanoQL.Models;
 /// statistics and each Greek's values to its own, in units of the initial numeraire.
 /// </para>
 /// <para>
-/// A working type (the S-mmp plan's MMPR1 (i)): it holds the caller's evolvers, as QuantLib's <c>shared_ptr</c>, and
-/// steps them, so an evolver serves one engine at a time; it holds its own clone of the product. Its buffers are sized
-/// at construction, so a path, the original's and the constrained evolvers', allocates nothing after a warm-up path
-/// (MMPR1 (v)).
+/// A working type: it holds the caller's evolvers, as QuantLib's <c>shared_ptr</c>, and steps them, so an evolver
+/// serves one engine at a time; it holds its own clone of the product. Its buffers are sized at construction, so a
+/// path, the original's and the constrained evolvers', allocates nothing after a warm-up path.
 /// </para>
 /// <para>
-/// The constrained evolvers' weights are S-mm's evolver's, which since MMPR3 carry the reference model's transition
+/// The constrained evolvers' weights are the constrained Euler evolver's, which carry the reference model's transition
 /// density: a volatility-bumped evolver given the original model as its reference yields vegas within their standard
 /// errors of Black's, where QuantLib's are of the wrong sign (<c>Divergences/ProxyGreekVegaTests.cs</c>).
 /// </para>
 /// <para>
 /// Refused, where QuantLib reads past its buffers: a group of weights without its evolvers, a list of weights longer
 /// than its group's evolvers and the original, constraints fewer than the product's steps, statistics fewer than the
-/// weights, and a product not finished at the evolver's last step (MMPR4's refusals).
+/// weights, and a product not finished at the evolver's last step.
 /// </para>
 /// </remarks>
 [WorkingType]

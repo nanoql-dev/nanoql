@@ -13,8 +13,8 @@ namespace NanoQL.Methods;
 /// operator weighted by ½ − μ to the mixed part weighted by μ.
 /// </summary>
 /// <remarks>
-/// A working type (the S-eq plan's SEQR1): <see cref="Step"/> steps the caller's values in place through buffers the
-/// scheme holds, so a step allocates nothing after the first.
+/// A working type: <see cref="Step"/> steps the caller's values in place through buffers the scheme holds, so a step
+/// allocates nothing after the first.
 /// </remarks>
 [WorkingType]
 public sealed class ModifiedCraigSneydScheme : IFdmScheme, IFdmSetOperatorScheme

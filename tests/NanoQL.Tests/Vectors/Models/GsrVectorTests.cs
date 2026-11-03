@@ -13,7 +13,7 @@ namespace NanoQL.Tests.Vectors;
 /// The GSR model vectors, <c>tests/vectors/models/shortrate/onefactormodels/gsr.json</c>: <see cref="Gsr"/>'s
 /// constructions (its reversions, volatilities, parameters and zero bonds), its refusals, and its calibrations to
 /// swaption helpers priced by <see cref="Gaussian1dSwaptionEngine"/> (with the reversions fixed, everything free, and
-/// the two iterative ones), each holding the outputs the S7R6 filter keeps.
+/// the two iterative ones), each holding the outputs the stability filter keeps.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class GsrVectorTests

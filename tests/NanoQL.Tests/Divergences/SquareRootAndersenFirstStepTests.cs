@@ -12,17 +12,15 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The square-root volatility process's first step (the S-mm plan's MR3 (xvii), fixed under R8). QuantLib's
-/// <c>SquareRootAndersen</c> fills the first evolution step's sub-step lengths but not their e^{−κΔt}, left 0
-/// (<c>squarerootandersen.cpp:51-52</c>), so the first step reverts in full: from v₀ 0.16, θ 0.04, κ 1, ε 0.5 the mean
-/// of v at 0.5 over 20,000 Mersenne-twister paths is 0.0391 against CIR's 0.1128 (this run's
-/// <c>probes\c2_facts.cpp</c>). QuantLib's <c>testStochVolForwardsAndOptionlets</c> prices the SVD-DD evolver's caplets
-/// against
-/// <c>AnalyticHestonEngine</c> within 4 standard errors at θ = v₀ = 1 (<c>marketmodel.cpp:4326</c>, <c>:4330</c>),
-/// where the first step can't show; at v₀ 0.25, v₀ 2 or θ 0.5 its caplets are 6.3 to 38.6 standard errors off, and with
-/// the first step filled within 1.71 (this run's copy of the S-mm plan's m6 probe, <c>probes\m6.out</c>). nanoql takes
-/// e^{−κΔt} for the first step's sub-steps too. Checks: QuantLib's own process where its e^{−κΔt} underflows to 0
-/// itself (the vectors), bit for bit; CIR's mean and variance at the first step; and QuantLib's test at v₀ ≠ θ.
+/// The square-root volatility process's first step (fixed). QuantLib's <c>SquareRootAndersen</c> fills the first
+/// evolution step's sub-step lengths but not their e^{−κΔt}, left 0 (<c>squarerootandersen.cpp:51-52</c>), so the first
+/// step reverts in full: from v₀ 0.16, θ 0.04, κ 1, ε 0.5 the mean of v at 0.5 over 20,000 Mersenne-twister paths is
+/// 0.0391 against CIR's 0.1128. QuantLib's <c>testStochVolForwardsAndOptionlets</c> prices the SVD-DD evolver's caplets
+/// against <c>AnalyticHestonEngine</c> within 4 standard errors at θ = v₀ = 1 (<c>marketmodel.cpp:4326</c>,
+/// <c>:4330</c>), where the first step can't show; at v₀ 0.25, v₀ 2 or θ 0.5 its caplets are 6.3 to 38.6 standard
+/// errors off, and with the first step filled within 1.71. nanoql takes e^{−κΔt} for the first step's sub-steps too.
+/// Checks: QuantLib's own process where its e^{−κΔt} underflows to 0 itself (the vectors), bit for bit; CIR's mean and
+/// variance at the first step; and QuantLib's test at v₀ ≠ θ.
 /// </summary>
 public class SquareRootAndersenFirstStepTests
 {
@@ -54,7 +52,7 @@ public class SquareRootAndersenFirstStepTests
         Assert.True(Math.Abs(mean - cirMean) < 4 * standardError, $"mean {mean}, CIR {cirMean}, standard error {standardError}");
         Assert.Equal(cirVariance, variance, 0.1 * cirVariance);
 
-        // QuantLib's mean, the first step reverting in full (this run's probes\c2_facts.cpp)
+        // QuantLib's mean, the first step reverting in full
         Assert.True(Math.Abs(0.039072494604281374 - cirMean) > 100 * standardError);
     }
 
@@ -127,8 +125,8 @@ public class SquareRootAndersenFirstStepTests
     {
         // QuantLib's testStochVolForwardsAndOptionlets on its own route (marketmodel.cpp:4283-4460): forwards and
         // optionlets in a multi-product composite through the accounting engine, the terminal measure, its full
-        // factors; each caplet checked against its own standard error (the S-mmp plan's SMD12), where QuantLib's test
-        // divides by its forward's (marketmodel.cpp:4450)
+        // factors; each caplet checked against its own standard error, where QuantLib's test divides by its forward's
+        // (marketmodel.cpp:4450)
         const int n = 9, paths = 32767;
         const double reversionSpeed = 1.0, volVar = 1.0;
         double[] rateTimes = [.. Enumerable.Range(1, n + 1).Select(i => 0.5 * i)];

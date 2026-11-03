@@ -364,7 +364,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `cpicapfloortermpricesurface` | ported | Experimental/Inflation/CPICapFloorTermPriceSurface.cs, Experimental/Inflation/InterpolatedCPICapFloorTermPriceSurface{TInterpolator2D}.cs |  |
 | `genericindexes` | ported | Experimental/Inflation/GenericIndexes/GenericCPI.cs, Experimental/Inflation/GenericIndexes/GenericRegion.cs, Experimental/Inflation/GenericIndexes/YYGenericCPI.cs |  |
 | `interpolatedyoyoptionletstripper` | ported | Experimental/Inflation/InterpolatedYoYInflationOptionletStripper.cs, Experimental/Inflation/InterpolatedYoYOptionletStripper{TInterpolator}.cs |  |
-| `kinterpolatedyoyoptionletvolatilitysurface` | partial | Experimental/Inflation/KInterpolatedYoYInflationOptionletVolatilitySurface.cs, Experimental/Inflation/KInterpolatedYoYOptionletVolatilitySurface{TInterpolator}.cs | partial: KInterpolatedYoYOptionletVolatilitySurface::volatilityImpl(const Date&, Rate), never ported: only its time form calls it, and the time form reads the stripped curves by time (XRR5 (xiii)) |
+| `kinterpolatedyoyoptionletvolatilitysurface` | partial | Experimental/Inflation/KInterpolatedYoYInflationOptionletVolatilitySurface.cs, Experimental/Inflation/KInterpolatedYoYOptionletVolatilitySurface{TInterpolator}.cs | partial: KInterpolatedYoYOptionletVolatilitySurface::volatilityImpl(const Date&, Rate), never ported: only its time form calls it, and the time form reads the stripped curves by time |
 | `piecewiseyoyoptionletvolatility` | ported | Experimental/Inflation/PiecewiseYoYOptionletVolatilityCurve{TInterpolator,TBootstrap,TTraits}.cs, Experimental/Inflation/YoYInflationVolatilityTraits.cs |  |
 | `polynomial2Dspline` | ported | Experimental/Inflation/Polynomial.cs, Experimental/Inflation/Polynomial2DSpline.cs |  |
 | `yoycapfloortermpricesurface` | ported | Experimental/Inflation/InterpolatedYoYCapFloorTermPriceSurface{TInterpolator2D,TInterpolator1D}.cs, Experimental/Inflation/YoYCapFloorTermPriceSurface.cs, Experimental/Inflation/YoYInflationCapFloorTermPriceSurface.cs |  |
@@ -992,15 +992,15 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `all` | not ported: include-only header |  |  |
 | `boundarycondition` | ported | Methods/FiniteDifferences/BoundaryConditionSide.cs, Methods/FiniteDifferences/BoundaryCondition{TOperator}.cs | no nanoql type: NeumannBC, DirichletBC |
 | `bsmoperator` | not ported: deprecated |  |  |
-| `cranknicolson` | not ported: deprecated (D5): QuantLib's [[deprecated]] attribute alone |  |  |
-| `dminus` | not ported: deprecated (D5): QuantLib's [[deprecated]] attribute alone |  |  |
-| `dplus` | not ported: deprecated (D5): QuantLib's [[deprecated]] attribute alone |  |  |
-| `dplusdminus` | not ported: deprecated (D5): QuantLib's [[deprecated]] attribute alone |  |  |
-| `dzero` | not ported: deprecated (D5): QuantLib's [[deprecated]] attribute alone |  |  |
-| `expliciteuler` | not ported: deprecated (D5): QuantLib's [[deprecated]] attribute alone |  |  |
+| `cranknicolson` | not ported: deprecated: QuantLib's [[deprecated]] attribute alone |  |  |
+| `dminus` | not ported: deprecated: QuantLib's [[deprecated]] attribute alone |  |  |
+| `dplus` | not ported: deprecated: QuantLib's [[deprecated]] attribute alone |  |  |
+| `dplusdminus` | not ported: deprecated: QuantLib's [[deprecated]] attribute alone |  |  |
+| `dzero` | not ported: deprecated: QuantLib's [[deprecated]] attribute alone |  |  |
+| `expliciteuler` | not ported: deprecated: QuantLib's [[deprecated]] attribute alone |  |  |
 | `finitedifferencemodel` | ported | Methods/FiniteDifferences/FiniteDifferenceModel{TScheme}.cs, Methods/FiniteDifferences/IFdmScheme.cs |  |
-| `impliciteuler` | not ported: deprecated (D5): QuantLib's [[deprecated]] attribute alone |  |  |
-| `mixedscheme` | not ported: deprecated (D5): QuantLib's [[deprecated]] attribute alone |  |  |
+| `impliciteuler` | not ported: deprecated: QuantLib's [[deprecated]] attribute alone |  |  |
+| `mixedscheme` | not ported: deprecated: QuantLib's [[deprecated]] attribute alone |  |  |
 | `operatortraits` | replaced: generics: BoundaryCondition<TOperator>; StepCondition is on arrays alone |  |  |
 | `pde` | not ported: deprecated |  |  |
 | `pdebsm` | not ported: deprecated |  |  |
@@ -1761,7 +1761,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `bootstraperror` | not ported: deprecated (D5): QuantLib's [[deprecated]] attribute alone |  |  |
+| `bootstraperror` | not ported: deprecated: QuantLib's [[deprecated]] attribute alone |  |  |
 | `bootstraphelper` | ported | TermStructures/BootstrapHelper/BootstrapHelperExtensions.cs, TermStructures/BootstrapHelper/BootstrapHelperFunctions.cs, TermStructures/BootstrapHelper/BootstrapHelper{TTermStructure}.cs, TermStructures/BootstrapHelper/IBootstrapHelper.cs, TermStructures/BootstrapHelper/PillarChoice.cs, TermStructures/BootstrapHelper/RelativeDateBootstrapHelper{TTermStructure}.cs |  |
 | `defaulttermstructure` | ported | TermStructures/DefaultProbabilityTermStructure.cs |  |
 | `globalbootstrap` | ported | TermStructures/GlobalBootstrap/AdditionalBootstrapVariables.cs, TermStructures/GlobalBootstrap/GlobalBootstrap.cs, TermStructures/GlobalBootstrap/IMultiCurveBootstrap.cs, TermStructures/GlobalBootstrap/MultiCurveBootstrap.cs, TermStructures/GlobalBootstrap/MultiCurveBootstrapContributor.cs |  |
@@ -1919,7 +1919,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `flatforward` | ported | TermStructures/Yield/FlatForward.cs |  |
 | `forwardcurve` | ported | TermStructures/Yield/ForwardCurve/CubicForwardCurve.cs, TermStructures/Yield/ForwardCurve/ForwardCurve.cs, TermStructures/Yield/ForwardCurve/ForwardCurveFormula.cs, TermStructures/Yield/ForwardCurve/ForwardFlatForwardCurve.cs, TermStructures/Yield/ForwardCurve/InterpolatedForwardCurve{TInterpolator}.cs, TermStructures/Yield/ForwardCurve/LinearForwardCurve.cs |  |
 | `forwardspreadedtermstructure` | ported | TermStructures/Yield/ForwardSpreadedTermStructure.cs |  |
-| `forwardstructure` | not ported: deprecated (D5): QuantLib's [[deprecated]] attribute alone |  |  |
+| `forwardstructure` | not ported: deprecated: QuantLib's [[deprecated]] attribute alone |  |  |
 | `impliedtermstructure` | ported | TermStructures/Yield/ImpliedTermStructure.cs |  |
 | `interpolatedsimplezerocurve` | ported | TermStructures/Yield/InterpolatedSimpleZeroCurve/InterpolatedSimpleZeroCurveFormula.cs, TermStructures/Yield/InterpolatedSimpleZeroCurve/InterpolatedSimpleZeroCurve{TInterpolator}.cs, TermStructures/Yield/InterpolatedSimpleZeroCurve/SimpleZeroCurve.cs |  |
 | `multipleresetsswaphelper` | ported | TermStructures/Yield/MultipleResetsSwapRateHelper.cs |  |
@@ -2162,8 +2162,8 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `interpolations` | ported | TestSuite/InterpolationsTests.cs | 40 of 40 cases; replaced: testInterpolateWithoutUpdate by Conventions/InterpolationConstructionTests.cs; testBicubicUpdate by Conventions/InterpolationConstructionTests.cs |
 | `jumpdiffusion` | ported | TestSuite/JumpDiffusionTests.cs | 2 of 2 cases |
 | `lazyobject` | not ported: tests LazyObject, which is replaced |  |  |
-| `libormarketmodel` | not ported: tests the legacy LIBOR market model, which isn't ported (D6) |  |  |
-| `libormarketmodelprocess` | not ported: tests the legacy LIBOR market model, which isn't ported (D6) |  |  |
+| `libormarketmodel` | not ported: tests the legacy LIBOR market model, which isn't ported |  |  |
+| `libormarketmodelprocess` | not ported: tests the legacy LIBOR market model, which isn't ported |  |  |
 | `linearleastsquaresregression` | ported | TestSuite/LinearLeastSquaresRegressionTests.cs | 3 of 3 cases |
 | `lookbackoptions` | ported | TestSuite/LookbackOptionsTests.cs | 5 of 5 cases |
 | `lowdiscrepancysequences` | ported | TestSuite/LowDiscrepancySequencesTests.cs | 20 of 20 cases; replaced: testSeedGenerator by Divergences/SeedZeroTests.cs |

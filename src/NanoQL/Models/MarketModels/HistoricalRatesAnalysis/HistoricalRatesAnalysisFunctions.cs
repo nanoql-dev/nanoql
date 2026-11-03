@@ -22,10 +22,10 @@ public static class HistoricalRatesAnalysisFunctions
     /// </summary>
     /// <remarks>
     /// The statistics are reset to the number of indexes and filled in place, as QuantLib's reference argument is; the
-    /// skipped dates and their messages are returned (the S-mmp plan's SMD6). The fixings are read in the given
-    /// context, as QuantLib's read the global settings. QuantLib's <c>catch (std::exception&amp;)</c> catches the
-    /// <see cref="NanoQLException"/> and <see cref="ArgumentException"/> QuantLib's errors map to (SMD9). A step of no
-    /// length, on which QuantLib's loop never ends, is refused.
+    /// skipped dates and their messages are returned. The fixings are read in the given context, as QuantLib's read the
+    /// global settings. QuantLib's <c>catch (std::exception&amp;)</c> catches the <see cref="NanoQLException"/> and
+    /// <see cref="ArgumentException"/> QuantLib's errors map to. A step of no length, on which QuantLib's loop never
+    /// ends, is refused.
     /// </remarks>
     /// <param name="statistics">The statistics filled.</param>
     /// <param name="startDate">The start date.</param>

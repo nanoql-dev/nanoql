@@ -9,13 +9,12 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The CEV formula's small tails (the S-van plan's VR4 (xxxiv)). <c>CEVCalculator::value</c> takes a tail as
-/// 1 − cdf (or Γ-ratio − cdf, <c>analyticcevengine.cpp:50-80</c>), which loses most of its digits where the tail is
-/// small: a 36-day call at K 150 comes out about 11% low. nanoql takes Boost's complement where QuantLib's difference is
-/// below 1e-3, and QuantLib's arithmetic and bits elsewhere. The check: Hagan's ν = 0 Black (QuantLib's
-/// <c>unsafeSabrLogNormalVolatility</c>), within 2% of the CEV value at |β − 1| = 1e-2 and 36 days, and QuantLib's FD CEV
-/// engine (200 × 2,000), 5.70e-11 and 6.83e-11 [executed on the wheel and C++: <c>scratchpad\c3\oracle_c3.py</c>, the
-/// planner's VP57; f0 100, σ 20%, r 3% on Actual/365 (Fixed), from 15 October 2026].
+/// The CEV formula's small tails. <c>CEVCalculator::value</c> takes a tail as 1 − cdf (or Γ-ratio − cdf,
+/// <c>analyticcevengine.cpp:50-80</c>), which loses most of its digits where the tail is small: a 36-day call at K 150
+/// comes out about 11% low. nanoql takes Boost's complement where QuantLib's difference is below 1e-3, and QuantLib's
+/// arithmetic and bits elsewhere. The check: Hagan's ν = 0 Black (QuantLib's <c>unsafeSabrLogNormalVolatility</c>),
+/// within 2% of the CEV value at |β − 1| = 1e-2 and 36 days, and QuantLib's FD CEV engine (200 × 2,000), 5.70e-11 and
+/// 6.83e-11 (f0 100, σ 20%, r 3% on Actual/365 (Fixed), from 15 October 2026).
 /// </summary>
 public class CevTailTests
 {

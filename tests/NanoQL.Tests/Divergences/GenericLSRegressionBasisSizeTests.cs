@@ -6,14 +6,12 @@ using NanoQL.Methods;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The regression's basis size (the S-mmp plan's MMPR4 (xix), Revision 2's O1-5, fixed under R8). QuantLib takes the
-/// number of basis functions from path 0, valid or not (<c>genericlsregression.cpp:39</c>), and the node-data
-/// collection leaves an invalid path's values empty, so a path ended before an exercise, first among the paths, makes
-/// QuantLib copy every valid path's values past a one-entry buffer: a crash (the round-1 review's probe). nanoql takes
-/// the first valid path's, and refuses an exercise no path reaches with the parametric optimisation's text, "no valid
-/// paths". Check: QuantLib's regression on the same data with the invalid path moved last, bit for bit at the exercise
-/// the path misses, within the reordered sums' rounding at the one before (this run's <c>probes\c3_facts.cpp</c>; the
-/// planner's MPP22).
+/// The regression's basis size (fixed). QuantLib takes the number of basis functions from path 0, valid or not
+/// (<c>genericlsregression.cpp:39</c>), and the node-data collection leaves an invalid path's values empty, so a path
+/// ended before an exercise, first among the paths, makes QuantLib copy every valid path's values past a one-entry
+/// buffer: a crash. nanoql takes the first valid path's, and refuses an exercise no path reaches with the parametric
+/// optimisation's text, "no valid paths". Check: QuantLib's regression on the same data with the invalid path moved
+/// last, bit for bit at the exercise the path misses, within the reordered sums' rounding at the one before.
 /// </summary>
 public class GenericLSRegressionBasisSizeTests
 {

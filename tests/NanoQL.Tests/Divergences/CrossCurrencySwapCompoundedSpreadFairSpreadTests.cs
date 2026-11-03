@@ -13,16 +13,16 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The cross-currency swaps' fair spread on an overnight leg compounding its spread daily (the S-rx plan's C3 review,
-/// B1-2, fixed under R8). Each swap derives a leg's fair spread from its BPS, <c>spread − NPV/(BPS/1bp)</c>
+/// The cross-currency swaps' fair spread on an overnight leg compounding its spread daily (fixed). Each swap derives a
+/// leg's fair spread from its BPS, <c>spread − NPV/(BPS/1bp)</c>
 /// (<c>constnotionalcrosscurrencybasisswap.cpp:180-187</c>,
 /// <c>constnotionalcrosscurrencyfixedvsfloatingswap.cpp:161-163</c>, <c>mtmcrosscurrencybasisswap.cpp:235-249</c>),
-/// which is exact only while the leg's amount moves one for one with its spread; compounded daily, the amount is
-/// convex in it. On a five-year basis swap paying SOFR compounded with a 2-day lookback (QuantLib's path that
-/// compounds the spread) against ESTR + 1%, QuantLib's fair pay spread leaves the swap worth −2,387.78 on 1,100,000.
-/// nanoql solves a compounding leg's fair spread on the swap's own pricing, as C2's float-float swap does for capped
-/// legs; a leg that doesn't compound keeps QuantLib's BPS route and its bits. QuantLib's check: its own NPV, whose
-/// Brent root the solved spreads equal [executed on the wheel].
+/// which is exact only while the leg's amount moves one for one with its spread; compounded daily, the amount is convex
+/// in it. On a five-year basis swap paying SOFR compounded with a 2-day lookback (QuantLib's path that compounds the
+/// spread) against ESTR + 1%, QuantLib's fair pay spread leaves the swap worth −2,387.78 on 1,100,000. nanoql solves a
+/// compounding leg's fair spread on the swap's own pricing, as the float-float swap does for capped legs; a leg that
+/// doesn't compound keeps QuantLib's BPS route and its bits. QuantLib's check: its own NPV, whose Brent root the solved
+/// spreads equal (QuantLib-Python 1.44).
 /// </summary>
 public class CrossCurrencySwapCompoundedSpreadFairSpreadTests
 {

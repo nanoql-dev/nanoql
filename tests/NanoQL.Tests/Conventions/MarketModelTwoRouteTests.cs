@@ -7,12 +7,12 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// Two routes to one value in the market-model framework (the S-mm plan's §2.6, the planner's MP3 and MP14): the drifts
-/// with and without factor reduction at full factors; the constant-maturity state and drifts spanning one forward
-/// against the LIBOR ones; the three curve states on one curve; the coterminal Jacobian against central bumps; and the
-/// Euler and iterative predictor-corrector evolvers' caplets converging to the predictor-corrector's as the steps
-/// refine (Balland's in <c>Divergences/BallandGeometricMeanTests.cs</c>); the coterminal adapters' round trip; and
-/// FlatVol as the AbcdVol of a constant abcd function.
+/// Two routes to one value in the market-model framework: the drifts with and without factor reduction at full factors;
+/// the constant-maturity state and drifts spanning one forward against the LIBOR ones; the three curve states on one
+/// curve; the coterminal Jacobian against central bumps; and the Euler and iterative predictor-corrector evolvers'
+/// caplets converging to the predictor-corrector's as the steps refine (Balland's in
+/// <c>Divergences/BallandGeometricMeanTests.cs</c>); the coterminal adapters' round trip; and FlatVol as the AbcdVol of
+/// a constant abcd function.
 /// </summary>
 public class MarketModelTwoRouteTests
 {

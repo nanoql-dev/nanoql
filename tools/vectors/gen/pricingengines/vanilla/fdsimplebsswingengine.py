@@ -9,11 +9,10 @@ Swing options on forward and plain-vanilla calls and puts at the money and away 
 a year and on weekly ones over a quarter, with every number of rights from none to all and minimums of none, some and
 all, on three processes (tools/vectors/gen/processes/blackscholesprocess.py's), on small grids (25 x 60, Douglas) and
 testFdBSSwingOption's (50 x 200); then another scheme; the refusals of a minimum above the maximum and a maximum above
-the dates; an expired option; and the forward payoff's values at prices around its strike. Exercises within a day,
-whose seconds QuantLib's engine drops and nanoql's times (the S-van plan's VR4 (xvi),
-tests/NanoQL.Tests/Divergences/SwingExerciseSecondsTests.cs), are left out: the wheel's SwingExercise takes dates
-alone. Every structure is on the risk-free curve's day counter and reference date
-(tests/NanoQL.Tests/Divergences/FdShoutSwingCirMismatchedTimesTests.cs).
+the dates; an expired option; and the forward payoff's values at prices around its strike. Exercises within a day, whose
+seconds QuantLib's engine drops and nanoql's times (tests/NanoQL.Tests/Divergences/SwingExerciseSecondsTests.cs), are
+left out: the wheel's SwingExercise takes dates alone. Every structure is on the risk-free curve's day counter and
+reference date (tests/NanoQL.Tests/Divergences/FdShoutSwingCirMismatchedTimesTests.cs).
 
 The specs are a pricing {"process", "payoff" (plain vanilla, or {"type": "Forward", "optionType", "strike"}), "dates",
 "minExerciseRights", "maxExerciseRights", "tGrid", "xGrid", "scheme"}. The wheel's calls, by QuantLib-SWIG 1.44's

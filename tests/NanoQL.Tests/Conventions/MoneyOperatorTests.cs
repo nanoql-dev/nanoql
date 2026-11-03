@@ -6,10 +6,9 @@ using NanoQL.Currencies;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// <see cref="Money"/>'s operators keep QuantLib's <c>NoConversion</c> (U7, the S-rx plan's SRXR1): they see no
-/// context, so a currency mismatch is refused by every operator but <c>==</c> and <c>!=</c>, which compare amounts in
-/// different currencies as unequal; within a currency they are QuantLib's arithmetic; and the text is QuantLib's
-/// stream.
+/// <see cref="Money"/>'s operators keep QuantLib's <c>NoConversion</c>: they see no context, so a currency mismatch
+/// is refused by every operator but <c>==</c> and <c>!=</c>, which compare amounts in different currencies as
+/// unequal; within a currency they are QuantLib's arithmetic; and the text is QuantLib's stream.
 /// </summary>
 public class MoneyOperatorTests
 {

@@ -20,12 +20,12 @@ namespace NanoQL.Instruments;
 /// </summary>
 /// <remarks>
 /// It computes in its constructor, under the context it is built with, what QuantLib's first calculation computes;
-/// QuantLib starts a recalculation's yield solves from the last calculation's yields, so its warm start is a
-/// documented divergence (CMD9). The swaps start one day after spot, at a fixed rate of 5%, and are priced on the
-/// discount curve without the settlement date's flows. The search for the equivalent swap stops at the first swap
-/// whose duration exceeds the basket's; the later swaps' rates, yields and durations aren't computed and are
-/// <see langword="null"/>, where QuantLib's rates and durations are its null value and its yields its starting guess,
-/// 5% (a run-found R8 defect).
+/// QuantLib starts a recalculation's yield solves from the last calculation's yields, so its warm start is a documented
+/// divergence. The swaps start one day after spot, at a fixed rate of 5%, and are priced on the discount curve without
+/// the settlement date's flows. The search for the equivalent swap stops at the first swap whose duration exceeds the
+/// basket's; the later swaps' rates, yields and durations aren't computed and are <see langword="null"/>, where
+/// QuantLib's rates and durations are its null value and its yields its starting guess, 5% (a defect found while
+/// porting it).
 /// </remarks>
 public sealed class RendistatoCalculator
 {

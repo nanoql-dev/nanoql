@@ -14,7 +14,7 @@ traits or tree, the builder functions) falls in one group:
   engine's calculation or Bind, or static functions;
 - route: the table names what a user reaches instead, with its reason, and the target is checked: a type with a maker,
   an enum the surface carries, a C function the surface has, or a language form in prose (an array, a matrix);
-- exclusion: a name the table's exclusions match, each a ruled one with its reason (handles, observers and settings,
+- exclusion: a name the table's exclusions match, each with its reason (handles, observers and settings,
   SWIG's containers, the stepping parts, the caller's own functions);
 - gap: anything else, a route whose target the surface doesn't make among them, and a route or exclusion for a name
   the surface makes itself (a stale one, which an API change left behind).
@@ -123,7 +123,7 @@ def classify(name, surface, table):
         if surface.statics_only(name):
             return "crosses", "static functions"
         if "withheld" in surface.forms[name]:
-            return "exclusion", "a stepping part (BIR3's (A))"
+            return "exclusion", "a stepping part"
         return "gap", "the type crosses with no maker (forms " + ", ".join(sorted(surface.forms[name])) + ")"
     return "gap", "no nanoql type of this name and no route"
 

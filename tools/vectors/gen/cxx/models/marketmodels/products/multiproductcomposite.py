@@ -9,9 +9,8 @@ Composites of forwards, optionlets and a product of nothing on multistepforwards
 -2 (a subtraction) and 0.5, every part finishing at the last step; and forwards beside optionlets paid off the grid,
 the merged cash-flow times sorted.
 
-Left out (nanoql records a finished part, where QuantLib's composite steps it again and ends early; the S-mmp plan's
-MMPR4 (vii); tests/NanoQL.Tests/Divergences/MarketModelCompositeEndTests.cs): composites whose parts finish before the
-last step.
+Left out (nanoql records a finished part, where QuantLib's composite steps it again and ends early;
+tests/NanoQL.Tests/Divergences/MarketModelCompositeEndTests.cs): composites whose parts finish before the last step.
 
 The harness unit is tools/cxx/src/models/marketmodels/products/products.cpp. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Models/MarketModels/MultiProductCompositeCxxVectorTests.cs."""

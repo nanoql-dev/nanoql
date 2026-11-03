@@ -12,18 +12,16 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The stochastic-local volatility models and the Heston Green's function on structures counted differently (the S-hes
-/// plan's HR7 (xxi), the mismatched-dates class of master Revision 58). QuantLib's models run their time grids from the
-/// risk-free curve's reference date and read the dividend curve and the local volatility at the risk-free curve's times
-/// (<c>hestonslvmcmodel.cpp:47-55</c>, <c>hestonslvfdmmodel.cpp:300-330</c>), its Green's function the rates likewise.
-/// nanoql's run on <see cref="FdmHestonOp.Clock"/>, each structure read at the instants its times denote, a local
-/// volatility on another clock read through an adapter that extrapolates where the local volatility does. QuantLib's
-/// check: its models on the market restated on one clock (r 4% on Act/360, q 2%·360/365 on Act/360), which nanoql's
-/// on the original market (q 2% on Act/365) reproduce [executed on the wheel and the harness:
-/// <c>scratchpad\c4\oracle_c4.py</c>]; the finite-difference calibration within 1e-6 relative, its spread across
-/// machines: 3.2e-9 under one-ulp moves of its inputs on one machine (the S-hes run record's C4 entry), and 1.5e-8 on
-/// GitHub's windows-2022 runner and 1.6e-8 on macOS, whose C runtimes and processors move its last bits (CI run
-/// 41146085965).
+/// The stochastic-local volatility models and the Heston Green's function on structures counted differently. QuantLib's
+/// models run their time grids from the risk-free curve's reference date and read the dividend curve and the local
+/// volatility at the risk-free curve's times (<c>hestonslvmcmodel.cpp:47-55</c>, <c>hestonslvfdmmodel.cpp:300-330</c>),
+/// its Green's function the rates likewise. nanoql's run on <see cref="FdmHestonOp.Clock"/>, each structure read at the
+/// instants its times denote, a local volatility on another clock read through an adapter that extrapolates where the
+/// local volatility does. QuantLib's check: its models on the market restated on one clock (r 4% on Act/360, q
+/// 2%·360/365 on Act/360), which nanoql's on the original market (q 2% on Act/365) reproduce (QuantLib-Python 1.44 and
+/// the C++ harness); the finite-difference calibration within 1e-6 relative, its spread across machines: 3.2e-9 under
+/// one-ulp moves of its inputs on one machine, and 1.5e-8 on GitHub's windows-2022 runner and 1.6e-8 on macOS, whose C
+/// runtimes and processors move its last bits (CI run 41146085965).
 /// </summary>
 public class HestonSlvMismatchedTimesTests
 {

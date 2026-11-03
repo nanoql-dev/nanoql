@@ -11,17 +11,17 @@ using static NanoQL.Tests.Divergences.ExoticTermStructureMarkets;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The quanto engine's derived Greeks (C3's review, B3-2). QuantLib takes the rho, vega, qrho, qvega and qlambda from
-/// the inner dividend rho by one factor at expiry each (<c>quantoengine.hpp:140-171</c>), assuming the input moves the
-/// quanto zero rate in parallel. With the dividend curve on Act/360, whose clock the quanto curve keeps, a shift of the
-/// risk-free rate moves it by the ratio of the two curves' times: rho −18.4754 where the price under the shift moves
-/// −17.2347, the quanto Greeks 1.4% off. For a forward-start quanto, whose forward engine reads the quanto curve at the
-/// reset and at expiry, an input whose contribution varies in time moves the two unevenly: on a volatility curve
-/// (0.10, 0.20, 0.30 at one, two and three years) QuantLib's qvega and qlambda are 25.5% short of its own price bumped
-/// in the FX volatility and the correlation, and under an FX volatility curve the vega 3.5% over. nanoql reads each
-/// input's change to the quanto curve's log discount by date at the dates the inner engine reads (ER5 (xxiv), R8). The
-/// checks: on Act/360 dividends, the market restated onto Act/365, where QuantLib's formula is exact; on the curves,
-/// QuantLib's own prices bumped by 1e-5 each way in each input.
+/// The quanto engine's derived Greeks. QuantLib takes the rho, vega, qrho, qvega and qlambda from the inner dividend
+/// rho by one factor at expiry each (<c>quantoengine.hpp:140-171</c>), assuming the input moves the quanto zero rate in
+/// parallel. With the dividend curve on Act/360, whose clock the quanto curve keeps, a shift of the risk-free rate
+/// moves it by the ratio of the two curves' times: rho −18.4754 where the price under the shift moves −17.2347, the
+/// quanto Greeks 1.4% off. For a forward-start quanto, whose forward engine reads the quanto curve at the reset and at
+/// expiry, an input whose contribution varies in time moves the two unevenly: on a volatility curve (0.10, 0.20, 0.30
+/// at one, two and three years) QuantLib's qvega and qlambda are 25.5% short of its own price bumped in the FX
+/// volatility and the correlation, and under an FX volatility curve the vega 3.5% over. nanoql reads each input's
+/// change to the quanto curve's log discount by date at the dates the inner engine reads. The checks: on Act/360
+/// dividends, the market restated onto Act/365, where QuantLib's formula is exact; on the curves, QuantLib's own prices
+/// bumped by 1e-5 each way in each input.
 /// </summary>
 public class QuantoGreeksTermStructureTests
 {

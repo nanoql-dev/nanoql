@@ -7,14 +7,15 @@ using Microsoft.Office.Interop.Excel;
 namespace NanoQL.Excel.XlTests;
 
 /// <summary>
-/// A desk's tasks through the listed functions (XLP6, XLP85): the swap and the European call to their bits, a 5-year
-/// discount, a curve bootstrapped from deposits and swaps, a calendar by name, the members a listed type inherits, a leg
-/// priced, Sobol draws, and a quanto call priced by the engine the list holds.
+/// A desk's tasks through the listed functions: the swap and the European call to their bits, a 5-year discount, a
+/// curve bootstrapped from deposits and swaps, a calendar by name, the members a listed type inherits, a leg priced,
+/// Sobol draws, and a quanto call priced by the engine the list holds.
 /// </summary>
 [ExcelTestSettings(OutOfProcess = true)]
 public class TaskTests : RunnerTest
 {
-    /// <summary>The swap's NPV and fair rate to S-bind's bits; its fixed rate, inherited from FixedVsFloatingSwap; its index's name.</summary>
+    /// <summary>The swap's NPV and fair rate to the C ABI's bits; its fixed rate, inherited from FixedVsFloatingSwap;
+    /// its index's name.</summary>
     [ExcelFact(AddIn = AddIns.Test)]
     public void TheSwap()
     {
@@ -28,7 +29,8 @@ public class TaskTests : RunnerTest
         Assert.Equal("Euribor6M Actual/360", Xl.Get(ws, "A18"));
     }
 
-    /// <summary>A 5-year discount on the flat curve, and the European call's NPV and delta, to XLP6's bits.</summary>
+    /// <summary>A 5-year discount on the flat curve, and the European call's NPV and delta, to their reference
+    /// bits.</summary>
     [ExcelFact(AddIn = AddIns.Test)]
     public void TheDiscountAndTheCall()
     {
@@ -43,8 +45,8 @@ public class TaskTests : RunnerTest
     }
 
     /// <summary>
-    /// A curve bootstrapped from three deposits and two swaps, each set of helpers looped from one formula (XLR15): its
-    /// 2-year discount, and its nodes out as two columns, dates and values.
+    /// A curve bootstrapped from three deposits and two swaps, each set of helpers looped from one formula: its 2-year
+    /// discount, and its nodes out as two columns, dates and values.
     /// </summary>
     [ExcelFact(AddIn = AddIns.Test)]
     public void ABootstrappedCurve()
@@ -107,7 +109,7 @@ public class TaskTests : RunnerTest
         Assert.Equal([0.5, 0.5], d[0]);
     }
 
-    /// <summary>A quanto call priced by the quanto engine, its underlying engine bound with nothing (XLR10): its NPV and qvega.</summary>
+    /// <summary>A quanto call priced by the quanto engine, its underlying engine bound with nothing: its NPV and qvega.</summary>
     [ExcelFact(AddIn = AddIns.Test)]
     public void AQuantoCall()
     {
