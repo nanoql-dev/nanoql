@@ -29,6 +29,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- The example workbooks' values in C#: the docs' examples, and nanoql's two assemblies through them. -->
+    <ProjectReference Include="..\..\..\docs\examples\NanoQL.Examples.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Using Include="Xunit" />
     <!-- ExcelDna.Testing turns Windows Forms and WPF on: Forms' Application isn't Excel's, and WPF leaves System.IO out. -->
     <Using Remove="System.Windows.Forms" />

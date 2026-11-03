@@ -10,7 +10,7 @@ path = [
   "bindings/NanoQL.Bind.Tests/Fixtures/shipped.json", "bindings/python/nanoql/py.typed", "bindings/replay-floor.json",
   "bindings/wheel-routes.json", "bindings/excel/functions.json", "bindings/excel/list.json", "bindings/excel/replay-floor.json",
   "bindings/excel/NanoQL.Excel.slnx", "bindings/excel/xltests/global.json", "bindings/excel/README.md",
-  "bindings/excel/tests/repro/**",
+  "bindings/excel/tests/repro/**", "bindings/excel/examples/*.xlsx",
 ]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2026 The nanoql Authors"

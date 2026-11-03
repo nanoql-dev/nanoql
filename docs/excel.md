@@ -33,6 +33,24 @@ A release's `nanoql-excel-<version>-win-x64.zip` holds the two add-ins, nanoql's
   Publisher", which group policy often sets, disables an unsigned `.xll` without a prompt; a firm that enforces it
   signs the `.xll` with its own code-signing certificate.
 
+## Example workbooks
+
+Five workbooks in [bindings/excel/examples/](../bindings/excel/examples/) show the add-in at work, each on one sheet,
+its inputs in cells and its results named:
+
+- `curve.xlsx`: a Euribor 6M curve bootstrapped from deposits and swaps, read as discounts, zero rates and forwards;
+- `swap.xlsx`: Euribor and €STR swaps on that curve;
+- `bond.xlsx`: a five-year fixed-rate bond's NPV, prices and yield;
+- `option.xlsx`: a European call and put by Black-Scholes, with their Greeks;
+- `sofr.xlsx`: the USD SOFR swaps of [the SOFR example](sofr-example.md), at QuantLib's `MakeOIS` defaults and at
+  the market's convention, which its cells spell out on `OISRateHelper` and `MakeOIS`, New York's calendar read
+  from the conventions file `market.xml` beside it.
+
+They call the stable add-in's functions alone. The curve, the swaps and the SOFR trades are the docs' own examples,
+and give their numbers. Load the add-in, open a workbook and recalculate it (Ctrl+Alt+F9). `sofr.xlsx` reads
+`market.xml` from its own folder, so open it from a folder holding both: one opened straight from a zip is a copy
+with nothing beside it.
+
 ## Other .NET add-ins
 
 Excel holds one .NET runtime per process, and the add-ins run on .NET 10, so an add-in on another .NET version fails
@@ -465,7 +483,7 @@ own, and stops in FlatForward's discount from a cell's call, the generated works
 |---|---|---|
 | The surface | `dotnet run --project src/NanoQL.Bind -c Release -- excel check` | CI |
 | The back end | `dotnet test --project bindings/NanoQL.Bind.Tests -c Release`: names, the list, the fold, the forms' code, the builds | CI |
-| The runtime | `dotnet test --project bindings/excel/NanoQL.Excel.Tests -c Release`: the conversions and forms, keys, errors, settings, looping and messages, through a test host standing in for Excel, on the tests' builds | CI |
+| The runtime | `dotnet test --project bindings/excel/NanoQL.Excel.Tests -c Release`: the conversions and forms, keys, errors, settings, looping and messages, through a test host standing in for Excel, on the tests' builds; and the example workbooks' formulas, every function they call listed and stable | CI |
 | The replay | `dotnet run --project bindings/excel/replay -c Release -- <trace> <build folder> --floor bindings/excel/replay-floor.json` | CI |
 | The repro vectors | `dotnet run --project bindings/excel/replay -c Release -- vectors bindings/excel/tests/repro <build folder>`, then with `--reverse` | CI |
 | The package | `dotnet run --project src/NanoQL.Bind -c Release -- excel package --runtime-source <feed> --out <folder>` | CI |
@@ -490,7 +508,8 @@ own, and stops in FlatForward's discount from a cell's call, the generated works
   - repro export: a desk's swap exported in each format, the vector replayed, the C# compiled and run, the Python run
     (with `--python`, an interpreter with nanoql's Python package and NumPy), each to the cell's bits; every committed
     vector the build holds exported again from its workbook; the export's refusals;
-  - the package's stable add-in, from its zip, priced.
+  - the package's stable add-in, from its zip, priced;
+  - the example workbooks, each opened on the stable add-in and recalculated whole, its named results C#'s bits.
 
   Its wrapper builds the add-ins first. It checks that the run leaves the machine's other Excel processes and Excel's
   settings as it found them; it puts back Excel's window position, which Excel rewrites when a test closes a second
