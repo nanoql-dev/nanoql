@@ -23,6 +23,9 @@ public sealed class FdmDirichletBoundary : BoundaryCondition<FdmLinearOp>
     private readonly BoundaryConditionSide side;
     private readonly double valueOnBoundary;
     private readonly ImmutableArray<int> indices;
+
+    // one past the boundary's last index
+    private readonly int end;
     private readonly double xExtreme;
 
     /// <summary>Initializes a new instance of the <see cref="FdmDirichletBoundary"/> class.</summary>
@@ -43,6 +46,7 @@ public sealed class FdmDirichletBoundary : BoundaryCondition<FdmLinearOp>
         this.side = side;
         this.valueOnBoundary = valueOnBoundary;
         indices = new FdmIndicesOnBoundary(mesher.Layout, direction, side).Indices;
+        end = indices.IsEmpty ? 0 : indices.Max() + 1;
         if (side == BoundaryConditionSide.Lower)
         {
             xExtreme = mesher.Locations(direction)[0];
@@ -63,8 +67,16 @@ public sealed class FdmDirichletBoundary : BoundaryCondition<FdmLinearOp>
     }
 
     /// <inheritdoc/>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="a"/> doesn't reach the boundary's last index, where QuantLib writes past its end.
+    /// </exception>
     public override void ApplyAfterApplying(Span<double> a)
     {
+        if (!(a.Length >= end))
+        {
+            throw new ArgumentException($"{a.Length} values don't reach the boundary's index {end - 1}", nameof(a));
+        }
+
         foreach (int i in indices)
         {
             a[i] = valueOnBoundary;
@@ -77,6 +89,9 @@ public sealed class FdmDirichletBoundary : BoundaryCondition<FdmLinearOp>
     }
 
     /// <inheritdoc/>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="a"/> doesn't reach the boundary's last index, where QuantLib writes past its end.
+    /// </exception>
     public override void ApplyAfterSolving(Span<double> a) => ApplyAfterApplying(a);
 
     /// <inheritdoc/>

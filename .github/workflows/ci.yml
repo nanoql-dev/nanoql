@@ -424,7 +424,10 @@ jobs:
             (cd "$RUNNER_TEMP" && "$py" "$GITHUB_WORKSPACE/bindings/python/tests/wheel_check.py" "$GITHUB_WORKSPACE/bindings/python/pyproject.toml")
             PYTHONPATH="$RUNNER_TEMP/python-test" "$py" -m unittest discover -s bindings/python/tests -v
           done
-          (cd "$RUNNER_TEMP" && "$py" "$GITHUB_WORKSPACE/bindings/python/tests/replay.py" "$RUNNER_TEMP/recording/trace.jsonl")
+          # On Windows x64 the replay also calls once each function the suite doesn't, its outcomes in the runner's
+          # temp folder.
+          sweep=$([ "$RID" != win-x64 ] || echo --sweep "$RUNNER_TEMP/sweep-outcomes.tsv")
+          (cd "$RUNNER_TEMP" && "$py" "$GITHUB_WORKSPACE/bindings/python/tests/replay.py" "$RUNNER_TEMP/recording/trace.jsonl" $sweep)
       - name: Keep the Python wheel
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:

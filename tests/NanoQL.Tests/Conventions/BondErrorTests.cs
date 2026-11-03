@@ -15,7 +15,8 @@ namespace NanoQL.Tests.Conventions;
 /// The bonds' refusals by type, message and parameter: those of QuantLib's undefined paths (playbook §2), a value
 /// already stored refused with <see cref="NanoQLException"/> and an argument with <see cref="ArgumentException"/>; a
 /// null argument a member doesn't take with <see cref="ArgumentNullException"/>; and the bond functions' tradability
-/// refusals, whose texts are QuantLib's, the curve-based dirty price's alone naming the settlement date.
+/// refusals, whose texts are QuantLib's, the curve-based dirty price's alone naming the settlement date; and a fitted
+/// bond curve's method given fewer parameters than it fits, which QuantLib reads past.
 /// </summary>
 public class BondErrorTests
 {
@@ -37,6 +38,17 @@ public class BondErrorTests
         ArgumentException cashflows = Assert.Throws<ArgumentException>(() => new Bond(2, new TARGET(), 100.0, null, null, leg));
         Assert.Equal("cashflows", cashflows.ParamName);
         Assert.StartsWith("null cash flow in leg", cashflows.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void AFittingMethodsDiscountRefusesFewerParametersThanItFits()
+    {
+        // The discount function reads the method's parameters, past a shorter span's end in QuantLib.
+        var method = new NelsonSiegelFitting();
+        ArgumentException e = Assert.Throws<ArgumentException>(() => method.Discount([0.1, 0.2, 0.3], 1.0));
+        Assert.Equal("x", e.ParamName);
+        Assert.StartsWith("3 parameters given for a method of 4", e.Message, StringComparison.Ordinal);
+        Assert.Equal(method.Discount([0.03, -0.01, 0.0, 1.0], 1.0), method.Discount([0.03, -0.01, 0.0, 1.0, 9.0], 1.0));
     }
 
     [Fact]

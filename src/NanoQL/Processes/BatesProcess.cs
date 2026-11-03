@@ -89,10 +89,18 @@ public sealed class BatesProcess : HestonProcess
 
     /// <inheritdoc/>
     /// <exception cref="NanoQLException">The Heston step refuses.</exception>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="dw"/> holds fewer increments than the process's factors, where QuantLib reads past its end.
+    /// </exception>
     public override Vector Evolve(double t0, Vector x0, double dt, Vector dw)
     {
         ArgumentNullException.ThrowIfNull(x0);
         ArgumentNullException.ThrowIfNull(dw);
+        if (!(dw.Size >= Factors))
+        {
+            throw new ArgumentException($"{dw.Size} increments given for {Factors} factors", nameof(dw));
+        }
+
         int hestonFactors = base.Factors;
 
         double n = Jumps(dw[hestonFactors], dt);
@@ -104,8 +112,16 @@ public sealed class BatesProcess : HestonProcess
 
     /// <inheritdoc/>
     /// <exception cref="NanoQLException">The Heston step refuses.</exception>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="dw"/> holds fewer increments than the process's factors, where QuantLib reads past its end.
+    /// </exception>
     public override void Evolve(double t0, ReadOnlySpan<double> x0, double dt, ReadOnlySpan<double> dw, Span<double> result)
     {
+        if (!(dw.Length >= Factors))
+        {
+            throw new ArgumentException($"{dw.Length} increments given for {Factors} factors", nameof(dw));
+        }
+
         int hestonFactors = base.Factors;
 
         double n = Jumps(dw[hestonFactors], dt);

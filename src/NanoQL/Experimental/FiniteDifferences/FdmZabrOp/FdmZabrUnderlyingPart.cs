@@ -26,9 +26,16 @@ public sealed class FdmZabrUnderlyingPart
     /// <param name="rho">ρ, which this part doesn't read.</param>
     /// <param name="gamma">γ, which this part doesn't read.</param>
     /// <exception cref="ArgumentNullException"><paramref name="mesher"/> is null.</exception>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="mesher"/> has fewer than two directions, where QuantLib reads past its layout.
+    /// </exception>
     public FdmZabrUnderlyingPart(FdmMesher mesher, double beta, double nu, double rho, double gamma)
     {
         ArgumentNullException.ThrowIfNull(mesher);
+        if (!(mesher.Layout.Dim.Length >= 2))
+        {
+            throw new ArgumentException($"a mesher of {mesher.Layout.Dim.Length} directions; the ZABR operator takes 2", nameof(mesher));
+        }
         Vector volatilityValues = mesher.Locations(1);
         Vector forwardValues = mesher.Locations(0);
         mapT = new SecondDerivativeOp(0, mesher).Mult(0.5 * volatilityValues * volatilityValues * FdmZabrOp.Pow(forwardValues, 2.0 * beta));

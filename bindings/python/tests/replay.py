@@ -8,15 +8,34 @@ their code. Where the dispatch, reading the arguments' own classes, takes anothe
 static choice, the replay counts it and calls the recorded form. A fact replays up to its first call that needs what
 the trace couldn't write or the replay didn't make.
 
-Usage: python replay.py <trace.jsonl> [<facts report.tsv>]   (the package on the path, its library the production one)
+With --sweep, after the replay and before its objects are released, each function of the layer's table the trace never
+calls is called once (docs/bindings.md, "Checking the bindings"): through its Python member, or a record's equality pair
+the layer leaves to ==, through its C function checked against == and !=; its arguments the replay's objects by class
+and values by kind and parameter name, up to three choices, the objects it returns joining the pool, in passes until one
+reaches nothing new. A call past the limit ends the process, naming it; the calls run in a fresh temporary folder. The
+sweep reds on a Python-layer error, code 99 or code 9 in any attempt, and on an exclusion that names no target; each
+target's outcome is a line of the outcomes file.
+
+Usage: python replay.py <trace.jsonl> [<facts report.tsv>] [--sweep <outcomes.tsv> [--prefix <prefix>]
+       [--surface <surface.json>] [--limit <seconds>]]   (the package on the path, its library the production one)
+--prefix names the functions swept, nql by default (the prefix's package and its experimental module imported first);
+--surface gives their parameters' names, the checkout's bindings/surface.json by default.
 """
 
 import datetime
+import faulthandler
+import importlib
 import json
 import math
+import os
 import re
+import shutil
 import struct
 import sys
+import tempfile
+import time
+from collections import defaultdict
+from pathlib import Path
 
 import numpy as np
 
@@ -28,6 +47,24 @@ from nanoql._runtime import NanoQLError, Period, _functions as _F, _select, _spl
 
 class Stop(Exception):
     """An input the trace couldn't write, or an object the replay didn't make."""
+
+
+# Each C function's Python member, nanoql's and those of the user's packages the run uses (use_prefix).
+PY = dict(_generated._PY)
+
+
+def use_prefix(prefix):
+    """A user's package, by its prefix: imported with its experimental module, which registers its functions in the
+    runtime's table, and its members added to the map, so the replay and the sweep call its functions through them."""
+    if prefix != "nql":
+        importlib.import_module(prefix)
+        importlib.import_module(prefix + ".experimental")
+        PY.update(importlib.import_module(prefix + "._generated")._PY)
+
+
+def class_of(cname, cls_name):
+    """The class of a C function's member, by the function's prefix: a user's class may take one of nanoql's names."""
+    return _runtime._by_cname.get(cname.split("_", 1)[0] + "." + cls_name)
 
 
 STOPS = int(__import__("os").environ.get("NANOQL_REPLAY_STOPS", "0"))  # how many facts' stops to print
@@ -69,6 +106,10 @@ def same_double(a, b):
 class Replay:
     def __init__(self):
         self.objs = {}
+        self.seen = {}  # each object's first sight: the fact run, by name and occurrence, and the call in it
+        self.run = ("", 0)
+        self.run_line = 0
+        self.occurrences = defaultdict(int)
         self.mismatches = 0
         self.refusals = 0
         self.shown = 0
@@ -83,6 +124,18 @@ class Replay:
             self.shown += 1
             print(f"MISMATCH line {self.line} {self.fn}: {what}: recorded {want}, replayed {got}")
 
+    def fact(self, name):
+        """A fact run starts: its name and its occurrence, which order the pool the sweep calls with."""
+        self.run = (name, self.occurrences[name])
+        self.occurrences[name] += 1
+        self.run_line = 0
+
+    def saw(self, i):
+        # An object made or used here: its first sight in the facts' name order, wherever the recording put it.
+        here = (self.run, self.run_line)
+        if i not in self.seen or here < self.seen[i]:
+            self.seen[i] = here
+
     # ---- arguments ----
 
     def obj(self, v):
@@ -93,6 +146,7 @@ class Replay:
         o = self.objs.get(v)
         if o is None:
             raise Stop(f"object {v}, which the replay didn't make")
+        self.saw(v)
         return o
 
     def element(self, e, cname, v):
@@ -290,7 +344,9 @@ class Replay:
             if "y" in res and type_key(got.type_name) != type_key(res["y"]):
                 self.mismatch("object type", res["y"], got.type_name)
             self.objs[res.get("n", res.get("s"))] = got
+            self.saw(res.get("n", res.get("s")))
             return
+        self.saw(res["s"])
         if not (self.objs[res["s"]] == got):
             self.mismatch("object", "the same object", "another")
 
@@ -299,7 +355,8 @@ class Replay:
     def call(self, rec):
         cname = rec["f"]
         self.fn = cname
-        entry = _generated._PY.get(cname)
+        self.run_line += 1
+        entry = PY.get(cname)
         table = _runtime._Functions.table.get(cname)
         if table is None:
             raise Stop("a function the layer doesn't have")
@@ -349,7 +406,7 @@ class Replay:
                 return (args[0] == args[1]) if pair.group(1) == "Equality" else (args[0] != args[1])
             # A value type's constructor (Date, Period) has no member: datetime.date and nanoql.Period stand in for it.
             return _F[cname](*args)
-        cls = _runtime._by_cname.get("nql." + cls_name) or getattr(nanoql, cls_name, None) or getattr(nanoql.experimental, cls_name, None) or getattr(_generated, cls_name)
+        cls = class_of(cname, cls_name) or getattr(nanoql, cls_name, None) or getattr(nanoql.experimental, cls_name, None) or getattr(_generated, cls_name)
         if group is not None:
             # An overload: the form its group's dispatch takes, by the arguments' own classes; another than C#'s static
             # choice is counted, and the recorded form called.
@@ -361,7 +418,7 @@ class Replay:
                 raise TypeError(f"{e}: {', '.join(type(a).__name__ for a in args)}") from None
             if chosen != cname:
                 self.other_form += 1
-                return _F[cname](*args) if style != "new" else self.construct(cls_name, _F[cname](*args))
+                return _F[cname](*args) if style != "new" else self.construct(cname, cls_name, _F[cname](*args))
         if style == "new":
             return cls(*args)
         # A member through the class that declares the C function, as the trace records it: an object's own class may
@@ -379,8 +436,8 @@ class Replay:
             return args[0][args[1] if len(args) == 2 else tuple(args[1:])]
         return getattr(cls, member)(*args)
 
-    def construct(self, cls_name, h):
-        cls = _runtime._by_cname.get("nql." + cls_name) or _runtime.Object
+    def construct(self, cname, cls_name, h):
+        cls = class_of(cname, cls_name) or _runtime.Object
         o = object.__new__(cls)
         o._h = h
         return o
@@ -388,13 +445,269 @@ class Replay:
 
 STOPS_LEFT = [STOPS]
 
+# ---- the sweep ----
+
+SWEEP_LIMIT = 30.0  # seconds a call may take before the sweep ends the process, naming it
+
+# The functions the sweep skips, each with its reason and its time on the arguments it gives. An entry silences the
+# check for its function; one that no longer names a target (gone from the layer, or now called by the trace) reds.
+EXCLUDED = {
+    "nql_ZabrInterpolatedSmileSection_ZabrFullFd_Create":
+        "a ZABR smile section pricing each strike by finite differences, 52.3 s",
+    "nql_FixedLocalVolSurface_WithInterpolation__NoArbSabr":
+        "a local volatility surface refitting a no-arbitrage SABR section per expiry, 387.9 s",
+}
+
+CALLED = re.compile(r'"f":"([^"]+)"')
+PAIR = re.compile(r"_op_(Equality|Inequality)$")
+
+
+def pool_of(r):
+    """The replay's objects, at most 40 of a class, each at its first sight in the facts' name order (a fact run, then
+    a call in it), so the recording's order of facts doesn't move which objects a function is called with: but for a
+    fact whose replay stops before it reaches an object another fact made."""
+    pool = defaultdict(list)
+    for i in sorted(r.objs, key=lambda i: r.seen[i]):
+        o = r.objs[i]
+        if isinstance(o, _runtime.Object) and len(pool[type(o)]) < 40 and not getattr(o, "closed", False):
+            pool[type(o)].append(o)
+    return pool
+
+
+class Sweep:
+    """The values and objects the sweep calls with, by kind and parameter name: the pool's objects of the parameter's
+    class, the first three of each class deriving from it."""
+
+    def __init__(self, pool):
+        self.pool = pool
+        self.cache = {}
+
+    def objects(self, cname):
+        cls = _runtime.BoundEngine if cname is None else _runtime._by_cname.get(cname)
+        if cls is None:
+            return []
+        if cls not in self.cache:
+            self.cache[cls] = [o for k, v in self.pool.items() if issubclass(k, cls) for o in v[:3]]
+        return self.cache[cls]
+
+    def joined(self, o):
+        if isinstance(o, _runtime.Object) and len(self.pool[type(o)]) < 40:
+            self.pool[type(o)].append(o)
+            self.cache.clear()
+
+    def value(self, kind, name, choice):
+        k, cname = _split(kind)
+        head, _, rest = k.partition(":")
+        n = (name or "").lower()
+        if k.endswith("?") and ":" not in k:
+            return None if choice == 0 else self.value(k[:-1] + ("@" + cname if cname else ""), name, choice - 1)
+        if k == "double":
+            for key, v in (("strike", 100.0), ("spot", 100.0), ("underlying", 100.0), ("vol", 0.2), ("sigma", 0.2),
+                           ("rate", 0.03), ("yield", 0.03), ("time", 1.0), ("maturity", 1.0), ("tolerance", 1e-6),
+                           ("accuracy", 1e-6), ("notional", 100.0), ("nominal", 100.0), ("weight", 0.5)):
+                if key in n:
+                    return v
+            return (0.5, 1.0, 0.05)[choice % 3]
+        if k in ("int32", "int64"):
+            for key, v in (("seed", 42), ("dimension", 1), ("days", 2), ("size", 10), ("steps", 10), ("samples", 16),
+                           ("points", 10), ("index", 0), ("year", 2025), ("month", 1), ("day", 15), ("count", 3)):
+                if key in n:
+                    return v
+            return (1, 2, 0)[choice % 3]
+        if k == "bool":
+            return choice % 2 == 1
+        if k == "enum":
+            e = _runtime._enums.get(cname or "")
+            return choice if e is None else list(e)[min(choice, len(e) - 1)]
+        if k == "string":
+            for key, v in (("calendar", "TARGET"), ("currency", "USD"), ("code", "USD"), ("index", "Euribor6M"),
+                           ("daycounter", "Actual365Fixed"), ("xml", "<a/>"), ("name", "TARGET")):
+                if key in n:
+                    return v
+            return ("x", "TARGET", "USD")[choice % 3]
+        if k == "date":
+            return _runtime._date(45672 + 30 * choice)
+        if k == "period":
+            return Period(1 + choice, 3)
+        if k == "complex":
+            return complex(1.0, 0.0)
+        if k in ("handle", "boxed", "snapshot", "engine"):
+            objs = self.objects(cname)
+            if not objs:
+                raise LookupError(f"no object of {cname}")
+            return objs[choice % len(objs)]
+        if k in ("vector", "vector&"):
+            return np.array([0.5, 1.0, 2.0], dtype=np.float64)
+        if k in ("matrix", "matrix&"):
+            return np.eye(2, dtype=np.float64)
+        if k == "jagged":
+            return [[0.5, 1.0], [1.5, 2.0]]
+        if head == "span":
+            e = _split(rest)[0]
+            if e == "double":
+                return np.array([0.5, 1.0, 2.0], dtype=np.float64)
+            return np.array([1, 2, 3], dtype=np.int32)
+        if head == "tuple":
+            return tuple(self.value(x, name, choice) for x in _runtime._top_split(rest.partition("|")[2]))
+        if head == "array":
+            if rest.startswith("tuple:"):
+                return [self.value(rest, name, choice), self.value(rest, name, choice + 1)]
+            e, ec = _split(rest)
+            if e in ("handle", "boxed", "snapshot"):
+                objs = self.objects(ec)
+                if not objs:
+                    raise LookupError(f"no object of {ec}")
+                return objs[:2] if choice == 0 else objs[choice % len(objs):][:2] or objs[:1]
+            if e == "double":
+                return [0.5, 1.0, 2.0]
+            if e == "date":
+                return [_runtime._date(45672 + 182 * i) for i in range(3)]
+            if e in ("int32", "int64"):
+                return [1, 2, 3]
+            ek = e + ("@" + ec if ec else "")
+            return [self.value(ek, name, choice), self.value(ek, name, choice)]
+        if head == "map":
+            ke, ve = rest.split(":", 1)
+            return [(self.value(ke, "key", choice), self.value(ve, "value", choice))]
+        raise LookupError(f"no value for the kind {kind}")
+
+
+def one_line(text):
+    return str(text)[:160].replace("\t", " ").replace("\r", " ").replace("\n", " ")
+
+
+def sweep(r, called, outcomes, prefix="nql", surface=None, limit=SWEEP_LIMIT, excluded=None, planted=None):
+    """Calls each function of the prefix's table the trace doesn't call, its exclusions apart; writes each target's
+    outcome to the outcomes file and returns the reds' count. ``planted`` gives a target its arguments (for its own
+    tests), ``excluded`` replaces the exclusions."""
+    excluded = EXCLUDED if excluded is None else excluded
+    planted = planted or {}
+    use_prefix(prefix)
+    table = _runtime._Functions.table
+    own = prefix + "_"
+    targets = sorted(n for n in table if n.startswith(own) and n not in called and n not in excluded)
+    stale = sorted(n for n in excluded if n.startswith(own) and (n not in table or n in called))
+    names = {}
+    if surface is not None:
+        functions = json.loads(Path(surface).read_text(encoding="utf-8"))["functions"]
+        names = {fn["name"]: [x["name"] for x in fn["params"]] for fn in functions}
+    s = Sweep(pool_of(r))
+    red, unreached, counts = [], {}, defaultdict(int)
+    attempts = passes = 0
+    outcomes = os.path.abspath(outcomes)
+    here = os.getcwd()
+    sandbox = tempfile.mkdtemp(prefix="nanoql-sweep-")
+    os.chdir(sandbox)
+    t0 = time.time()
+    with open(outcomes, "w", encoding="utf-8", newline="\n") as out:
+        pending = targets
+        while pending and passes < 50:
+            passes += 1
+            nxt = []
+            for cname in pending:
+                ins, _ = table[cname]
+                entry = PY.get(cname)
+                cls_name, member, style, _form, group = entry if entry else ("", "", "function", None, None)
+                ps = names.get(cname, [])
+                ps = (["self"] + ps) if len(ins) == len(ps) + 1 else (ps + [None] * len(ins))[:len(ins)]
+                tried = []
+                for choice in range(3):
+                    try:
+                        args = planted.get(cname) or [s.value(k, nm, choice) for k, nm in zip(ins, ps)]
+                    except LookupError as e:
+                        tried.append(("unreached", str(e)))
+                        break
+                    sys.stderr.write(cname + "\n")
+                    sys.stderr.flush()
+                    faulthandler.dump_traceback_later(limit, exit=True)
+                    attempts += 1
+                    try:
+                        if entry is None and PAIR.search(cname) and isinstance(args[0], _runtime.Object):
+                            # A record's equality pair the layer leaves to the language's ==: its C function against it.
+                            got = _F[cname](*args)
+                            want = (args[0] == args[1]) if cname.endswith("_op_Equality") else (args[0] != args[1])
+                            if bool(got) != bool(want):
+                                raise AssertionError(f"the C function says {got}, the language's operator {want}")
+                        else:
+                            got = r.invoke(cls_name, member, style, group, cname, args)
+                        o = ("returned", type(got).__name__)
+                        s.joined(got)
+                    except NanoQLError as e:
+                        o = (f"code {e.code}", one_line(e))
+                    except Stop as e:
+                        o = ("unreached", f"stop: {one_line(e)}")
+                    except Exception as e:  # noqa: BLE001 - a Python-layer error reds
+                        o = (f"python {type(e).__name__}", one_line(e))
+                    finally:
+                        faulthandler.cancel_dump_traceback_later()
+                    tried.append(o)
+                    if o[0] == "returned" or cname in planted:
+                        break
+                if all(o[0] == "unreached" for o in tried):
+                    unreached[cname] = tried[0][1]
+                    nxt.append(cname)
+                    continue
+                bad = [o for o in tried if o[0] in ("code 99", "code 9") or o[0].startswith("python")]
+                verdict = "red" if bad else "returned" if any(o[0] == "returned" for o in tried) else "refused"
+                if bad:
+                    red.append((cname, bad[0]))
+                counts[verdict] += 1
+                o = (bad or [o for o in tried if o[0] == "returned"] or [o for o in tried if o[0] != "unreached"])[0]
+                out.write(f"{cname}\t{verdict}\t{o[0]}\t{o[1]}\t{passes}\n")
+                out.flush()
+            if len(nxt) == len(pending):
+                break
+            pending = nxt
+        for cname in pending:
+            out.write(f"{cname}\tunreached\t{unreached.get(cname, '')}\t\t{passes}\n")
+        for cname in sorted(n for n in excluded if n.startswith(own)):
+            out.write(f"{cname}\texcluded\t{excluded[cname]}\t\t0\n")
+    os.chdir(here)
+    for cname in stale:
+        red.append((cname, ("stale exclusion", "it names no target: gone from the layer, or called by the trace")))
+    if red:
+        print(f"sweep: the calls' folder kept for the diagnosis, {sandbox}")
+    else:
+        shutil.rmtree(sandbox, ignore_errors=True)
+    print(f"sweep: {len(targets)} targets, {sum(n.startswith(own) for n in excluded)} excluded; {attempts} calls in "
+          f"{passes} passes, "
+          f"{time.time() - t0:.1f} s; returned {counts['returned']}, refused {counts['refused']}, "
+          f"unreached {len(pending)}; red {len(red)}")
+    for cname, (kind, detail) in red:
+        print(f"RED {cname}: {kind}: {detail}")
+    return len(red)
+
 
 def main():
-    trace = sys.argv[1]
-    report = sys.argv[2] if len(sys.argv) > 2 else None
+    argv = sys.argv[1:]
+
+    def option(name, default=None):
+        if name not in argv:
+            return default
+        k = argv.index(name)
+        value = argv[k + 1]
+        del argv[k:k + 2]
+        return value
+
+    outcomes = option("--sweep")
+    prefix = option("--prefix", "nql")
+    surface = option("--surface")
+    limit = float(option("--limit", str(SWEEP_LIMIT)))
+    trace = argv[0]
+    report = argv[1] if len(argv) > 1 else None
+    if outcomes is not None and surface is None:
+        surface = str(Path(__file__).resolve().parents[2] / "surface.json")
+        if not Path(surface).is_file():
+            # Without the parameters' names the values go by kind alone and the verdicts move.
+            print(f"sweep: no surface at {surface}; --surface names one")
+            return 1
+    if outcomes is not None:
+        # A user's package and its members, for the replay as for the sweep.
+        use_prefix(prefix)
     r = Replay()
     facts = {}
     order = []
+    called = set()
     current = None
     whole = True
     stopped = False
@@ -410,9 +723,14 @@ def main():
                     facts[current] = [0, 0, 0, 0]
                     order.append(current)
                 facts[current][0] += 1
+                r.fact(current)
                 whole, stopped = True, False
                 continue
             calls += 1
+            if outcomes is not None:
+                m = CALLED.search(line)
+                if m:
+                    called.add(m.group(1))
             if current is not None:
                 facts[current][2] += 1
             if stopped:
@@ -436,6 +754,7 @@ def main():
             for name in order:
                 runs, w, c, rp = facts[name]
                 out.write(f"{name}\t{runs}\t{w}\t{c}\t{rp}\n")
+    reds = 0 if outcomes is None else sweep(r, called, outcomes, prefix, surface, limit)
     r.objs.clear()
     import gc
 
@@ -447,7 +766,7 @@ def main():
     if TOLERANCE > 0 or ABS_TOLERANCE > 0:
         print(f"tolerance {TOLERANCE:g} relative, {ABS_TOLERANCE:g} absolute: {NEAR[0]} doubles within the relative, not bit for bit, "
               f"the widest {NEAR[1]:.3g}; {SMALL[0]} more within the absolute, the widest {SMALL[1]:.3g}")
-    return 0 if r.mismatches == 0 else 1
+    return 0 if r.mismatches == 0 and reds == 0 else 1
 
 
 if __name__ == "__main__":

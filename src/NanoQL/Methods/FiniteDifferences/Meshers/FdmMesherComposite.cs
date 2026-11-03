@@ -123,8 +123,13 @@ public sealed class FdmMesherComposite : FdmMesher
     }
 
     /// <inheritdoc/>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="direction"/> isn't one of the mesher's, where QuantLib reads past its meshers.
+    /// </exception>
     public override Vector Locations(int direction)
     {
+        ArgumentOutOfRangeException.ThrowIfNegative(direction);
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(direction, mesher.Length);
         var retVal = new Vector(Layout.Size);
         Fdm1dMesher m = mesher[direction];
         FdmLinearOpIterator iter = Layout.Begin();

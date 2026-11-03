@@ -5,6 +5,8 @@ using System.Collections.Immutable;
 using NanoQL.Currencies;
 using NanoQL.Indexes;
 using NanoQL.Instruments;
+using NanoQL.Models;
+using NanoQL.PricingEngines;
 using NanoQL.TermStructures;
 using NanoQL.Time;
 
@@ -90,6 +92,26 @@ public class SwapErrorTests
         n = Assert.Throws<ArgumentNullException>(() => new VanillaSwap(
             SwapType.Payer, 1e6, schedule, 0.03, null, schedule, new Euribor6M(Curve), 0.0, null, null!));
         Assert.Equal("context", n.ParamName);
+    }
+
+    [Fact]
+    public void TheTreeEngineRefusesASwapWithNoTimeOnItsCurve()
+    {
+        // A curve starting after every date of the swap leaves it no mandatory time, whose maximum QuantLib reads off
+        // an empty vector; the given lattice's form reaches that read.
+        var index = new Euribor6M(Curve);
+        var context = new EvaluationContext { EvaluationDate = Today, Fixings = IndexFixings.Empty.AddFixing(index, Today, 0.03) };
+        Date spot = new TARGET().Advance(Today, 2, TimeUnit.Days);
+        var floating = new Schedule(
+            spot, spot + new Period(1, TimeUnit.Years), new Period(6, TimeUnit.Months), new TARGET(), BusinessDayConvention.ModifiedFollowing,
+            BusinessDayConvention.ModifiedFollowing, DateGenerationRule.Forward, false, context);
+        var swap = new VanillaSwap(
+            SwapType.Payer, 1e6, Annual(spot, 1, new TARGET()), 0.03, new Thirty360(Thirty360Convention.BondBasis), floating, index, 0.0,
+            new Actual360(), context);
+        var late = new FlatForward(Today + new Period(2, TimeUnit.Years), 0.03, new Actual365Fixed());
+        NanoQLException e = Assert.Throws<NanoQLException>(
+            () => TreeVanillaSwapEngine.Calculate(swap, context, new Vasicek(), new Vasicek().Tree(new TimeGrid(1.0, 4)), late));
+        Assert.Equal("the swap has no time on or after the curve's reference date", e.Message);
     }
 
     [Fact]

@@ -21,6 +21,9 @@ namespace NanoQL.Methods;
 public sealed class FdmTimeDepDirichletBoundary : BoundaryCondition<FdmLinearOp>
 {
     private readonly ImmutableArray<int> indices;
+
+    // one past the boundary's last index
+    private readonly int end;
     private readonly Func<double, double>? valueOnBoundary;
     private readonly Func<double, ImmutableArray<double>>? valuesOnBoundary;
 
@@ -44,6 +47,7 @@ public sealed class FdmTimeDepDirichletBoundary : BoundaryCondition<FdmLinearOp>
         ArgumentNullException.ThrowIfNull(mesher);
         ArgumentNullException.ThrowIfNull(valueOnBoundary);
         indices = new FdmIndicesOnBoundary(mesher.Layout, direction, side).Indices;
+        end = indices.IsEmpty ? 0 : indices.Max() + 1;
         this.valueOnBoundary = valueOnBoundary;
         filled = new double[indices.Length];
     }
@@ -67,6 +71,7 @@ public sealed class FdmTimeDepDirichletBoundary : BoundaryCondition<FdmLinearOp>
         ArgumentNullException.ThrowIfNull(mesher);
         ArgumentNullException.ThrowIfNull(valuesOnBoundary);
         indices = new FdmIndicesOnBoundary(mesher.Layout, direction, side).Indices;
+        end = indices.IsEmpty ? 0 : indices.Max() + 1;
         this.valuesOnBoundary = valuesOnBoundary;
         filled = new double[indices.Length];
         values = [.. filled];
@@ -103,9 +108,19 @@ public sealed class FdmTimeDepDirichletBoundary : BoundaryCondition<FdmLinearOp>
     }
 
     /// <inheritdoc/>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="a"/> doesn't reach the boundary's last index, where QuantLib writes past its end.
+    /// </exception>
     /// <exception cref="NanoQLException">The function gave another number of values than the side has points.</exception>
     public override void ApplyAfterApplying(Span<double> a)
     {
+        if (!(a.Length >= end))
+        {
+            throw new ArgumentException(
+                string.Create(System.Globalization.CultureInfo.InvariantCulture, $"{a.Length} values don't reach the boundary's index {end - 1}"),
+                nameof(a));
+        }
+
         ReadOnlySpan<double> v = valueOnBoundary is not null ? filled : values.AsSpan();
         if (indices.Length != v.Length)
         {
@@ -122,5 +137,10 @@ public sealed class FdmTimeDepDirichletBoundary : BoundaryCondition<FdmLinearOp>
     }
 
     /// <inheritdoc/>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="a"/> doesn't reach the boundary's last index, where QuantLib writes past its end.
+    /// </exception>
+    /// <exception cref="NanoQLException">The function gave another number of values than the side has
+    /// points.</exception>
     public override void ApplyAfterSolving(Span<double> a) => ApplyAfterApplying(a);
 }

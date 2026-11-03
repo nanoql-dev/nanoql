@@ -10,7 +10,8 @@ namespace NanoQL.Tests.Conventions;
 /// <summary>
 /// The latent model framework's own rules: the copula policies' zero values refused, the samplers' and the polar
 /// generator's seeds explicit and their generators copied, the models and integrations of no dimension or above 15
-/// refused, the weights copied.
+/// refused, the weights copied; a T density given more values than the systemic factors refused, as QuantLib's extra
+/// safety check refuses them, and a latent variable outside the model or past its sample, where QuantLib reads past.
 /// </summary>
 public class LatentModelConventionTests
 {
@@ -86,6 +87,27 @@ public class LatentModelConventionTests
         Assert.Equal("No vector integration provided", Assert.Throws<NanoQLException>(() =>
             new MultidimLMIntegration([new TrapezoidIntegral<Default>(1e-4, 10)], -1.0, 1.0).IntegrateV(_ => [1.0])).Message);
         Assert.Throws<ArgumentOutOfRangeException>(() => new GaussianDefProbLM(0.3, 2, (LatentModelIntegrationType)7));
+    }
+
+    [Fact]
+    public void ADensityOrALatentValueReadPastItsFactorsIsRefused()
+    {
+        // The T density takes the systemic factors' values: as many as the distributions are refused, the upper half of
+        // QuantLib's extra safety check, which its default build skips, reading the idiosyncratic factor's.
+        TCopulaPolicy t = TCopulaPolicy.Create([[0.3]], new TCopulaPolicyInitTraits([5, 5]));
+        ArgumentException e = Assert.Throws<ArgumentException>(() => t.Density([0.1, 0.2]));
+        Assert.Equal("m", e.ParamName);
+        Assert.StartsWith("2 factor values given for 1 systemic factors", e.Message, StringComparison.Ordinal);
+        Assert.True(t.Density([0.1]) > 0.0);
+
+        // A variable the model has, and a sample reaching its idiosyncratic factor.
+        var lm = new LatentModel<GaussianCopulaPolicy, GaussianCopulaPolicyInitTraits>(0.3, 2);
+        e = Assert.Throws<ArgumentException>(() => lm.LatentVarValue([0.1, 0.2], 1));
+        Assert.Equal("allFactors", e.ParamName);
+        Assert.StartsWith("2 factor values don't reach variable 1's", e.Message, StringComparison.Ordinal);
+        Assert.Equal("iVar", Assert.Throws<ArgumentOutOfRangeException>(() => lm.LatentVarValue([0.1, 0.2, 0.3], 2)).ParamName);
+        Assert.Equal("iVar", Assert.Throws<ArgumentOutOfRangeException>(() => lm.LatentVarValue([0.1, 0.2, 0.3], -1)).ParamName);
+        Assert.Equal((0.3 * 0.1) + (Math.Sqrt(1.0 - (0.3 * 0.3)) * 0.3), lm.LatentVarValue([0.1, 0.2, 0.3], 1), 14);
     }
 
     [Fact]

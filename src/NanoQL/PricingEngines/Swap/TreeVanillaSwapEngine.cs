@@ -92,7 +92,8 @@ public static class TreeVanillaSwapEngine
     /// <exception cref="ArgumentNullException">An argument but the term structure is null.</exception>
     /// <exception cref="NanoQLException">
     /// The swap's terms are inconsistent, its nominal isn't constant, a known floating coupon's amount can't be
-    /// computed, the model has no curve and none is given, or the lattice's grid lacks one of the swap's times.
+    /// computed, the model has no curve and none is given, the lattice's grid lacks one of the swap's times, or the
+    /// swap has no time on or after the curve's reference date.
     /// </exception>
     public static FixedVsFloatingSwapResults Calculate(
         VanillaSwap swap, EvaluationContext context, ShortRateModel model, Lattice lattice, YieldTermStructure? termStructure = null)
@@ -148,7 +149,12 @@ public static class TreeVanillaSwapEngine
 
         Lattice lattice = givenLattice ?? LatticeShortRateModelEngine.Lattice(model, times.AsSpan(), timeSteps);
 
-        // std::max_element
+        // std::max_element, which QuantLib reads at the end of an empty vector
+        if (times.IsEmpty)
+        {
+            throw new NanoQLException("the swap has no time on or after the curve's reference date");
+        }
+
         double maxTime = times[0];
         for (int i = 1; i < times.Length; i++)
         {

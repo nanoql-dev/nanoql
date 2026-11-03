@@ -150,9 +150,18 @@ public readonly struct TCopulaPolicy : ICopulaPolicy<TCopulaPolicy, TCopulaPolic
     /// <param name="m">The systemic factors' values.</param>
     /// <returns>The density.</returns>
     /// <exception cref="InvalidOperationException">The policy is the zero value.</exception>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="m"/> holds as many values as the distributions or more: QuantLib's extra safety check refuses
+    /// them, where its default build reads the idiosyncratic factor's or past the end.
+    /// </exception>
     public double Density(ReadOnlySpan<double> m)
     {
         Checked();
+        if (!(m.Length < distributions.Length))
+        {
+            throw new ArgumentException($"{m.Length} factor values given for {distributions.Length - 1} systemic factors", nameof(m));
+        }
+
         double prodDensities = 1.0;
         for (int i = 0; i < m.Length; i++)
         {

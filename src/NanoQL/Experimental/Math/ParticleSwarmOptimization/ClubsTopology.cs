@@ -132,8 +132,13 @@ public sealed class ClubsTopology : ParticleSwarmOptimizationTopology
     }
 
     /// <inheritdoc/>
+    /// <exception cref="NanoQLException">
+    /// The topology isn't bound to a minimization's swarm, where QuantLib reads clubs <c>setSize</c> hasn't made.
+    /// </exception>
     public override void FindSocialBest()
     {
+        RequireBound();
+
         // update iteration
         iteration++;
         bool reset = false;

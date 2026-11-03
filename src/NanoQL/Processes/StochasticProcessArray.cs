@@ -93,9 +93,13 @@ public sealed class StochasticProcessArray : StochasticProcess
     }
 
     /// <inheritdoc/>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="x"/> holds fewer values than the processes, where QuantLib reads past its end.
+    /// </exception>
     public override Vector Drift(double t, Vector x)
     {
         ArgumentNullException.ThrowIfNull(x);
+        CheckState(x, nameof(x));
         var tmp = new Vector(Size);
         for (int i = 0; i < Size; ++i)
         {
@@ -109,9 +113,13 @@ public sealed class StochasticProcessArray : StochasticProcess
     /// <param name="t">The time.</param>
     /// <param name="x">The state, one element per process.</param>
     /// <returns>A new matrix.</returns>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="x"/> holds fewer values than the processes, where QuantLib reads past its end.
+    /// </exception>
     public override Matrix Diffusion(double t, Vector x)
     {
         ArgumentNullException.ThrowIfNull(x);
+        CheckState(x, nameof(x));
         Matrix tmp = sqrtCorrelation.Clone();
         for (int i = 0; i < Size; ++i)
         {
@@ -127,9 +135,13 @@ public sealed class StochasticProcessArray : StochasticProcess
     }
 
     /// <inheritdoc/>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="x0"/> holds fewer values than the processes, where QuantLib reads past its end.
+    /// </exception>
     public override Vector Expectation(double t0, Vector x0, double dt)
     {
         ArgumentNullException.ThrowIfNull(x0);
+        CheckState(x0, nameof(x0));
         var tmp = new Vector(Size);
         for (int i = 0; i < Size; ++i)
         {
@@ -146,9 +158,13 @@ public sealed class StochasticProcessArray : StochasticProcess
     /// <param name="x0">The state at its start, one element per process.</param>
     /// <param name="dt">The interval's length.</param>
     /// <returns>A new matrix.</returns>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="x0"/> holds fewer values than the processes, where QuantLib reads past its end.
+    /// </exception>
     public override Matrix StdDeviation(double t0, Vector x0, double dt)
     {
         ArgumentNullException.ThrowIfNull(x0);
+        CheckState(x0, nameof(x0));
         Matrix tmp = sqrtCorrelation.Clone();
         for (int i = 0; i < Size; ++i)
         {
@@ -168,6 +184,9 @@ public sealed class StochasticProcessArray : StochasticProcess
     /// <param name="x0">The state at its start, one element per process.</param>
     /// <param name="dt">The interval's length.</param>
     /// <returns>A new matrix.</returns>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="x0"/> holds fewer values than the processes, where QuantLib reads past its end.
+    /// </exception>
     public override Matrix Covariance(double t0, Vector x0, double dt)
     {
         Matrix tmp = StdDeviation(t0, x0, dt);
@@ -183,10 +202,14 @@ public sealed class StochasticProcessArray : StochasticProcess
     /// <param name="dt">The interval's length.</param>
     /// <param name="dw">The independent Brownian increments, one per process.</param>
     /// <returns>A new vector.</returns>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="x0"/> holds fewer values than the processes, where QuantLib reads past its end.
+    /// </exception>
     public override Vector Evolve(double t0, Vector x0, double dt, Vector dw)
     {
         ArgumentNullException.ThrowIfNull(x0);
         ArgumentNullException.ThrowIfNull(dw);
+        CheckState(x0, nameof(x0));
         Vector dz = sqrtCorrelation * dw;
 
         var tmp = new Vector(Size);
@@ -259,10 +282,16 @@ public sealed class StochasticProcessArray : StochasticProcess
     /// <param name="x0">The state, one element per process.</param>
     /// <param name="dx">The change, one element per process.</param>
     /// <returns>A new vector.</returns>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="x0"/> or <paramref name="dx"/> holds fewer values than the processes, where QuantLib reads past
+    /// its end.
+    /// </exception>
     public override Vector Apply(Vector x0, Vector dx)
     {
         ArgumentNullException.ThrowIfNull(x0);
         ArgumentNullException.ThrowIfNull(dx);
+        CheckState(x0, nameof(x0));
+        CheckState(dx, nameof(dx));
         var tmp = new Vector(Size);
         for (int i = 0; i < Size; ++i)
         {
@@ -270,6 +299,15 @@ public sealed class StochasticProcessArray : StochasticProcess
         }
 
         return tmp;
+    }
+
+    // A state holds a value per process, QuantLib reading one for each: a shorter one is refused.
+    private void CheckState(Vector x, string paramName)
+    {
+        if (!(x.Size >= Size))
+        {
+            throw new ArgumentException($"{x.Size} values given for {Size} processes", paramName);
+        }
     }
 
     /// <summary>The time a date denotes: the first process's.</summary>

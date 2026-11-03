@@ -5,6 +5,7 @@ using NanoQL.Methods;
 using NanoQL.Numerics;
 using NanoQL.PricingEngines;
 using NanoQL.Processes;
+using NanoQL.TermStructures;
 using NanoQL.Time;
 
 namespace NanoQL.Tests.Conventions;
@@ -193,6 +194,52 @@ public class MonteCarloErrorTests
         e = Assert.Throws<ArgumentException>(() => new StochasticProcessArray([], new Matrix()));
         Assert.Equal("matrix", e.ParamName);
         Assert.StartsWith("matrix must not be empty", e.Message);
+    }
+
+    [Fact]
+    public void BatesProcessIncrementRefusals()
+    {
+        // The jumps read the two increments after Heston's, which QuantLib reads past a shorter vector's end.
+        var curve = new FlatForward(new Date(15, Month.October, 2026), 0.05, new Actual365Fixed());
+        var process = new BatesProcess(curve, curve, 100.0, 0.04, 1.5, 0.05, 0.5, -0.7, 2.0, -0.2, 0.1);
+        ArgumentException e = Assert.Throws<ArgumentException>(
+            () => process.Evolve(0.0, new Vector([100.0, 0.04]), 0.1, new Vector([0.1, 0.2, 0.3])));
+        Assert.Equal("dw", e.ParamName);
+        Assert.StartsWith("3 increments given for 4 factors", e.Message, StringComparison.Ordinal);
+        double[] result = new double[2];
+        e = Assert.Throws<ArgumentException>(() => process.Evolve(0.0, [100.0, 0.04], 0.1, [0.1, 0.2, 0.3], result));
+        Assert.Equal("dw", e.ParamName);
+        Assert.StartsWith("3 increments given for 4 factors", e.Message, StringComparison.Ordinal);
+        Assert.Equal(2, process.Evolve(0.0, new Vector([100.0, 0.04]), 0.1, new Vector([0.1, 0.2, 0.3, 0.4])).Size);
+    }
+
+    [Fact]
+    public void StochasticProcessArrayStateRefusals()
+    {
+        // A state of fewer values than the processes, which QuantLib reads one per process, past its end; a longer one
+        // is read as far as the processes go, as QuantLib reads it.
+        var array = new StochasticProcessArray(
+            [new OrnsteinUhlenbeckProcess(0.1, 0.2), new OrnsteinUhlenbeckProcess(0.2, 0.3)], new Matrix(new[,] { { 1.0, 0.3 }, { 0.3, 1.0 } }));
+        var shorter = new Vector([0.5]);
+        var two = new Vector([0.5, 1.0]);
+        foreach ((string param, Action call) in new (string, Action)[]
+                 {
+                     ("x", () => array.Drift(0.0, shorter)),
+                     ("x", () => array.Diffusion(0.0, shorter)),
+                     ("x0", () => array.Expectation(0.0, shorter, 0.1)),
+                     ("x0", () => array.StdDeviation(0.0, shorter, 0.1)),
+                     ("x0", () => array.Covariance(0.0, shorter, 0.1)),
+                     ("x0", () => array.Evolve(0.0, shorter, 0.1, two)),
+                     ("x0", () => array.Apply(shorter, two)),
+                     ("dx", () => array.Apply(two, shorter)),
+                 })
+        {
+            ArgumentException e = Assert.Throws<ArgumentException>(call);
+            Assert.Equal(param, e.ParamName);
+            Assert.StartsWith("1 values given for 2 processes", e.Message, StringComparison.Ordinal);
+        }
+
+        Assert.Equal(array.Drift(0.0, two).AsSpan().ToArray(), array.Drift(0.0, new Vector([0.5, 1.0, 2.0])).AsSpan().ToArray());
     }
 
     private sealed class BackPricer : PathPricer<MonteCarloPath>

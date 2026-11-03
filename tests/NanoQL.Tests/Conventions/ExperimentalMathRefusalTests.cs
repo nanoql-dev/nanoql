@@ -48,6 +48,15 @@ public class ExperimentalMathRefusalTests
         _ = new ClubsTopology(2, 4, 3, 1, 5, 1);
     }
 
+    [Fact]
+    public void AnUnboundClubsTopologyIsRefusedBeforeItsClubsAreRead()
+    {
+        // QuantLib's setSize makes the clubs its findSocialBest reads; unbound, the topology refuses as each read of
+        // the swarm does.
+        NanoQLException e = Assert.Throws<NanoQLException>(new ClubsTopology(2, 4, 3, 1, 5, 1).FindSocialBest);
+        Assert.Equal("the topology isn't bound to a minimization's swarm", e.Message);
+    }
+
     [Theory]
     [InlineData("ring")]
     [InlineData("mirror")]

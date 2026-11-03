@@ -221,8 +221,22 @@ public class LatentModel<TCopula, TInitTraits>
     /// <param name="allFactors">The factors' values, a full sample.</param>
     /// <param name="iVar">The variable.</param>
     /// <returns>The variable's value.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="iVar"/> isn't one of the model's variables, where QuantLib reads past its weights.
+    /// </exception>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="allFactors"/> doesn't reach the variable's idiosyncratic factor, where QuantLib reads past its
+    /// end.
+    /// </exception>
     public double LatentVarValue(ReadOnlySpan<double> allFactors, int iVar)
     {
+        ArgumentOutOfRangeException.ThrowIfNegative(iVar);
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(iVar, factorWeights.Length);
+        if (!(allFactors.Length > NumFactors + iVar))
+        {
+            throw new ArgumentException($"{allFactors.Length} factor values don't reach variable {iVar}'s", nameof(allFactors));
+        }
+
         ImmutableArray<double> fw = factorWeights[iVar];
 
         // idiosyncratic term:

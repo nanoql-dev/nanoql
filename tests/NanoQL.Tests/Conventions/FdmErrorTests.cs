@@ -3,6 +3,7 @@
 
 using System.Collections.Immutable;
 using NanoQL.Coupons;
+using NanoQL.Experimental;
 using NanoQL.Instruments;
 using NanoQL.Methods;
 using NanoQL.Numerics;
@@ -20,7 +21,9 @@ namespace NanoQL.Tests.Conventions;
 /// dimensions and bands of different sizes
 /// (<c>Divergences/FdmUndefinedPathRefusalTests.cs</c>); and the argument checks no vector reaches: the dividend
 /// schedules' null and default values, the backward solver's null boundary condition, the model's rollback forward in
-/// time, the Thomas sweep's zero pivot, and an operator's sparse matrices where it has none.
+/// time, the Thomas sweep's zero pivot, and an operator's sparse matrices where it has none; and the values, directions
+/// and meshers QuantLib reads past: a Dirichlet boundary's values short of its last index, a composite's direction it
+/// has no mesher for, and a ZABR operator's part on a mesher of one direction.
 /// </summary>
 public class FdmErrorTests
 {
@@ -104,6 +107,48 @@ public class FdmErrorTests
         var op = new NoMatrixOp();
         Assert.Equal(" ublas representation is not implemented", Assert.Throws<NanoQLException>(() => op.ToMatrixDecomp()).Message);
         Assert.Equal(" ublas representation is not implemented", Assert.Throws<NanoQLException>(() => op.ToMatrix()).Message);
+    }
+
+    [Fact]
+    public void ValuesDirectionsAndMeshersQuantLibReadsPastAreRefused()
+    {
+        // A Dirichlet boundary writes each of its indices of the values, through the scheme helper as on its own.
+        var mesher = new FdmMesherComposite(new Uniform1dMesher(0.0, 1.0, 5));
+        var upper = new FdmDirichletBoundary(mesher, 1.0, 0, BoundaryConditionSide.Upper);
+        var timeDep = new FdmTimeDepDirichletBoundary(mesher, t => 1.0, 0, BoundaryConditionSide.Upper);
+        var helper = new BoundaryConditionSchemeHelper([upper]);
+        double[] four = new double[4];
+        foreach (Action call in new Action[]
+                 {
+                     () => upper.ApplyAfterApplying(four), () => upper.ApplyAfterSolving(four), () => timeDep.ApplyAfterApplying(four),
+                     () => timeDep.ApplyAfterSolving(four), () => helper.ApplyAfterApplying(four), () => helper.ApplyAfterSolving(four),
+                 })
+        {
+            Refused(call, "a", "4 values don't reach the boundary's index 4");
+        }
+
+        double[] five = new double[5];
+        helper.ApplyAfterSolving(five);
+        Assert.Equal([0.0, 0.0, 0.0, 0.0, 1.0], five);
+
+        // Their steps before applying and before solving are QuantLib's empty ones: the values are left as they are.
+        var op = new FirstDerivativeOp(0, mesher);
+        double[] rhs = [1.0, 2.0, 3.0, 4.0, 5.0];
+        upper.ApplyBeforeApplying(op);
+        upper.ApplyBeforeSolving(op, rhs);
+        timeDep.ApplyBeforeApplying(op);
+        timeDep.ApplyBeforeSolving(op, rhs);
+        Assert.Equal([1.0, 2.0, 3.0, 4.0, 5.0], rhs);
+
+        // A direction the composite has no mesher for.
+        var plane = new FdmMesherComposite(new Uniform1dMesher(0.0, 1.0, 3), new Uniform1dMesher(0.0, 1.0, 4));
+        Assert.Equal("direction", Assert.Throws<ArgumentOutOfRangeException>(() => plane.Locations(2)).ParamName);
+        Assert.Equal("direction", Assert.Throws<ArgumentOutOfRangeException>(() => plane.Locations(-1)).ParamName);
+        Assert.Equal(12, plane.Locations(1).Size);
+
+        // The ZABR operator's parts read a forward and a volatility direction.
+        Refused(() => _ = new FdmZabrUnderlyingPart(mesher, 0.5, 0.3, -0.2, 1.0), "mesher", "a mesher of 1 directions; the ZABR operator takes 2");
+        Refused(() => _ = new FdmZabrVolatilityPart(mesher, 0.5, 0.3, -0.2, 1.0), "mesher", "a mesher of 1 directions; the ZABR operator takes 2");
     }
 
     private static void Refused(Action call, string paramName, string message)

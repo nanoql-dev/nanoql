@@ -47,6 +47,10 @@ public abstract class ParticleSwarmOptimizationTopology
     /// <summary>Gets each particle's social best value, which the topology sets, QuantLib's <c>gBF_</c>.</summary>
     protected Vector GlobalBestF => Bound.GlobalBestF;
 
+    /// <summary>Refuses an unbound topology, as each read of the swarm does.</summary>
+    /// <exception cref="NanoQLException">The topology isn't bound to a minimization's swarm.</exception>
+    protected void RequireBound() => _ = Bound;
+
     private ParticleSwarmOptimization.Swarm Bound =>
         swarm ?? throw new NanoQLException("the topology isn't bound to a minimization's swarm");
 

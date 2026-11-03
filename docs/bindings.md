@@ -279,9 +279,9 @@ too. Schema 1, its `"schema"` field raised on any change of meaning; one row a l
 - **The surface:** `nanoql-bind check` keeps the checked-in outputs in step with the code. The tool's own tests,
   `bindings/NanoQL.Bind.Tests`, check its rules on nanoql's assemblies and on fixtures it binds as a user's assembly.
 - **The test build:** `nanoql-bind build --test-exports` adds the assembly `bindings/NanoQL.Bind.TestTypes` under the
-  prefix `nqlt` (an echo per kind, each refusal kind, a deprecated member, a user's generator, and the bound-engine
-  cases' markets with their C# routes) and narrows handles' generations to 8 bits; the packages ship without it. Each
-  language's conformance suite runs on it: `bindings/c/tests/` for C, `bindings/cpp/tests/` for C++,
+  prefix `nqlt` (an echo per kind, each refusal kind, a deprecated member, a user's generator, a member that sleeps, and
+  the bound-engine cases' markets with their C# routes) and narrows handles' generations to 8 bits; the packages ship
+  without it. Each language's conformance suite runs on it: `bindings/c/tests/` for C, `bindings/cpp/tests/` for C++,
   `bindings/python/tests/` for Python, `bindings/java/src/test/` (JUnit 5) for Java, the test types' Java layer compiled
   with its tests, as a user's package beside nanoql's.
 - **The vector suite through each binding:** the recorder (`tools/replay/`) compiles `nanoql-bind twins` with its
@@ -315,6 +315,21 @@ too. Schema 1, its `"schema"` field raised on any change of meaning; one row a l
   `bindings/replay-floor.json`, the C and Java replayers also fail below the floor: at least as many facts replayed
   whole, each with calls, as the floor lists (the facts that reach only crossing members), at least its calls replayed,
   refusals matched, and the facts it names whole.
+- **Every function called once:** the Python replayer's `--sweep <outcomes.tsv>`, after its replay of the whole suite
+  and before its objects are released, calls once each function of the layer's table that the trace doesn't call:
+  through its Python member, or, for a record's equality pair the layer leaves to `==`, through its C function, its
+  answer checked against `==` and `!=`. Its arguments are the replay's objects by class, at most 40 of each, each taken
+  at its first sight in the facts' name order, so that the recording's order of facts doesn't move them (but for a fact
+  whose replay stops before it reaches an object another fact made), and values by kind and parameter name, the names
+  from `bindings/surface.json` (`--surface` names another; a run with neither stops), up to three choices; the objects
+  it returns join them, in passes until one reaches nothing new. The calls run in a fresh temporary folder, removed
+  after a clean sweep and kept after a red, each under a limit (`--limit`, 30 s), past which `faulthandler` ends the
+  process, the call named on standard error. It fails on a Python-layer error, code 99 or code 9 in any attempt, and on
+  an exclusion that names no function it would call; the outcomes file gives each function's: returned, refused with its
+  code, unreached with the class it lacked, or excluded. `EXCLUDED` in `replay.py` lists the functions it skips, each
+  with its reason and its time. `--prefix` sweeps a user's package, `nqlt` for the test build, through its own members,
+  importing it and its experimental module first, so a trace of its calls replays too. CI's Python step runs it on
+  Windows x64; a replay of a subset doesn't sweep, as its objects aren't the whole suite's.
 - **Parity with QuantLib-Python:** `tools/bindings/wheelparity.py` reads the wheel's `QuantLib.py` (the release
   `tools/vectors/requirements.txt` pins), `surface.json` and `bindings/wheel-routes.json`, and puts every class the
   wheel constructs, and every module function that constructs one, in one group: it crosses with a maker (a constructor,

@@ -121,8 +121,16 @@ public abstract class FittedBondDiscountCurveFittingMethod
     /// <param name="x">The parameters.</param>
     /// <param name="t">The time.</param>
     /// <returns>The discount factor.</returns>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="x"/> holds fewer than <see cref="Size"/> parameters, where QuantLib reads past its end.
+    /// </exception>
     public double Discount(ReadOnlySpan<double> x, double t)
     {
+        if (!(x.Length >= Size))
+        {
+            throw new ArgumentException($"{x.Length} parameters given for a method of {Size}", nameof(x));
+        }
+
         if (t < minCutoffTime)
         {
             // flat fwd extrapolation before min cutoff time
