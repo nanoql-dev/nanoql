@@ -1,0 +1,24 @@
+<!--
+  SPDX-FileCopyrightText: 2026 The nanoql Authors
+  SPDX-License-Identifier: Apache-2.0
+-->
+<!-- The docs' code samples, compiled and run in the library's own build: each page includes its example's code by tag,
+     and the docs' sync runs this console to write each example's output (dotnet run -project docs/examples <folder>).
+     NanoQL.Tests runs each example. -->
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\NanoQL\NanoQL.csproj" />
+    <ProjectReference Include="..\..\src\NanoQL.Extensions\NanoQL.Extensions.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="SofrMarket\market.xml" CopyToOutputDirectory="PreserveNewest" LinkBase="SofrMarket" />
+  </ItemGroup>
+
+</Project>

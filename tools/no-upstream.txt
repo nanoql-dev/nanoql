@@ -5,6 +5,7 @@
 # identifier, and no Upstream line. tools/check-upstream.py reads this list.
 # One path or glob per line, relative to the repository root, with forward slashes; "**" matches any depth.
 bindings/**
+docs/examples/**
 src/NanoQL/ConventionProvider.cs
 src/NanoQL/CurrencyData.cs
 src/NanoQL/EnumArguments.cs
@@ -50,6 +51,7 @@ src/NanoQL.Excel/**
 src/NanoQL.Extensions/Conventions/**
 src/NanoQL.Native/**
 tests/NanoQL.Tests/Conventions/**
+tests/NanoQL.Tests/Docs/**
 tests/NanoQL.Tests/Divergences/**
 tests/NanoQL.Tests/Extensions/**
 tests/NanoQL.Tests/Harness/**

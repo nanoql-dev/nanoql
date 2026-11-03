@@ -3,6 +3,9 @@
     <Project Path="src/NanoQL/NanoQL.csproj" />
     <Project Path="src/NanoQL.Extensions/NanoQL.Extensions.csproj" />
   </Folder>
+  <Folder Name="/docs/">
+    <Project Path="docs/examples/NanoQL.Examples.csproj" />
+  </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/NanoQL.Tests/NanoQL.Tests.csproj" />
   </Folder>

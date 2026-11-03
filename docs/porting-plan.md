@@ -29,8 +29,8 @@ the rest are checked through QuantLib's own test cases, the classes that use the
 | 6 | Core remainder | 79 | 7,240 | 4% | 31% |
 | 7 | Experimental remainder | 194 | 29,987 | 16% | 10% |
 
-- **v0.1** is batches 1–6, all of QuantLib's non-experimental code: 1,067 units and 158,438 code lines. Batch 7 joins
-  it if it is ready, marked `[Experimental]`.
+- **2.0** is batches 1–6, all of QuantLib's non-experimental code: 1,067 units and 158,438 code lines, and the
+  seventh batch's experimental units, marked `[Experimental]`.
 - **QuantLib's test suite:** 182 test files to port, 98,709 code lines. Most test files span batches, so each step
   ports the test cases for its own units.
 - **Frameworks that keep state between steps** settle how their state fits nanoql's stateless design in the step that
@@ -70,24 +70,22 @@ In this order, each a family of units with the test cases that complete in it:
 | 5 | Market models: curve states, drifts, correlations, Brownian generators, models, evolvers and calibrations | 55 | 7,793 |
 | 5 | Market models: products, callability, accounting engines and pathwise Greeks | 65 | 7,971 |
 | 6 | The core remainder: optimisers, random numbers, copulas, statistics, quotes, integrals, interpolations, matrix utilities and the finite-difference remainder | 79 | 7,240 |
-| — | Conventions as data: the core's `ConventionProvider`, which every preset and market builder reads when it is built, QuantLib's values by default; the `NanoQL.Extensions` package's XML format, its convention sets, and QuantLib's presets and builder defaults as generated records checked against the coded ones ([conventions.md](conventions.md), [the catalogue](conventions-catalogue.md)). It ports no QuantLib units, and starts the extensions layer. | — | — |
-| — | QLNet's additions, ported from QLNet 1.13.2 into the `NanoQL.Extensions` package and checked against QLNet (its own test cases and vectors from its release) and SIFMA's standard formulas: the prepayment models `PSACurve` and `ConstantCPR`; the fixed-rate mortgage pass-through `MBSFixedRateBond`, with its `VoluntaryPrepay` flows and SIFMA's yield and price; and `AmortizingBond`, a bond's amortised cost by the effective interest method of IFRS 9 and ASC 310-20. QLNet's notices are kept, and the divergences from QLNet are listed apart in [divergences.md](divergences.md). | 6 (QLNet's) | 355 (QLNet's) |
 | 7 | Experimental credit: latent and loss models, baskets, CDOs, n-th to default, CDS options; cat bonds | 55 | 9,685 |
 | 7 | Experimental equity, FX and energy: double barriers, exotics, variance gamma, path engines; volatility surfaces; energy finite differences | 72 | 10,107 |
 | 7 | Experimental rates, inflation, commodities and maths | 67 | 10,195 |
+| — | Conventions as data: the core's `ConventionProvider`, which every preset and market builder reads when it is built, QuantLib's values by default; the `NanoQL.Extensions` package's XML format, its convention sets, and QuantLib's presets and builder defaults as generated records checked against the coded ones ([conventions.md](conventions.md), [the catalogue](conventions-catalogue.md)). It ports no QuantLib units, and starts the extensions layer. | — | — |
+| — | QLNet's additions, ported from QLNet 1.13.2 into the `NanoQL.Extensions` package and checked against QLNet (its own test cases and vectors from its release) and SIFMA's standard formulas: the prepayment models `PSACurve` and `ConstantCPR`; the fixed-rate mortgage pass-through `MBSFixedRateBond`, with its `VoluntaryPrepay` flows and SIFMA's yield and price; and `AmortizingBond`, a bond's amortised cost by the effective interest method of IFRS 9 and ASC 310-20. QLNet's notices are kept, and the divergences from QLNet are listed apart in [divergences.md](divergences.md). | 6 (QLNet's) | 355 (QLNet's) |
 
-The seventh batch's units are marked `[Experimental]`. If it is ready for v0.1 it runs after the sixth and before
-conventions as data; otherwise after v0.1's release.
+The seventh batch's units are marked `[Experimental]`, and 2.0 includes them.
 
-After the sixth batch (and the seventh if it is ready), the release steps, which port nothing. Nothing ships before v0.1, the first
-public release.
+Then the release steps, which port nothing. Nothing ships before 2.0, the first public release.
 
 | Step | Content |
 |---|---|
 | Bindings | Over 2.0's whole API ([bindings.md](bindings.md)): one C interface over Native AOT's exports, generated from the built assemblies by the tool `nanoql-bind`, with the header `nanoql.h`, opaque handles any thread may share, error codes with a last-error message, conventions by name, generators as snapshots drawn in batches, and engines bound with their inputs; a user's own assembly compiles into the same native library. Over it, Python (a wheel), the C header, C++ (a header with RAII) and Java through Java's Foreign Function & Memory API (JDK 22 or later, no JNI), each with its package and its conformance suite, the vector suite replayed through each bit for bit. |
 | The bindings against QuantLib-Python | Their reach ([bindings.md](bindings.md)): the classes QuantLib-Python names for the Monte Carlo and binomial barrier engines, curves, surfaces and generators; tuples across the C ABI both ways; a bound engine's open nullable inputs as null; optional parameters of a type that doesn't cross left at their defaults; generator bases as snapshots; statics under their declaring type; the presets' lookups by name; and a check, run by CI, that every class QuantLib-Python constructs crosses, has a documented route, or is excluded with its reason. |
 | The Excel add-in | Generated by `nanoql-bind` from the bindings' surface ([excel.md](excel.md)), on Excel-DNA 1.9.0 and `net10.0-windows`: worksheet functions named `nql` and the type's and member's names, for the types a desk's tasks need, listed by task in a list a user can widen (2,652 functions with the experimental API, 2,324 without); immutable objects behind handles keyed by their inputs, released with their cells; Excel's values and ranges as each kind's form, a range looping where a function takes one value; calendars and day counters by name; Excel's errors with their messages; conventions from a settings file beside the add-in; engines bound in cells; a user's assembly built into an add-in beside nanoql's; a cell's calls exported as a test vector, C# or Python, the committed vectors replayed in CI; the release's package with its notices, nanoql's symbols apart; a suite inside Excel, and the vector suite replayed through the worksheet functions. |
-| Release | The documentation, with a validation report per module, and the v0.1 release. |
+| Release | The documentation, with a validation report per module, and the 2.0 release. |
 
 ## Partial ports
 

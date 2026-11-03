@@ -17,4 +17,4 @@ exploited.
 
 ## Supported versions
 
-Until 1.0, fixes go into the latest 0.y release only.
+Fixes go into the latest 2.x release only.

@@ -24,6 +24,8 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\NanoQL\NanoQL.csproj" />
     <ProjectReference Include="..\..\src\NanoQL.Extensions\NanoQL.Extensions.csproj" />
+    <!-- The docs' examples, each run by Docs/ExamplesTests.cs. -->
+    <ProjectReference Include="..\..\docs\examples\NanoQL.Examples.csproj" />
   </ItemGroup>
 
   <!-- Ported tests keep QuantLib's type names (Real, Rate, Size, ...): the library's global aliases. -->

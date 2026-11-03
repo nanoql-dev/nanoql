@@ -1,0 +1,47 @@
+<!--
+  SPDX-FileCopyrightText: 2026 The nanoql Authors
+  SPDX-License-Identifier: Apache-2.0
+-->
+<!--
+  USD SOFR OIS as the CFTC's 2023 trade execution table specifies it: spot (T+2), both legs annual on ACT/360, New York
+  business days (USNY), paid two days after each period ends; SOFR fixed on the US government securities calendar.
+  USNY maps New York's banking days to the Federal Reserve's calendar. "Lag" and "LagAndCalendars" are the steps from
+  QuantLib's MakeOIS defaults toward the market's convention; "USD-SOFR-Dated" is the market's convention without its
+  settlement days, for a swap given its own start date.
+-->
+<Conventions xmlns="https://nanoql.org/schemas/conventions">
+  <Alias name="USNY" base="UnitedStates.FederalReserve" />
+  <OisConvention name="USD-SOFR">
+    <Index>Sofr</Index>
+    <SettlementDays>2</SettlementDays>
+    <SettlementCalendar>USNY</SettlementCalendar>
+    <PaymentLag>2</PaymentLag>
+    <PaymentFrequency>Annual</PaymentFrequency>
+    <PaymentCalendar>USNY</PaymentCalendar>
+    <FixedLegCalendar>USNY</FixedLegCalendar>
+    <FixedLegDayCounter>ACT/360</FixedLegDayCounter>
+    <OvernightLegCalendar>USNY</OvernightLegCalendar>
+  </OisConvention>
+  <OisConvention name="Lag">
+    <Index>Sofr</Index>
+    <PaymentLag>2</PaymentLag>
+  </OisConvention>
+  <OisConvention name="LagAndCalendars">
+    <Index>Sofr</Index>
+    <SettlementCalendar>USNY</SettlementCalendar>
+    <PaymentLag>2</PaymentLag>
+    <PaymentCalendar>USNY</PaymentCalendar>
+    <FixedLegCalendar>USNY</FixedLegCalendar>
+    <OvernightLegCalendar>USNY</OvernightLegCalendar>
+  </OisConvention>
+  <OisConvention name="USD-SOFR-Dated">
+    <Index>Sofr</Index>
+    <SettlementCalendar>USNY</SettlementCalendar>
+    <PaymentLag>2</PaymentLag>
+    <PaymentFrequency>Annual</PaymentFrequency>
+    <PaymentCalendar>USNY</PaymentCalendar>
+    <FixedLegCalendar>USNY</FixedLegCalendar>
+    <FixedLegDayCounter>ACT/360</FixedLegDayCounter>
+    <OvernightLegCalendar>USNY</OvernightLegCalendar>
+  </OisConvention>
+</Conventions>
