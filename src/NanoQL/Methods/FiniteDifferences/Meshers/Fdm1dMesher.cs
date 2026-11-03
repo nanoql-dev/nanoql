@@ -7,6 +7,7 @@
 // Ported to C# from QuantLib and modified by the nanoql Authors.
 
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 
 namespace NanoQL.Methods;
 
@@ -54,17 +55,50 @@ public class Fdm1dMesher
     /// <summary>The distance from a point to its upper neighbour.</summary>
     /// <param name="index">The point's index.</param>
     /// <returns>The distance.</returns>
-    public double Dplus(int index) => dplus[index];
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="index"/> isn't a point of the mesher, where QuantLib reads past its end.
+    /// </exception>
+    public double Dplus(int index)
+    {
+        if ((uint)index >= (uint)dplus.Length)
+        {
+            ThrowIndex(index, dplus.Length, nameof(index));
+        }
+
+        return dplus[index];
+    }
 
     /// <summary>The distance from a point to its lower neighbour.</summary>
     /// <param name="index">The point's index.</param>
     /// <returns>The distance.</returns>
-    public double Dminus(int index) => dminus[index];
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="index"/> isn't a point of the mesher, where QuantLib reads past its end.
+    /// </exception>
+    public double Dminus(int index)
+    {
+        if ((uint)index >= (uint)dminus.Length)
+        {
+            ThrowIndex(index, dminus.Length, nameof(index));
+        }
+
+        return dminus[index];
+    }
 
     /// <summary>A point's location.</summary>
     /// <param name="index">The point's index.</param>
     /// <returns>The location.</returns>
-    public double Location(int index) => locations[index];
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="index"/> isn't a point of the mesher, where QuantLib reads past its end.
+    /// </exception>
+    public double Location(int index)
+    {
+        if ((uint)index >= (uint)locations.Length)
+        {
+            ThrowIndex(index, locations.Length, nameof(index));
+        }
+
+        return locations[index];
+    }
 
     /// <summary>The points' locations.</summary>
     /// <returns>A copy of the locations.</returns>
@@ -82,4 +116,11 @@ public class Fdm1dMesher
             throw new ArgumentException($"a mesher needs at least two points, not {size}", paramName);
         }
     }
+
+    // An index past the array an accessor reads: QuantLib's Array::at text, in a helper, so the accessors
+    // stay small enough to inline.
+    [DoesNotReturn]
+    private static void ThrowIndex(int index, int length, string paramName) =>
+        throw new ArgumentOutOfRangeException(
+            paramName, $"index ({index}) must be less than {length}: array access out of range");
 }

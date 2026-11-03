@@ -22,6 +22,9 @@ public sealed class ArithmeticAPOHestonPathPricer : PathPricer<MultiPath>
     private readonly PlainVanillaPayoff payoff;
     private readonly double discount;
     private readonly ImmutableArray<int> fixingIndices;
+
+    // The largest fixing index, so a step's check of the path allocates nothing.
+    private readonly int lastFixing = -1;
     private readonly double runningSum;
     private readonly int pastFixings;
 
@@ -51,6 +54,7 @@ public sealed class ArithmeticAPOHestonPathPricer : PathPricer<MultiPath>
         foreach (int index in fixingIndices)
         {
             ArgumentOutOfRangeException.ThrowIfNegative(index, nameof(fixingIndices));
+            lastFixing = Math.Max(lastFixing, index);
         }
 
         ArgumentOutOfRangeException.ThrowIfNegative(pastFixings);
@@ -70,7 +74,9 @@ public sealed class ArithmeticAPOHestonPathPricer : PathPricer<MultiPath>
     /// <returns>The discounted payoff.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="path"/> is <see langword="null"/>.</exception>
     /// <exception cref="NanoQLException">The path is empty.</exception>
-    /// <exception cref="IndexOutOfRangeException">A fixing index is past the path's end.</exception>
+    /// <exception cref="ArgumentException">
+    /// A fixing index is past <paramref name="path"/>'s end, where QuantLib reads past it.
+    /// </exception>
     public override double Evaluate(MultiPath path)
     {
         ArgumentNullException.ThrowIfNull(path);
@@ -79,6 +85,11 @@ public sealed class ArithmeticAPOHestonPathPricer : PathPricer<MultiPath>
         if (!(n > 0))
         {
             throw new NanoQLException("the path cannot be empty");
+        }
+
+        if (!(lastFixing < n))
+        {
+            throw new ArgumentException($"the path has {n} points, the fixings reach {lastFixing}", nameof(path));
         }
 
         double sum = runningSum;

@@ -137,8 +137,16 @@ public readonly struct TCopulaPolicy : ICopulaPolicy<TCopulaPolicy, TCopulaPolic
 
     /// <inheritdoc/>
     /// <exception cref="InvalidOperationException">The policy is the zero value.</exception>
-    /// <exception cref="IndexOutOfRangeException"><paramref name="iVariable"/> isn't a variable's index.</exception>
-    public double CumulativeY(double val, int iVariable) => Checked().latentVarsCumul[iVariable].Value(val);
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="iVariable"/> isn't a variable's index, where QuantLib reads past its end.
+    /// </exception>
+    public double CumulativeY(double val, int iVariable)
+    {
+        Checked();
+        ArgumentOutOfRangeException.ThrowIfNegative(iVariable);
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(iVariable, latentVarsCumul.Length);
+        return latentVarsCumul[iVariable].Value(val);
+    }
 
     /// <inheritdoc/>
     /// <exception cref="InvalidOperationException">The policy is the zero value.</exception>
@@ -177,7 +185,16 @@ public readonly struct TCopulaPolicy : ICopulaPolicy<TCopulaPolicy, TCopulaPolic
     /// <returns>The value.</returns>
     /// <exception cref="InvalidOperationException">The policy is the zero value.</exception>
     /// <exception cref="NanoQLException">The inversion fails.</exception>
-    public double InverseCumulativeY(double p, int iVariable) => Checked().latentVarsInverters[iVariable].Value(p);
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="iVariable"/> isn't a variable's index, where QuantLib reads past its end.
+    /// </exception>
+    public double InverseCumulativeY(double p, int iVariable)
+    {
+        Checked();
+        ArgumentOutOfRangeException.ThrowIfNegative(iVariable);
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(iVariable, latentVarsInverters.Length);
+        return latentVarsInverters[iVariable].Value(p);
+    }
 
     /// <inheritdoc/>
     /// <exception cref="InvalidOperationException">The policy is the zero value.</exception>
@@ -185,16 +202,33 @@ public readonly struct TCopulaPolicy : ICopulaPolicy<TCopulaPolicy, TCopulaPolic
 
     /// <inheritdoc/>
     /// <exception cref="InvalidOperationException">The policy is the zero value.</exception>
-    public double InverseCumulativeDensity(double p, int iFactor) =>
-        Quantile(Checked().distributions[iFactor], p) * varianceFactors[iFactor];
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="iFactor"/> isn't a factor's index, where QuantLib reads past its end.
+    /// </exception>
+    public double InverseCumulativeDensity(double p, int iFactor)
+    {
+        Checked();
+        ArgumentOutOfRangeException.ThrowIfNegative(iFactor);
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(iFactor, distributions.Length);
+        return Quantile(distributions[iFactor], p) * varianceFactors[iFactor];
+    }
 
     /// <inheritdoc/>
     /// <exception cref="InvalidOperationException">The policy is the zero value.</exception>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="probs"/> holds fewer probabilities than the systemic factors, where QuantLib reads past its end.
+    /// </exception>
     public double[] AllFactorCumulInverter(ReadOnlySpan<double> probs)
     {
         Checked();
-        var result = new double[probs.Length];
         int nSystemic = varianceFactors.Length - 1;
+        if (!(probs.Length >= nSystemic))
+        {
+            throw new ArgumentException(
+                $"{probs.Length} probabilities given for {nSystemic} systemic factors", nameof(probs));
+        }
+
+        var result = new double[probs.Length];
         for (int i = 0; i < nSystemic; i++)
         {
             result[i] = InverseCumulativeDensity(probs[i], i);

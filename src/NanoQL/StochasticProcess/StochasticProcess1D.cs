@@ -121,9 +121,13 @@ public abstract class StochasticProcess1D : StochasticProcess
     /// <param name="t">The time.</param>
     /// <param name="x">The state, of size 1.</param>
     /// <returns>A new vector.</returns>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="x"/> holds fewer values than the state, where QuantLib reads past its end.
+    /// </exception>
     public override Vector Drift(double t, Vector x)
     {
         ArgumentNullException.ThrowIfNull(x);
+        CheckState(x.Size, nameof(x));
         return new Vector(1, Drift(t, x[0]));
     }
 
@@ -131,9 +135,13 @@ public abstract class StochasticProcess1D : StochasticProcess
     /// <param name="t">The time.</param>
     /// <param name="x">The state, of size 1.</param>
     /// <returns>A new matrix.</returns>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="x"/> holds fewer values than the state, where QuantLib reads past its end.
+    /// </exception>
     public override Matrix Diffusion(double t, Vector x)
     {
         ArgumentNullException.ThrowIfNull(x);
+        CheckState(x.Size, nameof(x));
         return new Matrix(1, 1, Diffusion(t, x[0]));
     }
 
@@ -142,9 +150,13 @@ public abstract class StochasticProcess1D : StochasticProcess
     /// <param name="x0">The state at its start, of size 1.</param>
     /// <param name="dt">The interval's length.</param>
     /// <returns>A new vector.</returns>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="x0"/> holds fewer values than the state, where QuantLib reads past its end.
+    /// </exception>
     public override Vector Expectation(double t0, Vector x0, double dt)
     {
         ArgumentNullException.ThrowIfNull(x0);
+        CheckState(x0.Size, nameof(x0));
         return new Vector(1, Expectation(t0, x0[0], dt));
     }
 
@@ -153,9 +165,13 @@ public abstract class StochasticProcess1D : StochasticProcess
     /// <param name="x0">The state at its start, of size 1.</param>
     /// <param name="dt">The interval's length.</param>
     /// <returns>A new matrix.</returns>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="x0"/> holds fewer values than the state, where QuantLib reads past its end.
+    /// </exception>
     public override Matrix StdDeviation(double t0, Vector x0, double dt)
     {
         ArgumentNullException.ThrowIfNull(x0);
+        CheckState(x0.Size, nameof(x0));
         return new Matrix(1, 1, StdDeviation(t0, x0[0], dt));
     }
 
@@ -164,9 +180,13 @@ public abstract class StochasticProcess1D : StochasticProcess
     /// <param name="x0">The state at its start, of size 1.</param>
     /// <param name="dt">The interval's length.</param>
     /// <returns>A new matrix.</returns>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="x0"/> holds fewer values than the state, where QuantLib reads past its end.
+    /// </exception>
     public override Matrix Covariance(double t0, Vector x0, double dt)
     {
         ArgumentNullException.ThrowIfNull(x0);
+        CheckState(x0.Size, nameof(x0));
         return new Matrix(1, 1, Variance(t0, x0[0], dt));
     }
 
@@ -176,10 +196,16 @@ public abstract class StochasticProcess1D : StochasticProcess
     /// <param name="dt">The interval's length.</param>
     /// <param name="dw">The Brownian increment, of size 1.</param>
     /// <returns>A new vector.</returns>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="x0"/> holds fewer values than the state, or <paramref name="dw"/> fewer increments than the
+    /// process's factors, where QuantLib reads past its end.
+    /// </exception>
     public override Vector Evolve(double t0, Vector x0, double dt, Vector dw)
     {
         ArgumentNullException.ThrowIfNull(x0);
         ArgumentNullException.ThrowIfNull(dw);
+        CheckState(x0.Size, nameof(x0));
+        CheckIncrements(dw.Size, nameof(dw));
         return new Vector(1, Evolve(t0, x0[0], dt, dw[0]));
     }
 
@@ -187,10 +213,16 @@ public abstract class StochasticProcess1D : StochasticProcess
     /// <param name="x0">The state, of size 1.</param>
     /// <param name="dx">The change, of size 1.</param>
     /// <returns>A new vector.</returns>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="x0"/> or <paramref name="dx"/> holds fewer values than the state, where QuantLib reads past its
+    /// end.
+    /// </exception>
     public override Vector Apply(Vector x0, Vector dx)
     {
         ArgumentNullException.ThrowIfNull(x0);
         ArgumentNullException.ThrowIfNull(dx);
+        CheckState(x0.Size, nameof(x0));
+        CheckState(dx.Size, nameof(dx));
         return new Vector(1, Apply(x0[0], dx[0]));
     }
 

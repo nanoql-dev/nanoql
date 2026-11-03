@@ -38,10 +38,15 @@ public class ExcelWriterTests
         Assert.Contains($"global::NanoQL.Bind.Tests.Fixtures.Optionals.Scaled({X}.Dbl(a[0], \"x\"), null, null)", Function(x, "fxOptionalsScaled"), StringComparison.Ordinal);
     }
 
-    /// <summary>The codes a member documents for kinds outside the table, emitted as its shims catch them.</summary>
+    /// <summary>The codes a member documents for kinds outside the table, emitted as its shims catch them: a fixture's,
+    /// as no nanoql member documents such a kind.</summary>
     [Fact]
     public void DocumentedCodesAreEmitted()
-        => Assert.Contains("static e_ => e_ switch { global::", Function(WholeExperimental, "nqlTCopulaPolicyCumulativeY"), StringComparison.Ordinal);
+    {
+        ExcelOutput x = Run(true, new() { ["nql"] = null, ["fx"] = null }, fixtures: true);
+        Assert.Contains(
+            "static e_ => e_ switch { global::System.IndexOutOfRangeException => 4, _ => 0 }", Function(x, "fxKindsElement"), StringComparison.Ordinal);
+    }
 
     /// <summary>The loop mask per kind: every scalar kind loops, an array's argument doesn't, a function returning a range doesn't loop.</summary>
     [Fact]

@@ -19,18 +19,19 @@ internal static class ZeroCurveFormula
     public static double ZeroYieldImpl(
         ReadOnlySpan<double> times, ReadOnlySpan<double> data, Interpolation interpolation, double t)
     {
-        if (t <= times[^1])
+        if (t <= CurveData.Last(times, nameof(times)))
         {
             return interpolation.Evaluate(t, true);
         }
 
         // flat fwd extrapolation
-        double tMax = times[^1];
-        double zMax = data[^1];
+        double tMax = CurveData.Last(times, nameof(times));
+        double zMax = CurveData.Last(data, nameof(data));
         double instFwdMax = zMax + (tMax * interpolation.Derivative(tMax));
         return ((zMax * tMax) + (instFwdMax * (t - tMax))) / t;
     }
 
     // InterpolatedZeroCurve::maxDate
-    public static Date MaxDate(ReadOnlySpan<Date> dates, Date? maxDate) => maxDate ?? dates[^1];
+    public static Date MaxDate(ReadOnlySpan<Date> dates, Date? maxDate) =>
+        maxDate ?? CurveData.Last(dates, nameof(dates));
 }

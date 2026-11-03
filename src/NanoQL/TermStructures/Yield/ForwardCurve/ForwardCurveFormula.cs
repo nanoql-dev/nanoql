@@ -24,7 +24,7 @@ internal static class ForwardCurveFormula
             return interpolation.Evaluate(t, true);
         }
 
-        double maxTime = times[^1];
+        double maxTime = CurveData.Last(times, nameof(times));
         double integral;
         if (t <= maxTime)
         {
@@ -33,12 +33,13 @@ internal static class ForwardCurveFormula
         else
         {
             // flat fwd extrapolation
-            integral = interpolation.Primitive(maxTime, true) + (data[^1] * (t - maxTime));
+            integral = interpolation.Primitive(maxTime, true) + (CurveData.Last(data, nameof(data)) * (t - maxTime));
         }
 
         return integral / t;
     }
 
     // InterpolatedForwardCurve::maxDate
-    public static Date MaxDate(ReadOnlySpan<Date> dates, Date? maxDate) => maxDate ?? dates[^1];
+    public static Date MaxDate(ReadOnlySpan<Date> dates, Date? maxDate) =>
+        maxDate ?? CurveData.Last(dates, nameof(dates));
 }

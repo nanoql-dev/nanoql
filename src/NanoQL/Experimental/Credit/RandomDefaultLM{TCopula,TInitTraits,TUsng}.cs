@@ -90,7 +90,15 @@ public class RandomDefaultLM<TCopula, TInitTraits, TUsng> : RandomLM<TCopula, TI
     /// <param name="iName">The name's position in the bound basket.</param>
     /// <param name="defaultKey">The key, unread.</param>
     /// <returns>The recovery.</returns>
-    public override double ExpectedRecovery(Date d, int iName, DefaultProbKey defaultKey) => recoveries[iName];
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="iName"/> isn't one of the names, where QuantLib reads past its end.
+    /// </exception>
+    public override double ExpectedRecovery(Date d, int iName, DefaultProbKey defaultKey)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(iName);
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(iName, recoveries.Length);
+        return recoveries[iName];
+    }
 
     /// <inheritdoc/>
     private protected override TCopula SimulationCopula => model.Copula;

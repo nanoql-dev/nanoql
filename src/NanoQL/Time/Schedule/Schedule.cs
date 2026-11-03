@@ -9,6 +9,7 @@
 // Ported to C# from QuantLib and modified by the nanoql Authors.
 
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 
 namespace NanoQL.Time;
 
@@ -590,7 +591,21 @@ public sealed class Schedule
     /// <summary>Gets the date at the given index.</summary>
     /// <param name="i">The index.</param>
     /// <returns>The date.</returns>
-    public Date this[int i] => dates[i];
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="i"/> isn't a date of the schedule, where QuantLib reads past its end.
+    /// </exception>
+    public Date this[int i]
+    {
+        get
+        {
+            if ((uint)i >= (uint)dates.Length)
+            {
+                ThrowIndex(i, dates.Length, nameof(i));
+            }
+
+            return dates[i];
+        }
+    }
 
     /// <summary>The date at the given index, checked.</summary>
     /// <param name="i">The index.</param>
@@ -887,6 +902,13 @@ public sealed class Schedule
 
         throw new ArgumentException("null effective date", nameof(effectiveDate));
     }
+
+    // An index past the array an accessor reads: QuantLib's Array::at text, in a helper, so the accessors
+    // stay small enough to inline.
+    [DoesNotReturn]
+    private static void ThrowIndex(int index, int length, string paramName) =>
+        throw new ArgumentOutOfRangeException(
+            paramName, $"index ({index}) must be less than {length}: array access out of range");
 }
 
 // QuantLib's anonymous-namespace helper in schedule.cpp.

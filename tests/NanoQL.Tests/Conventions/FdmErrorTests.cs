@@ -23,7 +23,10 @@ namespace NanoQL.Tests.Conventions;
 /// schedules' null and default values, the backward solver's null boundary condition, the model's rollback forward in
 /// time, the Thomas sweep's zero pivot, and an operator's sparse matrices where it has none; and the values, directions
 /// and meshers QuantLib reads past: a Dirichlet boundary's values short of its last index, a composite's direction it
-/// has no mesher for, and a ZABR operator's part on a mesher of one direction.
+/// has no mesher for, and a ZABR operator's part on a mesher of one direction; and the indices, coordinates, grids and
+/// results it reads past: the mesher's and the modified triple-band operator's accessors, a layout's index of more
+/// coordinates than its directions, a jump operator's second direction of one point, a density calculator's grid of no
+/// step and a quanto helper's short result.
 /// </summary>
 public class FdmErrorTests
 {
@@ -149,6 +152,59 @@ public class FdmErrorTests
         // The ZABR operator's parts read a forward and a volatility direction.
         Refused(() => _ = new FdmZabrUnderlyingPart(mesher, 0.5, 0.3, -0.2, 1.0), "mesher", "a mesher of 1 directions; the ZABR operator takes 2");
         Refused(() => _ = new FdmZabrVolatilityPart(mesher, 0.5, 0.3, -0.2, 1.0), "mesher", "a mesher of 1 directions; the ZABR operator takes 2");
+    }
+
+    [Fact]
+    public void IndicesCoordinatesGridsAndResultsQuantLibReadsPastAreRefused()
+    {
+        // The mesher's accessors and the modified triple-band operator's bands, QuantLib's unchecked reads, refuse an
+        // index past their points or a negative one with Array::at's text.
+        var line = new Uniform1dMesher(0.0, 1.0, 5);
+        var mod = new ModTripleBandLinearOp(0, new FdmMesherComposite(line));
+        foreach ((string param, int index, Action call) in new (string, int, Action)[]
+                 {
+                     ("index", 5, () => line.Dplus(5)), ("index", -1, () => line.Dplus(-1)),
+                     ("index", 5, () => line.Dminus(5)), ("index", -1, () => line.Dminus(-1)),
+                     ("index", 5, () => line.Location(5)), ("index", -1, () => line.Location(-1)),
+                     ("i", 5, () => mod.Lower(5)), ("i", -1, () => mod.Lower(-1)),
+                     ("i", 5, () => mod.Diag(5)), ("i", -1, () => mod.Diag(-1)),
+                     ("i", 5, () => mod.Upper(5)), ("i", -1, () => mod.Upper(-1)),
+                 })
+        {
+            ArgumentOutOfRangeException e = Assert.Throws<ArgumentOutOfRangeException>(call);
+            Assert.Equal(param, e.ParamName);
+            Assert.StartsWith($"index ({index}) must be less than 5: array access out of range", e.Message, StringComparison.Ordinal);
+        }
+
+        Assert.Equal((0.25, 0.25, 1.0), (line.Dplus(3), line.Dminus(4), line.Location(4)));
+        mod.Diag(4) = 2.0;
+        Assert.Equal(2.0, mod.Diag(4));
+
+        // A layout's index of more coordinates than its directions, whose spacing QuantLib reads past.
+        FdmLinearOpLayout layout = new FdmMesherComposite(line, new Uniform1dMesher(0.0, 1.0, 3)).Layout;
+        Refused(() => layout.Index([1, 2, 0]), "coordinates", "3 coordinates given for 2 directions");
+        Assert.Equal(11, layout.Index([1, 2]));
+
+        // The jump operator's second direction, whose second last location QuantLib reads on one point.
+        var rTS = new FlatForward(Today, 0.05, new Actual365Fixed());
+        var power = new ExtOUWithJumpsProcess(new ExtendedOrnsteinUhlenbeckProcess(1.0, 0.5, 3.0, _ => 3.0), 0.0, 5.0, 1.0, 2.0);
+        Refused(
+            () => _ = new FdmExtOUJumpOp(new FdmMesherComposite(line, new Fdm1dMesher(1)), power, rTS, [], 4),
+            "mesher",
+            "the jump operator's second direction needs at least two points, not 1");
+        Assert.Equal(2, new FdmExtOUJumpOp(new FdmMesherComposite(line, new Uniform1dMesher(0.0, 1.0, 2)), power, rTS, [], 4).Size);
+
+        // The density calculator's first step, which the port reads where QuantLib's at() refuses.
+        var vol = new LocalConstantVol(Today, 0.2, new Actual365Fixed());
+        Refused(() => _ = new LocalVolRNDCalculator(100.0, rTS, rTS, vol, new TimeGrid([0.0])), "timeGrid", "the time grid has no step");
+        Refused(() => _ = new LocalVolRNDCalculator(100.0, rTS, rTS, vol, new TimeGrid()), "timeGrid", "the time grid has no step");
+
+        // The quanto helper's span form writes one adjustment per volatility.
+        var quanto = new FdmQuantoHelper(rTS, rTS, new BlackConstantVol(Today, new NullCalendar(), 0.1, new Actual365Fixed()), 0.3, 1.0);
+        Refused(() => quanto.QuantoAdjustment([0.2, 0.3], 0.0, 0.5, new double[1]), "result", "the result is shorter than the volatilities");
+        double[] adjusted = new double[2];
+        quanto.QuantoAdjustment([0.2, 0.3], 0.0, 0.5, adjusted);
+        Assert.Equal(quanto.QuantoAdjustment(0.3, 0.0, 0.5), adjusted[1]);
     }
 
     private static void Refused(Action call, string paramName, string message)

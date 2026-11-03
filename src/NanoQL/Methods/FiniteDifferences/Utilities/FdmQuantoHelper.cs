@@ -94,8 +94,16 @@ public sealed class FdmQuantoHelper
     /// <param name="t1">The start time.</param>
     /// <param name="t2">The end time.</param>
     /// <param name="result">The adjustments, one per volatility; it may be <paramref name="equityVol"/> itself.</param>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="result"/> is shorter than <paramref name="equityVol"/>.
+    /// </exception>
     public void QuantoAdjustment(ReadOnlySpan<double> equityVol, double t1, double t2, Span<double> result)
     {
+        if (!(result.Length >= equityVol.Length))
+        {
+            throw new ArgumentException("the result is shorter than the volatilities", nameof(result));
+        }
+
         double rDomestic = RTS.ContinuousForwardRate(t1, t2);
         double rForeign = FTS.ContinuousForwardRate(t1, t2);
         double fxVol = FxVolTS.BlackForwardVol(t1, t2, ExchRateATMlevel);

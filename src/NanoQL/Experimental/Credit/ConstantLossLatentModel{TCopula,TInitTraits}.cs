@@ -89,7 +89,15 @@ public class ConstantLossLatentModel<TCopula, TInitTraits> : DefaultLatentModel<
     /// <param name="iName">The name.</param>
     /// <param name="mktFactors">The factors' values.</param>
     /// <returns>The recovery.</returns>
-    public double ConditionalRecovery(Date d, int iName, ReadOnlySpan<double> mktFactors) => recoveries[iName];
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="iName"/> isn't one of the names, where QuantLib reads past its end.
+    /// </exception>
+    public double ConditionalRecovery(Date d, int iName, ReadOnlySpan<double> mktFactors)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(iName);
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(iName, recoveries.Length);
+        return recoveries[iName];
+    }
 
     /// <summary>A name's recovery conditional on the factors, given its unconditional default probability: the
     /// constant.</summary>
@@ -97,7 +105,15 @@ public class ConstantLossLatentModel<TCopula, TInitTraits> : DefaultLatentModel<
     /// <param name="iName">The name.</param>
     /// <param name="mktFactors">The factors' values.</param>
     /// <returns>The recovery.</returns>
-    public double ConditionalRecovery(double uncondDefP, int iName, ReadOnlySpan<double> mktFactors) => recoveries[iName];
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="iName"/> isn't one of the names, where QuantLib reads past its end.
+    /// </exception>
+    public double ConditionalRecovery(double uncondDefP, int iName, ReadOnlySpan<double> mktFactors)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(iName);
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(iName, recoveries.Length);
+        return recoveries[iName];
+    }
 
     /// <summary>A name's recovery conditional on the factors, given the inverse cumulative of its unconditional default
     /// probability: the constant.</summary>
@@ -105,21 +121,45 @@ public class ConstantLossLatentModel<TCopula, TInitTraits> : DefaultLatentModel<
     /// <param name="iName">The name.</param>
     /// <param name="mktFactors">The factors' values.</param>
     /// <returns>The recovery.</returns>
-    public double ConditionalRecoveryInvP(double invUncondDefP, int iName, ReadOnlySpan<double> mktFactors) => recoveries[iName];
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="iName"/> isn't one of the names, where QuantLib reads past its end.
+    /// </exception>
+    public double ConditionalRecoveryInvP(double invUncondDefP, int iName, ReadOnlySpan<double> mktFactors)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(iName);
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(iName, recoveries.Length);
+        return recoveries[iName];
+    }
 
     /// <summary>A name's recovery given a sample of its latent variable at a date: the constant.</summary>
     /// <param name="latentVarSample">The latent variable's value.</param>
     /// <param name="iName">The name.</param>
     /// <param name="d">The date.</param>
     /// <returns>The recovery.</returns>
-    public double ConditionalRecovery(double latentVarSample, int iName, Date d) => recoveries[iName];
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="iName"/> isn't one of the names, where QuantLib reads past its end.
+    /// </exception>
+    public double ConditionalRecovery(double latentVarSample, int iName, Date d)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(iName);
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(iName, recoveries.Length);
+        return recoveries[iName];
+    }
 
     /// <summary>A name's expected recovery given its default by a date: the constant.</summary>
     /// <param name="d">The date.</param>
     /// <param name="iName">The name.</param>
     /// <param name="defaultKey">The name's default key, unused.</param>
     /// <returns>The recovery.</returns>
-    public double ExpectedRecovery(Date d, int iName, DefaultProbKey defaultKey) => recoveries[iName];
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="iName"/> isn't one of the names, where QuantLib reads past its end.
+    /// </exception>
+    public double ExpectedRecovery(Date d, int iName, DefaultProbKey defaultKey)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(iName);
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(iName, recoveries.Length);
+        return recoveries[iName];
+    }
 
     /// <inheritdoc/>
     private protected override void RestrictRows(ImmutableArray<int> rows)

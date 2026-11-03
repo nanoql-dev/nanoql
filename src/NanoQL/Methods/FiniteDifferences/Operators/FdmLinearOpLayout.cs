@@ -73,8 +73,18 @@ public sealed class FdmLinearOpLayout
     /// <summary>The index of a point in storage order.</summary>
     /// <param name="coordinates">The point's coordinates.</param>
     /// <returns>The index.</returns>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="coordinates"/> holds more coordinates than the layout's directions, where QuantLib reads past
+    /// its spacing.
+    /// </exception>
     public int Index(ReadOnlySpan<int> coordinates)
     {
+        if (!(coordinates.Length <= spacing.Length))
+        {
+            throw new ArgumentException(
+                $"{coordinates.Length} coordinates given for {spacing.Length} directions", nameof(coordinates));
+        }
+
         // std::inner_product over the coordinates, with the spacing
         int result = 0;
         for (int i = 0; i < coordinates.Length; ++i)

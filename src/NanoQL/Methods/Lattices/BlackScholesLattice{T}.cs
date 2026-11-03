@@ -75,9 +75,30 @@ public class BlackScholesLattice<T> : TreeLattice1D
     public override double Probability(int i, int index, int branch) => tree.Probability(i, index, branch);
 
     /// <inheritdoc/>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="i"/> is negative, a step QuantLib's unsigned index can't be.
+    /// </exception>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="values"/> holds fewer values than step <paramref name="i"/> + 1's nodes, or
+    /// <paramref name="newValues"/> fewer than step <paramref name="i"/>'s, where QuantLib reads and writes past their
+    /// ends.
+    /// </exception>
     public override void Stepback(int i, ReadOnlySpan<double> values, Span<double> newValues)
     {
+        ArgumentOutOfRangeException.ThrowIfNegative(i);
         int size = Size(i);
+        if (!(values.Length >= size + 1))
+        {
+            throw new ArgumentException(
+                $"{values.Length} values given for step {i + 1}'s {size + 1} nodes", nameof(values));
+        }
+
+        if (!(newValues.Length >= size))
+        {
+            throw new ArgumentException(
+                $"room for {newValues.Length} values given for step {i}'s {size} nodes", nameof(newValues));
+        }
+
         for (int j = 0; j < size; j++)
         {
             newValues[j] = ((pd * values[j]) + (pu * values[j + 1])) * discount;

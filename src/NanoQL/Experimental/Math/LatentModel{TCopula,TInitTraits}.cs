@@ -255,8 +255,16 @@ public class LatentModel<TCopula, TInitTraits>
     /// <param name="iVar1">The first variable.</param>
     /// <param name="iVar2">The second variable.</param>
     /// <returns>The correlation.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="iVar1"/> or <paramref name="iVar2"/> isn't one of the variables, where QuantLib reads past its
+    /// weights.
+    /// </exception>
     public double LatentVariableCorrel(int iVar1, int iVar2)
     {
+        ArgumentOutOfRangeException.ThrowIfNegative(iVar1);
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(iVar1, factorWeights.Length);
+        ArgumentOutOfRangeException.ThrowIfNegative(iVar2);
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(iVar2, factorWeights.Length);
         // true for any normalized combination
         double result = iVar1 == iVar2 ? idiosyncFctrs[iVar1] * idiosyncFctrs[iVar1] : 0.0;
         ImmutableArray<double> f1 = factorWeights[iVar1], f2 = factorWeights[iVar2];

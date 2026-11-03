@@ -14,8 +14,9 @@ namespace NanoQL.Tests.Conventions;
 /// QuantLib's loops never end, and the ring's and mirror's bounds of different sizes; the very fast sampler from a
 /// point no draw brings into its box, its width or farther from it, off a zero-width box's bound, or outside the box at
 /// a temperature of 0, alone or as an annealing's start, where QuantLib's loop never ends, each run on a thread with a
-/// time limit, while a point just within its width still draws; and every optimizer, walk, sampler and generator takes
-/// its seed in [1, 4294967295], QuantLib's default 0, which seeds from the clock, refused.
+/// time limit, while a point just within its width still draws; every optimizer, walk, sampler and generator takes
+/// its seed in [1, 4294967295], QuantLib's default 0, which seeds from the clock, refused; and a Laplace
+/// interpolation's coordinates of another count than the matrix's columns or rows, which QuantLib reads past.
 /// </summary>
 public class ExperimentalMathRefusalTests
 {
@@ -150,6 +151,23 @@ public class ExperimentalMathRefusalTests
         { "ProbabilityBoltzmann", () => _ = new ProbabilityBoltzmann(0) },
         { "ProbabilityBoltzmannDownhill", () => _ = new ProbabilityBoltzmannDownhill(0) },
     };
+
+    [Fact]
+    public void ALaplaceInterpolationsGivenCoordinatesMatchTheMatrix()
+    {
+        // QuantLib reads the coordinates at each row and column, past a shorter set's end; a longer set is refused too,
+        // as its points have no row or column. With none given, the indices serve.
+        var A = new Matrix(new double[,] { { 1.0, double.NaN, 4.0 }, { 6.0, 6.5, 7.0 } });
+        ArgumentException e = Assert.Throws<ArgumentException>(() => LaplaceInterpolationFunctions.LaplaceInterpolation(A, [1.0, 2.0], [1.0, 3.0]));
+        Assert.Equal("x", e.ParamName);
+        Assert.StartsWith("2 x values given for 3 columns", e.Message, StringComparison.Ordinal);
+        e = Assert.Throws<ArgumentException>(() => LaplaceInterpolationFunctions.LaplaceInterpolation(A, [1.0, 2.0, 4.0], [1.0, 3.0, 7.0]));
+        Assert.Equal("y", e.ParamName);
+        Assert.StartsWith("3 y values given for 2 rows", e.Message, StringComparison.Ordinal);
+
+        Assert.True(double.IsFinite(LaplaceInterpolationFunctions.LaplaceInterpolation(A, [1.0, 2.0, 4.0], [1.0, 3.0])[0, 1]));
+        Assert.True(double.IsFinite(LaplaceInterpolationFunctions.LaplaceInterpolation(A)[0, 1]));
+    }
 
     [Theory]
     [MemberData(nameof(SeedZero))]

@@ -4,6 +4,9 @@
 using System.Collections.Immutable;
 using NanoQL.Experimental;
 using NanoQL.Numerics;
+using NanoQL.TermStructures;
+using NanoQL.Time;
+using static NanoQL.Tests.Conventions.CreditPortfolioBuilders;
 
 namespace NanoQL.Tests.Conventions;
 
@@ -11,7 +14,8 @@ namespace NanoQL.Tests.Conventions;
 /// The latent model framework's own rules: the copula policies' zero values refused, the samplers' and the polar
 /// generator's seeds explicit and their generators copied, the models and integrations of no dimension or above 15
 /// refused, the weights copied; a T density given more values than the systemic factors refused, as QuantLib's extra
-/// safety check refuses them, and a latent variable outside the model or past its sample, where QuantLib reads past.
+/// safety check refuses them, and a latent variable outside the model or past its sample, a name, variable or factor
+/// past the model's or its bound basket's, or fewer factor values than a name's weights, where QuantLib reads past.
 /// </summary>
 public class LatentModelConventionTests
 {
@@ -108,6 +112,113 @@ public class LatentModelConventionTests
         Assert.Equal("iVar", Assert.Throws<ArgumentOutOfRangeException>(() => lm.LatentVarValue([0.1, 0.2, 0.3], 2)).ParamName);
         Assert.Equal("iVar", Assert.Throws<ArgumentOutOfRangeException>(() => lm.LatentVarValue([0.1, 0.2, 0.3], -1)).ParamName);
         Assert.Equal((0.3 * 0.1) + (Math.Sqrt(1.0 - (0.3 * 0.3)) * 0.3), lm.LatentVarValue([0.1, 0.2, 0.3], 1), 14);
+    }
+
+    [Fact]
+    public void ANameVariableOrFactorPastTheModelsIsRefused()
+    {
+        // Each index into the model's weights, recoveries, quotes or the T policy's distributions, and the factors'
+        // values a name's weights read, which QuantLib reads unchecked past their ends.
+        var lm = new LatentModel<GaussianCopulaPolicy, GaussianCopulaPolicyInitTraits>(0.3, 2);
+        var defaults = new GaussianDefProbLM(0.3, 2, LatentModelIntegrationType.GaussianQuadrature);
+        double[][] w = [.. Enumerable.Repeat(new[] { 0.5 }, 6)];
+        var spot = new GaussianSpotLossLM(w, [0.4, 0.4, 0.4], 1.0, LatentModelIntegrationType.GaussianQuadrature);
+        var constant = new GaussianConstantLossLM(0.3, [0.4, 0.4, 0.4], LatentModelIntegrationType.GaussianQuadrature, 3);
+        var random = new GaussianRandomDefaultLM(constant, 100, 42);
+        var lhp = new GaussianLHPLossModel(0.3, [0.4, 0.4, 0.4]);
+        TCopulaPolicy t = TCopulaPolicy.Create([[0.3]], new TCopulaPolicyInitTraits([5, 5]));
+        var tModel = new TDefProbLM(0.3, 3, LatentModelIntegrationType.GaussianQuadrature, new TCopulaPolicyInitTraits([5, 5]));
+        var today = new Date(15, Month.October, 2026);
+        var key = new DefaultProbKey();
+        foreach ((string param, string message, Action call) in new (string, string, Action)[]
+                 {
+                     ("iVar1", "iVar1 ('2') must be less than '2'.", () => lm.LatentVariableCorrel(2, 0)),
+                     ("iVar2", "iVar2 ('-1') must be a non-negative value.", () => lm.LatentVariableCorrel(0, -1)),
+                     ("iName", "iName ('2') must be less than '2'.", () => defaults.ConditionalDefaultProbabilityInvP(0.1, 2, [0.1])),
+                     ("iName", "iName ('6') must be less than '6'.", () => spot.ConditionalDefaultProbabilityInvP(0.1, 6, [0.1])),
+                     ("iName", "iName ('2') must be less than '2'.", () => defaults.ConditionalDefaultProbability(0.1, 2, [0.1])),
+                     ("iName", "iName ('6') must be less than '6'.", () => spot.ConditionalDefaultProbability(0.1, 6, [0.1])),
+                     ("iName", "iName ('3') must be less than '3'.", () => spot.ExpCondRecoveryP(0.1, 3, [0.1])),
+                     ("iName", "iName ('3') must be less than '3'.", () => spot.ExpCondRecoveryInvPinvRR(-1.0, -0.2, 3, [0.1])),
+                     ("iName", "iName ('3') must be less than '3'.", () => constant.ConditionalRecovery(today, 3, [0.1])),
+                     ("iName", "iName ('3') must be less than '3'.", () => constant.ConditionalRecovery(0.1, 3, [0.1])),
+                     ("iName", "iName ('-1') must be a non-negative value.", () => constant.ConditionalRecoveryInvP(-1.0, -1, [0.1])),
+                     ("iName", "iName ('3') must be less than '3'.", () => constant.ConditionalRecovery(0.1, 3, today)),
+                     ("iName", "iName ('3') must be less than '3'.", () => constant.ExpectedRecovery(today, 3, key)),
+                     ("iName", "iName ('3') must be less than '3'.", () => random.ExpectedRecovery(today, 3, key)),
+                     ("iName", "iName ('3') must be less than '3'.", () => lhp.ExpectedRecovery(today, 3, key)),
+                     ("iVariable", "iVariable ('1') must be less than '1'.", () => t.CumulativeY(0.1, 1)),
+                     ("iVariable", "iVariable ('1') must be less than '1'.", () => t.InverseCumulativeY(0.5, 1)),
+                     ("iFactor", "iFactor ('2') must be less than '2'.", () => t.InverseCumulativeDensity(0.5, 2)),
+                     ("iVariable", "iVariable ('3') must be less than '3'.", () => tModel.CumulativeY(0.1, 3)),
+                 })
+        {
+            ArgumentOutOfRangeException e = Assert.Throws<ArgumentOutOfRangeException>(call);
+            Assert.Equal(param, e.ParamName);
+            Assert.StartsWith(message, e.Message, StringComparison.Ordinal);
+        }
+
+        foreach ((string param, string message, Action call) in new (string, string, Action)[]
+                 {
+                     ("m", "0 factor values given for 1 factors", () => defaults.ConditionalDefaultProbabilityInvP(0.1, 0, [])),
+                     ("m", "0 factor values given for 1 factors", () => spot.ConditionalDefaultProbabilityInvP(0.1, 0, [])),
+                     ("mktFactors", "0 factor values given for 1 factors", () => spot.ExpCondRecoveryInvPinvRR(-1.0, -0.2, 0, [])),
+                     ("mktFactors", "0 factor values given for 1 factors", () => spot.ExpCondRecoveryP(0.1, 0, [])),
+                     ("m", "0 factor values given for 1 factors", () => defaults.ConditionalDefaultProbability(0.1, 0, [])),
+                     ("probs", "0 probabilities given for 1 systemic factors", () => t.AllFactorCumulInverter([])),
+                 })
+        {
+            ArgumentException e = Assert.Throws<ArgumentException>(call);
+            Assert.Equal(param, e.ParamName);
+            Assert.StartsWith(message, e.Message, StringComparison.Ordinal);
+        }
+
+        // Each index and factor within the model still computes.
+        Assert.Equal((0.4, 0.4, 0.4, 0.4), (constant.ConditionalRecovery(0.1, 2, today), constant.ExpectedRecovery(today, 2, key),
+            random.ExpectedRecovery(today, 2, key), lhp.ExpectedRecovery(today, 2, key)));
+        Assert.InRange(defaults.ConditionalDefaultProbabilityInvP(-1.0, 1, [0.1]), 0.0, 1.0);
+        Assert.InRange(spot.ExpCondRecoveryP(0.1, 2, [0.1]), 0.0, 1.0);
+        Assert.InRange(t.CumulativeY(0.1, 0), 0.0, 1.0);
+        Assert.InRange(tModel.CumulativeY(0.1, 2), 0.0, 1.0);
+        Assert.True(double.IsFinite(t.InverseCumulativeDensity(0.5, 1)));
+        Assert.Equal(2, t.AllFactorCumulInverter([0.5, 0.5]).Length);
+        Assert.Equal(0.3 * 0.3, lm.LatentVariableCorrel(0, 1), 15);
+    }
+
+    [Fact]
+    public void ANamePastTheBoundBasketsIsRefused()
+    {
+        // The bound models read the basket's names, keys and curves by a caller's name, unchecked in QuantLib; the
+        // sweep binds no model to a basket, so these cases are the reads' only check.
+        DefaultProbabilityTermStructure[] curves = [Flat(Today, 0.01), Flat(Today, 0.02), Flat(Today, 0.03)];
+        var basket = new Basket(Today, ["A", "B", "C"], [10.0, 20.0, 30.0], PoolOf(["A", "B", "C"], curves), Context);
+        var defaults = new GaussianDefProbLM(0.3, 3, LatentModelIntegrationType.GaussianQuadrature).ResetBasket(basket);
+        double[][] w = [.. Enumerable.Repeat(new[] { 0.5 }, 6)];
+        var spot = new GaussianSpotLossLM(w, [0.4, 0.4, 0.4], 1.0, LatentModelIntegrationType.GaussianQuadrature).ResetBasket(basket);
+        Date d = Today + 365;
+        foreach ((string param, int i, Action call) in new (string, int, Action)[]
+                 {
+                     ("iName", 3, () => defaults.ProbOfDefault(3, d)),
+                     ("iNamei", 3, () => defaults.DefaultCorrelation(d, 3, 0)),
+                     ("iNamej", -1, () => defaults.DefaultCorrelation(d, 0, -1)),
+                     ("iName", 3, () => spot.ConditionalDefaultProbability(d, 3, [0.1])),
+                     ("iName", 3, () => spot.ExpCondRecovery(d, 3, [0.1])),
+                     ("iName", -1, () => spot.ConditionalRecovery(0.1, -1, d)),
+                 })
+        {
+            ArgumentOutOfRangeException e = Assert.Throws<ArgumentOutOfRangeException>(call);
+            Assert.Equal(param, e.ParamName);
+            Assert.StartsWith(
+                i < 0 ? $"{param} ('{i}') must be a non-negative value." : $"{param} ('{i}') must be less than '3'.",
+                e.Message,
+                StringComparison.Ordinal);
+        }
+
+        Assert.InRange(defaults.ProbOfDefault(2, d), 0.0, 1.0);
+        Assert.InRange(defaults.DefaultCorrelation(d, 0, 2), -1.0, 1.0);
+        Assert.InRange(spot.ConditionalDefaultProbability(d, 2, [0.1]), 0.0, 1.0);
+        Assert.InRange(spot.ExpCondRecovery(d, 2, [0.1]), 0.0, 1.0);
+        Assert.True(double.IsFinite(spot.ConditionalRecovery(0.1, 2, d)));
     }
 
     [Fact]

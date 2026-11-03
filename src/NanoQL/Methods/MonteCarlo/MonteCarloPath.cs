@@ -6,6 +6,7 @@
 // Upstream: ql/methods/montecarlo/path.hpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
 
+using System.Diagnostics.CodeAnalysis;
 using NanoQL.Numerics;
 
 namespace NanoQL.Methods;
@@ -69,7 +70,21 @@ public sealed class MonteCarloPath
     /// <summary>Gets the asset value at the <paramref name="i"/>-th point.</summary>
     /// <param name="i">The index.</param>
     /// <returns>The value.</returns>
-    public double this[int i] => values[i];
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="i"/> isn't a point of the path, where QuantLib reads past its end.
+    /// </exception>
+    public double this[int i]
+    {
+        get
+        {
+            if ((uint)i >= (uint)values.Length)
+            {
+                ThrowIndex(i, values.Length, nameof(i));
+            }
+
+            return values[i];
+        }
+    }
 
     /// <summary>The asset value at the <paramref name="i"/>-th point, checked.</summary>
     /// <param name="i">The index.</param>
@@ -91,11 +106,25 @@ public sealed class MonteCarloPath
     /// <summary>The asset value at the <paramref name="i"/>-th point.</summary>
     /// <param name="i">The index.</param>
     /// <returns>The value.</returns>
-    public double Value(int i) => values[i];
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="i"/> isn't a point of the path, where QuantLib reads past its end.
+    /// </exception>
+    public double Value(int i)
+    {
+        if ((uint)i >= (uint)values.Length)
+        {
+            ThrowIndex(i, values.Length, nameof(i));
+        }
+
+        return values[i];
+    }
 
     /// <summary>The time at the <paramref name="i"/>-th point.</summary>
     /// <param name="i">The index.</param>
     /// <returns>The time.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="i"/> isn't a point of the path's grid, where QuantLib reads past its end.
+    /// </exception>
     public double Time(int i) => timeGrid[i];
 
     /// <summary>The initial asset value.</summary>
@@ -132,4 +161,11 @@ public sealed class MonteCarloPath
 
     // A path over a time grid, of zeros, for a path generator to own and write through Buffer.
     internal static MonteCarloPath ForGenerator(TimeGrid timeGrid) => new(timeGrid);
+
+    // An index past the array an accessor reads: QuantLib's Array::at text, in a helper, so the accessors
+    // stay small enough to inline.
+    [DoesNotReturn]
+    private static void ThrowIndex(int index, int length, string paramName) =>
+        throw new ArgumentOutOfRangeException(
+            paramName, $"index ({index}) must be less than {length}: array access out of range");
 }

@@ -470,13 +470,29 @@ public sealed class Vector : IEquatable<Vector>, IEnumerable<double>
 
     /// <summary>The first element, which can also be set.</summary>
     /// <returns>A reference to the first element.</returns>
-    /// <exception cref="IndexOutOfRangeException">The vector is empty.</exception>
-    public ref double Front() => ref data[0];
+    /// <exception cref="InvalidOperationException">The vector is empty, where QuantLib reads past its end.</exception>
+    public ref double Front()
+    {
+        if (data.Length == 0)
+        {
+            throw new InvalidOperationException("the vector is empty");
+        }
+
+        return ref data[0];
+    }
 
     /// <summary>The last element, which can also be set.</summary>
     /// <returns>A reference to the last element.</returns>
-    /// <exception cref="IndexOutOfRangeException">The vector is empty.</exception>
-    public ref double Back() => ref data[^1];
+    /// <exception cref="InvalidOperationException">The vector is empty, where QuantLib reads past its end.</exception>
+    public ref double Back()
+    {
+        if (data.Length == 0)
+        {
+            throw new InvalidOperationException("the vector is empty");
+        }
+
+        return ref data[^1];
+    }
 
     /// <summary>
     /// Changes the size, keeping the elements that fit; new elements are zero, where QuantLib leaves them

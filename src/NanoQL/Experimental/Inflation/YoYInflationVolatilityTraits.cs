@@ -87,9 +87,14 @@ public readonly struct YoYInflationVolatilityTraits : IBootstrapTraits<YoYOption
     }
 
     /// <inheritdoc/>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="i"/> isn't a point of <paramref name="data"/>, where QuantLib writes past its end.
+    /// </exception>
     public static void UpdateGuess(double[] data, double value, int i)
     {
         ArgumentNullException.ThrowIfNull(data);
+        ArgumentOutOfRangeException.ThrowIfNegative(i);
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(i, data.Length);
         data[i] = value;
     }
 }

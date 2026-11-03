@@ -85,9 +85,14 @@ public readonly struct SurvivalProbability : IDefaultProbabilityTraits
     }
 
     /// <inheritdoc/>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="i"/> isn't a point of <paramref name="data"/>, where QuantLib writes past its end.
+    /// </exception>
     public static void UpdateGuess(double[] data, double p, int i)
     {
         ArgumentNullException.ThrowIfNull(data);
+        ArgumentOutOfRangeException.ThrowIfNegative(i);
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(i, data.Length);
         data[i] = p;
     }
 
@@ -97,18 +102,22 @@ public readonly struct SurvivalProbability : IDefaultProbabilityTraits
     /// <param name="interpolation">The interpolation of the probabilities.</param>
     /// <param name="t">The time.</param>
     /// <returns>The probability.</returns>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="times"/> is empty, or <paramref name="t"/> is past the last time and <paramref name="data"/> is
+    /// empty, where QuantLib reads past their end.
+    /// </exception>
     public static double SurvivalProbabilityImpl(
         ReadOnlySpan<double> times, ReadOnlySpan<double> data, Interpolation interpolation, double t)
     {
         ArgumentNullException.ThrowIfNull(interpolation);
-        if (t <= times[^1])
+        if (t <= CurveData.Last(times, nameof(times)))
         {
             return interpolation.Evaluate(t, true);
         }
 
         // flat hazard rate extrapolation
-        double tMax = times[^1];
-        double sMax = data[^1];
+        double tMax = CurveData.Last(times, nameof(times));
+        double sMax = CurveData.Last(data, nameof(data));
         double hazardMax = -interpolation.Derivative(tMax) / sMax;
         return sMax * Math.Exp(-hazardMax * (t - tMax));
     }
@@ -120,18 +129,22 @@ public readonly struct SurvivalProbability : IDefaultProbabilityTraits
     /// <param name="interpolation">The interpolation of the probabilities.</param>
     /// <param name="t">The time.</param>
     /// <returns>The density.</returns>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="times"/> is empty, or <paramref name="t"/> is past the last time and <paramref name="data"/> is
+    /// empty, where QuantLib reads past their end.
+    /// </exception>
     public static double DefaultDensityImpl(
         ReadOnlySpan<double> times, ReadOnlySpan<double> data, Interpolation interpolation, double t)
     {
         ArgumentNullException.ThrowIfNull(interpolation);
-        if (t <= times[^1])
+        if (t <= CurveData.Last(times, nameof(times)))
         {
             return -interpolation.Derivative(t, true);
         }
 
         // flat hazard rate extrapolation
-        double tMax = times[^1];
-        double sMax = data[^1];
+        double tMax = CurveData.Last(times, nameof(times));
+        double sMax = CurveData.Last(data, nameof(data));
         double hazardMax = -interpolation.Derivative(tMax) / sMax;
         return sMax * hazardMax * Math.Exp(-hazardMax * (t - tMax));
     }
@@ -158,5 +171,8 @@ public readonly struct SurvivalProbability : IDefaultProbabilityTraits
     /// <summary>The maximum date: the last node's.</summary>
     /// <param name="dates">The nodes' dates.</param>
     /// <returns>The date.</returns>
-    public static Date MaxDate(ReadOnlySpan<Date> dates) => dates[^1];
+    /// <exception cref="ArgumentException">
+    /// <paramref name="dates"/> is empty, where QuantLib reads past its end.
+    /// </exception>
+    public static Date MaxDate(ReadOnlySpan<Date> dates) => CurveData.Last(dates, nameof(dates));
 }

@@ -102,16 +102,25 @@ public sealed class HestonSLVProcess : StochasticProcess
     public override Vector InitialValues() => hestonProcess.InitialValues();
 
     /// <inheritdoc/>
+    /// <exception cref="ArgumentException"><paramref name="result"/> is shorter than the process's size.</exception>
     public override void InitialValues(Span<double> result) => hestonProcess.InitialValues(result);
 
     /// <inheritdoc/>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="x0"/> or <paramref name="dx"/> holds fewer values than the state, where QuantLib reads past its
+    /// end.
+    /// </exception>
     public override Vector Apply(Vector x0, Vector dx) => hestonProcess.Apply(x0, dx);
 
     /// <inheritdoc/>
     /// <remarks>The spot's drift r − q − ½(√v·L)², its volatility at least 1e-8, and the variance's κ(θ − v).</remarks>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="x"/> holds fewer values than the state, where QuantLib reads past its end.
+    /// </exception>
     public override Vector Drift(double t, Vector x)
     {
         ArgumentNullException.ThrowIfNull(x);
+        CheckState(x.Size, nameof(x));
         double vol = Max(1e-8, Math.Sqrt(x[1]) * Leverage(t, x[0]));
 
         return new Vector(
@@ -123,9 +132,13 @@ public sealed class HestonSLVProcess : StochasticProcess
 
     /// <inheritdoc/>
     /// <remarks>[[√v·L, 0], [ρσ_m√v, √(1 − ρ²)σ_m√v]], the spot's volatility at least 1e-8.</remarks>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="x"/> holds fewer values than the state, where QuantLib reads past its end.
+    /// </exception>
     public override Matrix Diffusion(double t, Vector x)
     {
         ArgumentNullException.ThrowIfNull(x);
+        CheckState(x.Size, nameof(x));
         double vol = Max(1e-8, Math.Sqrt(x[1]) * Leverage(t, x[0]));
 
         double sigma2 = mixedSigma * Math.Sqrt(x[1]);
@@ -151,8 +164,15 @@ public sealed class HestonSLVProcess : StochasticProcess
 
     /// <inheritdoc/>
     /// <remarks>The variance by the quadratic-exponential scheme, the spot by the leverage at the step's start.</remarks>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="x0"/> holds fewer values than the state, or <paramref name="dw"/> fewer increments than the
+    /// process's factors, where QuantLib reads past their end; or <paramref name="result"/> is shorter than the state.
+    /// </exception>
     public override void Evolve(double t0, ReadOnlySpan<double> x0, double dt, ReadOnlySpan<double> dw, Span<double> result)
     {
+        CheckState(x0.Length, nameof(x0));
+        CheckIncrements(dw.Length, nameof(dw));
+        CheckResult(result.Length);
         double ex = Math.Exp(-kappa * dt);
 
         double m = theta + ((x0[1] - theta) * ex);

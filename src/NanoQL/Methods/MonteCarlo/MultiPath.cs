@@ -6,6 +6,7 @@
 // Ported to C# from QuantLib and modified by the nanoql Authors.
 
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 
 namespace NanoQL.Methods;
 
@@ -67,7 +68,21 @@ public sealed class MultiPath
     /// <summary>The j-th asset's path.</summary>
     /// <param name="j">The asset's index.</param>
     /// <returns>The path.</returns>
-    public MonteCarloPath this[int j] => multiPath[j];
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="j"/> isn't one of the assets, where QuantLib reads past its end.
+    /// </exception>
+    public MonteCarloPath this[int j]
+    {
+        get
+        {
+            if ((uint)j >= (uint)multiPath.Length)
+            {
+                ThrowIndex(j, multiPath.Length, nameof(j));
+            }
+
+            return multiPath[j];
+        }
+    }
 
     /// <summary>The number of times in each path.</summary>
     /// <returns>The paths' length.</returns>
@@ -103,4 +118,11 @@ public sealed class MultiPath
 
     // The paths of zeros a multi-path generator owns and writes through each path's buffer.
     internal static MultiPath ForGenerator(int nAsset, TimeGrid timeGrid) => new(nAsset, timeGrid);
+
+    // An index past the array an accessor reads: QuantLib's Array::at text, in a helper, so the accessors
+    // stay small enough to inline.
+    [DoesNotReturn]
+    private static void ThrowIndex(int index, int length, string paramName) =>
+        throw new ArgumentOutOfRangeException(
+            paramName, $"index ({index}) must be less than {length}: array access out of range");
 }

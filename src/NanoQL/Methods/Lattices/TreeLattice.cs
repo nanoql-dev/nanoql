@@ -244,9 +244,31 @@ public abstract class TreeLattice : Lattice
     /// <param name="i">The step's index on the grid.</param>
     /// <param name="values">The values at step <paramref name="i"/> + 1.</param>
     /// <param name="newValues">The values at step <paramref name="i"/>, written here: <see cref="Size"/>(i) of them.</param>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="i"/> isn't a step before the grid's last, where QuantLib reads past its end.
+    /// </exception>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="values"/> holds fewer values than step <paramref name="i"/> + 1's nodes, or
+    /// <paramref name="newValues"/> fewer than step <paramref name="i"/>'s, where QuantLib reads and writes past their
+    /// ends.
+    /// </exception>
     public virtual void Stepback(int i, ReadOnlySpan<double> values, Span<double> newValues)
     {
+        ArgumentOutOfRangeException.ThrowIfNegative(i);
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(i, TimeGrid.Size - 1);
         int size = Size(i);
+        if (!(values.Length >= Size(i + 1)))
+        {
+            throw new ArgumentException(
+                $"{values.Length} values given for step {i + 1}'s {Size(i + 1)} nodes", nameof(values));
+        }
+
+        if (!(newValues.Length >= size))
+        {
+            throw new ArgumentException(
+                $"room for {newValues.Length} values given for step {i}'s {size} nodes", nameof(newValues));
+        }
+
         for (int j = 0; j < size; j++)
         {
             double value = 0.0;

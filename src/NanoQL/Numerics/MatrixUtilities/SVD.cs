@@ -44,9 +44,17 @@ public sealed class SVD
     /// An entry of <paramref name="matrix"/> is NaN or infinite, or the decomposition leaves the range of doubles
     /// (divergences: QuantLib's loop never ends).
     /// </exception>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="matrix"/> has no row or no column, where QuantLib reads past its arrays.
+    /// </exception>
     public SVD(Matrix matrix)
     {
         ArgumentNullException.ThrowIfNull(matrix);
+        if (!(matrix.Rows > 0 && matrix.Columns > 0))
+        {
+            throw new ArgumentException("an empty matrix has no decomposition", nameof(matrix));
+        }
+
         for (int r = 0; r < matrix.Rows; r++)
         {
             for (int c = 0; c < matrix.Columns; c++)

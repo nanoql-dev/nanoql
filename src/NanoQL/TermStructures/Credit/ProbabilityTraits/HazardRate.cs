@@ -92,9 +92,14 @@ public readonly struct HazardRate : IDefaultProbabilityTraits
     }
 
     /// <inheritdoc/>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="i"/> isn't a point of <paramref name="data"/>, where QuantLib writes past its end.
+    /// </exception>
     public static void UpdateGuess(double[] data, double rate, int i)
     {
         ArgumentNullException.ThrowIfNull(data);
+        ArgumentOutOfRangeException.ThrowIfNegative(i);
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(i, data.Length);
         data[i] = rate;
 
         // first point is updated as well
@@ -111,6 +116,10 @@ public readonly struct HazardRate : IDefaultProbabilityTraits
     /// <param name="interpolation">The interpolation of the rates.</param>
     /// <param name="t">The time.</param>
     /// <returns>The probability.</returns>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="t"/> isn't 0 and <paramref name="times"/> is empty, or <paramref name="t"/> is past the last
+    /// time and <paramref name="data"/> is empty, where QuantLib reads past their end.
+    /// </exception>
     public static double SurvivalProbabilityImpl(
         ReadOnlySpan<double> times, ReadOnlySpan<double> data, Interpolation interpolation, double t)
     {
@@ -121,14 +130,15 @@ public readonly struct HazardRate : IDefaultProbabilityTraits
         }
 
         double integral;
-        if (t <= times[^1])
+        if (t <= CurveData.Last(times, nameof(times)))
         {
             integral = interpolation.Primitive(t, true);
         }
         else
         {
             // flat hazard rate extrapolation
-            integral = interpolation.Primitive(times[^1], true) + (data[^1] * (t - times[^1]));
+            integral = interpolation.Primitive(CurveData.Last(times, nameof(times)), true)
+                + (CurveData.Last(data, nameof(data)) * (t - CurveData.Last(times, nameof(times))));
         }
 
         return Math.Exp(-integral);
@@ -141,6 +151,10 @@ public readonly struct HazardRate : IDefaultProbabilityTraits
     /// <param name="interpolation">The interpolation of the rates.</param>
     /// <param name="t">The time.</param>
     /// <returns>The density.</returns>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="times"/> is empty, or <paramref name="t"/> is past the last time and <paramref name="data"/> is
+    /// empty, where QuantLib reads past their end.
+    /// </exception>
     public static double DefaultDensityImpl(
         ReadOnlySpan<double> times, ReadOnlySpan<double> data, Interpolation interpolation, double t) =>
         Rate(times, data, interpolation, t) * SurvivalProbabilityImpl(times, data, interpolation, t);
@@ -152,6 +166,10 @@ public readonly struct HazardRate : IDefaultProbabilityTraits
     /// <param name="t">The time.</param>
     /// <param name="curve">The curve, which this kind doesn't read.</param>
     /// <returns>The rate.</returns>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="times"/> is empty, or <paramref name="t"/> is past the last time and <paramref name="data"/> is
+    /// empty, where QuantLib reads past their end.
+    /// </exception>
     public static double HazardRateImpl(
         ReadOnlySpan<double> times,
         ReadOnlySpan<double> data,
@@ -163,17 +181,20 @@ public readonly struct HazardRate : IDefaultProbabilityTraits
     /// <summary>The maximum date: the last node's.</summary>
     /// <param name="dates">The nodes' dates.</param>
     /// <returns>The date.</returns>
-    public static Date MaxDate(ReadOnlySpan<Date> dates) => dates[^1];
+    /// <exception cref="ArgumentException">
+    /// <paramref name="dates"/> is empty, where QuantLib reads past its end.
+    /// </exception>
+    public static Date MaxDate(ReadOnlySpan<Date> dates) => CurveData.Last(dates, nameof(dates));
 
     private static double Rate(ReadOnlySpan<double> times, ReadOnlySpan<double> data, Interpolation interpolation, double t)
     {
         ArgumentNullException.ThrowIfNull(interpolation);
-        if (t <= times[^1])
+        if (t <= CurveData.Last(times, nameof(times)))
         {
             return interpolation.Evaluate(t, true);
         }
 
         // flat hazard rate extrapolation
-        return data[^1];
+        return CurveData.Last(data, nameof(data));
     }
 }

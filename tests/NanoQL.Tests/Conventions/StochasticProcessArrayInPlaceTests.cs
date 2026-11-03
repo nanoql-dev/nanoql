@@ -12,7 +12,8 @@ namespace NanoQL.Tests.Conventions;
 /// <see cref="StochasticProcessArray"/>'s in-place pair: <c>InitialValues(Span)</c> and <c>Evolve(t0, x0, dt, dw,
 /// Span)</c> give the allocating forms' bits, QuantLib's arithmetic (the correlated increments row by row in the matrix
 /// product's order, then each process's own step), on two and three Black-Scholes processes, and refuse increments of
-/// another size than the correlation's as the matrix product does.
+/// another size than the correlation's as the matrix product does, and a result span shorter than the array before
+/// writing to it.
 /// </summary>
 public class StochasticProcessArrayInPlaceTests
 {
@@ -54,6 +55,17 @@ public class StochasticProcessArrayInPlaceTests
         double[] result = new double[2];
         ArgumentException e = Assert.Throws<ArgumentException>(() => array.Evolve(0.0, [100.0, 100.0], 0.1, [0.1, 0.2, 0.3], result));
         Assert.Equal("dw", e.ParamName);
+    }
+
+    [Fact]
+    public void AShortResultIsRefusedBeforeAnyValueIsWritten()
+    {
+        StochasticProcessArray array = Array(3);
+        double[] result = [7.0, 7.0];
+        ArgumentException e = Assert.Throws<ArgumentException>(() => array.InitialValues(result));
+        Assert.Equal("result", e.ParamName);
+        Assert.StartsWith("the result is shorter than the process's state", e.Message, StringComparison.Ordinal);
+        Assert.Equal([7.0, 7.0], result);
     }
 
     private static StochasticProcessArray Array(int n)

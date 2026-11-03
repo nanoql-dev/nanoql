@@ -8,13 +8,16 @@ their code. Where the dispatch, reading the arguments' own classes, takes anothe
 static choice, the replay counts it and calls the recorded form. A fact replays up to its first call that needs what
 the trace couldn't write or the replay didn't make.
 
-With --sweep, after the replay and before its objects are released, each function of the layer's table the trace never
-calls is called once (docs/bindings.md, "Checking the bindings"): through its Python member, or a record's equality pair
-the layer leaves to ==, through its C function checked against == and !=; its arguments the replay's objects by class
-and values by kind and parameter name, up to three choices, the objects it returns joining the pool, in passes until one
-reaches nothing new. A call past the limit ends the process, naming it; the calls run in a fresh temporary folder. The
-sweep reds on a Python-layer error, code 99 or code 9 in any attempt, and on an exclusion that names no target; each
-target's outcome is a line of the outcomes file.
+With --sweep, after the replay and before its objects are released, each function of the layer's table is called
+(docs/bindings.md, "Checking the bindings"), those the trace never calls first, then those it calls: through its Python
+member, or a record's equality pair the layer leaves to ==, through its C function checked against == and !=. Its
+standing arguments are the replay's objects by class and values by kind and parameter name, up to three choices; then
+the widened ones, one change each on the choice that returned: an array-like argument empty, of one element or of
+twelve, or an index-like integer past a length or negative. An uncalled function's standing returns join the pool, in
+passes until one reaches nothing new; no other call's do. A call past the limit ends the process, naming it and its
+probe; the calls run in a fresh temporary folder. The sweep reds on a Python-layer error, code 99 or code 9 in any
+attempt, and on an exclusion that names no function of the layer; each function's outcome is a line of the outcomes
+file.
 
 Usage: python replay.py <trace.jsonl> [<facts report.tsv>] [--sweep <outcomes.tsv> [--prefix <prefix>]
        [--surface <surface.json>] [--limit <seconds>]]   (the package on the path, its library the production one)
@@ -449,14 +452,38 @@ STOPS_LEFT = [STOPS]
 
 SWEEP_LIMIT = 30.0  # seconds a call may take before the sweep ends the process, naming it
 
-# The functions the sweep skips, each with its reason and its time on the arguments it gives. An entry silences the
-# check for its function; one that no longer names a target (gone from the layer, or now called by the trace) reds.
+# The functions the sweep skips, in both its stages, each with its reason and its time on the arguments it gives. An
+# entry silences the check for its function; one naming a function the layer no longer has reds.
 EXCLUDED = {
     "nql_ZabrInterpolatedSmileSection_ZabrFullFd_Create":
         "a ZABR smile section pricing each strike by finite differences, 52.3 s",
     "nql_FixedLocalVolSurface_WithInterpolation__NoArbSabr":
         "a local volatility surface refitting a no-arbitrage SABR section per expiry, 387.9 s",
+    "nql_NoArbSabrInterpolatedSmileSection_Create__Date_double_doubleArray_bool_double_doubleArray":
+        "a no-arbitrage SABR smile section fitting its strikes, 64.7 s at its first choice",
+    "nql_NoArbSabr_Interpolate":
+        "a no-arbitrage SABR fit, 25.6 s at its first choice and 112.5 s on arrays of twelve",
+    "nql_ZabrFullFdInterpolatedSmileSection_Create":
+        "a ZABR smile section pricing each strike by finite differences, 70.4 s at its second choice and 68.7 s to "
+        "72.7 s widened",
 }
+
+# The widened values: after a function's standing attempts, on the choice that returned (each one tried, when none
+# did), one change each, its objects not joining the pool: an array-like parameter of no element, of one and of MANY,
+# all of them at once where there are two or more; and an index-like integer, by its name, past a length and negative.
+MANY = 12  # past the standing table's three values and the eleven points its sizes of ten make; under its samples' 16
+PAST = 1000  # an index past the lengths the pool's objects hold
+INDEX = frozenset({"i", "j", "k", "t", "index", "branch", "iname", "inamei", "inamej", "jname", "ivariable", "ivar",
+                   "ivar1", "ivar2", "ifactor", "leg", "direction"})
+
+# The widened values' exemptions, each with its reason, as an exclusion has one: the functions whose index-like
+# parameters take no index probe, and the parameter kinds no array probe lengthens.
+EXEMPT_INDEX = {
+    re.compile(r"Polynomial_(Alpha|Beta|Moment)$"):
+        "an orthogonal polynomial's order, defined for every value and computed up to it, has no length to be past: "
+        "MomentBasedGaussianPolynomial's Alpha(1000) takes past 30 s",
+}
+EXEMPT_KINDS = {"map": "a map's keys can't repeat, so the value table makes no longer one"}
 
 CALLED = re.compile(r'"f":"([^"]+)"')
 PAIR = re.compile(r"_op_(Equality|Inequality)$")
@@ -472,6 +499,33 @@ def pool_of(r):
         if isinstance(o, _runtime.Object) and len(pool[type(o)]) < 40 and not getattr(o, "closed", False):
             pool[type(o)].append(o)
     return pool
+
+
+def array_like(kind):
+    k, _ = _split(kind)
+    head = k.partition(":")[0]
+    return head not in EXEMPT_KINDS and (k in ("vector", "vector&", "matrix", "matrix&", "jagged")
+                                         or head in ("span", "array"))
+
+
+def index_like(kind, name):
+    k, _ = _split(kind)
+    return k.rstrip("?") in ("int32", "int64") and (name or "").lower() in INDEX
+
+
+def probes(cname, ins, ps):
+    """Each widened attempt's name and the parameters it changes: by a length, or to an index."""
+    arrays = [i for i, k in enumerate(ins) if array_like(k)]
+    out = []
+    for i in arrays:
+        nm = ps[i] or i
+        out += [(f"zero:{nm}", {i: 0}), (f"one:{nm}", {i: 1}), (f"many:{nm}", {i: MANY})]
+    if len(arrays) >= 2:
+        out += [(f"{p}:*", dict.fromkeys(arrays, n)) for p, n in (("zero", 0), ("one", 1), ("many", MANY))]
+    if not any(p.search(cname) for p in EXEMPT_INDEX):
+        out += [(f"{p}:{nm}", {i: ("index", v)}) for i, (k, nm) in enumerate(zip(ins, ps)) if index_like(k, nm)
+                for p, v in (("past", PAST), ("neg", -1))]
+    return out
 
 
 class Sweep:
@@ -494,6 +548,48 @@ class Sweep:
         if isinstance(o, _runtime.Object) and len(self.pool[type(o)]) < 40:
             self.pool[type(o)].append(o)
             self.cache.clear()
+
+    def args(self, ins, ps, choice, change=None):
+        """A call's arguments: the standing table's at a choice, with a widened attempt's changes."""
+        out = []
+        for i, (k, nm) in enumerate(zip(ins, ps)):
+            c = (change or {}).get(i)
+            out.append(self.value(k, nm, choice) if c is None else c[1] if isinstance(c, tuple)
+                       else self.widened(k, nm, choice, c))
+        return out
+
+    def widened(self, kind, name, choice, n):
+        """The array-like value of ``kind`` with ``n`` elements: doubles and dates rising, integers from 1, objects the
+        pool's in turn, the rest the standing table's element repeated."""
+        k, cname = _split(kind)
+        head, _, rest = k.partition(":")
+        dbl = [0.5 * (i + 1) for i in range(n)]
+        if k in ("vector", "vector&"):
+            return np.array(dbl, dtype=np.float64)
+        if k in ("matrix", "matrix&"):
+            return np.eye(n, dtype=np.float64)
+        if k == "jagged":
+            return [list(dbl) for _ in range(n)]
+        if head == "span":
+            e = _split(rest)[0]
+            return np.array(dbl, dtype=np.float64) if e == "double" else np.arange(1, n + 1, dtype=np.int32)
+        if rest.startswith("tuple:"):
+            return [self.value(rest, name, choice + i) for i in range(n)]
+        e, ec = _split(rest)
+        e = e.rstrip("?")
+        if e in ("handle", "boxed", "snapshot"):
+            objs = self.objects(ec)
+            if not objs:
+                raise LookupError(f"no object of {ec}")
+            return [objs[i % len(objs)] for i in range(n)]
+        if e == "double":
+            return dbl
+        if e == "date":
+            return [_runtime._date(45672 + 182 * i) for i in range(n)]
+        if e in ("int32", "int64"):
+            return list(range(1, n + 1))
+        ek = e + ("@" + ec if ec else "")
+        return [self.value(ek, name, choice) for _ in range(n)]
 
     def value(self, kind, name, choice):
         k, cname = _split(kind)
@@ -576,23 +672,121 @@ def one_line(text):
     return str(text)[:160].replace("\t", " ").replace("\r", " ").replace("\n", " ")
 
 
+def is_red(o):
+    return o[0] in ("code 99", "code 9") or o[0].startswith("python")
+
+
+def sweep_call(r, cname, entry, args, limit, label):
+    """One call, its label on standard error first and a call past the limit ending the process: through the
+    function's member, or a record's equality pair the layer leaves to the language's ==, through its C function
+    checked against it. Its outcome, and what it returned."""
+    sys.stderr.write(label + "\n")
+    sys.stderr.flush()
+    faulthandler.dump_traceback_later(limit, exit=True)
+    try:
+        if entry is None and PAIR.search(cname) and isinstance(args[0], _runtime.Object):
+            got = _F[cname](*args)
+            want = (args[0] == args[1]) if cname.endswith("_op_Equality") else (args[0] != args[1])
+            if bool(got) != bool(want):
+                raise AssertionError(f"the C function says {got}, the language's operator {want}")
+        else:
+            cls_name, member, style, _form, group = entry if entry else ("", "", "function", None, None)
+            got = r.invoke(cls_name, member, style, group, cname, args)
+        return ("returned", type(got).__name__), got
+    except NanoQLError as e:
+        return (f"code {e.code}", one_line(e)), None
+    except Stop as e:
+        return ("unreached", f"stop: {one_line(e)}"), None
+    except Exception as e:  # noqa: BLE001 - a Python-layer error reds
+        return (f"python {type(e).__name__}", one_line(e)), None
+    finally:
+        faulthandler.cancel_dump_traceback_later()
+
+
+def sweep_one(r, s, cname, ins, ps, planted, limit, joins, widened):
+    """A function's standing attempts, up to the first that returns, its returned objects joining the pool where
+    ``joins``; then, when one reached the call, its widened attempts, each one's outcome counted in ``widened`` (an
+    attempt no value could be made for as "unmade"). The standing outcomes, the widened ones by probe, and the standing
+    calls made."""
+    entry = PY.get(cname)
+    tried, wide, calls = [], [], 0
+    for choice in range(3):
+        try:
+            args = planted.get(cname) or s.args(ins, ps, choice)
+        except LookupError as e:
+            tried.append(("unreached", str(e)))
+            break
+        o, got = sweep_call(r, cname, entry, args, limit, cname)
+        calls += 1
+        if joins:
+            s.joined(got)
+        tried.append(o)
+        if o[0] == "returned" or cname in planted:
+            break
+    if all(o[0] == "unreached" for o in tried):
+        return tried, wide, calls
+    bases = [c for c, o in enumerate(tried) if o[0] == "returned"] or \
+            [c for c, o in enumerate(tried) if o[0] != "unreached"]
+    for probe, change in probes(cname, ins, ps):
+        for choice in bases:
+            label = probe if len(bases) == 1 else f"{probe}@{choice}"
+            try:
+                args = s.args(ins, ps, choice, change)
+            except LookupError as e:
+                o = ("unmade", one_line(e))
+            else:
+                o, _ = sweep_call(r, cname, entry, args, limit, f"{cname} {label}")
+            widened[o[0]] += 1
+            wide.append((label, o))
+    return tried, wide, calls
+
+
+def sweep_line(cname, tried, wide, stage):
+    """A function's outcome line, and its red if it has one: a red in any attempt, standing or widened, first, its
+    probe beside its kind; then a return; then a refusal. The widened attempts' outcomes close the line."""
+    bad = [o for o in tried if is_red(o)] + [(f"{o[0]} ({p})", o[1]) for p, o in wide if is_red(o)]
+    if bad:
+        verdict, o = "red", bad[0]
+    elif any(o[0] == "returned" for o in tried):
+        verdict, o = "returned", next(o for o in tried if o[0] == "returned")
+    else:
+        verdict, o = "refused", next(o for o in tried if o[0] != "unreached")
+    shown = "; ".join(f"{p} {w[0]}" for p, w in wide)
+    return verdict, f"{cname}\t{verdict}\t{o[0]}\t{o[1]}\t{stage}\t{shown}\n", (o if bad else None)
+
+
+def tally(counts):
+    return ", ".join(f"{k} {v}" for k, v in sorted(counts.items(), key=lambda kv: (-kv[1], kv[0]))) or "none"
+
+
+def made(counts):
+    return sum(v for k, v in counts.items() if k != "unmade")
+
+
 def sweep(r, called, outcomes, prefix="nql", surface=None, limit=SWEEP_LIMIT, excluded=None, planted=None):
-    """Calls each function of the prefix's table the trace doesn't call, its exclusions apart; writes each target's
-    outcome to the outcomes file and returns the reds' count. ``planted`` gives a target its arguments (for its own
-    tests), ``excluded`` replaces the exclusions."""
+    """Calls each function of the prefix's table the trace doesn't call, then each it calls, its exclusions apart, on
+    the standing values and then widened; writes each one's outcome to the outcomes file and returns the reds' count.
+    ``planted`` gives a function its standing arguments (for its own tests), ``excluded`` replaces the exclusions."""
     excluded = EXCLUDED if excluded is None else excluded
     planted = planted or {}
     use_prefix(prefix)
     table = _runtime._Functions.table
     own = prefix + "_"
     targets = sorted(n for n in table if n.startswith(own) and n not in called and n not in excluded)
-    stale = sorted(n for n in excluded if n.startswith(own) and (n not in table or n in called))
+    traced = sorted(n for n in table if n.startswith(own) and n in called and n not in excluded)
+    stale = sorted(n for n in excluded if n.startswith(own) and n not in table)
     names = {}
     if surface is not None:
         functions = json.loads(Path(surface).read_text(encoding="utf-8"))["functions"]
         names = {fn["name"]: [x["name"] for x in fn["params"]] for fn in functions}
+
+    def params(cname):
+        ins, _ = table[cname]
+        ps = names.get(cname, [])
+        return ins, (["self"] + ps) if ps and len(ins) == len(ps) + 1 else (ps + [None] * len(ins))[:len(ins)]
+
     s = Sweep(pool_of(r))
-    red, unreached, counts = [], {}, defaultdict(int)
+    red, unreached, counts, widened = [], {}, defaultdict(int), defaultdict(int)
     attempts = passes = 0
     outcomes = os.path.abspath(outcomes)
     here = os.getcwd()
@@ -605,74 +799,59 @@ def sweep(r, called, outcomes, prefix="nql", surface=None, limit=SWEEP_LIMIT, ex
             passes += 1
             nxt = []
             for cname in pending:
-                ins, _ = table[cname]
-                entry = PY.get(cname)
-                cls_name, member, style, _form, group = entry if entry else ("", "", "function", None, None)
-                ps = names.get(cname, [])
-                ps = (["self"] + ps) if len(ins) == len(ps) + 1 else (ps + [None] * len(ins))[:len(ins)]
-                tried = []
-                for choice in range(3):
-                    try:
-                        args = planted.get(cname) or [s.value(k, nm, choice) for k, nm in zip(ins, ps)]
-                    except LookupError as e:
-                        tried.append(("unreached", str(e)))
-                        break
-                    sys.stderr.write(cname + "\n")
-                    sys.stderr.flush()
-                    faulthandler.dump_traceback_later(limit, exit=True)
-                    attempts += 1
-                    try:
-                        if entry is None and PAIR.search(cname) and isinstance(args[0], _runtime.Object):
-                            # A record's equality pair the layer leaves to the language's ==: its C function against it.
-                            got = _F[cname](*args)
-                            want = (args[0] == args[1]) if cname.endswith("_op_Equality") else (args[0] != args[1])
-                            if bool(got) != bool(want):
-                                raise AssertionError(f"the C function says {got}, the language's operator {want}")
-                        else:
-                            got = r.invoke(cls_name, member, style, group, cname, args)
-                        o = ("returned", type(got).__name__)
-                        s.joined(got)
-                    except NanoQLError as e:
-                        o = (f"code {e.code}", one_line(e))
-                    except Stop as e:
-                        o = ("unreached", f"stop: {one_line(e)}")
-                    except Exception as e:  # noqa: BLE001 - a Python-layer error reds
-                        o = (f"python {type(e).__name__}", one_line(e))
-                    finally:
-                        faulthandler.cancel_dump_traceback_later()
-                    tried.append(o)
-                    if o[0] == "returned" or cname in planted:
-                        break
+                ins, ps = params(cname)
+                tried, wide, calls = sweep_one(r, s, cname, ins, ps, planted, limit, True, widened)
+                attempts += calls
                 if all(o[0] == "unreached" for o in tried):
                     unreached[cname] = tried[0][1]
                     nxt.append(cname)
                     continue
-                bad = [o for o in tried if o[0] in ("code 99", "code 9") or o[0].startswith("python")]
-                verdict = "red" if bad else "returned" if any(o[0] == "returned" for o in tried) else "refused"
+                verdict, line, bad = sweep_line(cname, tried, wide, passes)
                 if bad:
-                    red.append((cname, bad[0]))
+                    red.append((cname, bad))
                 counts[verdict] += 1
-                o = (bad or [o for o in tried if o[0] == "returned"] or [o for o in tried if o[0] != "unreached"])[0]
-                out.write(f"{cname}\t{verdict}\t{o[0]}\t{o[1]}\t{passes}\n")
+                out.write(line)
                 out.flush()
             if len(nxt) == len(pending):
                 break
             pending = nxt
         for cname in pending:
-            out.write(f"{cname}\tunreached\t{unreached.get(cname, '')}\t\t{passes}\n")
+            out.write(f"{cname}\tunreached\t{unreached.get(cname, '')}\t\t{passes}\t\n")
+        t1 = time.time()
+
+        # The functions the trace calls, on the final pool, their objects not joining it.
+        trace_counts, trace_widened = defaultdict(int), defaultdict(int)
+        trace_calls = 0
+        for cname in traced:
+            ins, ps = params(cname)
+            tried, wide, calls = sweep_one(r, s, cname, ins, ps, planted, limit, False, trace_widened)
+            trace_calls += calls
+            if all(o[0] == "unreached" for o in tried):
+                trace_counts["unreached"] += 1
+                out.write(f"{cname}\tunreached\t{tried[0][1]}\t\ttrace\t\n")
+                continue
+            verdict, line, bad = sweep_line(cname, tried, wide, "trace")
+            if bad:
+                red.append((cname, bad))
+            trace_counts[verdict] += 1
+            out.write(line)
+            out.flush()
         for cname in sorted(n for n in excluded if n.startswith(own)):
-            out.write(f"{cname}\texcluded\t{excluded[cname]}\t\t0\n")
+            out.write(f"{cname}\texcluded\t{excluded[cname]}\t\t0\t\n")
     os.chdir(here)
     for cname in stale:
-        red.append((cname, ("stale exclusion", "it names no target: gone from the layer, or called by the trace")))
+        red.append((cname, ("stale exclusion", "it names no function of the layer")))
     if red:
         print(f"sweep: the calls' folder kept for the diagnosis, {sandbox}")
     else:
         shutil.rmtree(sandbox, ignore_errors=True)
     print(f"sweep: {len(targets)} targets, {sum(n.startswith(own) for n in excluded)} excluded; {attempts} calls in "
-          f"{passes} passes, "
-          f"{time.time() - t0:.1f} s; returned {counts['returned']}, refused {counts['refused']}, "
-          f"unreached {len(pending)}; red {len(red)}")
+          f"{passes} passes, {t1 - t0:.1f} s; returned {counts['returned']}, refused {counts['refused']}, "
+          f"unreached {len(pending)}; widened attempts {made(widened)}: {tally(widened)}")
+    print(f"sweep: the trace's {len(traced)} functions, {trace_calls + made(trace_widened)} calls in "
+          f"{time.time() - t1:.1f} s; {tally(trace_counts)}; widened attempts {made(trace_widened)}: "
+          f"{tally(trace_widened)}")
+    print(f"sweep: red {len(red)}")
     for cname, (kind, detail) in red:
         print(f"RED {cname}: {kind}: {detail}")
     return len(red)

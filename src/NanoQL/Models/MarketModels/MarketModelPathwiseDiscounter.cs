@@ -82,6 +82,12 @@ public sealed class MarketModelPathwiseDiscounter
     /// <param name="factors">The units, then the derivatives: 1 + the number of rates entries, written.</param>
     /// <exception cref="ArgumentException"><paramref name="factors"/> holds fewer than 1 + the number of rates
     /// entries.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="currentStep"/> isn't a row of <paramref name="discounts"/>, where QuantLib reads past its end.
+    /// </exception>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="discounts"/> doesn't reach the column after the step's rate, where QuantLib reads past its end.
+    /// </exception>
     public void GetFactors(Matrix liborRates, Matrix discounts, int currentStep, Span<double> factors)
     {
         ArgumentNullException.ThrowIfNull(discounts);
@@ -89,6 +95,15 @@ public sealed class MarketModelPathwiseDiscounter
         {
             throw new ArgumentException(
                 $"the factors hold {factors.Length} entries, not 1 + the {numberRates} rates", nameof(factors));
+        }
+
+        ArgumentOutOfRangeException.ThrowIfNegative(currentStep);
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(currentStep, discounts.Rows);
+        if (!(discounts.Columns > before + 1))
+        {
+            throw new ArgumentException(
+                $"the discounts hold {discounts.Columns} columns, which don't reach column {before + 1}",
+                nameof(discounts));
         }
 
         ReadOnlySpan<double> d = discounts.Row(currentStep);

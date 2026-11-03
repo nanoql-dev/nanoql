@@ -70,6 +70,12 @@ public sealed class FdmExtOUJumpOp : FdmLinearOpComposite
         integroPart = new SparseMatrix(n, n);
         dy = new double[n];
 
+        if (!(layout.Dim[1] >= 2))
+        {
+            throw new ArgumentException(
+                $"the jump operator's second direction needs at least two points, not {layout.Dim[1]}", nameof(mesher));
+        }
+
         var yLoc = new double[layout.Dim[1]];
         FdmLinearOpIterator iter = layout.Begin();
         for (int k = 0; k < n; ++k, iter.Increment())

@@ -94,6 +94,7 @@ public sealed class LocalVolRNDCalculator : RiskNeutralDensityCalculator
     /// for half the first step.</param>
     /// <exception cref="ArgumentNullException">A structure or the grid is <see langword="null"/>.</exception>
     /// <exception cref="ArgumentException">The grid is too small, with QuantLib's message.</exception>
+    /// <exception cref="ArgumentException"><paramref name="timeGrid"/> has no step.</exception>
     /// <exception cref="NanoQLException">A structure can't be read, or a step can't be solved.</exception>
     public LocalVolRNDCalculator(
         double spot,
@@ -112,6 +113,11 @@ public sealed class LocalVolRNDCalculator : RiskNeutralDensityCalculator
         ArgumentNullException.ThrowIfNull(localVol);
         ArgumentNullException.ThrowIfNull(timeGrid);
         ArgumentOutOfRangeException.ThrowIfNegative(xGrid);
+        if (!(timeGrid.Size >= 2))
+        {
+            throw new ArgumentException("the time grid has no step", nameof(timeGrid));
+        }
+
         this.xGrid = xGrid;
         tGrid = timeGrid.Size - 1;
         localVolProbEps = eps;

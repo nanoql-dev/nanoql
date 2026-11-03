@@ -226,7 +226,15 @@ public class GaussianLHPLossModel
     /// <param name="iName">The name's position in the bound basket.</param>
     /// <param name="defaultKey">The key, unread.</param>
     /// <returns>The recovery.</returns>
-    public double ExpectedRecovery(Date d, int iName, DefaultProbKey defaultKey) => rrQuotes[iName];
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="iName"/> isn't one of the names, where QuantLib reads past its end.
+    /// </exception>
+    public double ExpectedRecovery(Date d, int iName, DefaultProbKey defaultKey)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(iName);
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(iName, rrQuotes.Length);
+        return rrQuotes[iName];
+    }
 
     /// <summary>The pool's default probability by a date, weighted by the live notionals.</summary>
     /// <param name="d">The date.</param>

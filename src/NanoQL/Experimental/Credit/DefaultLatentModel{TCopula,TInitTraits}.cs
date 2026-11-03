@@ -124,6 +124,14 @@ public class DefaultLatentModel<TCopula, TInitTraits> : LatentModel<TCopula, TIn
     /// <param name="iName">The name.</param>
     /// <param name="mktFactors">The factors' values.</param>
     /// <returns>The conditional probability.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="prob"/> isn't below 1e-10 and <paramref name="iName"/> isn't one of the names, where QuantLib
+    /// reads past its end.
+    /// </exception>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="prob"/> isn't below 1e-10 and <paramref name="mktFactors"/> holds fewer values than the name's
+    /// factors, where QuantLib reads past its end.
+    /// </exception>
     public double ConditionalDefaultProbability(double prob, int iName, ReadOnlySpan<double> mktFactors)
     {
         /*Avoid redundant call to minimum value inversion (might be \infty),
@@ -145,9 +153,22 @@ public class DefaultLatentModel<TCopula, TInitTraits> : LatentModel<TCopula, TIn
     /// <param name="iName">The name.</param>
     /// <param name="m">The factors' values.</param>
     /// <returns>The conditional probability.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="iName"/> isn't one of the names, where QuantLib reads past its end.
+    /// </exception>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="m"/> holds fewer values than the name's factors, where QuantLib reads past its end.
+    /// </exception>
     public double ConditionalDefaultProbabilityInvP(double invCumYProb, int iName, ReadOnlySpan<double> m)
     {
+        ArgumentOutOfRangeException.ThrowIfNegative(iName);
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(iName, FactorWeights.Length);
         ImmutableArray<double> fw = FactorWeights[iName];
+        if (!(m.Length >= fw.Length))
+        {
+            throw new ArgumentException($"{m.Length} factor values given for {fw.Length} factors", nameof(m));
+        }
+
         double sumMs = 0.0;
         for (int k = 0; k < fw.Length; k++)
         {
@@ -164,9 +185,13 @@ public class DefaultLatentModel<TCopula, TInitTraits> : LatentModel<TCopula, TIn
     /// <returns>The probability.</returns>
     /// <exception cref="NanoQLException">The model isn't bound ("No portfolio basket set.").</exception>
     /// <exception cref="ArgumentException"><paramref name="d"/> is <c>default(Date)</c>, not a date.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="iName"/> isn't one of the bound basket's names, where QuantLib reads past its end.
+    /// </exception>
     public double ProbOfDefault(int iName, Date d)
     {
         Date.ThrowIfDefault(d, nameof(d));
+        CheckName(iName, nameof(iName));
         double pUncond = UnconditionalProbability(iName, d);
         if (pUncond < 1.0e-10)
         {
@@ -186,9 +211,15 @@ public class DefaultLatentModel<TCopula, TInitTraits> : LatentModel<TCopula, TIn
     /// <exception cref="NanoQLException">The model isn't bound, or a name's default probability is 0 or 1, where the
     /// correlation is 0/0.</exception>
     /// <exception cref="ArgumentException"><paramref name="d"/> is <c>default(Date)</c>, not a date.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="iNamei"/> or <paramref name="iNamej"/> isn't one of the bound basket's names, where QuantLib
+    /// reads past its end.
+    /// </exception>
     public double DefaultCorrelation(Date d, int iNamei, int iNamej)
     {
         Date.ThrowIfDefault(d, nameof(d));
+        CheckName(iNamei, nameof(iNamei));
+        CheckName(iNamej, nameof(iNamej));
         // unconditionals:
         double pi = UnconditionalProbability(iNamei, d);
         double pj = UnconditionalProbability(iNamej, d);
@@ -261,6 +292,15 @@ public class DefaultLatentModel<TCopula, TInitTraits> : LatentModel<TCopula, TIn
     protected double CondProbProduct(double invCumYProb1, double invCumYProb2, int iName1, int iName2, ReadOnlySpan<double> mktFactors) =>
         ConditionalDefaultProbabilityInvP(invCumYProb1, iName1, mktFactors)
         * ConditionalDefaultProbabilityInvP(invCumYProb2, iName2, mktFactors);
+
+    // A name of the bound basket, which QuantLib reads by it unchecked: the bound check first, as QuantLib's
+    // read of the basket comes first.
+    private void CheckName(int iName, string paramName)
+    {
+        int names = BoundBasket.Names.Length;
+        ArgumentOutOfRangeException.ThrowIfNegative(iName, paramName);
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(iName, names, paramName);
+    }
 
     /// <summary>A name's unconditional default probability by a date, read on its curve: 0 before the curve's
     /// reference date.</summary>

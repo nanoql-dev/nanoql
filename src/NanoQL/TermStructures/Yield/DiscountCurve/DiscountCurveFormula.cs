@@ -20,18 +20,19 @@ internal static class DiscountCurveFormula
     public static double DiscountImpl(
         ReadOnlySpan<double> times, ReadOnlySpan<double> data, Interpolation interpolation, double t)
     {
-        if (t <= times[^1])
+        if (t <= CurveData.Last(times, nameof(times)))
         {
             return interpolation.Evaluate(t, true);
         }
 
         // flat fwd extrapolation
-        double tMax = times[^1];
-        double dMax = data[^1];
+        double tMax = CurveData.Last(times, nameof(times));
+        double dMax = CurveData.Last(data, nameof(data));
         double instFwdMax = -interpolation.Derivative(tMax) / dMax;
         return dMax * Math.Exp(-instFwdMax * (t - tMax));
     }
 
     // InterpolatedDiscountCurve::maxDate
-    public static Date MaxDate(ReadOnlySpan<Date> dates, Date? maxDate) => maxDate ?? dates[^1];
+    public static Date MaxDate(ReadOnlySpan<Date> dates, Date? maxDate) =>
+        maxDate ?? CurveData.Last(dates, nameof(dates));
 }

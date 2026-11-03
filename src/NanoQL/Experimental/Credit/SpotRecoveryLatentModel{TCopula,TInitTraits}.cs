@@ -158,6 +158,13 @@ public class SpotRecoveryLatentModel<TCopula, TInitTraits> : LatentModel<TCopula
     /// <param name="mktFactors">The factors' values.</param>
     /// <returns>The probability.</returns>
     /// <exception cref="NanoQLException">The model isn't bound to a basket.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="iName"/> isn't one of the bound basket's names, where QuantLib reads past its end.
+    /// </exception>
+    /// <exception cref="ArgumentException">
+    /// The name's default probability by <paramref name="date"/> isn't below 1e-10 and <paramref name="mktFactors"/>
+    /// holds fewer values than the name's factors, where QuantLib reads past its end.
+    /// </exception>
     public double ConditionalDefaultProbability(Date date, int iName, ReadOnlySpan<double> mktFactors) =>
         ConditionalDefaultProbability(Curve(iName).AccruedDefaultProbability(date), iName, mktFactors);
 
@@ -167,6 +174,14 @@ public class SpotRecoveryLatentModel<TCopula, TInitTraits> : LatentModel<TCopula
     /// <param name="iName">The name.</param>
     /// <param name="mktFactors">The factors' values.</param>
     /// <returns>The probability.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="prob"/> isn't below 1e-10 and <paramref name="iName"/> isn't one of the names, where QuantLib
+    /// reads past its end.
+    /// </exception>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="prob"/> isn't below 1e-10 and <paramref name="mktFactors"/> holds fewer values than the name's
+    /// factors, where QuantLib reads past its end.
+    /// </exception>
     public double ConditionalDefaultProbability(double prob, int iName, ReadOnlySpan<double> mktFactors)
     {
         /*Avoid redundant call to minimum value inversion (might be \infty),
@@ -186,9 +201,22 @@ public class SpotRecoveryLatentModel<TCopula, TInitTraits> : LatentModel<TCopula
     /// <param name="iName">The name.</param>
     /// <param name="m">The factors' values.</param>
     /// <returns>The probability.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="iName"/> isn't one of the names, where QuantLib reads past its end.
+    /// </exception>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="m"/> holds fewer values than the name's factors, where QuantLib reads past its end.
+    /// </exception>
     public double ConditionalDefaultProbabilityInvP(double invCumYProb, int iName, ReadOnlySpan<double> m)
     {
+        ArgumentOutOfRangeException.ThrowIfNegative(iName);
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(iName, FactorWeights.Length);
         ImmutableArray<double> w = FactorWeights[iName];
+        if (!(m.Length >= w.Length))
+        {
+            throw new ArgumentException($"{m.Length} factor values given for {w.Length} factors", nameof(m));
+        }
+
         double sumMs = 0.0;
         for (int k = 0; k < w.Length; k++)
         {
@@ -207,6 +235,12 @@ public class SpotRecoveryLatentModel<TCopula, TInitTraits> : LatentModel<TCopula
     /// <param name="mktFactors">The factors' values.</param>
     /// <returns>The recovery.</returns>
     /// <exception cref="NanoQLException">The model isn't bound to a basket.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="iName"/> isn't one of the bound basket's names, where QuantLib reads past its end.
+    /// </exception>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="mktFactors"/> holds fewer values than the name's factors, where QuantLib reads past its end.
+    /// </exception>
     public double ExpCondRecovery(Date d, int iName, ReadOnlySpan<double> mktFactors) =>
         ExpCondRecoveryP(Curve(iName).AccruedDefaultProbability(d), iName, mktFactors);
 
@@ -216,9 +250,19 @@ public class SpotRecoveryLatentModel<TCopula, TInitTraits> : LatentModel<TCopula
     /// <param name="iName">The name.</param>
     /// <param name="mktFactors">The factors' values.</param>
     /// <returns>The recovery.</returns>
-    public double ExpCondRecoveryP(double uncondDefP, int iName, ReadOnlySpan<double> mktFactors) =>
-        ExpCondRecoveryInvPinvRR(
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="iName"/> isn't one of the names, where QuantLib reads past its end.
+    /// </exception>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="mktFactors"/> holds fewer values than the name's factors, where QuantLib reads past its end.
+    /// </exception>
+    public double ExpCondRecoveryP(double uncondDefP, int iName, ReadOnlySpan<double> mktFactors)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(iName);
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(iName, numNames);
+        return ExpCondRecoveryInvPinvRR(
             InverseCumulativeY(uncondDefP, iName), InverseCumulativeY(recoveries[iName], iName + numNames), iName, mktFactors);
+    }
 
     /// <summary>A name's expected spot recovery conditional on the factors' values and on its default, from the
     /// inverses of its unconditional default probability and recovery.</summary>
@@ -227,9 +271,23 @@ public class SpotRecoveryLatentModel<TCopula, TInitTraits> : LatentModel<TCopula
     /// <param name="iName">The name.</param>
     /// <param name="mktFactors">The factors' values.</param>
     /// <returns>The recovery.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="iName"/> isn't one of the names, where QuantLib reads past its end.
+    /// </exception>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="mktFactors"/> holds fewer values than the name's factors, where QuantLib reads past its end.
+    /// </exception>
     public double ExpCondRecoveryInvPinvRR(double invUncondDefP, double invUncondRR, int iName, ReadOnlySpan<double> mktFactors)
     {
+        ArgumentOutOfRangeException.ThrowIfNegative(iName);
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(iName, numNames);
         ImmutableArray<ImmutableArray<double>> fctrs = FactorWeights;
+        if (!(mktFactors.Length >= fctrs[iName].Length))
+        {
+            throw new ArgumentException(
+                $"{mktFactors.Length} factor values given for {fctrs[iName].Length} factors", nameof(mktFactors));
+        }
+
         double sumMs = 0.0;
         for (int k = 0; k < fctrs[iName].Length; k++)
         {
@@ -258,6 +316,9 @@ public class SpotRecoveryLatentModel<TCopula, TInitTraits> : LatentModel<TCopula
     /// <param name="d">The default's date.</param>
     /// <returns>The recovery.</returns>
     /// <exception cref="NanoQLException">The model isn't bound to a basket.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="iName"/> isn't one of the bound basket's names, where QuantLib reads past its end.
+    /// </exception>
     public double ConditionalRecovery(double latentVarSample, int iName, Date d)
     {
         // retrieve the default probability for this name
@@ -296,9 +357,14 @@ public class SpotRecoveryLatentModel<TCopula, TInitTraits> : LatentModel<TCopula
     /// <param name="iName">The name.</param>
     /// <returns>The curve.</returns>
     /// <exception cref="NanoQLException">The model isn't bound to a basket.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="iName"/> isn't one of the basket's names.
+    /// </exception>
     internal DefaultProbabilityTermStructure Curve(int iName)
     {
         Basket b = BoundBasket;
+        ArgumentOutOfRangeException.ThrowIfNegative(iName);
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(iName, b.Names.Length);
         return b.Pool.Get(b.Names[iName]).DefaultProbability(b.DefaultKeys[iName]);
     }
 }

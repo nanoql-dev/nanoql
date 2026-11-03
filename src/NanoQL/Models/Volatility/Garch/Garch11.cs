@@ -143,6 +143,9 @@ public sealed class Garch11 : VolatilityCompositor
     /// <returns>A new model, with this one's mode.</returns>
     /// <exception cref="ArgumentNullException">An argument is <see langword="null"/>.</exception>
     /// <exception cref="NanoQLException">The minimizer doesn't converge.</exception>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="initialGuess"/> holds fewer than three values, where QuantLib reads past its end.
+    /// </exception>
     public Garch11 Calibrate(TimeSeries<double> quoteSeries, OptimizationMethod method, EndCriteria endCriteria, ReadOnlySpan<double> initialGuess)
     {
         ArgumentNullException.ThrowIfNull(method);
@@ -422,6 +425,9 @@ public sealed class Garch11 : VolatilityCompositor
     /// <see langword="null"/>.</exception>
     /// <exception cref="NanoQLException">The minimizer doesn't converge, or the cost reaches a conditional variance that
     /// isn't positive.</exception>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="initialGuess"/> holds fewer than three values, where QuantLib reads past its end.
+    /// </exception>
     public static Garch11Calibration CalibrateR2(
         ReadOnlySpan<double> r2, double meanR2, OptimizationMethod method, EndCriteria endCriteria, ReadOnlySpan<double> initialGuess) =>
         CalibrateR2(Demeaned(r2, meanR2), method, endCriteria, initialGuess);
@@ -438,6 +444,9 @@ public sealed class Garch11 : VolatilityCompositor
     /// <exception cref="ArgumentNullException"><paramref name="method"/> or <paramref name="endCriteria"/> is
     /// <see langword="null"/>.</exception>
     /// <exception cref="NanoQLException">The minimizer doesn't converge.</exception>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="initialGuess"/> holds fewer than three values, where QuantLib reads past its end.
+    /// </exception>
     public static Garch11Calibration CalibrateR2(
         ReadOnlySpan<double> r2, OptimizationMethod method, EndCriteria endCriteria, ReadOnlySpan<double> initialGuess)
     {
@@ -457,6 +466,9 @@ public sealed class Garch11 : VolatilityCompositor
     /// <exception cref="ArgumentNullException">An argument is <see langword="null"/>.</exception>
     /// <exception cref="NanoQLException">The minimizer doesn't converge, or the cost reaches a conditional variance that
     /// isn't positive.</exception>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="initialGuess"/> holds fewer than three values, where QuantLib reads past its end.
+    /// </exception>
     public static Garch11Calibration CalibrateR2(
         ReadOnlySpan<double> r2,
         double meanR2,
@@ -475,12 +487,21 @@ public sealed class Garch11 : VolatilityCompositor
     /// <returns>The parameters and the minimization's results.</returns>
     /// <exception cref="ArgumentNullException">An argument is <see langword="null"/>.</exception>
     /// <exception cref="NanoQLException">The minimizer doesn't converge (#2844).</exception>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="initialGuess"/> holds fewer than three values, where QuantLib reads past its end.
+    /// </exception>
     public static Garch11Calibration CalibrateR2(
         ReadOnlySpan<double> r2, OptimizationMethod method, Constraint constraints, EndCriteria endCriteria, ReadOnlySpan<double> initialGuess)
     {
         ArgumentNullException.ThrowIfNull(method);
         ArgumentNullException.ThrowIfNull(constraints);
         ArgumentNullException.ThrowIfNull(endCriteria);
+        if (!(initialGuess.Length >= 3))
+        {
+            throw new ArgumentException(
+                $"{initialGuess.Length} initial values given for ω, α and β", nameof(initialGuess));
+        }
+
         var cost = new Garch11CostFunction(r2.ToArray());
         var problem = new Problem(cost, constraints, initialGuess);
         ProblemResults results = method.Minimize(problem, endCriteria);

@@ -3,13 +3,17 @@
 
 using NanoQL.Methods;
 using NanoQL.Models;
+using NanoQL.Processes;
+using NanoQL.TermStructures;
+using NanoQL.Time;
 
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
 /// The lattice framework's refusals, by type, message and parameter (playbook §2): an argument is refused with
 /// <see cref="ArgumentException"/> or <see cref="ArgumentOutOfRangeException"/> naming it, a check of a value already
-/// stored with <see cref="NanoQLException"/>.
+/// stored with <see cref="NanoQLException"/>; a step back on values and room fewer than the nodes, or a trinomial
+/// tree's from the grid's last step, is refused before QuantLib's read past them.
 /// </summary>
 public class LatticeErrorTests
 {
@@ -57,6 +61,59 @@ public class LatticeErrorTests
         NanoQLException forward = Assert.Throws<NanoQLException>(() => bond.Rollback(1.0));
         Assert.Equal(typeof(NanoQLException), forward.GetType());
         Assert.Equal("cannot roll the asset back to1 (it is already at t = 0.5)", forward.Message);
+    }
+
+    [Fact]
+    public void ASteppingBackFromTheGridsLastStepOrOnShortValuesIsRefused()
+    {
+        // TreeLattice's stepback, and the Black-Scholes lattice's own loop, read step i + 1's values and write step
+        // i's: QuantLib reads past values or room fewer than the nodes, and the trinomial tree's branchings past the
+        // grid's last step; the binomial tree's nodes need no grid, so a step at or past its last computes.
+        var today = new Date(15, Month.October, 2026);
+        DayCounter dc = new Actual365Fixed();
+        var curve = new FlatForward(today, 0.03, dc);
+        var process = new BlackScholesMertonProcess(100.0, curve, curve, new BlackConstantVol(today, null, 0.25, dc));
+        foreach (TreeLattice lattice in new TreeLattice[]
+                 {
+                     (OneFactorModelShortRateTree)new Vasicek().Tree(new TimeGrid(1.0, 2)),
+                     new BlackScholesLattice<CoxRossRubinstein>(new CoxRossRubinstein(process, 1.0, 2, 100.0), 0.04, 1.0, 2),
+                 })
+        {
+            int last = lattice.TimeGrid.Size - 1;
+            int n0 = lattice.Size(0), n1 = lattice.Size(1);
+            if (lattice is OneFactorModelShortRateTree)
+            {
+                ArgumentOutOfRangeException past = Assert.Throws<ArgumentOutOfRangeException>(
+                    () => lattice.Stepback(last, new double[lattice.Size(last)], new double[lattice.Size(last)]));
+                Assert.Equal("i", past.ParamName);
+                Assert.StartsWith($"i ('{last}') must be less than '{last}'.", past.Message, StringComparison.Ordinal);
+            }
+            else
+            {
+                foreach (int i in new[] { last, last + 3 })
+                {
+                    double[] stepped = new double[lattice.Size(i)];
+                    lattice.Stepback(i, [.. Enumerable.Repeat(1.0, lattice.Size(i) + 1)], stepped);
+                    Assert.All(stepped, v => Assert.True(v > 0.0 && v < 1.0));
+                }
+            }
+
+            ArgumentOutOfRangeException step = Assert.Throws<ArgumentOutOfRangeException>(
+                () => lattice.Stepback(-1, new double[n0], new double[n0]));
+            Assert.Equal("i", step.ParamName);
+            Assert.StartsWith("i ('-1') must be a non-negative value.", step.Message, StringComparison.Ordinal);
+
+            ArgumentException e = Assert.Throws<ArgumentException>(() => lattice.Stepback(0, new double[n1 - 1], new double[n0]));
+            Assert.Equal("values", e.ParamName);
+            Assert.StartsWith($"{n1 - 1} values given for step 1's {n1} nodes", e.Message, StringComparison.Ordinal);
+            e = Assert.Throws<ArgumentException>(() => lattice.Stepback(1, new double[lattice.Size(2)], new double[n1 - 1]));
+            Assert.Equal("newValues", e.ParamName);
+            Assert.StartsWith($"room for {n1 - 1} values given for step 1's {n1} nodes", e.Message, StringComparison.Ordinal);
+
+            double[] back = new double[n0];
+            lattice.Stepback(0, [.. Enumerable.Repeat(1.0, n1)], back);
+            Assert.All(back, v => Assert.True(v > 0.0 && v < 1.0));
+        }
     }
 
     [Fact]

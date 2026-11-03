@@ -176,6 +176,33 @@ public abstract class StochasticProcess
     private StochasticProcessDiscretization Discretization() =>
         discretization ?? throw new NanoQLException("no discretization given");
 
+    // A state the process reads shorter than its size: QuantLib reads the state's variables past its end.
+    private protected void CheckState(int length, string paramName)
+    {
+        if (!(length >= Size))
+        {
+            throw new ArgumentException($"{length} values given for a state of {Size}", paramName);
+        }
+    }
+
+    // Increments fewer than the process's factors: QuantLib reads them past their end.
+    private protected void CheckIncrements(int length, string paramName)
+    {
+        if (!(length >= Factors))
+        {
+            throw new ArgumentException($"{length} increments given for {Factors} factors", paramName);
+        }
+    }
+
+    // A span to write a state into, shorter than the process's: the in-place forms' refusal, as CopyInto's.
+    private protected void CheckResult(int length)
+    {
+        if (length < Size)
+        {
+            throw new ArgumentException("the result is shorter than the process's state", "result");
+        }
+    }
+
     // The in-place forms' default: an allocating form's vector, copied into the caller's span.
     private static void CopyInto(Vector values, Span<double> result)
     {

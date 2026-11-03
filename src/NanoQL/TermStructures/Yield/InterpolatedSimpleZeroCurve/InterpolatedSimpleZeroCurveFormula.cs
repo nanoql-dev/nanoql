@@ -20,7 +20,7 @@ internal static class InterpolatedSimpleZeroCurveFormula
         ReadOnlySpan<double> times, ReadOnlySpan<double> data, Interpolation interpolation, double t)
     {
         double r;
-        if (t <= times[^1])
+        if (t <= CurveData.Last(times, nameof(times)))
         {
             r = interpolation.Evaluate(t, true);
         }
@@ -28,8 +28,8 @@ internal static class InterpolatedSimpleZeroCurveFormula
         {
             // flat fwd extrapolation after last pillar,
             // Notice that bbg uses flat extrapolation of non-annualized zero instead
-            double tMax = times[^1];
-            double zMax = data[^1];
+            double tMax = CurveData.Last(times, nameof(times));
+            double zMax = CurveData.Last(data, nameof(data));
             double instFwdMax = zMax + (tMax * interpolation.Derivative(tMax));
             r = ((zMax * tMax) + (instFwdMax * (t - tMax))) / t;
         }
@@ -38,5 +38,5 @@ internal static class InterpolatedSimpleZeroCurveFormula
     }
 
     // InterpolatedSimpleZeroCurve::maxDate: the last date, whatever a bootstrap's helpers need
-    public static Date MaxDate(ReadOnlySpan<Date> dates, Date? maxDate) => dates[^1];
+    public static Date MaxDate(ReadOnlySpan<Date> dates, Date? maxDate) => CurveData.Last(dates, nameof(dates));
 }

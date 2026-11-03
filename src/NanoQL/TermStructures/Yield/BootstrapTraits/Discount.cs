@@ -104,17 +104,29 @@ public readonly struct Discount : IYieldTraits
     public static double TransformInverse(double x, int i, BootstrapState<YieldTermStructure> c) => Math.Log(x);
 
     /// <inheritdoc/>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="i"/> isn't a point of <paramref name="data"/>, where QuantLib writes past its end.
+    /// </exception>
     public static void UpdateGuess(double[] data, double discount, int i)
     {
         ArgumentNullException.ThrowIfNull(data);
+        ArgumentOutOfRangeException.ThrowIfNegative(i);
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(i, data.Length);
         data[i] = discount;
     }
 
     /// <inheritdoc/>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="times"/> is empty, or <paramref name="t"/> is past the last time and <paramref name="data"/> is
+    /// empty, where QuantLib reads past their end.
+    /// </exception>
     public static double DiscountImpl(
         ReadOnlySpan<double> times, ReadOnlySpan<double> data, Interpolation interpolation, double t) =>
         DiscountCurveFormula.DiscountImpl(times, data, interpolation, t);
 
     /// <inheritdoc/>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="maxDate"/> isn't given and <paramref name="dates"/> is empty, where QuantLib reads past its end.
+    /// </exception>
     public static Date MaxDate(ReadOnlySpan<Date> dates, Date? maxDate) => DiscountCurveFormula.MaxDate(dates, maxDate);
 }

@@ -3302,7 +3302,7 @@ Facts:
 
 [`Divergences/FdmUndefinedPathRefusalTests.cs`](../tests/NanoQL.Tests/Divergences/FdmUndefinedPathRefusalTests.cs)
 
-The finite-difference core's inputs QuantLib leaves undefined, each refused before the undefined step. A mesher of no point writes the first and last of an empty vector, and runs its loop to the unsigned size less one (`uniform1dmesher.hpp:41-50`, `concentrating1dmesher.cpp:61-103`); a mesher of one point divides by zero and leaves that point at its end and its distances null. A one-point splitting solve runs its back substitution from the unsigned size less two (`triplebandlinearop.cpp:301-303`). An empty layout takes the element before its dimensions' first and the last of an empty spacing (`fdmlinearoplayout.hpp:37-42`). A composite of more meshers than its layout's dimensions reads past them (`fdmmeshercomposite.cpp:80-83`). Bands of different sizes, added or multiplied, are read past the shorter's end (`triplebandlinearop.cpp:163-188`).
+The finite-difference core's inputs QuantLib leaves undefined, each refused before the undefined step. A mesher of no point writes the first and last of an empty vector, and runs its loop to the unsigned size less one (`uniform1dmesher.hpp:41-50`, `concentrating1dmesher.cpp:61-103`); a mesher of one point divides by zero and leaves that point at its end and its distances null. A one-point splitting solve runs its back substitution from the unsigned size less two (`triplebandlinearop.cpp:301-303`); the one-point operator's apply and its matrix read and write its point's neighbours, which the layout reflects past the grid. An empty layout takes the element before its dimensions' first and the last of an empty spacing (`fdmlinearoplayout.hpp:37-42`). A composite of more meshers than its layout's dimensions reads past them (`fdmmeshercomposite.cpp:80-83`). Bands of different sizes, added or multiplied, are read past the shorter's end (`triplebandlinearop.cpp:163-188`).
 
 Facts:
 
@@ -3311,6 +3311,7 @@ Facts:
 - `AConcentratingMesherOfNoPointIsRefused`
 - `AConcentratingMesherOfOnePointIsRefused`
 - `AOnePointSolveIsRefused`
+- `AOnePointApplyAndMatrixAreRefused`
 - `AnEmptyLayoutIsRefused`
 - `MoreMeshersThanDimensionsAreRefused`
 - `BandsOfDifferentSizesAreRefused`

@@ -84,9 +84,13 @@ public sealed class G2ForwardProcess : ForwardMeasureProcess
 
     /// <inheritdoc/>
     /// <exception cref="NanoQLException">The process has no forward measure time.</exception>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="x"/> holds fewer values than the state, where QuantLib reads past its end.
+    /// </exception>
     public override Vector Drift(double t, Vector x)
     {
         ArgumentNullException.ThrowIfNull(x);
+        CheckState(x.Size, nameof(x));
         double shiftDrift = 0.0;
         if (TermStructure is not null)
         {
@@ -120,9 +124,13 @@ public sealed class G2ForwardProcess : ForwardMeasureProcess
 
     /// <inheritdoc/>
     /// <exception cref="NanoQLException">The process has no forward measure time.</exception>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="x0"/> holds fewer values than the state, where QuantLib reads past its end.
+    /// </exception>
     public override Vector Expectation(double t0, Vector x0, double dt)
     {
         ArgumentNullException.ThrowIfNull(x0);
+        CheckState(x0.Size, nameof(x0));
         double shiftExp = 0.0;
         if (TermStructure is not null)
         {
@@ -138,9 +146,13 @@ public sealed class G2ForwardProcess : ForwardMeasureProcess
     }
 
     /// <inheritdoc/>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="x0"/> holds fewer values than the state, where QuantLib reads past its end.
+    /// </exception>
     public override Matrix StdDeviation(double t0, Vector x0, double dt)
     {
         ArgumentNullException.ThrowIfNull(x0);
+        CheckState(x0.Size, nameof(x0));
         return G2Process.G2ProcessStdDeviation(
             xProcess.StdDeviation(t0, x0[0], dt), yProcess.StdDeviation(t0, x0[1], dt), A, B, Rho, dt);
     }

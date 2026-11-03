@@ -44,6 +44,10 @@ public class NinePointLinearOp : FdmLinearOp
     /// <summary>The mesher.</summary>
     protected readonly FdmMesher mesher;
 
+    // Whether a point's neighbour lies outside the grid, as on a direction of one point, which QuantLib's
+    // reflection sends past it: the operator stays built, as QuantLib's is, and refuses what would read there.
+    private readonly bool neighbourOutside;
+
     /// <summary>Initializes a new instance of the <see cref="NinePointLinearOp"/> class, its coefficients zero.</summary>
     /// <param name="d0">The first direction.</param>
     /// <param name="d1">The second direction.</param>
@@ -98,6 +102,9 @@ public class NinePointLinearOp : FdmLinearOp
             i02[i] = layout.Neighbourhood(iter, d0, -1, d1, 1);
             i22[i] = layout.Neighbourhood(iter, d0, 1, d1, 1);
         }
+
+        neighbourOutside = Outside(i00) || Outside(i10) || Outside(i20) || Outside(i01) || Outside(i21)
+            || Outside(i02) || Outside(i12) || Outside(i22);
     }
 
     /// <summary>Initializes a new instance of the <see cref="NinePointLinearOp"/> class as a copy of another.</summary>
@@ -126,10 +133,25 @@ public class NinePointLinearOp : FdmLinearOp
         a02 = (double[])m.a02.Clone();
         a12 = (double[])m.a12.Clone();
         a22 = (double[])m.a22.Clone();
+        neighbourOutside = m.neighbourOutside;
     }
 
     // The operator's size: the layout's number of points.
     private int N => a11.Length;
+
+    // Whether an index of a point's neighbour lies outside the grid.
+    private static bool Outside(int[] index)
+    {
+        foreach (int k in index)
+        {
+            if (k < 0 || k >= index.Length)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     /// <summary>A copy of the operator: QuantLib's copy constructor.</summary>
     /// <returns>The copy.</returns>
@@ -142,6 +164,12 @@ public class NinePointLinearOp : FdmLinearOp
         if (!(r.Length == N))
         {
             throw new ArgumentException($"inconsistent length of r {r.Length} vs {N}", nameof(r));
+        }
+
+        if (neighbourOutside)
+        {
+            throw new ArgumentException(
+                "a nine-point apply needs at least two points in each of its directions, not 1", nameof(r));
         }
 
         for (int i = 0; i < N; ++i)
@@ -159,8 +187,17 @@ public class NinePointLinearOp : FdmLinearOp
     }
 
     /// <inheritdoc/>
+    /// <exception cref="InvalidOperationException">
+    /// A direction of the operator has one point, whose neighbours QuantLib writes past the matrix.
+    /// </exception>
     public override SparseMatrix ToMatrix()
     {
+        if (neighbourOutside)
+        {
+            throw new InvalidOperationException(
+                "a nine-point matrix needs at least two points in each of its directions, not 1");
+        }
+
         int n = N;
 
         var retVal = new SparseMatrix(n, n, 9 * n);

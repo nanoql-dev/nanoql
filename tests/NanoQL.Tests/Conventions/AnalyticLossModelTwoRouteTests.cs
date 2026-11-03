@@ -11,8 +11,9 @@ namespace NanoQL.Tests.Conventions;
 
 /// <summary>
 /// The analytic loss models against each other on one basket: the recursive model exact, the binomial and the
-/// inhomogeneous pool within their approximations; and the base-correlation model as its LHP sub-models at the
-/// surface's nodes, exactly.
+/// inhomogeneous pool within their approximations; the base-correlation model as its LHP sub-models at the
+/// surface's nodes, exactly; and the LHP model's two routes to a quantile of the portfolio's loss, its percentile
+/// and the probability of a loss at or above it.
 /// </summary>
 public class AnalyticLossModelTwoRouteTests
 {
@@ -51,6 +52,22 @@ public class AnalyticLossModelTwoRouteTests
         double Equity(double level) => Basket(0.0, level)
             .SetLossModel(new GaussianLHPLossModel(correls[Array.IndexOf(levels, level)], recoveries)).ExpectedTrancheLoss(D5);
         Assert.Equal(Equity(d) - Equity(a), model, 1e-13);
+    }
+
+    [Theory]
+    [InlineData(0.5)]
+    [InlineData(0.9)]
+    [InlineData(0.99)]
+    public void TheLhpPercentileAndTheProbabilityOverItAgree(double q)
+    {
+        // Two routes to one quantile of the whole portfolio's loss: the percentile, and the probability of a loss at or
+        // above it, its complement; the expected shortfall above the percentile is at least the loss there.
+        Basket basket = Basket(0.0, 1.0).SetLossModel(new GaussianLHPLossModel(0.3, [.. Enumerable.Repeat(0.4, 20)]));
+        double tranche = basket.DetachmentAmount - basket.AttachmentAmount;
+        double loss = basket.Percentile(D5, q);
+        Assert.InRange(loss, 0.0, tranche);
+        Assert.Equal(1.0 - q, basket.ProbOverLoss(D5, loss / tranche), 1e-9);
+        Assert.True(basket.ExpectedShortfall(D5, q) >= loss);
     }
 
     private static Basket Basket(double a, double d)

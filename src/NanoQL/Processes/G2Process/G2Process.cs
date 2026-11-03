@@ -87,9 +87,13 @@ public sealed class G2Process : StochasticProcess
     }
 
     /// <inheritdoc/>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="x"/> holds fewer values than the state, where QuantLib reads past its end.
+    /// </exception>
     public override Vector Drift(double t, Vector x)
     {
         ArgumentNullException.ThrowIfNull(x);
+        CheckState(x.Size, nameof(x));
 
         // Drift in shifted coordinates z1 = x + phi(t), z2 = y:
         //   dz1 = (-a*z1 + a*phi(t) + phi'(t)) dt + sigma dW1
@@ -128,9 +132,13 @@ public sealed class G2Process : StochasticProcess
     }
 
     /// <inheritdoc/>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="x0"/> holds fewer values than the state, where QuantLib reads past its end.
+    /// </exception>
     public override Vector Expectation(double t0, Vector x0, double dt)
     {
         ArgumentNullException.ThrowIfNull(x0);
+        CheckState(x0.Size, nameof(x0));
 
         // E[z1(t0+dt) | z1(t0)] = z1(t0)*exp(-a*dt)
         //                       + phi(t0+dt) - phi(t0)*exp(-a*dt)
@@ -145,9 +153,13 @@ public sealed class G2Process : StochasticProcess
     }
 
     /// <inheritdoc/>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="x0"/> holds fewer values than the state, where QuantLib reads past its end.
+    /// </exception>
     public override Matrix StdDeviation(double t0, Vector x0, double dt)
     {
         ArgumentNullException.ThrowIfNull(x0);
+        CheckState(x0.Size, nameof(x0));
         return G2ProcessStdDeviation(
             xProcess.StdDeviation(t0, x0[0], dt), yProcess.StdDeviation(t0, x0[1], dt), A, B, Rho, dt);
     }

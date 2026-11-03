@@ -33,9 +33,17 @@ public static class MoorePenroseInverseFunctions
     /// max(m, n) · ε · |σ₀|.
     /// </param>
     /// <returns>The n × m inverse.</returns>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="A"/> has no row or no column, where QuantLib reads past its decomposition's arrays.
+    /// </exception>
     public static Matrix MoorePenroseInverse(Matrix A, double? tol = null)
     {
         ArgumentNullException.ThrowIfNull(A);
+        if (!(A.Rows > 0 && A.Columns > 0))
+        {
+            throw new ArgumentException("an empty matrix has no Moore-Penrose inverse", nameof(A));
+        }
+
         if (A.Rows < A.Columns)
         {
             return MatrixFunctions.Transpose(MoorePenroseInverse(MatrixFunctions.Transpose(A), tol));

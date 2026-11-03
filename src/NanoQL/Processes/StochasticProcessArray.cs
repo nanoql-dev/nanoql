@@ -6,6 +6,7 @@
 // Ported to C# from QuantLib and modified by the nanoql Authors.
 
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using NanoQL.Numerics;
 using NanoQL.Time;
 using static NanoQL.Numerics.MatrixFunctions;
@@ -83,9 +84,10 @@ public sealed class StochasticProcessArray : StochasticProcess
 
     /// <summary>The initial values, each process's, written into the caller's span; nothing is allocated.</summary>
     /// <param name="result">The values, of the array's <see cref="Size"/> at least.</param>
-    /// <exception cref="IndexOutOfRangeException"><paramref name="result"/> is shorter than the array.</exception>
+    /// <exception cref="ArgumentException"><paramref name="result"/> is shorter than the array.</exception>
     public override void InitialValues(Span<double> result)
     {
+        CheckResult(result.Length);
         for (int i = 0; i < Size; ++i)
         {
             result[i] = processes[i].X0;
@@ -320,9 +322,27 @@ public sealed class StochasticProcessArray : StochasticProcess
     /// <summary>The i-th process.</summary>
     /// <param name="i">The index.</param>
     /// <returns>The process.</returns>
-    public StochasticProcess1D Process(int i) => processes[i];
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="i"/> isn't one of the processes, where QuantLib reads past its end.
+    /// </exception>
+    public StochasticProcess1D Process(int i)
+    {
+        if ((uint)i >= (uint)processes.Length)
+        {
+            ThrowIndex(i, processes.Length, nameof(i));
+        }
+
+        return processes[i];
+    }
 
     /// <summary>The correlation the array's square root gives back, S·Sᵀ.</summary>
     /// <returns>A new matrix.</returns>
     public Matrix Correlation() => sqrtCorrelation * Transpose(sqrtCorrelation);
+
+    // An index past the array an accessor reads: QuantLib's Array::at text, in a helper, so the accessors
+    // stay small enough to inline.
+    [DoesNotReturn]
+    private static void ThrowIndex(int index, int length, string paramName) =>
+        throw new ArgumentOutOfRangeException(
+            paramName, $"index ({index}) must be less than {length}: array access out of range");
 }

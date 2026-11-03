@@ -132,34 +132,54 @@ public sealed class HybridHestonHullWhiteProcess : StochasticProcess
     public override Vector InitialValues() => new([hestonProcess.S0, hestonProcess.V0, hullWhiteProcess.X0]);
 
     /// <inheritdoc/>
+    /// <exception cref="ArgumentException"><paramref name="result"/> is shorter than the process's size.</exception>
     public override void InitialValues(Span<double> result)
     {
+        CheckResult(result.Length);
         result[0] = hestonProcess.S0;
         result[1] = hestonProcess.V0;
         result[2] = hullWhiteProcess.X0;
     }
 
     /// <inheritdoc/>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="x"/> holds fewer values than the state, where QuantLib reads past its end.
+    /// </exception>
     public override Vector Drift(double t, Vector x)
     {
         ArgumentNullException.ThrowIfNull(x);
+        CheckState(x.Size, nameof(x));
         Vector y0 = hestonOnClock.Drift(t, new Vector([x[0], x[1]]));
         return new Vector([y0[0], y0[1], hullWhiteProcess.Drift(t, x[2])]);
     }
 
     /// <inheritdoc/>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="x0"/> or <paramref name="dx"/> holds fewer values than the state, where QuantLib reads past its
+    /// end.
+    /// </exception>
     public override Vector Apply(Vector x0, Vector dx)
     {
         ArgumentNullException.ThrowIfNull(x0);
         ArgumentNullException.ThrowIfNull(dx);
+        CheckState(x0.Size, nameof(x0));
+        CheckState(dx.Size, nameof(dx));
         Vector yt = hestonOnClock.Apply(new Vector([x0[0], x0[1]]), new Vector([dx[0], dx[1]]));
         return new Vector([yt[0], yt[1], hullWhiteProcess.Apply(x0[2], dx[2])]);
     }
 
     /// <inheritdoc/>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="x"/> holds fewer values than the Heston process's state, where QuantLib reads past its end.
+    /// </exception>
     public override Matrix Diffusion(double t, Vector x)
     {
         ArgumentNullException.ThrowIfNull(x);
+        if (!(x.Size >= 2))
+        {
+            throw new ArgumentException($"{x.Size} values given for the Heston process's state of 2", nameof(x));
+        }
+
         var retVal = new Matrix(3, 3);
 
         Matrix m = hestonOnClock.Diffusion(t, new Vector([x[0], x[1]]));
@@ -181,10 +201,16 @@ public sealed class HybridHestonHullWhiteProcess : StochasticProcess
     /// <inheritdoc/>
     /// <exception cref="NanoQLException">The step's variances aren't positive ("zero or negative variance given"), or
     /// its terminal correlation is invalid.</exception>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="x0"/> holds fewer values than the state, or <paramref name="dw"/> fewer increments than the
+    /// process's factors, where QuantLib reads past its end.
+    /// </exception>
     public override Vector Evolve(double t0, Vector x0, double dt, Vector dw)
     {
         ArgumentNullException.ThrowIfNull(x0);
         ArgumentNullException.ThrowIfNull(dw);
+        CheckState(x0.Size, nameof(x0));
+        CheckIncrements(dw.Size, nameof(dw));
         var retVal = new Vector(3);
         Step(t0, x0.AsSpan(), dt, dw.AsSpan(), retVal.AsSpan(), false);
         return retVal;
@@ -195,17 +221,30 @@ public sealed class HybridHestonHullWhiteProcess : StochasticProcess
     /// <see cref="Evolve(double, Vector, double, Vector)"/>'s bit for bit.</remarks>
     /// <exception cref="NanoQLException">The step's variances aren't positive, or its terminal correlation is
     /// invalid.</exception>
-    public override void Evolve(double t0, ReadOnlySpan<double> x0, double dt, ReadOnlySpan<double> dw, Span<double> result) =>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="x0"/> holds fewer values than the state, or <paramref name="dw"/> fewer increments than the
+    /// process's factors, where QuantLib reads past their end; or <paramref name="result"/> is shorter than the state.
+    /// </exception>
+    public override void Evolve(double t0, ReadOnlySpan<double> x0, double dt, ReadOnlySpan<double> dw, Span<double> result)
+    {
+        CheckState(x0.Length, nameof(x0));
+        CheckIncrements(dw.Length, nameof(dw));
+        CheckResult(result.Length);
         Step(t0, x0, dt, dw, result, true);
+    }
 
     /// <summary>The numeraire at a time and state: the Hull-White zero bond to the forward-measure time over its
     /// initial discount.</summary>
     /// <param name="t">The time.</param>
     /// <param name="x">The state.</param>
     /// <returns>The numeraire's value.</returns>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="x"/> holds fewer values than the state, where QuantLib reads past its end.
+    /// </exception>
     public double Numeraire(double t, Vector x)
     {
         ArgumentNullException.ThrowIfNull(x);
+        CheckState(x.Size, nameof(x));
         return NumeraireAt(t, x[2]);
     }
 

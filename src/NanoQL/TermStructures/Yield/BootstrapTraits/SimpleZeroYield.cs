@@ -123,9 +123,14 @@ public readonly struct SimpleZeroYield : IYieldTraits
     }
 
     /// <inheritdoc/>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="i"/> isn't a point of <paramref name="data"/>, where QuantLib writes past its end.
+    /// </exception>
     public static void UpdateGuess(double[] data, double rate, int i)
     {
         ArgumentNullException.ThrowIfNull(data);
+        ArgumentOutOfRangeException.ThrowIfNegative(i);
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(i, data.Length);
         data[i] = rate;
 
         // first point is updated as well
@@ -136,11 +141,18 @@ public readonly struct SimpleZeroYield : IYieldTraits
     }
 
     /// <inheritdoc/>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="times"/> is empty, or <paramref name="t"/> is past the last time and <paramref name="data"/> is
+    /// empty, where QuantLib reads past their end.
+    /// </exception>
     public static double DiscountImpl(
         ReadOnlySpan<double> times, ReadOnlySpan<double> data, Interpolation interpolation, double t) =>
         InterpolatedSimpleZeroCurveFormula.DiscountImpl(times, data, interpolation, t);
 
     /// <inheritdoc/>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="dates"/> is empty, where QuantLib reads past its end.
+    /// </exception>
     public static Date MaxDate(ReadOnlySpan<Date> dates, Date? maxDate) =>
         InterpolatedSimpleZeroCurveFormula.MaxDate(dates, maxDate);
 

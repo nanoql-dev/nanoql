@@ -65,9 +65,14 @@ public sealed class AmericanPathPricer : IEarlyExercisePathPricer<MonteCarloPath
     /// <param name="path">The path.</param>
     /// <param name="t">The time step's index.</param>
     /// <returns>The state.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="t"/> isn't a point of the path, where QuantLib reads past its end.
+    /// </exception>
     public double State(MonteCarloPath path, int t)
     {
         ArgumentNullException.ThrowIfNull(path);
+        ArgumentOutOfRangeException.ThrowIfNegative(t);
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(t, path.Length);
 
         // scale values of the underlying
         // to increase numerical stability
@@ -78,6 +83,9 @@ public sealed class AmericanPathPricer : IEarlyExercisePathPricer<MonteCarloPath
     /// <param name="path">The path.</param>
     /// <param name="t">The time step's index.</param>
     /// <returns>The exercise value.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="t"/> isn't a point of the path, where QuantLib reads past its end.
+    /// </exception>
     public double Evaluate(MonteCarloPath path, int t) => Payoff(State(path, t));
 
     /// <summary>The basis: the polynomials of the state, then the payoff of the state.</summary>

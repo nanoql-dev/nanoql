@@ -91,9 +91,14 @@ public readonly struct AffineHazardRate : IDefaultProbabilityTraits
     }
 
     /// <inheritdoc/>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="i"/> isn't a point of <paramref name="data"/>, where QuantLib writes past its end.
+    /// </exception>
     public static void UpdateGuess(double[] data, double rate, int i)
     {
         ArgumentNullException.ThrowIfNull(data);
+        ArgumentOutOfRangeException.ThrowIfNegative(i);
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(i, data.Length);
         data[i] = rate;
 
         // first point is updated as well
@@ -136,7 +141,10 @@ public readonly struct AffineHazardRate : IDefaultProbabilityTraits
         throw NoModel();
 
     /// <inheritdoc/>
-    public static Date MaxDate(ReadOnlySpan<Date> dates) => dates[^1];
+    /// <exception cref="ArgumentException">
+    /// <paramref name="dates"/> is empty, where QuantLib reads past its end.
+    /// </exception>
+    public static Date MaxDate(ReadOnlySpan<Date> dates) => CurveData.Last(dates, nameof(dates));
 
     /// <summary>The survival probability: the deterministic hazard rate's survival, flat past the last node, times the
     /// model's bond price at its initial intensity.</summary>
@@ -146,6 +154,10 @@ public readonly struct AffineHazardRate : IDefaultProbabilityTraits
     /// <param name="t">The time.</param>
     /// <param name="model">The model.</param>
     /// <returns>The probability.</returns>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="t"/> isn't 0 and <paramref name="times"/> is empty, or <paramref name="t"/> is past the last
+    /// time and <paramref name="data"/> is empty, where QuantLib reads past their end.
+    /// </exception>
     public static double SurvivalProbabilityImpl(
         ReadOnlySpan<double> times, ReadOnlySpan<double> data, Interpolation interpolation, double t, OneFactorAffineModel model)
     {
@@ -168,6 +180,10 @@ public readonly struct AffineHazardRate : IDefaultProbabilityTraits
     /// <param name="t">The time.</param>
     /// <param name="model">The model.</param>
     /// <returns>The density.</returns>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="times"/> is empty, or <paramref name="t"/> is past the last time and <paramref name="data"/> is
+    /// empty, where QuantLib reads past their end.
+    /// </exception>
     public static double DefaultDensityImpl(
         ReadOnlySpan<double> times, ReadOnlySpan<double> data, Interpolation interpolation, double t, OneFactorAffineModel model)
     {
@@ -184,6 +200,10 @@ public readonly struct AffineHazardRate : IDefaultProbabilityTraits
     /// <param name="curve">The curve.</param>
     /// <param name="model">The model.</param>
     /// <returns>The rate.</returns>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="times"/> is empty, or <paramref name="t"/> is past the last time and <paramref name="data"/> is
+    /// empty, where QuantLib reads past their end.
+    /// </exception>
     public static double HazardRateImpl(
         ReadOnlySpan<double> times,
         ReadOnlySpan<double> data,
@@ -202,14 +222,17 @@ public readonly struct AffineHazardRate : IDefaultProbabilityTraits
 
     // The deterministic hazard rate's integral from 0, flat past the last node.
     internal static double Integral(ReadOnlySpan<double> times, ReadOnlySpan<double> data, Interpolation interpolation, double t) =>
-        t <= times[^1]
+        t <= CurveData.Last(times, nameof(times))
             ? interpolation.Primitive(t, true)
-            : interpolation.Primitive(times[^1], true) + (data[^1] * (t - times[^1]));
+            : interpolation.Primitive(CurveData.Last(times, nameof(times)), true)
+                + (CurveData.Last(data, nameof(data)) * (t - CurveData.Last(times, nameof(times))));
 
     internal static double Rate(ReadOnlySpan<double> times, ReadOnlySpan<double> data, Interpolation interpolation, double t)
     {
         ArgumentNullException.ThrowIfNull(interpolation);
-        return t <= times[^1] ? interpolation.Evaluate(t, true) : data[^1];
+        return t <= CurveData.Last(times, nameof(times))
+            ? interpolation.Evaluate(t, true)
+            : CurveData.Last(data, nameof(data));
     }
 
     private static NanoQLException NoModel() => new("the affine hazard-rate traits take a model: build the curve on one");

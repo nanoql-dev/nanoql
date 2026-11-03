@@ -60,6 +60,10 @@ public class TripleBandLinearOp : FdmLinearOp
 
     private readonly double[] temp;
 
+    // Whether a point's neighbour lies outside the grid, as on a direction of one point, which QuantLib's reflection
+    // sends past it: the operator stays built, as QuantLib's is, and refuses what would read there.
+    private readonly bool neighbourOutside;
+
     /// <summary>Initializes a new instance of the <see cref="TripleBandLinearOp"/> class, its bands zero.</summary>
     /// <param name="direction">The direction.</param>
     /// <param name="mesher">The mesher.</param>
@@ -105,6 +109,8 @@ public class TripleBandLinearOp : FdmLinearOp
 
             reverseIndex[newIndex] = i;
         }
+
+        neighbourOutside = Outside(i0) || Outside(i2);
     }
 
     /// <summary>Initializes a new instance of the <see cref="TripleBandLinearOp"/> class as a copy of
@@ -123,10 +129,25 @@ public class TripleBandLinearOp : FdmLinearOp
         diag = (double[])m.diag.Clone();
         upper = (double[])m.upper.Clone();
         temp = new double[m.temp.Length];
+        neighbourOutside = m.neighbourOutside;
     }
 
     /// <summary>Gets the operator's size: the layout's number of points.</summary>
     private int N => lower.Length;
+
+    // Whether an index of a point's neighbour lies outside the grid.
+    private static bool Outside(int[] index)
+    {
+        foreach (int k in index)
+        {
+            if (k < 0 || k >= index.Length)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     /// <summary>A copy of the operator: QuantLib's copy constructor.</summary>
     /// <returns>The copy.</returns>
@@ -134,11 +155,20 @@ public class TripleBandLinearOp : FdmLinearOp
 
     /// <inheritdoc/>
     /// <exception cref="ArgumentException"><paramref name="r"/>'s length isn't the layout's size.</exception>
+    /// <exception cref="ArgumentException">
+    /// The operator's direction has one point, whose neighbours QuantLib reads past the grid.
+    /// </exception>
     public override void Apply(ReadOnlySpan<double> r, Span<double> result)
     {
         if (!(r.Length == N))
         {
             throw new ArgumentException("inconsistent length of r", nameof(r));
+        }
+
+        if (neighbourOutside)
+        {
+            throw new ArgumentException(
+                "a triple-band apply needs at least two points in its direction, not 1", nameof(r));
         }
 
         for (int i = 0; i < N; ++i)
@@ -383,8 +413,17 @@ public class TripleBandLinearOp : FdmLinearOp
     }
 
     /// <inheritdoc/>
+    /// <exception cref="InvalidOperationException">
+    /// The operator's direction has one point, whose neighbours QuantLib writes past the matrix.
+    /// </exception>
     public override SparseMatrix ToMatrix()
     {
+        if (neighbourOutside)
+        {
+            throw new InvalidOperationException(
+                "a triple-band matrix needs at least two points in its direction, not 1");
+        }
+
         int n = N;
 
         var retVal = new SparseMatrix(n, n, 3 * n);

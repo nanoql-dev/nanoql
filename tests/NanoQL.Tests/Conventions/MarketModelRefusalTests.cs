@@ -440,6 +440,25 @@ public class MarketModelRefusalTests
         Check<ArgumentOutOfRangeException>(() => new BasisIncompleteOrdered(-1), "euclideanDimension", "");
     }
 
+    [Fact]
+    public void ThePathwiseDiscountersStepAndColumnsRefusals()
+    {
+        // The discounter reads the step's row of the discounts and its period's two columns, unchecked in QuantLib: a
+        // step past the rows or a negative one, and discounts that don't reach the column after the period's start.
+        var discounter = new MarketModelPathwiseDiscounter(1.25, Times);
+        var libor = new Matrix(2, 3, 0.03);
+        double[] factors = new double[4];
+        Check<ArgumentOutOfRangeException>(
+            () => discounter.GetFactors(libor, new Matrix(2, 4, 0.98), 2, factors), "currentStep", "currentStep ('2') must be less than '2'.");
+        Check<ArgumentOutOfRangeException>(
+            () => discounter.GetFactors(libor, new Matrix(2, 4, 0.98), -1, factors), "currentStep", "currentStep ('-1') must be a non-negative value.");
+        Check<ArgumentException>(
+            () => discounter.GetFactors(libor, new Matrix(2, 2, 0.98), 0, factors), "discounts", "the discounts hold 2 columns, which don't reach column 2");
+
+        discounter.GetFactors(libor, new Matrix(2, 3, 0.98), 1, factors);
+        Assert.All(factors, f => Assert.True(double.IsFinite(f)));
+    }
+
     // The refusal's type exactly, its parameter, and its text (an ArgumentException's own suffix after it).
     private static void Check<T>(Action a, string paramName, string text)
         where T : ArgumentException

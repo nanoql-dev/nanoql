@@ -88,9 +88,14 @@ public readonly struct YoYInflationTraits : IYoYInflationTraits
     }
 
     /// <inheritdoc/>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="i"/> isn't a point of <paramref name="data"/>, where QuantLib writes past its end.
+    /// </exception>
     public static void UpdateGuess(double[] data, double level, int i)
     {
         ArgumentNullException.ThrowIfNull(data);
+        ArgumentOutOfRangeException.ThrowIfNegative(i);
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(i, data.Length);
         data[i] = level;
     }
 
@@ -104,5 +109,9 @@ public readonly struct YoYInflationTraits : IYoYInflationTraits
 
     /// <inheritdoc/>
     /// <remarks>The latest date the helpers need, or else the last node's.</remarks>
-    public static Date MaxDate(ReadOnlySpan<Date> dates, Date? maxDate) => maxDate ?? dates[^1];
+    /// <exception cref="ArgumentException">
+    /// <paramref name="maxDate"/> isn't given and <paramref name="dates"/> is empty, where QuantLib reads past its end.
+    /// </exception>
+    public static Date MaxDate(ReadOnlySpan<Date> dates, Date? maxDate) =>
+        maxDate ?? CurveData.Last(dates, nameof(dates));
 }

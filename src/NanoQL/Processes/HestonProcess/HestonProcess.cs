@@ -129,8 +129,10 @@ public class HestonProcess : StochasticProcess
     public override Vector InitialValues() => new([S0, V0]);
 
     /// <inheritdoc/>
+    /// <exception cref="ArgumentException"><paramref name="result"/> is shorter than the process's size.</exception>
     public override void InitialValues(Span<double> result)
     {
+        CheckResult(result.Length);
         result[0] = S0;
         result[1] = V0;
     }
@@ -181,9 +183,13 @@ public class HestonProcess : StochasticProcess
     }
 
     /// <inheritdoc/>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="x"/> holds fewer values than the state, where QuantLib reads past its end.
+    /// </exception>
     public override Vector Drift(double t, Vector x)
     {
         ArgumentNullException.ThrowIfNull(x);
+        CheckState(x.Size, nameof(x));
         double vol = x[1] > 0.0 ? Math.Sqrt(x[1])
             : scheme == HestonProcessDiscretization.Reflection ? -Math.Sqrt(-x[1])
             : 0.0;
@@ -201,9 +207,13 @@ public class HestonProcess : StochasticProcess
     /// <remarks>The square root of the correlation matrix times the volatilities: [[√v, 0], [ρσ√v, √(1 − ρ²)σ√v]], a
     /// variance at or below zero read as 1e-8 (Reflection's as its negative root), so the correlation still
     /// shows.</remarks>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="x"/> holds fewer values than the state, where QuantLib reads past its end.
+    /// </exception>
     public override Matrix Diffusion(double t, Vector x)
     {
         ArgumentNullException.ThrowIfNull(x);
+        CheckState(x.Size, nameof(x));
         var tmp = new Matrix(2, 2);
         double vol = x[1] > 0.0 ? Math.Sqrt(x[1])
             : scheme == HestonProcessDiscretization.Reflection ? -Math.Sqrt(-x[1])
@@ -220,10 +230,16 @@ public class HestonProcess : StochasticProcess
 
     /// <inheritdoc/>
     /// <remarks>The underlying moves by its exponential, the variance additively.</remarks>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="x0"/> or <paramref name="dx"/> holds fewer values than the state, where QuantLib reads past its
+    /// end.
+    /// </exception>
     public override Vector Apply(Vector x0, Vector dx)
     {
         ArgumentNullException.ThrowIfNull(x0);
         ArgumentNullException.ThrowIfNull(dx);
+        CheckState(x0.Size, nameof(x0));
+        CheckState(dx.Size, nameof(dx));
         return new Vector([x0[0] * Math.Exp(dx[0]), x0[1] + dx[1]]);
     }
 
@@ -330,10 +346,16 @@ public class HestonProcess : StochasticProcess
     /// The quadratic-exponential martingale correction has no solution ("illegal value"), or the variance's law can't
     /// be inverted.
     /// </exception>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="x0"/> holds fewer values than the state, or <paramref name="dw"/> fewer increments than the
+    /// process's factors, where QuantLib reads past its end.
+    /// </exception>
     public override Vector Evolve(double t0, Vector x0, double dt, Vector dw)
     {
         ArgumentNullException.ThrowIfNull(x0);
         ArgumentNullException.ThrowIfNull(dw);
+        CheckState(x0.Size, nameof(x0));
+        CheckIncrements(dw.Size, nameof(dw));
         return EvolveHeston(t0, x0, dt, dw);
     }
 
@@ -437,8 +459,15 @@ public class HestonProcess : StochasticProcess
     /// The quadratic-exponential martingale correction has no solution ("illegal value"), or the variance's law can't
     /// be inverted.
     /// </exception>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="x0"/> holds fewer values than the state, or <paramref name="dw"/> fewer increments than the
+    /// process's factors, where QuantLib reads past their end; or <paramref name="result"/> is shorter than the state.
+    /// </exception>
     public override void Evolve(double t0, ReadOnlySpan<double> x0, double dt, ReadOnlySpan<double> dw, Span<double> result)
     {
+        CheckState(x0.Length, nameof(x0));
+        CheckIncrements(dw.Length, nameof(dw));
+        CheckResult(result.Length);
         double vol, vol2, mu, nu;
 
         double sdt = Math.Sqrt(dt);

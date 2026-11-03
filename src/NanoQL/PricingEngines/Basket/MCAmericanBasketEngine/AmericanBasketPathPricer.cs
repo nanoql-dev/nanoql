@@ -89,6 +89,9 @@ public sealed class AmericanBasketPathPricer : IEarlyExercisePathPricer<MultiPat
     /// <returns>The state, a new vector.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="path"/> is <see langword="null"/>.</exception>
     /// <exception cref="NanoQLException">The paths' number isn't the pricer's ("invalid multipath").</exception>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="t"/> isn't a point of the path, where QuantLib reads past its end.
+    /// </exception>
     public Vector State(MultiPath path, int t)
     {
         ArgumentNullException.ThrowIfNull(path);
@@ -97,6 +100,8 @@ public sealed class AmericanBasketPathPricer : IEarlyExercisePathPricer<MultiPat
             throw new NanoQLException("invalid multipath");
         }
 
+        ArgumentOutOfRangeException.ThrowIfNegative(t);
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(t, path.PathSize());
         var tmp = new Vector(assetNumber);
         for (int i = 0; i < assetNumber; ++i)
         {
@@ -112,6 +117,9 @@ public sealed class AmericanBasketPathPricer : IEarlyExercisePathPricer<MultiPat
     /// <returns>The exercise value.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="path"/> is <see langword="null"/>.</exception>
     /// <exception cref="NanoQLException">The paths' number isn't the pricer's.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="t"/> isn't a point of the path, where QuantLib reads past its end.
+    /// </exception>
     public double Evaluate(MultiPath path, int t) => Payoff(State(path, t));
 
     /// <summary>The basis: the polynomials of the state, then the payoff of the state.</summary>

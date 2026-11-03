@@ -73,16 +73,27 @@ public sealed class KlugeExtOUProcess : StochasticProcess
     }
 
     /// <inheritdoc/>
+    /// <exception cref="ArgumentException"><paramref name="result"/> is shorter than the process's size.</exception>
     public override void InitialValues(Span<double> result)
     {
+        CheckResult(result.Length);
         KlugeProcess.InitialValues(result[..KlugeProcess.Size]);
         result[Size - 1] = ExtOUProcess.X0;
     }
 
     /// <inheritdoc/>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="x"/> holds fewer values than the jump process's state, where QuantLib reads past its end.
+    /// </exception>
     public override Vector Drift(double t, Vector x)
     {
         ArgumentNullException.ThrowIfNull(x);
+        if (!(x.Size >= KlugeProcess.Size))
+        {
+            throw new ArgumentException(
+                $"{x.Size} values given for the jump process's state of {KlugeProcess.Size}", nameof(x));
+        }
+
         var retVal = new Vector(Size);
         Vector mu = KlugeProcess.Drift(t, x);
         mu.AsSpan().CopyTo(retVal.AsSpan());
@@ -91,9 +102,11 @@ public sealed class KlugeExtOUProcess : StochasticProcess
     }
 
     /// <inheritdoc/>
+    /// <exception cref="ArgumentException"><paramref name="x"/> holds fewer values than the state.</exception>
     public override Matrix Diffusion(double t, Vector x)
     {
         ArgumentNullException.ThrowIfNull(x);
+        CheckState(x.Size, nameof(x));
         var retVal = new Matrix(Size, Factors, 0.0);
         double vol = ExtOUProcess.Diffusion(t, x[x.Size - 1]);
         retVal[0, 0] = KlugeProcess.Diffusion(t, x)[0, 0];
@@ -115,8 +128,26 @@ public sealed class KlugeExtOUProcess : StochasticProcess
     }
 
     /// <inheritdoc/>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="x0"/> holds fewer values than the jump process's state, or <paramref name="dw"/> fewer
+    /// increments than its factors, where QuantLib reads past their end; or <paramref name="result"/> is shorter than
+    /// the state.
+    /// </exception>
     public override void Evolve(double t0, ReadOnlySpan<double> x0, double dt, ReadOnlySpan<double> dw, Span<double> result)
     {
+        if (!(x0.Length >= KlugeProcess.Size))
+        {
+            throw new ArgumentException(
+                $"{x0.Length} values given for the jump process's state of {KlugeProcess.Size}", nameof(x0));
+        }
+
+        if (!(dw.Length >= KlugeProcess.Factors))
+        {
+            throw new ArgumentException(
+                $"{dw.Length} increments given for the jump process's {KlugeProcess.Factors} factors", nameof(dw));
+        }
+
+        CheckResult(result.Length);
         int n = KlugeProcess.Size;
         KlugeProcess.Evolve(t0, x0[..n], dt, dw[..KlugeProcess.Factors], result[..n]);
         double dz = (dw[^1] * sqrtMRho) + (dw[0] * Rho);

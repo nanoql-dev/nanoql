@@ -9,10 +9,23 @@ namespace NanoQL.Tests.Conventions;
 /// <see cref="Vector"/> and <see cref="Matrix"/> are working types (docs/porting-playbook.md §2.5): a compound
 /// assignment changes the object in place, so an alias sees it, as QuantLib's <c>operator+=</c> changes its target,
 /// while a binary operator returns a new object; and <c>Clone()</c> is a deep copy, equal to the original until either
-/// changes.
+/// changes. An empty vector has no first or last element, which QuantLib reads past its end.
 /// </summary>
 public class VectorMatrixTests
 {
+    [Fact]
+    public void AnEmptyVectorHasNoFrontOrBack()
+    {
+        var empty = new Vector(0);
+        Assert.Equal("the vector is empty", Assert.Throws<InvalidOperationException>(() => empty.Front()).Message);
+        Assert.Equal("the vector is empty", Assert.Throws<InvalidOperationException>(() => empty.Back()).Message);
+
+        var v = new Vector([1.0, 2.0]);
+        v.Front() = 3.0;
+        v.Back() = 4.0;
+        Assert.Equal([3.0, 4.0], v.ToArray());
+    }
+
     [Fact]
     public void VectorCompoundAssignmentInPlaceAndCloneDeep()
     {

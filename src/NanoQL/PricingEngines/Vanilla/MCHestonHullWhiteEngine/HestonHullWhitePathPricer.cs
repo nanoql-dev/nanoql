@@ -36,9 +36,17 @@ public sealed class HestonHullWhitePathPricer : PathPricer<MultiPath>
 
     /// <inheritdoc/>
     /// <exception cref="NanoQLException">The path is empty.</exception>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="path"/> holds fewer than the hybrid's three assets, where QuantLib reads past its end.
+    /// </exception>
     public override double Evaluate(MultiPath path)
     {
         ArgumentNullException.ThrowIfNull(path);
+        if (!(path.AssetNumber >= 3))
+        {
+            throw new ArgumentException($"a path of {path.AssetNumber} assets given for the hybrid's 3", nameof(path));
+        }
+
         if (!(path.PathSize() > 0))
         {
             throw new NanoQLException("the path cannot be empty");

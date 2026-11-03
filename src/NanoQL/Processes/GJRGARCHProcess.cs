@@ -153,16 +153,22 @@ public sealed class GJRGARCHProcess : StochasticProcess
     public override Vector InitialValues() => new([S0, DaysPerYear * V0]);
 
     /// <inheritdoc/>
+    /// <exception cref="ArgumentException"><paramref name="result"/> is shorter than the process's size.</exception>
     public override void InitialValues(Span<double> result)
     {
+        CheckResult(result.Length);
         result[0] = S0;
         result[1] = DaysPerYear * V0;
     }
 
     /// <inheritdoc/>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="x"/> holds fewer values than the state, where QuantLib reads past its end.
+    /// </exception>
     public override Vector Drift(double t, Vector x)
     {
         ArgumentNullException.ThrowIfNull(x);
+        CheckState(x.Size, nameof(x));
         double vol = x[1] > 0.0 ? Math.Sqrt(x[1])
             : scheme == GJRGARCHProcessDiscretization.Reflection ? -Math.Sqrt(-x[1])
             : 0.0;
@@ -176,9 +182,13 @@ public sealed class GJRGARCHProcess : StochasticProcess
     }
 
     /// <inheritdoc/>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="x"/> holds fewer values than the state, where QuantLib reads past its end.
+    /// </exception>
     public override Matrix Diffusion(double t, Vector x)
     {
         ArgumentNullException.ThrowIfNull(x);
+        CheckState(x.Size, nameof(x));
 
         // the correlation matrix is | 1 rho; rho 1 |, whose square root (which is used here) is | 1 0; rho sqrt(1 - rho^2) |
         var tmp = new Matrix(2, 2);
@@ -195,18 +205,30 @@ public sealed class GJRGARCHProcess : StochasticProcess
     }
 
     /// <inheritdoc/>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="x0"/> or <paramref name="dx"/> holds fewer values than the state, where QuantLib reads past its
+    /// end.
+    /// </exception>
     public override Vector Apply(Vector x0, Vector dx)
     {
         ArgumentNullException.ThrowIfNull(x0);
         ArgumentNullException.ThrowIfNull(dx);
+        CheckState(x0.Size, nameof(x0));
+        CheckState(dx.Size, nameof(dx));
         return new Vector([x0[0] * Math.Exp(dx[0]), x0[1] + dx[1]]);
     }
 
     /// <inheritdoc/>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="x0"/> holds fewer values than the state, or <paramref name="dw"/> fewer increments than the
+    /// process's factors, where QuantLib reads past its end.
+    /// </exception>
     public override Vector Evolve(double t0, Vector x0, double dt, Vector dw)
     {
         ArgumentNullException.ThrowIfNull(x0);
         ArgumentNullException.ThrowIfNull(dw);
+        CheckState(x0.Size, nameof(x0));
+        CheckIncrements(dw.Size, nameof(dw));
         var retVal = new Vector(2);
         Step(x0.AsSpan(), dt, dw.AsSpan(), retVal.AsSpan(), RiskFreeForwardRate(t0, t0 + dt) - DividendRate(t0, t0 + dt));
         return retVal;
@@ -215,8 +237,17 @@ public sealed class GJRGARCHProcess : StochasticProcess
     /// <inheritdoc/>
     /// <remarks>QuantLib's arithmetic without allocating, so the values are
     /// <see cref="Evolve(double, Vector, double, Vector)"/>'s bit for bit.</remarks>
-    public override void Evolve(double t0, ReadOnlySpan<double> x0, double dt, ReadOnlySpan<double> dw, Span<double> result) =>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="x0"/> holds fewer values than the state, or <paramref name="dw"/> fewer increments than the
+    /// process's factors, where QuantLib reads past their end; or <paramref name="result"/> is shorter than the state.
+    /// </exception>
+    public override void Evolve(double t0, ReadOnlySpan<double> x0, double dt, ReadOnlySpan<double> dw, Span<double> result)
+    {
+        CheckState(x0.Length, nameof(x0));
+        CheckIncrements(dw.Length, nameof(dw));
+        CheckResult(result.Length);
         Step(x0, dt, dw, result, ForwardDriftInPlace(t0, dt));
+    }
 
     /// <summary>The time of a date: the risk-free curve's year fraction from its reference date, QuantLib's.</summary>
     /// <param name="date">The date.</param>

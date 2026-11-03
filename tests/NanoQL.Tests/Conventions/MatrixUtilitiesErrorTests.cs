@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 The nanoql Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using NanoQL.Experimental;
 using NanoQL.Numerics;
 
 namespace NanoQL.Tests.Conventions;
@@ -9,7 +10,8 @@ namespace NanoQL.Tests.Conventions;
 /// The exception types and messages of the matrix utilities' refusals (playbook §2), which a vector's
 /// <c>{"throws": true}</c> can't tell apart: a matrix or vector argument that doesn't fit throws an
 /// <see cref="ArgumentException"/> naming it, a value outside its range an <see cref="ArgumentOutOfRangeException"/>,
-/// each with QuantLib's text; a decomposition that doesn't converge, a <see cref="NanoQLException"/>.
+/// each with QuantLib's text, or nanoql's where QuantLib reads past an empty matrix; a decomposition that doesn't
+/// converge, a <see cref="NanoQLException"/>.
 /// </summary>
 public class MatrixUtilitiesErrorTests
 {
@@ -26,6 +28,25 @@ public class MatrixUtilitiesErrorTests
         // A NaN off the diagonal stops every rotation (its comparisons are false), so the loop runs out.
         var nan = new Matrix(new[,] { { 1.0, double.NaN }, { double.NaN, 1.0 } });
         Assert.Equal("Too many iterations (100) reached", Assert.Throws<NanoQLException>(() => new SymmetricSchurDecomposition(nan)).Message);
+    }
+
+    [Fact]
+    public void AnEmptyMatrixHasNoSingularValueDecomposition()
+    {
+        // QuantLib's decomposition reads its arrays' first elements on a matrix of no row or no column, as does the
+        // Moore-Penrose inverse through it; a one-by-one matrix decomposes.
+        foreach (Matrix empty in new[] { new Matrix(0, 3), new Matrix(3, 0), new Matrix() })
+        {
+            ArgumentException e = Assert.Throws<ArgumentException>(() => new SVD(empty));
+            Assert.Equal("matrix", e.ParamName);
+            Assert.StartsWith("an empty matrix has no decomposition", e.Message, StringComparison.Ordinal);
+            e = Assert.Throws<ArgumentException>(() => MoorePenroseInverseFunctions.MoorePenroseInverse(empty));
+            Assert.Equal("A", e.ParamName);
+            Assert.StartsWith("an empty matrix has no Moore-Penrose inverse", e.Message, StringComparison.Ordinal);
+        }
+
+        Assert.Equal([2.0], new SVD(new Matrix(new[,] { { 2.0 } })).SingularValues().ToArray());
+        Assert.Equal(0.5, MoorePenroseInverseFunctions.MoorePenroseInverse(new Matrix(new[,] { { 2.0 } }))[0, 0], 15);
     }
 
     [Fact]

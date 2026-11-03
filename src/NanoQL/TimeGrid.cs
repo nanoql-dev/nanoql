@@ -6,6 +6,7 @@
 // Ported to C# from QuantLib and modified by the nanoql Authors.
 
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using NanoQL.Numerics;
 
@@ -204,7 +205,21 @@ public sealed class TimeGrid
     /// <summary>Gets the time at an index.</summary>
     /// <param name="i">The index.</param>
     /// <returns>The time.</returns>
-    public double this[int i] => times[i];
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="i"/> isn't a point of the grid, where QuantLib reads past its end.
+    /// </exception>
+    public double this[int i]
+    {
+        get
+        {
+            if ((uint)i >= (uint)times.Length)
+            {
+                ThrowIndex(i, times.Length, nameof(i));
+            }
+
+            return times[i];
+        }
+    }
 
     /// <summary>The index of a time on the grid: the closest time's, if <paramref name="t"/> is close enough to it.</summary>
     /// <param name="t">The time.</param>
@@ -303,7 +318,18 @@ public sealed class TimeGrid
     /// <summary>The length of the step that starts at index <paramref name="i"/>.</summary>
     /// <param name="i">The index, from 0 to <see cref="Size"/> − 2.</param>
     /// <returns>The step's length.</returns>
-    public double Dt(int i) => dt[i];
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="i"/> isn't a step of the grid, where QuantLib reads past its end.
+    /// </exception>
+    public double Dt(int i)
+    {
+        if ((uint)i >= (uint)dt.Length)
+        {
+            ThrowIndex(i, dt.Length, nameof(i));
+        }
+
+        return dt[i];
+    }
 
     /// <summary>The time at an index, checked.</summary>
     /// <param name="i">The index.</param>
@@ -430,4 +456,11 @@ public sealed class TimeGrid
 
         return first;
     }
+
+    // An index past the array an accessor reads: QuantLib's Array::at text, in a helper, so the accessors
+    // stay small enough to inline.
+    [DoesNotReturn]
+    private static void ThrowIndex(int index, int length, string paramName) =>
+        throw new ArgumentOutOfRangeException(
+            paramName, $"index ({index}) must be less than {length}: array access out of range");
 }

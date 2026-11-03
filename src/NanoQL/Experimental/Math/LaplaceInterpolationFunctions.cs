@@ -25,6 +25,10 @@ public static class LaplaceInterpolationFunctions
     /// <param name="maxIterMultiplier">BiCGstab's iterations, per grid point.</param>
     /// <returns>The filled copy.</returns>
     /// <exception cref="NanoQLException">BiCGstab fails to converge, with its text.</exception>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="x"/> or <paramref name="y"/> is given with another length than <paramref name="A"/>'s columns or
+    /// rows, where QuantLib reads past one or the other.
+    /// </exception>
     public static Matrix LaplaceInterpolation(
         Matrix A,
         IReadOnlyList<double>? x = null,
@@ -35,6 +39,16 @@ public static class LaplaceInterpolationFunctions
         ArgumentNullException.ThrowIfNull(A);
         IReadOnlyList<double> rows = y is null || y.Count == 0 ? [.. Enumerable.Range(0, A.Rows).Select(i => (double)i)] : y;
         IReadOnlyList<double> columns = x is null || x.Count == 0 ? [.. Enumerable.Range(0, A.Columns).Select(i => (double)i)] : x;
+
+        if (!(rows.Count == A.Rows))
+        {
+            throw new ArgumentException($"{rows.Count} y values given for {A.Rows} rows", nameof(y));
+        }
+
+        if (!(columns.Count == A.Columns))
+        {
+            throw new ArgumentException($"{columns.Count} x values given for {A.Columns} columns", nameof(x));
+        }
 
         Matrix copy = A.Clone();
         var interpolation = new LaplaceInterpolation(
