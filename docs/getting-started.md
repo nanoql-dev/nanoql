@@ -41,4 +41,5 @@ any thread.
 - [The stateless design](stateless.md): rebuilding, memoizing and pricing scenarios in parallel.
 - Coming from QuantLib-Python or QLNet: [from QuantLib-Python](migration/from-quantlib-python.md),
   [from QLNet](migration/from-qlnet.md).
-- Beyond C#: [the bindings](bindings.md) for Python, C, C++ and Java, and [the Excel add-in](excel.md).
+- Beyond C#: [the bindings](bindings.md) for Python and for C, which any language that calls C can use, and
+  [the Excel add-in](excel.md).

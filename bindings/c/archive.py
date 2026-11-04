@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: 2026 The nanoql Authors
 # SPDX-License-Identifier: Apache-2.0
-"""Assembles the C and C++ archive (docs/bindings.md, "C and C++"): include/ (nanoql.h and nanoql.hpp), lib/ (the
+"""Assembles the C archive (docs/bindings.md, "C and C++"): include/ (nanoql.h, which C++ includes as it is), lib/ (the
 library, and its import library on Windows) and the notices (LICENSE, NOTICE, THIRD_PARTY_NOTICES.md, and the .NET
 runtime's LICENSE.TXT and THIRD-PARTY-NOTICES.TXT, which Native AOT compiles into the library), in one folder,
 nanoql-<version>-<rid>-c-api, zipped on Windows and a .tar.xz elsewhere. The symbols ship apart.
@@ -21,7 +21,7 @@ import zipfile
 HERE = pathlib.Path(__file__).resolve().parent
 REPO = HERE.parent.parent
 LIBRARIES = {"win": ["nanoql.dll", "nanoql.lib"], "linux": ["libnanoql.so"], "osx": ["libnanoql.dylib"]}
-HEADERS = ["nanoql.h", "nanoql.hpp"]
+HEADERS = ["nanoql.h"]
 NOTICES = ["LICENSE", "NOTICE", "THIRD_PARTY_NOTICES.md"]
 
 

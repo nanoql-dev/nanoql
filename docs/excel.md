@@ -21,7 +21,8 @@ types a desk's tasks need, listed by task. This page gives its rules, and how to
 ## Installing
 
 A release's `nanoql-excel-<version>-win-x64.zip` holds the two add-ins, nanoql's `LICENSE`, `NOTICE` and
-`THIRD_PARTY_NOTICES.md` (with Excel-DNA's and .NET's notices, whose code each `.xll` carries), and a README.
+`THIRD_PARTY_NOTICES.md` (with Excel-DNA's and .NET's notices, whose code each `.xll` carries), a README, and the
+example workbooks with their conventions file under `examples/` (Example workbooks, below).
 
 - **What it needs:** 64-bit Excel for Microsoft 365 on Windows x64, and the .NET 10 Desktop Runtime, x64. Without the
   runtime, the add-in says so when it loads.
@@ -35,8 +36,8 @@ A release's `nanoql-excel-<version>-win-x64.zip` holds the two add-ins, nanoql's
 
 ## Example workbooks
 
-Five workbooks in [bindings/excel/examples/](../bindings/excel/examples/) show the add-in at work, each on one sheet,
-its inputs in cells and its results named:
+Five workbooks in [bindings/excel/examples/](../bindings/excel/examples/), and in the release's zip under `examples/`,
+show the add-in at work, each on one sheet, its inputs in cells and its results named:
 
 - `curve.xlsx`: a Euribor 6M curve bootstrapped from deposits and swaps, read as discounts, zero rates and forwards;
 - `swap.xlsx`: Euribor and €STR swaps on that curve;
@@ -66,7 +67,9 @@ silently in the same Excel, its functions or nanoql's `#NAME?`:
 
 ## The tool: nanoql-bind excel
 
-In the repository, `dotnet run --project src/NanoQL.Bind -c Release -- excel <command>` runs it:
+In the repository, `dotnet run --project src/NanoQL.Bind -c Release -- excel <command>` runs it; outside it, the tool
+installed from NuGet runs `generate` and `build` from the defaults it carries, and refuses `update`, `check`, `package`
+and `--test-exports`, which work on the repository's own files ([bindings.md](bindings.md), the tool):
 
 | Command | What it does |
 |---|---|
@@ -74,7 +77,7 @@ In the repository, `dotnet run --project src/NanoQL.Bind -c Release -- excel <co
 | `check` | regenerates the surface into memory and compares its bytes with the checked-in file; checks its names are distinct regardless of case, none a cell reference, none the add-in's own, none over 255 characters |
 | `generate --out <folder>` | writes a build's generated C#, its surface and its repro templates alone |
 | `build --out <folder>` | generates a build into an Excel-DNA project in `<folder>`, builds it and packs its `.xll` there |
-| `package --out <folder>` | builds nanoql's two add-ins and writes the release's zip, `nanoql-excel-<version>-win-x64.zip`, and its symbols zip there |
+| `package --out <folder>` | builds nanoql's two add-ins and writes the release's zip, `nanoql-excel-<version>-win-x64.zip`, with the example workbooks, and its symbols zip there |
 
 The others take:
 
@@ -133,12 +136,14 @@ the generated ones, and the `.xll` packs nanoql's assemblies inside it.
   nanoql's XML documentation, with the argument's form ("The calendar (a Calendar handle or its name)"), each cut at a
   word to 253 characters. IntelliSense in cells isn't packaged; Excel-DNA's standalone IntelliSense add-in reads the
   registered descriptions.
-- **Frozen from 2.0:** each release writes `bindings/excel/functions.shipped.json`, every released name with its C name.
+- **Frozen from 2.0:** each release writes `bindings/excel/functions.shipped.json` (`nanoql-bind freeze`), every
+  released name, the experimental build's included, with its C name or its family's key.
   - The tool keeps each released name. A new function takes its group's lowest unused number, so adding an overload
     never renumbers a released one.
   - A removed function's name stays in the file, retired, and is never given to another function, so a workbook calling
     it gets #NAME?, never another function's result.
-  - A released stable name changes only through deprecation (two releases and a year).
+  - A released stable name changes only through deprecation (two releases and a year); an experimental function may
+    change or go in any release, its name retired.
   - Before 2.0 nothing is frozen.
 
 The add-in's own functions take a prefix of their own, `nqlxl`; the tool refuses a generated name equal to one of them,
@@ -196,7 +201,8 @@ tasks:
 - **A type made by a lookup:** where no listed function makes a type, the convention set's lookup by its record's name
   may: `=nqlConventionSetInterestRateIndex(, "BMAIndex", curve)` makes the BMA index.
 - **Asking for a type:** open an issue naming the type and the task it serves. An entry added is a change that breaks no
-  workbook. An entry removed after a release is a removed function, under deprecation.
+  workbook. An entry removed after a release is a removed function: a stable one under deprecation (two releases and a
+  year), an experimental one in any release, its name retired.
 - **A user's own list:** `--list nql=<file>` widens or narrows nanoql's list for a user's build, in the same format;
   `--list nql=none` takes nanoql's whole surface, 10,226 functions with the experimental API and 8,008 without. A
   wider build names every function as nanoql's builds do.

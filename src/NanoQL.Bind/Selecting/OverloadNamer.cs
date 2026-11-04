@@ -42,7 +42,7 @@ internal static class OverloadNamer
         var fresh = new List<CFunction>();
         foreach (CFunction f in kept)
         {
-            if (shipped.Function(f.Key) is { } released)
+            if (shipped.Function(f.Type.FullName!, f.Key) is { } released)
             {
                 f.CName = released;
                 f.Overloaded = released != Short(f);

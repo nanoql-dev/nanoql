@@ -1,8 +1,8 @@
 # SPDX-FileCopyrightText: 2026 The nanoql Authors
 # SPDX-License-Identifier: Apache-2.0
 """The installed wheel's check (docs/bindings.md, "Python"): it imports, prices a swap through a bound engine, ends with
-no live handle once Python collects its objects, and its metadata names every licence and notices file the wheel
-carries (pyproject.toml's license and license-files).
+no live handle once Python collects its objects, its metadata names every licence and notices file the wheel carries
+(pyproject.toml's license and license-files), and its description is the package's README, as Markdown.
 
 Usage: python wheel_check.py <pyproject.toml>   (in a fresh environment the wheel was installed into)
 """
@@ -10,6 +10,7 @@ Usage: python wheel_check.py <pyproject.toml>   (in a fresh environment the whee
 import datetime
 import gc
 import importlib.metadata
+import pathlib
 import sys
 import tomllib
 
@@ -40,10 +41,14 @@ def main() -> int:
     assert carried == set(project["license-files"]), carried
     empty = [str(f) for f in licences if not f.locate().is_file() or f.locate().stat().st_size == 0]
     assert not empty, f"notices missing or empty: {empty}"
+    readme = (pathlib.Path(sys.argv[1]).parent / project["readme"]).read_text(encoding="utf-8")
+    assert meta.metadata["Description-Content-Type"] == "text/markdown", meta.metadata["Description-Content-Type"]
+    assert meta.metadata.get_payload() == readme, "the description isn't the package's README"
     dotnet = next(f for f in licences if str(f).endswith("dotnet/LICENSE.TXT")).locate().read_bytes()
     assert dotnet.lstrip().startswith(b"The MIT License") and b".NET Foundation" in dotnet, "dotnet/LICENSE.TXT isn't .NET's MIT licence"
     print(f"the wheel: nanoql {meta.version} from {nanoql.__file__}; a 5Y swap's fixed rate {rate!r}; 0 live handles; "
-          f"{len(carried)} notices files, .NET's the MIT licence, the expression naming {project['license'].count(' AND ') + 1} licences")
+          f"{len(carried)} notices files, .NET's the MIT licence, the expression naming {project['license'].count(' AND ') + 1} licences; "
+          f"the description the README, {len(readme):,} characters")
     return 0
 
 

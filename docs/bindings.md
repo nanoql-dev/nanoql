@@ -7,19 +7,21 @@
 nanoql crosses to other languages through one C ABI: its assemblies compiled with Native AOT into one shared library
 (`nanoql.dll`, `libnanoql.so`, `libnanoql.dylib`) that exports a C function per member, described by a generated header,
 `nanoql.h`. Every other language's layer is generated over it: Python (ctypes), C++ (a header with RAII) and Java (the
-FFM API). This page gives the C ABI's rules, the tool that generates and builds it, and how it is checked; the
-language pages follow.
+FFM API). A release ships the C archive and the Python wheel, and the C archive serves any language that calls C; the
+C++ and Java layers are built and tested in the repository and not released. This page gives the C ABI's rules, the
+tool that generates and builds it, and how it is checked; the language pages follow.
 
 ## The tool: nanoql-bind
 
 `nanoql-bind` (the .NET tool `NanoQL.Bind`, `src/NanoQL.Bind/`) reads built assemblies' metadata without running them,
 selects what crosses, and writes the outputs. In the repository, `dotnet run --project src/NanoQL.Bind -c Release --`
-runs it:
+runs it; outside it, the tool installed from NuGet runs as `nanoql-bind` (Outside the repository, below):
 
 | Command | What it does |
 |---|---|
 | `update` | regenerates `bindings/c/include/nanoql.h`, `bindings/surface.json` and `bindings/coverage.md` |
 | `check` | regenerates them into memory and compares their bytes with `bindings/`'s; a difference fails |
+| `freeze` | writes a release's shipped files, `bindings/surface.shipped.json` and `bindings/excel/functions.shipped.json`, from the checked-in surface; it refuses, writing nothing, unless `check` and `excel check` are green |
 | `build --rid <rid> --out <folder> [--test-exports]` | generates the export shims, publishes the native host (`src/NanoQL.Native/`) with Native AOT, and writes `include/` and `lib/` |
 | `shims --out <folder>` | writes the C# export shims the native host compiles (its build runs this) |
 | `python --out <folder> [--test-exports]` | writes the Python package's generated modules into its folder (Python, below) |
@@ -41,6 +43,17 @@ Visual Studio's C++ tools with the Visual Studio Installer's folder on `PATH`.
   user's, since two Native AOT libraries can't share an object. `nanoql-bind build --assembly nql=NanoQL.dll --assembly
   nql=NanoQL.Extensions.dll --assembly acme=Acme.dll` builds one: the user's functions take its own prefix
   (`acme_...`) and its own header (`acme.h`, which includes `nanoql.h`), and a user's roles table sits beside nanoql's.
+- **Outside the repository:** the tool installed from NuGet (`dotnet tool install --global NanoQL.Bind`) carries beside
+  it nanoql's two assemblies and, under `defaults/`, the roles table, the released names and the native host's project
+  and sources, so a user builds a library of their own in any folder. `nanoql-bind build` writes the host into its
+  output and publishes it there, against the nanoql assemblies the generation reads: the two given with
+  `--assembly nql=`, from one folder (a build output holding both), or the tool's own copies when none is given, so
+  the library's nanoql is the one the user's assembly was built on; `include/` holds the C headers alone (`nanoql.h`
+  and `acme.h`); `nanoql-bind python` writes the user's Python package, and `nanoql-bind excel build` their add-in
+  ([excel.md](excel.md)). The commands that work on the repository's own files refuse there (`update`, `check`,
+  `freeze`, `--test-exports`, `excel update`, `excel check` and `excel package`), and so do those writing the C++ and
+  Java layers, which the repository builds and tests but doesn't release (`cpp`, `java`, `replay-cpp` and
+  `replay-java`).
 
 ## The C ABI
 
@@ -80,9 +93,13 @@ Visual Studio's C++ tools with the Visual Studio Installer's folder on `PATH`.
   `InvCumulativeBurley2020SobolGaussianRsg`); the four the wheel deprecates (`LogLinearZeroCurve`, `LogCubicZeroCurve`,
   `NaturalCubicDiscountCurve`, `PiecewiseSplineCubicDiscount`) are deprecated in every layer, their messages the
   wheel's reasons with nanoql's replacements.
-- **Released names never move:** each release writes its surface to `bindings/surface.shipped.json`, and the generator
-  keeps every released function's and type's name. Only a new member is named against the names in use: a member that
-  gains its first overload keeps its short name and the newcomer takes the suffix.
+- **Released names never move:** each release writes its surface to `bindings/surface.shipped.json` (`nanoql-bind
+  freeze`), and the generator keeps every released function's name, by the type it crosses under and its member, and
+  every released type's. A type is read by its name without its assemblies' version, culture and public key token,
+  which a closed generic's arguments carry and a release or a runtime moves. A released name the surface no longer
+  holds, a removed function's, one whose parameters changed or a removed type's, stays in the file under `"retired"`,
+  and no later function or type takes it. Only a new member is named against the names in use: a member that gains its
+  first overload keeps its short name and the newcomer takes the suffix.
 - **Parameters** keep their C# names; one a C or C++ keyword takes, or `self`, `result` or `has_value`, gets a trailing
   underscore. A tuple's elements take the parameter's name and their own in snake case, C#'s tuple element names
   (`calibrationSet_option`), or `item1`... where C# names none; a returned tuple's elements their own (`first`). In a
@@ -239,8 +256,14 @@ form of C#'s opt-in. A member of a stable type whose signature names an experime
   times 1,000 plus the minor (2000), which a fix keeps; the library answers `nql_version()` and `nql_abi_version()`. A
   2.y header works with the 2.y library alone; a program linking a separately installed library checks
   `assert(nql_abi_version() == NQL_ABI_VERSION)`.
-- A 2.y release may remove or change only what was deprecated at least two releases and at least a year before. A
-  member nanoql marks `[Obsolete]` is declared `NQL_DEPRECATED("...")` in the header and deprecated in every layer.
+- A 2.y release may remove or change the stable API only where it was deprecated at least two releases and at least a
+  year before. A member nanoql marks `[Obsolete]` is declared `NQL_DEPRECATED("...")` in the header and deprecated in
+  every layer.
+- The experimental API (NQL0001, `NANOQL_EXPERIMENTAL`, the Excel add-in's experimental build) may change or go in any
+  release, outside that window. Its released names still never move and are never reused: a removed function's name is
+  retired.
+- nanoql's assemblies carry the major version alone, `2.0.0.0`, for every 2.y release, since `surface.json` names
+  closed generic types by assembly-qualified names that carry it.
 
 ### Fixed functions
 
@@ -371,14 +394,16 @@ validated platform; on the others, a result's last bits may differ where the C r
 ## C and C++
 
 - **Install:** an archive per platform on the release, `nanoql-<version>-<rid>-c-api.zip` on Windows and `.tar.xz`
-  elsewhere: `include/` (`nanoql.h`, `nanoql.hpp`), `lib/` (`nanoql.dll` with its import library `nanoql.lib`,
+  elsewhere: `include/` (`nanoql.h`), `lib/` (`nanoql.dll` with its import library `nanoql.lib`,
   `libnanoql.so` or `libnanoql.dylib`) and the notices: `LICENSE`, `NOTICE`, `THIRD_PARTY_NOTICES.md`, and the .NET
   runtime's `LICENSE.TXT` and `THIRD-PARTY-NOTICES.TXT`, which Native AOT compiles into the library. The symbols ship
   apart. `python bindings/c/archive.py --library <native build folder> --out <folder>` writes one.
 - **C:** include `nanoql.h` and link the library; the C ABI above is the whole of it.
-- **C++:** include `nanoql.hpp`, C++17, over `nanoql.h`; `NANOQL_EXPERIMENTAL`, defined first, opts in to the
-  experimental API. Its hand-written part is `bindings/cpp/runtime.hpp`; the tool writes the rest, never checked in, as
-  `nanoql-bind build` does into the build's `include/`.
+- **C++, from the release:** include `nanoql.h` as it is; its declarations sit in `extern "C"`.
+- **C++, the repository's layer:** `nanoql.hpp`, C++17, over `nanoql.h`, built and tested in the repository and not
+  released. `NANOQL_EXPERIMENTAL`, defined first, opts in to the experimental API. Its hand-written part is
+  `bindings/cpp/runtime.hpp`; the tool writes the rest, never checked in, as `nanoql-bind build` does into the build's
+  `include/` in the repository. The bullets below describe it.
 - **Names:** namespace `nanoql`; nanoql's type names; members in QuantLib's camelCase (`curve.discount(5.0)`,
   `swap.fixedRate()`, `NPV()`, `yoyInflationIndex()`), a getter a member function; a static member or an extension
   method a static member of its declaring class (`ConventionSet::quantLib()`), a record's init-only property
@@ -474,10 +499,12 @@ validated platform; on the others, a result's last bits may differ where the C r
 
 ## Java
 
-- **Install:** Maven's `org.nanoql:nanoql:2.0` and the platform's natives jar, the same artifact with its classifier:
-  `natives-windows-x64`, `natives-windows-arm64`, `natives-linux-x64`, `natives-linux-arm64` or `natives-macos-arm64`.
-  Java 22 or later (the FFM API), run with `--enable-native-access=ALL-UNNAMED`, and on Linux and macOS with the JDK's
-  libjsig preloaded (`LD_PRELOAD=$JAVA_HOME/lib/libjsig.so`, `DYLD_INSERT_LIBRARIES=$JAVA_HOME/lib/libjsig.dylib`): the
+- **Not released:** the repository builds and tests the Java layer, and no release publishes it, so no Maven artifact
+  holds it; a checkout builds its jars (Building, below): the main jar and the platform's natives jar, the same
+  artifact with its classifier, `natives-windows-x64`, `natives-windows-arm64`, `natives-linux-x64`,
+  `natives-linux-arm64` or `natives-macos-arm64`. It needs Java 22 or later (the FFM API), run with
+  `--enable-native-access=ALL-UNNAMED`, and on Linux and macOS with the JDK's libjsig preloaded
+  (`LD_PRELOAD=$JAVA_HOME/lib/libjsig.so`, `DYLD_INSERT_LIBRARIES=$JAVA_HOME/lib/libjsig.dylib`): the
   library's runtime installs SIGSEGV and SIGFPE handlers, which libjsig chains behind the JVM's. The variable has to
   reach the `java` process itself: on macOS a launcher that goes through `/bin/sh`, such as Surefire's fork or a
   shell-script launcher, drops `DYLD_INSERT_LIBRARIES`, so a wrapper named `java` sets it and runs the JDK's (CI's Java

@@ -86,6 +86,23 @@ public class ExcelBuildTests
         }
     }
 
+    /// <summary>The release's zip carries the five example workbooks and their conventions file under <c>examples/</c>,
+    /// each the checked-in file byte for byte, beside the notices and the README.</summary>
+    [Fact]
+    public void TheReleasesZipCarriesTheExamples()
+    {
+        string bindings = Path.Combine(Surfaces.Repository, "bindings");
+        var files = ExcelCommand.ReleaseFiles(bindings);
+        string[] examples = ["bond.xlsx", "curve.xlsx", "market.xml", "option.xlsx", "sofr.xlsx", "swap.xlsx"];
+        Assert.Equal(examples.Select(e => "examples/" + e), files.Keys.Where(k => k.StartsWith("examples/", StringComparison.Ordinal)));
+        foreach (string e in examples)
+        {
+            Assert.Equal(File.ReadAllBytes(Path.Combine(bindings, "excel", "examples", e)), files["examples/" + e]);
+        }
+
+        Assert.Equal(["LICENSE", "NOTICE", "README.md", "THIRD_PARTY_NOTICES.md"], files.Keys.Where(k => !k.StartsWith("examples/", StringComparison.Ordinal)));
+    }
+
     /// <summary>The checked-in surface is the listed experimental build's, the add-in's own and the withheld in
     /// it.</summary>
     [Fact]

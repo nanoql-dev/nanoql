@@ -8,6 +8,10 @@
        the export shims for the assemblies it binds into obj/nanoql-bind/ and passes their folder as NanoQLShimsDir;
        NanoQLTestExports=true makes the test build (8-bit handle generations, the test types' functions). -->
   <PropertyGroup>
+    <!-- What Directory.Build.props gives it in the repository, stated for the copy nanoql-bind writes outside it. -->
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>NanoQL.Native</RootNamespace>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PublishAot>true</PublishAot>
@@ -21,14 +25,21 @@
     <DefineConstants Condition="'$(NanoQLTestExports)' == 'true'">$(DefineConstants);NANOQL_TEST_EXPORTS</DefineConstants>
   </PropertyGroup>
 
-  <ItemGroup>
+  <!-- nanoql's two assemblies: the repository's projects, or outside it the tool's own copies, whose folder nanoql-bind
+       passes as NanoQLLibraryDir when it writes this project into a build's output. -->
+  <ItemGroup Condition="'$(NanoQLLibraryDir)' == ''">
     <ProjectReference Include="..\NanoQL\NanoQL.csproj" />
     <ProjectReference Include="..\NanoQL.Extensions\NanoQL.Extensions.csproj" />
   </ItemGroup>
+  <ItemGroup Condition="'$(NanoQLLibraryDir)' != ''">
+    <Reference Include="NanoQL" HintPath="$(NanoQLLibraryDir)NanoQL.dll" />
+    <Reference Include="NanoQL.Extensions" HintPath="$(NanoQLLibraryDir)NanoQL.Extensions.dll" />
+  </ItemGroup>
 
-  <!-- The tool, built first, writes the shims into obj/ before the compile, unless its build command already did. -->
-  <ItemGroup>
-    <ProjectReference Include="..\NanoQL.Bind\NanoQL.Bind.csproj" ReferenceOutputAssembly="false" GlobalPropertiesToRemove="RuntimeIdentifier;SelfContained;PublishAot;NativeLib" />
+  <!-- In the repository the tool, built first, writes the shims into obj/ before the compile, unless its build command
+       already did; none of its files is copied into the host's output (Private). -->
+  <ItemGroup Condition="'$(NanoQLLibraryDir)' == ''">
+    <ProjectReference Include="..\NanoQL.Bind\NanoQL.Bind.csproj" ReferenceOutputAssembly="false" Private="false" GlobalPropertiesToRemove="RuntimeIdentifier;SelfContained;PublishAot;NativeLib" />
     <ProjectReference Include="..\..\bindings\NanoQL.Bind.TestTypes\NanoQL.Bind.TestTypes.csproj" Condition="'$(NanoQLTestExports)' == 'true'" />
   </ItemGroup>
 

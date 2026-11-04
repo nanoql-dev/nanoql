@@ -4,6 +4,8 @@
 -->
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <Description>nanoql's extensions: market conventions as XML data (calendars, day counts, indexes and the instruments' defaults), and instruments and models beyond the core.</Description>
+    <PackageTags>finance;quantitative-finance;conventions;fpml</PackageTags>
     <RootNamespace>NanoQL.Extensions</RootNamespace>
     <IsAotCompatible>true</IsAotCompatible>
     <!-- The extensions may use the core's experimental types (NQL0001); consumers still get the diagnostic. -->

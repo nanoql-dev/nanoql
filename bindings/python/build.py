@@ -108,7 +108,11 @@ def metadata(project: dict, version: str) -> str:
     lines += [f"Author: {a['name']}" for a in project.get("authors", [])]
     lines += [f"Classifier: {c}" for c in project.get("classifiers", [])]
     lines += [f"Project-URL: {k}, {v}" for k, v in project.get("urls", {}).items()]
-    return "\n".join(lines) + "\n"
+    if "readme" not in project:
+        return "\n".join(lines) + "\n"
+    # The README is the description, in the message body after a blank line (core metadata 2.1 and later).
+    lines.append("Description-Content-Type: text/markdown")
+    return "\n".join(lines) + "\n\n" + (HERE / project["readme"]).read_text(encoding="utf-8")
 
 
 def wheel(package: pathlib.Path, out: pathlib.Path, rid: str, version: str, notices: dict[str, bytes]) -> pathlib.Path:

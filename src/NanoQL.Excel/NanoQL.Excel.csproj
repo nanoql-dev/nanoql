@@ -11,8 +11,8 @@
     <TargetFramework>net10.0-windows</TargetFramework>
     <RootNamespace>NanoQL.Excel</RootNamespace>
     <PackageId>NanoQL.Excel</PackageId>
-    <Version>2.0.0</Version>
     <Description>The runtime of nanoql's Excel add-in: handles, conversions, errors and settings for the worksheet functions nanoql-bind generates.</Description>
+    <PackageTags>finance;quantitative-finance;excel;excel-dna</PackageTags>
     <!-- The add-in exposes the experimental API in its experimental build, behind its opt-in. -->
     <NoWarn>$(NoWarn);NQL0001</NoWarn>
   </PropertyGroup>

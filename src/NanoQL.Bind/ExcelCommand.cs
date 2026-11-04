@@ -29,7 +29,9 @@ namespace NanoQL.Bind;
 /// list unless told otherwise, any other none), <c>--test-exports</c> (the bindings' test types, prefix nqlt, and
 /// <c>nqlxlStats</c>), <c>--roles</c> and <c>--shipped</c> as the tool's other commands do; <c>build</c> also takes
 /// <c>--runtime-source &lt;feed&gt;</c>, <c>--no-pack</c> (compile, no <c>.xll</c>) and the test-only
-/// <c>--xl-budget &lt;n&gt;</c>, which only lowers the 10,000 functions Excel-DNA's loader registers.
+/// <c>--xl-budget &lt;n&gt;</c>, which only lowers the 10,000 functions Excel-DNA's loader registers. Outside the
+/// repository <c>generate</c> and <c>build</c> read the defaults beside the tool, and <c>update</c>, <c>check</c>,
+/// <c>package</c> and <c>--test-exports</c>, which work on the repository's own files, refuse.
 /// </summary>
 internal static class ExcelCommand
 {
@@ -38,10 +40,11 @@ internal static class ExcelCommand
 
     /// <summary>Runs an <c>excel</c> command.</summary>
     /// <param name="args">The arguments after <c>excel</c>.</param>
-    /// <param name="repo">The repository.</param>
+    /// <param name="repo">The repository, or null outside one.</param>
+    /// <param name="defaults">The defaults beside the tool, laid out as the repository's, read outside it.</param>
     /// <param name="testTypes">Builds the bindings' test types and gives their assembly's path.</param>
     /// <returns>The exit code.</returns>
-    public static int Run(string[] args, string repo, Func<string, string> testTypes)
+    public static int Run(string[] args, string? repo, string defaults, Func<string, string> testTypes)
     {
         if (args.Length == 0)
         {
@@ -91,7 +94,12 @@ internal static class ExcelCommand
             throw new ArgumentException($"--xl-budget {budget} would raise the ceiling: Excel-DNA's loader registers {Budget:N0} functions, and --xl-budget only lowers it");
         }
 
-        string bindings = Path.Combine(repo, "bindings");
+        if (repo == null && (command is "update" or "check" or "package" || testExports))
+        {
+            throw new IOException($"'excel {command}{(testExports ? " --test-exports" : string.Empty)}' works on the repository's own files: run nanoql-bind in the repository");
+        }
+
+        string bindings = Path.Combine(repo ?? defaults, "bindings");
         if (command == "package")
         {
             if (assemblies.Count > 0 || roles.Count > 0 || lists.Count > 0 || shipped != null || ns != null || experimental || testExports || noPack || budget != null)
@@ -110,7 +118,7 @@ internal static class ExcelCommand
 
         if (testExports)
         {
-            assemblies.Add(new AssemblyInput("nqlt", testTypes(repo)));
+            assemblies.Add(new AssemblyInput("nqlt", testTypes(repo!)));
         }
 
         if (roles.Count == 0)
@@ -157,9 +165,36 @@ internal static class ExcelCommand
         }
     }
 
-    // The release: nanoql's two add-ins built and packed; the release's zip (the two .xll, LICENSE, NOTICE, the notices
-    // with Excel-DNA's and .NET's added, README.md) and its symbols zip (nanoql's PDBs, their sources embedded), each
-    // in the C archive's form: one folder, its entries sorted and dated 2026-01-01.
+    /// <summary>
+    /// The release zip's files beside the two add-ins: <c>LICENSE</c>, <c>NOTICE</c>, the notices with Excel-DNA's and
+    /// .NET's added, <c>README.md</c>, and the example workbooks with their market data under <c>examples/</c>.
+    /// </summary>
+    /// <param name="bindings">The repository's <c>bindings/</c> folder.</param>
+    /// <returns>Each file's bytes by its path in the zip's folder.</returns>
+    internal static SortedDictionary<string, byte[]> ReleaseFiles(string bindings)
+    {
+        var content = new SortedDictionary<string, byte[]>(StringComparer.Ordinal)
+        {
+            ["LICENSE"] = ExcelProject.Notice("LICENSE"),
+            ["NOTICE"] = ExcelProject.Notice("NOTICE"),
+        };
+
+        // nanoql's notices, then Excel-DNA's, whose runtime each .xll packs, and .NET's, whose host it links.
+        string notices = Path.Combine(bindings, "excel", "notices");
+        content["THIRD_PARTY_NOTICES.md"] = [.. ExcelProject.Notice("THIRD_PARTY_NOTICES.md"),
+            .. File.ReadAllBytes(Path.Combine(notices, "Excel-DNA.txt")), .. File.ReadAllBytes(Path.Combine(notices, "dotnet.txt"))];
+        content["README.md"] = File.ReadAllBytes(Path.Combine(bindings, "excel", "README.md"));
+        foreach (string f in Directory.EnumerateFiles(Path.Combine(bindings, "excel", "examples")))
+        {
+            content["examples/" + Path.GetFileName(f)] = File.ReadAllBytes(f);
+        }
+
+        return content;
+    }
+
+    // The release: nanoql's two add-ins built and packed; the release's zip (the two .xll and ReleaseFiles') and its
+    // symbols zip (nanoql's PDBs, their sources embedded), each in the C archive's form: one folder, its entries sorted
+    // and dated 2026-01-01.
     private static int Package(string bindings, string dir, string? runtimeSource)
     {
         var sw = Stopwatch.StartNew();
@@ -168,7 +203,7 @@ internal static class ExcelCommand
             new("nql", Path.Combine(AppContext.BaseDirectory, "NanoQL.dll")),
             new("nql", Path.Combine(AppContext.BaseDirectory, "NanoQL.Extensions.dll")),
         };
-        var content = new SortedDictionary<string, byte[]>(StringComparer.Ordinal);
+        SortedDictionary<string, byte[]> content = ReleaseFiles(bindings);
         foreach (bool experimental in new[] { false, true })
         {
             var options = new ExcelOptions
@@ -190,14 +225,6 @@ internal static class ExcelCommand
             content[xll] = File.ReadAllBytes(Path.Combine(build, xll));
         }
 
-        content["LICENSE"] = ExcelProject.Notice("LICENSE");
-        content["NOTICE"] = ExcelProject.Notice("NOTICE");
-
-        // nanoql's notices, then Excel-DNA's, whose runtime each .xll packs, and .NET's, whose host it links.
-        string notices = Path.Combine(bindings, "excel", "notices");
-        content["THIRD_PARTY_NOTICES.md"] = [.. ExcelProject.Notice("THIRD_PARTY_NOTICES.md"),
-            .. File.ReadAllBytes(Path.Combine(notices, "Excel-DNA.txt")), .. File.ReadAllBytes(Path.Combine(notices, "dotnet.txt"))];
-        content["README.md"] = File.ReadAllBytes(Path.Combine(bindings, "excel", "README.md"));
         var symbols = new SortedDictionary<string, byte[]>(StringComparer.Ordinal);
         foreach (AssemblyInput a in assemblies)
         {
@@ -248,9 +275,15 @@ internal static class ExcelCommand
         return lists;
     }
 
-    // X1: the checked-in surface byte for byte, and its names distinct regardless of case, none a cell reference, none
-    // the add-in's own, none over 255 characters.
-    private static int Check(ExcelOutput x, string checkedIn, Stopwatch sw)
+    /// <summary>
+    /// <c>excel check</c>: the checked-in surface byte for byte, and its names distinct regardless of case, none a cell
+    /// reference, none the add-in's own, none over 255 characters, each reading printed.
+    /// </summary>
+    /// <param name="x">The experimental build's output.</param>
+    /// <param name="checkedIn">The checked-in <c>functions.json</c>.</param>
+    /// <param name="sw">The run's clock.</param>
+    /// <returns>0 when green, 1 otherwise.</returns>
+    internal static int Check(ExcelOutput x, string checkedIn, Stopwatch sw)
     {
         byte[] want = Encoding.UTF8.GetBytes(x.Manifest);
         bool same = File.Exists(checkedIn) && File.ReadAllBytes(checkedIn).AsSpan().SequenceEqual(want);

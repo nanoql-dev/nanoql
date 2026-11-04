@@ -8,7 +8,10 @@ This zip holds:
 - `nanoql64.xll`, the stable API;
 - `nanoql-experimental64.xll`, the stable API and the experimental one: loading it is the consent to the experimental
   API's changes;
-- `LICENSE`, `NOTICE` and `THIRD_PARTY_NOTICES.md`, nanoql's license and the notices of the code it carries.
+- `LICENSE`, `NOTICE` and `THIRD_PARTY_NOTICES.md`, nanoql's license and the notices of the code it carries;
+- `examples/`: five workbooks on the stable add-in (a curve, swaps, a bond, an option and SOFR swaps), each on one
+  sheet with its inputs in cells and its results named, and `market.xml`, the conventions file `sofr.xlsx` reads from
+  its own folder. Unzip the folder before opening them, and recalculate each (Ctrl+Alt+F9) with the add-in loaded.
 
 Both add-ins carry the same names, so a workbook built on the stable one opens unchanged in the experimental one. Load
 one of them per Excel process.

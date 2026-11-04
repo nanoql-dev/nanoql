@@ -6,6 +6,8 @@
   <!-- nanoql-bind: the bindings' generator and native build, a .NET tool (docs/bindings.md). It reads built
        assemblies' metadata without running them; nanoql's own two are copied beside it and are its default input. -->
   <PropertyGroup>
+    <Description>nanoql-bind: the generator and native build behind nanoql's C interface, its Python wheel and its Excel add-in, for a library of your own built on nanoql.</Description>
+    <PackageTags>finance;quantitative-finance;native-aot;bindings;excel</PackageTags>
     <OutputType>Exe</OutputType>
     <RootNamespace>NanoQL.Bind</RootNamespace>
     <PackAsTool>true</PackAsTool>
@@ -30,6 +32,15 @@
     <EmbeddedResource Include="..\..\LICENSE" LogicalName="NanoQL.Bind.notices.LICENSE" />
     <EmbeddedResource Include="..\..\NOTICE" LogicalName="NanoQL.Bind.notices.NOTICE" />
     <EmbeddedResource Include="..\..\THIRD_PARTY_NOTICES.md" LogicalName="NanoQL.Bind.notices.THIRD_PARTY_NOTICES.md" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- The repository's defaults beside the tool, for its builds outside the repository (docs/bindings.md): the roles,
+         the released names, and the native host's project and sources, which the tool writes into the build's output. -->
+    <None Include="..\..\bindings\roles.json" Link="defaults\bindings\roles.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\bindings\surface.shipped.json" Link="defaults\bindings\surface.shipped.json" CopyToOutputDirectory="PreserveNewest" Condition="Exists('..\..\bindings\surface.shipped.json')" />
+    <None Include="..\..\bindings\excel\functions.shipped.json" Link="defaults\bindings\excel\functions.shipped.json" CopyToOutputDirectory="PreserveNewest" Condition="Exists('..\..\bindings\excel\functions.shipped.json')" />
+    <None Include="..\NanoQL.Native\*.cs;..\NanoQL.Native\NanoQL.Native.csproj" Link="defaults\host\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>

@@ -4,6 +4,8 @@
 -->
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <Description>Quantitative finance for .NET, stateless by design: calendars, curves, instruments, pricing engines and models, each a plain function of its inputs, with market conventions as data.</Description>
+    <PackageTags>finance;quantitative-finance;derivatives;pricing;fixed-income;yield-curve;options;risk</PackageTags>
     <RootNamespace>NanoQL</RootNamespace>
     <IsAotCompatible>true</IsAotCompatible>
     <!-- NanoQL's own code may use its experimental types (NQL0001); consumers still get the diagnostic. -->
