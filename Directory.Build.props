@@ -8,7 +8,8 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
     <!-- Debugging: the PDB carries the source text, symbols ship as a symbol package, builds are deterministic.
-         ContinuousIntegrationBuild is passed only by release builds (-p:ContinuousIntegrationBuild=true). -->
+         ContinuousIntegrationBuild is set only by release builds, in the environment (release.yml, and ci.yml's release
+         mode): it records the source paths as /_/, which Source Link maps to the commit on GitHub. -->
     <EmbedAllSources>true</EmbedAllSources>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>

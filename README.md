@@ -3,7 +3,19 @@
 nanoql is a stateless quantitative finance library for .NET. Every model and pricer is a plain function of its
 inputs: there are no observers, lazy objects or global evaluation date, and market conventions are data, not code.
 
-> **Status:** pre-release. Nothing is usable yet.
+## Install
+
+- **.NET:** `dotnet add package NanoQL`, and `NanoQL.Extensions` for the conventions' XML format and the instruments
+  and models beyond the core.
+- **Python:** `pip install nanoql`.
+- **C:** `nanoql-2.0-<platform>-c-api` on [the release](https://github.com/nanoql-dev/nanoql/releases/tag/v2.0): the
+  header, the library and the notices.
+- **Excel:** `nanoql-excel-2.0-win-x64.zip` on the release: the add-ins and five example workbooks.
+
+nanoql's first public release is 2.0, the whole library rather than a preview. Its versions have two parts: a minor
+release adds, and nothing stable is removed until it has been deprecated for at least two releases and a year. The
+experimental API may change in any release, and its released names are never reused. Each release's changes are in
+[CHANGELOG.md](CHANGELOG.md).
 
 ## Principles
 
@@ -17,7 +29,14 @@ inputs: there are no observers, lazy objects or global evaluation date, and mark
   from QLNet are checked against QLNet 1.13.2. The vectors are committed to this repository, and what they cover is
   under [Validation](#validation).
 - **Traceable to its sources.** Each ported file records the library, path and release it was ported from.
-- **Python without .NET** (planned). Wheels generated over Native AOT: `pip install nanoql`, no .NET runtime needed.
+- **Python and C without .NET.** One C interface over nanoql compiled with Native AOT: Python's wheels hold it, so
+  `pip install nanoql` needs no .NET runtime, and the C archive serves any language that calls C.
+
+## Platforms
+
+Windows x64 is the validated platform. The .NET library on Linux and macOS, and the native library under C and Python
+on Windows Arm64, Linux x64 and Arm64 and macOS on Apple silicon, are supported: built and tested in every release run,
+their known differences listed in each release's notes.
 
 ## Validation
 

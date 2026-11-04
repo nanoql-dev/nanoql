@@ -376,12 +376,14 @@ too. Schema 1, its `"schema"` field raised on any change of meaning; one row a l
   Python or Java program steps from its call into nanoql's source, the generated export the frame above.
   `tools/replay/stepin.py` shows it from a C program: `python -I tools/replay/stepin.py <exe> nanoql.dll
   "*FlatForward___ctor*"` stops in `FlatForward`'s constructor and prints the stack's source lines. Visual Studio's
-  mixed-mode debugging does the same from Python. Source Link is added once the repository is public; until then the
-  debugger reads a source checkout.
+  mixed-mode debugging does the same from Python. A release's library, built in release mode, maps nanoql's sources
+  to its commit on GitHub (Source Link), so the debugger fetches them; a library built from a checkout reads the
+  checkout.
 - **Linux and macOS:** the build strips the DWARF line records into `libnanoql.so.dbg` and `libnanoql.dylib.dSYM`;
   point gdb at a checkout with `set substitute-path <the build's source root> <checkout>`, or lldb with
   `settings set target.source-map <the build's source root> <checkout>`.
-- **Symbols ship apart** from the packages, as an archive per platform on the release.
+- **Symbols ship apart** from the packages, as an archive per platform on the release, `nanoql-<version>-<rid>-symbols`
+  beside the C archive: `nanoql.pdb`, `libnanoql.so.dbg` or `libnanoql.dylib.dSYM` (`tools/release/symbols.py`).
 
 ## Platforms
 
@@ -494,8 +496,9 @@ validated platform; on the others, a result's last bits may differ where the C r
   and the .NET runtime's `LICENSE.TXT` and `THIRD-PARTY-NOTICES.TXT`, which Native AOT compiles into the library, each a
   PEP 639 `License-File` under the `License-Expression` `pyproject.toml` gives. `--stage <folder> --test-exports`
   stages the test build's package instead, for the conformance suite.
-- **Publishing:** CI's `publish-pypi` job, dispatched by hand with the `pypi` environment's approval, uploads the five
-  bindings jobs' wheels through PyPI's trusted publishing, with no stored token.
+- **Publishing:** a release's `release.yml` uploads the five bindings jobs' wheels through PyPI's trusted publishing,
+  with no stored token, after the `pypi` environment's approval; its dry run uploads them to TestPyPI
+  ([releasing.md](releasing.md)).
 
 ## Java
 

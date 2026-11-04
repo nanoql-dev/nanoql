@@ -29,6 +29,8 @@ papers and documentation.
 4. A maintainer reviews the change against the faithfulness rule and QuantLib's vectors, and runs any check CI can't.
 5. The maintainer squash-merges it, editing the message to the repository's style and keeping your sign-off.
 
+A release, the maintainers', follows [docs/releasing.md](docs/releasing.md).
+
 ## Running the gates yourself
 
 The gates are in docs/porting-playbook.md §8; each passes only with its denominator full. From the repository root:

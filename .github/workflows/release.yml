@@ -1,0 +1,298 @@
+# SPDX-FileCopyrightText: 2026 The nanoql Authors
+# SPDX-License-Identifier: Apache-2.0
+#
+# The release (docs/releasing.md). A pushed v* tag runs it: the tag checked against every version source; ci.yml's
+# gates on every system and every platform, in release mode; the NuGet packages packed and every package and file
+# inspected; the notes written from this run's own tests; the GitHub Release drafted with every file; then each registry
+# from a job in its own environment, each after a maintainer's approval, NuGet first, then PyPI, and the draft published
+# last. A dispatch is the dry run, on any branch or tag: the same builds and checks, NuGet's login alone and the wheels
+# to TestPyPI, nothing else published, since the publishing steps run on a pushed tag alone. The publishing jobs are
+# this workflow's own, since PyPI's trusted publishing takes no reusable workflow; no registry's key or token is stored.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "The version the dry run checks, as its tag would name it without the v (2.0)"
+        type: string
+        required: true
+      testpypi:
+        description: "Upload the wheels to TestPyPI, which takes a filename once: a second dry run passes false"
+        type: boolean
+        default: true
+      best-effort:
+        description: "Bindings legs, by runtime identifier, that report without stopping the run (win-arm64), space-separated"
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  DOTNET_CLI_TELEMETRY_OPTOUT: "1"
+  DOTNET_NOLOGO: "1"
+
+jobs:
+  versions:
+    name: The versions
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    outputs:
+      version: ${{ steps.check.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: The tag against every version source
+        id: check
+        env:
+          TAG: ${{ github.event_name == 'push' && github.ref_type == 'tag' && github.ref_name || format('v{0}', inputs.version) }}
+        run: |
+          python3 -I tools/release/versions.py "$TAG"
+          echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
+
+  # The gates, as CI runs them, on every system and platform; a dispatch's best-effort input, or for the tag's run the
+  # repository variable NANOQL_BEST_EFFORT, names a bindings leg that reports without stopping the run.
+  ci:
+    name: The gates
+    needs: versions
+    uses: ./.github/workflows/ci.yml
+    permissions:
+      contents: read
+    with:
+      systems: all
+      bindings: all
+      release: true
+      best-effort: ${{ inputs.best-effort || vars.NANOQL_BEST_EFFORT }}
+
+  # The four NuGet packages, the release's builds (Directory.Build.props), the tool built first.
+  packages:
+    name: The NuGet packages
+    needs: versions
+    runs-on: windows-2022
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+    env:
+      ContinuousIntegrationBuild: "true"
+      VERSION: ${{ needs.versions.outputs.version }}
+    steps:
+      - name: Check out with LF line endings, as the working clones are
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - name: Packed
+        run: |
+          dotnet build src/NanoQL.Bind -c Release
+          for p in src/NanoQL.Bind src/NanoQL src/NanoQL.Extensions src/NanoQL.Excel; do
+            dotnet pack "$p" -c Release -o "$RUNNER_TEMP/nuget"
+          done
+          ls -l "$RUNNER_TEMP/nuget"
+      - name: Inspected
+        run: python -I tools/release/inspect.py --version "$VERSION" --nuget "$RUNNER_TEMP/nuget" --commit "$GITHUB_SHA"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: nanoql-nuget
+          path: ${{ runner.temp }}/nuget
+          retention-days: 7
+
+  # Every file the release takes, inspected again where they meet; the GitHub Release's files by name with their
+  # checksums; and the notes. The Java jars ci.yml builds aren't among them: the Java layer isn't released.
+  assets:
+    name: The release's files and notes
+    needs: [versions, ci, packages]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      VERSION: ${{ needs.versions.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: nanoql-python-*
+          path: wheels
+          merge-multiple: true
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: nanoql-c-api-*
+          path: files
+          merge-multiple: true
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: nanoql-symbols-*
+          path: files
+          merge-multiple: true
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: nanoql-excel-*win-x64
+          path: files
+          merge-multiple: true
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: nanoql-nuget
+          path: nuget
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: tests-*
+          path: tests
+          merge-multiple: true
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: bindings-outcomes-*
+          path: outcomes
+          merge-multiple: true
+      - name: Inspected
+        run: python3 -I tools/release/inspect.py --version "$VERSION" --nuget nuget --commit "$GITHUB_SHA" --wheels wheels --archives files
+      - name: The files by name, and their checksums
+        run: |
+          cd files
+          want=("nanoql-excel-$VERSION-win-x64.zip" "nanoql-excel-$VERSION-win-x64-symbols.zip")
+          for rid in win-x64 win-arm64 linux-x64 linux-arm64 osx-arm64; do
+            ext=tar.xz; [ "${rid%%-*}" = win ] && ext=zip
+            want+=("nanoql-$VERSION-$rid-c-api.$ext" "nanoql-$VERSION-$rid-symbols.$ext")
+          done
+          ls -l
+          for f in "${want[@]}"; do [ -s "$f" ] || { echo "::error::no $f"; exit 1; }; done
+          [ "$(ls | wc -l)" = "${#want[@]}" ] || { echo "::error::files beside the release's ${#want[@]}"; exit 1; }
+          sha256sum "${want[@]}" > SHA256SUMS
+          cat SHA256SUMS
+      # Every system and leg the call ran is named, its file given whether or not it came: a missing one is a line in
+      # the notes, or on Windows x64 and on a leg that isn't best-effort, a stop.
+      - name: The notes
+        env:
+          BEST_EFFORT: ${{ inputs.best-effort || vars.NANOQL_BEST_EFFORT }}
+        run: |
+          args=(--tests "Windows x64=tests/tests-windows-2022.txt" --tests "Linux x64=tests/tests-ubuntu-24.04.txt"
+                --tests "macOS Arm64=tests/tests-macos-15.txt")
+          for rid in win-x64 win-arm64 linux-x64 linux-arm64 osx-arm64; do
+            args+=(--outcomes "$rid=outcomes/bindings-outcomes-$rid.txt")
+          done
+          python3 -I tools/release/notes.py --version "$VERSION" --out notes.md --best-effort "$BEST_EFFORT" "${args[@]}"
+          cat notes.md
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: nanoql-release
+          path: |
+            files
+            notes.md
+          retention-days: 7
+
+  draft:
+    name: The draft release
+    if: github.event_name == 'push' && github.ref_type == 'tag'
+    needs: assets
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: nanoql-release
+          path: release
+      - name: Drafted with every file
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ github.ref_name }}
+        run: gh release create "$TAG" --draft --verify-tag --title "nanoql ${TAG#v}" --notes-file release/notes.md release/files/*
+
+  # NuGet: a key that lasts an hour, from GitHub's token, by the trusted publishing policy that names this workflow and
+  # this environment; at a tag the four packages pushed, each symbol package beside its package. The dry run logs in.
+  nuget:
+    name: NuGet
+    needs: [assets, draft]
+    if: ${{ !cancelled() && needs.assets.result == 'success' && (needs.draft.result == 'success' || github.event_name != 'push') }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    environment: nuget
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: nanoql-nuget
+          path: nuget
+      - uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841 # v1 (v1.2.0)
+        id: login
+        with:
+          user: ${{ secrets.NUGET_USER }}
+      - name: The four packages and their symbol packages
+        if: github.event_name == 'push' && github.ref_type == 'tag'
+        env:
+          NUGET_API_KEY: ${{ steps.login.outputs.NUGET_API_KEY }}
+        run: dotnet nuget push "nuget/*.nupkg" --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json
+
+  # The dry run's rehearsal of PyPI: the five wheels to TestPyPI, by its trusted publisher.
+  testpypi:
+    name: TestPyPI
+    if: github.event_name == 'workflow_dispatch' && inputs.testpypi
+    needs: assets
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment: testpypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: nanoql-python-*
+          path: dist
+          merge-multiple: true
+      - uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # v1.14.3
+        with:
+          repository-url: https://test.pypi.org/legacy/
+
+  pypi:
+    name: PyPI
+    needs: [assets, nuget]
+    if: ${{ !cancelled() && github.event_name == 'push' && github.ref_type == 'tag' && needs.nuget.result == 'success' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment: pypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: nanoql-python-*
+          path: dist
+          merge-multiple: true
+      - uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # v1.14.3
+
+  # The draft published last, after the registries, as immutable releases want it.
+  release:
+    name: The release published
+    needs: [draft, nuget, pypi]
+    if: ${{ !cancelled() && github.event_name == 'push' && github.ref_type == 'tag' && needs.pypi.result == 'success' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    environment: github-release
+    permissions:
+      contents: write
+    steps:
+      - name: Published
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ github.ref_name }}
+        run: gh release edit "$TAG" --draft=false

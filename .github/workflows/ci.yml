@@ -9,6 +9,14 @@
 # count macOS's tenfold and Windows's twofold, so the weekly run builds and tests on Windows alone, as a dispatch does
 # unless it asks for all three systems, and the bindings jobs build Windows x64 and Linux x64 unless a dispatch asks
 # for macOS or all five. The no-AI-trace check is never part of CI; it runs where commits are made.
+#
+# A release runs it too: release.yml calls it (workflow_call) with every system and every platform, in release mode.
+# The jobs read the call's inputs, not the event's name, since a called workflow's github context is its caller's.
+# In release mode the bindings jobs build with ContinuousIntegrationBuild, so the native library's and the add-in's
+# symbols record nanoql's sources under /_/, deterministic paths Source Link maps to the commit on GitHub, and they keep
+# the native symbols archive and the add-in's symbols zip;
+# every artifact a release takes is kept 7 days, not 1; and a leg the call names best-effort runs without stopping it,
+# its checks' outcomes kept for the release's notes.
 name: CI
 
 on:
@@ -17,6 +25,24 @@ on:
   pull_request:
   schedule:
     - cron: "0 6 * * 1"
+  workflow_call:
+    inputs:
+      systems:
+        description: "Systems for the build, tests and vectors: windows or all"
+        type: string
+        default: windows
+      bindings:
+        description: "Bindings platforms: core, macos or all"
+        type: string
+        default: core
+      release:
+        description: "Release mode: the release's builds, its symbols kept, its artifacts kept 7 days"
+        type: boolean
+        default: false
+      best-effort:
+        description: "Bindings legs, by runtime identifier, whose red checks don't stop the call, space-separated"
+        type: string
+        default: ""
   workflow_dispatch:
     inputs:
       reproduce:
@@ -36,16 +62,8 @@ on:
         description: "Use global.json's SDK exactly, alone in its own folder, with the runtime it ships, not the runner's newer one"
         type: boolean
         default: false
-      publish-pypi:
-        description: "Publish the bindings jobs' wheels to PyPI (the pypi environment's approval; docs/bindings.md)"
-        type: boolean
-        default: false
-      pypi-version:
-        description: "The wheels' version when publishing (2.0.dev1 claims the name, then is yanked)"
-        type: string
-        default: "2.0.dev1"
       bindings:
-        description: "Bindings platforms: core (Windows x64, Linux x64), macos (macOS Arm64 alone) or all five; publishing builds all five"
+        description: "Bindings platforms: core (Windows x64, Linux x64), macos (macOS Arm64 alone) or all five"
         type: choice
         options: [core, macos, all]
         default: core
@@ -53,8 +71,10 @@ on:
 permissions:
   contents: read
 
+# Keyed by the workflow too: called by release.yml, github.workflow is the caller's, so a release's dry run on main
+# doesn't wait behind main's own run.
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ${{ github.workflow }}-ci-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
@@ -68,7 +88,7 @@ env:
 jobs:
   build-test:
     name: Build, tests and vectors (${{ matrix.os }})
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || !github.event.repository.private
+    if: inputs.release || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || !github.event.repository.private
     strategy:
       fail-fast: false
       matrix:
@@ -138,10 +158,23 @@ jobs:
           dotnet --list-runtimes
       - name: Build
         run: dotnet build NanoQL.slnx -c Release --no-incremental
+      # The run's own output kept, which a release's notes count each system's failures from.
       - name: Tests
+        shell: bash
         env:
           NANOQL_BITID_DIR: ${{ github.workspace }}/TestResults/bitid
-        run: dotnet test --solution NanoQL.slnx -c Release --no-build
+          SUMMARY: tests-${{ matrix.os }}.txt
+        run: |
+          set -o pipefail
+          dotnet test --solution NanoQL.slnx -c Release --no-build 2>&1 | tee "$RUNNER_TEMP/$SUMMARY"
+      - name: Keep the tests' output, for a release's notes
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: tests-${{ matrix.os }}
+          path: ${{ runner.temp }}/tests-${{ matrix.os }}.txt
+          if-no-files-found: ignore
+          retention-days: ${{ inputs.release && 7 || 1 }}
       - name: Vectors
         run: |
           python -I tools/vectors/count.py
@@ -159,7 +192,7 @@ jobs:
   # every bindings job compiles this one layer.
   java-ffi:
     name: Java's jextract layer
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || !github.event.repository.private
+    if: inputs.release || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || !github.event.repository.private
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     env:
@@ -197,26 +230,31 @@ jobs:
   # The bindings (docs/bindings.md): the C ABI built with Native AOT on each platform, its checked-in surface checked,
   # the C conformance suite on the test build, and the vector suite recorded and replayed through the C ABI. The weekly
   # run and a dispatch's core build Windows x64 and Linux x64; a dispatch's macos builds macOS Arm64 alone, and its all
-  # the five, as a PyPI publish does. Linux builds in a manylinux_2_28 container, so the library runs on glibc 2.28 and
+  # the five, as a release does. Linux builds in a manylinux_2_28 container, so the library runs on glibc 2.28 and
   # later; the container has no libicu, which the library doesn't load. A check's red doesn't stop the checks after
   # it, so a run shows every language's results, and the job's last step reds the job.
   bindings:
     name: Bindings (${{ matrix.rid }})
     needs: java-ffi
     # Not skipped when the java-ffi job fails: C's, C++'s and Python's checks run, and Java's steps are skipped.
-    if: ${{ !cancelled() && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || !github.event.repository.private) }}
+    if: ${{ !cancelled() && (inputs.release || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || !github.event.repository.private) }}
     strategy:
       fail-fast: false
       matrix:
-        include: ${{ fromJSON(github.event_name == 'schedule' && '[{"rid":"win-x64","os":"windows-2022","container":""},{"rid":"linux-x64","os":"ubuntu-24.04","container":"quay.io/pypa/manylinux_2_28_x86_64"}]' || (inputs.bindings == 'all' || inputs.publish-pypi) && '[{"rid":"win-x64","os":"windows-2022","container":""},{"rid":"win-arm64","os":"windows-11-arm","container":""},{"rid":"linux-x64","os":"ubuntu-24.04","container":"quay.io/pypa/manylinux_2_28_x86_64"},{"rid":"linux-arm64","os":"ubuntu-24.04-arm","container":"quay.io/pypa/manylinux_2_28_aarch64"},{"rid":"osx-arm64","os":"macos-15","container":""}]' || inputs.bindings == 'macos' && '[{"rid":"osx-arm64","os":"macos-15","container":""}]' || '[{"rid":"win-x64","os":"windows-2022","container":""},{"rid":"linux-x64","os":"ubuntu-24.04","container":"quay.io/pypa/manylinux_2_28_x86_64"}]') }}
+        include: ${{ fromJSON(github.event_name == 'schedule' && '[{"rid":"win-x64","os":"windows-2022","container":""},{"rid":"linux-x64","os":"ubuntu-24.04","container":"quay.io/pypa/manylinux_2_28_x86_64"}]' || inputs.bindings == 'all' && '[{"rid":"win-x64","os":"windows-2022","container":""},{"rid":"win-arm64","os":"windows-11-arm","container":""},{"rid":"linux-x64","os":"ubuntu-24.04","container":"quay.io/pypa/manylinux_2_28_x86_64"},{"rid":"linux-arm64","os":"ubuntu-24.04-arm","container":"quay.io/pypa/manylinux_2_28_aarch64"},{"rid":"osx-arm64","os":"macos-15","container":""}]' || inputs.bindings == 'macos' && '[{"rid":"osx-arm64","os":"macos-15","container":""}]' || '[{"rid":"win-x64","os":"windows-2022","container":""},{"rid":"linux-x64","os":"ubuntu-24.04","container":"quay.io/pypa/manylinux_2_28_x86_64"}]') }}
     runs-on: ${{ matrix.os }}
     container: ${{ matrix.container }}
     timeout-minutes: 120
+    # A leg the call names best-effort reds without stopping it; its outcomes go to the release's notes.
+    continue-on-error: ${{ contains(format(' {0} ', inputs.best-effort), format(' {0} ', matrix.rid)) }}
     defaults:
       run:
         shell: bash
     env:
       RID: ${{ matrix.rid }}
+      # In release mode every build is the release's (Directory.Build.props): the tool built so before its native
+      # build, which would otherwise rebuild the running tool.
+      ContinuousIntegrationBuild: ${{ inputs.release && 'true' || '' }}
       # The SDK runs without ICU in the Linux container, as the library does.
       DOTNET_SYSTEM_GLOBALIZATION_INVARIANT: ${{ matrix.container != '' && '1' || '' }}
       # Off Windows x64, the reference platform, a replayed double within this relative difference of C#'s, or else
@@ -365,7 +403,14 @@ jobs:
         with:
           name: nanoql-excel-win-x64
           path: ${{ runner.temp }}/excel-package/nanoql-excel-*-win-x64.zip
-          retention-days: 1
+          retention-days: ${{ inputs.release && 7 || 1 }}
+      - name: Keep the Excel package's symbols, at a release
+        if: matrix.rid == 'win-x64' && inputs.release
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: nanoql-excel-symbols-win-x64
+          path: ${{ runner.temp }}/excel-package/nanoql-excel-*-win-x64-symbols.zip
+          retention-days: 7
       # C++: nanoql.hpp, C++17, through its conformance suite on the test build and the vector suite's trace, which
       # replays to C's facts line for line.
       - name: The C++ conformance suite
@@ -405,13 +450,12 @@ jobs:
         env:
           FLOOR: ${{ steps.python-floor.outputs.python-path }}
           NEWEST: ${{ steps.python-newest.outputs.python-path }}
-          VERSION: ${{ github.event_name == 'workflow_dispatch' && inputs.publish-pypi && inputs.pypi-version || '' }}
         run: |
           if [ -d /opt/python ]; then
             FLOOR=/opt/python/cp311-cp311/bin/python
             NEWEST=$(ls -d /opt/python/cp3*-cp3*/bin/python | grep -v 't-cp' | sort -V | tail -1)
           fi
-          "$NEWEST" bindings/python/build.py --library "$RUNNER_TEMP/nanoql" --rid "$RID" --out "$RUNNER_TEMP/wheels" ${VERSION:+--version "$VERSION"}
+          "$NEWEST" bindings/python/build.py --library "$RUNNER_TEMP/nanoql" --rid "$RID" --out "$RUNNER_TEMP/wheels"
           "$NEWEST" bindings/python/build.py --library "$RUNNER_TEMP/nanoql-test" --rid "$RID" --stage "$RUNNER_TEMP/python-test" --test-exports
           for run in "floor|$FLOOR|numpy==1.26.*" "newest|$NEWEST|numpy"; do
             IFS='|' read -r label interpreter numpy <<< "$run"
@@ -433,9 +477,9 @@ jobs:
         with:
           name: nanoql-python-${{ matrix.rid }}
           path: ${{ runner.temp }}/wheels/*.whl
-          retention-days: 1
-      # The C and C++ archive: the headers, the library and the notices, zipped on Windows, .tar.xz elsewhere.
-      - name: The C and C++ archive
+          retention-days: ${{ inputs.release && 7 || 1 }}
+      # The C archive: the header, the library and the notices, zipped on Windows, .tar.xz elsewhere.
+      - name: The C archive
         id: archive
         continue-on-error: true
         run: |
@@ -443,12 +487,28 @@ jobs:
           if [ -d /opt/python ]; then py=$(ls -d /opt/python/cp3*-cp3*/bin/python | grep -v 't-cp' | sort -V | tail -1); fi
           "$py" bindings/c/archive.py --library "$RUNNER_TEMP/nanoql" --rid "$RID" --out "$RUNNER_TEMP/archive"
           "$py" bindings/c/tests/archive_check.py "$(ls "$RUNNER_TEMP"/archive/nanoql-*-c-api.*)"
-      - name: Keep the C and C++ archive
+      - name: Keep the C archive
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: nanoql-c-api-${{ matrix.rid }}
           path: ${{ runner.temp }}/archive/nanoql-*-c-api.*
-          retention-days: 1
+          retention-days: ${{ inputs.release && 7 || 1 }}
+      # At a release, the native library's symbols beside the C archive, in its form.
+      - name: The native symbols archive, at a release
+        id: symbols
+        if: inputs.release
+        continue-on-error: true
+        run: |
+          py=$(command -v python3 || command -v python)
+          if [ -d /opt/python ]; then py=$(ls -d /opt/python/cp3*-cp3*/bin/python | grep -v 't-cp' | sort -V | tail -1); fi
+          "$py" tools/release/symbols.py --library "$RUNNER_TEMP/nanoql" --rid "$RID" --out "$RUNNER_TEMP/symbols"
+      - name: Keep the native symbols archive, at a release
+        if: inputs.release
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: nanoql-symbols-${{ matrix.rid }}
+          path: ${{ runner.temp }}/symbols/nanoql-*-symbols.*
+          retention-days: 7
       # Java: the java-ffi job's layers, the idiomatic layer over nanoql's compiled for Java 22 on the newest LTS JDK,
       # under -Xcheck:jni on Linux and macOS, which fails the step where it reports a signal handler Native AOT's
       # runtime replaced; the conformance suite on the test build, the test types a user's package beside nanoql's; the
@@ -528,8 +588,9 @@ jobs:
         with:
           name: nanoql-java-${{ matrix.rid }}
           path: bindings/java/target/nanoql-*.jar
-          retention-days: 1
-      # The checks above go on past a red; the job reds here, after them all.
+          retention-days: ${{ inputs.release && 7 || 1 }}
+      # The checks above go on past a red; the job reds here, after them all, first writing their outcomes, which a
+      # release's notes read for a best-effort leg.
       - name: Every check green
         if: ${{ !cancelled() }}
         env:
@@ -544,43 +605,29 @@ jobs:
             cpp-replay:${{ steps.cpp-replay.outcome }}
             python:${{ steps.python.outcome }}
             archive:${{ steps.archive.outcome }}
+            symbols:${{ steps.symbols.outcome }}
             java:${{ steps.java.outcome }}
             java-jars:${{ steps.java-jars.outcome }}
         run: |
+          printf '%s\n' $OUTCOMES > "$RUNNER_TEMP/bindings-outcomes-$RID.txt"
           reds=""
           for step in $OUTCOMES; do
             echo "$step"
             case "$step" in *:failure) reds="$reds ${step%:failure}" ;; esac
           done
           [ -z "$reds" ] || { echo "::error::red:$reds"; exit 1; }
-
-  # PyPI's nanoql: dispatched by hand, the pypi environment's approval, trusted publishing (no stored token), the wheels
-  # the same run's five bindings jobs built.
-  publish-pypi:
-    name: Publish to PyPI
-    if: github.event_name == 'workflow_dispatch' && inputs.publish-pypi
-    needs: bindings
-    runs-on: ubuntu-24.04
-    timeout-minutes: 15
-    environment: pypi
-    permissions:
-      id-token: write
-    steps:
-      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+      - name: Keep the checks' outcomes
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          pattern: nanoql-python-*
-          path: dist
-          merge-multiple: true
-      - name: The five wheels, one version
-        run: |
-          ls -l dist
-          test "$(ls dist/*.whl | wc -l)" = 5
-          test "$(ls dist/*.whl | sed 's/.*nanoql-\([^-]*\)-.*/\1/' | sort -u | wc -l)" = 1
-      - uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # v1.14.3
+          name: bindings-outcomes-${{ matrix.rid }}
+          path: ${{ runner.temp }}/bindings-outcomes-${{ matrix.rid }}.txt
+          if-no-files-found: ignore
+          retention-days: ${{ inputs.release && 7 || 1 }}
 
   licensing:
     name: Licensing
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || !github.event.repository.private
+    if: inputs.release || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || !github.event.repository.private
     runs-on: windows-2022
     timeout-minutes: 60
     defaults:

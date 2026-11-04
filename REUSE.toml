@@ -12,7 +12,8 @@ path = [
   "bindings/excel/NanoQL.Excel.slnx", "bindings/excel/xltests/global.json", "bindings/excel/README.md",
   "bindings/excel/tests/repro/**", "bindings/excel/examples/*.xlsx",
   "src/NanoQL/README.md", "src/NanoQL.Extensions/README.md", "src/NanoQL.Bind/README.md", "src/NanoQL.Excel/README.md",
-  "bindings/python/README.md", "assets/icon.png",
+  "bindings/python/README.md", "assets/icon.png", "CHANGELOG.md", "bindings/surface.shipped.json",
+  "bindings/excel/functions.shipped.json",
 ]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2026 The nanoql Authors"

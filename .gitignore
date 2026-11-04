@@ -486,3 +486,6 @@ $RECYCLE.BIN/
 
 # Maven's output for the Java binding (bindings/java/stage.py fills it before mvn)
 bindings/java/target/
+
+# The release scripts, which the build results' [Rr]elease/ above would otherwise leave out
+!tools/release/
