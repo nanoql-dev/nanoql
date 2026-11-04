@@ -43,7 +43,9 @@ def main() -> int:
     assert not empty, f"notices missing or empty: {empty}"
     readme = (pathlib.Path(sys.argv[1]).parent / project["readme"]).read_text(encoding="utf-8")
     assert meta.metadata["Description-Content-Type"] == "text/markdown", meta.metadata["Description-Content-Type"]
-    assert meta.metadata.get_payload() == readme, "the description isn't the package's README"
+    # The description by importlib.metadata's field for METADATA's body (since 3.10): since Python 3.15 it moves the
+    # body into Description and leaves the message's payload empty.
+    assert meta.metadata["Description"] == readme, "the description isn't the package's README"
     dotnet = next(f for f in licences if str(f).endswith("dotnet/LICENSE.TXT")).locate().read_bytes()
     assert dotnet.lstrip().startswith(b"The MIT License") and b".NET Foundation" in dotnet, "dotnet/LICENSE.TXT isn't .NET's MIT licence"
     print(f"the wheel: nanoql {meta.version} from {nanoql.__file__}; a 5Y swap's fixed rate {rate!r}; 0 live handles; "
