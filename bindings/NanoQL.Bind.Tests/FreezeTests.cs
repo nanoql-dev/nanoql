@@ -65,8 +65,8 @@ public class FreezeTests
     }
 
     /// <summary>
-    /// A name the last release shipped and the surface no longer holds is retired, never freed: a C function, a type
-    /// and an Excel name planted in the shipped files, as a removed function's would be, retired by the next freeze,
+    /// A name the last release shipped and the surface no longer holds is retired, never freed: a C function, a type, an
+    /// enum and an Excel name planted in the shipped files, as a removed function's would be, retired by the next freeze,
     /// kept retired by the one after, and the tree still green.
     /// </summary>
     [Fact]
@@ -80,7 +80,8 @@ public class FreezeTests
             string shipped = Path.Combine(bindings, "surface.shipped.json"), excelShipped = Path.Combine(bindings, "excel", "functions.shipped.json");
             JsonNode c = JsonNode.Parse(File.ReadAllText(shipped))!;
             c["functions"]!.AsArray().Add(new JsonObject { ["name"] = "nql_Zzz_Removed", ["type"] = "NanoQL.Zzz", ["key"] = "NanoQL.Zzz::Removed()" });
-            c["types"]!.AsArray().Add(new JsonObject { ["name"] = "NanoQL.Zzz", ["cname"] = "Zzz" });
+            c["types"]!.AsArray().Add(new JsonObject { ["name"] = "NanoQL.Zzz", ["prefix"] = "nql", ["cname"] = "Zzz" });
+            c["enums"]!.AsArray().Add(new JsonObject { ["name"] = "NanoQL.ZzzKind", ["prefix"] = "nql", ["cname"] = "ZzzKind" });
             File.WriteAllText(shipped, c.ToJsonString());
             JsonNode x = JsonNode.Parse(File.ReadAllText(excelShipped))!;
             x["functions"]!.AsArray().Add(new JsonObject { ["excel"] = "nqlZzzRemoved", ["c"] = "nql_Zzz_Removed" });
@@ -92,7 +93,7 @@ public class FreezeTests
                 using JsonDocument xs = JsonDocument.Parse(File.ReadAllText(excelShipped));
                 JsonElement retired = cs.RootElement.GetProperty("retired");
                 Assert.Equal(["nql_Zzz_Removed"], retired.GetProperty("functions").EnumerateArray().Select(n => n.GetString()));
-                Assert.Equal(["Zzz"], retired.GetProperty("types").EnumerateArray().Select(n => n.GetString()));
+                Assert.Equal(["nql_Zzz", "nql_ZzzKind"], retired.GetProperty("types").EnumerateArray().Select(n => n.GetString()));
                 Assert.Equal(["nqlZzzRemoved"], xs.RootElement.GetProperty("retired").EnumerateArray().Select(n => n.GetString()));
                 Assert.DoesNotContain(cs.RootElement.GetProperty("functions").EnumerateArray(), f => f.GetProperty("name").GetString() == "nql_Zzz_Removed");
             }

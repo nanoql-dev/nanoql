@@ -605,7 +605,7 @@ NanoQL/
   LICENSES/                     Apache-2.0.txt, BSD-3-Clause.txt, and the licences of ported third-party code
   NOTICE, THIRD_PARTY_NOTICES.md (QuantLib's LICENSE.TXT verbatim), README.md, CONTRIBUTING.md
   REUSE.toml                    licensing for files without a comment header
-  global.json                   SDK 10.0.300 (rollForward latestFeature); the test runner, Microsoft.Testing.Platform
+  global.json                   SDK 10.0.403 (rollForward latestFeature); the test runner, Microsoft.Testing.Platform
   Directory.Build.props         net10.0, nullable, warnings as errors, XML docs, embedded sources, symbol packages,
                                 deterministic builds, StyleCop's SA1402 and SA1649 only
   .editorconfig                 IDE0130 off; SA1402 and SA1649 as errors

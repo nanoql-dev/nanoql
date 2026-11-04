@@ -98,8 +98,9 @@ Visual Studio's C++ tools with the Visual Studio Installer's folder on `PATH`.
   every released type's. A type is read by its name without its assemblies' version, culture and public key token,
   which a closed generic's arguments carry and a release or a runtime moves. A released name the surface no longer
   holds, a removed function's, one whose parameters changed or a removed type's, stays in the file under `"retired"`,
-  and no later function or type takes it. Only a new member is named against the names in use: a member that gains its
-  first overload keeps its short name and the newcomer takes the suffix.
+  and no later function or type takes it. A name is held within its prefix: nanoql's released `nql_Calendar` leaves a
+  user's `Calendar` its own name. Only a new member is named against the names in use: a member that gains its first
+  overload keeps its short name and the newcomer takes the suffix.
 - **Parameters** keep their C# names; one a C or C++ keyword takes, or `self`, `result` or `has_value`, gets a trailing
   underscore. A tuple's elements take the parameter's name and their own in snake case, C#'s tuple element names
   (`calibrationSet_option`), or `item1`... where C# names none; a returned tuple's elements their own (`first`). In a
@@ -391,7 +392,9 @@ The library is built natively on each of five platforms: `win-x64`, `win-arm64`,
 `osx-arm64`; Linux in a `manylinux_2_28` container, so it runs on glibc 2.28 and later; Intel Macs aren't among them
 (nanoql's C# library runs there; nanoql builds and tests no bindings for them). It loads no ICU (invariant
 globalization), so its messages read the same in every locale and it runs where libicu is absent. Windows x64 is the
-validated platform; on the others, a result's last bits may differ where the C runtime's maths functions do.
+validated platform; on the others, a result's last bits may differ where the C runtime's maths functions do. A release
+ships the platforms `release.yml` names in `RIDS`: Windows x64 and Linux x64, with Windows Arm64, Linux Arm64 and macOS
+on Apple silicon in later releases.
 
 ## C and C++
 
@@ -444,9 +447,9 @@ validated platform; on the others, a result's last bits may differ where the C r
 
 ## Python
 
-- **Install:** `pip install nanoql`, a `py3-none-<platform>` wheel holding the library for Windows x64 and Arm64,
-  Linux x64 and Arm64 (`manylinux_2_28`) and macOS on Apple silicon (14 or later): one wheel for every Python from 3.11,
-  with NumPy 1.26 or later, and nothing compiled on install.
+- **Install:** `pip install nanoql`, a `py3-none-<platform>` wheel holding the library for Windows x64 and Linux x64
+  (`manylinux_2_28`), with Windows Arm64, Linux Arm64 and macOS on Apple silicon (14 or later) in later releases: one
+  wheel for every Python from 3.11, with NumPy 1.26 or later, and nothing compiled on install.
 - **Names:** nanoql's type names; members in PEP 8's snake case (`curve.discount(5.0)`, `swap.fixed_rate`); enum
   members as nanoql's (`Compounding.Continuous`). A constructor is the class's call, a getter a property, a static
   member or an extension method a static method of its declaring class (`ConventionSet.quant_lib()`), a record's
@@ -496,7 +499,7 @@ validated platform; on the others, a result's last bits may differ where the C r
   and the .NET runtime's `LICENSE.TXT` and `THIRD-PARTY-NOTICES.TXT`, which Native AOT compiles into the library, each a
   PEP 639 `License-File` under the `License-Expression` `pyproject.toml` gives. `--stage <folder> --test-exports`
   stages the test build's package instead, for the conformance suite.
-- **Publishing:** a release's `release.yml` uploads the five bindings jobs' wheels through PyPI's trusted publishing,
+- **Publishing:** a release's `release.yml` uploads its platforms' wheels through PyPI's trusted publishing,
   with no stored token, after the `pypi` environment's approval; its dry run uploads them to TestPyPI
   ([releasing.md](releasing.md)).
 

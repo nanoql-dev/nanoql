@@ -185,7 +185,7 @@ public class NameTests
         JsonNode surface = JsonNode.Parse(File.ReadAllText(Path.Combine(Surfaces.Repository, "bindings", "surface.json")))!;
         JsonArray types = surface["types"]!.AsArray();
         types.Remove(types.Single(t => (string?)t!["name"] == "NanoQL.Time.Calendar"));
-        surface["retired"] = new JsonObject { ["functions"] = new JsonArray(), ["types"] = new JsonArray("Calendar") };
+        surface["retired"] = new JsonObject { ["functions"] = new JsonArray(), ["types"] = new JsonArray("nql_Calendar") };
         string shipped = Path.Combine(Path.GetTempPath(), "nanoql-bind-retired-type-" + Guid.NewGuid().ToString("N") + ".json");
         File.WriteAllText(shipped, surface.ToJsonString());
         try
@@ -198,5 +198,43 @@ public class NameTests
         {
             File.Delete(shipped);
         }
+    }
+
+    /// <summary>
+    /// A released enum keeps its name as a released class does: the checked-in surface as the release's, DurationType's
+    /// enum entry released as <c>Coupons_DurationType</c>; the enum keeps that name, and its typedef with it.
+    /// </summary>
+    [Fact]
+    public void AReleasedEnumKeepsItsName()
+    {
+        JsonNode surface = JsonNode.Parse(File.ReadAllText(Path.Combine(Surfaces.Repository, "bindings", "surface.json")))!;
+        surface["enums"]!.AsArray().Single(e => (string?)e!["name"] == "NanoQL.Coupons.DurationType")!["cname"] = "Coupons_DurationType";
+        string shipped = Path.Combine(Path.GetTempPath(), "nanoql-bind-enum-" + Guid.NewGuid().ToString("N") + ".json");
+        File.WriteAllText(shipped, surface.ToJsonString());
+        try
+        {
+            Generation g = Surfaces.Run(shipped);
+            Assert.Equal("Coupons_DurationType", g.Surface.Enums.Single(e => e.Type.FullName == "NanoQL.Coupons.DurationType").CName);
+            Assert.Contains("typedef int32_t nql_Coupons_DurationType;", g.Files["c/include/nanoql.h"], StringComparison.Ordinal);
+        }
+        finally
+        {
+            File.Delete(shipped);
+        }
+    }
+
+    /// <summary>
+    /// A released name holds within its prefix: with the checked-in surface as the release's, the fixtures' Calendar,
+    /// a user's class named like nanoql's, keeps its name beside nanoql's released one, and freeze reads it so.
+    /// </summary>
+    [Fact]
+    public void AnotherPrefixsTypeKeepsANameNanoqlReleased()
+    {
+        string shipped = Path.Combine(Surfaces.Repository, "bindings", "surface.shipped.json");
+        Generation g = Surfaces.Run(shipped, fixtures: true);
+        Assert.Equal("Calendar", g.Surface.Types.Single(t => t.Type.FullName == "NanoQL.Time.Calendar").CName);
+        Model.TypeRow mine = g.Surface.Types.Single(t => t.Type.FullName == "NanoQL.Bind.Tests.Fixtures.Calendar");
+        Assert.Equal(("fx", "Calendar"), (mine.Prefix, mine.CName));
+        Assert.Contains("nql_Calendar", Reading.ShippedSurface.Read(shipped).TypeNames);
     }
 }

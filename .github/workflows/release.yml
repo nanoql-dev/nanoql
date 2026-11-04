@@ -2,12 +2,13 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 # The release (docs/releasing.md). A pushed v* tag runs it: the tag checked against every version source; ci.yml's
-# gates on every system and every platform, in release mode; the NuGet packages packed and every package and file
-# inspected; the notes written from this run's own tests; the GitHub Release drafted with every file; then each registry
-# from a job in its own environment, each after a maintainer's approval, NuGet first, then PyPI, and the draft published
-# last. A dispatch is the dry run, on any branch or tag: the same builds and checks, NuGet's login alone and the wheels
-# to TestPyPI, nothing else published, since the publishing steps run on a pushed tag alone. The publishing jobs are
-# this workflow's own, since PyPI's trusted publishing takes no reusable workflow; no registry's key or token is stored.
+# gates on every system and on the release's platforms (RIDS), in release mode; the NuGet packages packed and every
+# package and file inspected; the notes written from this run's own tests; the GitHub Release drafted with every file;
+# then each registry from a job in its own environment, each after a maintainer's approval, NuGet first, then PyPI, and
+# the draft published last. A dispatch is the dry run, on any branch or tag: the same builds and checks, NuGet's login
+# alone and the wheels to TestPyPI, nothing else published, since the publishing steps run on a pushed tag alone. The
+# publishing jobs are this workflow's own, since PyPI's trusted publishing takes no reusable workflow; no registry's key
+# or token is stored.
 name: Release
 
 on:
@@ -24,7 +25,7 @@ on:
         type: boolean
         default: true
       best-effort:
-        description: "Bindings legs, by runtime identifier, that report without stopping the run (win-arm64), space-separated"
+        description: "Bindings legs, by runtime identifier, that report without stopping the run (linux-x64), space-separated"
         type: string
         default: ""
 
@@ -38,6 +39,10 @@ concurrency:
 env:
   DOTNET_CLI_TELEMETRY_OPTOUT: "1"
   DOTNET_NOLOGO: "1"
+  # The platforms whose native files the release ships, the ci call's bindings legs: core's two. Windows Arm64, Linux
+  # Arm64 and macOS on Apple silicon follow in later releases, each once its leg is green: named here, and in the set
+  # the call's bindings names, ci.yml's matrix gaining one where none fits.
+  RIDS: win-x64 linux-x64
 
 jobs:
   versions:
@@ -58,8 +63,9 @@ jobs:
           python3 -I tools/release/versions.py "$TAG"
           echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
 
-  # The gates, as CI runs them, on every system and platform; a dispatch's best-effort input, or for the tag's run the
-  # repository variable NANOQL_BEST_EFFORT, names a bindings leg that reports without stopping the run.
+  # The gates, as CI runs them, on every system and on RIDS' platforms (a call's with takes no env, so bindings names
+  # them as ci.yml's core); a dispatch's best-effort input, or for the tag's run the repository variable
+  # NANOQL_BEST_EFFORT, names a bindings leg that reports without stopping the run.
   ci:
     name: The gates
     needs: versions
@@ -68,7 +74,7 @@ jobs:
       contents: read
     with:
       systems: all
-      bindings: all
+      bindings: core
       release: true
       best-effort: ${{ inputs.best-effort || vars.NANOQL_BEST_EFFORT }}
 
@@ -161,12 +167,14 @@ jobs:
           path: outcomes
           merge-multiple: true
       - name: Inspected
-        run: python3 -I tools/release/inspect.py --version "$VERSION" --nuget nuget --commit "$GITHUB_SHA" --wheels wheels --archives files
+        run: |
+          python3 -I tools/release/inspect.py --version "$VERSION" --nuget nuget --commit "$GITHUB_SHA" \
+            --wheels wheels --archives files --rids $RIDS
       - name: The files by name, and their checksums
         run: |
           cd files
           want=("nanoql-excel-$VERSION-win-x64.zip" "nanoql-excel-$VERSION-win-x64-symbols.zip")
-          for rid in win-x64 win-arm64 linux-x64 linux-arm64 osx-arm64; do
+          for rid in $RIDS; do
             ext=tar.xz; [ "${rid%%-*}" = win ] && ext=zip
             want+=("nanoql-$VERSION-$rid-c-api.$ext" "nanoql-$VERSION-$rid-symbols.$ext")
           done
@@ -183,7 +191,7 @@ jobs:
         run: |
           args=(--tests "Windows x64=tests/tests-windows-2022.txt" --tests "Linux x64=tests/tests-ubuntu-24.04.txt"
                 --tests "macOS Arm64=tests/tests-macos-15.txt")
-          for rid in win-x64 win-arm64 linux-x64 linux-arm64 osx-arm64; do
+          for rid in $RIDS; do
             args+=(--outcomes "$rid=outcomes/bindings-outcomes-$rid.txt")
           done
           python3 -I tools/release/notes.py --version "$VERSION" --out notes.md --best-effort "$BEST_EFFORT" "${args[@]}"
@@ -242,7 +250,7 @@ jobs:
           NUGET_API_KEY: ${{ steps.login.outputs.NUGET_API_KEY }}
         run: dotnet nuget push "nuget/*.nupkg" --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json
 
-  # The dry run's rehearsal of PyPI: the five wheels to TestPyPI, by its trusted publisher.
+  # The dry run's rehearsal of PyPI: the release's wheels to TestPyPI, by its trusted publisher.
   testpypi:
     name: TestPyPI
     if: github.event_name == 'workflow_dispatch' && inputs.testpypi

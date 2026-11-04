@@ -6,6 +6,7 @@
     { "name": "fx_Twin_get_Value", "type": "NanoQL.Bind.Tests.Fixtures.A.Twin", "key": "NanoQL.Bind.Tests.Fixtures.A.Twin::get_Value()" }
   ],
   "types": [
-    { "name": "NanoQL.Bind.Tests.Fixtures.A.Twin", "cname": "Twin" }
-  ]
+    { "name": "NanoQL.Bind.Tests.Fixtures.A.Twin", "prefix": "fx", "cname": "Twin" }
+  ],
+  "enums": []
 }

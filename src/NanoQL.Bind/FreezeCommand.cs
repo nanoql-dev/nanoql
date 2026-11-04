@@ -51,7 +51,7 @@ internal static class FreezeCommand
         // retired, so no later function or type takes it.
         ShippedSurface last = ShippedSurface.Read(shipped);
         var functions = g.Surface.Functions.Select(f => f.CName).ToHashSet(StringComparer.Ordinal);
-        var types = g.Surface.Types.Select(t => t.CName).ToHashSet(StringComparer.Ordinal);
+        var types = g.Surface.Types.Select(t => t.Prefix + "_" + t.CName).Concat(g.Surface.Enums.Select(e => e.Prefix + "_" + e.CName)).ToHashSet(StringComparer.Ordinal);
         var retiredFunctions = last.FunctionNames.Where(n => !functions.Contains(n)).Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal).ToList();
         var retiredTypes = last.TypeNames.Where(n => !types.Contains(n)).Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal).ToList();
         var names = x.Selection.Units.Select(u => u.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);

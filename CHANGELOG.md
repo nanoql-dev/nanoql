@@ -52,9 +52,9 @@ What each module's checks cover is on [the validation page](https://nanoql.org/v
 - **Windows x64:** the validated platform, where every test and vector passes; a failure there blocks a release.
 - **Linux and macOS, the .NET library:** supported; their known differences, a result's last bits where the C
   runtime's maths functions differ, are counted in each release's notes.
-- **The bindings,** the native library under C and Python: Windows x64 and Arm64, Linux x64 and Arm64 (glibc 2.28 or
-  later) and macOS on Apple silicon, each built and tested natively in every release run, its differences counted in
-  each release's notes.
+- **The bindings,** the native library under C and Python: Windows x64 and Linux x64 (glibc 2.28 or later), each built
+  and tested natively in every release run, its differences counted in each release's notes. Windows Arm64, Linux
+  Arm64 and macOS on Apple silicon follow in later releases.
 
 ### Versions
 

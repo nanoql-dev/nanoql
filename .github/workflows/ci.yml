@@ -10,7 +10,8 @@
 # unless it asks for all three systems, and the bindings jobs build Windows x64 and Linux x64 unless a dispatch asks
 # for macOS or all five. The no-AI-trace check is never part of CI; it runs where commits are made.
 #
-# A release runs it too: release.yml calls it (workflow_call) with every system and every platform, in release mode.
+# A release runs it too: release.yml calls it (workflow_call) with every system and the release's platforms (core), in
+# release mode.
 # The jobs read the call's inputs, not the event's name, since a called workflow's github context is its caller's.
 # In release mode the bindings jobs build with ContinuousIntegrationBuild, so the native library's and the add-in's
 # symbols record nanoql's sources under /_/, deterministic paths Source Link maps to the commit on GitHub, and they keep
@@ -229,8 +230,8 @@ jobs:
 
   # The bindings (docs/bindings.md): the C ABI built with Native AOT on each platform, its checked-in surface checked,
   # the C conformance suite on the test build, and the vector suite recorded and replayed through the C ABI. The weekly
-  # run and a dispatch's core build Windows x64 and Linux x64; a dispatch's macos builds macOS Arm64 alone, and its all
-  # the five, as a release does. Linux builds in a manylinux_2_28 container, so the library runs on glibc 2.28 and
+  # run, a dispatch's core and a release build Windows x64 and Linux x64; a dispatch's macos builds macOS Arm64 alone,
+  # and its all the five. Linux builds in a manylinux_2_28 container, so the library runs on glibc 2.28 and
   # later; the container has no libicu, which the library doesn't load. A check's red doesn't stop the checks after
   # it, so a run shows every language's results, and the job's last step reds the job.
   bindings:

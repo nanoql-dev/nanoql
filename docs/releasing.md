@@ -9,12 +9,16 @@ A release publishes, from one commit and its tag:
 
 - **On NuGet:** `NanoQL`, `NanoQL.Extensions`, `NanoQL.Bind` and `NanoQL.Excel`, each with its symbol package on
   NuGet's symbol server.
-- **On PyPI:** `nanoql`, a wheel per platform: `win_amd64`, `win_arm64`, `manylinux_2_28_x86_64`,
-  `manylinux_2_28_aarch64` and `macosx_14_0_arm64`; no source distribution, since one would need the .NET SDK and the
-  whole repository to build.
-- **On GitHub, the release `v<version>`:** the C archive and the native symbols archive for each of the five
-  platforms, the Excel add-in's zip and its symbols zip, `SHA256SUMS` over them, and the notes: `CHANGELOG.md`'s
-  section with the platforms' readings from the release run's own tests.
+- **On PyPI:** `nanoql`, a wheel per platform the release ships: `win_amd64` and `manylinux_2_28_x86_64`, and
+  `win_arm64`, `manylinux_2_28_aarch64` and `macosx_14_0_arm64` once those platforms ship; no source distribution,
+  since one would need the .NET SDK and the whole repository to build.
+- **On GitHub, the release `v<version>`:** the C archive and the native symbols archive for each platform the release
+  ships, the Excel add-in's zip and its symbols zip, `SHA256SUMS` over them, and the notes: `CHANGELOG.md`'s section
+  with the platforms' readings from the release run's own tests.
+- **The platforms it ships** are `release.yml`'s `RIDS`, the bindings legs its `ci` call runs: Windows x64 and Linux
+  x64 (ci.yml's `core`). A later release adds Windows Arm64, Linux Arm64 or macOS on Apple silicon once its leg is
+  green, by naming it in `RIDS` and in the set the `ci` call names, `ci.yml`'s matrix gaining one where none fits; a
+  published release's files don't grow, so a platform ships from its first release on.
 - **The site,** nanoql.org, built from the tag.
 
 ## What can't be undone
@@ -39,16 +43,16 @@ Every name and file is permanent from its first upload.
      (CONTRIBUTING.md); a red stops the release;
    - the SOFR example's trades (docs/sofr-example.md) priced again by an independent pricer, each within $0.01 on $10
      million; a residual past it stops the release.
-3. **The dry run:** `release.yml` dispatched on `main` at the release commit. It runs `ci.yml` on every system and
-   platform, builds and inspects every package and file, writes the notes, logs in to NuGet and uploads the wheels to
-   TestPyPI, and publishes nothing else. TestPyPI takes a filename once, as PyPI does, so a second dry run passes
-   `testpypi: false`.
+3. **The dry run:** `release.yml` dispatched on `main` at the release commit. It runs `ci.yml` on every system and on
+   the release's platforms, builds and inspects every package and file, writes the notes, logs in to NuGet and uploads
+   the wheels to TestPyPI, and publishes nothing else. TestPyPI takes a filename once, as PyPI does, so a second dry
+   run passes `testpypi: false`.
 
 ## The tag
 
 An annotated tag `v<version>` at the release commit, pushed, runs `release.yml` again from the tag: `ci.yml`'s gates,
 the packages and the files built and inspected, and the GitHub Release drafted with every file. Then, each after its
-environment's approval: `nuget` pushes the four packages and their symbol packages, `pypi` the five wheels, and
+environment's approval: `nuget` pushes the four packages and their symbol packages, `pypi` the wheels, and
 `release` publishes the draft.
 
 - **Windows x64 blocks the release:** a red there stops the run. Linux's and macOS's test failures are counted in the

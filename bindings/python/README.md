@@ -9,8 +9,8 @@ pip install nanoql
 ```
 
 One wheel per platform, for every Python from 3.11, with NumPy 1.26 or later and nothing compiled on install: Windows
-x64 and Arm64, Linux x64 and Arm64 (`manylinux_2_28`, glibc 2.28 or later) and macOS on Apple silicon (14 or later).
-The wheel holds nanoql's native library, so no .NET runtime is needed.
+x64 and Linux x64 (`manylinux_2_28`, glibc 2.28 or later); Windows Arm64, Linux Arm64 and macOS on Apple silicon follow
+in later releases. The wheel holds nanoql's native library, so no .NET runtime is needed.
 
 ## A first swap
 

@@ -8,7 +8,8 @@ namespace NanoQL.Bind.Selecting;
 /// <summary>
 /// Types' C names: the simple name without its generic arity; where two of one prefix's types share it, each takes its
 /// namespace's last segment in front (<c>Experimental_PolarStudentTRng</c>). A released type keeps its released name,
-/// and a new type whose simple name a released one holds takes the qualified name.
+/// and a new type whose simple name a released one of its prefix holds takes the qualified name; another prefix's
+/// released names leave it its own.
 /// </summary>
 internal sealed class TypeNamer
 {
@@ -31,7 +32,7 @@ internal sealed class TypeNamer
                 continue;
             }
 
-            bool clash = counts[(prefix, Simple(t))] > 1 || released.Contains(Simple(t));
+            bool clash = counts[(prefix, Simple(t))] > 1 || released.Contains(prefix + "_" + Simple(t));
             names[t] = clash ? Qualified(t) : Simple(t);
         }
     }
