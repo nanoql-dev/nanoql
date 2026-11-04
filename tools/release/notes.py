@@ -35,7 +35,9 @@ def summary(path: pathlib.Path) -> tuple[int, int, list[str]] | str:
     """A test run's total, its failures and the failing tests' names, from its own output; or why it doesn't read."""
     if not path.is_file():
         return "no summary was written"
-    text = path.read_text(encoding="utf-8", errors="replace")
+    # The run's output as a terminal shows it: on CI's runners the test runner colours its lines with ANSI escape
+    # sequences (ECMA-48's control sequences), which the patterns below read past once they are removed.
+    text = re.sub(r"\x1b\[[0-?]*[ -/]*[@-~]", "", path.read_text(encoding="utf-8", errors="replace"))
     total = re.findall(r"^\s*total:\s*(\d+)\s*$", text, re.M)
     failed = re.findall(r"^\s*failed:\s*(\d+)\s*$", text, re.M)
     # A failure's line: "failed <name> (<duration>)", the name a theory's row with its arguments, spaces and all.
