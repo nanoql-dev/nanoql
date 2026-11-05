@@ -30,6 +30,12 @@ payments, and two settlement days. `DiscountingSwapEngine.Calculate` returns a r
 and each leg's `LegNPV` and `LegBPS` are read like any other property. The same inputs give the same results, on
 any thread.
 
+## In Python
+
+The same swap, a bootstrapped SOFR curve, an American put and a CDS run in Python in
+[a notebook you can open in Google Colab](https://colab.research.google.com/github/nanoql-dev/nanoql/blob/main/docs/notebooks/first-steps.ipynb), with nothing to install;
+locally, `pip install nanoql jupyter` runs it. [The bindings guide](bindings.md) gives the Python layer's rules.
+
 ## Next
 
 - [Concepts](concepts.md): values and functions, the evaluation context, conventions as data, and what is

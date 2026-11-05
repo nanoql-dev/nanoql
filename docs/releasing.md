@@ -20,6 +20,9 @@ A release publishes, from one commit and its tag:
   green, by naming it in `RIDS` and in the set the `ci` call names, `ci.yml`'s matrix gaining one where none fits; a
   published release's files don't grow, so a platform ships from its first release on.
 - **The site,** nanoql.org, built from the tag.
+- **The notebook,** `docs/notebooks/first-steps.ipynb`, isn't published: Colab opens it from `main` and its first
+  cell installs the latest release from PyPI, so it uses released API alone. `notebook.yml` runs it so, weekly and
+  on a pull request that changes it.
 
 ## What can't be undone
 

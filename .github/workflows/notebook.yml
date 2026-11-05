@@ -1,0 +1,51 @@
+# SPDX-FileCopyrightText: 2026 The nanoql Authors
+# SPDX-License-Identifier: Apache-2.0
+#
+# The getting-started notebook, docs/notebooks/first-steps.ipynb, run as a reader runs it in Google Colab: on Ubuntu
+# 24.04 with Python 3.13, Colab's runtime, its first cell installing the latest nanoql release from PyPI, and nbmake
+# running every cell in a Jupyter kernel. The harness (nbmake and what it runs a notebook with) is hash-pinned by
+# tools/docs/notebook-requirements.txt, and nanoql is not, so a red is the released package's: the notebook uses
+# released API alone. It runs when a pull request changes the notebook or this harness, and weekly, so a release that
+# breaks the notebook shows. It isn't a required check: a run its paths filter skips would hold a pull request.
+name: Notebook
+
+on:
+  pull_request:
+    paths:
+      - "docs/notebooks/**"
+      - ".github/workflows/notebook.yml"
+      - "tools/docs/notebook-requirements.txt"
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  notebook:
+    name: The getting-started notebook
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13"
+      - name: The notebook stores no outputs
+        run: |
+          python - <<'EOF'
+          import json
+          cells = json.load(open("docs/notebooks/first-steps.ipynb", encoding="utf-8"))["cells"]
+          stored = [c.get("id") for c in cells
+                    if c["cell_type"] == "code" and (c["outputs"] or c["execution_count"])]
+          assert not stored, f"cells with stored outputs: {stored}"
+          EOF
+      - name: Run the notebook in a kernel
+        run: |
+          python -m venv "$RUNNER_TEMP/notebook"
+          "$RUNNER_TEMP/notebook/bin/python" -m pip install --require-hashes --only-binary :all: \
+            -r tools/docs/notebook-requirements.txt
+          "$RUNNER_TEMP/notebook/bin/python" -m pytest --nbmake docs/notebooks/first-steps.ipynb
