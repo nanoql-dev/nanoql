@@ -46,6 +46,12 @@ and in order; the SPDX expression is Apache-2.0 AND BSD-3-Clause; one Upstream l
 THIRD_PARTY_NOTICES.md's fenced block under its "## QLNet" heading is QLNet's LICENSE at the pin, verbatim. A QLNet test
 class's "// Not ported:" line names test methods ([Fact] or [Theory]) of its QLNet test file, each with its reason,
 which it doesn't port.
+
+A docs sample's Upstream line (a file under docs/examples/ that follows a QuantLib example, Examples/<Name>/<Name>.cpp,
+or takes a QuantLib test file's data) names QuantLib paths at the pin, each an entry of the name table's examples
+section, a path there allowed in the main table too: the file sits in the folder under docs/examples/ and declares the
+namespace that the entry gives, and (3) checks its copyright lines and its SPDX expression as any port's. Every
+examples entry exists at the pin.
 """
 import hashlib
 import importlib.util
@@ -69,6 +75,9 @@ TESTS = "tests/NanoQL.Tests/"
 TEST_SUITE = TESTS + "TestSuite/"
 DIVERGENCES = "Divergences/"
 BOOST_SRC = SRC + "Boost/"
+# The docs' samples that follow a QuantLib example or take a QuantLib test's data, placed by the name table's examples
+# section.
+DOCS_EXAMPLES = "docs/examples/"
 BOOST_NAMESPACE = "NanoQL.Numerics"
 BOOST_VERSION = "109000"
 # QLNet's ports: the extensions' sources and QLNet's test cases, from a checkout of QLNet at the tag's commit.
@@ -597,6 +606,8 @@ class Checker:
         if not ok:
             return False
         units = {sources.unit_of(up) for up in header.upstream}
+        if path.startswith(DOCS_EXAMPLES):
+            return self.check_docs_sample(path, header)
         if path.startswith(TEST_SUITE):
             return self.check_test_file(path, units)
         if not path.startswith(SRC):
@@ -624,6 +635,33 @@ class Checker:
             ok = False
         if header.namespace is not None and namespaces != {header.namespace}:
             self.error("namespace", f"{path}: namespace {header.namespace}, but the name table gives "
+                                    f"{', '.join(sorted(namespaces))}")
+            ok = False
+        return ok
+
+    def check_docs_sample(self, path, header):
+        """A docs sample's place: each path its Upstream line names is an entry of the name table's examples section,
+        whose folder under docs/examples/ holds the file and whose namespace it declares."""
+        folders, namespaces = set(), set()
+        for up in header.upstream:
+            entry = self.table.get("examples", {}).get(up)
+            if entry is None:
+                self.error("folder", f"{path}: {up} isn't in the name table's examples")
+                return False
+            folders.add((DOCS_EXAMPLES + entry["folder"]).rstrip("/"))
+            namespaces.add(entry["namespace"])
+        ok = True
+        actual = path.rsplit("/", 1)[0]
+        if folders != {actual}:
+            self.error("folder", f"{path}: in {actual}, but the name table's examples give "
+                                 f"{', '.join(sorted(folders))}")
+            ok = False
+        if header.namespace is None:
+            self.error("namespace", f"{path}: declares no namespace, expected {', '.join(sorted(namespaces))} from the "
+                                    "name table's examples")
+            ok = False
+        elif namespaces != {header.namespace}:
+            self.error("namespace", f"{path}: namespace {header.namespace}, but the name table's examples give "
                                     f"{', '.join(sorted(namespaces))}")
             ok = False
         return ok
@@ -739,6 +777,12 @@ class Checker:
                 if not exists(os.path.join(self.qlnet, entry)):
                     self.error("table-absent", f"tools/porting-map.json: {entry} doesn't exist under the QLNet "
                                                "checkout")
+        examples = self.table.get("examples", {})
+        for entry in examples:
+            if not os.path.isfile(os.path.join(self.ql, entry)):
+                self.error("table-absent", f"tools/porting-map.json: the examples entry {entry} doesn't exist at the "
+                                           "pin")
+        self.counts["examples"] = (sum(os.path.isfile(os.path.join(self.ql, e)) for e in examples), len(examples))
         self.counts["table"] = (len(entries) + len(self.table["directories"]) - len(absent),
                                 len(entries) + len(self.table["directories"]))
         self.counts["table-lists"] = len(self.table["replaced"]) + len(self.table["notPorted"])
@@ -810,7 +854,8 @@ def report(checker):
           + (", and QLNet's LICENSE under its '## QLNet' heading" if checker.qlnet is not None else ""))
     print(f"(4) partial files: {c['partial']}, listed in docs/porting-plan.md: {c['partial']}")
     print(f"(5) table entries at the pin: {c['table'][0]}/{c['table'][1]} "
-          f"(replaced and not-ported: {c['table-lists']}); porting map reproduces")
+          f"(replaced and not-ported: {c['table-lists']}); examples entries at the pin: {c['examples'][0]}/"
+          f"{c['examples'][1]}; porting map reproduces")
     print(f"(6) generated tables reproducing: {c['tables'][0]}/{c['tables'][1]} files, {c['tables'][2]:,} bytes, from "
           f"{c['tables'][3]} scripts under {TABLES}")
     print(f"(7) the divergence page reproduces, {c['divergences']} entries")

@@ -4,8 +4,21 @@
 # Source files with no QuantLib upstream. Each carries only the nanoql copyright line and the Apache-2.0 licence
 # identifier, and no Upstream line. tools/check-upstream.py reads this list.
 # One path or glob per line, relative to the repository root, with forward slashes; "**" matches any depth.
+# docs/examples/ is listed file by file: a docs sample that follows a QuantLib example, or takes a QuantLib test's
+# data, carries an Upstream line instead (the name table's examples section).
 bindings/**
-docs/examples/**
+docs/examples/Examples.cs
+docs/examples/GettingStarted/FirstSwap.cs
+docs/examples/Program.cs
+docs/examples/Rates/CapsAndFloors.cs
+docs/examples/Rates/Curves.cs
+docs/examples/Rates/DatesAndCalendars.cs
+docs/examples/Rates/IndexesAndFixings.cs
+docs/examples/Rates/Swaps.cs
+docs/examples/Rates/Swaptions.cs
+docs/examples/SofrMarket/SofrExample.cs
+docs/examples/Stateless/StatelessPatterns.cs
+docs/examples/Table.cs
 src/NanoQL/ConventionProvider.cs
 src/NanoQL/CurrencyData.cs
 src/NanoQL/EnumArguments.cs

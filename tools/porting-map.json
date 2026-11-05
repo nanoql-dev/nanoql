@@ -1660,5 +1660,11 @@
     "src/QLNet/Instruments/Bonds/MBSFixedRateBond.cs": {"subfolder": "MBSFixedRateBond"},
     "tests/QLNet.Tests/T_Bonds.cs": {"test": "BondsTests"},
     "tests/QLNet.Tests/T_PSACurve.cs": {"test": "PSACurveTests"}
+  },
+  "examples": {
+    "Examples/BermudanSwaption/BermudanSwaption.cpp": {"folder": "Rates", "namespace": "NanoQL.Examples.Rates"},
+    "Examples/CDS/CDS.cpp": {"folder": "Credit", "namespace": "NanoQL.Examples.Credit"},
+    "Examples/EquityOption/EquityOption.cpp": {"folder": "Equity", "namespace": "NanoQL.Examples.Equity"},
+    "test-suite/hestonmodel.cpp": {"folder": "Equity", "namespace": "NanoQL.Examples.Equity"}
   }
 }
