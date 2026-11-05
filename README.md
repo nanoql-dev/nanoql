@@ -53,7 +53,7 @@ Checked against QuantLib 1.44 on Windows x64.
   defect fixed, is checked by its own tests. 303 more are listed apart, 291 with no executable code and 12 own-tested
   (six of them extensions, five experimental and one a term structure), and three are equality-only. 89.5% of the ported
   lines are covered.
-- **The divergences:** 720 documented divergences from QuantLib, each with its own test class.
+- **The divergences:** 736 documented divergences, 720 from QuantLib and 16 from QLNet, each with its own test class.
 <!-- end of the validation statement -->
 
 ## License

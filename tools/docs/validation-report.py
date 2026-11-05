@@ -24,9 +24,10 @@ ports) has no row. The modules' sums are check-coverage's own "every ported file
 
 --page writes the report's page: the statement, the commit it was measured on (and, with --built-from, the commit the
 site builds from, whose library code and vectors' counts are the same), and the per-module table with each module's
-types listed apart. --home writes the home page's figures, a fragment in the statement's words naming no reference
-library: the vectors with their tolerance, the ported tests, and the divergences. --readme rewrites the README's
-statement between its two marker comments, or with --check exits 1 when the README's differs from a fresh one.
+types listed apart. --home writes the home page's figures, a fragment in fewer words than the statement's, naming no
+reference library: the outputs and their share within the tolerance, the ported tests, and the divergences. --readme
+rewrites the README's statement between its two marker comments, or with --check exits 1 when the README's differs
+from a fresh one.
 """
 import collections
 import importlib.util
@@ -252,21 +253,20 @@ def statement(facts, rows, uncovered):
                    f"{len(own)} own-tested ({own_split(own)}), and {word(equality)} are equality-only. "
                    f"{100 * covered / lines:.1f}% of the ported lines are covered.")
     text.append(types_line)
-    text.append(f"- **The divergences:** {facts['divergences']:,} documented divergences from QuantLib, each with its "
+    text.append(f"- **The divergences:** {facts['divergences'] + facts['qlnet_divergences']:,} documented divergences, "
+                f"{facts['divergences']:,} from QuantLib and {facts['qlnet_divergences']:,} from QLNet, each with its "
                 "own test class.")
     return wrapped(text)
 
 
 def home(facts):
-    """The home page's figures: one line, which the page includes after "independent reference values:". Its
-    tolerance and its tests are the statement's words, the reference library unnamed."""
-    share = 100 * facts["overridden"] / facts["outputs"]
-    return (f"{facts['outputs']:,} reference outputs in {facts['files']:,} committed vector files, each within a "
-            "relative 1e-10 of the larger of the two values and the output's scale (an amount's is its notional), "
-            f"except {facts['overridden']:,} ({share:.2f}%) held to a documented looser tolerance; the reference "
-            f"library's own tests, ported at their tolerances; and "
-            f"{facts['divergences'] + facts['qlnet_divergences']:,} departures from the "
-            "references, each documented and tested.\n")
+    """The home page's figures: one line, which the page includes after "Checked against". The statement's facts in
+    fewer words, for a card: the outputs, the share within a relative 1e-10, the reference library's own tests (the
+    library unnamed) and the departures from both references, the statement's divergences."""
+    within = 100 * (facts["outputs"] - facts["overridden"]) / facts["outputs"]
+    return (f"{facts['outputs']:,} independent reference outputs, {within:.2f}% within a relative 1e-10, and the "
+            "reference library's own tests at their tolerances; "
+            f"{facts['divergences'] + facts['qlnet_divergences']:,} departures are each documented and tested.\n")
 
 
 def page(facts, rows, uncovered, built_from):
