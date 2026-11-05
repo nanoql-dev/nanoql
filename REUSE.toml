@@ -20,11 +20,19 @@ SPDX-FileCopyrightText = "2026 The nanoql Authors"
 SPDX-License-Identifier = "Apache-2.0"
 
 # The getting-started notebook, which holds no comment header; its option cell follows QuantLib's EquityOption
-# example (Examples/EquityOption/EquityOption.cpp).
+# example (Examples/EquityOption/EquityOption.cpp), and its SABR cell takes the swaption cube tests' market data
+# (test-suite/swaptionvolstructuresutilities.hpp).
 [[annotations]]
 path = "docs/notebooks/first-steps.ipynb"
 precedence = "aggregate"
-SPDX-FileCopyrightText = ["Copyright (C) 2005, 2006, 2007, 2009 StatPro Italia srl", "2026 The nanoql Authors"]
+SPDX-FileCopyrightText = [
+    "Copyright (C) 2005, 2006, 2007, 2009 StatPro Italia srl",
+    "Copyright (C) 2007 Cristina Duminuco",
+    "Copyright (C) 2006 Ferdinando Ametrano",
+    "Copyright (C) 2006 François du Vignaud",
+    "Copyright (C) 2006 Giorgio Facchinetti",
+    "2026 The nanoql Authors",
+]
 SPDX-License-Identifier = "Apache-2.0 AND BSD-3-Clause"
 
 # QuantLib's license file, verbatim; its copyright lines are read from the file itself.

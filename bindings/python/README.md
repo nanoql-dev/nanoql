@@ -38,7 +38,7 @@ released when Python collects it, or at once by `close()` or a `with` block. `im
 the experimental API. The rules are in [the bindings guide](https://nanoql.org/docs/bindings.html).
 
 [A notebook](https://github.com/nanoql-dev/nanoql/blob/main/docs/notebooks/first-steps.ipynb) takes this swap
-further, to a bootstrapped curve, an American put and a CDS; it [runs in Google Colab](https://colab.research.google.com/github/nanoql-dev/nanoql/blob/main/docs/notebooks/first-steps.ipynb) with nothing to
+further, to bootstrapped curves, €STR discounting and Euribor forecasting, a SABR smile, an American put and a CDS; it [runs in Google Colab](https://colab.research.google.com/github/nanoql-dev/nanoql/blob/main/docs/notebooks/first-steps.ipynb) with nothing to
 install.
 
 ## How it is checked

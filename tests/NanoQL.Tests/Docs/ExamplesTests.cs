@@ -279,6 +279,87 @@ public class ExamplesTests
         Assert.All(CrossCurrencyBasis.Run(), q => Assert.True(Math.Abs(q.Implied - q.Quote) < 1e-10, q.Tenor));
     }
 
+    /// <summary>
+    /// The multi-curve page holds QuantLib 1.44's MulticurveBootstrapping example: its twelve values at the example's
+    /// printed digits, and each within 1e-12 relative of QuantLib's run on the same quotes with its curves built afresh,
+    /// as the page builds them for the 0.90% quote. QuantLib's example re-bootstraps that curve from its first one,
+    /// which moves its values by up to 2.2e-13 relative, below every printed digit.
+    /// </summary>
+    [Fact]
+    public void TheMultiCurvePageHoldsQuantLibsExample()
+    {
+        Assert.Equal(
+            [
+                ["0.76%", "5-year swap paying 0.70%", "3,076.04", "-0.06%", "0.76%"],
+                ["0.76%", "5-year swap a year forward, paying 0.70%", "19,202.54", "-0.38%", "1.09%"],
+                ["0.90%", "5-year swap paying 0.70%", "9,922.71", "-0.20%", "0.90%"],
+                ["0.90%", "5-year swap a year forward, paying 0.70%", "19,202.54", "-0.38%", "1.09%"],
+            ],
+            MulticurveBootstrapping.Outputs().Single().Table.Rows);
+
+        static void Near(double expected, double actual) =>
+            Assert.True(Math.Abs(actual - expected) <= 1e-12 * Math.Abs(expected), $"{actual} against {expected}");
+
+        (double Npv, double FairSpread, double FairRate)[] quantLib =
+        [
+            (3076.0402375131889, -0.00061035781293196823, 0.00761999999999966),
+            (19202.541207947317, -0.0038369601055406118, 0.01090097252984254),
+            (9922.7104435990041, -0.0019688961707498864, 0.0090000000000005284),
+            (19202.541207950373, -0.003836960105541222, 0.010900972529843161),
+        ];
+        var values = new[] { MulticurveBootstrapping.FiveYearQuote, 0.0090 }
+            .SelectMany(MulticurveBootstrapping.Price).ToList();
+        for (int i = 0; i < quantLib.Length; i++)
+        {
+            Near(quantLib[i].Npv, values[i].Npv);
+            Near(quantLib[i].FairSpread, values[i].FairSpread);
+            Near(quantLib[i].FairRate, values[i].FairRate);
+        }
+    }
+
+    /// <summary>
+    /// The SABR page's fit holds QuantLib 1.44's on the same smile: the forward, the parameters, the errors and the
+    /// smile on the page's nine strikes, each within 1e-12 relative of QuantLib's run, and at the page's digits; the
+    /// smile section on the fitted parameters gives the interpolation's vols.
+    /// </summary>
+    [Fact]
+    public void TheSabrFitHoldsQuantLibs()
+    {
+        var fit = SabrSmile.Calibrate();
+
+        static void Near(double expected, double actual) =>
+            Assert.True(Math.Abs(actual - expected) <= 1e-12 * Math.Abs(expected), $"{actual} against {expected}");
+
+        Near(0.05131556617811487, fit.Forward);
+        Near(0.032566645737178039, fit.Sabr.Alpha);
+        Near(0.50000000000000011, fit.Sabr.Beta);
+        Near(0.52213213335682951, fit.Sabr.Nu);
+        Near(-0.084029403531948044, fit.Sabr.Rho);
+        Near(0.00049051505331549196, fit.Sabr.RmsError);
+        Near(0.0015974149660653303, fit.Sabr.MaxError);
+        Assert.Equal(NanoQL.Numerics.EndCriteriaType.StationaryFunctionValue, fit.Sabr.EndCriteria);
+
+        double[] smile =
+        [
+            0.21830258503393465, 0.19248431087832038, 0.17156813439153054, 0.1560548567117741, 0.14691254233507292,
+            0.14427604564378665, 0.14655199721155746, 0.15156784384666105, 0.15778365506607506,
+        ];
+        for (int i = 0; i < smile.Length; i++)
+        {
+            double strike = fit.Forward + (-200 + 50 * i) * 1e-4;
+            Near(smile[i], fit.Sabr.Evaluate(strike));
+            Assert.Equal(fit.Sabr.Evaluate(strike), fit.Section.Volatility(strike));
+        }
+
+        var tables = SabrSmile.Outputs().ToDictionary(o => o.Name, o => o.Table.Rows);
+        Assert.Equal(
+            ["5.1316%", "0.032567", "0.5", "0.522132", "-0.084029", "0.0491%", "0.1597%"],
+            tables["sabr-parameters"].Select(r => r[1]));
+        Assert.Equal(
+            ["21.8303%", "19.2484%", "17.1568%", "15.6055%", "14.6913%", "14.4276%", "14.6552%", "15.1568%", "15.7784%"],
+            tables["sabr-smile"].Select(r => r[^1]));
+    }
+
     /// <summary>The stateless page's scenarios, priced in parallel and then in sequence, give the same bits.</summary>
     [Fact]
     public void TheParallelScenariosEqualTheSequentialOnes()

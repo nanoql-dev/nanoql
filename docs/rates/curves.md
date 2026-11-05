@@ -34,6 +34,8 @@ other choices, and `PiecewiseYieldCurve<TTraits, TInterpolator, TBootstrap>` tak
 
 ## Other curves
 
+- **Multi-curve:** an €STR curve for discounting and a Euribor curve bootstrapped on it, each swap helper given the
+  discounting curve ([multi-curve bootstrapping](multi-curve.md)).
 - **Interpolated curves** from given nodes: `InterpolatedDiscountCurve<TInterpolator>`,
   `InterpolatedZeroCurve<TInterpolator>`, `InterpolatedForwardCurve<TInterpolator>`.
 - **Spreaded curves** over another curve: `ZeroSpreadedTermStructure`, `ForwardSpreadedTermStructure`, and the

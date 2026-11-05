@@ -30,5 +30,7 @@ public static class Examples
         ("credit/cds", CreditDefaultSwaps.Outputs),
         ("rates/short-rate-models", ShortRateModels.Outputs),
         ("rates/basis-and-fx", () => [.. BasisAndFx.Outputs(), .. CrossCurrencyBasis.Outputs()]),
+        ("rates/multi-curve", MulticurveBootstrapping.Outputs),
+        ("rates/sabr", SabrSmile.Outputs),
     ];
 }

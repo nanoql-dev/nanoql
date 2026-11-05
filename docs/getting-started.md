@@ -32,9 +32,10 @@ any thread.
 
 ## In Python
 
-The same swap, a bootstrapped SOFR curve, an American put and a CDS run in Python in
+The same swap, a bootstrapped SOFR curve, €STR and Euribor curves with their swaps, a SABR smile, an American put
+and a CDS run in Python in
 [a notebook you can open in Google Colab](https://colab.research.google.com/github/nanoql-dev/nanoql/blob/main/docs/notebooks/first-steps.ipynb), with nothing to install;
-locally, `pip install nanoql jupyter` runs it. [The bindings guide](bindings.md) gives the Python layer's rules.
+locally, `pip install nanoql jupyter matplotlib` runs it. [The bindings guide](bindings.md) gives the Python layer's rules.
 
 ## Next
 
