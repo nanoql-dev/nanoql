@@ -10,8 +10,8 @@ the engine takes. Nothing outside them reaches the result, and no call changes w
 inputs give the same result, bit for bit, whenever and on whichever thread they are priced.
 
 Keeping a book's prices current as its market data moves is the application's part: it knows which inputs changed and
-what depends on them, and calls the library again. This page shows the patterns it builds that layer from. Each
-sample prices a ten-year Euribor swap on the curve of [the curves guide](rates/curves.md).
+what depends on them, and calls the library again. This page shows the patterns it builds that layer from. The
+first three price a ten-year Euribor swap on the curve of [the curves guide](rates/curves.md).
 
 ## Rebuild on change
 
@@ -31,13 +31,26 @@ share it: an immutable object is safe to read from any number of threads.
 
 ## Price scenarios in parallel
 
-Scenarios are independent calls on immutable inputs, so they run side by side with no locks:
+Scenarios are independent calls on immutable inputs, so they run side by side with no locks, and priced again one
+after another they give the same bits:
 
 [!code-csharp[](examples/Stateless/StatelessPatterns.cs#parallel)]
 
 [!INCLUDE [the swap under each shift](_generated/stateless-scenarios-output.md)]
 
 Run again, in any order or on any number of threads, the scenarios give the same bits.
+
+## Value as of a past date
+
+A valuation reads its date from the context and its market from its arguments, so a valuation as of another date is
+the same call with that day's inputs: here a swap as of its trade date, and seven months on, on that day's curve and
+with the fixings the index published since the trade in the context:
+
+[!code-csharp[](examples/Stateless/StatelessPatterns.cs#asof)]
+
+[!INCLUDE [the swap as of two dates](_generated/stateless-as-of-output.md)]
+
+Neither valuation reads the other's inputs, so they run in either order, or side by side, with the same results.
 
 ## The one global
 

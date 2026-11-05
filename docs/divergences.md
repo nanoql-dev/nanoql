@@ -5081,11 +5081,12 @@ Facts:
 
 [`Divergences/LongstaffSchwartzCalibrationSeedTests.cs`](../tests/NanoQL.Tests/Divergences/LongstaffSchwartzCalibrationSeedTests.cs)
 
-The Longstaff-Schwartz calibration seed's default. QuantLib's documentation says the calibration seed is the pricing seed plus an offset, "to avoid identical paths in calibration and pricing" (`mclongstaffschwartzengine.hpp:63-71`), but its constructor tests `seedCalibration != Null<Real>()` on a `BigNatural` already narrowed from `Null<Size>()` (`:148`), so its default is always the narrowed null: 4294967295 through C++, 2147483647 (`nullInt()`) through the wheel. nanoql's default is the documented one, (seed + 1768237423) mod 2³². QuantLib's check: its engine with that seed passed explicitly, whose bits the fixed default reproduces; and QuantLib's default's bits through the narrowed null passed explicitly.
+The Longstaff-Schwartz calibration seed's default. QuantLib's documentation says the calibration seed is the pricing seed plus an offset, "to avoid identical paths in calibration and pricing" (`mclongstaffschwartzengine.hpp:63-71`), but its constructor tests `seedCalibration != Null<Real>()` on a `BigNatural` already narrowed from `Null<Size>()` (`:148`), so its default is always that null, 2147483647, since `Null<T>()` is `numeric_limits<int>::max()` for every integral type (`null.hpp:41-43`), through C++ and through the wheel's `nullInt()` alike. nanoql's default is the documented one, (seed + 1768237423) mod 2³². QuantLib's check: its engine with that seed passed explicitly, whose bits the fixed default reproduces; QuantLib's default's bits through the null passed explicitly; and QuantLib's EquityOption example, whose Longstaff-Schwartz value through C++ (4.456935) the null reproduces and the documented seed moves to its own run's 4.454440.
 
 Facts:
 
 - `TheDefaultCalibrationSeedIsTheDocumentedOne`
+- `QuantLibsDefaultThroughCxxIsTheSameNull`
 
 ## LongstaffSchwartzExerciseTimesTests
 

@@ -10,7 +10,9 @@ bindings/**
 docs/examples/Examples.cs
 docs/examples/GettingStarted/FirstSwap.cs
 docs/examples/Program.cs
+docs/examples/Rates/BasisAndFx.cs
 docs/examples/Rates/CapsAndFloors.cs
+docs/examples/Rates/CrossCurrencyBasis.cs
 docs/examples/Rates/Curves.cs
 docs/examples/Rates/DatesAndCalendars.cs
 docs/examples/Rates/IndexesAndFixings.cs

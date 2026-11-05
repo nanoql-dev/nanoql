@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: 2026 The nanoql Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using NanoQL.Examples.Credit;
+using NanoQL.Examples.Equity;
 using NanoQL.Examples.GettingStarted;
 using NanoQL.Examples.Rates;
 using NanoQL.Examples.SofrMarket;
@@ -23,5 +25,10 @@ public static class Examples
         ("rates/swaptions", Swaptions.Outputs),
         ("stateless", StatelessPatterns.Outputs),
         ("sofr-example", SofrExample.Outputs),
+        ("equity/options", EquityOptions.Outputs),
+        ("equity/volatility-and-heston", VolatilityAndHeston.Outputs),
+        ("credit/cds", CreditDefaultSwaps.Outputs),
+        ("rates/short-rate-models", ShortRateModels.Outputs),
+        ("rates/basis-and-fx", () => [.. BasisAndFx.Outputs(), .. CrossCurrencyBasis.Outputs()]),
     ];
 }
