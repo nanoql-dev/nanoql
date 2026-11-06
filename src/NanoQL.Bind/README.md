@@ -9,8 +9,9 @@ add-in over it.
 dotnet tool install --global NanoQL.Bind
 ```
 
-It needs the .NET 10 SDK and, for a native build, the platform's C toolchain: on Windows, Visual Studio's C++ tools
-with the Visual Studio Installer's folder on `PATH`.
+It needs a .NET 10 SDK of the 10.0.14 release or later, such as 10.0.114 or 10.0.403 (an earlier one builds on a Native
+AOT compiler NuGet's audit flags), and, for a native build, the platform's C toolchain: on Windows, Visual Studio's C++
+tools with the Visual Studio Installer's folder on `PATH`.
 
 ## A library of your own
 

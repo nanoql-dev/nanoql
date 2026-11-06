@@ -55,6 +55,11 @@ def read(root: pathlib.Path) -> tuple[dict[str, str], list[str]]:
 
 def main() -> int:
     args = sys.argv[1:]
+    valued = ("--root",)
+    if not args or any(a in valued and (k + 1 == len(args) or args[k + 1].startswith("--"))
+                       for k, a in enumerate(args)):
+        print(__doc__)
+        return 2
     here = pathlib.Path(__file__).resolve().parents[2]
     root = pathlib.Path(args[args.index("--root") + 1]) if "--root" in args else here
     want = args[0].removeprefix("v")

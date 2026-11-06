@@ -109,7 +109,9 @@ def render(units, rows):
 
 
 def main(argv):
-    if len(argv) < 2:
+    valued = ("--root", "--out")
+    if len(argv) < 2 or any(a in valued and (k + 1 == len(argv) or argv[k + 1].startswith("--"))
+                            for k, a in enumerate(argv)):
         print(__doc__)
         return 2
     ql, qlnet_root = argv[0], argv[1]

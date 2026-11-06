@@ -117,7 +117,9 @@ def points(api, root):
 
 
 def main(argv):
-    if len(argv) < 2:
+    valued = ("--root",)
+    if len(argv) < 2 or any(a in valued and (k + 1 == len(argv) or argv[k + 1].startswith("--"))
+                            for k, a in enumerate(argv)):
         print(__doc__)
         return 2
     api, out = argv[0], argv[1]

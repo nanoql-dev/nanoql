@@ -296,7 +296,9 @@ def page(facts, rows, uncovered, built_from):
 
 
 def main(argv):
-    if len(argv) < 2:
+    valued = ("--page", "--built-from", "--home", "--readme")
+    if len(argv) < 2 or any(a in valued and (k + 1 == len(argv) or argv[k + 1].startswith("--"))
+                            for k, a in enumerate(argv)):
         print(__doc__)
         return 2
     root, results = os.path.abspath(argv[0]), os.path.abspath(argv[1])

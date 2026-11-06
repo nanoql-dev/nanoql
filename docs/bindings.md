@@ -412,8 +412,9 @@ on Apple silicon in later releases.
 - **Names:** namespace `nanoql`; nanoql's type names; members in QuantLib's camelCase (`curve.discount(5.0)`,
   `swap.fixedRate()`, `NPV()`, `yoyInflationIndex()`), a getter a member function; a static member or an extension
   method a static member of its declaring class (`ConventionSet::quantLib()`), a record's init-only property
-  `with<Name>(value)`, an operator a static `op_<Name>` and, for arithmetic and ordering, C++'s operator (and `==` for
-  `Date` and `Period`). A name a keyword or a type takes gets a trailing underscore: `Echo::double_`.
+  `with<Name>(value)`, an operator a static `op_<Name>` (a record's `==` and `!=` aside, under Objects) and, for
+  arithmetic and ordering, C++'s operator (and `==` for `Date` and `Period`). A name a keyword or a type takes gets a
+  trailing underscore: `Echo::double_`.
 - **Objects:** each class owns a handle: a copy takes a new handle to the same object, a move takes the handle, the
   destructor releases it. A class's bases and interfaces are virtual bases, so an object converts to each
   (`const ICalibratedModel& m = gsr;`). Nanoql's null reference is a null object, `T(nullptr)`, which `if (obj)` tests;
@@ -450,11 +451,12 @@ on Apple silicon in later releases.
 - **Install:** `pip install nanoql`, a `py3-none-<platform>` wheel holding the library for Windows x64 and Linux x64
   (`manylinux_2_28`), with Windows Arm64, Linux Arm64 and macOS on Apple silicon (14 or later) in later releases: one
   wheel for every Python from 3.11, with NumPy 1.26 or later, and nothing compiled on install.
-- **Names:** nanoql's type names; members in PEP 8's snake case (`curve.discount(5.0)`, `swap.fixed_rate`); enum
-  members as nanoql's (`Compounding.Continuous`). A constructor is the class's call, a getter a property, a static
-  member or an extension method a static method of its declaring class (`ConventionSet.quant_lib()`), a record's
-  init-only property `with_<name>(value)`, an operator a static `op_<name>` and, for arithmetic and ordering, Python's
-  operator. A member that would take another's name, or one of `Object`'s, takes a suffix: `close_`.
+- **Names:** nanoql's type names; members in PEP 8's snake case (`curve.discount(5.0)`, `swap.fixed_rate`); enum members
+  as nanoql's (`Compounding.Continuous`). A constructor is the class's call, a getter a property, a static member or an
+  extension method a static method of its declaring class (`ConventionSet.quant_lib()`), a record's init-only property
+  `with_<name>(value)`, an operator a static `op_<name>` (a record's `==` and `!=` aside, under Objects) and, for
+  arithmetic and ordering, Python's operator. A member that would take another's name, or one of `Object`'s, takes a
+  suffix: `close_`.
 - **Constructors:** every class has its own: its constructors' dispatch, or a `TypeError` where none crosses, never a
   base's, which would build the base under the class's name. A preset's names its lookup by name: `USDCurrency()` raises
   "USDCurrency is made by ConventionSet.currency". An experimental constructor added on the opt-in replaces the
@@ -521,11 +523,12 @@ on Apple silicon in later releases.
   `org.nanoql.experimental`; members in QuantLib's camelCase (`curve.discount(5.0)`, `swap.fixedRate()`,
   `yoyInflationIndex()`), a getter a method; a static member or an extension method a static method of its declaring
   class (`ConventionSet.quantLib()`), a record's init-only property `with<Name>(value)`, an operator a static `op<Name>`
-  (`Period.opAddition`). Date's members are statics of `org.nanoql.time.Date` taking a `LocalDate` (`Date.year(d)`). A
-  name a keyword or one of `Object`'s takes a trailing underscore (`Echo.double_`), and so does a member Java's
-  overriding rules refuse: a static beside an inherited instance member of its signature, or a member C# declares `new`
-  with a result the inherited one's isn't (`OvernightIndexedSwapIndex.underlyingSwap_`); a form whose erased parameters
-  another form's are takes its C overload suffix (`Echo.total_doubleArrayArray`), a constructor a static `create_...`.
+  (`Period.opAddition`; a record's equality aside, under Objects). Date's members are statics of `org.nanoql.time.Date`
+  taking a `LocalDate` (`Date.year(d)`). A name a keyword or one of `Object`'s takes a trailing underscore
+  (`Echo.double_`), and so does a member Java's overriding rules refuse: a static beside an inherited instance member of
+  its signature, or a member C# declares `new` with a result the inherited one's isn't
+  (`OvernightIndexedSwapIndex.underlyingSwap_`); a form whose erased parameters another form's are takes its C overload
+  suffix (`Echo.total_doubleArrayArray`), a constructor a static `create_...`.
 - **Values:** `java.time.LocalDate`, `null` for no date; `Period`, a record with nanoql's equality
   (`new Period(1, TimeUnit.Years)` equals twelve months); enums as Java enums with `value()` and `of(int)`, a flags enum
   as a record holding any combination of its constants (`KahaleSmile.or(SabrSmile)`, `has`); a nullable as its boxed

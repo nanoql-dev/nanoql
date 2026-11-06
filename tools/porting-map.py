@@ -391,6 +391,10 @@ def reproduces(root, ql_root):
 
 
 def main(argv):
+    valued = ("--root",)
+    if any(a in valued and (k + 1 == len(argv) or argv[k + 1].startswith("--")) for k, a in enumerate(argv)):
+        print(__doc__)
+        return 2
     args = [a for a in argv if not a.startswith("--")]
     root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     if "--root" in argv:

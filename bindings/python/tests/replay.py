@@ -859,6 +859,11 @@ def sweep(r, called, outcomes, prefix="nql", surface=None, limit=SWEEP_LIMIT, ex
 
 def main():
     argv = sys.argv[1:]
+    # An option with no value after it, or no trace, gets the usage.
+    valued = ("--sweep", "--prefix", "--surface", "--limit")
+    if any(a in valued and (k + 1 == len(argv) or argv[k + 1].startswith("--")) for k, a in enumerate(argv)):
+        print(__doc__)
+        return 2
 
     def option(name, default=None):
         if name not in argv:
@@ -872,6 +877,9 @@ def main():
     prefix = option("--prefix", "nql")
     surface = option("--surface")
     limit = float(option("--limit", str(SWEEP_LIMIT)))
+    if not argv:
+        print(__doc__)
+        return 2
     trace = argv[0]
     report = argv[1] if len(argv) > 1 else None
     if outcomes is not None and surface is None:

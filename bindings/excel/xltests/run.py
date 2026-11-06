@@ -239,6 +239,10 @@ def main():
     argv = sys.argv[1:]
     if argv == ["--self-test"]:
         sys.exit(self_test())
+    valued = ("--python", "--filter")
+    if any(a in valued and (k + 1 == len(argv) or argv[k + 1].startswith("--")) for k, a in enumerate(argv)):
+        print(__doc__)
+        sys.exit(2)
     python = None
     if "--python" in argv:
         i = argv.index("--python")

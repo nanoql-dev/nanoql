@@ -74,6 +74,10 @@ class Debugger:
 
 def main():
     args = sys.argv[1:]
+    valued = ("--netcoredbg", "--at")
+    if any(a in valued and (k + 1 == len(args) or args[k + 1].startswith("--")) for k, a in enumerate(args)):
+        print(__doc__)
+        sys.exit(2)
     exe = args[args.index("--netcoredbg") + 1] if "--netcoredbg" in args else shutil.which("netcoredbg") or "netcoredbg"
     at = args[args.index("--at") + 1] if "--at" in args else "FlatForward.cs:94"
     xll = build()

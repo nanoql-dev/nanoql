@@ -34,7 +34,8 @@ def main() -> int:
 
     project = tomllib.loads(open(sys.argv[1], encoding="utf-8").read())["project"]
     meta = importlib.metadata.distribution("nanoql")
-    assert meta.metadata["License-Expression"] == project["license"], meta.metadata["License-Expression"]
+    expression = meta.metadata.get("License-Expression")
+    assert expression == project["license"], expression
     assert meta.metadata.get_all("License-File") == project["license-files"], meta.metadata.get_all("License-File")
     licences = [f for f in meta.files if ".dist-info/licenses/" in str(f)]
     carried = {str(f).split(".dist-info/licenses/", 1)[1] for f in licences}
@@ -42,10 +43,12 @@ def main() -> int:
     empty = [str(f) for f in licences if not f.locate().is_file() or f.locate().stat().st_size == 0]
     assert not empty, f"notices missing or empty: {empty}"
     readme = (pathlib.Path(sys.argv[1]).parent / project["readme"]).read_text(encoding="utf-8")
-    assert meta.metadata["Description-Content-Type"] == "text/markdown", meta.metadata["Description-Content-Type"]
+    content_type = meta.metadata.get("Description-Content-Type")
+    assert content_type == "text/markdown", content_type
     # The description by importlib.metadata's field for METADATA's body (since 3.10): since Python 3.15 it moves the
-    # body into Description and leaves the message's payload empty.
-    assert meta.metadata["Description"] == readme, "the description isn't the package's README"
+    # body into Description and leaves the message's payload empty. Each field by get(), since 3.15 raises on a missing
+    # key, where the check's own message says what is wrong.
+    assert meta.metadata.get("Description") == readme, "the description isn't the package's README"
     dotnet = next(f for f in licences if str(f).endswith("dotnet/LICENSE.TXT")).locate().read_bytes()
     assert dotnet.lstrip().startswith(b"The MIT License") and b".NET Foundation" in dotnet, "dotnet/LICENSE.TXT isn't .NET's MIT licence"
     print(f"the wheel: nanoql {meta.version} from {nanoql.__file__}; a 5Y swap's fixed rate {rate!r}; 0 live handles; "

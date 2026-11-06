@@ -175,7 +175,9 @@ class Reference:
 
 
 def main(argv):
-    if len(argv) < 2:
+    valued = ("--root",)
+    if len(argv) < 2 or any(a in valued and (k + 1 == len(argv) or argv[k + 1].startswith("--"))
+                            for k, a in enumerate(argv)):
         print(__doc__)
         return 2
     root = argv[argv.index("--root") + 1] if "--root" in argv else os.path.dirname(os.path.dirname(

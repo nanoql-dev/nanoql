@@ -266,6 +266,17 @@ class Sweep(Child):
         self.assertIn("sweep: no surface at", p.stdout)
         self.assertFalse(self.outcomes.exists())
 
+    def test_an_option_with_no_value_and_no_trace_get_the_usage(self):
+        for args in ([str(self.trace), "--sweep"], [str(self.trace), "--sweep", "--prefix", "nqlt"],
+                     ["--sweep", str(self.outcomes)]):
+            with self.subTest(args=args[1:]):
+                p = subprocess.run([sys.executable, str(HERE / "replay.py"), *args], capture_output=True, text=True,
+                                   cwd=self.work, env=self.env(), timeout=600)
+                self.assertEqual(p.returncode, 2, p.stderr[-2000:])
+                self.assertIn("Usage: python replay.py", p.stdout)
+                self.assertNotIn("Traceback", p.stderr)
+        self.assertFalse(self.outcomes.exists())
+
 
 class Probes(unittest.TestCase):
     """One sweep with the plants in and a surface naming their parameters: each plant red under its probe alone, and
