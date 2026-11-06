@@ -12,9 +12,10 @@ A release publishes, from one commit and its tag:
 - **On PyPI:** `nanoql`, a wheel per platform the release ships: `win_amd64` and `manylinux_2_28_x86_64`, and
   `win_arm64`, `manylinux_2_28_aarch64` and `macosx_14_0_arm64` once those platforms ship; no source distribution,
   since one would need the .NET SDK and the whole repository to build.
-- **On GitHub, the release `v<version>`:** the C archive and the native symbols archive for each platform the release
-  ships, the Excel add-in's zip and its symbols zip, `SHA256SUMS` over them, and the notes: `CHANGELOG.md`'s section
-  with the platforms' readings from the release run's own tests.
+- **On GitHub, the release `v<version>`:** the C archive (the C and C++ headers, the library and its CMake package) and
+  the native symbols archive for each platform the release ships, the Excel add-in's zip and its symbols zip,
+  `SHA256SUMS` over them, and the notes: `CHANGELOG.md`'s section with the platforms' readings from the release run's
+  own tests.
 - **The platforms it ships** are `release.yml`'s `RIDS`, the bindings legs its `ci` call runs: Windows x64 and Linux
   x64 (ci.yml's `core`). A later release adds Windows Arm64, Linux Arm64 or macOS on Apple silicon once its leg is
   green, by naming it in `RIDS` and in the set the `ci` call names, `ci.yml`'s matrix gaining one where none fits; a
@@ -68,8 +69,9 @@ environment's approval: `nuget` pushes the four packages and their symbol packag
   artifact (`nanoql-nuget`, `nanoql-python-*`), with a key or token scoped to those packages and deleted once used,
   or the version is abandoned, unlisted on nuget.org and yanked on PyPI, and the fix ships as the next version.
 - **After it:** each package installed from its registry and checked (the first swap from NuGet, `pip install nanoql`
-  with `bindings/python/tests/wheel_check.py`, the C archive with `bindings/c/tests/archive_check.py`, the add-in's zip
-  opened); then the site built from the tag and deployed.
+  with `bindings/python/tests/wheel_check.py`, each C archive with `bindings/c/tests/archive_check.py` and a user's C++
+  project built through its CMake package, `bindings/cpp/consumer/`, the add-in's zip opened); then the site built
+  from the tag and deployed.
 
 ## Set up once
 

@@ -4,6 +4,38 @@ The notable changes in each release of nanoql. The format follows
 [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/), and the versions follow nanoql's own rule (Versions,
 below).
 
+## [Unreleased]
+
+### Added
+
+- **The C++ layer:** each platform's C archive carries `nanoql.hpp`, C++17 over `nanoql.h`, and a CMake package in
+  `lib/cmake/nanoql/`: `find_package(nanoql CONFIG)` gives `nanoql::cpp` and `nanoql::c`, and a version request
+  follows CMake's SameMajorVersion rule. [The C++ page](docs/cpp.md) covers installing, CMake and a first program
+  (#7).
+- **`nanoql-bind` writes the C++ layer for a library of your own:** `cpp`, and `build`'s `include/` beside the C
+  headers.
+
+### Fixed
+
+- **Python:** `OISRateHelper`'s tenor form and `SwapRateHelper`'s two forms taking a rate can be called without
+  `forward_start` or `fwd_start`, as their defaults allow; they raised "no overload takes these arguments" (#8).
+
+### Validation
+
+- The coverage figures count only the lines a test executes: the test data the runner built while discovering the
+  tests no longer counts as covered, so the same tests read slightly lower figures than 2.0's.
+
+### Known limits
+
+- The Excel add-ins are unsigned. A firm whose Excel requires add-ins signed by a trusted publisher signs the `.xll`
+  with its own certificate.
+- The add-ins run on the .NET 10 Desktop Runtime, Excel-DNA's just-in-time path, not compiled to native code.
+- The bindings, the C++ layer among them, cover Windows x64 and Linux x64 (glibc 2.28 or later); Windows Arm64,
+  Linux Arm64 and macOS on Apple silicon follow in later releases, and Intel Macs have none, though nanoql's .NET
+  library runs there.
+- Python 3.11 or later.
+- The Java layer is built and tested in the repository and not released.
+
 ## [2.0] - 2026-11-03
 
 nanoql's first public release is 2.0, the whole library rather than a preview. Its versions have two parts: a minor

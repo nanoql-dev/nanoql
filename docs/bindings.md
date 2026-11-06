@@ -7,9 +7,10 @@
 nanoql crosses to other languages through one C ABI: its assemblies compiled with Native AOT into one shared library
 (`nanoql.dll`, `libnanoql.so`, `libnanoql.dylib`) that exports a C function per member, described by a generated header,
 `nanoql.h`. Every other language's layer is generated over it: Python (ctypes), C++ (a header with RAII) and Java (the
-FFM API). A release ships the C archive and the Python wheel, and the C archive serves any language that calls C; the
-C++ and Java layers are built and tested in the repository and not released. This page gives the C ABI's rules, the
-tool that generates and builds it, and how it is checked; the language pages follow.
+FFM API). A release ships the C archive, which carries the C++ layer and its CMake package, and the Python wheel; the C
+archive serves any language that calls C, and the Java layer is built and tested in the repository and not released.
+This page gives the C ABI's rules, the tool that generates and builds it, and how it is checked; the language pages
+follow.
 
 ## The tool: nanoql-bind
 
@@ -48,12 +49,13 @@ Visual Studio's C++ tools with the Visual Studio Installer's folder on `PATH`.
   and sources, so a user builds a library of their own in any folder. `nanoql-bind build` writes the host into its
   output and publishes it there, against the nanoql assemblies the generation reads: the two given with
   `--assembly nql=`, from one folder (a build output holding both), or the tool's own copies when none is given, so
-  the library's nanoql is the one the user's assembly was built on; `include/` holds the C headers alone (`nanoql.h`
-  and `acme.h`); `nanoql-bind python` writes the user's Python package, and `nanoql-bind excel build` their add-in
-  ([excel.md](excel.md)). The commands that work on the repository's own files refuse there (`update`, `check`,
-  `freeze`, `--test-exports`, `excel update`, `excel check` and `excel package`), and so do those writing the C++ and
-  Java layers, which the repository builds and tests but doesn't release (`cpp`, `java`, `replay-cpp` and
-  `replay-java`).
+  the library's nanoql is the one the user's assembly was built on; `include/` holds the C and C++ headers (`nanoql.h`
+  and `acme.h`, `nanoql.hpp` and `acme.hpp`); `nanoql-bind cpp` writes the C++ headers alone, `nanoql-bind python`
+  the user's Python package, and `nanoql-bind excel build` their add-in ([excel.md](excel.md)). The commands that
+  work on the repository's own files refuse there (`update`, `check`, `freeze`, `--test-exports`, `excel update`,
+  `excel check` and `excel package`), and so do `replay-cpp`, which writes the C++ replayer's dispatch, the
+  repository's own test, and those writing the Java layer, which the repository builds and tests but doesn't
+  release (`java` and `replay-java`).
 
 ## The C ABI
 
@@ -399,16 +401,17 @@ on Apple silicon in later releases.
 ## C and C++
 
 - **Install:** an archive per platform on the release, `nanoql-<version>-<rid>-c-api.zip` on Windows and `.tar.xz`
-  elsewhere: `include/` (`nanoql.h`), `lib/` (`nanoql.dll` with its import library `nanoql.lib`,
-  `libnanoql.so` or `libnanoql.dylib`) and the notices: `LICENSE`, `NOTICE`, `THIRD_PARTY_NOTICES.md`, and the .NET
-  runtime's `LICENSE.TXT` and `THIRD-PARTY-NOTICES.TXT`, which Native AOT compiles into the library. The symbols ship
-  apart. `python bindings/c/archive.py --library <native build folder> --out <folder>` writes one.
+  elsewhere: `include/` (`nanoql.h` and `nanoql.hpp`), `lib/` (`nanoql.dll` with its import library `nanoql.lib`,
+  `libnanoql.so` or `libnanoql.dylib`, and `cmake/nanoql/`, the CMake package) and the notices: `LICENSE`, `NOTICE`,
+  `THIRD_PARTY_NOTICES.md`, and the .NET runtime's `LICENSE.TXT` and `THIRD-PARTY-NOTICES.TXT`, which Native AOT
+  compiles into the library. The symbols ship apart. `python bindings/c/archive.py --library <native build folder> --out
+  <folder>` writes one.
 - **C:** include `nanoql.h` and link the library; the C ABI above is the whole of it.
-- **C++, from the release:** include `nanoql.h` as it is; its declarations sit in `extern "C"`.
-- **C++, the repository's layer:** `nanoql.hpp`, C++17, over `nanoql.h`, built and tested in the repository and not
-  released. `NANOQL_EXPERIMENTAL`, defined first, opts in to the experimental API. Its hand-written part is
-  `bindings/cpp/runtime.hpp`; the tool writes the rest, never checked in, as `nanoql-bind build` does into the build's
-  `include/` in the repository. The bullets below describe it.
+- **C++:** `nanoql.hpp`, C++17, over `nanoql.h`, its CMake target `nanoql::cpp` (`find_package(nanoql CONFIG)`;
+  [cpp.md](cpp.md) gives the install, CMake and a first program). `NANOQL_EXPERIMENTAL`, defined first, opts in to
+  the experimental API. Its hand-written part is `bindings/cpp/runtime.hpp`; the tool writes the rest, never checked
+  in, as `nanoql-bind build` does into `include/`. The bullets below describe it. C++ can also include `nanoql.h` as
+  it is; its declarations sit in `extern "C"`.
 - **Names:** namespace `nanoql`; nanoql's type names; members in QuantLib's camelCase (`curve.discount(5.0)`,
   `swap.fixedRate()`, `NPV()`, `yoyInflationIndex()`), a getter a member function; a static member or an extension
   method a static member of its declaring class (`ConventionSet::quantLib()`), a record's init-only property

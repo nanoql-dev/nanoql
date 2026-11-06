@@ -29,8 +29,9 @@ experimental API may change in any release, and its released names are never reu
   from QLNet are checked against QLNet 1.13.2. The vectors are committed to this repository, and what they cover is
   under [Validation](#validation).
 - **Traceable to its sources.** Each ported file records the library, path and release it was ported from.
-- **Python and C without .NET.** One C interface over nanoql compiled with Native AOT: Python's wheels hold it, so
-  `pip install nanoql` needs no .NET runtime, and the C archive serves any language that calls C.
+- **Python, C and C++ without .NET.** One C interface over nanoql compiled with Native AOT: Python's wheels hold it,
+  so `pip install nanoql` needs no .NET runtime, and the C archive, with its C++ header and CMake package, serves
+  C++ and any language that calls C.
 
 ## Platforms
 

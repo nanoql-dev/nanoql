@@ -25,7 +25,9 @@ nanoql-bind build --rid win-x64 --out acme-native \
 ```
 
 `acme-native/lib/` holds the library, nanoql's functions (`nql_...`) and yours (`acme_...`), and
-`acme-native/include/` the C headers, `nanoql.h` and `acme.h`. The library is compiled against the nanoql assemblies
+`acme-native/include/` the C and C++ headers: `nanoql.h` and `acme.h`, and `nanoql.hpp` and `acme.hpp`, whose classes
+extend nanoql's (`acme::ExponentialCurve` is a `nanoql::YieldTermStructure`); `nanoql-bind cpp --out <folder>` with
+the same `--assembly` arguments writes the C++ headers alone. The library is compiled against the nanoql assemblies
 you give, from one folder, so its nanoql is the one your assembly was built on; given no `--assembly`, the tool builds
 nanoql's own library from the copies beside it.
 
