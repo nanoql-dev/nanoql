@@ -8,9 +8,9 @@ inputs: there are no observers, lazy objects or global evaluation date, and mark
 - **.NET:** `dotnet add package NanoQL`, and `NanoQL.Extensions` for the conventions' XML format and the instruments
   and models beyond the core.
 - **Python:** `pip install nanoql`.
-- **C:** `nanoql-2.0-<platform>-c-api` on [the release](https://github.com/nanoql-dev/nanoql/releases/tag/v2.0): the
-  header, the library and the notices.
-- **Excel:** `nanoql-excel-2.0-win-x64.zip` on the release: the add-ins and five example workbooks.
+- **C and C++:** `nanoql-2.1-<platform>-c-api` on [the release](https://github.com/nanoql-dev/nanoql/releases/tag/v2.1):
+  the C and C++ headers, the library, its CMake package and the notices ([C++](docs/cpp.md)).
+- **Excel:** `nanoql-excel-2.1-win-x64.zip` on the release: the add-ins and five example workbooks.
 
 nanoql's first public release is 2.0, the whole library rather than a preview. Its versions have two parts: a minor
 release adds, and nothing stable is removed until it has been deprecated for at least two releases and a year. The
@@ -49,10 +49,10 @@ Checked against QuantLib 1.44 on Windows x64.
   QLNet's additions against QLNet 1.13.2. Each output agrees within a relative 1e-10 of the larger of the two values and
   the output's scale (an amount's is its notional), except 4,854 (0.14%) held to a documented looser tolerance.
 - **The tests:** QuantLib's own tests, ported at QuantLib's tolerances.
-- **The types:** 2,281 of the 2,282 public types with executable code are run by a QuantLib-checked test, QLNet's
+- **The types:** 2,265 of the 2,266 public types with executable code are run by a QuantLib-checked test, QLNet's
   additions by a QLNet-checked one. The one apart, `FactorReductionFunctions`, every output of which is QuantLib's
-  defect fixed, is checked by its own tests. 303 more are listed apart, 291 with no executable code and 12 own-tested
-  (six of them extensions, five experimental and one a term structure), and three are equality-only. 89.5% of the ported
+  defect fixed, is checked by its own tests. 319 more are listed apart, 291 with no executable code and 28 own-tested
+  (22 of them extensions, five experimental and one a term structure), and three are equality-only. 89.0% of the ported
   lines are covered.
 - **The divergences:** 736 documented divergences, 720 from QuantLib and 16 from QLNet, each with its own test class.
 <!-- end of the validation statement -->

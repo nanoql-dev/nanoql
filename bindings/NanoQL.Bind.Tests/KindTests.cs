@@ -158,8 +158,8 @@ public class KindTests
     public void TheHeaderCarriesTheVersionAndItsCheck()
     {
         string header = Surfaces.Nanoql.Files["c/include/nanoql.h"];
-        Assert.Contains("#define NQL_VERSION \"2.0\"", header, StringComparison.Ordinal);
-        Assert.Contains("#define NQL_ABI_VERSION 2000", header, StringComparison.Ordinal);
+        Assert.Contains("#define NQL_VERSION \"2.1\"", header, StringComparison.Ordinal);
+        Assert.Contains("#define NQL_ABI_VERSION 2001", header, StringComparison.Ordinal);
         Assert.Contains("assert(nql_abi_version() == NQL_ABI_VERSION);", header, StringComparison.Ordinal);
     }
 

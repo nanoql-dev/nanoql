@@ -10,7 +10,7 @@
 cmake_minimum_required(VERSION 3.21)
 project(nanoql_consumer CXX)
 
-find_package(nanoql 2.0 CONFIG REQUIRED)
+find_package(nanoql 2.1 CONFIG REQUIRED)
 message(STATUS "nanoql ${nanoql_VERSION} from ${nanoql_DIR}")
 
 add_executable(consumer main.cpp)
