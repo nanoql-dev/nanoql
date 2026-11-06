@@ -897,6 +897,10 @@ through a checked caller):
 run's: a type whose file's Upstream line names QLNet passes on that run's covered lines alone, and every other type on
 the first run's, so each type passes against the library it comes from. A QLNet type the commit changes without
 `--qlnet` is a red.
+- **What a report holds:** only the lines its tests execute. The test project turns xUnit's theory pre-enumeration off
+  (`tests/NanoQL.Tests/xunit.runner.json`), so a theory's data is built when its test runs, not when the runner
+  discovers every test whatever the filter; a run matching no test reports every type at 0. A covered command passes no
+  `--pre-enumerate-theories on`, which overrides the file.
 - **The types:** the top-level public types of the `.cs` files under `src/NanoQL/` that the commit adds or changes
   (the working tree against `HEAD`, untracked files included) and that carry an Upstream line, and of every such file
   under `src/NanoQL.Extensions/`. Files that declare no

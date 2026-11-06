@@ -17,6 +17,13 @@
     <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.12.0" />
   </ItemGroup>
 
+  <!-- xunit.runner.json turns theory pre-enumeration off, so a theory's data is built when its test runs. Discovery
+       would build every theory's data whatever the filter, and a covered run would count those lines as its tests'
+       (the coverage gate's type check, docs/porting-playbook.md §9.5). -->
+  <ItemGroup>
+    <None Update="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
   <ItemGroup>
     <Using Include="Xunit" />
   </ItemGroup>
