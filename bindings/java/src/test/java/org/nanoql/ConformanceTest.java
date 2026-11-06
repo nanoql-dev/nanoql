@@ -508,8 +508,8 @@ class ConformanceTest {
 
     @Test
     void versions() {
-        assertEquals(2000, NanoQL.abiVersion());
-        assertEquals("2.0", NanoQL.version());
+        assertEquals(2001, NanoQL.abiVersion());
+        assertEquals("2.1", NanoQL.version());
         assertTrue(org.nanoql.time.Date.todaysDate().isAfter(LocalDate.of(2025, 1, 1)));
         assertFalse(NanoQL.liveHandles() < 0);
     }

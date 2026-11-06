@@ -524,6 +524,7 @@ inline int64_t liveHandles()
     return n;
 }
 
-// The library's version ("2.0") and its ABI's (2000), which a program checks against NQL_ABI_VERSION.
+// The library's version ("major.minor", or "major.minor.patch" for a fix) and its ABI's, which a program checks
+// against the header's NQL_ABI_VERSION.
 inline std::string version() { return detail::text(nql_version()); }
 inline int32_t abiVersion() { return nql_abi_version(); }

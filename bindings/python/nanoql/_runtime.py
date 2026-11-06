@@ -145,7 +145,7 @@ def _expect_abi(abi: int) -> None:
 
 
 def version() -> str:
-    """The library's version: ``2.0``."""
+    """The library's version: ``major.minor``, or ``major.minor.patch`` for a fix."""
     return (_library().nql_version() or b"").decode("utf-8")
 
 

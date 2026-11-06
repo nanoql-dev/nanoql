@@ -43,7 +43,7 @@ public final class NanoQL {
     }
 
     /**
-     * The library's version: {@code 2.0}.
+     * The library's version: {@code major.minor}, or {@code major.minor.patch} for a fix.
      *
      * @return the version
      */
