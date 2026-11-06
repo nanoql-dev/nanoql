@@ -14,6 +14,8 @@ below).
   (#7).
 - **`nanoql-bind` writes the C++ layer for a library of your own:** `cpp`, and `build`'s `include/` beside the C
   headers.
+- **Migrating from QuantLib's C++:** [a guide](docs/migration/from-quantlib-cpp.md) pairs QuantLib's C++ with nanoql's
+  C++ layer for the rates products, beside the QuantLib-Python and QLNet guides.
 
 ### Fixed
 

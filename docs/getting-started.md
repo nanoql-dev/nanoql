@@ -46,7 +46,7 @@ locally, `pip install nanoql jupyter matplotlib` runs it. [The bindings guide](b
   [caps and floors](rates/caps-and-floors.md) and [swaptions](rates/swaptions.md).
 - [Pricing a USD SOFR swap to match the market](sofr-example.md): the conventions that move a price, set in XML.
 - [The stateless design](stateless.md): rebuilding, memoizing and pricing scenarios in parallel.
-- Coming from QuantLib-Python or QLNet: [from QuantLib-Python](migration/from-quantlib-python.md),
-  [from QLNet](migration/from-qlnet.md).
+- Coming from QuantLib's C++, QuantLib-Python or QLNet: [from QuantLib's C++](migration/from-quantlib-cpp.md),
+  [from QuantLib-Python](migration/from-quantlib-python.md), [from QLNet](migration/from-qlnet.md).
 - Beyond C#: [the bindings](bindings.md) for Python and for C, which any language that calls C can use, the C++
   layer over it ([C++](cpp.md)), and [the Excel add-in](excel.md).
