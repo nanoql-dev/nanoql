@@ -1145,22 +1145,32 @@ def _dispatch(forms: tuple, args: tuple, kwargs: dict) -> Any:
     return call(*values)
 
 
+def _default_fits(text: str, v: Any) -> int | None:
+    """How well a form's own default matches its kind: as an argument's, but a period's None, which _period sends as
+    C#'s default(Period), fits the form it is the default of."""
+    if v is None and text == "period":
+        return 0
+    return _score(text, v)
+
+
 def _select(forms: tuple, args: tuple, kwargs: dict) -> tuple[Any, list[Any], str]:
     """The overload the arguments fit best, its arguments and its C function: per form its function, parameter names,
     kinds, defaults, the argument counts it's offered at (a count another form takes exactly isn't offered) and its C
-    function's name."""
+    function's name. The arguments are scored by _score, the defaults that fill the rest by _default_fits."""
     best = None
     best_score = None
     for call, names, kinds, defaults, offered, cname in forms:
         if len(args) > len(names):
             continue
         values = list(args)
+        defaulted = set()
         ok = True
         for i in range(len(args), len(names)):
             if names[i] in kwargs:
                 values.append(kwargs[names[i]])
             elif defaults[i] is not _REQUIRED:
                 values.append(defaults[i])
+                defaulted.add(i)
             else:
                 ok = False
                 break
@@ -1170,8 +1180,8 @@ def _select(forms: tuple, args: tuple, kwargs: dict) -> tuple[Any, list[Any], st
         if given not in offered and not kwargs:
             continue
         total = 0
-        for kind, v in zip(kinds, values):
-            s = _score(kind, v)
+        for i, (kind, v) in enumerate(zip(kinds, values)):
+            s = _default_fits(kind, v) if i in defaulted else _score(kind, v)
             if s is None:
                 ok = False
                 break

@@ -229,6 +229,50 @@ class Defaults(unittest.TestCase):
                                                       i=nanoql.BackwardFlat(), bootstrap=nanoql.IterativeBootstrap())
         self.assertEqual(bits(explicit.discount(2.0)), bits(References.piecewise_discount()))
 
+    def test_a_periods_none_default_takes_its_form(self):
+        # OISRateHelper's tenor form and SwapRateHelper's two rate forms default a period to None, C#'s
+        # default(Period): left out, it takes the form as the spot start given does.
+        qs = ConventionSet.quant_lib()
+        context = Fixtures.context()
+        spot = Period(0, TimeUnit.Days)
+        sofr = qs.overnight_index("Sofr")
+        ois = nanoql.OISRateHelper(2, Period(1, TimeUnit.Years), 0.0372, sofr, context)
+        self.assertIsInstance(ois, nanoql.OISRateHelper)
+        given = nanoql.OISRateHelper(2, Period(1, TimeUnit.Years), 0.0372, sofr, context, forward_start=spot)
+        self.assertEqual((ois.earliest_date, ois.maturity_date), (given.earliest_date, given.maturity_date))
+        swap_index = qs.swap_index("EuriborSwapIsdaFixA", Period(5, TimeUnit.Years))
+        by_index = nanoql.SwapRateHelper(0.03, swap_index, context)
+        given = nanoql.SwapRateHelper(0.03, swap_index, context, fwd_start=spot)
+        self.assertEqual((by_index.earliest_date, by_index.maturity_date), (given.earliest_date, given.maturity_date))
+        terms = (0.03, Period(5, TimeUnit.Years), qs.calendar("TARGET"), Frequency.Annual,
+                 nanoql.BusinessDayConvention.Unadjusted, qs.day_counter("Actual365Fixed"), qs.ibor_index("Euribor6M"), context)
+        by_tenor = nanoql.SwapRateHelper(*terms)
+        given = nanoql.SwapRateHelper(*terms, fwd_start=spot)
+        self.assertEqual((by_tenor.earliest_date, by_tenor.maturity_date), (given.earliest_date, given.maturity_date))
+
+    def test_every_default_fits_its_form(self):
+        # Each overload group's forms, nanoql's, its experimental module's and the test types': every default scores as
+        # a match under the dispatcher's rule for defaults, so a form is callable with them left out.
+        import inspect
+
+        import nanoql.experimental
+        import nqlt.experimental
+        from nanoql import _runtime
+
+        failing, groups, seen = [], 0, set()
+        for module in (nanoql, nanoql.experimental, nqlt, nqlt.experimental):
+            for _, cls in inspect.getmembers(module, inspect.isclass):
+                for attr, forms in vars(cls).items():
+                    if not (attr.startswith("_D") and attr[2:].isdigit() and isinstance(forms, tuple)) or id(forms) in seen:
+                        continue
+                    seen.add(id(forms))
+                    groups += 1
+                    for _, names, kinds, defaults, _, cname in forms:
+                        failing += [f"{cname} {name}" for name, kind, default in zip(names, kinds, defaults)
+                                    if default is not _runtime._REQUIRED and _runtime._default_fits(kind, default) is None]
+        self.assertGreater(groups, 600)
+        self.assertEqual(failing, [])
+
 
 class Codes(unittest.TestCase):
     def test_each_kind(self):
