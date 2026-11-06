@@ -479,7 +479,8 @@ jobs:
           name: nanoql-python-${{ matrix.rid }}
           path: ${{ runner.temp }}/wheels/*.whl
           retention-days: ${{ inputs.release && 7 || 1 }}
-      # The C archive: the header, the library and the notices, zipped on Windows, .tar.xz elsewhere.
+      # The C archive: the headers, the library, its CMake package and the notices, zipped on Windows, .tar.xz
+      # elsewhere.
       - name: The C archive
         id: archive
         continue-on-error: true
@@ -494,6 +495,27 @@ jobs:
           name: nanoql-c-api-${{ matrix.rid }}
           path: ${{ runner.temp }}/archive/nanoql-*-c-api.*
           retention-days: ${{ inputs.release && 7 || 1 }}
+      # A user's C++ project through the archive's CMake package, the archive unpacked as a user unpacks it: built and
+      # run with the leg's compilers, MSVC on Windows, g++ and clang elsewhere.
+      - name: A user's C++ project through the archive's package
+        id: cpp-package
+        continue-on-error: true
+        run: |
+          unpacked="$RUNNER_TEMP/unpacked"
+          rm -rf "$unpacked" && mkdir -p "$unpacked"
+          archive=$(ls "$RUNNER_TEMP"/archive/nanoql-*-c-api.*)
+          (cd "$unpacked" && cmake -E tar xf "$archive")
+          prefix=$(ls -d "$unpacked"/nanoql-*-c-api)
+          compilers=default
+          [ "${{ runner.os }}" = Windows ] || compilers="g++ clang++"
+          for cxx in $compilers; do
+            build="$RUNNER_TEMP/cpp-package-$cxx"
+            chosen=()
+            [ "$cxx" = default ] || chosen=(-DCMAKE_CXX_COMPILER="$cxx")
+            cmake -S bindings/cpp/consumer -B "$build" -DCMAKE_PREFIX_PATH="$prefix" -DCMAKE_BUILD_TYPE=Release "${chosen[@]}"
+            cmake --build "$build" --config Release
+            ctest --test-dir "$build" -C Release --output-on-failure
+          done
       # At a release, the native library's symbols beside the C archive, in its form.
       - name: The native symbols archive, at a release
         id: symbols
@@ -606,6 +628,7 @@ jobs:
             cpp-replay:${{ steps.cpp-replay.outcome }}
             python:${{ steps.python.outcome }}
             archive:${{ steps.archive.outcome }}
+            cpp-package:${{ steps.cpp-package.outcome }}
             symbols:${{ steps.symbols.outcome }}
             java:${{ steps.java.outcome }}
             java-jars:${{ steps.java-jars.outcome }}

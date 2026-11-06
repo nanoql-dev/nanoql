@@ -5,10 +5,11 @@ namespace NanoQL.Bind.Tests;
 
 /// <summary>
 /// The tool outside any repository (docs/bindings.md, the tool), in a scratch folder with no <c>bindings/roles.json</c>
-/// above it: the commands that work on the repository's own files, and those writing the C++ and Java layers, refuse;
-/// <c>report</c> reads the defaults beside the tool; <c>build</c> writes the native host into its output, publishes it
-/// against the nanoql assemblies the generation reads (the tool's own with none given, else the two given, from one
-/// folder), and writes the C headers alone, its publish's command line captured.
+/// above it: the commands that work on the repository's own files, and those writing the C++ replayer's dispatch and
+/// the Java layer, refuse; <c>report</c> reads the defaults beside the tool; <c>cpp</c> writes the C++ layer the
+/// repository's generation writes; <c>build</c> writes the native host into its output, publishes it against the
+/// nanoql assemblies the generation reads (the tool's own with none given, else the two given, from one folder), and
+/// writes the C and C++ headers, its publish's command line captured.
 /// </summary>
 public class OutsideRepositoryTests
 {
@@ -21,7 +22,7 @@ public class OutsideRepositoryTests
             string[][] refused =
             [
                 ["update"], ["check"], ["freeze"], ["headers", "--out", Path.Combine(dir, "h"), "--test-exports"],
-                ["cpp", "--out", Path.Combine(dir, "c")], ["java", "--out", Path.Combine(dir, "j")],
+                ["java", "--out", Path.Combine(dir, "j")],
                 ["replay-cpp", "--out", Path.Combine(dir, "rc")], ["replay-java", "--out", Path.Combine(dir, "rj")],
                 ["excel", "update"], ["excel", "check"], ["excel", "package", "--out", Path.Combine(dir, "p")],
                 ["excel", "generate", "--out", Path.Combine(dir, "g"), "--test-exports"],
@@ -56,7 +57,24 @@ public class OutsideRepositoryTests
     }
 
     [Fact]
-    public void BuildWritesTheHostAndTheCHeadersAlone()
+    public void CppWritesTheRepositorysCppLayer()
+    {
+        string dir = Scratch();
+        try
+        {
+            string output = Path.Combine(dir, "c");
+            Assert.Equal(0, Program.Run(["cpp", "--out", output], dir, Captured([])));
+            Assert.Equal(["nanoql.hpp"], Directory.EnumerateFiles(output).Select(f => Path.GetFileName(f)));
+            Assert.Equal(Surfaces.Nanoql.CppHeaders()["nanoql.hpp"], File.ReadAllText(Path.Combine(output, "nanoql.hpp")));
+        }
+        finally
+        {
+            Directory.Delete(dir, true);
+        }
+    }
+
+    [Fact]
+    public void BuildWritesTheHostAndTheCAndCppHeaders()
     {
         string dir = Scratch();
         try
@@ -71,7 +89,7 @@ public class OutsideRepositoryTests
             Assert.True(File.Exists(host));
             Assert.True(File.Exists(Path.Combine(output, "host", "Rt.cs")));
             Assert.Equal("<Project />\n", File.ReadAllText(Path.Combine(output, "host", "Directory.Build.props")));
-            Assert.Equal(["nanoql.h"], Directory.EnumerateFiles(Path.Combine(output, "include")).Select(f => Path.GetFileName(f)));
+            Assert.Equal(["nanoql.h", "nanoql.hpp"], Directory.EnumerateFiles(Path.Combine(output, "include")).Select(f => Path.GetFileName(f)).Order(StringComparer.Ordinal));
         }
         finally
         {

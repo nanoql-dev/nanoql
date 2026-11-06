@@ -36,8 +36,8 @@ namespace NanoQL.Bind;
 // Outside the repository (no bindings/roles.json in the current folder or above it) the tool reads the defaults it
 // carries beside it, defaults/bindings/, laid out as the repository's; build writes the native host's project into its
 // output and publishes it there against the nanoql assemblies the generation reads, the given ones or the tool's own
-// (LibraryDir), with the C headers alone; and the commands that read or write the repository's own files, or write the
-// C++ and Java layers, which the repository builds and tests but doesn't release, refuse.
+// (LibraryDir), with the C and C++ headers; and the commands that read or write the repository's own files, or write
+// the C++ replayer's dispatch or the Java layer, which the repository builds and tests but doesn't release, refuse.
 internal static class Program
 {
     private static int Main(string[] args)
@@ -278,8 +278,8 @@ internal static class Program
         return Path.TrimEndingDirectorySeparator(folders[0]) + Path.DirectorySeparatorChar;
     }
 
-    // Outside the repository: the commands on the repository's own files, and the layers it builds and tests without
-    // releasing them, stay in it.
+    // Outside the repository: the commands on the repository's own files, and what it builds and tests without
+    // releasing it, stay in it.
     private static void RefuseOutside(string command, bool testExports)
     {
         if (command is "update" or "check" or "freeze" || testExports)
@@ -287,9 +287,14 @@ internal static class Program
             throw new IOException($"'{command}{(testExports ? " --test-exports" : string.Empty)}' works on the repository's own files: run nanoql-bind in the repository");
         }
 
-        if (command is "cpp" or "java" or "replay-cpp" or "replay-java")
+        if (command is "replay-cpp")
         {
-            throw new IOException($"'{command}' writes the {(command.EndsWith("cpp", StringComparison.Ordinal) ? "C++" : "Java")} layer, which the repository builds and tests but doesn't release: run nanoql-bind in the repository");
+            throw new IOException("'replay-cpp' writes the C++ replayer's dispatch, the repository's own test: run nanoql-bind in the repository");
+        }
+
+        if (command is "java" or "replay-java")
+        {
+            throw new IOException($"'{command}' writes the Java layer, which the repository builds and tests but doesn't release: run nanoql-bind in the repository");
         }
     }
 
@@ -334,8 +339,8 @@ internal static class Program
         return dll;
     }
 
-    // Outside the repository (a library folder given), the host references nanoql's two assemblies there, and include/
-    // holds the C headers alone.
+    // Outside the repository (a library folder given), the host references nanoql's two assemblies there; include/
+    // holds the C and C++ headers either way.
     private static int Build(Generation g, string host, string rid, string outDir, bool testExports, List<AssemblyInput> assemblies, string? libraryDir, Func<string, IReadOnlyList<string>, int> exec)
     {
         bool outside = libraryDir != null;
@@ -350,13 +355,10 @@ internal static class Program
             File.WriteAllBytes(full, System.Text.Encoding.UTF8.GetBytes(text));
         }
 
-        // The C++ headers beside the C ones, in the repository.
-        if (!outside)
+        // The C++ headers beside the C ones.
+        foreach ((string name, string text) in g.CppHeaders())
         {
-            foreach ((string name, string text) in g.CppHeaders())
-            {
-                File.WriteAllBytes(Path.Combine(outDir, "include", name), System.Text.Encoding.UTF8.GetBytes(text));
-            }
+            File.WriteAllBytes(Path.Combine(outDir, "include", name), System.Text.Encoding.UTF8.GetBytes(text));
         }
 
         // Assemblies beyond nanoql's two are referenced by path; nanoql's are the host's project references, or outside
