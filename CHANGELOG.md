@@ -4,7 +4,7 @@ The notable changes in each release of nanoql. The format follows
 [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/), and the versions follow nanoql's own rule (Versions,
 below).
 
-## [Unreleased]
+## [2.2] - 2026-11-07
 
 ### Added
 
@@ -35,6 +35,17 @@ below).
   an arbitrage, is refitted to the same ends and slopes, so nothing else in the section moves; on 163 SABR smiles of a
   sweep the fit missed on 60. The route is opt-in: `KahaleSmileSection`'s `interpolate`, and the Markov-functional
   model's `KahaleInterpolation` adjustment (#16).
+
+### Known limits
+
+- The Excel add-ins are unsigned. A firm whose Excel requires add-ins signed by a trusted publisher signs the `.xll`
+  with its own certificate.
+- The add-ins run on the .NET 10 Desktop Runtime, Excel-DNA's just-in-time path, not compiled to native code.
+- The bindings, the C++ layer among them, cover Windows x64 and Linux x64 (glibc 2.28 or later); Windows Arm64,
+  Linux Arm64 and macOS on Apple silicon follow in later releases, and Intel Macs have none, though nanoql's .NET
+  library runs there.
+- Python 3.11 or later.
+- The Java layer is built and tested in the repository and not released.
 
 ## [2.1] - 2026-11-06
 
@@ -153,5 +164,6 @@ QuantLib's are sealed by their use:
 - Python 3.11 or later.
 - The Java and C++ layers are built and tested in the repository and not released; C++ includes `nanoql.h` as it is.
 
+[2.2]: https://github.com/nanoql-dev/nanoql/releases/tag/v2.2
 [2.1]: https://github.com/nanoql-dev/nanoql/releases/tag/v2.1
 [2.0]: https://github.com/nanoql-dev/nanoql/releases/tag/v2.0

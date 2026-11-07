@@ -8,9 +8,9 @@ inputs: there are no observers, lazy objects or global evaluation date, and mark
 - **.NET:** `dotnet add package NanoQL`, and `NanoQL.Extensions` for the conventions' XML format and the instruments
   and models beyond the core.
 - **Python:** `pip install nanoql`.
-- **C and C++:** `nanoql-2.1-<platform>-c-api` on [the release](https://github.com/nanoql-dev/nanoql/releases/tag/v2.1):
+- **C and C++:** `nanoql-2.2-<platform>-c-api` on [the release](https://github.com/nanoql-dev/nanoql/releases/tag/v2.2):
   the C and C++ headers, the library, its CMake package and the notices ([C++](docs/cpp.md)).
-- **Excel:** `nanoql-excel-2.1-win-x64.zip` on the release: the add-ins and five example workbooks.
+- **Excel:** `nanoql-excel-2.2-win-x64.zip` on the release: the add-ins and five example workbooks.
 
 nanoql's first public release is 2.0, the whole library rather than a preview. Its versions have two parts: a minor
 release adds, and nothing stable is removed until it has been deprecated for at least two releases and a year. The
@@ -54,7 +54,7 @@ Checked against QuantLib 1.44 on Windows x64.
   defect fixed, is checked by its own tests. 319 more are listed apart, 291 with no executable code and 28 own-tested
   (22 of them extensions, five experimental and one a term structure), and three are equality-only. 89.0% of the ported
   lines are covered.
-- **The divergences:** 736 documented divergences, 720 from QuantLib and 16 from QLNet, each with its own test class.
+- **The divergences:** 738 documented divergences, 722 from QuantLib and 16 from QLNet, each with its own test class.
 <!-- end of the validation statement -->
 
 ## License

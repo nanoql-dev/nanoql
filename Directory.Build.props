@@ -20,7 +20,7 @@
        major alone, kept for every 2.y release: bindings/surface.json names closed generic types by assembly-qualified
        names, which carry it (docs/bindings.md, "Versions"). -->
   <PropertyGroup>
-    <Version>2.1</Version>
+    <Version>2.2</Version>
     <AssemblyVersion>2.0.0.0</AssemblyVersion>
     <Authors>The nanoql Authors</Authors>
     <Copyright>Copyright 2026 The nanoql Authors</Copyright>

@@ -1,4 +1,4 @@
-{"version": "2.1", "build": "experimental",
+{"version": "2.2", "build": "experimental",
  "functions": [
   {"excel": "nqlASXCode", "c": "nql_ASX_Code", "kind": "static", "category": "nanoql.Time", "experimental": false, "args": [{"name": "asxDate", "kind": "date"}], "returns": "string", "loops": "1"},
   {"excel": "nqlASXDate", "c": "nql_ASX_Date", "kind": "static", "category": "nanoql.Time", "experimental": false, "args": [{"name": "asxCode", "kind": "string"}, {"name": "context", "kind": "handle"}, {"name": "referenceDate", "kind": "date?", "optional": true}], "returns": "date", "loops": "111"},

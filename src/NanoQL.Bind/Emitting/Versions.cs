@@ -13,7 +13,7 @@ internal static class Versions
     public const int Major = 2;
 
     /// <summary>The minor version.</summary>
-    public const int Minor = 1;
+    public const int Minor = 2;
 
     /// <summary>The patch, 0 but for a fix.</summary>
     public const int Patch = 0;

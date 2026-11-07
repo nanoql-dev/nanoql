@@ -1,4 +1,4 @@
-{"version": "2.1",
+{"version": "2.2",
  "functions": [
   {"excel": "nqlASXCode", "c": "nql_ASX_Code"},
   {"excel": "nqlASXDate", "c": "nql_ASX_Date"},

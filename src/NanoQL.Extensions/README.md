@@ -45,7 +45,7 @@ cover, per module, is on [the validation page](https://nanoql.org/validation/).
 
 - [Documentation](https://nanoql.org/docs/).
 - [Source and issues](https://github.com/nanoql-dev/nanoql), and
-  [the changelog](https://github.com/nanoql-dev/nanoql/blob/v2.1/CHANGELOG.md).
+  [the changelog](https://github.com/nanoql-dev/nanoql/blob/v2.2/CHANGELOG.md).
 
 ## License
 
