@@ -20,11 +20,14 @@ namespace NanoQL.PricingEngines;
 /// <remarks>
 /// <para>
 /// The option's exercise is American with its payoff at expiry, its window open from the start, as in QuantLib. The
-/// engine reads its discounts and its variance by date, so curves on other day counters or dates price as on one
-/// clock. The formulas are first-passage closed forms in one equivalent-constant carry and volatility, the variance
-/// and discounts to expiry: no exact closed form exists for a first passage under general deterministic term
-/// structures, and on shaped markets they miss QuantLib's finite-difference barrier engine or a Monte Carlo by -1.2% to
-/// +1.7%; the term-structure-exact routes are <see cref="FdBlackScholesBarrierEngine"/> and the Monte Carlo engines.
+/// engine reads its discounts and its variance by date, so curves on other day counters or dates price as on one clock.
+/// The formulas are first-passage closed forms in one equivalent-constant carry and volatility, the variance and
+/// discounts to expiry: no exact closed form exists for a first passage under general deterministic term structures,
+/// and on shaped markets they miss QuantLib's finite-difference barrier engine or a Monte Carlo by -3.6% to +1.7%. They
+/// are exact where (r − q)/σ² is constant over the option's life and the volatility depends on time alone, the price
+/// then a time change of a constant market's; a knock-out's rebate, paid at the hit, where r/σ² and q/σ² are each
+/// constant (<c>Conventions/ClosedFormExactnessTests.cs</c>). The term-structure-exact route is
+/// <see cref="FdBlackScholesBarrierEngine"/>; the Monte Carlo engines monitor the barrier at their grid's dates.
 /// </para>
 /// <para>
 /// Two documented divergences. At a variance below machine epsilon the underlying follows its forward, and hits the

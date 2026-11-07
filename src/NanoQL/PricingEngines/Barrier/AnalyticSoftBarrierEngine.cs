@@ -46,8 +46,10 @@ namespace NanoQL.PricingEngines;
 /// <para>
 /// Haug's form and the average are first-passage closed forms in equivalent-constant rates and a volatility, the
 /// variance and discounts to expiry: no exact closed form exists for a first passage under general deterministic term
-/// structures, and on shaped markets they miss the average of <see cref="FdBlackScholesBarrierEngine"/>'s single-barrier
-/// knock-ins by -0.8% to +1.5%; that average is the term-structure-exact route.
+/// structures, and on shaped markets they miss the average of <see cref="FdBlackScholesBarrierEngine"/>'s
+/// single-barrier knock-ins by -0.8% to +1.5%; that average is the term-structure-exact route. Both are exact where (r
+/// − q)/σ² is constant over the option's life and the volatility depends on time alone, the price then a time change of
+/// a constant market's (<c>Conventions/ClosedFormExactnessTests.cs</c>).
 /// </para>
 /// </remarks>
 public static class AnalyticSoftBarrierEngine

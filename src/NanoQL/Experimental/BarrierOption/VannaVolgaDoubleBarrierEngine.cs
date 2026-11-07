@@ -48,7 +48,10 @@ namespace NanoQL.Experimental;
 /// the analytic engine and Suo-Wang price a rebate and converge their series.
 /// </para>
 /// <para>
-/// The method's equivalent-constant reads stand, QuantLib's: one volatility and the zero rates to the quotes' time.
+/// The method's equivalent-constant reads stand, QuantLib's: one volatility and the zero rates to the quotes' time. Its
+/// volatilities are quotes, flat in time, so its Black-Scholes legs are exact where r_d − r_f is constant, and an out
+/// option's rebate, paid at the hit, where r_d and r_f are each flat; the smile's correction is the method's
+/// approximation.
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]

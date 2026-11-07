@@ -43,7 +43,9 @@ namespace NanoQL.Experimental;
 /// Each rate and discount is read to the residual time on the volatility's clock, the volatility at the strike, as the
 /// analytic engine reads them, where QuantLib reads every structure at the risk-free curve's time: equivalent-constant
 /// reads, as the analytic engine keeps them, no exact closed form existing for a first passage under general
-/// deterministic term structures.
+/// deterministic term structures. They are exact where (r − q)/σ² is constant over the option's life and the volatility
+/// depends on time alone, a knock-out's rebate, paid at the first touch, where r/σ² and q/σ² are each constant, as the
+/// analytic engine's are (<c>Conventions/ClosedFormExactnessTests.cs</c>).
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]

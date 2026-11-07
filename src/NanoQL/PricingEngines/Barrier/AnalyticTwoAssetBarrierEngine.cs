@@ -38,12 +38,15 @@ namespace NanoQL.PricingEngines;
 /// (<c>Divergences/TwoAssetBarrierExerciseTests.cs</c>).
 /// </para>
 /// <para>
-/// The formula is a first-passage closed form in equivalent-constant rates and volatilities, the variance and
-/// discounts to expiry: no exact closed form exists for a first passage under general deterministic term structures,
-/// and its single correlation term, ρσ₁σ₂, can't carry a first volatility that moves over the option's life. On shaped
-/// markets (1.5 years; forward rates 1%, 3%, 6%, dividends 0%, 1%, 3% and volatilities 15%, 25%, 35%, rising or
-/// falling; ρ 0.5) it misses an independent Monte Carlo by −24% to +21%, and by 3% to 7% with the first volatility
-/// flat, where on a flat market it agrees. A Monte Carlo on the two processes is the term-structure-exact route.
+/// The formula is a first-passage closed form in equivalent-constant rates and volatilities, the variance and discounts
+/// to expiry: no exact closed form exists for a first passage under general deterministic term structures, and its
+/// single correlation term, ρσ₁σ₂, can't carry a first volatility that moves over the option's life. On shaped markets
+/// (1.5 years; forward rates 1%, 3%, 6%, dividends 0%, 1%, 3% and volatilities 15%, 25%, 35%, rising or falling; ρ 0.5)
+/// it misses an independent Monte Carlo by −24% to +21%, and by 3% to 7% with the first volatility flat, where on a
+/// flat market it agrees. It is exact where one clock serves both assets: each asset's (r − qᵢ)/σᵢ² constant, σ₁/σ₂
+/// constant and the correlation constant (<c>Conventions/ClosedFormExactnessTests.cs</c>). No engine in the library
+/// prices it under term structures; a Monte Carlo on the two processes would, monitoring the barrier at its grid's
+/// dates.
 /// </para>
 /// </remarks>
 public static class AnalyticTwoAssetBarrierEngine

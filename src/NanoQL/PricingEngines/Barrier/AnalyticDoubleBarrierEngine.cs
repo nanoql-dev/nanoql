@@ -43,8 +43,11 @@ namespace NanoQL.PricingEngines;
 /// <para>
 /// The formula is a first-passage closed form in equivalent-constant rates and a volatility, the variance and discounts
 /// to expiry: no exact closed form exists for a first passage under general deterministic term structures, and on
-/// shaped markets an independent Monte Carlo finds a knock-out within two of its standard errors, +0.04%; the
-/// term-structure-exact route is a Monte Carlo on the process.
+/// shaped markets an independent Monte Carlo finds a knock-out within two of its standard errors, +0.04%. It is exact
+/// where (r − q)/σ² is constant over the option's life and the volatility depends on time alone, the price then a time
+/// change of a constant market's; a knock-out's rebate, paid at the first touch, where r/σ² and q/σ² are each constant
+/// (<c>Conventions/ClosedFormExactnessTests.cs</c>). The term-structure-exact route is a Monte Carlo on the process,
+/// which monitors the barriers at its grid's dates.
 /// </para>
 /// </remarks>
 public static class AnalyticDoubleBarrierEngine

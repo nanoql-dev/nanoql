@@ -51,7 +51,10 @@ namespace NanoQL.PricingEngines;
 /// The series are first-passage closed forms in equivalent-constant rates and a volatility, the variance and discounts
 /// to expiry: no exact closed form exists for a first passage under general deterministic term structures, and on
 /// shaped markets an independent Monte Carlo finds a knock-out +0.66% and +1.78% off, within two of its standard
-/// errors; the term-structure-exact route is a Monte Carlo on the process.
+/// errors. Its knock-in and knock-out are exact where (r − q)/σ² is constant over the option's life and the volatility
+/// depends on time alone, the price then a time change of a constant market's; its KIKO and KOKI, paid at the hit, and
+/// a knock-out's rebate, where r/σ² and q/σ² are each constant (<c>Conventions/ClosedFormExactnessTests.cs</c>). The
+/// term-structure-exact route is a Monte Carlo on the process, which monitors the barriers at its grid's dates.
 /// </para>
 /// </remarks>
 public static class AnalyticDoubleBarrierBinaryEngine

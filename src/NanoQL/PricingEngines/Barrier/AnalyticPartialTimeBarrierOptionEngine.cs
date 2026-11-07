@@ -43,8 +43,13 @@ namespace NanoQL.PricingEngines;
 /// </para>
 /// <para>
 /// The formulas are first-passage closed forms in equivalent-constant rates and volatilities: no exact closed form
-/// exists under general deterministic term structures, and on shaped markets they miss an independent Monte Carlo by
-/// up to +3.9%.
+/// exists under general deterministic term structures, and on shaped markets they miss an independent Monte Carlo by up
+/// to +3.9%. They are exact only where σ and r − q are flat, r and q themselves free: the engine reads the volatility
+/// at the cover date and at expiry and splits the variance at the cover date in calendar time, so a time change doesn't
+/// carry it, and where the volatility steps at the cover date under a constant (r − q)/σ² it misses by −72% to +31%
+/// (<c>Conventions/ClosedFormExactnessTests.cs</c>). A start-window knock-out's rebate, paid at the hit, is exact where
+/// r and q are also flat to the cover date, as the analytic barrier engine's rebate to it is. No engine in the library
+/// prices a partial-time barrier under term structures.
 /// </para>
 /// </remarks>
 public static class AnalyticPartialTimeBarrierOptionEngine

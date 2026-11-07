@@ -36,8 +36,10 @@ namespace NanoQL.PricingEngines;
 /// </para>
 /// <para>
 /// The formula is a first-passage closed form in equivalent-constant rates and a volatility, the variance and discounts
-/// to expiry: no exact closed form exists for a first passage under general deterministic term structures; the
-/// term-structure-exact route is <see cref="MCLookbackEngine"/>.
+/// to expiry: no exact closed form exists for a first passage under general deterministic term structures. It is exact
+/// where (r − q)/σ² is constant over the option's life and the volatility depends on time alone, the price then a time
+/// change of a constant market's (<c>Conventions/ClosedFormExactnessTests.cs</c>); the term-structure-exact route is
+/// <see cref="MCLookbackEngine"/>, which reads the extremum at its grid's dates.
 /// </para>
 /// </remarks>
 public static class AnalyticContinuousFloatingLookbackEngine

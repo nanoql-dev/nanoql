@@ -36,8 +36,11 @@ namespace NanoQL.PricingEngines;
 /// <para>
 /// The formulas are first-passage closed forms in one equivalent-constant carry and volatility, the variance and
 /// discounts to expiry: no exact closed form exists for a first passage under general deterministic term structures,
-/// and on shaped markets they miss QuantLib's finite-difference barrier engine by -1.6% to +0.6%; the
-/// term-structure-exact routes are <see cref="FdBlackScholesBarrierEngine"/> and the Monte Carlo engines.
+/// and on shaped markets they miss QuantLib's finite-difference barrier engine by -2.4% to +0.6%. They are exact where
+/// (r − q)/σ² is constant over the option's life and the volatility depends on time alone, the price then a time change
+/// of a constant market's, so a smile breaks it; a knock-out's rebate, paid at the hit, where r/σ² and q/σ² are each
+/// constant (<c>Conventions/ClosedFormExactnessTests.cs</c>). The term-structure-exact route is
+/// <see cref="FdBlackScholesBarrierEngine"/>; the Monte Carlo engines monitor the barrier at their grid's dates.
 /// </para>
 /// <para>QuantLib's references: Haug's formulas, and its <c>testHaugValues</c> table.</para>
 /// </remarks>
