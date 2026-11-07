@@ -44,14 +44,30 @@ namespace NanoQL.TermStructures;
 /// anchored solve can't fit fails as QuantLib's unsolved one, its right point removed.
 /// </para>
 /// <para>
-/// One of QuantLib's defects is kept. With interpolation, a segment's slope is found by a Brent search that stops once
-/// its bracket is narrow (<c>kahalesmilesection.cpp:151-155</c>, <c>brent.hpp:87-90</c>), so it can end at a sign
-/// change of the segment's mismatch that isn't a root. The segment it accepts then misses its right end's price, and
-/// the section's price jumps there, an arbitrage: on a lognormal SABR smile (a forward of 5% for a year, α 0.3, β 1,
-/// ν 0.3, ρ −0.3) the call is 0.000330 just below a strike of 7.5% and 0.000646 at it, as QuantLib's is. Rejecting such
-/// a segment as unsolved removes the jump, but its grid point is then removed, as an unsolved segment's is, so the core
-/// shrinks, and on many such smiles the section misses the source by more or can't be built. Without interpolation,
-/// the default, no segment is fitted and the core keeps the source's prices.
+/// And with interpolation, a segment whose fit misses its right end's price is refitted
+/// (<c>Divergences/KahaleMissedSegmentTests.cs</c>). QuantLib's fit solves for the segment's slope a by a Brent search
+/// (<c>kahalesmilesection.cpp:151-155</c>), but a forms the law's tails at the segment's ends, N(d₂(k₀)) = a − c′₀ and
+/// N(d₂(k₁)) = a − c′₁, by subtraction, so where the root's lognormal law puts less than about 1e-16 of its mass beyond
+/// an end, adjacent doubles of a skip over the root and the search's bracket closes on a non-root
+/// (<c>brent.hpp:87-90</c>). The segment then misses its right end's price and the section jumps there, an arbitrage:
+/// on a lognormal SABR smile (a forward of 5% for a year, α 0.3, β 1, ν 0.3, ρ −0.3) QuantLib's call a millionth of the
+/// forward below a strike of 7.5% is 0.000326 against 0.000646 at it. A fitted segment that misses its right end by
+/// more than 1e-8 of the price, QuantLib's own test's tolerance, and its evaluation's rounding is solved again to the
+/// same ends and slopes on the law's tail parameter u, its mass below k₀ (1 − Δ)·σ(u) and above k₁ (1 − Δ)·σ(−u), Δ =
+/// c′₁ − c′₀ and σ the logistic function, so that every member of the family is reachable, and evaluated without the
+/// law's forward, its first moment on the segment through Mills' ratios where the forward would overflow. A refit keeps
+/// QuantLib's ends and slopes, so nothing else in the section moves; a segment no refit fits fails as QuantLib's
+/// unsolved one, its right point removed. Without interpolation, the default, no segment is fitted and the core keeps
+/// the source's prices.
+/// </para>
+/// <para>
+/// Two of QuantLib's limits are kept. Where a segment's solve fails, its right point is removed, as QuantLib's is, which
+/// can leave one segment over most of the core (on the smile above, from 1% to 150% of the forward) far from the source;
+/// the same refit would fit most such segments, but a rescued segment far out in a wing carries QuantLib's
+/// averaged-secant slopes over a wide interval and can stray from the source further than QuantLib's Black wing does.
+/// And the left wing's fit can run its forward to 10⁵ to 10⁷ times the section's, its constant near minus that, so its
+/// prices step by an ulp of that forward, a few calls falling below their intrinsic value by about 1e-11; anchoring it
+/// at its right end would move the core through QuantLib's wing check, which reads the wing's digital.
 /// </para>
 /// <para>
 /// QuantLib's public helper structs (<c>cFunction</c> and the three solvers' functions) are the fit's internals here.
@@ -368,6 +384,20 @@ public sealed class KahaleSmileSection : SmileSection
                     }
                 }
 
+                // a fit whose bracket closed on a non-root misses its right end's price: solved again to the same ends
+                // and slopes on the law's tail parameter, or failing as QuantLib's unsolved one
+                if (valid && Misses(cFct, k1, c0, c1))
+                {
+                    if (TailFit(k0, k1, c0, c1, cp0, cp1) is CFunction refit)
+                    {
+                        cFct = refit;
+                    }
+                    else
+                    {
+                        valid = false;
+                    }
+                }
+
                 if (valid)
                 {
                     cFunctions = cFunctions.SetItem(Slot(i), cFct);
@@ -433,6 +463,111 @@ public sealed class KahaleSmileSection : SmileSection
         }
     }
 
+    // Whether a segment function misses its right end's price beyond QuantLib's own test's tolerance, relative, and the
+    // evaluation's rounding of the left end's.
+    private static bool Misses(CFunction f, double k1, double c0, double c1) =>
+        !(Math.Abs(f.Evaluate(k1) - c1) <= (CancellationTolerance * Math.Abs(c1)) + (16.0 * Eps * Math.Abs(c0)));
+
+    // Kahale's segment on the law's tail parameter u: its mass below k0 (1 - delta) s(u) and above k1 (1 - delta) s(-u),
+    // delta = cp1 - cp0 its mass on the segment and s the logistic function, each tail's quantile taken from its small
+    // side; a scan of u for the mismatch's sign change, then Brent on the bracket. Null where the data aren't convex, no
+    // sign change is found, or the fit misses too.
+    private static CFunction? TailFit(double k0, double k1, double c0, double c1, double cp0, double cp1)
+    {
+        double delta = cp1 - cp0;
+        double sec = (c1 - c0) / (k1 - k0);
+        if (!(cp0 < sec && sec < cp1 && delta < 1.0))
+        {
+            return null;
+        }
+
+        double onePlusCp0 = 1.0 + cp0;
+        CFunction Build(double u)
+        {
+            double w = 1.0 - delta;
+            double q0 = w / (1.0 + Math.Exp(-u)); // below k0
+            double p1 = w / (1.0 + Math.Exp(u)); // above k1
+            double p0 = delta + p1; // above k0
+            double d0 = p0 <= 0.5 ? NormalFunctions.Quantile(0.0, 1.0, p0) : -NormalFunctions.Quantile(0.0, 1.0, q0);
+            double d1 = p1 <= 0.5 ? NormalFunctions.Quantile(0.0, 1.0, p1) : -NormalFunctions.Quantile(0.0, 1.0, q0 + delta);
+            double s = Math.Log(k1 / k0) / (d0 - d1);
+            double a = d0 >= 0.0 ? onePlusCp0 - UpperTail(d0) : cp0 + NormalFunctions.Cdf(0.0, 1.0, d0);
+            return CFunction.Tail(s, a, k0, c0, d0);
+        }
+
+        double Mismatch(double u)
+        {
+            double g = Build(u).Evaluate(k1) - c1;
+            return double.IsNaN(g) ? throw new NanoQLException("the segment's mismatch is NaN") : g;
+        }
+
+        try
+        {
+            // negative where the law's mass on the segment lies near k1 (u to minus infinity), positive near k0
+            double[] grid = [-700.0, -300.0, -100.0, -50.0, -30.0, -20.0, -12.0, -8.0, -5.0, -3.0, -1.5, 0.0, 1.5, 3.0, 5.0, 8.0, 12.0, 20.0, 30.0, 50.0, 100.0, 300.0, 700.0];
+            double previous = Mismatch(grid[0]);
+            for (int j = 1; j < grid.Length; j++)
+            {
+                double g = Mismatch(grid[j]);
+                if ((previous < 0.0) != (g < 0.0))
+                {
+                    CFunction fct = Build(new Brent().Solve(Mismatch, Acc, 0.5 * (grid[j - 1] + grid[j]), grid[j - 1], grid[j]));
+                    return Misses(fct, k1, c0, c1) ? null : fct;
+                }
+
+                previous = g;
+            }
+
+            return null;
+        }
+        catch (Exception e) when (Caught(e))
+        {
+            return null;
+        }
+    }
+
+    // The upper normal tail N(-x).
+    private static double UpperTail(double x) => NormalFunctions.Cdf(0.0, 1.0, -x);
+
+    private static double NormalDensity(double x) => Math.Exp(-0.5 * x * x) / Math.Sqrt(2.0 * Math.PI);
+
+    // Mills' ratio N(-x) / phi(x) for x > 0: directly to 5, by Laplace's continued fraction above.
+    private static double Mills(double x)
+    {
+        if (x <= 5.0)
+        {
+            return UpperTail(x) / NormalDensity(x);
+        }
+
+        double t = x;
+        for (int n = 80; n >= 1; n--)
+        {
+            t = x + (n / t);
+        }
+
+        return 1.0 / t;
+    }
+
+    // The law's first moment on [k0, k], its log-deviation s, d2 at k0 d0 and at k d: F (N(d0 + s) - N(d + s)) with
+    // F = k0 exp(s d0 + s^2 / 2), or, where both arguments are positive, through Mills' ratios as
+    // k phi(d) M(d + s) - k0 phi(d0) M(d0 + s) (F phi(d1) = k phi(d2)), without the forward.
+    private static double Moment(double k0, double d0, double k, double d, double s)
+    {
+        if (d + s > 0.0)
+        {
+            return (k * NormalDensity(d) * Mills(d + s)) - (k0 * NormalDensity(d0) * Mills(d0 + s));
+        }
+
+        double f = k0 * Math.Exp((s * d0) + (s * s / 2.0));
+        return f * (NormalFunctions.Cdf(0.0, 1.0, d0 + s) - NormalFunctions.Cdf(0.0, 1.0, d + s));
+    }
+
+    // k N(d) - k0 N(d0), through the upper tails where both are above a half.
+    private static double StrikeTerm(double k0, double d0, double k, double d) =>
+        d >= 0.0 && d0 >= 0.0
+            ? k - k0 - ((k * UpperTail(d)) - (k0 * UpperTail(d0)))
+            : (k * NormalFunctions.Cdf(0.0, 1.0, d)) - (k0 * NormalFunctions.Cdf(0.0, 1.0, d0));
+
     // A segment's slot: QuantLib's leftIndex_ > 0 ? i - leftIndex_ + 1 : 0.
     private int Slot(int i) => leftIndex > 0 ? i - leftIndex + 1 : 0;
 
@@ -474,11 +609,12 @@ public sealed class KahaleSmileSection : SmileSection
 
     // QuantLib's cFunction: a Black call on a forward f and a standard deviation s, plus a·k + b, or exp(−a·k + b); or,
     // for a segment whose forward runs far above its strikes, the same function anchored at its left end's price c0,
-    // c0 + the Black call's change from k0 + a·(k − k0), without the cancellation of the call and the constant.
+    // c0 + the Black call's change from k0 + a·(k − k0), without the cancellation of the call and the constant; or, for
+    // a refitted segment, its tail form, d2 at k0 d0 in place of the forward.
     private readonly struct CFunction
     {
-        private readonly double f, s, a, b, k0, c0;
-        private readonly bool exponential, anchored;
+        private readonly double f, s, a, b, k0, c0, d0;
+        private readonly bool exponential, anchored, tail;
 
         public CFunction(double f, double s, double a, double b)
         {
@@ -508,6 +644,20 @@ public sealed class KahaleSmileSection : SmileSection
 
         public static CFunction Anchored(double f, double s, double a, double k0, double c0) => new(f, s, a, k0, c0);
 
+        // The tail form: c0 + a (k - k0) - [k N(d2(k)) - k0 N(d0)] - M(k0, k), d2(k) = d0 - ln(k / k0) / s, without
+        // the forward.
+        public static CFunction Tail(double s, double a, double k0, double c0, double d0) => new(s, a, k0, c0, d0, true);
+
+        private CFunction(double s, double a, double k0, double c0, double d0, bool tail)
+        {
+            this.s = s;
+            this.a = a;
+            this.k0 = k0;
+            this.c0 = c0;
+            this.d0 = d0;
+            this.tail = tail;
+        }
+
         public double Evaluate(double k)
         {
             if (exponential)
@@ -518,6 +668,12 @@ public sealed class KahaleSmileSection : SmileSection
             if (anchored)
             {
                 return c0 + BlackChange(f, s, k0, k) + (a * (k - k0));
+            }
+
+            if (tail)
+            {
+                double d = d0 - (Math.Log(k / k0) / s);
+                return c0 + (a * (k - k0)) - StrikeTerm(k0, d0, k, d) - Moment(k0, d0, k, d, s);
             }
 
             if (s < NumericLimits.QL_EPSILON)

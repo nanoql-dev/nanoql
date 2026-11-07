@@ -55,13 +55,15 @@ public class KahaleSegmentFitTests
     [Fact]
     public void ASoundSegmentIsQuantLibsAtAnyScale()
     {
-        // A lognormal SABR smile at a forward of 5e8 (α 0.3, β 1, ν 0.3, ρ −0.3, T 1): QuantLib's on the wheel.
+        // A lognormal SABR smile at a forward of 5e8 (α 0.3, β 1, ν 0.3, ρ −0.3, T 1): QuantLib's on the wheel, in its
+        // sound segments from 70% of the forward up. Its segment from 10% to 70% misses its end on QuantLib's fit and is
+        // refitted (KahaleMissedSegmentTests).
         const double forward = 5e8;
         var kahale = new KahaleSmileSection(new SabrSmileSection(1.0, forward, [0.3, 1.0, 0.3, -0.3]), null, true);
         (double M, double Price)[] quantLib =
         [
-            (0.25, 376113477.92929775), (0.5, 253122832.89026886), (0.75, 138157425.46990943), (1.0, 59602159.70072213),
-            (1.25, 20794963.414857432), (1.5, 6457470.895488158), (2.0, 610348.9711679919),
+            (0.75, 138157425.46990943), (1.0, 59602159.70072213), (1.25, 20794963.414857432), (1.5, 6457470.895488158),
+            (2.0, 610348.9711679919),
         ];
         foreach ((double m, double price) in quantLib)
         {
