@@ -250,7 +250,10 @@ engine) takes a bound engine: an immutable handle naming an engine with its inpu
 ### Experimental functions
 
 nanoql's experimental API (NQL0001) crosses, each declaration compiled only under `#ifdef NANOQL_EXPERIMENTAL`, C's
-form of C#'s opt-in. A member of a stable type whose signature names an experimental type is experimental too.
+form of C#'s opt-in. A member of a stable type whose signature names an experimental type is experimental too, and
+so is an experimental member of a stable type, beside the type's stable functions: `AnalyticGJRGARCHEngine`'s
+`CalculateWithinBounds` is `nql_AnalyticGJRGARCHEngine_CalculateWithinBounds__VanillaOption_EvaluationContext`, and
+its static form, both under `NANOQL_EXPERIMENTAL`.
 
 ### Versions
 

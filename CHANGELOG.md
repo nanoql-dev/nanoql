@@ -4,6 +4,38 @@ The notable changes in each release of nanoql. The format follows
 [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/), and the versions follow nanoql's own rule (Versions,
 below).
 
+## [Unreleased]
+
+### Added
+
+- **Experimental: a tranche's expected loss from the saddle-point model's own tail.**
+  `SaddlePointTailLossModel<TCopula, TInitTraits>` integrates the model's saddle-point tail over the tranche, where
+  `SaddlePointLossModel` reads a large-pool loss. On a 100-name pool (hazard 1%, recovery 40%), where that reading puts
+  the whole loss in the first tranche at correlation 0, it is within 2% of the recursive model on the same latent model
+  on the 3% to 22% tranches at correlations from 0.3, at one and five years. At high correlation it refuses a tranche
+  whose tail it can't read: one attaching close above zero, [0.1%, 3%] from 0.6, or a senior one crowding the pool's
+  largest loss, [22%, 60%] at 0.9 (#13).
+- **Experimental: the analytic GJR-GARCH engine within the no-arbitrage bounds.**
+  `AnalyticGJRGARCHEngine.CalculateWithinBounds`, on an engine or static, returns `Calculate`'s results but refuses a
+  price outside a call's or a put's no-arbitrage bounds beyond rounding: the Edgeworth price leaves them in both wings
+  at every λ, and everywhere once the variance's moments grow. `Calculate` is unchanged (#14).
+- **Where the closed-form barrier and lookback engines are exact:** each engine's remarks state its condition under term
+  structures, on a volatility of time alone: (r − q)/σ² constant over the option's life; for a rebate paid at the hit,
+  r/σ² and q/σ² each constant; for the partial-time windows, σ and r − q flat. Each names the engine to use outside it,
+  where the library has one (#15).
+
+### Fixed
+
+- **Black's formula:** a price below zero within rounding, which its arithmetic can reach at tiny standard deviations,
+  is 0, where QuantLib's check refused it ("negative value"): within 16 ε of the discounted larger of the forward and
+  the strike, a few ulps of the forward. A larger negative and NaN still refuse. The Gaussian copula spread engine then
+  prices volatilities within rounding of zero, from about 1e-14 to 1e-8, but for most from 4e-14 to 1.3e-9, which its
+  density calculator refuses (#12).
+- **Kahale's interpolated smile section:** a segment whose fit missed its right end's price, a jump in the section and
+  an arbitrage, is refitted to the same ends and slopes, so nothing else in the section moves; on 163 SABR smiles of a
+  sweep the fit missed on 60. The route is opt-in: `KahaleSmileSection`'s `interpolate`, and the Markov-functional
+  model's `KahaleInterpolation` adjustment (#16).
+
 ## [2.1] - 2026-11-06
 
 ### Added
