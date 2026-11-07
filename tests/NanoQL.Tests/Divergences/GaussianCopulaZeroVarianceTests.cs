@@ -20,7 +20,9 @@ namespace NanoQL.Tests.Divergences;
 /// engine's own value at a volatility of 1e-6, which QuantLib's prices too, within 1e-5; the deterministic value at
 /// both zero and at an expiry on the volatilities' date; Kirk's value at an expiry before it. A surface whose strikes
 /// stop below the forward prices QuantLib's bits: the test for no variance is the density calculator's own, at the
-/// forward on the smile section, which reads every strike with extrapolation.
+/// forward on the smile section, which reads every strike with extrapolation. At a volatility within rounding of zero,
+/// where QuantLib's Black's formula refuses its own rounding residue, the engine prices on its own curve, or the density
+/// calculator refuses a law narrower than its digitals resolve.
 /// </summary>
 public class GaussianCopulaZeroVarianceTests
 {
@@ -53,6 +55,26 @@ public class GaussianCopulaZeroVarianceTests
         double zero = Copula(call, p1, p2);
         Assert.Equal(expected, zero, 1e-3 * expected);
         Assert.Equal(Copula(call, Process(100.0, 0.02, Shared, 1e-6), p2), zero, 1e-5 * zero);
+    }
+
+    [Fact]
+    public void AVolatilityWithinRoundingOfZeroPricesOrTheCalculatorRefuses()
+    {
+        // QuantLib refuses second volatilities of 1e-9 and 1e-8 through Black's formula's check ("negative value" of
+        // −9.7e-16 and −1.5e-15, at the density calculator's strikes), where nanoql's formula returns the residue as
+        // 0: the engine prices there on its own curve, within 2e-8 of its value at 1e-7, which QuantLib prices too.
+        var p1 = Process(100.0, 0.02, Shared, 0.3);
+        BasketOption call = Spread(OptionType.Call, 5.0);
+        double at1e7 = Copula(call, p1, Process(95.0, 0.03, Shared, 1e-7));
+        foreach (double v in new[] { 1e-9, 1e-8 })
+        {
+            Assert.Equal(at1e7, Copula(call, p1, Process(95.0, 0.03, Shared, v)), 2e-8 * at1e7);
+        }
+
+        // at 1e-12 the density calculator's tail probabilities, digitals over a gap of 2e-6 of the strike, can't
+        // resolve the law, so it refuses where QuantLib's formula refused first
+        var e = Assert.Throws<NanoQLException>(() => Copula(call, p1, Process(95.0, 0.03, Shared, 1e-12)));
+        Assert.Equal("SmileSectionRNDCalculator: could not refine a tail quantile", e.Message);
     }
 
     [Fact]

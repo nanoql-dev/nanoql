@@ -44,6 +44,11 @@ public static class BlackFormulaFunctions
     private const double M_2_PI = 0.636619772367581343076;
     private const double M_PI_2 = 1.57079632679489661923;
 
+    // Black's formula's rounding residue at most, relative to the discounted larger of the forward and the strike:
+    // 16 epsilon, against the worst measured, 5.875, where the formula's two arguments straddle the normal
+    // distribution's switch to its asymptotic series.
+    private const double ResidueBound = 16.0 * NumericLimits.QL_EPSILON;
+
     // bachelierBlackFormulaImpliedVolChoi's function-local constant.
     private static readonly double SqrtQlEpsilon = Math.Sqrt(NumericLimits.QL_EPSILON);
 
@@ -60,7 +65,15 @@ public static class BlackFormulaFunctions
     /// <returns>The price.</returns>
     /// <exception cref="ArgumentException">A parameter is out of its domain.</exception>
     /// <exception cref="ArgumentOutOfRangeException"><paramref name="optionType"/> isn't a member of its type.</exception>
-    /// <exception cref="NanoQLException">The price comes out negative.</exception>
+    /// <exception cref="NanoQLException">The price comes out negative beyond rounding, or NaN.</exception>
+    /// <remarks>
+    /// A negative result within 16·ε·D·max(F, K) of zero, D the discount and F and K the forward and the strike
+    /// displaced, is the formula's rounding residue and returns 0, where QuantLib's check refuses it ("negative value"):
+    /// the price is never negative on the inputs the formula accepts, and the residue is at most 5.875·ε·D·max(F, K),
+    /// where its two arguments straddle the normal distribution's switch to its asymptotic series
+    /// (<c>Divergences/BlackFormulaResidueTests.cs</c>). A larger negative, a negative where the bound's scale
+    /// 16·ε·D·max(F, K) overflows, and NaN still refuse, with QuantLib's text.
+    /// </remarks>
     public static double BlackFormula(
         OptionType optionType,
         double strike,
@@ -97,6 +110,15 @@ public static class BlackFormulaFunctions
         double nd1 = phi.Evaluate(sign * d1);
         double nd2 = phi.Evaluate(sign * d2);
         double result = discount * sign * ((forward * nd1) - (strike * nd2));
+
+        // the price is never negative here, so a negative result within rounding of zero is the formula's residue; a
+        // scale that overflows reads none as such
+        double residue = ResidueBound * discount * Math.Max(forward, strike);
+        if (result < 0.0 && double.IsFinite(residue) && result >= -residue)
+        {
+            return 0.0;
+        }
+
         if (!(result >= 0.0))
         {
             throw new NanoQLException(
@@ -116,7 +138,7 @@ public static class BlackFormulaFunctions
     /// <returns>The price.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="payoff"/> is <see langword="null"/>.</exception>
     /// <exception cref="ArgumentException">A parameter, or the payoff's strike, is out of its domain.</exception>
-    /// <exception cref="NanoQLException">The price comes out negative.</exception>
+    /// <exception cref="NanoQLException">The price comes out negative beyond rounding, or NaN.</exception>
     public static double BlackFormula(
         PlainVanillaPayoff payoff,
         double forward,

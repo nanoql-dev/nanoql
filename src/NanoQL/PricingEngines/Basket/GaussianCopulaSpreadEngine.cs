@@ -31,7 +31,10 @@ namespace NanoQL.PricingEngines;
 /// <c>Divergences/TwoAssetMismatchedTimesTests.cs</c>). An asset whose volatility accrues no variance to expiry, an
 /// expiry on or before the volatility's date or a zero volatility, is at its forward there, where QuantLib's density
 /// calculator refuses ("non-positive at-the-money volatility", <c>Divergences/GaussianCopulaZeroVarianceTests.cs</c>);
-/// a variance within rounding of zero keeps QuantLib's refusal through Black's formula's check of a negative value.
+/// at a volatility within rounding of zero, from about 1e-14 to 1e-8, Black's formula returns its rounding residue as
+/// 0 where QuantLib's refuses it ("negative value"), so the engine prices, but for most points from 4e-14 to 1.3e-9,
+/// which the density calculator refuses: its tail probabilities, digitals over a strike gap of 2e-6 of the strike,
+/// can't resolve a law that narrow ("could not refine a tail quantile").
 /// </para>
 /// </remarks>
 public static class GaussianCopulaSpreadEngine

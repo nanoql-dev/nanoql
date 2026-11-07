@@ -1011,6 +1011,19 @@ Facts:
 
 - `ANullPayoffIsRefusedBeforeItIsRead`
 
+## BlackFormulaResidueTests
+
+[`Divergences/BlackFormulaResidueTests.cs`](../tests/NanoQL.Tests/Divergences/BlackFormulaResidueTests.cs)
+
+Black's formula's rounding residue. The price is never negative on the inputs the formula accepts, but at tiny standard deviations its arithmetic can land about 1e-16 to 1e-15 below zero, which QuantLib's check refuses ("negative value", `blackformula.cpp`): on the wheel, a call struck at 96.9191326288682 on a forward of 96.91912730254181 with a standard deviation of 1e-8 reads "negative value (-1.45416e-15) for 1e-08 stdDev, Call option, 96.9191 strike , 96.9191 forward", one of the Gaussian copula spread engine's density strikes. nanoql returns 0 for a negative result within 16·ε·D·max(F, K), the forward and the strike displaced. The worst residue, 5.875·ε·D·max(F, K), comes where the formula's two arguments straddle the normal distribution's switch to its asymptotic series, below an erf result of 1e-8, whose truncation N carries there. QuantLib's own precedent: its implied-deviation helper clamps the same residue at 0 ("numerical inaccuracies can yield a negative answer", `blackformula.cpp`). QuantLib's check: its bits wherever its result isn't negative, a positive residue included.
+
+Facts:
+
+- `QuantLibsRefusedResiduesAreZero`
+- `AScaleThatOverflowsKeepsQuantLibsRefusal`
+- `QuantLibsBitsWhereItsResultIsntNegative`
+- `NoResidueRefusesAcrossTheSwitchOrNearTheMoney`
+
 ## BlackFormulaUpstreamFixesTests
 
 [`Divergences/BlackFormulaUpstreamFixesTests.cs`](../tests/NanoQL.Tests/Divergences/BlackFormulaUpstreamFixesTests.cs)
@@ -3769,12 +3782,13 @@ Facts:
 
 [`Divergences/GaussianCopulaZeroVarianceTests.cs`](../tests/NanoQL.Tests/Divergences/GaussianCopulaZeroVarianceTests.cs)
 
-The Gaussian copula spread engine where a volatility accrues no variance to expiry: at a zero volatility, and at an expiry on the volatility's own date. QuantLib reads the smile at expiry through its density calculator, which refuses a smile with no variance ("non-positive at-the-money volatility", `gaussiancopulaspreadengine.cpp`, `smilesectionrndcalculator.cpp`), where Kirk's and the other spread engines price both; nanoql puts that asset at its forward. The checks: Kirk's engine, exact at a zero second volatility, and Black's put on the second asset at a zero first volatility, each within the engine's quadrature (QuantLib's own copula cases hold 1e-3), and the engine's own value at a volatility of 1e-6, which QuantLib's prices too, within 1e-5; the deterministic value at both zero and at an expiry on the volatilities' date; Kirk's value at an expiry before it. A surface whose strikes stop below the forward prices QuantLib's bits: the test for no variance is the density calculator's own, at the forward on the smile section, which reads every strike with extrapolation.
+The Gaussian copula spread engine where a volatility accrues no variance to expiry: at a zero volatility, and at an expiry on the volatility's own date. QuantLib reads the smile at expiry through its density calculator, which refuses a smile with no variance ("non-positive at-the-money volatility", `gaussiancopulaspreadengine.cpp`, `smilesectionrndcalculator.cpp`), where Kirk's and the other spread engines price both; nanoql puts that asset at its forward. The checks: Kirk's engine, exact at a zero second volatility, and Black's put on the second asset at a zero first volatility, each within the engine's quadrature (QuantLib's own copula cases hold 1e-3), and the engine's own value at a volatility of 1e-6, which QuantLib's prices too, within 1e-5; the deterministic value at both zero and at an expiry on the volatilities' date; Kirk's value at an expiry before it. A surface whose strikes stop below the forward prices QuantLib's bits: the test for no variance is the density calculator's own, at the forward on the smile section, which reads every strike with extrapolation. At a volatility within rounding of zero, where QuantLib's Black's formula refuses its own rounding residue, the engine prices on its own curve, or the density calculator refuses a law narrower than its digitals resolve.
 
 Facts:
 
 - `AZeroSecondVolatilityMeetsKirk`
 - `AZeroFirstVolatilityIsBlacksPutOnTheSecond`
+- `AVolatilityWithinRoundingOfZeroPricesOrTheCalculatorRefuses`
 - `BothZeroAreTheDeterministicValue`
 - `AnExpiryOnTheVolatilitiesDateIsAtTheForwards`
 - `AnExpiryBeforeTheVolatilitiesDateIsAtTheForwards`
