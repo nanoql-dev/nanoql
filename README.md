@@ -1,7 +1,8 @@
 # nanoql
 
-nanoql is a stateless quantitative finance library for .NET. Every model and pricer is a plain function of its
-inputs: there are no observers, lazy objects or global evaluation date, and market conventions are data, not code.
+nanoql is a stateless quantitative finance library for .NET, with Python, C and C++ layers and an Excel add-in. Every
+model and pricer is a plain function of its inputs: there are no observers, lazy objects or global evaluation date,
+and market conventions are data, not code.
 
 ## Install
 
