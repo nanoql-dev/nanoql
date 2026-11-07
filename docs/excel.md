@@ -204,7 +204,7 @@ tasks:
   workbook. An entry removed after a release is a removed function: a stable one under deprecation (two releases and a
   year), an experimental one in any release, its name retired.
 - **A user's own list:** `--list nql=<file>` widens or narrows nanoql's list for a user's build, in the same format;
-  `--list nql=none` takes nanoql's whole surface, 10,226 functions with the experimental API and 8,008 without. A
+  `--list nql=none` takes nanoql's whole surface, 10,228 functions with the experimental API and 8,008 without. A
   wider build names every function as nanoql's builds do.
 - **The budget:** Excel-DNA's loader registers at most 10,000 functions, and one past them is silently missing. The tool
   counts a build's functions, the generated and the add-in's own, and refuses to pack one over 10,000, naming the count

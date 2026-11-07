@@ -16,7 +16,7 @@ public class ExcelListTests
     /// <summary>
     /// The seed's counts: 2,652 functions with the experimental API, 2,324 stable (the first list's 2,575 and 2,253,
     /// the 71 of the seven types the completeness check's least fixpoint showed missing, and DefaultType's 6); the
-    /// tests' builds 10,226 and 8,008.
+    /// tests' builds 10,228 and 8,008.
     /// </summary>
     [Fact]
     public void TheBuildsCounts()
@@ -24,7 +24,7 @@ public class ExcelListTests
         Assert.Equal(2652, ListedExperimental.Selection.Units.Count);
         Assert.Equal(328, ListedExperimental.Selection.Units.Count(u => u.Experimental));
         Assert.Equal(2324, ListedStable.Selection.Units.Count);
-        Assert.Equal(10226, WholeExperimental.Selection.Units.Count);
+        Assert.Equal(10228, WholeExperimental.Selection.Units.Count);
         Assert.Equal(8008, WholeStable.Selection.Units.Count);
         Assert.Equal(309, ExcelList.Nanoql().Entries.Count);
     }

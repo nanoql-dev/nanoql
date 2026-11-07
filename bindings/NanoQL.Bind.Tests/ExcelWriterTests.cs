@@ -136,9 +136,9 @@ public class ExcelWriterTests
     [Fact]
     public void TheBudget()
     {
-        Assert.Equal(10233, WholeExperimental.Registered);
+        Assert.Equal(10235, WholeExperimental.Registered);
         var e = Assert.Throws<BindException>(() => ExcelCommand.CheckBudget(WholeExperimental, ExcelCommand.Budget));
-        Assert.Contains("registers 10,233 functions", e.Message, StringComparison.Ordinal);
+        Assert.Contains("registers 10,235 functions", e.Message, StringComparison.Ordinal);
         Assert.Contains("the largest namespaces: NanoQL.", e.Message, StringComparison.Ordinal);
         ExcelCommand.CheckBudget(ListedExperimental, ExcelCommand.Budget);
         Assert.Throws<BindException>(() => ExcelCommand.CheckBudget(ListedStable, 2000));
