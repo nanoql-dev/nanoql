@@ -5,7 +5,8 @@
 
 # Getting started
 
-nanoql is a .NET 10 library. Add its package to a project:
+nanoql is a .NET 10 library, and Python, C and C++ reach it through its C interface ([in Python](#in-python) below).
+From C#, add its package to a project:
 
 ```shell
 dotnet add package NanoQL
@@ -32,8 +33,36 @@ any thread.
 
 ## In Python
 
-The same swap, a bootstrapped SOFR curve, €STR and Euribor curves with their swaps, a SABR smile, an American put
-and a CDS run in Python in
+```shell
+pip install nanoql
+```
+
+It needs Python 3.11 or later, on Windows x64 or Linux x64, and no .NET runtime
+([which platforms](faq.md#which-platforms-does-nanoql-run-on)). The same swap:
+
+```python
+import datetime
+
+from nanoql import ConventionSet, DiscountingSwapEngine, EvaluationContext, FlatForward, MakeOIS, Period, TimeUnit
+
+today = datetime.date(2026, 10, 15)
+context = EvaluationContext(today)
+qs = ConventionSet.quant_lib()
+curve = FlatForward(today, 0.036, qs.day_counter("Actual365Fixed"))
+
+swap = (MakeOIS(Period(5, TimeUnit.Years), qs.overnight_index("Sofr", curve))
+        .with_fixed_rate(0.036).with_nominal(10e6)
+        .to_overnight_indexed_swap(context))
+
+result = DiscountingSwapEngine.calculate(swap, context, curve)
+print(f"NPV {result.npv:,.2f}, fair rate {result.fair_rate:.4%}")
+```
+
+It prints `NPV 7,041.24, fair rate 3.6154%`, the C# example's results. In Python a preset such as SOFR or
+Actual/365 (Fixed) comes from `ConventionSet.quant_lib()` by name, where C# constructs its class.
+
+That swap, a bootstrapped SOFR curve, €STR and Euribor curves with their swaps, a SABR smile, an American put and a
+CDS run in
 [a notebook you can open in Google Colab](https://colab.research.google.com/github/nanoql-dev/nanoql/blob/main/docs/notebooks/first-steps.ipynb), with nothing to install;
 locally, `pip install nanoql jupyter matplotlib` runs it. [The bindings guide](bindings.md) gives the Python layer's rules.
 

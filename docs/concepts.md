@@ -65,8 +65,10 @@ departure is a documented divergence, with the test that asserts it: [divergence
 
 ## Experimental code
 
-The types ported from QuantLib's experimental folder carry `[Experimental("NQL0001")]`: the compiler reports NQL0001
-where code uses them, until a project opts in with `<NoWarn>$(NoWarn);NQL0001</NoWarn>`.
+The types ported from QuantLib's experimental folder carry `[Experimental("NQL0001")]`, and so do the types and members
+nanoql adds as experimental: the compiler reports NQL0001 where code uses them, until a project opts in with
+`<NoWarn>$(NoWarn);NQL0001</NoWarn>`. The experimental API may change in any release, and its released names are never
+reused.
 
 ## Deriving your own types
 
