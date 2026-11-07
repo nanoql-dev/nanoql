@@ -40,7 +40,8 @@ namespace NanoQL.Experimental;
 /// <para>
 /// <b>Kept</b>, QuantLib's method: the expected tranche loss is the tranche of the conditional expected loss, a
 /// large-pool reading, not a saddle-point expansion; at correlation 0 on 100 names its four tranches read 292.78, 0, 0,
-/// 0 where the exact recursive model reads 245.40, 46.48, 0.89, 0.0003.
+/// 0 where the recursive model on the same latent model reads 245.40, 46.48, 0.89, 0.0022.
+/// <see cref="SaddlePointTailLossModel{TCopula, TInitTraits}"/> reads it from the model's own tail instead.
 /// </para>
 /// <para>
 /// <b>The tail's degenerate nodes and domain</b> (<c>Divergences/SaddlePointLossModelTests.cs</c>). QuantLib's saddle
@@ -207,6 +208,17 @@ public class SaddlePointLossModel<TCopula, TInitTraits> : DefaultLossModel
     {
         double[] invUncondProbs = InverseProbabilities(d);
         return copula.IntegratedExpectedValue(v1 => ConditionalExpectedTrancheLoss(invUncondProbs, v1));
+    }
+
+    /// <summary>The whole (untranched) live portfolio's expected loss by a date: its conditional expected loss
+    /// integrated over the factor.</summary>
+    /// <param name="d">The date.</param>
+    /// <returns>The expected loss, an amount.</returns>
+    /// <exception cref="NanoQLException">The model isn't bound to a basket.</exception>
+    protected double ExpectedPortfolioLoss(Date d)
+    {
+        double[] invUncondProbs = InverseProbabilities(d);
+        return copula.IntegratedExpectedValue(v1 => ConditionalExpectedLoss(invUncondProbs, v1));
     }
 
     /// <summary>The probability density of the whole (untranched) live portfolio's loss at an amount by a

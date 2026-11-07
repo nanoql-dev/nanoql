@@ -15,7 +15,7 @@ report applies.
 - **Names:** the longest 165 characters, 1,114 over 63.
 - **Presets withheld:** 310 constructors of 298 types, 356 of the 356 preset constructions with a lookup by name.
 - **Engines:** 225 engines, 268 input sets; 41 engine parameters, 1,188 pairs formed, 17 refused at the call, 320 calculations forming no pair.
-- **Not crossing:** 2,472 members and types.
+- **Not crossing:** 2,473 members and types.
 
 ## What doesn't cross, by reason
 
@@ -1593,7 +1593,7 @@ report applies.
 - `Zaronia.new` <sub>`NanoQL.Indexes.Zaronia::.ctor(NanoQL.TermStructures.YieldTermStructure)`</sub>
 - `Zibor.new` <sub>`NanoQL.Indexes.Zibor::.ctor(NanoQL.Time.Period,NanoQL.TermStructures.YieldTermStructure)`</sub>
 
-### open generic type: all members (151)
+### open generic type: all members (152)
 
 - `NanoQL.Experimental.BaseCorrelationLossModel`3` <sub>`NanoQL.Experimental.BaseCorrelationLossModel`3`</sub>
 - `NanoQL.Experimental.BaseCorrelationTermStructure`1` <sub>`NanoQL.Experimental.BaseCorrelationTermStructure`1`</sub>
@@ -1644,6 +1644,7 @@ report applies.
 - `NanoQL.Experimental.RandomLossLM`3` <sub>`NanoQL.Experimental.RandomLossLM`3`</sub>
 - `NanoQL.Experimental.RecursiveLossModel`2` <sub>`NanoQL.Experimental.RecursiveLossModel`2`</sub>
 - `NanoQL.Experimental.SaddlePointLossModel`2` <sub>`NanoQL.Experimental.SaddlePointLossModel`2`</sub>
+- `NanoQL.Experimental.SaddlePointTailLossModel`2` <sub>`NanoQL.Experimental.SaddlePointTailLossModel`2`</sub>
 - `NanoQL.Experimental.SpotRecoveryLatentModel`2` <sub>`NanoQL.Experimental.SpotRecoveryLatentModel`2`</sub>
 - `NanoQL.LocalVolatilityEstimator`1` <sub>`NanoQL.LocalVolatilityEstimator`1`</sub>
 - `NanoQL.Methods.BinomialTree`1` <sub>`NanoQL.Methods.BinomialTree`1`</sub>

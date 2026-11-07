@@ -25,6 +25,7 @@ src/NanoQL/ConventionProvider.cs
 src/NanoQL/CurrencyData.cs
 src/NanoQL/EnumArguments.cs
 src/NanoQL/Experimental/Commodities/UnitOfMeasure/UnitOfMeasureData.cs
+src/NanoQL/Experimental/Credit/SaddlePointTailLossModel{TCopula,TInitTraits}.cs
 src/NanoQL/Indexes/IborIndexConventions.cs
 src/NanoQL/Indexes/InflationIndex/InflationIndexConventions.cs
 src/NanoQL/Indexes/Region/RegionData.cs
