@@ -1616,6 +1616,12 @@ NQL_API nql_status nql_AnalyticEuropeanMargrabeEngine_Calculate(nql_handle optio
 NQL_API nql_status nql_AnalyticGJRGARCHEngine_Bind(nql_handle model, nql_handle* result);
 /* AnalyticGJRGARCHEngine.BindOn(VanillaOption instrument, GJRGARCHModel model = null) -> InstrumentResults */
 NQL_API nql_status nql_AnalyticGJRGARCHEngine_BindOn(nql_handle instrument, nql_handle model, nql_handle* result);
+#ifdef NANOQL_EXPERIMENTAL
+/* AnalyticGJRGARCHEngine.CalculateWithinBounds(VanillaOption option, EvaluationContext context) -> OneAssetOptionResults */
+NQL_API nql_status nql_AnalyticGJRGARCHEngine_CalculateWithinBounds__VanillaOption_EvaluationContext(nql_handle self, nql_handle option, nql_handle context, nql_handle* result);
+/* AnalyticGJRGARCHEngine.CalculateWithinBounds(VanillaOption option, EvaluationContext context, GJRGARCHModel model) -> OneAssetOptionResults */
+NQL_API nql_status nql_AnalyticGJRGARCHEngine_CalculateWithinBounds__VanillaOption_EvaluationContext_GJRGARCHModel(nql_handle option, nql_handle context, nql_handle model, nql_handle* result);
+#endif /* NANOQL_EXPERIMENTAL */
 /* AnalyticGJRGARCHEngine.Calculate(VanillaOption option, EvaluationContext context) -> OneAssetOptionResults */
 NQL_API nql_status nql_AnalyticGJRGARCHEngine_Calculate__VanillaOption_EvaluationContext(nql_handle self, nql_handle option, nql_handle context, nql_handle* result);
 /* AnalyticGJRGARCHEngine.Calculate(VanillaOption option, EvaluationContext context, GJRGARCHModel model) -> OneAssetOptionResults */

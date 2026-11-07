@@ -5,6 +5,8 @@
 // Ported to C# from QuantLib and modified by the nanoql Authors.
 
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using NanoQL.Instruments;
 using NanoQL.Models;
 using NanoQL.Numerics;
@@ -45,7 +47,12 @@ namespace NanoQL.PricingEngines;
 /// engine, daily steps of its continuous-time process, gives the model's prices within 1.3%). Where the variance's
 /// second or third moment grows without bound its prices run off: −41,067 at two years on that model at λ 0.2 (m₂
 /// 1.0022, m₃ 1.0257), and −3.4e19 at two years at 252 days a year with α 0.05, β 0.85, γ 0.1 and λ 0.3 (m₂ 1.0135, m₃
-/// 1.1208).
+/// 1.1208). <see cref="CalculateWithinBounds(VanillaOption, EvaluationContext)"/>, experimental, returns the same
+/// price but refuses one outside the no-arbitrage bounds beyond rounding
+/// (<c>Conventions/AnalyticGJRGARCHBoundsTests.cs</c>): on that model it refuses both wings at every λ, the low strikes
+/// at every maturity and the high strikes from two years, where the expansion's expected spot misses the forward (at
+/// λ 0 a deep in-the-money call falls below its bound by 4.7e-7 at two days and by 0.0194 at two years), and the
+/// runaway prices from λ 0.15; a price it returns keeps the expansion's error.
 /// </para>
 /// <para>
 /// Where two of the variance's growth factors m₁, m₂ and m₃, or one of them and 1, are equal (α = β = γ = 0; an
@@ -112,6 +119,68 @@ public sealed class AnalyticGJRGARCHEngine
 
         option.Validate();
         return option.FetchResults(new OneAssetOptionResults { NPV = Value(option) });
+    }
+
+    /// <summary>
+    /// Prices a European plain-vanilla option as
+    /// <see cref="Calculate(VanillaOption, EvaluationContext, GJRGARCHModel)"/> does, refusing a price outside the
+    /// no-arbitrage bounds beyond rounding.
+    /// </summary>
+    /// <param name="option">The option.</param>
+    /// <param name="context">The evaluation context.</param>
+    /// <param name="model">The model.</param>
+    /// <returns>The option's results: its value.</returns>
+    /// <exception cref="ArgumentNullException">An argument is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentException">The payoff isn't plain vanilla ("non-plain payoff given").</exception>
+    /// <exception cref="NanoQLException">The exercise isn't European, the underlying isn't positive, or the price
+    /// leaves the no-arbitrage bounds.</exception>
+    [Experimental("NQL0001")]
+    public static OneAssetOptionResults CalculateWithinBounds(
+        VanillaOption option, EvaluationContext context, GJRGARCHModel model) =>
+        new AnalyticGJRGARCHEngine(model).CalculateWithinBounds(option, context);
+
+    /// <summary>
+    /// Prices a European plain-vanilla option as <see cref="Calculate(VanillaOption, EvaluationContext)"/> does,
+    /// refusing a price outside the no-arbitrage bounds beyond rounding: a call's max(0, S·D_q − K·D_r) to S·D_q, a
+    /// put's max(0, K·D_r − S·D_q) to K·D_r, each discount read on the process's curves at expiry, beyond 8·ε of the
+    /// larger of S·D_q and K·D_r.
+    /// </summary>
+    /// <param name="option">The option.</param>
+    /// <param name="context">The evaluation context.</param>
+    /// <returns>The option's results: its value.</returns>
+    /// <exception cref="ArgumentNullException">An argument is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentException">The payoff isn't plain vanilla ("non-plain payoff given").</exception>
+    /// <exception cref="NanoQLException">The exercise isn't European, the underlying isn't positive, or the price
+    /// leaves the no-arbitrage bounds ("the analytic price (p) leaves the no-arbitrage bounds [lo, hi] beyond
+    /// rounding").</exception>
+    [Experimental("NQL0001")]
+    public OneAssetOptionResults CalculateWithinBounds(VanillaOption option, EvaluationContext context)
+    {
+        OneAssetOptionResults results = Calculate(option, context);
+        if (option.IsExpired(context))
+        {
+            return results;
+        }
+
+        // Calculate refused any other payoff
+        var payoff = (PlainVanillaPayoff)option.Payoff!;
+        GJRGARCHProcess process = model.Process;
+        Date lastDate = option.Exercise.LastDate();
+        double spot = process.S0 * process.DividendYield.AccruedDiscount(lastDate);
+        double strike = payoff.Strike * process.RiskFreeRate.AccruedDiscount(lastDate);
+        bool call = payoff.OptionType == OptionType.Call;
+        double lo = Math.Max(0.0, call ? spot - strike : strike - spot);
+        double hi = call ? spot : strike;
+        double margin = 8.0 * NumericLimits.QL_EPSILON * Math.Max(spot, strike);
+        double price = results.NPV!.Value;
+        if (!(price >= lo - margin && price <= hi + margin))
+        {
+            throw new NanoQLException(string.Create(
+                CultureInfo.InvariantCulture,
+                $"the analytic price ({price}) leaves the no-arbitrage bounds [{lo}, {hi}] beyond rounding"));
+        }
+
+        return results;
     }
 
     // QuantLib's calculate (analyticgjrgarchengine.cpp:42-283)

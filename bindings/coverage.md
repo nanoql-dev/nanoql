@@ -9,10 +9,10 @@ report applies.
 ## Counts
 
 - **Assemblies:** `NanoQL` (`nql_`), `NanoQL.Extensions` (`nql_`).
-- **Functions:** 11,477, 2,523 of them experimental and 1,503 with an overload suffix; by kind, method 3,918, get 3,547, new 1,422, static 970, with 626, operator 413, bind 259, bindon 259, draws 50, field 7, indexer 5, set 1.
+- **Functions:** 11,479, 2,525 of them experimental and 1,505 with an overload suffix; by kind, method 3,919, get 3,547, new 1,422, static 971, with 626, operator 413, bind 259, bindon 259, draws 50, field 7, indexer 5, set 1.
 - **Types:** 2,343; by form, handle 1,651, static 344, withheld 215, boxed 73, snapshot 55, value 2, distribution 1, matrix 1, vector 1.
 - **Enums:** 165.
-- **Names:** the longest 165 characters, 1,114 over 63.
+- **Names:** the longest 165 characters, 1,116 over 63.
 - **Presets withheld:** 310 constructors of 298 types, 356 of the 356 preset constructions with a lookup by name.
 - **Engines:** 225 engines, 268 input sets; 41 engine parameters, 1,188 pairs formed, 17 refused at the call, 320 calculations forming no pair.
 - **Not crossing:** 2,473 members and types.
