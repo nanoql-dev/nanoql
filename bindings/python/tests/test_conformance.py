@@ -428,8 +428,8 @@ class Overloads(unittest.TestCase):
 
 class Misc(unittest.TestCase):
     def test_versions(self):
-        self.assertEqual(nanoql.abi_version(), 2002)
-        self.assertEqual(nanoql.version(), "2.2")
+        self.assertEqual(nanoql.abi_version(), 2003)
+        self.assertEqual(nanoql.version(), "2.3")
         today = nanoql.Date.todays_date()
         self.assertGreater(today, datetime.date(2025, 1, 1))
 

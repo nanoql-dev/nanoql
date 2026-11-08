@@ -4,7 +4,7 @@ The notable changes in each release of nanoql. The format follows
 [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/), and the versions follow nanoql's own rule (Versions,
 below).
 
-## [Unreleased]
+## [2.3] - 2026-11-07
 
 ### Added
 
@@ -208,6 +208,7 @@ QuantLib's are sealed by their use:
 - Python 3.11 or later.
 - The Java and C++ layers are built and tested in the repository and not released; C++ includes `nanoql.h` as it is.
 
+[2.3]: https://github.com/nanoql-dev/nanoql/releases/tag/v2.3
 [2.2]: https://github.com/nanoql-dev/nanoql/releases/tag/v2.2
 [2.1]: https://github.com/nanoql-dev/nanoql/releases/tag/v2.1
 [2.0]: https://github.com/nanoql-dev/nanoql/releases/tag/v2.0

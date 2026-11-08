@@ -15,10 +15,10 @@
      assert(nql_abi_version() == NQL_ABI_VERSION);
    A 2.y header works with the 2.y library alone. */
 #define NQL_VERSION_MAJOR 2
-#define NQL_VERSION_MINOR 2
+#define NQL_VERSION_MINOR 3
 #define NQL_VERSION_PATCH 0
-#define NQL_VERSION "2.2"
-#define NQL_ABI_VERSION 2002
+#define NQL_VERSION "2.3"
+#define NQL_ABI_VERSION 2003
 
 #if defined(_WIN32)
 #  define NQL_API __declspec(dllimport)

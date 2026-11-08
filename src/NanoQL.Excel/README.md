@@ -4,7 +4,7 @@ The runtime of nanoql's Excel add-in: handles, conversions, errors and settings 
 nanoql-bind generates.
 
 Nobody installs it by hand. nanoql's own add-ins, `nanoql64.xll` and `nanoql-experimental64.xll`, carry it inside each
-`.xll`, in the release's `nanoql-excel-2.2-win-x64.zip` on
+`.xll`, in the release's `nanoql-excel-2.3-win-x64.zip` on
 [GitHub](https://github.com/nanoql-dev/nanoql/releases). An add-in of your own, your worksheet functions beside
 nanoql's, is built by the tool, [NanoQL.Bind](https://www.nuget.org/packages/NanoQL.Bind), which writes its project
 with a reference to this package and restores it from NuGet. Given your assembly's build output, holding nanoql's two
@@ -28,7 +28,7 @@ cover, per module, is on [the validation page](https://nanoql.org/validation/).
 ## More
 
 - [Source and issues](https://github.com/nanoql-dev/nanoql), and
-  [the changelog](https://github.com/nanoql-dev/nanoql/blob/v2.2/CHANGELOG.md).
+  [the changelog](https://github.com/nanoql-dev/nanoql/blob/v2.3/CHANGELOG.md).
 
 ## License
 
