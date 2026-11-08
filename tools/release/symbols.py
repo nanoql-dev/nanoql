@@ -6,7 +6,8 @@ elsewhere, holding nanoql.pdb, libnanoql.so.dbg or libnanoql.dylib.dSYM/ with LI
 THIRD_PARTY_NOTICES.md. A release build's symbols map nanoql's sources to its commit on GitHub (Source Link on
 Windows); the C archive carries none.
 
-Usage: python tools/release/symbols.py --library <native build folder> --out <folder> --rid <rid> [--version <version>]
+Usage: python -I tools/release/symbols.py --library <native build folder> --out <folder> --rid <rid>
+       [--version <version>]
 The native build folder is nanoql-bind build's --out: the symbols in lib/, or the macOS bundle in publish/.
 """
 

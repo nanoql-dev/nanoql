@@ -520,7 +520,9 @@ jobs:
             cmake --build "$build" --config Release
             ctest --test-dir "$build" -C Release --output-on-failure
           done
-      # At a release, the native library's symbols beside the C archive, in its form.
+      # At a release, the native library's symbols beside the C archive, in its form. Isolated (-I), as the other
+      # tools/ scripts run: the script's own folder first on the path would put tools/release/inspect.py in place of
+      # the standard library's inspect, which Python 3.14's argparse reaches.
       - name: The native symbols archive, at a release
         id: symbols
         if: inputs.release
@@ -528,7 +530,7 @@ jobs:
         run: |
           py=$(command -v python3 || command -v python)
           if [ -d /opt/python ]; then py=$(ls -d /opt/python/cp3*-cp3*/bin/python | grep -v 't-cp' | sort -V | tail -1); fi
-          "$py" tools/release/symbols.py --library "$RUNNER_TEMP/nanoql" --rid "$RID" --out "$RUNNER_TEMP/symbols"
+          "$py" -I tools/release/symbols.py --library "$RUNNER_TEMP/nanoql" --rid "$RID" --out "$RUNNER_TEMP/symbols"
       - name: Keep the native symbols archive, at a release
         if: inputs.release
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
