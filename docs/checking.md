@@ -39,7 +39,9 @@ that names the measured cause; the validation report counts them.
 nanoql's outputs needn't match QuantLib's bit for bit. .NET's mathematical functions and the C runtime's, `pow` and
 `hypot` among them, can differ in the last bit, and a long calculation carries the difference along. Where a
 calculation magnifies it (a second difference, a gradient by differences, an ill-conditioned fit), the output's
-bound is set at least ten times above the largest difference measured on Windows, Linux and macOS, with its reason.
+bound is set at least ten times above the largest difference measured on Windows, Linux and macOS, with its reason,
+where Windows x64 needs one; a result that moves past its bound on another system alone is listed among that system's
+known differences (below).
 
 A calibration's parameters can move more than its inputs do. So a calibrated output is recorded only where QuantLib's
 own value holds, within 1e-12, when every input moves one unit in its last place, up and then down. The outputs left
@@ -82,8 +84,11 @@ conformance suite. The Excel add-in's suite runs inside Excel before each releas
 
 ## Every change and every release
 
-- **Every change:** the build, the tests and the vectors run on Windows, Linux and macOS. Windows x64 must pass; Linux
-  and macOS report their differences.
+- **Every change:** the build, the tests and the vectors run on Windows, Linux and macOS. Windows x64 must pass. On
+  Linux and macOS the tests that fail from the platform's floating point (a result's last bits, which a calculation
+  can magnify, or on Arm64 a NaN's sign) are listed for each system
+  ([`tests/known-differences/`](https://github.com/nanoql-dev/nanoql/tree/main/tests/known-differences)), and a
+  failure not on its system's list turns that check red.
 - **Every release:** the release is built from one commit, and a failure on Windows x64 stops it. The tests also
   run on Windows Arm64 and Linux Arm64, and each language's replay on all five platforms. The release notes count the
   test differences on each platform beside Windows x64. The SOFR example's trades ([the example](sofr-example.md)) are

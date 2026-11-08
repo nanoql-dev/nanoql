@@ -840,6 +840,13 @@ Every port of QuantLib is checked against QuantLib itself, and every port of QLN
 - **Ported QuantLib tests** keep QuantLib's own tolerances.
 - **Why not bit identity:** IEEE 754 recommends correctly rounded mathematical functions but doesn't require them,
   and .NET's `Math.Exp` calls the platform's C runtime. 1e-10 relative is about 10⁶ ulp of headroom.
+- **Other systems:** beside Windows x64, the reference, a test can fail from the platform's floating point: a
+  result's last bits, from the C runtime's maths functions or the processor, which a calculation can magnify past its
+  bound, or on Arm64 a NaN's sign. Each system lists such tests in `tests/known-differences/<runner>.txt`. CI's tests
+  on that runner are red on a failure off its list, and warn on a listed test that passes, which the list then
+  drops. A commit whose test fails there that way adds it, writing the list from that job's output (its
+  `tests-<runner>` artifact) with `python -I tools/known-differences.py <output> <list> --write`; a failure that
+  doesn't come from the platform's floating point is a defect to fix, not a line to add.
 
 ## 8 Gates
 

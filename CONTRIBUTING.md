@@ -25,7 +25,10 @@ papers and documentation.
 1. Fork the repository, and make your change on a branch of your fork.
 2. Commit with `git commit -s` (below), and open a pull request against `main`.
 3. CI runs the gates on the pull request, and checks that every commit is signed off. Windows is the reference
-   system; results on Linux and macOS are reported, not yet required.
+   system; results on Linux and macOS are reported, not yet required. There, the tests that fail from the platform's
+   floating point (a result's last bits, which a calculation can magnify, or on Arm64 a NaN's sign) are listed per
+   system in `tests/known-differences/`, and a failure off its system's list turns that check red for a maintainer
+   to read.
 4. A maintainer reviews the change against the faithfulness rule and QuantLib's vectors, and runs any check CI can't.
 5. The maintainer squash-merges it, editing the message to the repository's style and keeping your sign-off.
 

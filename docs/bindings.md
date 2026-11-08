@@ -393,7 +393,10 @@ too. Schema 1, its `"schema"` field raised on any change of meaning; one row a l
 ## Debugging into nanoql
 
 - **Windows:** the native library's PDB holds line records for nanoql's C# code, so a debugger attached to a C, C++,
-  Python or Java program steps from its call into nanoql's source, the generated export the frame above.
+  Python or Java program steps from its call into nanoql's source, the generated export the frame above. Stepping in
+  with F11 passes two frames without source first: the runtime's transition into managed code, and the generated
+  export, which the build writes and doesn't commit, so Source Link can't fetch it. Press F11 past them, or set a
+  function breakpoint on the method's native name (`NanoQL_NanoQL_Time_Date__NthWeekday` for `Date.NthWeekday`).
   `tools/replay/stepin.py` shows it from a C program: `python -I tools/replay/stepin.py <exe> nanoql.dll
   "*FlatForward___ctor*"` stops in `FlatForward`'s constructor and prints the stack's source lines. Visual Studio's
   mixed-mode debugging does the same from Python. A release's library, built in release mode, maps nanoql's sources

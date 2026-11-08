@@ -3,10 +3,11 @@
 #
 # The gates of docs/porting-playbook.md §8 on GitHub's runners.
 #
-# Pushes to main and pull requests run the jobs, as the weekly schedule and a dispatch do. Windows x64 is the
-# reference: on the other systems a build, test or vector red is reported but doesn't fail the run. A push or a pull
-# request builds and tests on Windows x64, Linux x64 and macOS, and its bindings jobs build Windows x64 and Linux x64;
-# the weekly run builds and tests on Windows x64 alone and builds the bindings on all five platforms, so a shipped
+# Pushes to main and pull requests run the jobs, as the weekly schedule and a dispatch do. Windows x64 is the reference:
+# on the other systems a build, test or vector red is reported but doesn't fail the run, and the tests that fail there
+# from the platform's floating point, listed per system in tests/known-differences/, leave its job green. A push or a
+# pull request builds and tests on Windows x64, Linux x64 and macOS, and its bindings jobs build Windows x64 and Linux
+# x64; the weekly run builds and tests on Windows x64 alone and builds the bindings on all five platforms, so a shipped
 # platform's drift shows before a release; a dispatch asks for the systems (Windows x64, or all five with Windows Arm64
 # and Linux Arm64) and the bindings platforms (core, macOS alone, or all five).
 #
@@ -161,15 +162,21 @@ jobs:
           dotnet --list-runtimes
       - name: Build
         run: dotnet build NanoQL.slnx -c Release --no-incremental
-      # The run's own output kept, which a release's notes count each system's failures from.
+      # The run's own output kept, which a release's notes count each system's failures from. Beside Windows x64 the
+      # step's red doesn't stop the job: a later step reads the failures against the system's known differences.
       - name: Tests
+        id: tests
         shell: bash
+        continue-on-error: ${{ matrix.os != 'windows-2022' }}
         env:
           NANOQL_BITID_DIR: ${{ github.workspace }}/TestResults/bitid
           SUMMARY: tests-${{ matrix.os }}.txt
         run: |
           set -o pipefail
-          dotnet test --solution NanoQL.slnx -c Release --no-build 2>&1 | tee "$RUNNER_TEMP/$SUMMARY"
+          code=0
+          dotnet test --solution NanoQL.slnx -c Release --no-build 2>&1 | tee "$RUNNER_TEMP/$SUMMARY" || code=$?
+          echo "exit-code=$code" >> "$GITHUB_OUTPUT"
+          exit "$code"
       - name: Keep the tests' output, for a release's notes
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -178,6 +185,20 @@ jobs:
           path: ${{ runner.temp }}/tests-${{ matrix.os }}.txt
           if-no-files-found: ignore
           retention-days: ${{ inputs.release && 7 || 1 }}
+      # Beside Windows x64 some tests fail from the platform's floating point: a result's last bits, which a
+      # calculation can magnify, or on Arm64 a NaN's sign (docs/porting-playbook.md §7.3). The job is green when
+      # every failure is on the system's list in tests/known-differences/, and red on any other, or when the tests
+      # didn't finish.
+      - name: The failures, against the system's known differences
+        if: ${{ !cancelled() && matrix.os != 'windows-2022' }}
+        shell: bash
+        env:
+          EXIT_CODE: ${{ steps.tests.outputs.exit-code }}
+          SUMMARY: tests-${{ matrix.os }}.txt
+          KNOWN: tests/known-differences/${{ matrix.os }}.txt
+        run: |
+          python -I tools/known-differences.py --self-test
+          python -I tools/known-differences.py "$RUNNER_TEMP/$SUMMARY" "$KNOWN" --exit-code "${EXIT_CODE:-none}"
       - name: Vectors
         run: |
           python -I tools/vectors/count.py
