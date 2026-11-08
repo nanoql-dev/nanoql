@@ -324,7 +324,7 @@ public sealed class AnalyticRoughHestonEngine
     public Complex ChF(Complex z, double t) =>
         chFCache.GetOrAdd(
             (BitConverter.DoubleToInt64Bits(z.Real), BitConverter.DoubleToInt64Bits(z.Imaginary), BitConverter.DoubleToInt64Bits(t)),
-            static (_, state) => Complex.Exp(state.Engine.LnChF(state.Z, state.T)),
+            static (_, state) => ComplexFunctions.Exp(state.Engine.LnChF(state.Z, state.T)),
             (Engine: this, Z: z, T: t));
 
     /// <summary>The logarithm of the normalized characteristic function of the log forward moneyness.</summary>
@@ -759,7 +759,7 @@ public sealed class AnalyticRoughHestonEngine
         {
             var z = new Complex(u, -alpha);
             var zPrime = new Complex(u, -alpha - 1.0);
-            Complex phiBS = Complex.Exp(
+            Complex phiBS = ComplexFunctions.Exp(
                 -0.5 * VAvg * term * ((zPrime * zPrime) + new Complex(-zPrime.Imaginary, zPrime.Real)));
             Complex phi = engine.ChF(zPrime, term);
 
@@ -773,7 +773,7 @@ public sealed class AnalyticRoughHestonEngine
                 phi = new Complex(0.0, 0.0);
             }
 
-            return (Complex.Exp(new Complex(0.0, u * freq)) * (phiBS - phi) / (z * zPrime)).Real * sAlpha;
+            return (ComplexFunctions.Exp(new Complex(0.0, u * freq)) * (phiBS - phi) / (z * zPrime)).Real * sAlpha;
         }
 
         internal double ControlVariateValue() =>

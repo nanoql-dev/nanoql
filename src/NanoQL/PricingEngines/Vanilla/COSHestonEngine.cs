@@ -134,9 +134,9 @@ public sealed class COSHestonEngine
         var g = new Complex(kappa, -rho * sigma * u);
         Complex gg = (g - d) / (g + d);
 
-        return Complex.Exp(
-            (v0 / sigma2 * (1.0 - Complex.Exp(-d * t)) / (1.0 - (gg * Complex.Exp(-d * t))) * (g - d))
-            + (kappa * theta / sigma2 * (((g - d) * t) - (2.0 * Complex.Log((1.0 - (gg * Complex.Exp(-d * t))) / (1.0 - gg))))));
+        return ComplexFunctions.Exp(
+            (v0 / sigma2 * (1.0 - ComplexFunctions.Exp(-d * t)) / (1.0 - (gg * ComplexFunctions.Exp(-d * t))) * (g - d))
+            + (kappa * theta / sigma2 * (((g - d) * t) - (2.0 * Complex.Log((1.0 - (gg * ComplexFunctions.Exp(-d * t))) / (1.0 - gg))))));
     }
 
     /// <summary>The first cumulant of the log-forward's return at a time.</summary>
@@ -247,7 +247,7 @@ public sealed class COSHestonEngine
         {
             double r = i * Math.PI * d;
             double un = 2.0 * d * ((1.0 / (1.0 + (r * r)) * (expA + (r * Math.Sin(r * a)) - Math.Cos(r * a))) - (1.0 / r * Math.Sin(r * a)));
-            s += un * (ChF(r, maturity) * Complex.Exp(new Complex(0, r * (x - a)))).Real;
+            s += un * (ChF(r, maturity) * ComplexFunctions.Exp(new Complex(0, r * (x - a)))).Real;
         }
 
         return payoff.OptionType == OptionType.Put ? k * df * s : (spot * qf) - (k * df * (1 - s));

@@ -136,11 +136,11 @@ public static class ModifiedBesselFunctions
 
     private static double Weight2LargeX(double x, bool weighted) => weighted ? Math.Exp(-2.0 * x) : Math.Exp(-x);
 
-    private static Complex WeightSmallX(Complex x, bool weighted) => weighted ? Complex.Exp(-x) : new Complex(1.0, 0.0);
+    private static Complex WeightSmallX(Complex x, bool weighted) => weighted ? ComplexFunctions.Exp(-x) : new Complex(1.0, 0.0);
 
-    private static Complex Weight1LargeX(Complex x, bool weighted) => weighted ? new Complex(1.0, 0.0) : Complex.Exp(x);
+    private static Complex Weight1LargeX(Complex x, bool weighted) => weighted ? new Complex(1.0, 0.0) : ComplexFunctions.Exp(x);
 
-    private static Complex Weight2LargeX(Complex x, bool weighted) => weighted ? Complex.Exp(-2.0 * x) : Complex.Exp(-x);
+    private static Complex Weight2LargeX(Complex x, bool weighted) => weighted ? ComplexFunctions.Exp(-2.0 * x) : ComplexFunctions.Exp(-x);
 
     private static double IImpl(double nu, double x, bool weighted)
     {
@@ -190,7 +190,7 @@ public static class ModifiedBesselFunctions
     {
         if (Complex.Abs(x) < 13.0)
         {
-            Complex alpha = Complex.Pow(0.5 * x, nu) / new GammaFunction().Value(1.0 + nu);
+            Complex alpha = ComplexFunctions.Pow(0.5 * x, nu) / new GammaFunction().Value(1.0 + nu);
             Complex Y = 0.25 * x * x;
             int k = 1;
             Complex sum = alpha, B_k = alpha;
@@ -226,7 +226,7 @@ public static class ModifiedBesselFunctions
             var i = new Complex(0.0, 1.0);
             return 1.0 / Complex.Sqrt(2 * MathConstants.M_PI * x)
                    * ((Weight1LargeX(x, weighted) * s1)
-                      + (i * Complex.Exp(i * nu * MathConstants.M_PI) * Weight2LargeX(x, weighted) * s2));
+                      + (i * ComplexFunctions.Exp(i * nu * MathConstants.M_PI) * Weight2LargeX(x, weighted) * s2));
         }
     }
 
@@ -342,7 +342,7 @@ public static class ModifiedBesselFunctions
                 sum1 += coeff / kFactorial * minusY;
             }
 
-            sum1 *= 0.5 * Complex.Pow(half, -(double)n);
+            sum1 *= 0.5 * ComplexFunctions.Pow(half, -(double)n);
         }
 
         double sign = (n % 2 == 0) ? -1.0 : 1.0;
@@ -372,7 +372,7 @@ public static class ModifiedBesselFunctions
             }
         }
 
-        sum3 *= -sign * 0.5 * Complex.Pow(half, (double)n);
+        sum3 *= -sign * 0.5 * ComplexFunctions.Pow(half, (double)n);
 
         return (sum1 + sum2 + sum3) * WeightSmallX(x, weighted);
     }

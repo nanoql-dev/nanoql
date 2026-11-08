@@ -140,16 +140,16 @@ public sealed class AnalyticHestonEngineAPHelper
             Complex phiBS = new(0.0, 0.0);
             if (cpxLog == AnalyticHestonEngineComplexLogFormula.AngledContour)
             {
-                phiBS = Complex.Exp(
+                phiBS = ComplexFunctions.Exp(
                     -0.5 * vAvg * term * ((hPrime * hPrime) + new Complex(-hPrime.Imaginary, hPrime.Real)));
             }
             else if (cpxLog == AnalyticHestonEngineComplexLogFormula.AsymptoticChF)
             {
-                phiBS = Complex.Exp((u * new Complex(1, tanPhi) * phi) + psi);
+                phiBS = ComplexFunctions.Exp((u * new Complex(1, tanPhi) * phi) + psi);
             }
 
             return Math.Exp(-u * tanPhi * freq)
-                   * (Complex.Exp(new Complex(0.0, u * freq))
+                   * (ComplexFunctions.Exp(new Complex(0.0, u * freq))
                       * new Complex(1, tanPhi)
                       * (phiBS - engine.ChF(hPrime, term)) / (h_u * hPrime)).Real * sAlpha;
         }
@@ -158,10 +158,10 @@ public sealed class AnalyticHestonEngineAPHelper
         {
             var z = new Complex(u, -alpha);
             var zPrime = new Complex(u, -alpha - 1);
-            Complex phiBS = Complex.Exp(
+            Complex phiBS = ComplexFunctions.Exp(
                 -0.5 * vAvg * term * ((zPrime * zPrime) + new Complex(-zPrime.Imaginary, zPrime.Real)));
 
-            return (Complex.Exp(new Complex(0.0, u * freq))
+            return (ComplexFunctions.Exp(new Complex(0.0, u * freq))
                     * (phiBS - engine.ChF(zPrime, term)) / (z * zPrime)).Real * sAlpha;
         }
         else
@@ -192,9 +192,9 @@ public sealed class AnalyticHestonEngineAPHelper
             var phiFreq = new Complex(phi.Real, phi.Imaginary + freq);
 
             return fwd - (Math.Sqrt(strike * fwd) / Math.PI
-                          * (Complex.Exp(psi)
-                             * ((-2.0 * ExponentialIntegralsFunctions.Ci(-0.5 * phiFreq) * Complex.Sin(0.5 * phiFreq))
-                                + (Complex.Cos(0.5 * phiFreq) * (Math.PI + (2.0 * ExponentialIntegralsFunctions.Si(0.5 * phiFreq)))))).Real);
+                          * (ComplexFunctions.Exp(psi)
+                             * ((-2.0 * ExponentialIntegralsFunctions.Ci(-0.5 * phiFreq) * ComplexFunctions.Sin(0.5 * phiFreq))
+                                + (ComplexFunctions.Cos(0.5 * phiFreq) * (Math.PI + (2.0 * ExponentialIntegralsFunctions.Si(0.5 * phiFreq)))))).Real);
         }
         else if (cpxLog == AnalyticHestonEngineComplexLogFormula.AngledContourNoCV)
         {

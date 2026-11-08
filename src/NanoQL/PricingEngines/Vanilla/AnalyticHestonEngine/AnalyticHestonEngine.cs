@@ -290,7 +290,7 @@ public class AnalyticHestonEngine
     {
         if (Model.Sigma > 1e-6 || Model.Kappa < 1e-8)
         {
-            return Complex.Exp(LnChF(z, t));
+            return ComplexFunctions.Exp(LnChF(z, t));
         }
         else
         {
@@ -311,12 +311,12 @@ public class AnalyticHestonEngine
             double a = theta - v0 + (ekt * (((-1 + kt) * theta) + v0));
             double b = (2 * theta) + (kt * theta) - v0 - (kt * v0) + (ekt * (((-2 + kt) * theta) + v0));
 
-            return Complex.Exp(-(a * z * zpi / ekt) / (2.0 * kappa))
+            return ComplexFunctions.Exp(-(a * z * zpi / ekt) / (2.0 * kappa))
 
-                + (Complex.Exp(-kt - (a * z * zpi / (2.0 * ekt * kappa))) * rho * b
+                + (ComplexFunctions.Exp(-kt - (a * z * zpi / (2.0 * ekt * kappa))) * rho * b
                    * (1.0 - new Complex(-z.Imaginary, z.Real)) * z * z / (2.0 * kappa * kappa) * sigma)
 
-                + (Complex.Exp((-2 * kt) - (a * z * zpi / (2.0 * ekt * kappa))) * z * z * zpi
+                + (ComplexFunctions.Exp((-2 * kt) - (a * z * zpi / (2.0 * ekt * kappa))) * z * z * zpi
                    * ((-2 * rho2 * Squared(b) * z * z * zpi)
                       + (2 * kappa * v0 * (-zpi + (e2kt * (zpi + (4 * rho2 * z)))
                                            - (2 * ekt * ((2 * rho2 * z) + (kt * (zpi + (rho2 * (2 + kt) * z)))))))
@@ -674,7 +674,7 @@ public class AnalyticHestonEngine
 
             Complex t1 = t0 + new Complex(0, -rpsig);
             Complex d = Complex.Sqrt((t1 * t1) - (sigma2 * phi * new Complex(-phi, j == 1 ? 1 : -1)));
-            Complex ex = Complex.Exp(-d * term);
+            Complex ex = ComplexFunctions.Exp(-d * term);
             Complex addOnTerm = engine.AddOnTerm(phi, term, j);
 
             if (cpxLog == AnalyticHestonEngineComplexLogFormula.Gatheral)
@@ -686,7 +686,7 @@ public class AnalyticHestonEngine
                         Complex p = (t1 - d) / (t1 + d);
                         Complex g = Complex.Log((1.0 - (p * ex)) / (1.0 - p));
 
-                        return Complex.Exp(
+                        return ComplexFunctions.Exp(
                             (v0 * (t1 - d) * (1.0 - ex) / (sigma2 * (1.0 - (ex * p))))
                             + (kappa * theta / sigma2 * (((t1 - d) * term) - (2.0 * g)))
                             + new Complex(0.0, phi * (dd - sx))
@@ -698,7 +698,7 @@ public class AnalyticHestonEngine
                         Complex p = td * sigma2 / (t1 + d);
                         Complex g = p * (1.0 - ex);
 
-                        return Complex.Exp(
+                        return ComplexFunctions.Exp(
                             (v0 * td * (1.0 - ex) / (1.0 - (p * ex)))
                             + (kappa * theta * ((td * term) - (2.0 * g / sigma2)))
                             + new Complex(0.0, phi * (dd - sx))
@@ -789,7 +789,7 @@ public class AnalyticHestonEngine
                 gKm1 = g.Imaginary;
                 g += new Complex(0, 2 * b * Math.PI);
 
-                return Complex.Exp(
+                return ComplexFunctions.Exp(
                     (v0 * (t1 + d) * (ex - 1.0) / (sigma2 * (ex - p)))
                     + (kappa * theta / sigma2 * (((t1 + d) * term) - (2.0 * g)))
                     + new Complex(0, phi * (dd - sx))

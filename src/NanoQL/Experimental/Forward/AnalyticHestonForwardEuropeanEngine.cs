@@ -344,7 +344,7 @@ public class AnalyticHestonForwardEuropeanEngine
         {
             (Complex a, Complex bz) = AffineLnChF(z, tenor, kappa, theta, sigma, rho);
             Complex den = 1.0 - (2.0 * bz / b);
-            return Complex.Exp(a + (lambda / b * bz / den)) * Complex.Pow(den, -halfR);
+            return ComplexFunctions.Exp(a + (lambda / b * bz / den)) * ComplexFunctions.Pow(den, -halfR);
         }
 
         return ResolvedP1P2(Expected, logMoneyness);
@@ -359,7 +359,7 @@ public class AnalyticHestonForwardEuropeanEngine
         Complex ChF(Complex z)
         {
             (Complex a, Complex bz) = AffineLnChF(z, tenor, kappa, theta, sigma, rho);
-            return Complex.Exp(a + (v0 * bz));
+            return ComplexFunctions.Exp(a + (v0 * bz));
         }
 
         return ResolvedP1P2(ChF, logK);
@@ -387,7 +387,7 @@ public class AnalyticHestonForwardEuropeanEngine
         double Probability(bool p1)
         {
             Complex adj = p1 ? new Complex(0.0, -1.0) : Complex.Zero;
-            double Integrand(double phi) => (Complex.Exp(-phi * logK * i) / (phi * i) * expected(phi + adj)).Real;
+            double Integrand(double phi) => (ComplexFunctions.Exp(-phi * logK * i) / (phi * i) * expected(phi + adj)).Real;
 
             double sum = 0.0, lo = 0.0, width = Math.Min(1.0, widest);
             int quiet = 0;
@@ -451,7 +451,7 @@ public class AnalyticHestonForwardEuropeanEngine
         Complex adj = p1 ? new Complex(0.0, -1.0) : Complex.Zero;
         double phiDash = (0.5 + 1e-8 + (0.5 * phi)) * phiRightLimit; // Map phi to full range
         Complex i = Complex.ImaginaryOne;
-        return 0.5 * phiRightLimit * (Complex.Exp(-phiDash * logK * i) / (phiDash * i) * engine.ChF(phiDash + adj, tenor)).Real;
+        return 0.5 * phiRightLimit * (ComplexFunctions.Exp(-phiDash * logK * i) / (phiDash * i) * engine.ChF(phiDash + adj, tenor)).Real;
     }
 
     // r(x) = x/(−expm1(−x)), r(0) = 1

@@ -350,7 +350,7 @@ public abstract class FFTEngine
             double sw = eta * (3.0 + ((i % 2) == 0 ? -1.0 : 1.0) - ((i == 0) ? 1.0 : 0.0)) / 3.0;
             Complex psi = df * state.ComplexFourierTransform(vJ - ((alpha + 1) * i1));
             psi /= (alpha * alpha) + alpha - (vJ * vJ) + (i1 * ((2 * alpha) + 1.0) * vJ);
-            fti[i] = Complex.Exp(i1 * b * vJ) * sw * psi;
+            fti[i] = ComplexFunctions.Exp(i1 * b * vJ) * sw * psi;
         }
 
         // Perform fft

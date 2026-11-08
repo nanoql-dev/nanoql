@@ -200,7 +200,7 @@ public class AnalyticContinuousGeometricAveragePriceAsianHestonEngine
             double xiDash = (0.5 + 1e-8 + (0.5 * xi)) * XiRightLimit; // Map xi to full range
             Complex inner1 = PhiAt(c, 1.0 + (xiDash * i), 0, T, t, SummationCutoff);
             Complex inner2 = -strike * PhiAt(c, xiDash * i, 0, T, t, SummationCutoff);
-            return 0.5 * XiRightLimit * ((inner1 + inner2) * Complex.Exp(-xiDash * logK * i) / (xiDash * i)).Real;
+            return 0.5 * XiRightLimit * ((inner1 + inner2) * ComplexFunctions.Exp(-xiDash * logK * i) / (xiDash * i)).Real;
         }
 
         double term2 = Integrator.Evaluate(Integrand) / Math.PI;
@@ -279,7 +279,7 @@ public class AnalyticContinuousGeometricAveragePriceAsianHestonEngine
         Complex z4 = Z4(w);
 
         (Complex f, Complex fTilde) = FFTilde(z1, z2, z3, z4, tau, cutoff);
-        return Complex.Exp((-a1 * fTilde / f) - (a2 * Complex.Log(f)) + (c.A3 * s) + (c.A4 * w) + c.A5);
+        return ComplexFunctions.Exp((-a1 * fTilde / f) - (a2 * Complex.Log(f)) + (c.A3 * s) + (c.A4 * w) + c.A5);
     }
 
     // Equations (13)

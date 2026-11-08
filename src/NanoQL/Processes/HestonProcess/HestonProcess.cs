@@ -315,7 +315,7 @@ public class HestonProcess : StochasticProcess
 
         // Re[e^{-iuy}·Φ(ζ(u))], ζ(u) = -uc + i·½u²(1 − ρ²)
         double Integrand(double u) =>
-            (Complex.Exp(new Complex(0.0, -u * y)) * Phi(new Complex(-u * c, damping * u * u), V0, v, t, true)).Real;
+            (ComplexFunctions.Exp(new Complex(0.0, -u * y)) * Phi(new Complex(-u * c, damping * u * u), V0, v, t, true)).Real;
 
         double sum = 0.0, lo = 0.0, width = Min(2.0, maxWidth);
         for (int panel = 0; ; panel++)
@@ -551,23 +551,23 @@ public class HestonProcess : StochasticProcess
         Complex ga = Complex.Sqrt((kappa * kappa) - (2 * sigma2 * a * new Complex(0.0, 1.0)));
         double d = 4 * theta * kappa / sigma2;
         double nu = (0.5 * d) - 1;
-        Complex z = ga * Complex.Exp(-0.5 * ga * dt) / (1.0 - Complex.Exp(-ga * dt));
-        Complex log_z = (-0.5 * ga * dt) + Complex.Log(ga / (1.0 - Complex.Exp(-ga * dt)));
+        Complex z = ga * ComplexFunctions.Exp(-0.5 * ga * dt) / (1.0 - ComplexFunctions.Exp(-ga * dt));
+        Complex log_z = (-0.5 * ga * dt) + Complex.Log(ga / (1.0 - ComplexFunctions.Exp(-ga * dt)));
 
-        Complex alpha = 4.0 * ga * Complex.Exp(-0.5 * ga * dt) / (sigma2 * (1.0 - Complex.Exp(-ga * dt)));
+        Complex alpha = 4.0 * ga * ComplexFunctions.Exp(-0.5 * ga * dt) / (sigma2 * (1.0 - ComplexFunctions.Exp(-ga * dt)));
         double beta = 4.0 * kappa * Math.Exp(-0.5 * kappa * dt) / (sigma2 * (1.0 - Math.Exp(-kappa * dt)));
 
-        return ga * Complex.Exp(-0.5 * (ga - kappa) * dt) * (1 - Math.Exp(-kappa * dt))
-            / (kappa * (1.0 - Complex.Exp(-ga * dt)))
-            * Complex.Exp((nu_0 + nu_t) / sigma2 * ((kappa * (1.0 + Math.Exp(-kappa * dt)) / (1.0 - Math.Exp(-kappa * dt)))
-                - (ga * (1.0 + Complex.Exp(-ga * dt)) / (1.0 - Complex.Exp(-ga * dt)))))
-            * Complex.Exp(nu * log_z) / Complex.Pow(z, nu)
+        return ga * ComplexFunctions.Exp(-0.5 * (ga - kappa) * dt) * (1 - Math.Exp(-kappa * dt))
+            / (kappa * (1.0 - ComplexFunctions.Exp(-ga * dt)))
+            * ComplexFunctions.Exp((nu_0 + nu_t) / sigma2 * ((kappa * (1.0 + Math.Exp(-kappa * dt)) / (1.0 - Math.Exp(-kappa * dt)))
+                - (ga * (1.0 + ComplexFunctions.Exp(-ga * dt)) / (1.0 - ComplexFunctions.Exp(-ga * dt)))))
+            * ComplexFunctions.Exp(nu * log_z) / ComplexFunctions.Pow(z, nu)
             * (nu_t > 1e-8
                 ? (weightedBessel
                     ? BesselRatio(nu, Math.Sqrt(nu_0 * nu_t) * alpha, Math.Sqrt(nu_0 * nu_t) * beta)
                     : ModifiedBesselFunctions.ModifiedBesselFunction_i(nu, Math.Sqrt(nu_0 * nu_t) * alpha)
                         / ModifiedBesselFunctions.ModifiedBesselFunction_i(nu, Math.Sqrt(nu_0 * nu_t) * beta))
-                : Complex.Pow(alpha / beta, nu));
+                : ComplexFunctions.Pow(alpha / beta, nu));
     }
 
     // I_nu(za)/I_nu(zb) through the exponentially weighted functions, I_nu(z)·e^(−z), which don't overflow where the
@@ -575,7 +575,7 @@ public class HestonProcess : StochasticProcess
     private static Complex BesselRatio(double nu, Complex za, Complex zb) =>
         ModifiedBesselFunctions.ModifiedBesselFunction_i_exponentiallyWeighted(nu, za)
         / ModifiedBesselFunctions.ModifiedBesselFunction_i_exponentiallyWeighted(nu, zb)
-        * Complex.Exp(za - zb);
+        * ComplexFunctions.Exp(za - zb);
 
     private double Ch(double x, double u, double nu_0, double nu_t, double dt) =>
         MathConstants.M_2_PI * Math.Sin(u * x) / u * Phi(u, nu_0, nu_t, dt).Real;

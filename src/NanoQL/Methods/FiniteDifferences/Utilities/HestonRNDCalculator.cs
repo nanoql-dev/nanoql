@@ -208,10 +208,10 @@ public sealed class HestonRNDCalculator : RiskNeutralDensityCalculator
             Complex g = Gamma(p, pX);
             Complex o = Omega(p, pX);
             Complex gamma = (g - o) / (g + o);
-            return 2.0 * Complex.Exp(
+            return 2.0 * ComplexFunctions.Exp(
                 new Complex(0.0, pX * x)
-                - (p.V0 * new Complex(pX * pX, -pX) / (g + (o * (1.0 + Complex.Exp(-o * t)) / (1.0 - Complex.Exp(-o * t)))))
-                + (p.Kappa * p.Theta / sigma2 * (((g - o) * t) - (2.0 * Complex.Log((1.0 - (gamma * Complex.Exp(-o * t))) / (1.0 - gamma))))));
+                - (p.V0 * new Complex(pX * pX, -pX) / (g + (o * (1.0 + ComplexFunctions.Exp(-o * t)) / (1.0 - ComplexFunctions.Exp(-o * t)))))
+                + (p.Kappa * p.Theta / sigma2 * (((g - o) * t) - (2.0 * Complex.Log((1.0 - (gamma * ComplexFunctions.Exp(-o * t))) / (1.0 - gamma))))));
         }
     }
 }

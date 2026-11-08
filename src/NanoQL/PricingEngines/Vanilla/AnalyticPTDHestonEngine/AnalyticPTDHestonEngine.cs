@@ -197,7 +197,7 @@ public sealed class AnalyticPTDHestonEngine
     /// <param name="t">The time, on the model's clock.</param>
     /// <returns>The characteristic function's value.</returns>
     /// <exception cref="NanoQLException"><paramref name="t"/> is past the model's time grid.</exception>
-    public Complex ChF(Complex z, double t) => Complex.Exp(LnChF(z, t));
+    public Complex ChF(Complex z, double t) => ComplexFunctions.Exp(LnChF(z, t));
 
     /// <summary>The logarithm of the normalized characteristic function of the log spot's move to a time.</summary>
     /// <param name="z">The argument.</param>
@@ -239,8 +239,8 @@ public sealed class AnalyticPTDHestonEngine
             Complex g = (k - d) / (k + d);
             Complex gt = (k - d - (dd * sigma2)) / (k + d - (dd * sigma2));
             c += kappa * theta / sigma2 * (((k - d) * tau)
-                - (2.0 * Complex.Log((1.0 - (gt * Complex.Exp(-d * tau))) / (1.0 - gt))));
-            dd = (k + d) / sigma2 * (g - (gt * Complex.Exp(-d * tau))) / (1.0 - (gt * Complex.Exp(-d * tau)));
+                - (2.0 * Complex.Log((1.0 - (gt * ComplexFunctions.Exp(-d * tau))) / (1.0 - gt))));
+            dd = (k + d) / sigma2 * (g - (gt * ComplexFunctions.Exp(-d * tau))) / (1.0 - (gt * ComplexFunctions.Exp(-d * tau)));
         }
 
         return (dd * v0) + c;
@@ -500,16 +500,16 @@ public sealed class AnalyticPTDHestonEngine
                     Complex g = (t1 - d) / (t1 + d);
                     Complex gt = (t1 - d - (dd * sigma2)) / (t1 + d - (dd * sigma2));
 
-                    dd = (t1 + d) / sigma2 * (g - (gt * Complex.Exp(-d * tau))) / (1.0 - (gt * Complex.Exp(-d * tau)));
+                    dd = (t1 + d) / sigma2 * (g - (gt * ComplexFunctions.Exp(-d * tau))) / (1.0 - (gt * ComplexFunctions.Exp(-d * tau)));
 
-                    Complex lng = Complex.Log((1.0 - (gt * Complex.Exp(-d * tau))) / (1.0 - gt));
+                    Complex lng = Complex.Log((1.0 - (gt * ComplexFunctions.Exp(-d * tau))) / (1.0 - gt));
 
                     c = (kappa * theta / sigma2 * (((t1 - d) * tau) - (2.0 * lng)))
                         + new Complex(0.0, phi * (r[i - 1] - q[i - 1]) * tau) + c;
                 }
             }
 
-            return Complex.Exp((v0 * dd) + c + new Complex(0.0, phi * (x - sx))).Imaginary / phi;
+            return ComplexFunctions.Exp((v0 * dd) + c + new Complex(0.0, phi * (x - sx))).Imaginary / phi;
         }
     }
 
@@ -535,9 +535,9 @@ public sealed class AnalyticPTDHestonEngine
         internal double Evaluate(double u)
         {
             var z = new Complex(u, -0.5);
-            Complex phiBS = Complex.Exp(-0.5 * sigmaBS * sigmaBS * term * ((z * z) + new Complex(-z.Imaginary, z.Real)));
+            Complex phiBS = ComplexFunctions.Exp(-0.5 * sigmaBS * sigmaBS * term * ((z * z) + new Complex(-z.Imaginary, z.Real)));
 
-            return (Complex.Exp(new Complex(0.0, u * (dd - sx))) * (phiBS - engine.ChF(z, term)) / ((u * u) + 0.25)).Real;
+            return (ComplexFunctions.Exp(new Complex(0.0, u * (dd - sx))) * (phiBS - engine.ChF(z, term)) / ((u * u) + 0.25)).Real;
         }
     }
 }

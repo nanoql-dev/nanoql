@@ -109,6 +109,6 @@ public class BatesEngine : AnalyticHestonEngine
         var g = new Complex(i, phi);
 
         // it can throw: to be fixed
-        return t * lambda * (Complex.Exp((nu * g) + (delta2 * g * g)) - 1.0 - (g * (Math.Exp(nu + delta2) - 1.0)));
+        return t * lambda * (ComplexFunctions.Exp((nu * g) + (delta2 * g * g)) - 1.0 - (g * (Math.Exp(nu + delta2) - 1.0)));
     }
 }

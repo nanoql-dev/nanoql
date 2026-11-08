@@ -441,7 +441,7 @@ public static class AnalyticDiscreteGeometricAveragePriceAsianHestonEngine
             double F(double x)
             {
                 var z = new Complex(a1, x);
-                Complex value = Complex.Exp(model.LogPhi(z) - lp0 - new Complex(0.0, x * logStrike))
+                Complex value = ComplexFunctions.Exp(model.LogPhi(z) - lp0 - new Complex(0.0, x * logStrike))
                     / (new Complex(alpha, x) * z);
                 return value.Real;
             }
@@ -767,7 +767,7 @@ public static class AnalyticDiscreteGeometricAveragePriceAsianHestonEngine
                 Complex q1 = kg == Complex.Zero ? Complex.Zero : 2 * z1 / kg;
                 Complex x = g == Complex.Zero
                     ? tau * (q1 - z2) / 2
-                    : (1 - Complex.Exp(-tau * g)) * (q1 - z2) / (2 * g);
+                    : (1 - ComplexFunctions.Exp(-tau * g)) * (q1 - z2) / (2 * g);
                 sum += (tau * q1) - (2 / s2 * Log1p(s2 * x));
                 omegaNext = OmegaTilde(s, w, k, n, z1, z2, tau);
             }
@@ -822,7 +822,7 @@ public static class AnalyticDiscreteGeometricAveragePriceAsianHestonEngine
         // tanh(z) for Re z >= 0, (1 - e^(-2z))/(1 + e^(-2z)), which doesn't overflow
         private static Complex SafeTanh(Complex z)
         {
-            Complex e = Complex.Exp(-2 * z);
+            Complex e = ComplexFunctions.Exp(-2 * z);
             return (1 - e) / (1 + e);
         }
 

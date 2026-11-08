@@ -11,6 +11,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using NanoQL.Instruments;
+using NanoQL.Numerics;
 using NanoQL.Processes;
 using NanoQL.TermStructures;
 using NanoQL.Time;
@@ -167,7 +168,7 @@ public static class IntegralHestonVarianceOptionEngine
             caux1 *= ui;
             caux2 = caux1 + caux;
             zita = 0.5 * Complex.Sqrt(caux2);
-            caux1 = Complex.Exp(-2.0 * horizon * zita);
+            caux1 = ComplexFunctions.Exp(-2.0 * horizon * zita);
             beta = (0.5 * chi) + zita;
             beta += caux1 * (zita - (0.5 * chi));
             gamma = 1.0 - caux1;
@@ -179,12 +180,12 @@ public static class IntegralHestonVarianceOptionEngine
                 caux3 = -v0 * ui * xi * (gamma / beta);
                 caux += caux3;
                 caux += caux2;
-                ff[j + 1] = Complex.Exp(caux);
+                ff[j + 1] = ComplexFunctions.Exp(caux);
             }
             else
             {
                 caux += caux2;
-                ff[j + 1] = Complex.Exp(caux) * start.Transform(-ui * xi * (gamma / beta));
+                ff[j + 1] = ComplexFunctions.Exp(caux) * start.Transform(-ui * xi * (gamma / beta));
             }
 
             if (Math.Sqrt((xi.Imaginary * xi.Imaginary) + (xi.Real * xi.Real)) > 1.0e-06)
@@ -192,7 +193,7 @@ public static class IntegralHestonVarianceOptionEngine
                 contrib = -eprice / (ui * xi);
                 caux = ui * xi;
                 caux *= eprice;
-                caux = Complex.Exp(caux);
+                caux = ComplexFunctions.Exp(caux);
                 caux -= 1.0;
                 caux2 = ui * xi * ui * xi;
                 contrib += caux / caux2;
@@ -211,7 +212,7 @@ public static class IntegralHestonVarianceOptionEngine
             caux = Math.Pow(-1.0, j);
             caux2 = -2.0 * pi * mm * j * 0.5 / mm;
             caux3 = ui * caux2;
-            csum += ff[j + 1] * caux * Complex.Exp(caux3);
+            csum += ff[j + 1] * caux * ComplexFunctions.Exp(caux3);
         }
 
         csum = csum * Math.Sqrt(Math.Pow(-1.0, mm)) * nris / pi2;
@@ -246,7 +247,7 @@ public static class IntegralHestonVarianceOptionEngine
         public Complex Transform(Complex b)
         {
             Complex denominator = 1.0 - (2.0 * c * b);
-            return Complex.Pow(denominator, -d / 2.0) * Complex.Exp(b * v0 * decay / denominator);
+            return ComplexFunctions.Pow(denominator, -d / 2.0) * ComplexFunctions.Exp(b * v0 * decay / denominator);
         }
     }
 }

@@ -8,6 +8,7 @@ using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using NanoQL.Instruments;
+using NanoQL.Numerics;
 using NanoQL.Time;
 
 namespace NanoQL.Experimental;
@@ -108,9 +109,9 @@ public sealed class FFTVarianceGammaEngine : FFTEngine
         {
             var i1 = new Complex(0, 1);
             double omega = Math.Log(1.0 - (theta * nu) - (sigma * sigma * nu / 2.0)) / nu;
-            Complex phi = Complex.Exp(i1 * u * (Math.Log(s) + (omega * t)))
-                * Complex.Pow(dividendDiscount / riskFreeDiscount, i1 * u);
-            phi *= Complex.Pow(1.0 - (i1 * theta * nu * u) + (sigma * sigma * nu * u * u / 2.0), -t / nu);
+            Complex phi = ComplexFunctions.Exp(i1 * u * (Math.Log(s) + (omega * t)))
+                * ComplexFunctions.Pow(dividendDiscount / riskFreeDiscount, i1 * u);
+            phi *= ComplexFunctions.Pow(1.0 - (i1 * theta * nu * u) + (sigma * sigma * nu * u * u / 2.0), -t / nu);
             return phi;
         }
     }

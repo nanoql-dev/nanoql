@@ -28,7 +28,7 @@ public static class Expm1Functions
         }
         else
         {
-            return Complex.Exp(z) - 1.0;
+            return ComplexFunctions.Exp(z) - 1.0;
         }
     }
 

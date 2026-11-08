@@ -8,6 +8,7 @@ using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using NanoQL.Instruments;
+using NanoQL.Numerics;
 using NanoQL.Processes;
 using NanoQL.TermStructures;
 using NanoQL.Time;
@@ -101,8 +102,8 @@ public sealed class FFTVanillaEngine : FFTEngine
         public override Complex ComplexFourierTransform(Complex u)
         {
             var i1 = new Complex(0, 1);
-            Complex phi = Complex.Exp((i1 * u * (Math.Log(s) - (var * t / 2.0))) - (var * u * u * t / 2.0));
-            phi *= Complex.Pow(dividendDiscount / riskFreeDiscount, i1 * u);
+            Complex phi = ComplexFunctions.Exp((i1 * u * (Math.Log(s) - (var * t / 2.0))) - (var * u * u * t / 2.0));
+            phi *= ComplexFunctions.Pow(dividendDiscount / riskFreeDiscount, i1 * u);
             return phi;
         }
     }

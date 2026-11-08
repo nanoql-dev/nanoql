@@ -215,13 +215,13 @@ public static class ExponentialIntegralsFunctions
 
         if (z.Real > z_inf)
         {
-            return (Complex.Exp(z) / z) + acc;
+            return (ComplexFunctions.Exp(z) / z) + acc;
         }
 
         if (abs_z > 1.1 * z_asym)
         {
             Complex ei = acc + new Complex(0.0, SignFunctions.Sign(z.Imaginary) * MathConstants.M_PI);
-            Complex s = Complex.Exp(z) / z;
+            Complex s = ComplexFunctions.Exp(z) / z;
             for (int i = 1; i <= Math.Floor(abs_z) + 1; ++i)
             {
                 if (Match(ei + s, ei))
@@ -245,7 +245,7 @@ public static class ExponentialIntegralsFunctions
             }
 
             return acc + new Complex(0.0, SignFunctions.Sign(z.Imaginary) * MathConstants.M_PI)
-                   - (Complex.Exp(z) / (1.0 - z + ei));
+                   - (ComplexFunctions.Exp(z) / (1.0 - z + ei));
         }
 
         Complex sum = new(0.0, 0.0), sn = z;
@@ -269,7 +269,7 @@ public static class ExponentialIntegralsFunctions
             throw new NanoQLException($"series conversion issue for Ei({Show(z)})");
         }
 
-        Complex r = M_EULER_MASCHERONI + acc + Complex.Log(z) + (Complex.Exp(0.5 * z) * sum);
+        Complex r = M_EULER_MASCHERONI + acc + Complex.Log(z) + (ComplexFunctions.Exp(0.5 * z) * sum);
 
         if (z.Imaginary != 0.0)
         {

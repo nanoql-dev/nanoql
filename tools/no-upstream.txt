@@ -47,6 +47,7 @@ src/NanoQL/MsvcNormalDistribution.cs
 src/NanoQL/MsvcRandom.cs
 src/NanoQL/NanoQLException.cs
 src/NanoQL/NumericLimits.cs
+src/NanoQL/Numerics/ComplexFunctions.cs
 src/NanoQL/Numerics/DoubleDouble.cs
 src/NanoQL/Numerics/DoubleDoubleNormal.cs
 src/NanoQL/Numerics/ExtendedDouble.cs
