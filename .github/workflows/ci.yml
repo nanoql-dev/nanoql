@@ -141,7 +141,8 @@ jobs:
             [ "$(basename "$d")" = "$runtime" ] || { echo "removing $d"; rm -rf "$d"; }
           done
       # The last bits of some results depend on the processor and on the C runtime that .NET's maths functions call
-      # (docs/porting-playbook.md §7.3), so each run names them.
+      # (docs/porting-playbook.md §7.3), so each run names them; on Arm64 Linux, whose /proc/cpuinfo names no model,
+      # lscpu does.
       - name: The machine
         shell: bash
         run: |
@@ -149,7 +150,8 @@ jobs:
             Windows)
               powershell -NoProfile -Command '(Get-CimInstance Win32_Processor).Name; $os = Get-CimInstance Win32_OperatingSystem; "$($os.Caption) build $($os.BuildNumber)"; "ucrtbase.dll " + (Get-Item C:\Windows\System32\ucrtbase.dll).VersionInfo.FileVersion' ;;
             Linux)
-              grep -m1 'model name' /proc/cpuinfo; grep PRETTY_NAME /etc/os-release; ldd --version | sed -n 1p ;;
+              grep -m1 'model name' /proc/cpuinfo || lscpu | grep -m1 'Model name' || true
+              grep PRETTY_NAME /etc/os-release; ldd --version | sed -n 1p ;;
             macOS)
               sysctl -n machdep.cpu.brand_string; sw_vers ;;
           esac
