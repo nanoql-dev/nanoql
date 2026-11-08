@@ -77,18 +77,20 @@ entry each, and a check fails if the page and the tests disagree.
 The Python, C and C++ layers call one C interface over nanoql compiled to native code. A recorder runs the vector
 suite in C# and records each call the tests make into nanoql as a call to the matching C function, with its arguments
 and its result. Each language's replayer then makes the same calls through its own layer and compares every result
-with C#'s, bit for bit on Windows x64. Each layer also has its own conformance suite. The Excel add-in's suite runs
-inside Excel before each release.
+with C#'s, bit for bit, on each of the five platforms the native library ships for. Each layer also has its own
+conformance suite. The Excel add-in's suite runs inside Excel before each release.
 
 ## Every change and every release
 
 - **Every change:** the build, the tests and the vectors run on Windows, Linux and macOS. Windows x64 must pass; Linux
   and macOS report their differences.
-- **Every release:** the release is built from one commit, and a failure on Windows x64 stops it. The release notes
-  count the test differences on Linux and macOS. The SOFR example's trades ([the example](sofr-example.md)) are priced
-  again by an independent pricer, each within $0.01 on $10 million. Once the packages are published, each is
+- **Every release:** the release is built from one commit, and a failure on Windows x64 stops it. The tests also
+  run on Windows Arm64 and Linux Arm64, and each language's replay on all five platforms. The release notes count the
+  test differences on each platform beside Windows x64. The SOFR example's trades ([the example](sofr-example.md)) are
+  priced again by an independent pricer, each within $0.01 on $10 million. Once the packages are published, each is
   installed from its registry and checked.
-- **Every week:** [the Python notebook](https://colab.research.google.com/github/nanoql-dev/nanoql/blob/main/docs/notebooks/first-steps.ipynb)
+- **Every week:** each language's replay runs on all five platforms, and
+  [the Python notebook](https://colab.research.google.com/github/nanoql-dev/nanoql/blob/main/docs/notebooks/first-steps.ipynb)
   runs against the latest release on PyPI.
 
 ## Running the checks yourself

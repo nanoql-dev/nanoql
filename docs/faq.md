@@ -11,21 +11,19 @@
   Linux and macOS the C runtime's maths functions round some last bits differently, and a calculation that magnifies
   them moves further: dozens of tests fall outside their tolerances there, a calibration by about 1e-7 relative. Each
   release's notes count them ([issue #21](https://github.com/nanoql-dev/nanoql/issues/21)).
-- **Python, C and C++:** Windows x64 and Linux x64 (glibc 2.28 or later). macOS on Apple silicon follows in a later
-  release, and Linux Arm64 may too ([issue #19](https://github.com/nanoql-dev/nanoql/issues/19)). Windows Arm64 and
-  Intel Macs have none planned.
+- **Python, C and C++:** Windows x64 and Arm64, Linux x64 and Arm64 (glibc 2.28 or later), and macOS on Apple silicon
+  (14 or later). Intel Macs have none, though the .NET library runs there.
 - **Excel:** 64-bit Excel for Microsoft 365 on Windows x64, with the .NET 10 Desktop Runtime ([the add-in](excel.md)).
 
 ## Why does `pip install nanoql` find no version?
 
-pip installs nanoql from a wheel, and the wheels are for Windows x64 and Linux x64 (glibc 2.28 or later). On macOS,
-on Linux Arm64, on Linux with musl (Alpine) or with a glibc older than 2.28, or with a native Arm64 Python on Windows,
-pip finds none and reports "No matching distribution found for nanoql". On Windows x64 or Linux x64 with Python older
-than 3.11, it first names the versions it skipped, each needing 3.11 or later.
+pip installs nanoql from a wheel, and the wheels are for Windows x64 and Arm64, Linux x64 and Arm64 (glibc 2.28 or
+later), and macOS on Apple silicon (14 or later). On an Intel Mac, with an Intel Python on Apple silicon, on macOS older
+than 14, or on Linux with musl (Alpine) or with a glibc older than 2.28, pip finds none and reports "No matching
+distribution found for nanoql". With Python older than 3.11 on a platform that has wheels, it first names the
+versions it skipped, each needing 3.11 or later.
 
-Wheels for macOS on Apple silicon follow, and Linux Arm64's may too
-([issue #19](https://github.com/nanoql-dev/nanoql/issues/19)). Until then, or on a platform with none planned, you have
-two options:
+Where there is no wheel, you have two options:
 
 - run [the notebook](https://colab.research.google.com/github/nanoql-dev/nanoql/blob/main/docs/notebooks/first-steps.ipynb)
   in Google Colab, in the browser;
