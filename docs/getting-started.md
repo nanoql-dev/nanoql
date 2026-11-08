@@ -37,8 +37,8 @@ any thread.
 pip install nanoql
 ```
 
-It needs Python 3.11 or later, on Windows x64 or Linux x64, and no .NET runtime
-([which platforms](faq.md#which-platforms-does-nanoql-run-on)). The same swap:
+It needs Python 3.11 or later on Windows or Linux (x64 or Arm64) or an Apple silicon Mac (macOS 14 or later), and no
+.NET runtime ([which platforms](faq.md#which-platforms-does-nanoql-run-on)). The same swap:
 
 ```python
 import datetime
