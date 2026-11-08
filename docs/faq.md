@@ -8,9 +8,10 @@
 ## Which platforms does nanoql run on?
 
 - **The .NET library:** wherever .NET 10 runs, on Windows, Linux and macOS. Windows x64 is the validated platform. On
-  Linux and macOS the C runtime's maths functions round some last bits differently, and a calculation that magnifies
-  them moves further: dozens of tests fall outside their tolerances there, a calibration by about 1e-7 relative. Each
-  release's notes count them ([issue #21](https://github.com/nanoql-dev/nanoql/issues/21)).
+  Windows Arm64, Linux and macOS some results differ in their last bits, from the C runtime's maths functions or the
+  processor, and a calculation that magnifies them moves further: dozens of tests fall outside their tolerances there,
+  a calibration by about 1e-7 relative. Each release's notes count them
+  ([issue #21](https://github.com/nanoql-dev/nanoql/issues/21)).
 - **Python, C and C++:** Windows x64 and Arm64, Linux x64 and Arm64 (glibc 2.28 or later), and macOS on Apple silicon
   (14 or later). Intel Macs have none, though the .NET library runs there.
 - **Excel:** 64-bit Excel for Microsoft 365 on Windows x64, with the .NET 10 Desktop Runtime ([the add-in](excel.md)).
