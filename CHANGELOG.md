@@ -4,6 +4,50 @@ The notable changes in each release of nanoql. The format follows
 [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/), and the versions follow nanoql's own rule (Versions,
 below).
 
+## [Unreleased]
+
+### Added
+
+- **The bindings on three more platforms:** Python's wheels and the C archive, its C++ header and CMake package among
+  it, for Windows Arm64, Linux Arm64 (glibc 2.28 or later) and macOS on Apple silicon (14 or later), each built and
+  checked in every release run as Windows x64 and Linux x64 are, its replays of the vector suite bit for bit with .NET
+  on the same machine (#19).
+
+### Changed
+
+- **Complex exponentials, powers, sines and cosines** take the angle's sine and cosine apart, in nanoql's own
+  functions in place of `System.Numerics.Complex`'s, which take both from `Math.SinCos`: under .NET's JIT the
+  platform's combined routine, an ulp off for some angles on macOS and on Linux x64 with glibc older than 2.36. There
+  a result resting on them can move in its last bits, and now matches the native library's bit for bit: the Heston
+  family's semi-analytic engines (Bates's and the COS engine among them), the Heston process's density and its
+  Broadie–Kaya schemes, the variance-gamma FFT engines, and the complex `Expm1`, exponential integrals and Bessel
+  functions. On Windows and on Linux Arm64 nothing moves.
+
+### Fixed
+
+- **`nanoql-bind build` on macOS:** a native library it built for `osx-arm64` could read a caller's floating-point
+  values wrong, with no refusal, after an exception thrown and caught inside a call, an internal fallback's: .NET 10's
+  Native AOT writes the unwind information of a function that saves d8 to d15 in the wrong bits
+  ([dotnet/runtime#135616](https://github.com/dotnet/runtime/issues/135616)). The tool now corrects it before the
+  link; rebuild such a library with this release's tool.
+
+### Known limits
+
+- The Excel add-ins are unsigned. A firm whose Excel requires add-ins signed by a trusted publisher signs the `.xll`
+  with its own certificate.
+- The add-ins run on the .NET 10 Desktop Runtime, Excel-DNA's just-in-time path, not compiled to native code.
+- The bindings, the C++ layer among them, cover Windows x64 and Arm64, Linux x64 and Arm64 (glibc 2.28 or later) and
+  macOS on Apple silicon (14 or later); Intel Macs have none, though nanoql's .NET library runs there.
+- A .NET app of your own published with Native AOT for `osx-arm64` carries the same unwind fault until .NET ships its
+  fix; `nanoql-bind fix-unwind` corrects its object before the link (the bindings guide, "On macOS").
+- macOS's C archive isn't notarized: a browser download opened in Finder carries the quarantine attribute into its
+  folder, which `xattr -dr com.apple.quarantine <folder>` clears.
+- On macOS, a caller of the C library through its own libffi (ctypes, cffi's ABI mode, JNA) misreads a by-value period
+  that five functions take on the stack, until its libffi carries the fix of libffi issue #750; nanoql's Python package
+  and callers compiled by clang are unaffected (the bindings guide, "C and C++").
+- Python 3.11 or later; NumPy 1.26 or later, 2.3 or later on Windows Arm64.
+- The Java layer is built and tested in the repository and not released.
+
 ## [2.2] - 2026-11-07
 
 ### Added

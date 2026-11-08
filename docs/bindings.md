@@ -337,9 +337,9 @@ too. Schema 1, its `"schema"` field raised on any change of meaning; one row a l
   reflection, as its set's lookup, a record built by an object initializer as `new` and its `with_` calls, a struct made
   by `default` or `new T()` as its implicit constructor's call, a generator's draws as `Draws` calls along its
   snapshots. A call made from inside nanoql (a callback into the test code) isn't written. Each language's replayer then
-  calls its own layer for every line and compares every result with C#'s, bit for bit (off Windows x64, a double within
-  `NANOQL_REPLAY_TOLERANCE` relatively, or else within `NANOQL_REPLAY_ABS_TOLERANCE`
-  absolutely, is a match, tallied; CI sets 1e-12 and 1e-13), NaN as NaN, a new object by its
+  calls its own layer for every line and compares every result with C#'s, bit for bit on every platform (a double
+  within `NANOQL_REPLAY_TOLERANCE` relatively, or else within `NANOQL_REPLAY_ABS_TOLERANCE` absolutely, is a match,
+  tallied, where a run sets them; CI keeps both at 0), NaN as NaN, a new object by its
   class's name (a file-local class's without its compiler prefix, `<File>F<hash>__`, whose hash is of its source file's
   path, so a trace replays against a library built from another checkout); hash and equality calls aren't recorded (the
   conformance suites check them); a fact replays up to its first call that needs something the trace couldn't write (a
@@ -412,8 +412,7 @@ The library is built natively on each of five platforms: `win-x64`, `win-arm64`,
 (nanoql's C# library runs there; nanoql builds and tests no bindings for them). It loads no ICU (invariant
 globalization), so its messages read the same in every locale and it runs where libicu is absent. Windows x64 is the
 validated platform; on the others, a result's last bits may differ where the C runtime's maths functions do. A release
-ships the platforms `release.yml` names in `RIDS`: Windows x64 and Linux x64, with Windows Arm64, Linux Arm64 and macOS
-on Apple silicon in later releases.
+ships the platforms `release.yml` names in `RIDS`: all five.
 
 ## C and C++
 
@@ -422,8 +421,18 @@ on Apple silicon in later releases.
   `libnanoql.so` or `libnanoql.dylib`, and `cmake/nanoql/`, the CMake package) and the notices: `LICENSE`, `NOTICE`,
   `THIRD_PARTY_NOTICES.md`, and the .NET runtime's `LICENSE.TXT` and `THIRD-PARTY-NOTICES.TXT`, which Native AOT
   compiles into the library. The symbols ship apart. `python bindings/c/archive.py --library <native build folder> --out
-  <folder>` writes one.
+  <folder>` writes one. macOS's archive isn't notarized: a browser download opened in Finder carries the quarantine
+  attribute into its folder, which `xattr -dr com.apple.quarantine <folder>` clears; `curl`, `tar` and `unzip` in a
+  terminal set none.
 - **C:** include `nanoql.h` and link the library; the C ABI above is the whole of it.
+- **Through libffi on macOS:** a caller that reaches the library through its own libffi (Python's ctypes, cffi's ABI
+  mode, JNA) misreads a by-value `nql_period` passed on the stack, as five functions take one: `nql_CPISwap_new`'s
+  `observationLag`, and the `exCouponPeriod` of `nql_AmortizingFixedRateBond_new`,
+  `nql_AmortizingFloatingRateBond_new`, `nql_CallableFixedRateBond_new` and `nql_FloatingRateBond_new`. libffi places
+  the struct at its natural 4-byte alignment where Apple's compilers and the library give it a pointer-aligned slot
+  (libffi issue #750, fixed in its source after its 3.8.0). nanoql's Python package passes a period as a 64-bit
+  integer, its length in the low 32 bits and its units in the high 32, which every platform passes as the struct; a
+  caller compiled by clang, or one whose libffi has the fix, is unaffected.
 - **C++:** `nanoql.hpp`, C++17, over `nanoql.h`, its CMake target `nanoql::cpp` (`find_package(nanoql CONFIG)`;
   [cpp.md](cpp.md) gives the install, CMake and a first program). `NANOQL_EXPERIMENTAL`, defined first, opts in to
   the experimental API. Its hand-written part is `bindings/cpp/runtime.hpp`; the tool writes the rest, never checked
@@ -468,9 +477,9 @@ on Apple silicon in later releases.
 
 ## Python
 
-- **Install:** `pip install nanoql`, a `py3-none-<platform>` wheel holding the library for Windows x64 and Linux x64
-  (`manylinux_2_28`), with Windows Arm64, Linux Arm64 and macOS on Apple silicon (14 or later) in later releases: one
-  wheel for every Python from 3.11, with NumPy 1.26 or later, and nothing compiled on install.
+- **Install:** `pip install nanoql`, a `py3-none-<platform>` wheel holding the library for Windows x64 and Arm64, Linux
+  x64 and Arm64 (`manylinux_2_28`) and macOS on Apple silicon (14 or later): one wheel for every Python from 3.11, with
+  NumPy 1.26 or later (2.3 or later on Windows Arm64, where NumPy's wheels begin), and nothing compiled on install.
 - **Names:** nanoql's type names; members in PEP 8's snake case (`curve.discount(5.0)`, `swap.fixed_rate`); enum members
   as nanoql's (`Compounding.Continuous`). A constructor is the class's call, a getter a property, a static member or an
   extension method a static method of its declaring class (`ConventionSet.quant_lib()`), a record's init-only property

@@ -35,10 +35,11 @@ experimental API may change in any release, and its released names are never reu
 
 ## Platforms
 
-Windows x64 is the validated platform. The .NET library on Linux and macOS, and the native library under C and Python
-on Linux x64, are supported: built and tested in every release run, their known differences listed in each release's
-notes. The native library ships for Windows x64 and Linux x64; Windows Arm64, Linux Arm64 and macOS on Apple silicon
-follow in later releases.
+Windows x64 is the validated platform. The .NET library on Windows Arm64, Linux and macOS, and the native library
+under C, C++ and Python on the four platforms beside Windows x64, are supported: built and tested in every release run,
+their known differences listed in each release's notes. The native library ships for Windows x64 and Arm64, Linux x64
+and Arm64 (glibc 2.28 or later), and macOS on Apple silicon (14 or later); Intel Macs have none, though nanoql's .NET
+library runs there.
 
 ## Validation
 

@@ -6,9 +6,10 @@
 
 nanoql's C++ layer, `nanoql.hpp`, is C++17 over the C interface: objects that release their handles, refusals thrown
 as exceptions, nanoql's type names and QuantLib's member names (`curve.discount(5.0)`). It ships in each platform's C
-archive, for Windows x64 and Linux x64, with a CMake package. [The bindings guide](bindings.md)'s "C and C++" section
-gives its rules: names, objects, values, defaults and overloads, errors. Coming from QuantLib's C++,
-[the migration guide](migration/from-quantlib-cpp.md) pairs its code with nanoql's.
+archive, for Windows x64 and Arm64, Linux x64 and Arm64 and macOS on Apple silicon, with a CMake package.
+[The bindings guide](bindings.md)'s "C and C++" section gives its rules: names, objects, values, defaults and
+overloads, errors. Coming from QuantLib's C++, [the migration guide](migration/from-quantlib-cpp.md) pairs its code
+with nanoql's.
 
 ## Install
 

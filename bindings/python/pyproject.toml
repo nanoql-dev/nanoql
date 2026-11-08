@@ -20,6 +20,7 @@ license-files = ["LICENSE", "NOTICE", "THIRD_PARTY_NOTICES.md", "dotnet/LICENSE.
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Financial and Insurance Industry",
+    "Operating System :: MacOS",
     "Operating System :: Microsoft :: Windows",
     "Operating System :: POSIX :: Linux",
     "Programming Language :: Python :: 3",

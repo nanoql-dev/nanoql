@@ -9,17 +9,18 @@ A release publishes, from one commit and its tag:
 
 - **On NuGet:** `NanoQL`, `NanoQL.Extensions`, `NanoQL.Bind` and `NanoQL.Excel`, each with its symbol package on
   NuGet's symbol server.
-- **On PyPI:** `nanoql`, a wheel per platform the release ships: `win_amd64` and `manylinux_2_28_x86_64`, and
-  `win_arm64`, `manylinux_2_28_aarch64` and `macosx_14_0_arm64` once those platforms ship; no source distribution,
-  since one would need the .NET SDK and the whole repository to build.
+- **On PyPI:** `nanoql`, a wheel per platform the release ships: `win_amd64`, `win_arm64`, `manylinux_2_28_x86_64`,
+  `manylinux_2_28_aarch64` and `macosx_14_0_arm64`; no source distribution, since one would need the .NET SDK and the
+  whole repository to build.
 - **On GitHub, the release `v<version>`:** the C archive (the C and C++ headers, the library and its CMake package) and
   the native symbols archive for each platform the release ships, the Excel add-in's zip and its symbols zip,
   `SHA256SUMS` over them, and the notes: `CHANGELOG.md`'s section with the platforms' readings from the release run's
   own tests.
-- **The platforms it ships** are `release.yml`'s `RIDS`, the bindings legs its `ci` call runs: Windows x64 and Linux
-  x64 (ci.yml's `core`). A later release adds Windows Arm64, Linux Arm64 or macOS on Apple silicon once its leg is
-  green, by naming it in `RIDS` and in the set the `ci` call names, `ci.yml`'s matrix gaining one where none fits; a
-  published release's files don't grow, so a platform ships from its first release on.
+- **The platforms it ships** are `release.yml`'s `RIDS`, the bindings legs its `ci` call runs: Windows x64 and Arm64,
+  Linux x64 and Arm64, and macOS on Apple silicon (ci.yml's `all`). A platform joins once its leg is green, by naming
+  it in `RIDS` and in the set the `ci` call names, `ci.yml`'s matrix gaining one where none fits; a published
+  release's files don't grow, so a platform ships from its first release on. The release run's tests run on the five
+  systems too, Windows x64 the reference and the others reported in the notes.
 - **The site,** nanoql.org, built from the tag.
 - **The notebook,** `docs/notebooks/first-steps.ipynb`, isn't published: Colab opens it from `main` and its first
   cell installs the latest release from PyPI, so it uses released API alone. `notebook.yml` runs it so, weekly and

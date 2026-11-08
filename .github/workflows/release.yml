@@ -39,10 +39,10 @@ concurrency:
 env:
   DOTNET_CLI_TELEMETRY_OPTOUT: "1"
   DOTNET_NOLOGO: "1"
-  # The platforms whose native files the release ships, the ci call's bindings legs: core's two. Windows Arm64, Linux
-  # Arm64 and macOS on Apple silicon follow in later releases, each once its leg is green: named here, and in the set
-  # the call's bindings names, ci.yml's matrix gaining one where none fits.
-  RIDS: win-x64 linux-x64
+  # The platforms whose native files the release ships, the ci call's bindings legs: all five. A platform joins once
+  # its leg is green: named here, and in the set the call's bindings names, ci.yml's matrix gaining one where none
+  # fits.
+  RIDS: win-x64 win-arm64 linux-x64 linux-arm64 osx-arm64
 
 jobs:
   versions:
@@ -64,7 +64,7 @@ jobs:
           echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
 
   # The gates, as CI runs them, on every system and on RIDS' platforms (a call's with takes no env, so bindings names
-  # them as ci.yml's core); a dispatch's best-effort input, or for the tag's run the repository variable
+  # them as ci.yml's all); a dispatch's best-effort input, or for the tag's run the repository variable
   # NANOQL_BEST_EFFORT, names a bindings leg that reports without stopping the run.
   ci:
     name: The gates
@@ -74,7 +74,7 @@ jobs:
       contents: read
     with:
       systems: all
-      bindings: core
+      bindings: all
       release: true
       best-effort: ${{ inputs.best-effort || vars.NANOQL_BEST_EFFORT }}
 
@@ -189,7 +189,8 @@ jobs:
         env:
           BEST_EFFORT: ${{ inputs.best-effort || vars.NANOQL_BEST_EFFORT }}
         run: |
-          args=(--tests "Windows x64=tests/tests-windows-2022.txt" --tests "Linux x64=tests/tests-ubuntu-24.04.txt"
+          args=(--tests "Windows x64=tests/tests-windows-2022.txt" --tests "Windows Arm64=tests/tests-windows-11-arm.txt"
+                --tests "Linux x64=tests/tests-ubuntu-24.04.txt" --tests "Linux Arm64=tests/tests-ubuntu-24.04-arm.txt"
                 --tests "macOS Arm64=tests/tests-macos-15.txt")
           for rid in $RIDS; do
             args+=(--outcomes "$rid=outcomes/bindings-outcomes-$rid.txt")
