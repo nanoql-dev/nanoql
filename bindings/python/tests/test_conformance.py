@@ -97,12 +97,21 @@ class Kinds(unittest.TestCase):
         self.assertEqual(p, Period(6, TimeUnit.Months))
         self.assertIsInstance(p.units, TimeUnit)
         self.assertEqual(Echo.period((1, TimeUnit.Years)), Period(1, TimeUnit.Years))
+        self.assertEqual(Echo.period(Period(-2, TimeUnit.Days)), Period(-2, TimeUnit.Days))
         self.assertEqual(Echo.opt_period(Period(6, TimeUnit.Months)).length, 6)
         self.assertIsNone(Echo.opt_period(None))
         self.assertIs(Echo.enum(TimeUnit.Years), TimeUnit.Years)
         self.assertIs(Echo.opt_enum(TimeUnit.Weeks), TimeUnit.Weeks)
         self.assertIsNone(Echo.opt_enum(None))
         self.assertEqual(Echo.complex(complex(1.5, -2.25)), complex(1.5, -2.25))
+
+    def test_a_by_value_period_passes_as_its_structs_bytes(self):
+        from nanoql import _runtime
+
+        for length, units in ((6, TimeUnit.Months), (-2, TimeUnit.Days), (0, TimeUnit.Days), (2**31 - 1, TimeUnit.Years),
+                              (-(2**31), TimeUnit.Weeks)):
+            packed = _runtime._packed_period((length, units))
+            self.assertEqual(struct.pack("<q", packed), bytes(_runtime._CPeriod(length, int(units))), (length, units))
 
     def test_nullables(self):
         self.assertEqual(Echo.opt_double(2.5), 2.5)

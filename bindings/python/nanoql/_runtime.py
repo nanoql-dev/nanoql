@@ -422,6 +422,16 @@ def _period(v: Any) -> _CPeriod:
     return _CPeriod(operator.index(length), int(units))
 
 
+def _packed_period(v: Any) -> int:
+    """A by-value period's C argument: its struct's two fields as one 64-bit integer, the length in the low 32 bits and
+    the units in the high 32. Every platform's C ABI passes the two alike; but on Apple's Arm64, libffi places a small
+    struct on the stack at its natural 4-byte alignment where clang and the library read a pointer-aligned slot, so a
+    period passed once the integer registers are spent reads wrong there (libffi issue #750), and an integer reads
+    right."""
+    p = _period(v)
+    return (p.units << 32) | (p.length & 0xFFFFFFFF)
+
+
 def _out_period(p: _CPeriod) -> Period:
     return Period(p.length, _time_unit(p.units))
 
@@ -494,7 +504,7 @@ def _in_value(name: str, v: Any) -> Any:
     if name in ("date", "date?"):
         return _serial(v)
     if name == "period":
-        return _period(v)
+        return _packed_period(v)
     if name == "complex":
         c = complex(v)
         return _CComplex(c.real, c.imag)
@@ -587,6 +597,9 @@ class _Kind:
     # The C parameters in, as CForms.In writes them.
     def _cin(self) -> list[Any]:
         n = self.name
+        if n == "period":
+            # by value as a 64-bit integer (_packed_period); an output or an optional period keeps the struct
+            return [c_int64]
         if n in _SCALAR_IN:
             return [_SCALAR_IN[n]]
         if n in _OPTIONAL:
