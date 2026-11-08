@@ -86,6 +86,7 @@ public class OutsideRepositoryTests
             string host = Path.Combine(output, "host", "NanoQL.Native.csproj");
             Assert.Equal(["publish", host], argv.Take(2));
             Assert.Contains("-p:NanoQLLibraryDir=" + AppContext.BaseDirectory, argv);
+            Assert.Contains("-p:NanoQLBindDll=" + Path.Combine(AppContext.BaseDirectory, "NanoQL.Bind.dll"), argv);
             Assert.True(File.Exists(host));
             Assert.True(File.Exists(Path.Combine(output, "host", "Rt.cs")));
             Assert.Equal("<Project />\n", File.ReadAllText(Path.Combine(output, "host", "Directory.Build.props")));

@@ -62,7 +62,7 @@ internal static class Program
     {
         if (args.Length == 0)
         {
-            Console.Error.WriteLine("usage: nanoql-bind update | check | freeze | build --rid <rid> --out <folder> [--test-exports] | shims --out <folder> | python --out <folder> | report");
+            Console.Error.WriteLine("usage: nanoql-bind update | check | freeze | build --rid <rid> --out <folder> [--test-exports] | shims --out <folder> | python --out <folder> | report | fix-unwind <object>");
             return 2;
         }
 
@@ -71,6 +71,11 @@ internal static class Program
         if (command == "excel")
         {
             return ExcelCommand.Run(args[1..], repo, Defaults(), TestTypes);
+        }
+
+        if (command == "fix-unwind")
+        {
+            return CompactUnwindCommand.Run(args[1..]);
         }
 
         var assemblies = new List<AssemblyInput>();
@@ -369,6 +374,7 @@ internal static class Program
         {
             "publish", host, "-c", "Release", "-r", rid, "-o", publish, "-nologo", "-p:NanoQLShimsDir=" + shims,
             "-p:NanoQLTestExports=" + (testExports ? "true" : "false"), "-p:NanoQLGenerateShims=false",
+            "-p:NanoQLBindDll=" + Path.Combine(AppContext.BaseDirectory, "NanoQL.Bind.dll"),
         };
         if (extra.Length > 0)
         {

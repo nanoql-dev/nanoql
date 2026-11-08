@@ -31,6 +31,7 @@ runs it; outside it, the tool installed from NuGet runs as `nanoql-bind` (Outsid
 | `headers --out <folder> [--test-exports]` | writes the C headers alone, without a native build: `nanoql.h`, and a user assembly's own |
 | `twins --out <folder>`, `replay-c --out <folder>`, `replay-cpp --out <folder>`, `replay-java --out <folder>` | write the vector suite's recording twins and the C, C++ and Java replayers' dispatches |
 | `report` | prints the surface's counts |
+| `fix-unwind <object>` | corrects an Arm64 Mach-O object's compact-unwind entries in place, between Native AOT's compilation and the link (On macOS, below) |
 
 Each takes `--assembly <prefix>=<path>` for every assembly to cross (nanoql's two by default), `--roles <path>` for a
 roles table (the repository's `bindings/roles.json` by default) and `--shipped <path>` for the last release's surface
@@ -56,6 +57,19 @@ Visual Studio's C++ tools with the Visual Studio Installer's folder on `PATH`.
   `excel check` and `excel package`), and so do `replay-cpp`, which writes the C++ replayer's dispatch, the
   repository's own test, and those writing the Java layer, which the repository builds and tests but doesn't
   release (`java` and `replay-java`).
+- **On macOS:** `nanoql-bind build` for `osx-arm64` corrects the object Native AOT writes before it is linked
+  (`fix-unwind`). .NET 10 writes the unwind information of a function that saves d8 to d15 in the wrong bits
+  ([dotnet/runtime#135616](https://github.com/dotnet/runtime/issues/135616)), so after an exception thrown and caught
+  inside a call, an internal fallback's, a caller's floating-point values could come back wrong, with no refusal. A
+  library an earlier release's tool built on a Mac lacks the correction: rebuild it. A .NET app of your own published
+  with Native AOT for `osx-arm64` carries the same fault until .NET ships the fix (the JIT is unaffected); a target in
+  its project corrects its object as the native host's does, with the tool installed:
+
+  ```xml
+  <Target Name="FixUnwind" AfterTargets="IlcCompile" Condition="'$(RuntimeIdentifier)' == 'osx-arm64'">
+    <Exec Command="nanoql-bind fix-unwind &quot;$(NativeObject)&quot;" />
+  </Target>
+  ```
 
 ## The C ABI
 

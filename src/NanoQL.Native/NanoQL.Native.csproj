@@ -69,6 +69,16 @@
     <SharedLibraryInstallName>@rpath/libnanoql.dylib</SharedLibraryInstallName>
   </PropertyGroup>
 
+  <!-- On osx-arm64, the compact-unwind entries Native AOT wrote corrected before the link: .NET 10 misplaces a frame's
+       register-pair flags for d8 to d15, so a caught exception left a caller's values in them wrong
+       (dotnet/runtime#135616; nanoql-bind fix-unwind). The tool passes its own path; in the repository the built
+       tool's is the default. -->
+  <PropertyGroup>
+    <NanoQLBindDll Condition="'$(NanoQLBindDll)' == ''">$(MSBuildProjectDirectory)/../NanoQL.Bind/bin/$(Configuration)/net10.0/NanoQL.Bind.dll</NanoQLBindDll>
+  </PropertyGroup>
+  <Target Name="NanoQLCompactUnwind" AfterTargets="IlcCompile" Condition="'$(RuntimeIdentifier)' == 'osx-arm64'">
+    <Exec Command="dotnet &quot;$(NanoQLBindDll)&quot; fix-unwind &quot;$(NativeObject)&quot;" StandardOutputImportance="high" />
+  </Target>
   <Target Name="NanoQLNativeName" BeforeTargets="LinkNative">
     <PropertyGroup>
       <NanoQLNativePrefix Condition="'$(NativeBinaryExt)' != '.dll'">lib</NanoQLNativePrefix>
