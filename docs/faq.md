@@ -41,6 +41,10 @@ nanoql needs .NET 10 or later. It uses static abstract interface members, which 
 .NET Framework or .NET Standard build. A project on .NET Framework moves to .NET 10 first
 ([from QLNet](migration/from-qlnet.md)).
 
+In a project on an older .NET, `dotnet add package NanoQL` stops with NuGet's NU1202, "Package NanoQL ... is not
+compatible with net8.0 ... supports: net10.0". Set the project's `<TargetFramework>` to `net10.0`, with the .NET 10
+SDK installed, and add it again.
+
 ## How does nanoql relate to QuantLib?
 
 nanoql is derived from QuantLib 1.44. It has QuantLib's classes, names and mathematics, and its results are checked

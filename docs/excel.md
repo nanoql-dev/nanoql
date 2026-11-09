@@ -20,9 +20,11 @@ types a desk's tasks need, listed by task. This page gives its rules, and how to
 
 ## Installing
 
-A release's `nanoql-excel-<version>-win-x64.zip` holds the two add-ins, nanoql's `LICENSE`, `NOTICE` and
-`THIRD_PARTY_NOTICES.md` (with Excel-DNA's and .NET's notices, whose code each `.xll` carries), a README, and the
-example workbooks with their conventions file under `examples/` (Example workbooks, below).
+Download `nanoql-excel-<version>-win-x64.zip` from
+[the latest release](https://github.com/nanoql-dev/nanoql/releases/latest), under Assets. It holds the two add-ins,
+nanoql's `LICENSE`, `NOTICE` and `THIRD_PARTY_NOTICES.md` (with Excel-DNA's and .NET's notices, whose code each
+`.xll` carries), a README, and the example workbooks with their conventions file under `examples/` (Example
+workbooks, below).
 
 - **What it needs:** 64-bit Excel for Microsoft 365 on Windows x64, and the .NET 10 Desktop Runtime, x64. Without the
   runtime, the add-in says so when it loads.
