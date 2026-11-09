@@ -26,14 +26,25 @@ public static partial class X
     /// <summary>Gets the Excel names of the members reporting a read file's path, which an export refuses.</summary>
     internal static IReadOnlySet<string> PathReporters { get; private set; } = new HashSet<string>(StringComparer.Ordinal);
 
-    /// <summary>Gets nanoql's version, as a vector's generator names it.</summary>
-    internal static string VersionText
+    /// <summary>
+    /// Gets nanoql's version, as nqlxlVersion gives it and a vector's generator names it: the build's informational
+    /// version, the release's own (2.3.1), without the commit after its "+". Every assembly's version stays 2.0.0.0
+    /// within 2.y, so it can't tell one release from another.
+    /// </summary>
+    internal static string VersionText { get; } = Informational(typeof(X).Assembly);
+
+    // An assembly's informational version without its "+" suffix; its version's major and minor when it has none.
+    private static string Informational(Assembly a)
     {
-        get
+        string? v = a.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+        if (string.IsNullOrEmpty(v))
         {
-            Version v = typeof(X).Assembly.GetName().Version!;
-            return $"{v.Major}.{v.Minor}.{v.Build}";
+            Version n = a.GetName().Version!;
+            return string.Create(CultureInfo.InvariantCulture, $"{n.Major}.{n.Minor}");
         }
+
+        int plus = v.IndexOf('+', StringComparison.Ordinal);
+        return plus < 0 ? v : v[..plus];
     }
 
     /// <summary>Takes the generated build's assembly and its path reporters, from the build's module initializer.</summary>

@@ -65,12 +65,7 @@ public static class OwnFunctions
     /// <summary>nanoql's version and the .NET runtime's.</summary>
     /// <returns>The versions' text.</returns>
     [ExcelFunction(Name = "nqlxlVersion", Category = "nanoql", IsThreadSafe = true, Description = "nanoql's version and the .NET runtime the add-in runs on")]
-    public static string Version()
-    {
-        Version v = typeof(OwnFunctions).Assembly.GetName().Version!;
-        string nanoql = v.Build > 0 ? $"{v.Major}.{v.Minor}.{v.Build}" : $"{v.Major}.{v.Minor}";
-        return string.Create(CultureInfo.InvariantCulture, $"nanoql {nanoql} runtime {Environment.Version}");
-    }
+    public static string Version() => string.Create(CultureInfo.InvariantCulture, $"nanoql {X.VersionText} runtime {Environment.Version}");
 
     /// <summary>A batch of draws' values: a column, or a draw per row for sequences.</summary>
     /// <param name="draws">The draws' handle.</param>
