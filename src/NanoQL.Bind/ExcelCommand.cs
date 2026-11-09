@@ -26,12 +26,12 @@ namespace NanoQL.Bind;
 /// </list>
 /// The others take <c>--assembly &lt;prefix&gt;=&lt;path&gt;</c> (nanoql's two by default), <c>--experimental</c> (the
 /// experimental API beside the stable), <c>--list &lt;prefix&gt;=&lt;file&gt;|none</c> (nanoql's prefix takes nanoql's
-/// list unless told otherwise, any other none), <c>--test-exports</c> (the bindings' test types, prefix nqlt, and
-/// <c>nqlxlStats</c>), <c>--roles</c> and <c>--shipped</c> as the tool's other commands do; <c>build</c> also takes
-/// <c>--runtime-source &lt;feed&gt;</c>, <c>--no-pack</c> (compile, no <c>.xll</c>) and the test-only
-/// <c>--xl-budget &lt;n&gt;</c>, which only lowers the 10,000 functions Excel-DNA's loader registers. Outside the
-/// repository <c>generate</c> and <c>build</c> read the defaults beside the tool, and <c>update</c>, <c>check</c>,
-/// <c>package</c> and <c>--test-exports</c>, which work on the repository's own files, refuse.
+/// list unless told otherwise, any other none), <c>--test-exports</c> (the bindings' test types, prefix nqlt,
+/// <c>nqlxlStats</c> and <c>nqlxlLog</c>), <c>--roles</c> and <c>--shipped</c> as the tool's other commands do;
+/// <c>build</c> also takes <c>--runtime-source &lt;feed&gt;</c>, <c>--no-pack</c> (compile, no <c>.xll</c>) and the
+/// test-only <c>--xl-budget &lt;n&gt;</c>, which only lowers the 10,000 functions Excel-DNA's loader registers.
+/// Outside the repository <c>generate</c> and <c>build</c> read the defaults beside the tool, and <c>update</c>,
+/// <c>check</c>, <c>package</c> and <c>--test-exports</c>, which work on the repository's own files, refuse.
 /// </summary>
 internal static class ExcelCommand
 {

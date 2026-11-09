@@ -15,7 +15,7 @@ internal sealed record ExcelOptions
     /// </summary>
     public IReadOnlyDictionary<string, ExcelList?> Lists { get; init; } = new Dictionary<string, ExcelList?>(StringComparer.Ordinal);
 
-    /// <summary>Gets a value indicating whether the build is a test build, which registers <c>nqlxlStats</c>.</summary>
+    /// <summary>Gets a value indicating whether the build is a test build, which registers <c>nqlxlStats</c> and <c>nqlxlLog</c>.</summary>
     public bool TestBuild { get; init; }
 
     /// <summary>Gets the generated classes' namespace.</summary>

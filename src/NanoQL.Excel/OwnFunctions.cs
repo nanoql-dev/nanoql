@@ -8,7 +8,7 @@ namespace NanoQL.Excel;
 
 /// <summary>
 /// The add-in's own worksheet functions, under their own prefix, <c>nqlxl</c>, registered from the runtime's assembly
-/// beside the generated ones. <c>nqlxlStats</c> is generated into test builds alone.
+/// beside the generated ones. <c>nqlxlStats</c> and <c>nqlxlLog</c> are generated into test builds alone.
 /// </summary>
 public static class OwnFunctions
 {
@@ -89,7 +89,11 @@ public static class OwnFunctions
     /// <summary>The generator's snapshot after a batch of draws, from which the next batch draws.</summary>
     /// <param name="draws">The draws' handle.</param>
     /// <returns>The next snapshot's handle.</returns>
-    [ExcelFunction(Name = "nqlxlDrawsNext", Category = "nanoql", IsThreadSafe = true, Description = "The generator's snapshot after a batch of draws, from which the next batch draws")]
+    /// <remarks>
+    /// Not thread-safe: a cell shows the handle through Excel's RTD function, which Excel can refuse on its calculation
+    /// threads.
+    /// </remarks>
+    [ExcelFunction(Name = "nqlxlDrawsNext", Category = "nanoql", Description = "The generator's snapshot after a batch of draws, from which the next batch draws")]
     public static object DrawsNext([ExcelArgument(Name = "draws", Description = "The draws (a handle)")] object draws)
         => X.Run("nqlxlDrawsNext", [draws], static a => X.Obj<XlDraws>(a[0], "draws").Next);
 }

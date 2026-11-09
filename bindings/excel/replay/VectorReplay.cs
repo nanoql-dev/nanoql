@@ -64,7 +64,8 @@ internal sealed class VectorReplay
 
         Console.WriteLine($"Excel vectors{(reverse ? ", in reverse" : string.Empty)}{(shared ? ", the state shared" : string.Empty)}: {files.Length - failed} of {files.Length} replayed to their outcome; "
             + $"numbers within the tolerance {replay.numbers}, bit for bit {replay.identical} of {replay.numbers}");
-        return failed == 0 ? 0 : 1;
+        Console.WriteLine(ReplayHost.ShownThreadSafeLine());
+        return failed == 0 && ReplayHost.ShownThreadSafe.Count == 0 ? 0 : 1;
     }
 
     private static bool Within(double expected, double actual)
@@ -147,7 +148,7 @@ internal sealed class VectorReplay
                 MethodInfo m = methods.TryGetValue(fn, out MethodInfo? found) ? found : throw new InvalidDataException($"the build has no {fn}");
                 object[] given = [.. call.GetProperty("args").EnumerateArray().Select(Arg)];
                 object[] all = [.. given.Concat(Enumerable.Repeat<object>(ExcelMissing.Value, Math.Max(0, m.GetParameters().Length - given.Length)))];
-                last = m.Invoke(null, all);
+                last = ReplayHost.Invoke(m, all);
                 made[call.GetProperty("id").GetString()!] = last!;
                 n++;
             }

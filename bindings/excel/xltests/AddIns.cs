@@ -7,9 +7,9 @@ namespace NanoQL.Excel.XlTests;
 
 /// <summary>
 /// The add-ins run.py builds into <c>obj/addins/</c> with <c>nanoql-bind excel build</c>: the two shipped builds (the
-/// list on), the test build (the experimental one with the bindings' test types and <c>nqlxlStats</c>), whose functions
-/// the runner's instance loads, a user's build, the experimental tests' build the replayer reads (<c>texp</c>,
-/// compiled, no <c>.xll</c>), and the package's stable add-in.
+/// list on), the test build (the experimental one with the bindings' test types, <c>nqlxlStats</c> and
+/// <c>nqlxlLog</c>), whose functions the runner's instance loads, a user's build, the experimental tests' build the
+/// replayer reads (<c>texp</c>, compiled, no <c>.xll</c>), and the package's stable add-in.
 /// </summary>
 internal static class AddIns
 {

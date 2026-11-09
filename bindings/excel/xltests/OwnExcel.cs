@@ -12,9 +12,9 @@ namespace NanoQL.Excel.XlTests;
 /// <summary>
 /// An Excel instance of a test's own, for what the runner's shared instance can't hold: a build of its own (the shipped
 /// builds, a user's), a settings file read at load, a workbook reopened in a new instance. Started through automation
-/// (a new process, never the user's), the add-in loaded for the session alone with <c>RegisterXLL</c>, and quit; the
-/// instance must then end by itself, every object the add-in made released, or the test fails, its process killed by
-/// its identifier alone.
+/// (a new process, never the user's), the add-in loaded for the session alone with <c>RegisterXLL</c>, and quit. The
+/// test fails when Excel-DNA's log window opened, which it does on an error in its log, and when the instance doesn't
+/// end by itself once quit, every object the add-in made released, its process then killed by its identifier alone.
 /// </summary>
 internal static class OwnExcel
 {
@@ -48,6 +48,10 @@ internal static class OwnExcel
             }
 
             body(app);
+            if (xll != null && LogWindow(app, pid) is { } title)
+            {
+                Assert.Fail($"Excel-DNA's log window opened, an error in its log: \"{title}\"");
+            }
         }
         catch (Exception e)
         {
@@ -69,6 +73,24 @@ internal static class OwnExcel
         }
 
         return (pid, failed);
+    }
+
+    // Excel-DNA's log window, "<add-in> - Diagnostic Display", which Excel-DNA shows on an error in its log, posting it
+    // to Excel's main thread: one call into Excel first, then a second's watch for it to show.
+    private static string? LogWindow(Application app, int pid)
+    {
+        _ = Xl.Retry(() => app.Ready);
+        for (int i = 0; i < 10; i++)
+        {
+            if (NativeMethods.VisibleWindowTitled(pid, " - Diagnostic Display") is { } title)
+            {
+                return title;
+            }
+
+            Thread.Sleep(100);
+        }
+
+        return null;
     }
 
     private static void WaitForExit(int pid, bool failing)

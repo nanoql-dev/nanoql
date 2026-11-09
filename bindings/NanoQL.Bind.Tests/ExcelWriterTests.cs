@@ -13,7 +13,7 @@ namespace NanoQL.Bind.Tests;
 /// <summary>
 /// The generated worksheet functions: each argument's conversion by its kind, an object left out none where C# lets it
 /// be, the codes a member documents, the loop masks, the help text, the repro templates, the tuple forms, the path-like
-/// refusal and the budget.
+/// refusal, the budget and the thread-safe registration.
 /// </summary>
 public class ExcelWriterTests
 {
@@ -142,6 +142,30 @@ public class ExcelWriterTests
         Assert.Contains("the largest namespaces: NanoQL.", e.Message, StringComparison.Ordinal);
         ExcelCommand.CheckBudget(ListedExperimental, ExcelCommand.Budget);
         Assert.Throws<BindException>(() => ExcelCommand.CheckBudget(ListedStable, 2000));
+    }
+
+    /// <summary>
+    /// A function is registered thread-safe only when its result can't hold an object: a cell shows a handle through
+    /// Excel's RTD function, which Excel can refuse on its calculation threads. A value, a map, a matrix, nothing or a
+    /// tuple of values is thread-safe; a handle, handles in an array, a tuple or a map's values, a boxed value, a
+    /// snapshot, draws, a bind, a reader and a family whose result is an object run on Excel's main thread.
+    /// </summary>
+    [Fact]
+    public void ThreadSafeWhereNoObjectIsShown()
+    {
+        string[] safe =
+        [
+            "nqlYieldTermStructureDiscount2", "nqlAbcdAtmVolCurveK", "nqlDiscountCurveNodes", "nqlCholeskyDecompositionFunctionsCholeskyDecomposition",
+            "nqlAbcdCheckPoints", "nqlAnalyticHestonEnginePriceVanillaPayoffWithStatistics", "nqlBaseCorrelationTermStructureCorrelation",
+        ];
+        string[] main =
+        [
+            "nqlFlatForward", "nqlBondCashflows", "nqlIssuerProbabilities", "nqlCommodityIndexExchangeContracts", "nqlAbcd", "nqlFaureRsg",
+            "nqlFaureRsgDraws", "nqlAnalyticBarrierEngineBind", "nqlAnalyticBarrierEngineBindOn", "nqlConventionsXmlRead",
+            "nqlConventionsXmlRead2", "nqlBaseCorrelationTermStructureCreate",
+        ];
+        Assert.All(safe, n => Assert.Contains("IsThreadSafe = true,", Function(WholeExperimental, n), StringComparison.Ordinal));
+        Assert.All(main, n => Assert.Contains("IsThreadSafe = false,", Function(WholeExperimental, n), StringComparison.Ordinal));
     }
 
     /// <summary>

@@ -236,7 +236,8 @@ if (floorPath != null)
     Console.WriteLine($"floor: calls replayed {replayed:N0} (floor {floor:N0}); refusals matched {replay.Refusals:N0}; {(below ? "BELOW IT" : "at or above it")}");
 }
 
-return replay.Mismatches == 0 && failures == 0 && !below ? 0 : 1;
+Console.WriteLine(ReplayHost.ShownThreadSafeLine());
+return replay.Mismatches == 0 && failures == 0 && !below && ReplayHost.ShownThreadSafe.Count == 0 ? 0 : 1;
 
 // The repository: the nearest folder above the current one holding bindings/roles.json.
 static string Repository()

@@ -38,7 +38,7 @@ public class LoadTests
             Assert.Equal(Xl.Name, Xl.Get(ws, "B1"));
         });
 
-    /// <summary>The test build the runner's instance loads holds the shipped experimental build's functions, each as it ships, and nqlxlStats.</summary>
+    /// <summary>The test build the runner's instance loads holds the shipped experimental build's functions, each as it ships, nqlxlStats and nqlxlLog.</summary>
     [Fact]
     public void TheTestBuildHoldsTheShippedFunctions()
     {
@@ -46,6 +46,7 @@ public class LoadTests
         var tests = test.RootElement.GetProperty("functions").EnumerateArray().ToDictionary(f => f.GetProperty("excel").GetString()!, f => f.GetRawText());
         Assert.All(shipped.RootElement.GetProperty("functions").EnumerateArray(), f => Assert.Equal(f.GetRawText(), tests.GetValueOrDefault(f.GetProperty("excel").GetString()!)));
         Assert.Contains("nqlxlStats", test.RootElement.GetProperty("own").EnumerateArray().Select(e => e.GetString()));
+        Assert.Contains("nqlxlLog", test.RootElement.GetProperty("own").EnumerateArray().Select(e => e.GetString()));
     }
 
     private static void Loads(string xll, string build, Action<Worksheet> more)

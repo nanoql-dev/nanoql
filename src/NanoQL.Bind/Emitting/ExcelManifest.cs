@@ -16,10 +16,10 @@ namespace NanoQL.Bind.Emitting;
 /// </summary>
 internal static class ExcelManifest
 {
-    /// <summary>The add-in's own functions a build registers: the runtime's, and <c>nqlxlStats</c> in a test build.</summary>
+    /// <summary>The add-in's own functions a build registers: the runtime's, and <c>nqlxlStats</c> and <c>nqlxlLog</c> in a test build.</summary>
     /// <param name="testBuild">Whether the build is a test build.</param>
     /// <returns>The names.</returns>
-    public static IReadOnlyList<string> Own(bool testBuild) => [.. ExcelNames.Own.Where(n => testBuild || n != "nqlxlStats")];
+    public static IReadOnlyList<string> Own(bool testBuild) => [.. ExcelNames.Own.Where(n => testBuild || n is not ("nqlxlStats" or "nqlxlLog"))];
 
     /// <summary>Writes a build's surface.</summary>
     /// <param name="selection">The build's functions.</param>

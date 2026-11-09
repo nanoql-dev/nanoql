@@ -17,7 +17,7 @@ namespace NanoQL.Bind.Emitting;
 internal static class ExcelNames
 {
     /// <summary>The add-in's own functions, which no generated name may meet regardless of case.</summary>
-    public static readonly IReadOnlyList<string> Own = ["nqlxlError", "nqlxlRepro", "nqlxlRecipe", "nqlxlVersion", "nqlxlStats", "nqlxlDrawsValues", "nqlxlDrawsWeights", "nqlxlDrawsNext"];
+    public static readonly IReadOnlyList<string> Own = ["nqlxlError", "nqlxlRepro", "nqlxlRecipe", "nqlxlVersion", "nqlxlStats", "nqlxlLog", "nqlxlDrawsValues", "nqlxlDrawsWeights", "nqlxlDrawsNext"];
 
     // A1 or R1C1: Excel's columns to XFD and rows to 1,048,576.
     private static readonly Regex A1 = new("^([A-Za-z]{1,3})([0-9]+)$", RegexOptions.CultureInvariant);

@@ -17,13 +17,17 @@ public static partial class X
     /// <summary>The value a call returning nothing shows.</summary>
     public static readonly object Done = "OK";
 
-    // The calls made, objects built and store hits, for nqlxlStats.
+    // The calls made, objects built and store hits, and handles shown off Excel's main thread, for nqlxlStats.
     private static long calls;
     private static long builds;
     private static long hits;
+    private static long offMain;
 
     /// <summary>Gets or sets what the runtime reads from Excel: the calling cell, values, spills, the date system, RTD.</summary>
     internal static IXlHost Host { get; set; } = new ExcelHost();
+
+    /// <summary>Gets or sets Excel's main thread, the managed one the add-in opened on; 0 before it opens.</summary>
+    internal static int MainThread { get; set; }
 
     /// <summary>Gets whether an Excel value is no value at all: a missing argument or an empty cell.</summary>
     /// <param name="a">The value.</param>
@@ -54,11 +58,19 @@ public static partial class X
             ? Lifted(fn, args, lift, rows, cols, e => RunOne(fn, e, body, documented))
             : RunOne(fn, args, body, documented);
 
-    /// <summary>The live handles, calls, builds and hits, for nqlxlStats in a test build.</summary>
+    /// <summary>
+    /// The live handles, calls, builds and hits, the handles shown off Excel's main thread, the looped calls and their
+    /// elements, and the names built, for nqlxlStats in a test build.
+    /// </summary>
     /// <returns>The counts' text.</returns>
     public static string StatsText() => string.Create(
         CultureInfo.InvariantCulture,
-        $"handles {ByHandle.Count} calls {Interlocked.Read(ref calls)} builds {Interlocked.Read(ref builds)} hits {Interlocked.Read(ref hits)} lifted {Interlocked.Read(ref liftedCalls)}/{Interlocked.Read(ref liftedElements)} named {Interlocked.Read(ref namedBuilds)}");
+        $"handles {ByHandle.Count} calls {Interlocked.Read(ref calls)} builds {Interlocked.Read(ref builds)} hits {Interlocked.Read(ref hits)} offmain {Interlocked.Read(ref offMain)} lifted {Interlocked.Read(ref liftedCalls)}/{Interlocked.Read(ref liftedElements)} named {Interlocked.Read(ref namedBuilds)}");
+
+    /// <summary>
+    /// Counts a handle shown off Excel's main thread, where Excel can refuse the RTD call that shows it.
+    /// </summary>
+    internal static void ShownOffMain() => Interlocked.Increment(ref offMain);
 
     /// <summary>
     /// The C ABI's error code for an exception: the runtime's own kinds first (an unknown handle 9, though it derives

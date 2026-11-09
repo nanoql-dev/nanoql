@@ -101,7 +101,7 @@ internal sealed class TraceReplay(Dictionary<string, Dictionary<long, string>> e
             xargs[typeArgs.Length + i] = In(ps[i], ps[i].GetProperty("kind").GetString()!, a[i]);
         }
 
-        object got = m.Invoke(null, xargs)!;
+        object got = ReplayHost.Invoke(m, xargs)!;
         int status = rec.TryGetProperty("t", out var t) ? t.GetInt32() : 0;
         if (status != 0)
         {

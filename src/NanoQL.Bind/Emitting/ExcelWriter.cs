@@ -114,7 +114,10 @@ internal sealed class ExcelWriter
         {
             StringBuilder test = Header("XlTestFunctions");
             test.AppendLine("    [ExcelFunction(Name = \"nqlxlStats\", Category = \"nanoql\", IsThreadSafe = true, IsVolatile = true, Description = \"The live handles, calls, builds and hits (a test build's own)\")]")
-                .AppendLine($"    public static string Stats() => {X}.StatsText();").AppendLine("}");
+                .AppendLine($"    public static string Stats() => {X}.StatsText();")
+                .AppendLine("    [ExcelFunction(Name = \"nqlxlLog\", Category = \"nanoql\", IsVolatile = true, Description = \"Excel-DNA's log: its errors and warnings counted, and its first error's line (a test build's own)\")]")
+                .AppendLine($"    public static string Log([ExcelArgument(Name = \"clear\", Description = \"Optional. TRUE empties the log after reading it\")] object clear) => {X}.LogText(clear is bool b && b);")
+                .AppendLine("}");
             files["XlTestFunctions.g.cs"] = Text(test);
         }
 
@@ -187,6 +190,18 @@ internal sealed class ExcelWriter
         : string.Empty;
 
     private static bool IsObjectKind(CKind? k) => k != null && k.Name is "handle" or "boxed" or "boxed?" or "snapshot" or "engine";
+
+    // Whether a result can hold an object anywhere: an object kind, or a value kind with one as an element, a map's
+    // value or a tuple's item, each of which a cell shows by its handle.
+    private static bool HoldsObject(CKind? k) => k != null && (IsObjectKind(k) || HoldsObject(k.Element) || HoldsObject(k.Value) || k.Items.Any(i => HoldsObject(i)));
+
+    // Whether a function is registered thread-safe: only when it shows no handle, since a cell shows one through Excel's
+    // RTD function, which Excel can refuse on its calculation threads. A draws, bind or bindon function and a reader
+    // return an object whatever their result's kind.
+    private static bool ThreadSafe(CFunction f)
+        => f.Kind is not ("draws" or "bind" or "bindon") && !ExcelSelection.Readers.Contains(f.CName) && !HoldsObject(f.Return);
+
+    private static string Flag(bool b) => b ? "true" : "false";
 
     private static string Js(string? s) => JsonSerializer.Serialize(s);
 
@@ -360,7 +375,7 @@ internal sealed class ExcelWriter
         (string? summary, IReadOnlyDictionary<string, string> pdocs) = docs.Of(f.Member);
         Documented += summary != null ? 1 : 0;
         var ps = f.Params.Select((p, i) => $"[ExcelArgument(Name = \"{p.Name}\", Description = {Js(ArgHelp(p, pdocs))})] object a{i}").ToList();
-        sb.AppendLine($"    [ExcelFunction(Name = \"{name}\", Category = \"{Category(f.Type)}\", IsThreadSafe = true, Description = {Js(docs.Fit(summary ?? Describe.Of(f)))})]");
+        sb.AppendLine($"    [ExcelFunction(Name = \"{name}\", Category = \"{Category(f.Type)}\", IsThreadSafe = {Flag(ThreadSafe(f))}, Description = {Js(docs.Fit(summary ?? Describe.Of(f)))})]");
         sb.AppendLine($"    public static object F{index}({string.Join(", ", ps)})");
         string? mask = Lift(f.Params, f.Kind is "draws" or "bind" or "bindon" ? null : f.Return);
         string arr = f.Params.Count == 0 ? "global::System.Array.Empty<object>()" : $"new object[] {{ {string.Join(", ", f.Params.Select((_, i) => "a" + i))} }}";
@@ -435,7 +450,7 @@ internal sealed class ExcelWriter
             .Concat(r.Params.Select((p, i) => $"[ExcelArgument(Name = \"{p.Name}\", Description = {Js(ArgHelp(p, pdocs))})] object a{i}")).ToList();
         var all = Enumerable.Range(0, nT).Select(i => "t" + i).Concat(r.Params.Select((_, i) => "a" + i));
         string description = docs.Fit((summary != null ? summary.TrimEnd('.') + ". " : string.Empty) + $"{ExcelSelection.DefName(r.Type)}: {fam.Count} constructions");
-        sb.AppendLine($"    [ExcelFunction(Name = \"{u.Name}\", Category = \"{Category(r.Type)}\", IsThreadSafe = true, Description = {Js(description)})]");
+        sb.AppendLine($"    [ExcelFunction(Name = \"{u.Name}\", Category = \"{Category(r.Type)}\", IsThreadSafe = {Flag(ThreadSafe(r) && fam.All(ThreadSafe))}, Description = {Js(description)})]");
         sb.AppendLine($"    public static object F{index}({string.Join(", ", ps)})");
         string run = IsObjectKind(r.Return) ? "Run" : "RunVal";
         string? mask = Lift(r.Params, r.Return, nT);

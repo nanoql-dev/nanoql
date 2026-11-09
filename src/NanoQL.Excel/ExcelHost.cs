@@ -86,7 +86,20 @@ internal sealed class ExcelHost : IXlHost
     }
 
     /// <inheritdoc/>
-    public object Present(XlEntry entry) => ExcelAsyncUtil.Observe("nqlxl", new object[] { entry.Key }, () => new XlHolder(entry));
+    /// <remarks>
+    /// Excel-DNA shows the entry through Excel's RTD function, which Excel can refuse on its calculation threads, so
+    /// the functions that present one aren't registered thread-safe; one shown on another thread is counted, for the
+    /// test build's <c>nqlxlStats</c>.
+    /// </remarks>
+    public object Present(XlEntry entry)
+    {
+        if (Environment.CurrentManagedThreadId != X.MainThread)
+        {
+            X.ShownOffMain();
+        }
+
+        return ExcelAsyncUtil.Observe("nqlxl", new object[] { entry.Key }, () => new XlHolder(entry));
+    }
 
     private static object Get(object target, string name, params object[] args)
         => target.GetType().InvokeMember(name, BindingFlags.GetProperty, null, target, args, CultureInfo.InvariantCulture)!;

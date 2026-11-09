@@ -4,10 +4,10 @@
 [dotnet test arguments] python -I bindings/excel/xltests/run.py --self-test
 
 Builds what the suite loads into obj/: the runtime package, then with nanoql-bind the two shipped add-ins, the test
-build (the bindings' test types and nqlxlStats), a user's add-in over Acme.Models, the experimental tests' build and the
-replayer the repro tests replay through, and the package, whose stable add-in a test loads. --python names an
-interpreter with nanoql's Python package and NumPy, which runs the swap's Python repro; without it that test is left
-out, and the run says so. When every failure of a finished run is a test Excel rejected as busy
+build (the bindings' test types, nqlxlStats and nqlxlLog), a user's add-in over Acme.Models, the experimental tests'
+build and the replayer the repro tests replay through, and the package, whose stable add-in a test loads. --python
+names an interpreter with nanoql's Python package and NumPy, which runs the swap's Python repro; without it that test
+is left out, and the run says so. When every failure of a finished run is a test Excel rejected as busy
 (RPC_E_SERVERCALL_RETRYLATER) on ExcelDna.Testing's own call, before the test's first line (no frame of the suite's code
 in its stack), those tests run once more, by name; the run reports both runs' counts, and --self-test checks that rule
 on sample runs. Then runs the suite from this folder, which carries its own global.json. Around the run it records the

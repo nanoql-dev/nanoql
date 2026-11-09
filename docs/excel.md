@@ -134,8 +134,12 @@ the generated ones, and the `.xll` packs nanoql's assemblies inside it.
 - **Optional arguments:** trailing optional arguments may be left out (see Values).
 - **Categories and help:** a function's category is `nanoql.<namespace>`. Its description and each argument's come from
   nanoql's XML documentation, with the argument's form ("The calendar (a Calendar handle or its name)"), each cut at a
-  word to 253 characters. IntelliSense in cells isn't packaged; Excel-DNA's standalone IntelliSense add-in reads the
-  registered descriptions.
+  word to 253 characters. Excel takes a function's argument names as one text of 255 characters at most, so the
+  Function Wizard shows some functions' names cut short: `nqlOISRateHelper`, `nqlOISRateHelper2`,
+  `nqlOvernightIndexedCoupon` and `nqlSabrSwaptionVolatilityCube`, and in the experimental build
+  `nqlConstNotionalCrossCurrencyBasisSwapRateHelper` and `nqlMtMCrossCurrencyBasisSwapRateHelper` too; each still takes
+  every argument. IntelliSense in cells isn't packaged; Excel-DNA's standalone IntelliSense add-in reads the registered
+  descriptions.
 - **Frozen from 2.0:** each release writes `bindings/excel/functions.shipped.json` (`nanoql-bind freeze`), every
   released name, the experimental build's included, with its C name or its family's key.
   - The tool keeps each released name. A new function takes its group's lowest unused number, so adding an overload
@@ -332,8 +336,9 @@ An object is held by the add-in and shown in its cell as a handle, `<Type>#<16 h
   goes with its parent's cell.
 - **Saving and reopening:** a saved workbook's handle cells recalculate when it opens. Its handles are rebuilt, the same
   texts as saved, and every later edit finds them.
-- **Threads:** every generated function is thread-safe, objects are built once per key, and recalculation runs on all
-  of Excel's threads.
+- **Threads:** a function whose result is a handle, or holds handles, runs on Excel's main thread: a cell shows a
+  handle through Excel's RTD function, which Excel can refuse on its calculation threads. Every other function is
+  thread-safe and runs on all of Excel's threads. Objects are built once per key.
 - **Across workbooks:** a handle referenced from another workbook works while some cell holds it.
 
 ## Errors
@@ -502,20 +507,25 @@ own, and stops in FlatForward's discount from a cell's call, the generated works
 - **The replay:** the vector suite's recorded trace ([bindings.md](bindings.md)) through the experimental tests'
   build's worksheet functions, outside Excel, each result against C#'s, bit for bit. A fact stops at an input no cell
   gives: NaN, a whole number past 2^53, none where the default isn't none, a period in hours, an empty matrix, an enum
-  value no member has.
+  value no member has. A function registered thread-safe that shows a handle fails the replay (Handles, above).
 - **The suite inside Excel** (`bindings/excel/xltests/`, ExcelDna.Testing on xUnit 2, with its own `global.json`) runs
   on the shipped builds, a test build and a user's build, in Excel instances of its own that load the add-ins for their
   session alone. It checks:
   - loading, each build's registered functions its surface's;
   - a desk's tasks to their bits; bound engines in cells; handles across saving and reopening, and in both date
     systems; edited conventions files and the settings' failed loads;
-  - errors and their messages; 2,000 curves on all of Excel's threads; the forms in real ranges; a user's assembly;
+  - errors and their messages; the forms in real ranges; a user's assembly;
+  - 2,000 curves and their discounts, and a hundred bonds' cash flows spilled, recalculated with Excel's threads on:
+    every handle shown on Excel's main thread, as the test build's `nqlxlStats` counts them, and no error in Excel-DNA's
+    log, read through its `nqlxlLog`;
   - looping and its messages by cell, names for calendars and day counters, and objects released with their cells;
   - repro export: a desk's swap exported in each format, the vector replayed, the C# compiled and run, the Python run
     (with `--python`, an interpreter with nanoql's Python package and NumPy), each to the cell's bits; every committed
     vector the build holds exported again from its workbook; the export's refusals;
   - the package's stable add-in, from its zip, priced;
   - the example workbooks, each opened on the stable add-in and recalculated whole, its named results C#'s bits.
+
+  A test in an Excel of its own fails when Excel-DNA's log window opens, as it does on an error in its log.
 
   Its wrapper builds the add-ins first. It checks that the run leaves the machine's other Excel processes and Excel's
   settings as it found them; it puts back Excel's window position, which Excel rewrites when a test closes a second
