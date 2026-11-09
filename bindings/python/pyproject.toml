@@ -6,7 +6,7 @@
 
 [project]
 name = "nanoql"
-version = "2.3"
+version = "2.3.1"
 description = "nanoql for Python: quantitative finance, stateless by design, through nanoql's C interface"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -33,4 +33,4 @@ Homepage = "https://nanoql.org"
 Documentation = "https://nanoql.org/docs/"
 Source = "https://github.com/nanoql-dev/nanoql"
 Issues = "https://github.com/nanoql-dev/nanoql/issues"
-Changelog = "https://github.com/nanoql-dev/nanoql/blob/v2.3/CHANGELOG.md"
+Changelog = "https://github.com/nanoql-dev/nanoql/blob/v2.3.1/CHANGELOG.md"

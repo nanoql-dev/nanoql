@@ -16,7 +16,7 @@ internal static class Versions
     public const int Minor = 3;
 
     /// <summary>The patch, 0 but for a fix.</summary>
-    public const int Patch = 0;
+    public const int Patch = 1;
 
     /// <summary>Gets the version as its text: two parts, three for a fix.</summary>
     public static string Text => Patch == 0 ? $"{Major}.{Minor}" : $"{Major}.{Minor}.{Patch}";

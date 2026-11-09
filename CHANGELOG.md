@@ -4,6 +4,50 @@ The notable changes in each release of nanoql. The format follows
 [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/), and the versions follow nanoql's own rule (Versions,
 below).
 
+## [2.3.1] - 2026-11-09
+
+### Added
+
+- **Two guides:** [the FAQ](docs/faq.md), on the platforms, the .NET versions, how nanoql relates to QuantLib, the
+  licences and where to ask; and [how nanoql is checked](docs/checking.md), from the references and the tolerance to the
+  checks on each change and release. Getting started's first swap runs in Python too.
+
+### Fixed
+
+- **The Excel add-in under multi-threaded calculation,** Excel's default: every generated worksheet function was
+  registered thread-safe, so Excel's calculation threads showed handles too, through Excel's RTD function, which Excel
+  can refuse there. On some machines it did: Excel-DNA's log window opened with "The RTD server … could not be
+  registered" for each cell making a handle, and the cell's result rested on Excel recalculating it later on its main
+  thread. A function whose result is a handle, or holds handles, now runs on Excel's main thread; every other function
+  still runs on all of Excel's threads. A workbook building many costly objects at once, such as bootstrapped curves,
+  calibrations or engines' results, now builds them one at a time; the values computed from them still use all of
+  Excel's threads (#28).
+- **`nqlxlVersion()` named 2.0 in every 2.y add-in,** and a repro export's vectors named their generator
+  `nanoql-excel 2.0.0`: both read the add-in's assembly version, which stays 2.0.0.0 within 2.y. Both now give the
+  release's version.
+
+### Known limits
+
+- The Excel add-ins are unsigned. A firm whose Excel requires add-ins signed by a trusted publisher signs the `.xll`
+  with its own certificate.
+- The add-ins run on the .NET 10 Desktop Runtime, Excel-DNA's just-in-time path, not compiled to native code.
+- The Function Wizard shows some functions' argument names cut short, since Excel takes a function's argument names
+  as one text of 255 characters at most: `nqlOISRateHelper`, `nqlOISRateHelper2`, `nqlOvernightIndexedCoupon` and
+  `nqlSabrSwaptionVolatilityCube`, and in the experimental add-in `nqlConstNotionalCrossCurrencyBasisSwapRateHelper`
+  and `nqlMtMCrossCurrencyBasisSwapRateHelper` too. Each still takes every argument.
+- The bindings, the C++ layer among them, cover Windows x64 and Arm64, Linux x64 and Arm64 (glibc 2.28 or later) and
+  macOS on Apple silicon (14 or later); Intel Macs have none, though nanoql's .NET library runs there.
+- A .NET app of your own published with Native AOT for `osx-arm64` carries .NET 10's unwind fault
+  ([dotnet/runtime#135616](https://github.com/dotnet/runtime/issues/135616)) until .NET ships its fix;
+  `nanoql-bind fix-unwind` corrects its object before the link (the bindings guide, "On macOS").
+- macOS's C archive isn't notarized: a browser download opened in Finder carries the quarantine attribute into its
+  folder, which `xattr -dr com.apple.quarantine <folder>` clears.
+- On macOS, a caller of the C library through its own libffi (ctypes, cffi's ABI mode, JNA) misreads a by-value period
+  that five functions take on the stack, until its libffi carries the fix of libffi issue #750; nanoql's Python package
+  and callers compiled by clang are unaffected (the bindings guide, "C and C++").
+- Python 3.11 or later; NumPy 1.26 or later, 2.3 or later on Windows Arm64.
+- The Java layer is built and tested in the repository and not released.
+
 ## [2.3] - 2026-11-07
 
 ### Added
@@ -208,6 +252,7 @@ QuantLib's are sealed by their use:
 - Python 3.11 or later.
 - The Java and C++ layers are built and tested in the repository and not released; C++ includes `nanoql.h` as it is.
 
+[2.3.1]: https://github.com/nanoql-dev/nanoql/releases/tag/v2.3.1
 [2.3]: https://github.com/nanoql-dev/nanoql/releases/tag/v2.3
 [2.2]: https://github.com/nanoql-dev/nanoql/releases/tag/v2.2
 [2.1]: https://github.com/nanoql-dev/nanoql/releases/tag/v2.1
