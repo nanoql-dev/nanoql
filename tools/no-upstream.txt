@@ -14,8 +14,10 @@ docs/examples/Rates/BasisAndFx.cs
 docs/examples/Rates/CapsAndFloors.cs
 docs/examples/Rates/CrossCurrencyBasis.cs
 docs/examples/Rates/Curves.cs
+docs/examples/Rates/CustomRateHelpers.cs
 docs/examples/Rates/DatesAndCalendars.cs
 docs/examples/Rates/IndexesAndFixings.cs
+docs/examples/Rates/NcdRateHelper.cs
 docs/examples/Rates/Swaps.cs
 docs/examples/Rates/Swaptions.cs
 docs/examples/SofrMarket/SofrExample.cs
