@@ -4,6 +4,15 @@ The notable changes in each release of nanoql. The format follows
 [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/), and the versions follow nanoql's own rule (Versions,
 below).
 
+## [Unreleased]
+
+### Added
+
+- **Two docs sections:** in the FAQ, [how often nanoql is released](docs/faq.md#how-often-is-nanoql-released), the
+  pace and which version gets fixes; and in the curves guide,
+  [a helper of your own](docs/rates/curves.md#a-helper-of-your-own), a rate helper written outside the library: a
+  negotiable certificate of deposit derived from `RelativeDateRateHelper`, with its example and tests (#30).
+
 ## [2.3.1] - 2026-11-09
 
 ### Added
@@ -252,6 +261,7 @@ QuantLib's are sealed by their use:
 - Python 3.11 or later.
 - The Java and C++ layers are built and tested in the repository and not released; C++ includes `nanoql.h` as it is.
 
+[Unreleased]: https://github.com/nanoql-dev/nanoql/compare/v2.3.1...main
 [2.3.1]: https://github.com/nanoql-dev/nanoql/releases/tag/v2.3.1
 [2.3]: https://github.com/nanoql-dev/nanoql/releases/tag/v2.3
 [2.2]: https://github.com/nanoql-dev/nanoql/releases/tag/v2.2
