@@ -76,6 +76,18 @@ members nanoql adds as experimental. It may change in any release, its released 
 compiler flags its use ([experimental code](concepts.md#experimental-code)). Each release's changes are in
 [CHANGELOG.md](../CHANGELOG.md).
 
+## How often is nanoql released?
+
+A minor release comes when there is something to add, at most once a month, and a month with nothing to add has none.
+Each new QuantLib release, which comes quarterly, brings a minor release of nanoql derived from it. A fix comes in a
+patch release, within days when it fixes a reported defect.
+
+Fixes go into the latest minor release only: an application on an earlier 2.y takes a fix by moving to the latest one,
+under the stability rules above. If your firm needs a version supported for longer, say so in
+[Discussions](https://github.com/nanoql-dev/nanoql/discussions). Planned releases, and the issues each holds, are the
+repository's [milestones](https://github.com/nanoql-dev/nanoql/milestones); to hear of each release, watch the
+repository's releases on GitHub.
+
 ## Why does Excel disable the add-in?
 
 The add-ins are unsigned. An Excel set to require add-ins signed by a trusted publisher, which group policy often
