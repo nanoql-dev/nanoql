@@ -18,7 +18,7 @@ public static class Examples
     [
         ("getting-started", () => [("first-swap", FirstSwap.Output())]),
         ("rates/dates-and-calendars", DatesAndCalendars.Outputs),
-        ("rates/curves", Curves.Outputs),
+        ("rates/curves", () => [.. Curves.Outputs(), .. CustomRateHelpers.Outputs()]),
         ("rates/indexes-and-fixings", IndexesAndFixings.Outputs),
         ("rates/swaps", Swaps.Outputs),
         ("rates/caps-and-floors", CapsAndFloors.Outputs),

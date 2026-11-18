@@ -67,6 +67,61 @@ public class ExamplesTests
     }
 
     [Fact]
+    public void TheCustomHelpersCurvePricesEachNcdsBondAtPar()
+    {
+        YieldTermStructure curve = CustomRateHelpers.Build();
+        EvaluationContext context = CustomRateHelpers.Context;
+        foreach (var (tenor, rate) in CustomRateHelpers.Quotes)
+        {
+            FixedRateBond bond = CustomRateHelpers.Bond(tenor, rate);
+            double dirty = bond.DirtyPrice(DiscountingBondEngine.Calculate(bond, context, curve), context);
+            Assert.True(Math.Abs(dirty - 100.0) < 1e-9, $"{tenor}: {dirty}");
+        }
+    }
+
+    [Fact]
+    public void TheCustomHelpersCurveIsTheBondHelpersAtADirtyPar()
+    {
+        EvaluationContext context = CustomRateHelpers.Context;
+        RateHelper[] bondHelpers =
+        [
+            .. CustomRateHelpers.Quotes.Select(q =>
+                new BondHelper(100.0, CustomRateHelpers.Bond(q.Tenor, q.Rate), context, BondPriceType.Dirty)),
+        ];
+        var expected = new PiecewiseFlatForward(
+            context.EvaluationDate, bondHelpers, CustomRateHelpers.DayCounter, context);
+        YieldTermStructure curve = CustomRateHelpers.Build();
+        for (int months = 1; months <= 36; ++months)
+        {
+            Date d = CustomRateHelpers.Calendar.Advance(context.EvaluationDate, months, TimeUnit.Months);
+            Assert.True(
+                Math.Abs(curve.Discount(d) - expected.Discount(d)) < 1e-12,
+                $"{months}M: {curve.Discount(d)} against {expected.Discount(d)}");
+        }
+    }
+
+    [Fact]
+    public void TheCustomHelpersFollowTheEvaluationDate()
+    {
+        EvaluationContext context = CustomRateHelpers.Context;
+        Date next = CustomRateHelpers.Calendar.Advance(context.EvaluationDate, 1, TimeUnit.Days);
+        var nextContext = new EvaluationContext { EvaluationDate = next };
+        RateHelper[] builtBefore =
+        [
+            .. CustomRateHelpers.Quotes.Select(q => new NcdRateHelper(
+                q.Rate, q.Tenor, Frequency.Quarterly, CustomRateHelpers.Calendar, CustomRateHelpers.DayCounter,
+                context)),
+        ];
+        var redated = new PiecewiseFlatForward(next, builtBefore, CustomRateHelpers.DayCounter, nextContext);
+        YieldTermStructure fresh = CustomRateHelpers.Build(nextContext);
+        for (int months = 1; months <= 36; ++months)
+        {
+            Date d = CustomRateHelpers.Calendar.Advance(next, months, TimeUnit.Months);
+            Assert.Equal(fresh.Discount(d), redated.Discount(d));
+        }
+    }
+
+    [Fact]
     public void TheSofrMarketsConventionPricesItsParSwapAtPar()
     {
         var rows = SofrExample.Run(SofrExample.ConventionsFile);

@@ -32,6 +32,35 @@ other choices, and `PiecewiseYieldCurve<TTraits, TInterpolator, TBootstrap>` tak
 
 `ZeroRate` and `ForwardRate` return an `InterestRate`, the rate with its day counter, compounding and frequency.
 
+## A helper of your own
+
+The rate helpers are an extension point: a curve bootstraps on any class derived from `RateHelper`. A helper whose
+dates follow the evaluation date derives from `RelativeDateRateHelper`; one built on fixed dates derives from
+`RateHelper` with its quote alone. This one is a negotiable certificate of deposit: its quote is the NCD's rate, and
+the curve implies the coupon at which a bond over the NCD's schedule, from the evaluation date, is worth par.
+
+[!code-csharp[](../examples/Rates/NcdRateHelper.cs#helper)]
+
+- **Dates:** the constructor stores what the helper needs, then calls `InitializeDates`, which builds the instrument
+  from the context's evaluation date and sets the protected date fields: `earliestDate`, `maturityDate` and
+  `latestDate`, with `latestRelevantDate` or `pillarDate` where they differ. A curve built for another evaluation
+  date calls it again on a copy of the helper, so one set of helpers serves curves for several dates, and the fields
+  it sets can't be `readonly`.
+- **The implied quote:** `ImpliedQuote` prices on the curve under construction, read through `TermStructure` after
+  `RequireTermStructure()`. The bootstrap finds the curve on which each helper's implied quote is its quote.
+- **Binding:** the bootstrap gives each helper a copy bound to the curve. A helper holding objects that price against
+  the curve, such as an index forecasting on it, overrides `WithTermStructure` (as `protected override` from your own
+  assembly), calls the base, and rebuilds them on the copy it returns, as `SwapRateHelper` does. This one reads the
+  curve only in `ImpliedQuote`, so it needs no override.
+
+The curve takes these helpers as it takes the library's:
+
+[!code-csharp[](../examples/Rates/CustomRateHelpers.cs#curve)]
+
+[!INCLUDE [each NCD on the curve](../_generated/curves-custom-helper-output.md)]
+
+Each NCD's bond, its coupon the quoted rate, is worth par on the curve.
+
 ## Other curves
 
 - **Multi-curve:** an €STR curve for discounting and a Euribor curve bootstrapped on it, each swap helper given the
